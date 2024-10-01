@@ -3,7 +3,7 @@ name = "pyasdm"
 version = "0.0.1"
 description = ""
 authors = [
-    {name = "", email=""}
+    {name = "Bob Garwood", email="bgarwood@nrao.edu"}
 ]
 license = {file = "LICENSE"}
 readme = "README.md"
