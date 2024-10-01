@@ -1,0 +1,27 @@
+[project]
+name = "pyasdm"
+version = "0.0.1"
+description = ""
+authors = [
+    {name = "", email=""}
+]
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">= 3.9, < 3.13"
+
+dependencies = [
+
+]
+
+
+[project.optional-dependencies]
+docs = [
+    'nbsphinx',
+    'recommonmark',
+    'scanpydoc',
+    'sphinx-autoapi',
+    'sphinx-autosummary-accessors',
+    'sphinx_rtd_theme',
+    'twine',
+    'pandoc'
+]
