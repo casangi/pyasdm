@@ -69,11 +69,6 @@ class Interval:
 
     # these operators change the value of this Interval using the argument and return this Interval
     
-    # assigment
-    def equal(self, other):
-        self.value = self._getIntervalValue(other);
-        return(self);
-
     # +=
     def __iadd__(self, other):
         self.value += self._getIntervalValue(other);
@@ -91,22 +86,26 @@ class Interval:
 
      # /=
     def __idoiv__(self, other):
-        self.value -= self._getIntervalValue(other);
+        # note: this may lose precision because of the need for value and other to both be integers
+        self.value /= self._getIntervalValue(other);
+        # this may be unnecessary
+        self.value = int(self.value)
         return(self);
 
     # binary operators, these return a new Interval and do not change self
     # +
     def __add__(self,other):
-        return(self.value + self._getIntervalValue(other));
+        return(Interval(self.value + self._getIntervalValue(other)));
     # =
     def __sub__(self,other):
-        return(self.value - self._getIntervalValue(other));
+        return(Interval(self.value - self._getIntervalValue(other)));
     # *
     def __mul__(self,other):
-        return(self.value * self._getIntervalValue(other));
+        return(Interval(self.value * self._getIntervalValue(other)));
     # /
     def __truediv__(self,other):
-        return(self.value / self._getIntervalValue(other));
+        # note - this may lose precision because of the need for this to be an integer
+        return(Interval(int(self.value / self._getIntervalValue(other))));
 
     # comparison operators
     def __lt__(self,other):
@@ -124,13 +123,15 @@ class Interval:
 
     # unary operators, they return a new Interval and do not change this Interval
     def __neg__(self):
-        return(-self.value);
+        return(Interval(-self.value));
     def __pos__(self):
-        return(self.value)
+        return(Interval(self.value))
 
-    # equivalent to ==
+    # Return True if and only if other is an Interval and its value is equal to this interval
     def equals(self, other):
-        return(self==other);
+        if (not isinstance(other, Interval)):
+            return False
+        return(self.value == other.value);
 
     
     def isZero(self):
