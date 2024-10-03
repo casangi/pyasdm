@@ -28,7 +28,9 @@ from pyasdm.types.ArrayTime import ArrayTime
 from pyasdm.types.Entity import Entity
 from pyasdm.types.EntityId import EntityId
 
-from pyasdm.Parser import Parser
+# using minidom instead of Parser for now, may roll this into Parser later
+# from pyasdm.Parser import Parser
+from xml.dom import minidom
 
 # will need to import each table type here
 # from pysdm.MainTable import MainTable
@@ -182,77 +184,87 @@ class ASDM:
         Parse the XML representation of an ASDM stored in a string and fills this object
         data values as appropriate. 
         """
-        xmlParser = Parser(xmlstr)
-        if not xmlParser.isStr("<ASDM"):
-            raise ValueError("'<ASDM' not found in XML")
+        xmldom = minidom.parseString(xmlstr)
+        # this should have a single child with a name of ASDM
+        # ignore everything but the first child
+        if (not xmldom.hasChildNodes or xmldom.firstChild.nodeName != "ASDM"):
+            raise ValueError("XML is not from an ASDM file")
+        asdmdom = xmldom.firstChild
 
-        # find schemaVersion="..." in xmlstr
-        startSchema = xmlstr.find("schemaVersion")
-        if startSchema < 0:
-            raise ValueError("schemaVersion not found in XML")
-        nextEquals = xmlstr.find("=",startSchema+1)
-        if nextEquals < 0:
-            raise ValueError("correctly formatted schemaVersion not found in XML")
-        firstQuote = xmlstr.find('"',nextEquals+1)
-        if firstQuote < 0:
-            raise ValueError("correctly formatted schemaVersion not found in XML")
-        lastQuote = xmlstr.find('"',firstQuote+1)
-        if lastQuote < 0:
-            raise ValueError("correctly formatted schemaVersion not found in XML")
-        schemaVersion = xmlstr[(firstQuote+1):lastQuote]
-        print("schemaVersion = %s" % schemaVersion)
-        self.setVersion(int(schemaVersion))
+        # get the version from the schemaVersion attribute, which must be there
+        if (not asdmdom.hasAttributes()) or (asdmdom.attributes.getNamedItem('schemaVersion') is None):
+            raise ValueError("schemaVersion for ASDM not found in XML")
+        versionStr = asdmdom.attributes.getNamedItem('schemaVersion').value
+        # raises a ValueError if not an integer
+        self.setVersion(int(versionStr))
 
-        s = xmlParser.getElement("<Entity",">")
-        if s is None:
-            raise ValueError("'<Entity ... >' not found in XML")
-        e = Entity()
-        e.setFromXML(s)
-        if not e.getEntityTypeName() == "ASDM":
-            raise ValueError("First Entity found in XML is not ASDM as expected")
-        self.setEntity(e)
+        # go though the child nodes of asdmdom, either Entity, TimeOfCreation or Table
+        # only Table should appear more than once
+        asdmEntity = None
+        asdmToC = None
+        tableCount = 0
 
-        s = xmlParser.getElementContent("<TimeOfCreation>","</TimeOfCreation>")
-        if s is None:
-            raise ValueError("TimeOfCreation element not found in XML")
-        tofc = ArrayTime(s)
-        self.setTimeOfCreation(tofc)
+        # todo : startTimeDurationInXML and startTimeDurationInBin  - no examples found
+        #  <startTimeDurationInXML someAttribute="1"> I think it's just the presence of this element
+        # these become True (default is False) and need to be available for other uses
+        
+        if not asdmdom.hasChildNodes():
+            raise ValueError("ASDM XML is missing all of the expected elements")
 
-        # Do we have an element startTimeDurationInXML
-        s = xmlParser.getElement("<startTimeDurationInXML",">")
-        if s is not None:
-            print("has startTImeDurationInXML : %s" % s)
+        for thisNode in asdmdom.childNodes:
+            nodeName = thisNode.nodeName
+            if nodeName == "Entity":
+                if asdmEntity is not None:
+                    raise ValueError("More than one Entity found for ASDM XML")
+                asdmEntity = Entity(thisNode.toxml())
+            elif nodeName == "TimeOfCreation":
+                if asdmToC is not None:
+                    raise ValueError("More than one TimeOfCreation found for ASDM XML")
+                asdmToC = ArrayTime(thisNode.firstChild.data)
+            elif nodeName == "startTimeDurationInXML":
+                print("startTimeDurationInXML seen")
+            elif nodeName == "startTimeDurationInBin":
+                print("startTimeDurationInBin seen")
+            elif nodeName == "Table":
+                # each table must have one of Name, NumberRows, and Entity
+                # allow for a missing Entity if NumberRows is 0
+                tabName = None
+                tabSize = None
+                tabEntity = None
 
-        # Do we have an element startTimeDurationInBin
-        s = xmlParser.getElement("<startTimeDurationInBin",">")
-        if s is not None:
-            print("has startTimeDurationInBin : %s" % s)
+                for thisTabNode in thisNode.childNodes:
+                    tabNodeName = thisTabNode.nodeName
+                    if tabNodeName == "Name":
+                        if tabName is not None:
+                            raise ValueError("More than one Name seen for the same Table in ASDM XML")
+                        tabName = thisTabNode.firstChild.data
+                    elif tabNodeName == "NumberRows":
+                        if tabSize is not None:
+                            raise ValueError("More than one NumberOfRows seen for the same Table in ASDM XML")
+                        tabSize = int(thisTabNode.firstChild.data)
+                    elif tabNodeName == "Entity":
+                        if tabEntity is not None:
+                            raise ValueError("More than one Entity seen for the same Table in ASDM XML")
+                        tabEntity = Entity(thisTabNode.toxml())
 
-        # get each table in the dataset
-        s = xmlParser.getElementContent("<Table>","</Table>")
-        tabParser = None
-        tableName = None
-        numberOfRows = 0
-        while (s is not None):
-            tabParser = Parser(s)
-            s = tabParser.getElementContent("<Name>","</Name>")
-            if s is None:
-                raise ValueError("Name element missing from a table element in XML")
-            tableName = s
-            s = tabParser.getElementContent("<NumberRows>","</NumberRows>")
-            if s is None:
-                raise ValueError("NumberOfRows element not seen for table %s in XML" % tableName)
-            # bad formatting here will raise a ValueError, java catches the equivalent and issues it's own error
-            numberOfRows = int(s)
-            if (numberOfRows > 0):
-                s = tabParser.getElement("<Entity",">")
-                if s is None:
-                    raise ValueError("missing Entity element for table %s in XML" % tableName)
-                print("%s Entity = %s" % (tableName, s))
-                e = Entity(s)
-                if (not e.getEntityTypeName() == (tableName + "Table")):
-                    raise ValueError("Unexpected entity type name for table %s = %s in XML" % (e.getEntityTypeName(),tableName))
-                print("Table Entity: %s = %s" % (tableName, e.toString()))
-            s = xmlParser.getElementContent("<Table>","</Table>")
-        if not xmlParser.isStr("</ASDM>"):
-            raise ValueError("no trailing '</ASDM>' found in XML")
+                # name and size must be there
+                if tabName is None or tabSize is None:
+                    raise ValueError("A table in ASDM xml is not named or the number of rows is not given")
+                if tabSize > 0:
+                    if tabEntity is None:
+                        raise ValueError("No Entity given for %s table of size %s" % (tabName, tabSize))
+                    print("%s : %s : %s" % (tabName, tabSize, tabEntity.toString()))
+                    tableCount += 1
+                    
+
+        if asdmEntity is None:
+            raise("No Entity seen for ASDM element in ASDM XML")
+        if asdmToC is None:
+            raise("No TimeOfCreation seen in ASDM XML")
+        
+        self.setEntity(asdmEntity)
+        self.setTimeOfCreation(asdmToC)
+
+        print("\nASDM Entity %s" % self.getEntity().toString())
+        print("ASDM Time Of Creation %s" % self.getTimeOfCreation().toFITS())
+        print("Number of tables with size > 0 : %s" % tableCount)
