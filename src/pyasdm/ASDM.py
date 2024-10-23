@@ -28,12 +28,11 @@ from pyasdm.types.ArrayTime import ArrayTime
 from pyasdm.types.Entity import Entity
 from pyasdm.types.EntityId import EntityId
 
-# using minidom instead of Parser for now, may roll this into Parser later
-# from pyasdm.Parser import Parser
+# using minidom instead of Parser
 from xml.dom import minidom
 
 # will need to import each table type here
-# from pysdm.MainTable import MainTable
+from pyasdm.MainTable import MainTable
 
 import time
 import os
@@ -56,12 +55,20 @@ class ASDM:
     # _xmlnsPrefix = ""             # the XMLNS prefix for this ASDM, not used in Java, defer until needed
     _version = 0                  # the version integer
 
+    # the directory appropriate for this ASDM, set by setFromFile
+    _directory = None
+
     # c++ has an origin value, not java, defer : FILE, ARCHIVE, EX_NIHILO
     # c++ has loadTablesOnDemand and checkRowUniqueness, neither in java - defer
     # c++ has directory with a getter, java does not - defer
+
+    # dictionary of the Entity objects for each table found when the ASDM is populated
+    # tables are loaded on demand when the table is retrieved via it's getter IF that table
+    # has an entry in this dictionary, otherwise the detault (empty) Table is returned
+    _tableEntity = {}
     
     # each table will appear here as a data member
-    # _main = MainTable()
+    _main = None
 
     # defer on getTables() until necessary, would return a list or array of all of the tables
 
@@ -79,13 +86,15 @@ class ASDM:
         gmnow = time.gmtime()
         self._timeOfCreation.init(gmnow.tm_year, gmnow.tm_mon, gmnow.tm_mday, gmnow.tm_hour, gmnow.tm_min, gmnow.tm_sec)
 
+        self._main = MainTable(self)
+
     # getters and setters
     def getMain(self):
         """
         get the MainTable
         """
-        print("Not implemented yet")
-        return (None)
+        self._main.checkPresenceInMemory()
+        return (self._main)
 
     def getEntity(self):
         return(self._entity)
@@ -94,6 +103,12 @@ class ASDM:
         if not isinstance(e, Entity):
             raise ValueError("invalid argument to setEntity, must be an Entity")
         self._entity = e
+
+    def getDirectory(self):
+        """
+        The directory name is setFromFile was used, else None.
+        """
+        return self._directory
 
     def getName(self):
         """
@@ -149,6 +164,40 @@ class ASDM:
 
         self._xmlnsPrefix = xmlnsPrefix
 
+    def toXML(self):
+        """
+        Produces the XML representation of this.
+        Returns a string.
+        """
+        result = ""
+        result += "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?> "
+        result += "<ASDM xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:cntnr=\"http://Alma/XASDM/ASDM\" xsi:schemaLocation=\"http://Alma/XASDM/ASDM http://almaobservatory.org/XML/XASDM/4/ASDM.xsd\" schemaVersion=\"4\" schemaRevision=\"-1\"> "
+        if self._entity.isNull():
+            raise ValueError("Container entity cannot be null. (Container)")
+        result += self._entity.toXML()
+        result += " "
+        result += "<TimeOfCreation> "
+        result += self._timeOfCreation.toFITS()
+        result += " "
+        result += "</TimeOfCreation>"
+        # this ultimately needs a list of tables, just do Main now
+        result += "<Table> "
+        result += "<Name> "
+        result += self._main.getName()
+        result += " "
+        result += "</Name> "
+        result += "<NumberRows> "
+        result += str(self._main.size())
+        result += " "
+        result += "</NumberRows> "
+        if self._main.size() > 0:
+            if self._main.getEntity().isNull():
+                raise ValueError("Table entity is null. (Main)")
+            result += self._main.getEntity().toXML()
+        result += "</Table> "
+        result += "</ASDM>"
+        return result
+
     def setFromFile(self, directory):
         """
         Reads and parses a collection of files as those produced by the toFile method.
@@ -159,6 +208,7 @@ class ASDM:
         if not os.path.isdir(directory):
             raise ValueError("directory must be a path to an existing directory")
 
+        self._directory = directory
         if self._fileAsBin:
             raise ValueError("fileAsBin not implemented yet for ASDM")
         else :
@@ -179,6 +229,10 @@ class ASDM:
 
             self.fromXML(xmlstr)
 
+        # mark the tables found in the file with a non-zero size as not present in memory so they can be loaded on demain
+        if "Main" in self._tableEntity:
+            self._main.setNotPresentInMemory()
+
     def fromXML(self, xmlstr):
         """
         Parse the XML representation of an ASDM stored in a string and fills this object
@@ -187,7 +241,7 @@ class ASDM:
         xmldom = minidom.parseString(xmlstr)
         # this should have a single child with a name of ASDM
         # ignore everything but the first child
-        if (not xmldom.hasChildNodes or xmldom.firstChild.nodeName != "ASDM"):
+        if (not xmldom.hasChildNodes() or xmldom.firstChild.nodeName != "ASDM"):
             raise ValueError("XML is not from an ASDM file")
         asdmdom = xmldom.firstChild
 
@@ -202,7 +256,6 @@ class ASDM:
         # only Table should appear more than once
         asdmEntity = None
         asdmToC = None
-        tableCount = 0
 
         # todo : startTimeDurationInXML and startTimeDurationInBin  - no examples found
         #  <startTimeDurationInXML someAttribute="1"> I think it's just the presence of this element
@@ -253,9 +306,7 @@ class ASDM:
                 if tabSize > 0:
                     if tabEntity is None:
                         raise ValueError("No Entity given for %s table of size %s" % (tabName, tabSize))
-                    print("%s : %s : %s" % (tabName, tabSize, tabEntity.toString()))
-                    tableCount += 1
-                    
+                    self._tableEntity[tabName] = tabEntity
 
         if asdmEntity is None:
             raise("No Entity seen for ASDM element in ASDM XML")
@@ -265,6 +316,40 @@ class ASDM:
         self.setEntity(asdmEntity)
         self.setTimeOfCreation(asdmToC)
 
-        print("\nASDM Entity %s" % self.getEntity().toString())
-        print("ASDM Time Of Creation %s" % self.getTimeOfCreation().toFITS())
-        print("Number of tables with size > 0 : %s" % tableCount)
+    def toFile(self, directory):
+        """ 
+        Write this ASDM dataset to the specified directory as a collection of files.
+
+        The container itself is written into an XML file. Each table of the conainer
+        having at least one row is written into a binary or an XML file depending on
+        the value of its "fileAsBin" field.
+
+        This method will not overwrite an existing file
+        """
+        # check if directory exists
+        if os.path.exists(directory) and not os.path.isdir(directory):
+            raise ValueError("Cannot write into directory %s. This file already exists and is not a directory (ASDM)" % directory)
+
+        if not os.path.exists(directory):
+            # don't catch any exceptions here, assume it can be found
+            os.mkdir(directory)
+
+        fileName = None
+        if (self._fileAsBin):
+            # this should never happen for ASDM
+            fileName = os.path.join(directory,"ASDM.bin")
+        else:
+            fileName = os.path.join(directory,"ASDM.xml")
+
+        with open(fileName,'w') as f:
+            if self._fileAsBin:
+                # this should never happen, Java just passes here without any code
+                pass
+            else:
+                f.write(self.toXML())
+                f.close()
+
+        # then send each of its table to its own file
+        if self.getMain().size() > 0:
+            self.getMain().toFile(directory)
+
