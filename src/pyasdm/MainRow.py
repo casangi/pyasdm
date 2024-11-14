@@ -1,121 +1,128 @@
 # ALMA - Atacama Large Millimeter Array
-# (c) European Southern Observatory, 2024
-# (c) Associated Universities Inc., 2024
+# (c) European Southern Observatory, 2002
+# (c) Associated Universities Inc., 2002
 # Copyright by ESO (in the framework of the ALMA collaboration),
 # Copyright by AUI (in the framework of the ALMA collaboration),
 # All rights reserved.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY, without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307  USA
 #
-# File MainRow.py
-
-# this will eventually be generated code
+# Warning!
+#  --------------------------------------------------------------------
+# | This is generated code!  Do not modify this file.                  |
+# | If you do, all changes will be lost when the file is re-generated. |
+#  --------------------------------------------------------------------
+#
+# File MainRow.java
+#
 
 import pyasdm.MainTable
 
+from .Parser import Parser
+
+# All of the extended types are imported
+from pyasdm.types import *
+
+
 from pyasdm.enumerations.TimeSampling import TimeSampling
-from pyasdm.types.ArrayTime import ArrayTime
-from pyasdm.types.Interval import Interval
-from pyasdm.types.Tag import Tag
-from pyasdm.types.EntityRef import EntityRef
+
 
 from xml.dom import minidom
+
 
 class MainRow:
     """
     The MainRow class is a row of a MainTable.
+
+    Generated from model's revision -1, branch
     """
 
-    # every row belongs to a table
+    # the table to which this row belongs.
     _table = None
 
-    # a row has not been added to its table until this is true
+    # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
-    # attributes with their default initializations
-    _time = ArrayTime()
-    _numAntenna = 0
-    _timeSampling = TimeSampling.from_int(0)
-    _interval = Interval()
-    _numIntegration = 0
-    _scanNumber = 0
-    _subscanNumber = 0
-    _dataSize = 0
-    _dataUID = EntityRef()
-    _configDescriptionId = Tag()
-    _execBlockId = Tag()
-    _fieldId = Tag()
-    _stateId = []   # this is a list of Tags that should have length _numAntenna
+    # internal attribute values appear later, with their getters and setters
 
-    def __init__(self, table, row = None):
-        # When row is None, create an empty row attached to table, which must be a MainTable
-        # when row is give, copy those values to this row, row must be a MainRow if given
-        # in both cases the row is not yet added to the given table
-
+    def __init__(self, table, row=None):
+        """
+        Create a MainRow.
+        When row is None, create an empty row attached to table, which must be a MainTable.
+        When row is given, copy those values in to the new row. The row argument must be a MainRow.
+        The returned new row is not yet added to table, but it knows about table.
+        """
         if not isinstance(table, pyasdm.MainTable):
             raise ValueError("table must be a MainTable")
 
         self._table = table
         self._hasBeenAdded = False
 
-        # the default initialization is present in the class description
+        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+
+        timeSampling = TimeSampling.from_int(0)
 
         if row is not None:
             if not isinstance(row, MainRow):
                 raise ValueError("row must be a MainRow")
 
             self._time = ArrayTime(row._time)
+
             self._configDescriptionId = Tag(row._configDescriptionId)
+
             self._fieldId = Tag(row._fieldId)
+
             self._numAntenna = row._numAntenna
-            if row._timeSampling == None:
+
+            # We force the attribute of the result to be not None
+            if row._timeSampling is None:
                 self._timeSampling = TimeSampling.from_int(0)
             else:
                 self._timeSampling = TimeSampling(row._timeSampling)
+
             self._interval = Interval(row._interval)
+
             self._numIntegration = row._numIntegration
+
             self._scanNumber = row._scanNumber
+
             self._subscanNumber = row._subscanNumber
+
             self._dataSize = row._dataSize
+
             self._dataUID = EntityRef(row._dataUID)
+
+            # stateId is a list, let's populate self._stateId element by element.
+            if self._stateId is None:
+                self._stateId = []
+
             for i in range(len(row._stateId)):
+
                 self._stateId.append(Tag(row._stateId[i]))
+
             self._execBlockId = Tag(row._execBlockId)
 
     def isAdded(self):
-        """
-        Has this row been added to it's table?
-        """
-        return self._hasBeenAdded
+        self._hasBeenAdded = True
 
     def getTable(self):
         """
         Return the table to which this row belongs.
         """
         return self._table
-
-    @staticmethod
-    def _nameStringToXML(name, strval):
-        """
-        Internal method to produce and XML using the name and a string value.
-        <name>strval</name>
-        The returned value has a trailing space so that it can be used to add
-        these strings together without worrying about spacing.
-        """
-        return ("<%s> %s </%s> " % (name,strval,name))
 
     def toXML(self):
         """
@@ -125,37 +132,46 @@ class MainRow:
 
         result += "<row> \n"
 
-        result += MainRow._nameStringToXML("time",self._time.toString())
-        result += MainRow._nameStringToXML("numAntenna",str(self._numAntenna))
-        result += MainRow._nameStringToXML("timeSampling",TimeSampling.name(self._timeSampling))
-        result += MainRow._nameStringToXML("interval",self._interval.toString())
-        result += MainRow._nameStringToXML("numIntegration",str(self._numIntegration))
-        result += MainRow._nameStringToXML("scanNumber",str(self._scanNumber))
-        result += MainRow._nameStringToXML("subscanNumber",str(self._subscanNumber))
-        result += MainRow._nameStringToXML("dataSize",str(self._dataSize))
-        result += MainRow._nameStringToXML("dataUID",self._dataUID.toString())
-        result += MainRow._nameStringToXML("configDescriptionId",self._configDescriptionId.toString())
-        result += MainRow._nameStringToXML("execBlockId",self._execBlockId.toString())
-        result += MainRow._nameStringToXML("fieldId",self._fieldId.toString())
+        result += Parser.extendedValueToXML("time", self._time)
 
-        # stateId is a list of Tags
-        result += "<stateId> "
-        # 1 dimension and length of the list
-        result += "1 %s " % len(self._stateId)
-        for thisStateId in self._stateId:
-            result += thisStateId.toString() + " "
-        result += " </stateId> "
+        result += Parser.valueToXML("numAntenna", self._numAntenna)
+
+        result += Parser.valueToXML(
+            "timeSampling", TimeSampling.name(self._timeSampling)
+        )
+
+        result += Parser.extendedValueToXML("interval", self._interval)
+
+        result += Parser.valueToXML("numIntegration", self._numIntegration)
+
+        result += Parser.valueToXML("scanNumber", self._scanNumber)
+
+        result += Parser.valueToXML("subscanNumber", self._subscanNumber)
+
+        result += Parser.valueToXML("dataSize", self._dataSize)
+
+        result += Parser.extendedValueToXML("dataUID", self._dataUID)
+
+        result += Parser.extendedValueToXML(
+            "configDescriptionId", self._configDescriptionId
+        )
+
+        result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
+
+        result += Parser.extendedValueToXML("fieldId", self._fieldId)
+
+        result += Parser.listExtendedValueToXML("stateId", self._stateId)
 
         result += "</row>\n"
-        return(result)        
-        
-    def setFromXML(self,xmlrow):
+        return result
+
+    def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
-        that was produced by the toXML method.
-        If xmlrow is an minidom.Element with a nodeName of row then
+        that was produced by the toXML() method.
+        If xmlrow is a minidom.Element with a nodeName of row then
         it will be used as is. Anything else that is not a string
-        is an error
+        is an error.
         """
         rowdom = None
         if isinstance(xmlrow, str):
@@ -169,483 +185,557 @@ class MainRow:
         if rowdom.nodeName != "row":
             raise ValueError("the argument is not a row")
 
-        # look for the possible attributes, set to default if not found
+        # intrinsic attribute values
 
-        # required attributes - if they are missing then this will raise an excception
-
-        # time
         timeNode = rowdom.getElementsByTagName("time")[0]
+
         self._time = ArrayTime(timeNode.firstChild.data)
 
-        # numAntenna
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+
         self._numAntenna = int(numAntennaNode.firstChild.data)
 
-        # timeSampling
         timeSamplingNode = rowdom.getElementsByTagName("timeSampling")[0]
-        self._timeSampling = TimeSampling.newTimeSampling(timeSamplingNode.firstChild.data)
+        self._timeSampling = TimeSampling.newTimeSampling(
+            timeSamplingNode.firstChild.data
+        )
 
-        # interval
         intervalNode = rowdom.getElementsByTagName("interval")[0]
+
         self._interval = Interval(intervalNode.firstChild.data)
 
-        # numIntegration
         numIntegrationNode = rowdom.getElementsByTagName("numIntegration")[0]
+
         self._numIntegration = int(numIntegrationNode.firstChild.data)
 
-        # scanNumber
         scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+
         self._scanNumber = int(scanNumberNode.firstChild.data)
-       
-        # subscanNumber
+
         subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
+
         self._subscanNumber = int(subscanNumberNode.firstChild.data)
-       
-        # dataSize
+
         dataSizeNode = rowdom.getElementsByTagName("dataSize")[0]
+
         self._dataSize = int(dataSizeNode.firstChild.data)
 
-        # dataUID
         dataUIDNode = rowdom.getElementsByTagName("dataUID")[0]
+
         self._dataUID = EntityRef(dataUIDNode.toxml())
 
-        # the second argument of Parser.getTag is there so that the exceptions here can indicate the table name
-        
-        # configDescriptionId
+        # extrinsic attribute values
+
         configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
-        self._configDescriptionId = Tag.parseTag(configDescriptionIdNode.firstChild.data)
-        
-        # execBlockId
+
+        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data)
+
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
-        self._execBlockId = Tag.parseTag(execBlockIdNode.firstChild.data)
 
-        # fieldId
+        self._execBlockId = Tag(execBlockIdNode.firstChild.data)
+
         fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
-        self._fieldId = Tag.parseTag(fieldIdNode.firstChild.data)
 
-        # stateId
+        self._fieldId = Tag(fieldIdNode.firstChild.data)
+
         stateIdNode = rowdom.getElementsByTagName("stateId")[0]
         stateIdStr = stateIdNode.firstChild.data
-        stateIdList = stateIdStr.split()
-        # first 2 elements are the dimension, which must be 1, and the number of elements
-        if len(stateIdList) < 2:
-            raise(ValueError("invalid stateId value"))
-        if stateIdList[0] != "1":
-            raise ValueError("stateId does not start with a '1'")
-        nState = int(stateIdList[1])
-        if ((nState+2) > len(stateIdList)):
-            raise ValueError("not enough stateId values found in stateId attribute field")
-        self._stateId = []
-        for i in range(nState):
-            self._stateId.append(Tag.parseTag(stateIdList[i+2]))
+        self._stateId = Parser.stringListToLists(stateIdStr, Tag)
 
     def toBin(self):
         print("not yet implemented")
 
-    # getters and setters for the attributes
+    # Intrinsic Table Attributes
 
-    # intrisic table attributes
+    # ===> Attribute time
 
-    # time
-    
+    _time = ArrayTime()
+
     def getTime(self):
         """
-        Get time as an ArrayTime
+        Get time.
+        return time as ArrayTime
         """
-        # make sure it's a copy of the ArrayTime
+
+        # make sure it is a copy of ArrayTime
         return ArrayTime(self._time)
 
     def setTime(self, time):
         """
-        set time with the specified ArrayTime value (value can be anything allowed by the ArrayTime constructor)
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set time with the specified ArrayTime value.
+        time The ArrayTime value to which time is to be set.
+        The value of time can be anything allowed by the ArrayTime constructor.
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
         """
-        if (self._hasBeenAdded):
-            raise ValueError("Attempt to change the time field, which is part of the key, after this row has been added to this table.")
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the time field, which is part of the key, after this row has been added to this table."
+            )
 
         self._time = ArrayTime(time)
 
-    # numAntenna
-    
+    # ===> Attribute numAntenna
+
+    _numAntenna = 0
+
     def getNumAntenna(self):
         """
-        Get numAntenna as int
+        Get numAntenna.
+        return numAntenna as int
         """
+
         return self._numAntenna
 
     def setNumAntenna(self, numAntenna):
         """
-        set numAntenna with the specified integer value, numAntenna is converted to an int, possibly truncating the value
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set numAntenna with the specified int value.
+        numAntenna The int value to which numAntenna is to be set.
+
+
         """
-        if (self._hasBeenAdded):
-            # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the numAntenna field, which is a mandatory attribute, after this row has been added to this table.")
 
         self._numAntenna = int(numAntenna)
 
+    # ===> Attribute timeSampling
+
+    _timeSampling = TimeSampling.from_int(0)
+
     def getTimeSampling(self):
         """
-        Get timeSampling as TimeSampling
+        Get timeSampling.
+        return timeSampling as TimeSampling
         """
+
         return self._timeSampling
 
     def setTimeSampling(self, timeSampling):
         """
-        set timeSampling with the specified TimeSampling value (value can be anything allowed by the TimeSampling constructor)
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set timeSampling with the specified TimeSampling value.
+        timeSampling The TimeSampling value to which timeSampling is to be set.
+
+
         """
-        if (self._hasBeenAdded):
-            # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the timeSampling field, which is a mandatory attribute, after this row has been added to this table.")
 
         self._timeSampling = TimeSampling(timeSampling)
 
-    # interval
-    
+    # ===> Attribute interval
+
+    _interval = Interval()
+
     def getInterval(self):
         """
-        Get interval as an Interval
+        Get interval.
+        return interval as Interval
         """
-        # make sure it's a copy of the Interval
+
+        # make sure it is a copy of Interval
         return Interval(self._interval)
 
     def setInterval(self, interval):
         """
-        set interval with the specified Interval value (value can be anything allowed by the Interval constructor)
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set interval with the specified Interval value.
+        interval The Interval value to which interval is to be set.
+        The value of interval can be anything allowed by the Interval constructor.
+
         """
-        if (self._hasBeenAdded):
-            # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the interval field, which is part of the key, after this row has been added to this table.")
 
         self._interval = Interval(interval)
 
+    # ===> Attribute numIntegration
 
-    # numIntegration
-    
+    _numIntegration = 0
+
     def getNumIntegration(self):
         """
-        Get numIntegration as int
+        Get numIntegration.
+        return numIntegration as int
         """
+
         return self._numIntegration
 
     def setNumIntegration(self, numIntegration):
         """
-        set numIntegration with the specified integer value, numIntegration is converted to an int, possibly truncating the value
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set numIntegration with the specified int value.
+        numIntegration The int value to which numIntegration is to be set.
+
+
         """
-        if (self._hasBeenAdded):
-            # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the numIntegration field, which is a mandatory attribute, after this row has been added to this table.")
 
         self._numIntegration = int(numIntegration)
-        
-    # scanNumber
-    
+
+    # ===> Attribute scanNumber
+
+    _scanNumber = 0
+
     def getScanNumber(self):
         """
-        Get scanNumber as int
+        Get scanNumber.
+        return scanNumber as int
         """
+
         return self._scanNumber
 
     def setScanNumber(self, scanNumber):
         """
-        set scanNumber with the specified integer value, scanNumber is converted to an int, possibly truncating the value
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set scanNumber with the specified int value.
+        scanNumber The int value to which scanNumber is to be set.
+
+
         """
-        if (self._hasBeenAdded):
-            # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the scanNumber field, which is a mandatory attribute, after this row has been added to this table.")
 
         self._scanNumber = int(scanNumber)
 
-    # subscanNumber
-    
+    # ===> Attribute subscanNumber
+
+    _subscanNumber = 0
+
     def getSubscanNumber(self):
         """
-        Get subscanNumber as int
+        Get subscanNumber.
+        return subscanNumber as int
         """
+
         return self._subscanNumber
 
     def setSubscanNumber(self, subscanNumber):
         """
-        set subscanNumber with the specified integer value, subscanNumber is converted to an int, possibly truncating the value
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set subscanNumber with the specified int value.
+        subscanNumber The int value to which subscanNumber is to be set.
+
+
         """
-        if (self._hasBeenAdded):
-            # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the subscanNumber field, which is a mandatory attribute, after this row has been added to this table.")
 
         self._subscanNumber = int(subscanNumber)
 
-    # dataSize
-    
+    # ===> Attribute dataSize
+
+    _dataSize = 0
+
     def getDataSize(self):
         """
-        Get dataSize as int
+        Get dataSize.
+        return dataSize as int
         """
+
         return self._dataSize
 
     def setDataSize(self, dataSize):
         """
-        set dataSize with the specified integer value, dataSize is converted to an int, possibly truncating the value
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set dataSize with the specified int value.
+        dataSize The int value to which dataSize is to be set.
+
+
         """
-        if (self._hasBeenAdded):
-            # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the dataSize field, which is a mandatory attribute, after this row has been added to this table.")
 
         self._dataSize = int(dataSize)
 
-    # dataUID
-    
+    # ===> Attribute dataUID
+
+    _dataUID = EntityRef()
+
     def getDataUID(self):
         """
-        Get dataUID as EntityRef
+        Get dataUID.
+        return dataUID as EntityRef
         """
-        return self._dataUID
+
+        # make sure it is a copy of EntityRef
+        return EntityRef(self._dataUID)
 
     def setDataUID(self, dataUID):
         """
-        set dataUID with the specified EntityRef value (dataUID can be any argument valid for the EntityRef constructor)
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set dataUID with the specified EntityRef value.
+        dataUID The EntityRef value to which dataUID is to be set.
+        The value of dataUID can be anything allowed by the EntityRef constructor.
+
         """
-        if (self._hasBeenAdded):
-            # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the dataUID field, which is a mandatory attribute, after this row has been added to this table.")
 
         self._dataUID = EntityRef(dataUID)
 
-    # configDescriptionId
+    # Extrinsic Table Attributes
+
+    # ===> Attribute configDescriptionId
+
+    _configDescriptionId = Tag()
 
     def getConfigDescriptionId(self):
         """
-        Get configDescriptionId as Tag
+        Get configDescriptionId.
+        return configDescriptionId as Tag
         """
-        # make sure it's a copy of the Tag
+
+        # make sure it is a copy of Tag
         return Tag(self._configDescriptionId)
 
     def setConfigDescriptionId(self, configDescriptionId):
         """
-        set configDescriptionId with the specified Tag value (value can be anything allowed by the Tag constructor)
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set configDescriptionId with the specified Tag value.
+        configDescriptionId The Tag value to which configDescriptionId is to be set.
+        The value of configDescriptionId can be anything allowed by the Tag constructor.
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
         """
-        if (self._hasBeenAdded):
-            raise ValueError("Attempt to change the configDescriptionId field, which is part of the key, after this row has been added to this table.")
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the configDescriptionId field, which is part of the key, after this row has been added to this table."
+            )
 
         self._configDescriptionId = Tag(configDescriptionId)
 
-    # execBlockId
+    # ===> Attribute execBlockId
+
+    _execBlockId = Tag()
 
     def getExecBlockId(self):
         """
-        Get execBlockId as Tag
+        Get execBlockId.
+        return execBlockId as Tag
         """
-        # make sure it's a copy of the Tag
+
+        # make sure it is a copy of Tag
         return Tag(self._execBlockId)
 
     def setExecBlockId(self, execBlockId):
         """
-        set execBlockId with the specified Tag value (value can be anything allowed by the Tag constructor)
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set execBlockId with the specified Tag value.
+        execBlockId The Tag value to which execBlockId is to be set.
+        The value of execBlockId can be anything allowed by the Tag constructor.
+
         """
-        if (self._hasBeenAdded):
-           # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the execBlockId field, which is a mandatory attribute, after this row has been added to this table.")
 
         self._execBlockId = Tag(execBlockId)
 
-        
-    # fieldId
+    # ===> Attribute fieldId
+
+    _fieldId = Tag()
 
     def getFieldId(self):
         """
-        Get fieldId as Tag
+        Get fieldId.
+        return fieldId as Tag
         """
-        # make sure it's a copy of the Tag
+
+        # make sure it is a copy of Tag
         return Tag(self._fieldId)
 
     def setFieldId(self, fieldId):
         """
-        set fieldId with the specified Tag value (value can be anything allowed by the Tag constructor)
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set fieldId with the specified Tag value.
+        fieldId The Tag value to which fieldId is to be set.
+        The value of fieldId can be anything allowed by the Tag constructor.
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
         """
-        if (self._hasBeenAdded):
-            raise ValueError("Attempt to change the fieldId field, which is part of the key, after this row has been added to this table.")
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the fieldId field, which is part of the key, after this row has been added to this table."
+            )
 
         self._fieldId = Tag(fieldId)
 
-        
-    # stateId
-    def getStateId(self, i=None):
+    # ===> Attribute stateId
+
+    _stateId = []  # this is a list of Tag []
+
+    def getStateId(self):
         """
-        Get stateId as a list of Tag objects
-        When i is specified, return just that element as a Tag
+        Get stateId.
+        return stateId as Tag []
         """
-        result = None
-        if i is not None:
-            result = Tag(self._stateId[i])
-        else:
-            result = []
-            for i in range(len(self._stateId)):
-                result.append(Tag(self._stateId[i]))
-                
+
+        result = []
+        for i in range(len(self._stateId)):
+            result.append(Tag(self._stateId[i]))
+
         return result
 
     def setStateId(self, stateId):
         """
-        set stateId with the specified list of Tag values (each value can be anything allowed by the Tag constructor)
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set stateId with the specified Tag []  value.
+        stateId The Tag []  value to which stateId is to be set.
+        The value of stateId can be anything allowed by the Tag []  constructor.
+
         """
-        if (self._hasBeenAdded):
-           # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the stateId, which is a mandatory attribute, after this row has been added to this table.")
 
         self._stateId = []
         for i in range(len(stateId)):
             self._stateId.append(Tag(stateId[i]))
 
-    # links
+    # Links
+
     def getConfigDescriptionUsingConfigDescriptionId(self):
         """
-        Returns the row in hte ConfigDescription table having ConfigDescription.configDescriptionId == configDescriptionId
+        Returns the row in the ConfigDescription table having ConfigDescription.configDescriptionId == configDescriptionId
+
         """
-        return self._table.getContainer().getConfigDescription().getRowByKey(self._configDescriptionId)
+
+        return (
+            self._table.getContainer()
+            .getConfigDescription()
+            .getRowByKey(self._configDescriptionId)
+        )
 
     def getFieldUsingFieldId(self):
         """
         Returns the row in the Field table having Field.fieldId == fieldId
+
         """
+
         return self._table.getContainer().getField().getRowByKey(self._fieldId)
 
-    # set a specified stateId
-    def setStateid(self, index, stateId):
+    def setOneStateId(self, index, stateId):
         """
-        Set stateId[i] with the specified stateId value, which must be interpreted as a Tag by the Tag constructor.
-        stateId[i] must already exist
-        Throws an exception if an attempt is made to change this field after it has been added to the table.
+        Set stateId[i] with the specified Tag value.
+        index The index in stateId where to set the Tag value.
+        stateId The Tag value to which stateId[i] is to be set.
+        Raises an exception if that value does not already exist in this row.
+
         """
-        if (self._hasBeenAdded):
-           # Java code suppresses this exception at all times, only the key attributes trigger this
-            if (False):
-                raise ValueError("Attempt to change the stateId field, which is a mandatory attribute, after this row has been added to this table.")
 
         self._stateId[index] = Tag(stateId)
 
-    # hasmany link from a row of Main table to many rows of State table.
+    # ===> hasmany link from a row of Main table to many rows of State table.
 
-    def addStateId(self,stateId):
+    def addStateId(self, id):
         """
-        Append stateId as a Tag or list of Tags to the stateId
+        Append a Tag to stateId
+        id the Tag to be appended to stateId
         """
-        if isinstance(stateId, list):
-            for i in range(len(stateId)):
-                self._stateId.append(Tag(stateId[i]))
+        if isinstance(id, list):
+            for i in range(len(id)):
+                self._stateId.append(Tag(id[i]))
         else:
-            self._stateId.append(Tag(stateId))
+            self._stateId.append(Tag(id))
+
+    def getOneStateId(self, i):
+        """
+        Returns the Tag stored in stateId at position i.
+        """
+        return self._stateId[i]
 
     def getStateUsingStateId(self, i):
         """
-        Returns the StateRow linked to this row via the Tag stored in the indicated stateId
+        Returns the StateRow linked to this row via the Tag stored in stateId
+        at position i.
         """
+
         return self._table.getContainer().getState().getRowByKey(self._stateId[i])
 
     def getStatesUsingStateId(self):
         """
-        Returns the array of StateRows linked to this row via the Tags stored in stateId
+        Returns the array of StateRow linked to this row via the Tags stored in stateId
         """
-        stateRows = []
-        for thisStateId in self._stateId:
-            stateRows.append(self._table.getContainer().getState().getRowByKey(thisStateId))
+        result = []
+        for thisItem in self._stateId:
+            result.append(self._table.getContainer().getState().getRowByKey(thisItem))
+
+        return result
 
     def getExecBlockUsingExecBlockId(self):
         """
         Returns the row in the ExecBlock table having ExecBlock.execBlockId == execBlockId
+
         """
+
         return self._table.getContainer().getExecBlock().getRowByKey(self._execBlockId)
 
     # comparison methods
-    def compareNoAutoInc(self, time, configDescriptionId, fieldId, numAntenna, TimeSampling,
-                         interval, numIntegration, scanNumber, subscanNumber, dataSize,
-                         dataUID, stateId, execBlockId):
+
+    def compareNoAutoInc(
+        self,
+        time,
+        configDescriptionId,
+        fieldId,
+        numAntenna,
+        timeSampling,
+        interval,
+        numIntegration,
+        scanNumber,
+        subscanNumber,
+        dataSize,
+        dataUID,
+        stateId,
+        execBlockId,
+    ):
         """
         Compare each attribute except the autoincrementable one of this MainRow with
         the corresponding parameters and return True if there is a match and False otherwise.
         """
 
-        # time is a ArrayTime, compare using the equals method
-        if (not (this._time.equals(time))):
+        # time is a ArrayTime, compare using the equals method.
+        if not (self._time.equals(time)):
             return False
 
         # configDescriptionId is a Tag, compare using the equals method.
-        if (not (this._configDescriptionId.equals(configDescriptionId))):
+        if not (self._configDescriptionId.equals(configDescriptionId)):
             return False
 
         # fieldId is a Tag, compare using the equals method.
-        if (not (this._fieldid.equals(fieldId))):
+        if not (self._fieldId.equals(fieldId)):
             return False
 
         # numAntenna is a int, compare using the == operator.
-        if (not (this._numAntenna == numAntenna)):
+        if not (self._numAntenna == numAntenna):
             return False
 
-        # timeSampling is aTimeSampling, compare using the == on the getValue() member
-        if (not (this._timeSampling.getValue() == timeSampling.getValue())):
+        # timeSampling is a TimeSampling, compare using the == operator on the getValue() output
+        if not (self._timeSampling.getValue() == timeSampling.getValue()):
             return False
 
         # interval is a Interval, compare using the equals method.
-        if (not (this._interval.equals(interval))):
+        if not (self._interval.equals(interval)):
             return False
 
-        # numIntegration is a int, compare using the == operator
-        if (not (this._numIntegration == numIntegration)):
+        # numIntegration is a int, compare using the == operator.
+        if not (self._numIntegration == numIntegration):
             return False
 
-        # scanNumber is a int, compare using the == operator
-        if (not (this._scanNumber == scanNumber)):
+        # scanNumber is a int, compare using the == operator.
+        if not (self._scanNumber == scanNumber):
             return False
 
-        # subscanNumber is a int, compare using the == operator
-        if (not (this._subscanNumber == subscanNumber)):
+        # subscanNumber is a int, compare using the == operator.
+        if not (self._subscanNumber == subscanNumber):
             return False
 
-        # dataSize is a int, compare using the == operator
-        if (not (this._dataSize == dataSize)):
+        # dataSize is a int, compare using the == operator.
+        if not (self._dataSize == dataSize):
             return False
 
-        # dataUID is a EntityRef, compare using the equals method
-        if (not (this._dataUID.equals(dataUID))):
+        # dataUID is a EntityRef, compare using the equals method.
+        if not (self._dataUID.equals(dataUID)):
             return False
 
-        # stateId is an extrinsic attribute which is a list of Tag
+        # stateId is an extrinsic attribute which is a list of Tag.
         # the lists must have the same length
-        if (not (len(this._stateId) == len(stateId))):
+        if len(self._stateId) != len(stateId):
             return False
 
-        # compare each element using the equals method
-        for indx in range(len(this._stateId)):
-            if (not (this._stateId[indx].equals(stateId[indx]))):
+        # compare each element using the equals method.
+        for indx in range(len(self._stateId)):
+            if not (self._stateId[indx].equals(stateId[indx])):
                 return False
 
         # execBlockId is a Tag, compare using the equals method.
-        if (not (this._execBlockId.equals(execBlockId))):
+        if not (self._execBlockId.equals(execBlockId)):
             return False
 
         return True
 
     def equalByRequiredValue(self, otherRow):
-        return compareRequiredValue(
+        """
+        Return True if all required attributes of the value part are equal to their homologues
+        in otherRow and False otherwise.
+        """
+
+        return self.compareRequiredValue(
             otherRow.getNumAntenna(),
             otherRow.getTimeSampling(),
             otherRow.getInterval(),
@@ -653,59 +743,69 @@ class MainRow:
             otherRow.getScanNumber(),
             otherRow.getSubscanNumber(),
             otherRow.getDataSize(),
+            otherRow.getDataUID(),
             otherRow.getStateId(),
-            otherRow.getExecBlock()
-            )
+            otherRow.getExecBlockId(),
+        )
 
-    def compareRequiredValue(self, numAntenna, timeSampling, interval, numIntegration,
-                             scanNumber, subscanNumber, dataSize, dataUID, stateId, execBlockId):
+    def compareRequiredValue(
+        self,
+        numAntenna,
+        timeSampling,
+        interval,
+        numIntegration,
+        scanNumber,
+        subscanNumber,
+        dataSize,
+        dataUID,
+        stateId,
+        execBlockId,
+    ):
 
-        # numAntenna is a int, compare using the == operator
-        if (not (this._numAntenna == numAntenna)):
+        # numAntenna is a int, compare using the == operator.
+        if not (self._numAntenna == numAntenna):
             return False
 
-        # timeSampling is a TimeSampling, compare using the == on the getValue() member.
-        if (not (this._timeSampling.getValue() == timeSampling.getValue())):
+        # timeSampling is a TimeSampling, compare using the == operator on the getValue() output
+        if not (self._timeSampling.getValue() == timeSampling.getValue()):
             return False
 
-        # interval is a Interval, compare using the equals method
-        if (not (this._interval.equals(interval))):
+        # interval is a Interval, compare using the equals method.
+        if not (self._interval.equals(interval)):
             return False
 
-        # numIntegration is a int, compare using the == operator
-        if (not (this._numIntegration == numIntegration)):
+        # numIntegration is a int, compare using the == operator.
+        if not (self._numIntegration == numIntegration):
             return False
 
-        # scanNumber is a int, compare using the == operator
-        if (not (this._scanNumber == scanNumber)):
+        # scanNumber is a int, compare using the == operator.
+        if not (self._scanNumber == scanNumber):
             return False
 
-        # subscanNumber is a int, compare using the == operator
-        if (not (this._subscanNumber == subscanNumber)):
+        # subscanNumber is a int, compare using the == operator.
+        if not (self._subscanNumber == subscanNumber):
             return False
 
-        # dataSize is a int, compare using the == operator
-        if (not (this._dataSize == dataSize)):
+        # dataSize is a int, compare using the == operator.
+        if not (self._dataSize == dataSize):
             return False
 
-        # dataUID is a EntityRef, compare using the equals method
-        if (not (this._dataUID.equals(dataUID))):
+        # dataUID is a EntityRef, compare using the equals method.
+        if not (self._dataUID.equals(dataUID)):
             return False
 
-        # stateId is an extrinsic attribute which is a list of Tag
+        # stateId is an extrinsic attribute which is a list of Tag.
         # the lists must have the same length
-        if (not (len(this._stateId) == len(stateId))):
+        if len(self._stateId) != len(stateId):
             return False
-        # compare each element using the equals method
-        for indx in range(len(this._stateId)):
-            if (not (this._stateId[indx].equals(stateId[indx]))):
+
+        # compare each element using the equals method.
+        for indx in range(len(self._stateId)):
+            if not (self._stateId[indx].equals(stateId[indx])):
                 return False
 
-        # execBlock is a Tag, compare using the equals method.
-        if (not (this._execBlockId.equals(execBlockId))):
+        # execBlockId is a Tag, compare using the equals method.
+        if not (self._execBlockId.equals(execBlockId)):
             return False
 
         return True
-
-
-        

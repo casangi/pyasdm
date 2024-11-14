@@ -4,17 +4,17 @@
 # Copyright by ESO (in the framework of the ALMA collaboration),
 # Copyright by AUI (in the framework of the ALMA collaboration),
 # All rights reserved.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY, without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
@@ -22,47 +22,181 @@
 #
 # File Parser.py
 
-# this will eventually be generated code
+#
+
 
 class Parser:
+    """
+    A collection of static methods used by the pyasdm classes in producing and consuming XML.
+    This is different from how the strongly typed languages use Parser, but it's similar enough
+    that it's been kept in a class of the same name.
+    This is not generated code.
+    """
 
-    _pstr = "" # the string being parsed
-    _pos = 0   # the current position in the string
-    _beg = 0   # the beginning and end of a fragment
-    _end = 0   #    in the string
+    def __init__(self):
+        # there are no non-static members, so there should be no need to create a Parser object
+        raise ValueError("A Parser instance makes no sense")
 
-    def __init__(self, s):
-        # s must be a string
-        if not isinstance(s,str):
-            raise ValueError("s must be a string")
-        self._pstr = s
+    @staticmethod
+    def nameStringToXML(name, strval):
+        """
+        A method to produce XML using the name and a string value.
+        <name>strval</name>
+        The returned value has a trailing space so that it can be used to add
+        these strings together without worrying about spacing.
+        """
+        return "<%s> %s </%s> " % (name, strval, name)
 
-    # is s in the string being parsed?
-    def isStr(self, s):
-        return (self._pstr.find(s) >= 0)
+    @staticmethod
+    def valueToXML(name, value):
+        """
+        Return a string of the form '<name> value </name>' to be used in the XML output.
+        The value must be convertable to a string using the simple str(value) method.
+        A value that is an instance of a class with a toString method should use
+        the extendedValuetoXML method.
+        """
+        return Parser.nameStringToXML(name, str(value))
 
-    # Get the portion of the string bounded by s1 and s2, inclusive.
-    # The first matching index of s1 and s2 are used
-    # Subsequenty uses search string at positions after this element
-    # returns None if none found
-    def getElement(self, s1, s2):
-        self._beg = self._pstr.find(s1, self._pos)
-        if (self._beg < 0):
-            return(None)
+    @staticmethod
+    def extendedValueToXML(name, value):
+        """
+        Return a string of the form '<name> value </name>' to be used in the XML output.
+        The value must have a toString member used to convert that value to a string
+        representation. Extended type values all have that function.
+        """
+        return Parser.nameStringToXML(name, value.toString())
 
-        self._end = self._pstr.find(s2, self._beg+len(s1))
-        if (self._end) < 0:
-            return(None)
-        self._pos = self._end + len(s2)
-        return (self._pstr[self._beg:self._pos])
+    @staticmethod
+    def getListDims(thisList):
+        """
+        Given a list that may be an ND array of lists where all of the lists
+        at each element for the ndim > 1 case has the same shape, this returns
+        a list of the shape of the list of lists (and ND array shape)
+        """
+        result = [len(thisList)]
+        if len(thisList) > 0 and isinstance(thisList[0], list):
+            subdims = Parser.getListDims(thisList[0])
+            result[1:] = subdims
+        return result
 
-    # Get the portion of the string bounded by s1 and s2, exclusive
-    # uses getElement and then the resulting internals to return the content
-    # whitespace is removed from the start and end of the content
-    def getElementContent(self, s1, s2):
-        selement = self.getElement(s1,s2)
-        if selement is None:
-            return(None)
-        return (self._pstr[(self._beg+len(s1)):self._end].strip())
+    @staticmethod
+    def listXMLPrefix(dims):
+        """
+        Return a string with the dimensions list encoded as expected for XML storage of the associated list.
+        'no_dims dim0 dim1 ... dimn '
+        """
+        result = "%s " % len(dims)
+        for thisDim in dims:
+            result += "%s " % thisDim
+        return result
 
-    
+    @staticmethod
+    def listValuesAsString(theList, dims):
+        """
+        Turns a list (including a list of lists as used here) into a string for use in an XML output
+        Values in the list are turned into a string by use of str(value).
+        """
+        if len(dims) > 1:
+            for kk in range(dims[0]):
+                result += Parser.listValuesAsString(theList[kk], dims[1:])
+        else:
+            # these are actual values
+            for jj in range(dims[0]):
+                result += str(theList[jj]) + " "
+        return result
+
+    @staticmethod
+    def listExtendedValuesAsString(theList, dims):
+        """
+        Turns a list (including a list of lists as used here) into a string for use in an XML output
+        Values in the list extended type values and are turned into a string by use of
+        the toString method that is part of extended types.
+        """
+        result = ""
+        if len(dims) > 1:
+            for kk in range(dims[0]):
+                result += Parser.listExtendedValuesAsString(theList[kk], dims[1:])
+        else:
+            # these are actual values
+            for jj in range(dims[0]):
+                result += theList[jj].toString() + " "
+        return result
+
+    @staticmethod
+    def listValueToXML(name, value):
+        """
+        Return a string of the form '<name> list values </name>' to be used in the XML
+        output. The list values are encoded such that they can be read and the list
+        (which may be a list of lists, i.e. an ND array of values) be fully reconstructed
+        from that XML.
+        For use with standard types which can be expressed as a string using str(value).
+        Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
+        and the most rapidly varying dimension among the values is the last dimension.
+        """
+        listDims = Parser.getListDims(value)
+        result = "<%s> " % name
+        result += Parser.listXMLPrefix(listDims)
+        result += Parser.listValuesAsString(value, listDims)
+        result += "</%s> " % name
+        return result
+
+    @staticmethod
+    def listExtendedValueToXML(name, value):
+        """
+        Return a string of the form '<name> list values </name>' to be used in the XML
+        output. The list values are encoded such that they can be read and the list
+        (which may be a list of lists, i.e. an ND array of values) be fully reconstructed
+        from that XML.
+        For use with extended types which can be expressed as a string using their toString() member function.
+        Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
+        and the most rapidly varying dimension among the values is the last dimension.
+        """
+        listDims = Parser.getListDims(value)
+        result = "<%s> " % name
+        result += Parser.listXMLPrefix(listDims)
+        result += Parser.listExtendedValuesAsString(value, listDims)
+        result += "</%s> " % name
+        return result
+
+    def splitStrToClassLists(splitStr, dims, ListClass):
+        result = []
+        if len(dims) == 1:
+            # this is the result
+            # pull the values off of splitStr and return the altered splitStr and the list it made
+            for k in range(dims[0]):
+                result.append(ListClass(splitStr[k]))
+            splitStr = splitStr[dims[0] :]
+            return (splitStr, result)
+        # else loop through this value and then recursively call this
+        for k in range(dims[0]):
+            splitStr, thisResult = splitStrToClassLists(splitStr, dims[1:], ListClass)
+            result.append(thisResult)
+        return (splitStr, result)
+
+    @staticmethod
+    def stringListToLists(strlist, ListClass):
+        """
+        Parse an array expessed in strlist into a list (including lists of list)
+        made up of elements of ListClass that can all be constructed
+        from a single string in that list.
+        """
+        splitStr = strlist.split()
+        # parse the dimensions, which must be integers
+        # there must be at least 2 elements
+        if len(splitStr) < 2:
+            raise ValueError("invalid strlist, must be at least 2 elements")
+        ndim = int(splitStr[0])
+        # now there must be at least (ndim+1) elements
+        if len(splitStr) < (ndim + 1):
+            raise ValueError("invalid strlist, not enough elements given first value")
+        dims = []
+        count = 1
+        for i in range(1, (ndim + 1)):
+            dims.append(int(splitStr[i]))
+            count *= dims[i - 1]
+        if len(splitStr) < (count + 2):
+            raise ValueError("invalid strlist, not enough elements in string")
+        str, result = Parser.splitStrToClassLists(
+            splitStr[(ndim + 1) :], dims, ListClass
+        )
+        return result

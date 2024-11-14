@@ -2,17 +2,17 @@
 # Copyright by ESO (in the framework of the ALMA collaboration),
 # Copyright by AUI (in the framework of the ALMA collaboration),
 # All rights reserved.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY, without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
@@ -24,11 +24,14 @@
 import re
 
 # regular expressions used to validate an EntityId string
-_ALMAbasicUIDRegex = re.compile("^[uU][iI][dD]://[0-9a-zA-Z]+(/[xX][0-9a-fA-F]+){2}(#\\w{1,}){0,}$")
+_ALMAbasicUIDRegex = re.compile(
+    "^[uU][iI][dD]://[0-9a-zA-Z]+(/[xX][0-9a-fA-F]+){2}(#\\w{1,}){0,}$"
+)
 _EVLAbasicUIDRegex = re.compile("^[uU][iI][dD]:///?evla/[0-9a-zA-Z]+/.+$")
 # note that the Java implementation implies this re here:
 # _EVLAbasicUIDRegex = re.compile("^[uU][iI][dD]:///?evla/(bdf|sdm)/.+$")
 # the c++ version was chosen because CASA uses those classes regularly
+
 
 class EntityId:
     """
@@ -37,7 +40,6 @@ class EntityId:
 
     # the value of the EntityId, a string
     _id = ""
-
 
     @staticmethod
     def validate(candidateId):
@@ -49,23 +51,25 @@ class EntityId:
         a message is returned that can be used to throw an exception
         for an invalid EntityId
         """
-        if not isinstance(candidateId,str):
-            return("The UID is not a string (not shown here)")
-        
-        if _ALMAbasicUIDRegex.match(candidateId) or _EVLAbasicUIDRegex.match(candidateId):
+        if not isinstance(candidateId, str):
+            return "The UID is not a string (not shown here)"
+
+        if _ALMAbasicUIDRegex.match(candidateId) or _EVLAbasicUIDRegex.match(
+            candidateId
+        ):
             # this IS valid
-            return (None)
-        
-        return("The UID '" + candidateId + "' is not well formed")
+            return None
+
+        return "The UID '" + candidateId + "' is not well formed"
 
     def __init__(self, *args):
         """
         Initialize an EntityId.
         No arguments: a Null EntityId
-        A single argument: 
+        A single argument:
            An EntityId, copy the value to this one.
            A string, if valid, initialze this one with that string.
-        If the argument is of the wrong type, an invalid string, or 
+        If the argument is of the wrong type, an invalid string, or
         there is more than one argument then a ValueError is raised.
         """
         if len(args) > 1:
@@ -92,18 +96,18 @@ class EntityId:
         """
         returns the value
         """
-        return (self._id)
+        return self._id
 
     # TBD : toBin, fromBin
 
     def equals(self, id):
-        """ 
+        """
         returns True if id is EntityId with a value equal to this EntityId, else False.
         """
-        return (isinstance(id,EntityId) and (self._id == id._id))
+        return isinstance(id, EntityId) and (self._id == id._id)
 
     def isNull(self):
         """
         return True if the value is an empty string, else False
         """
-        return (len(self._id) == 0)
+        return len(self._id) == 0

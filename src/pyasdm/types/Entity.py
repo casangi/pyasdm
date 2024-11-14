@@ -2,17 +2,17 @@
 # Copyright by ESO (in the framework of the ALMA collaboration),
 # Copyright by AUI (in the framework of the ALMA collaboration),
 # All rights reserved.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY, without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
@@ -24,6 +24,7 @@
 from .EntityId import EntityId
 
 from xml.dom import minidom
+
 
 class Entity:
     """
@@ -42,7 +43,7 @@ class Entity:
     _entityTypeName = ""
     _entityVersion = ""
     _instanceVersion = ""
-    
+
     def __init__(self, *args):
         """
         Initialize an EntityId.
@@ -92,21 +93,24 @@ class Entity:
         """
         Return the values of this Entity as an XML-formatted string.
         """
-        msg = self._validXML();
+        msg = self._validXML()
         if msg is not None:
             raise ValueError("Entity.toXML : " + msg)
-        s = "<Entity entityId=\"" + self._entityId.toString()
-        s +="\" entityIdEncrypted=\"" + self._entityIdEncrypted
-        s +="\" entityTypeName=\"" + self._entityTypeName
-        s +="\" schemaVersion=\"" + self._entityVersion
-        s +="\" documentVersion=\"" + self._instanceVersion
-        s += "\"/>"
+        s = '<Entity entityId="' + self._entityId.toString()
+        s += '" entityIdEncrypted="' + self._entityIdEncrypted
+        s += '" entityTypeName="' + self._entityTypeName
+        s += '" schemaVersion="' + self._entityVersion
+        s += '" documentVersion="' + self._instanceVersion
+        s += '"/>'
 
-        return(s)
+        return s
 
     def setFromXML(self, xmlString):
-        if not isinstance(xmlString,str):
-            raise ValueError("Entity.setFromXML argument is not a string. type=" + str(type(xmlString)))
+        if not isinstance(xmlString, str):
+            raise ValueError(
+                "Entity.setFromXML argument is not a string. type="
+                + str(type(xmlString))
+            )
         try:
             xmlDom = minidom.parseString(xmlString)
             # this does not check if there's more than one Entity here
@@ -120,20 +124,23 @@ class Entity:
             msg = "Entity.setFromXML() invalid Entity XML string." + str(exc)
             raise ValueError(msg) from None
 
-    
     def _validXML(self):
         """
         Internal method to check for a valid value for use in creating the XML string
         Returns a non-null string if there are errors in the values (null EntityID or
         empty string).
         """
-        if (self._entityId.isNull() or (len(self._entityIdEncrypted) == 0) or
-            (len(self._entityTypeName) == 0) or (len(self._entityVersion) == 0) or
-            (len(self._instanceVersion) == 0)):
-            return ("Null values detectect in Entity " + self._entityId.toString())
+        if (
+            self._entityId.isNull()
+            or (len(self._entityIdEncrypted) == 0)
+            or (len(self._entityTypeName) == 0)
+            or (len(self._entityVersion) == 0)
+            or (len(self._instanceVersion) == 0)
+        ):
+            return "Null values detectect in Entity " + self._entityId.toString()
 
         # this check for a valid entityId and returns it
-        return (self._entityId.validate(self._entityId.toString()))
+        return self._entityId.validate(self._entityId.toString())
 
     def equals(self, entity):
         """
@@ -142,11 +149,13 @@ class Entity:
         if not isinstance(entity, Entity):
             return False
 
-        return (self._entityId.equals(entity.getEntityId()) and
-                (self._entityIdEncrypted == entity._entityIdEncrypted) and
-                (self._entityTypeName == entity._entityTypeName) and
-                (self._entityVersion == entity._entityVersion) and
-                (self._instanceVersion == entity._instanceVersion))
+        return (
+            self._entityId.equals(entity.getEntityId())
+            and (self._entityIdEncrypted == entity._entityIdEncrypted)
+            and (self._entityTypeName == entity._entityTypeName)
+            and (self._entityVersion == entity._entityVersion)
+            and (self._instanceVersion == entity._instanceVersion)
+        )
 
     def isNull(self):
         """
@@ -170,7 +179,7 @@ class Entity:
         if not isinstance(entityIdEncrypted, str):
             raise ValueError("entityIdEncrypted is not a string")
         self._entityIdEncrypted = entityIdEncrypted
-        
+
     def getEntityTypeName(self):
         return self._entityTypeName
 
@@ -178,7 +187,7 @@ class Entity:
         if not isinstance(entityTypeName, str):
             raise ValueError("entityTypeName is not a string")
         self._entityTypeName = entityTypeName
-        
+
     def getEntityVersion(self):
         return self._entityVersion
 
@@ -186,7 +195,7 @@ class Entity:
         if not isinstance(entityVersion, str):
             raise ValueError("entityVersion is not a string")
         self._entityVersion = entityVersion
-        
+
     def getInstanceVersion(self):
         return self._instanceVersion
 
@@ -194,5 +203,3 @@ class Entity:
         if not isinstance(instanceVersion, str):
             raise ValueError("instanceVersion is not a string")
         self._instanceVersion = instanceVersion
-
-    

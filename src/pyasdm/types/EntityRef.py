@@ -4,17 +4,17 @@
 # Copyright by ESO (in the framework of the ALMA collaboration),
 # Copyright by AUI (in the framework of the ALMA collaboration),
 # All rights reserved.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY, without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
@@ -29,6 +29,7 @@ from .EntityId import EntityId
 
 from xml.dom import minidom
 
+
 class EntityRef:
     """
     The EntityRef class is an identification of a persistent
@@ -37,24 +38,24 @@ class EntityRef:
     """
 
     _entityId = EntityId()
-    _partId = None # a PartId when not null
-    _entityTypeName = None # the entityTypeName string
-    _instanceVersion = None # the instanceVersion string
+    _partId = None  # a PartId when not null
+    _entityTypeName = None  # the entityTypeName string
+    _instanceVersion = None  # the instanceVersion string
 
     def __init__(self, *args):
         """
         Construct an EntityRef.
         If args is empty, the default EntityRef whose internal parameters are null.
         If args is 1 it may be either a string (XML as produced by toString) or
-        another EntityRef (copy constructor). 
-        If there are 4 args they are, in order, entityId, partId, 
+        another EntityRef (copy constructor).
+        If there are 4 args they are, in order, entityId, partId,
         entityTypeName, and instanceVersion. All strings that express the
         4 components of an EntityRef.
         """
         if len(args) == 0:
             # default, nothing to do
             pass
-        elif len(args) == 1 and isinstance(args[0],str):
+        elif len(args) == 1 and isinstance(args[0], str):
             self.setFromXML(args[0])
         elif len(args) == 1 and isinstance(args[0], EntityRef):
             otherRef = args[0]
@@ -100,21 +101,24 @@ class EntityRef:
         msg = self.validXML()
         if msg is not None:
             raise ValueError(msg)
-        
+
         result = ""
-        result = "<EntityRef entityId=\"" + self._entityId.toString()
+        result = '<EntityRef entityId="' + self._entityId.toString()
         if self._partId is not None:
-            result += "\" partId=\"" + self._partId.toString();
-        result += "\" entityTypeName=\"" + self._entityTypeName
-        result += "\" documentVersion=\"" + self._instanceVersion + "\"/>"
+            result += '" partId="' + self._partId.toString()
+        result += '" entityTypeName="' + self._entityTypeName
+        result += '" documentVersion="' + self._instanceVersion + '"/>'
         return result
 
     def setFromXML(self, xmlstr):
         """
         Set the values of this EntityRef from an XML formatted as produced by toXML
         """
-        if not isinstance(xmlstr,str):
-            raise ValueError("EntityRef.setFromXML argument is not a string. type=" + str(type(xmlstr)))
+        if not isinstance(xmlstr, str):
+            raise ValueError(
+                "EntityRef.setFromXML argument is not a string. type="
+                + str(type(xmlstr))
+            )
         try:
             xmldom = minidom.parseString(xmlstr)
             # requires that there's at least one EntityRef here and that the one that's desired is the first one
@@ -126,7 +130,7 @@ class EntityRef:
                 self._partId = None
             else:
                 self._partId = PartId(partIdStr)
-            
+
                 self._entityTypeName = entityRefEl.getAttribute("entityTypeName")
                 self._instanceVersion = entityRefEl.getAttribute("documentVersion")
         except Exception as exc:
@@ -145,8 +149,12 @@ class EntityRef:
         If this is invalid a string message is returned, otherwise None is returned.
         """
         # null values, except for partId, are invalid in XML
-        if self._entityId.isNull() or len(self._entityTypeName) == 0 or len(self._instanceVersion) == 0:
-            return ("Null values detected in EntityRef " + self._entityId.toString())
+        if (
+            self._entityId.isNull()
+            or len(self._entityTypeName) == 0
+            or len(self._instanceVersion) == 0
+        ):
+            return "Null values detected in EntityRef " + self._entityId.toString()
 
         # I think this isn't necessary the way these python classes work - caught elsewhere
         msg = EntityId.validate(self._entityId.toString())
@@ -165,9 +173,9 @@ class EntityRef:
         EntityRef.
         """
 
-        if not isinstance(other,EntityRef):
+        if not isinstance(other, EntityRef):
             return False
-        
+
         # if they're both null then they're equal, but if only one is they're not equal
         if self.isNull():
             if other.isNull():
@@ -209,7 +217,7 @@ class EntityRef:
 
         return self._entityId.toString()
 
-    def setEntityId(self,entityId):
+    def setEntityId(self, entityId):
         """
         Sets the entityId to this string, which must be a valid EntityId string
         """
@@ -240,7 +248,7 @@ class EntityRef:
         sets the entityTypeName to the given string
         """
         self._entityTypeName = entityTypeName
-        
+
     def getInstanceVersion(self):
         """
         returns the instanceVersion string
