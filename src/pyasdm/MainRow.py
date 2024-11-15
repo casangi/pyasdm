@@ -26,7 +26,7 @@
 # | If you do, all changes will be lost when the file is re-generated. |
 #  --------------------------------------------------------------------
 #
-# File MainRow.java
+# File MainRow.py
 #
 
 import pyasdm.MainTable
