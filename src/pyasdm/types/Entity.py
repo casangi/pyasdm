@@ -95,7 +95,7 @@ class Entity:
         """
         msg = self._validXML()
         if msg is not None:
-            raise ValueError("Entity.toXML : " + msg)
+            raise RuntimeError("Entity.toXML : " + msg)
         s = '<Entity entityId="' + self._entityId.toString()
         s += '" entityIdEncrypted="' + self._entityIdEncrypted
         s += '" entityTypeName="' + self._entityTypeName

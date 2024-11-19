@@ -33,6 +33,8 @@ import pyasdm.MainTable
 
 from .Parser import Parser
 
+from .exceptions.ConversionException import ConversionException
+
 # All of the extended types are imported
 from pyasdm.types import *
 
@@ -180,10 +182,12 @@ class MainRow:
         elif isinstance(xmlrow, minidom.Element):
             rowdom = xmlrow
         else:
-            raise ValueError("xmlrow is not a string or a minidom.Element")
+            raise ConversionException(
+                "xmlrow is not a string or a minidom.Element", "MainTable"
+            )
 
         if rowdom.nodeName != "row":
-            raise ValueError("the argument is not a row")
+            raise ConversionException("the argument is not a row", "MainTable")
 
         # intrinsic attribute values
 
@@ -240,7 +244,7 @@ class MainRow:
 
         stateIdNode = rowdom.getElementsByTagName("stateId")[0]
         stateIdStr = stateIdNode.firstChild.data
-        self._stateId = Parser.stringListToLists(stateIdStr, Tag)
+        self._stateId = Parser.stringListToLists(stateIdStr, Tag, "Main")
 
     def toBin(self):
         print("not yet implemented")

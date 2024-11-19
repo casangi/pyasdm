@@ -36,6 +36,9 @@ from .Representable import Representable
 from .types.Entity import Entity
 from .types.EntityId import EntityId
 
+from .exceptions.ConversionException import ConversionException
+from .exceptions.DuplicateKey import DuplicateKey
+
 # using minidom instead of Parser
 from xml.dom import minidom
 
@@ -186,14 +189,14 @@ class MainTable(Representable):
                     return rows[k0]
                 else:
                     # this is a duplicate row with different required values, it can not be added
-                    raise ValueError("DuplicateKey exception in MainTable")
+                    raise DuplicateKey("DuplicateKey exception in ", "MainTable")
             elif thisRowTime == rows[k1].getTime().get():
                 if rows[k1].equalByRequiredValue(thisRow):
                     # this row is already inserted, do not insert it again
                     return rows[k1]
                 else:
                     # this is a duplicate row with different required values, it can not be added
-                    raise ValueError("DuplicateKey exception in MainTable")
+                    raise DuplicateKey("DuplicateKey exception in ", "MainTable")
             else:
                 if thisRowTime <= rows[int((k0 + k1) / 2)].getTime().get():
                     k1 = int((k0 + k1) / 2)
@@ -206,14 +209,14 @@ class MainTable(Representable):
                 return rows[k0]
             else:
                 # this is a duplicate row with different required values, it can not be added
-                raise ValueError("DuplicateKey exception in MainTable")
+                raise DuplicateKey("DuplicateKey exception in ", "MainTable")
         elif thisRowTime == rows[k1].getTime().get():
             if rows[k1].equalByRequiredValue(thisRow):
                 # this row is already inserted, do not insert it again
                 return rows[k1]
             else:
                 # this is a duplicate row with different required values, it can not be added
-                raise ValueError("DuplicateKey exception in MainTable")
+                raise DuplicateKey("DuplicateKey exception in ", "MainTable")
 
         # it goes at k1
         rows.insert(k1, thisRow)
@@ -489,7 +492,9 @@ class MainTable(Representable):
         xmldom = minidom.parseString(xmlstr)
         # this should have at least one child node with a name of MainTable.
         if not xmldom.hasChildNodes() or xmldom.firstChild.nodeName != "MainTable":
-            raise ValueError("XML is not from a MainTable.")
+            raise ConversionException(
+                "XML is not from a the expected table", "MainTable."
+            )
 
         # ignore everything but the first child node
         tabdom = xmldom.firstChild
@@ -498,10 +503,16 @@ class MainTable(Representable):
         if (not tabdom.hasAttributes()) or (
             tabdom.attributes.getNamedItem("schemaVersion") is None
         ):
-            raise ValueError("schemaVersion for MainTable not found in XML")
+            raise ConversionException("schemaVersion not found in XML", "MainTable")
         versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
         # raises a ValueError if not an integer
-        self.setVersion(int(versionStr))
+        try:
+            self.setVersion(int(versionStr))
+        except Exception as ex:
+            # reraise it as a ConversionException
+            raise ConversionException(
+                "schemaVersion is not an integer", "MainTable"
+            ) from None
 
         # go through the child nodes of tabdom
         # get Entity and rows, require ContainerEntity but don't get anything from that
@@ -509,23 +520,28 @@ class MainTable(Representable):
         hasContainerEntity = False
 
         if not tabdom.hasChildNodes():
-            raise ValueError("MainTable XML is missing all of the expected elements")
+            raise ConversionException(
+                "XML is missing all of the expected elements", "MainTable"
+            )
 
         for thisNode in tabdom.childNodes:
             nodeName = thisNode.nodeName
             if nodeName == "Entity":
                 if tabEntity is not None:
-                    raise ValueError("More than one Entity found for MainTable in XML")
+                    raise ConversionException(
+                        "More than one Entity found in XML", "MainTable"
+                    )
                 tabEntity = Entity(thisNode.toxml())
                 if not (tabEntity.getEntityTypeName() == "MainTable"):
-                    raise (
-                        "Entity type name is not the expected value of MainTable in XML"
+                    raise ConversionException(
+                        "Entity type name in XML is not the expected value of the table name",
+                        "MainTable",
                     )
             elif nodeName == "ContainerEntity":
                 # there must be one, but no more than one
                 if hasContainerEntity:
-                    raise ValueError(
-                        "More than one ContainerEntity found for MainTable in XML"
+                    raise ConversionException(
+                        "More than one ContainerEntity found in XML", "MainTable"
                     )
                 hasContainerEntity = True
             elif nodeName == "row":
@@ -533,14 +549,14 @@ class MainTable(Representable):
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
                     self._checkAndAdd(row)
-                except ValueError as exc:
-                    msg = "DuplicateKey in row in MainTable : %s" % str(exc)
-                    raise ValueError(msg) from None
+                except DuplicateKey as exc:
+                    # reraise it as a ConversionException
+                    raise ConversionException(str, "MainTable") from None
 
         if tabEntity is None:
-            raise ValueError("No Entity seen for MainTable in XML")
+            raise ConversionException("No Entity seen in XML", "MainTable")
         if not hasContainerEntity:
-            raise ValueError("No Container Entity seen for MainTable in XML")
+            raise ValueError("No Container Entity seen in XL", "MainTable")
 
         self.setEntity(tabEntity)
 
@@ -553,14 +569,17 @@ class MainTable(Representable):
 
         # directory must exist as a directory
         if not os.path.isdir(directory):
-            raise ValueError("directory must be a path to an existing directory")
+            raise ConversionException(
+                "Directory " + directory + " must be a path to an existing directory",
+                "MainTable",
+            )
 
         if os.path.exists(os.path.join(directory, "Main.xml")):
             self.setFromXMLFile(directory)
         elif os.path.exists(os.path.join(directory, "Main.bin")):
             setFromMIMEFile(directory)
         else:
-            raise ValueError("No file found for the Main table")
+            raise ConversionException("No file found for the Main table", "MainTable")
 
     def setFromMIMEFile(self, directory):
         print("setFromMIMEFile not implemented yet")
@@ -577,7 +596,7 @@ class MainTable(Representable):
             xmlstr = f.read()
 
         if xmlstr is None:
-            raise ValueError("Main.xml is empty")
+            raise ConversionException("Main.xml is empty", "MainTable")
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
@@ -596,9 +615,10 @@ class MainTable(Representable):
         """
 
         if os.path.exists(directory) and not os.path.isdir(directory):
-            raise ValueError(
+            raise ConversionException(
                 "Cannot write into directory %s. This file already exists and is not a directory. (Main)"
-                % directory
+                % directory,
+                "MainTable",
             )
 
         if not os.path.exists(directory):

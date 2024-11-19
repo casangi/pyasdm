@@ -34,8 +34,11 @@ from xml.dom import minidom
 # will need to import each table type here
 from pyasdm.MainTable import MainTable
 
+from pyasdm.exceptions.ConversionException import ConversionException
+
 import time
 import os
+import errno
 
 
 class ASDM:
@@ -180,7 +183,7 @@ class ASDM:
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
         result += '<ASDM xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cntnr="http://Alma/XASDM/ASDM" xsi:schemaLocation="http://Alma/XASDM/ASDM http://almaobservatory.org/XML/XASDM/4/ASDM.xsd" schemaVersion="4" schemaRevision="-1"> '
         if self._entity.isNull():
-            raise ValueError("Container entity cannot be null. (Container)")
+            raise ConversionException("Container entity cannot be null", "Container")
         result += self._entity.toXML()
         result += " "
         result += "<TimeOfCreation> "
@@ -199,7 +202,7 @@ class ASDM:
         result += "</NumberRows> "
         if self._main.size() > 0:
             if self._main.getEntity().isNull():
-                raise ValueError("Table entity is null. (Main)")
+                raise ConversionException("Table entity is null.", self._main.getName())
             result += self._main.getEntity().toXML()
         result += "</Table> "
         result += "</ASDM>"
@@ -213,11 +216,14 @@ class ASDM:
         """
         # directory must exist as a directory.
         if not os.path.isdir(directory):
-            raise ValueError("directory must be a path to an existing directory")
+            raise ConversionException(
+                "Directory " + directory + " does not exist or is not a directory.",
+                "ASDM",
+            )
 
         self._directory = directory
         if self._fileAsBin:
-            raise ValueError("fileAsBin not implemented yet for ASDM")
+            raise RuntimeError("fileAsBin not implemented yet for ASDM")
         else:
             fileName = directory + "/ASDM.xml"
             # c++ uses ASDMUtils to find the origin and version if parse requests that, deferring
@@ -225,14 +231,16 @@ class ASDM:
             # skip that here and go right to xmlDoc
             # read the entire file into a string
             if not os.path.exists(fileName):
-                raise ValueError("no ASDM.xml found in %s" % directory)
+                raise ConversionException(
+                    "File " + fileName + " does not exist.", "ASDM"
+                )
 
             xmlstr = None
             with open(fileName) as f:
                 xmlstr = f.read()
 
             if xmlstr is None:
-                raise ValueError("ASDM.xml is empty")
+                raise ConversionException("ASDM.xml is empty", "ASDM")
 
             self.fromXML(xmlstr)
 
@@ -249,17 +257,23 @@ class ASDM:
         # this should have a single child with a name of ASDM
         # ignore everything but the first child
         if not xmldom.hasChildNodes() or xmldom.firstChild.nodeName != "ASDM":
-            raise ValueError("XML is not from an ASDM file")
+            raise ConversionError("XML is not from an ASDM file", "ASDM")
         asdmdom = xmldom.firstChild
 
         # get the version from the schemaVersion attribute, which must be there
         if (not asdmdom.hasAttributes()) or (
             asdmdom.attributes.getNamedItem("schemaVersion") is None
         ):
-            raise ValueError("schemaVersion for ASDM not found in XML")
+            raise ConversionError("schemaVersion not found in XML", "ASDM")
         versionStr = asdmdom.attributes.getNamedItem("schemaVersion").value
         # raises a ValueError if not an integer
-        self.setVersion(int(versionStr))
+        try:
+            self.setVersion(int(versionStr))
+        except ValueError as ex:
+            # rethrow that as a conversion exception
+            raise ConversionException(
+                "schemaVersion is not an integer as expected", "ASDM"
+            ) from None
 
         # go though the child nodes of asdmdom, either Entity, TimeOfCreation or Table
         # only Table should appear more than once
@@ -271,17 +285,17 @@ class ASDM:
         # these become True (default is False) and need to be available for other uses
 
         if not asdmdom.hasChildNodes():
-            raise ValueError("ASDM XML is missing all of the expected elements")
+            raise ConversionError("XML is missing all of the expected elements", "ASDM")
 
         for thisNode in asdmdom.childNodes:
             nodeName = thisNode.nodeName
             if nodeName == "Entity":
                 if asdmEntity is not None:
-                    raise ValueError("More than one Entity found for ASDM XML")
+                    raise ConversionError("More than one Entity found", "ASDM")
                 asdmEntity = Entity(thisNode.toxml())
             elif nodeName == "TimeOfCreation":
                 if asdmToC is not None:
-                    raise ValueError("More than one TimeOfCreation found for ASDM XML")
+                    raise ConversionError("More than one TimeOfCreation found", "ASDM")
                 asdmToC = ArrayTime(thisNode.firstChild.data)
             elif nodeName == "startTimeDurationInXML":
                 print("startTimeDurationInXML seen")
@@ -298,40 +312,45 @@ class ASDM:
                     tabNodeName = thisTabNode.nodeName
                     if tabNodeName == "Name":
                         if tabName is not None:
-                            raise ValueError(
-                                "More than one Name seen for the same Table in ASDM XML"
+                            raise ConversionError(
+                                "More than one Name seen for the same Table", "ASDM"
                             )
                         tabName = thisTabNode.firstChild.data
                     elif tabNodeName == "NumberRows":
                         if tabSize is not None:
-                            raise ValueError(
-                                "More than one NumberOfRows seen for the same Table in ASDM XML"
+                            raise ConversionError(
+                                "More than one NumberOfRows seen for the same Table",
+                                "ASDM",
                             )
                         tabSize = int(thisTabNode.firstChild.data)
                     elif tabNodeName == "Entity":
                         if tabEntity is not None:
-                            raise ValueError(
-                                "More than one Entity seen for the same Table in ASDM XML"
+                            raise ConversionError(
+                                "More than one Entity seen for the same Table", "ASDM"
                             )
                         tabEntity = Entity(thisTabNode.toxml())
 
                 # name and size must be there
                 if tabName is None or tabSize is None:
-                    raise ValueError(
-                        "A table in ASDM xml is not named or the number of rows is not given"
+                    raise ConversionError(
+                        "A table is not named or the number of rows is not given",
+                        "ASDM",
                     )
                 if tabSize > 0:
                     if tabEntity is None:
-                        raise ValueError(
-                            "No Entity given for %s table of size %s"
-                            % (tabName, tabSize)
+                        raise ConversionError(
+                            (
+                                "No Entity given for %s table of size %s"
+                                % (tabName, tabSize)
+                            ),
+                            "ASDM",
                         )
                     self._tableEntity[tabName] = tabEntity
 
         if asdmEntity is None:
-            raise ("No Entity seen for ASDM element in ASDM XML")
+            raise ConversionError("No Entity seen for ASDM element", "ASDM")
         if asdmToC is None:
-            raise ("No TimeOfCreation seen in ASDM XML")
+            raise ConversionError("No TimeOfCreation seen", "ASDM")
 
         self.setEntity(asdmEntity)
         self.setTimeOfCreation(asdmToC)
@@ -348,14 +367,21 @@ class ASDM:
         """
         # check if directory exists
         if os.path.exists(directory) and not os.path.isdir(directory):
-            raise ValueError(
-                "Cannot write into directory %s. This file already exists and is not a directory (ASDM)"
-                % directory
+            raise ConversionException(
+                "Cannnot write into directory "
+                + directory
+                + ". This file already exists and is not a directory",
+                "ASDM",
             )
 
         if not os.path.exists(directory):
-            # don't catch any exceptions here, assume it can be found
-            os.mkdir(directory)
+            try:
+                os.mkdir(directory)
+            except Exception as ex:
+                # rethrow this as a ConversionException
+                raise ConversionException(
+                    "Could not create directory " + directory, "ASDM"
+                ) from None
 
         fileName = None
         if self._fileAsBin:

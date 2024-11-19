@@ -22,7 +22,7 @@
 #
 # File Parser.py
 
-#
+from pyasdm.exceptions.ConversionException import ConversionException
 
 
 class Parser:
@@ -35,7 +35,7 @@ class Parser:
 
     def __init__(self):
         # there are no non-static members, so there should be no need to create a Parser object
-        raise ValueError("A Parser instance makes no sense")
+        raise RuntimeError("A Parser instance makes no sense")
 
     @staticmethod
     def nameStringToXML(name, strval):
@@ -174,29 +174,53 @@ class Parser:
         return (splitStr, result)
 
     @staticmethod
-    def stringListToLists(strlist, ListClass):
+    def stringListToLists(strlist, ListClass, tableName):
         """
         Parse an array expessed in strlist into a list (including lists of list)
         made up of elements of ListClass that can all be constructed
         from a single string in that list.
+        The tableName is used when raising ConversionException to indicate the responsible table.
         """
         splitStr = strlist.split()
         # parse the dimensions, which must be integers
         # there must be at least 2 elements
         if len(splitStr) < 2:
-            raise ValueError("invalid strlist, must be at least 2 elements")
+            raise ConversionException(
+                "invalid strlist, must be at least 2 elements. ListClass is "
+                + type(ListClass),
+                tableName,
+            )
         ndim = int(splitStr[0])
         # now there must be at least (ndim+1) elements
         if len(splitStr) < (ndim + 1):
-            raise ValueError("invalid strlist, not enough elements given first value")
+            raise ConversionException(
+                "invalid strlist, not enough elements given first value. ListClass is "
+                + type(ListClass),
+                tableName,
+            )
         dims = []
         count = 1
         for i in range(1, (ndim + 1)):
             dims.append(int(splitStr[i]))
             count *= dims[i - 1]
         if len(splitStr) < (count + 2):
-            raise ValueError("invalid strlist, not enough elements in string")
-        str, result = Parser.splitStrToClassLists(
-            splitStr[(ndim + 1) :], dims, ListClass
-        )
+            raise ConversionException(
+                "invalid strlist, not enough elements in string, ListClass is "
+                + type(ListClass),
+                tableName,
+            )
+        try:
+            str, result = Parser.splitStrToClassLists(
+                splitStr[(ndim + 1) :], dims, ListClass
+            )
+        except Exception as exc:
+            # raise a ConversionException for anything this unexpected
+            raise ConversionException(
+                "Unexpected exception "
+                + str(exc)
+                + ", ListClass is "
+                + type(ListClass),
+                tableName,
+            ) from None
+
         return result

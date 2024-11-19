@@ -100,7 +100,7 @@ class EntityRef:
         # checks for valid values first
         msg = self.validXML()
         if msg is not None:
-            raise ValueError(msg)
+            raise RuntimeError(msg)
 
         result = ""
         result = '<EntityRef entityId="' + self._entityId.toString()

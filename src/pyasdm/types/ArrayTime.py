@@ -366,7 +366,7 @@ class ArrayTime(Interval):
 
         # check for valid month
         if month < 1 or month > 12:
-            raise IllegalValueException(
+            raise ValueError(
                 "Illegal value of month: " + year + "-" + month + "-" + day
             )
 
@@ -374,15 +374,13 @@ class ArrayTime(Interval):
         if (iday < 1 or iday > 31) or (
             (month == 4 or month == 6 or month == 9 or month == 11) and iday > 30
         ):
-            raise IllegalValueException(
-                "Illegal value of day: " + year + "-" + month + "-" + day
-            )
+            raise ValueError("Illegal value of day: " + year + "-" + month + "-" + day)
         if month == 2:
             maxDays = 28
             if self.isLeapYear(year):
                 maxDays = 29
             if leapYear > maxDays:
-                raise IllegalValueException(
+                raise ValueError(
                     "Illegal value of day: " + year + "-" + month + "-" + day
                 )
 
@@ -410,9 +408,7 @@ class ArrayTime(Interval):
             or second < 0.0
             or second >= 60.0
         ):
-            raise IllegalVallueException(
-                "Invalid time: " + hour + ":" + minute + ":" + second
-            )
+            raise ValueError("Invalid time: " + hour + ":" + minute + ":" + second)
         return self.initFloatDay(
             year, month, (day + (((((second / 60.0) + minute) / 60.0) + hour) / 24.0))
         )
@@ -427,7 +423,7 @@ class ArrayTime(Interval):
         The "T" separting the data and time values is optional.  If the "T" is
         not present, then a space MUST be present.
 
-         An IllegalValueException is thrown is the string is not a valid
+         A ValueError is raised if the string is not a valid
          time.
         """
         if (
@@ -438,7 +434,7 @@ class ArrayTime(Interval):
             or t[13] != ":"
             or t[16] != ":"
         ):
-            raise IllegalArgumentException("Invalid time format: " + t)
+            raise ValueError("Invalid time format: " + t)
 
         yyyy = 0
         mm = 0
