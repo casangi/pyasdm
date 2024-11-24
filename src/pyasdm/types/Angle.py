@@ -1,0 +1,375 @@
+# ALMA - Atacama Large Millimeter Array
+# (c) European Southern Observatory, 2024
+# (c) Associated Universities Inc., 2024
+# Copyright by ESO (in the framework of the ALMA collaboration),
+# Copyright by AUI (in the framework of the ALMA collaboration),
+# All rights reserved.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307  USA
+#
+# File Angle.py
+#
+
+import math
+
+
+class Angle:
+    """
+    The Angle class implements a concept of an angle in radians.
+
+    This version adapted from the c++ and java implementation originally authored by Allen Farris
+    """
+
+    # The factor by which to multiply an angle in radians to convert it to degrees.
+    radToDeg = 180.0 / math.pi
+
+    # The factor by which to mulitply an angle in radians to convert it to hours.
+    radToHour = 12.0 / math.pi
+
+    # The factor by which to multiply an angle in radians to convert it to arcseconds.
+    radToArcsecond = (3600.0 * 180.0) / math.pi
+
+    # The factor by which to multiply an angle in degress to convert it to radians.
+    degToRad = math.pi / 180.0
+
+    # The factor by which to multiple an angle in hours to convert it to radians.
+    hourToRad = math.pi / 12.0
+
+    # The factor by which to multiple an angle in arcseconds to convert it to radians.
+    arcsecondToRad = math.pi / (3600.0 * 180.0)
+
+    # Radian, rad, an allowed unit of angle.
+    RADIAN = "rad"
+
+    # Degree, deg, an allowed unit of angle.
+    DEGREE = "deg"
+
+    # Hour, hr, an allowed unit of angle.
+    HOUR = "hr"
+
+    # Arcsecond, arcsec, an allowed unit of angle.
+    ARCSECOND = "arcsec"
+
+    # A list of strings containing the allowable units of Angle.
+    AllowedUnits = [RADIAN, DEGREE, HOUR, ARCSECOND]
+
+    # Return the canonical unit associated with this Angle, radian.
+    # The unit associated with this Angle, always returns RADIAN.
+    @staticmethod
+    def unit():
+        """
+        Return the canonical unit associated with this Angle, radian.
+        The unit associated with this Angle, always returns RADIAN.
+        """
+        return Angle.RADIAN
+
+    @staticmethod
+    def add(a1, a2):
+        """
+        Return a new Angle that is the sum of the
+        specified angles, a1 +  a2.
+        a1 The first Angle of the pair.
+        a2 The second Angle of the pair.
+        return A new Angle that is the sum of the specified angles, a1 +  a2.
+        """
+        if not (isinstance(a1, Angle) and isinstance(a2, Angle)):
+            raise ValueError("a1 and a2 must both be Angle instances")
+
+        return Angle(a1._angle + a2._angle)
+
+    @staticmethod
+    def subtract(a1, a2):
+        """
+        Return a new Angle that is the difference of the
+        specified angles, a1 - a2.
+        a1 The first Angle of the pair.
+        a2 The second Angle of the pair.
+        return A new Angle that is the difference of the specified angles, a1 - a2.
+        """
+        if not (isinstance(a1, Angle) and isinstance(a2, Angle)):
+            raise ValueError("a1 and a2 must both be Angle instances")
+
+        return Angle(a1._angle - a2._angle)
+
+    @staticmethod
+    def multiply(a, factor):
+        """
+        Return a new Angle that is the product of a specified
+        angle and some specified factor, a * factor.
+        a The base angle
+        factor The factor that is used to multiply the value.
+        return A new Angle that is the product of a specified angle
+        and some specified factor, a * factor.
+        """
+        if not isinstance(a, Angle):
+            raise ValueError("a must be an Angle")
+
+        return Angle(a._angle * factor)
+
+    @staticmethod
+    def divide(a, factor):
+        """
+        Return a new Angle that is a specified angle divided by a
+        specified factor, a / factor.
+        a The base angle
+        factor The factor that is used to divide the value.
+        return A new Angle that is the product of a specified
+        angle and some specified factor, a / factor.
+        """
+        if not isinstance(a, Angle):
+            raise ValueError("a must be an Angle")
+
+        return Angle(a._angle / factor)
+
+    # the angle in radians
+    _angle = 0.0
+
+    def __init__(self, value=0.0, units=None):
+        """
+        Create an Angle with an initial value and units.
+        The default Angle (no arguments) is zero (0.0) radians.
+        The default units (none specified) is RADIAN.
+        If value is a string then it is converted to a float as is.
+        The units must be one of the 4 recognized units: RADIAN,
+        DEGREE, HOUR, and ARCSECOND.
+        If value is an Angle instance then this is the copy constructor
+        and any value of units other than None is illegal.
+        """
+        if isinstance(value, Angle):
+            if units is not None:
+                raise ValueError("units can not be specied when value is an Angle")
+            self._angle = value._angle
+
+        else:
+            self.set(value, units)
+
+    def get(self, units=None):
+        """
+        Return the value of this angle in the specified units.
+        When units is None (the default) the returned units are RADIAN.
+        Recognized units are None (RADIAN), RADIAN, DEGREE, HOUR, and ARCSECOND.
+        """
+        if units is None or units == self.RADIAN:
+            return self._angle
+        if units == self.DEGREE:
+            return self._angle * self.radToDeg
+        if units == self.HOUR:
+            return self._angle * self.radToHour
+        if units == self.ARCSECOND:
+            return self._angle * self.radToArcsecond
+
+        raise ValueError(str(units) + " is not an allowable unit.")
+
+    def set(self, value, units=None):
+        """
+        Set the value of this angle to the specified value in the specified units.
+        If the value is a string it is first converted to a float.
+        The units default to RADIAN.
+        Recognized units are RADIAN, DEGREE, HOUR, and ARCSECOND.
+        """
+
+        # make sure that this is a float even if value is an int or a string
+        # other types might work, too
+        value = float(value)
+
+        if units is None or units == self.RADIAN:
+            self._angle = value
+        elif units == self.DEGREE:
+            self._angle = value * self.degToRad
+        elif units == self.HOUR:
+            self._angle = value * self.hourToRad
+        elif units == self.ARCSECOND:
+            self._angle = value * self.arcsecondToRad
+        else:
+            raise ValueError(str(units) + " is not al allowable unit.")
+
+    def toString(self, units=None):
+        """
+        Return the value of this Angle as a string in the given units.
+        The units default to RADIAN if not specified.
+        The units must be one of the recognized units of RADIAN, DEGREE,
+        HOUR, and ARCSECOND
+        """
+        return str(self.get(units))
+
+    @staticmethod
+    def values(items):
+        """
+        return a list of floats containing the value of the list of Angle objects
+        passed in the items argument.
+        items may also be a list of lists (2D array) of Angle objects. If the first
+        item is a list then this method assumes that items is a list of list and the
+        return value is a list of lists of floats.
+        The list of lists case is done by calling this method recursively and so should
+        work for higher levels of lists of lists. That use case is not tested.
+        """
+        result = []
+        if isinstance(items[0], list):
+            # this is a list of lists, assume they are all lists
+            for item in items:
+                thisResult = Angle.values(item)
+                result.append(thisResult)
+        else:
+            # assume this is a list of Angle objects
+            for item in items:
+                result.append(item.get())
+        return result
+
+    def toBin(self):
+        raise RuntimeError("Angle.toBin is not yet implemented")
+
+    def fromBin(self):
+        raise RuntimeError("Angle.fromBin is not yet implemented")
+
+    def from1DBin(self):
+        raise RuntimeError("Angle.from1DBin is not yet implemented")
+
+    def from2DBin(self):
+        raise RuntimeError("Angle.from2DBin is not yet implemented")
+
+    def from3DBin(self):
+        raise RuntimeError("Angle.from3DBin is not yet implemented")
+
+    def equals(self, otherAngle):
+        """
+        Returns True if and only if the specified other angle has
+        a value that is equal to this angle.
+        """
+        return isinstance(otherAngle, Angle) and (self._angle == otherAngle._angle)
+
+    def almostEquals(self, otherAngle, toleranceAngle):
+        """
+        Returns True if and only if otherAngle and toleranceAngle are both Angles
+        and if the distance (absolute value of the difference) between this angle
+        and otherAngle is less than the absolute value of toleranceAngle.
+        """
+        result = False
+        if isinstance(otherAngle, Angle) and isinstance(toleranceAngle, Angle):
+            result = abs(self._angle - otherAngle._angle) <= abs(toleranceAngle._angle)
+
+        return result
+
+    def isZero(self):
+        """
+        Return True if and only if this angle is zero (0.0).
+        """
+        return self._angle == 0.0
+
+    def compareTo(self, otherAngle):
+        """
+        Compare this angle to the specified other angle, which must be an angle.
+        Returning -1, 0, or +1 if this angle is less than, equal to, or greater
+        than the other angle.
+        """
+        if not isinstance(otherAngle, Angle):
+            raise ValueError("otherAngle must be an Angle")
+
+        result = 0
+        if self._angle < otherAngle._angle:
+            result = -1
+        elif self._angle > otherAngle._angle:
+            result = 1
+
+        return result
+
+    def eq(self, otherAngle):
+        """
+        Returns True if and only if this angle is equal to the otherAngle.
+        This is equivalent to the equals method.
+        """
+        return self.equals(otherAngle)
+
+    def ne(self, otherAngle):
+        """
+        Returns True if and only if this angle is not equal to otherAngle
+        """
+        return isinstance(otherAngle, Angle) and (self._angle != otherAngle._angle)
+
+    def lt(self, otherAngle):
+        """
+        Returns True if and only if this angle is less than otherAngle
+        """
+        return isinstance(otherAngle, Angle) and (self._angle < otherAngle._angle)
+
+    def le(self, otherAngle):
+        """
+        Returns True if and only if this angle is less than or equal to otherAngle
+        """
+        return isinstance(otherAngle, Angle) and (self._angle <= otherAngle._angle)
+
+    def gt(self, otherAngle):
+        """
+        Returns True if and only if this angle is greater than otherAngle
+        """
+        return isinstance(otherAngle, Angle) and (self._angle > otherAngle._angle)
+
+    def ge(self, otherAngle):
+        """
+        Returns True if and only if this angle is greater than or equal to otherAngle
+        """
+        return isinstance(otherAngle, Angle) and (self._angle >= otherAngle._angle)
+
+    def mult(self, factor):
+        """
+        Multiply this angle by some factor, (this * factor).
+        Return this angle after multiplication.
+        """
+        self._angle *= factor
+        return self
+
+    def div(self, factor):
+        """
+        Divide this angle by some factor, (this / factor)
+        Return this angle after division.
+        """
+        self._angle /= factor
+        return self
+
+    def sin(self):
+        """
+        Return the trigonometric sine of this angle.
+        """
+        return math.sin(self._angle)
+
+    def cos(self):
+        """
+        Return the trigonometric cosine of this angle.
+        """
+        return math.cos(self._angle)
+
+    def tan(self):
+        """
+        Return the trigonometric tangent of this angle.
+        """
+        return math.tan(self._angle)
+
+    def asin(self):
+        """
+        Return the arc sine of this angle, in the range of -<i>pi</i>/2 through <i>pi</i>/2.
+        """
+        return math.asin(self._angle)
+
+    def acos(self):
+        """
+        Return the arc cosine of this angle, in the range of 0.0 through <i>pi</i>.
+        """
+        return math.acos(self._angle)
+
+    def atan(self):
+        """
+        Return the arc tangent of this angle, in the range of -<i>pi</i>/2 through <i>pi</i>/2.
+        """
+        return math.atan(self._angle)

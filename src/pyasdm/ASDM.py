@@ -33,6 +33,7 @@ from xml.dom import minidom
 
 # will need to import each table type here
 from pyasdm.MainTable import MainTable
+from pyasdm.FieldTable import FieldTable
 
 from pyasdm.exceptions.ConversionException import ConversionException
 
@@ -73,6 +74,8 @@ class ASDM:
     # each table will appear here as a data member
     _main = None
 
+    _field = None
+
     # defer on getTables() until necessary, would return a list or array of all of the tables
 
     # default constructor makes an empty ASDM
@@ -97,6 +100,7 @@ class ASDM:
         )
 
         self._main = MainTable(self)
+        self._field = FieldTable(self)
 
     # getters and setters
     def getMain(self):
@@ -105,6 +109,13 @@ class ASDM:
         """
         self._main.checkPresenceInMemory()
         return self._main
+
+    def getField(self):
+        """
+        get the FieldTable
+        """
+        self._field.checkPresenceInMemory()
+        return self._field
 
     def getEntity(self):
         return self._entity
@@ -190,7 +201,11 @@ class ASDM:
         result += self._timeOfCreation.toFITS()
         result += " "
         result += "</TimeOfCreation>"
-        # this ultimately needs a list of tables, just do Main now
+        # this ultimately needs a list of tables, just do these for now
+
+        # MainTable
+        # this makes sure it's populated
+        mainTable = self.getMain()
         result += "<Table> "
         result += "<Name> "
         result += self._main.getName()
@@ -205,6 +220,27 @@ class ASDM:
                 raise ConversionException("Table entity is null.", self._main.getName())
             result += self._main.getEntity().toXML()
         result += "</Table> "
+
+        # FieldTable
+        # this makes sure it's populated
+        fieldTable = self.getField()
+        result += "<Table> "
+        result += "<Name> "
+        result += self._field.getName()
+        result += " "
+        result += "</Name> "
+        result += "<NumberRows> "
+        result += str(self._field.size())
+        result += " "
+        result += "</NumberRows> "
+        if self._field.size() > 0:
+            if self._field.getEntity().isNull():
+                raise ConversionException(
+                    "Table entity is null.", self._field.getName()
+                )
+            result += self._field.getEntity().toXML()
+        result += "</Table> "
+
         result += "</ASDM>"
         return result
 
@@ -247,6 +283,9 @@ class ASDM:
         # mark the tables found in the file with a non-zero size as not present in memory so they can be loaded on demain
         if "Main" in self._tableEntity:
             self._main.setNotPresentInMemory()
+
+        if "Field" in self._tableEntity:
+            self._field.setNotPresentInMemory()
 
     def fromXML(self, xmlstr):
         """
@@ -401,3 +440,6 @@ class ASDM:
         # then send each of its table to its own file
         if self.getMain().size() > 0:
             self.getMain().toFile(directory)
+
+        if self.getField().size() > 0:
+            self.getField().toFile(directory)

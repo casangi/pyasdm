@@ -65,7 +65,7 @@ class ArrayTime(Interval):
     2000, Willmann-Bell, Inc., ISBN 0-943396-61-1.  See
     chapter 7, "Julian day", and chapter 12, "Sidereal Time".
     <p>
-    This version adapted from the c++ and java implementations, originally authored by Alllen Farris.
+    This version adapted from the c++ and java implementations, originally authored by Allen Farris.
     """
 
     # multiple constructors

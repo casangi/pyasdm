@@ -7,3 +7,5 @@ from .ASDM import ASDM
 from .Parser import Parser
 from .MainTable import MainTable
 from .MainRow import MainRow
+from .FieldTable import FieldTable
+from .FieldRow import FieldRow

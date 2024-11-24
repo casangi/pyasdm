@@ -20,25 +20,16 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307  USA
 #
-# File DuplicateKey.py
+# File InvalidAccessException.py
 
 
-class DuplicateKey(Exception):
+class InvalidAccessException(Exception):
     """
-    Generate an exception when a new row cannot be inserted
-    because it contains a duplicate key.
+    An exception raised when an attempt is made to access an undefined optional variable.
     """
 
-    def __init__(self, key, tableName):
-        """
-        key is the duplicate key.
-        tableName the table name to which the row is being added.
-        """
-        fullmsg = (
-            "Cannot insert row with key "
-            + key
-            + " into table "
-            + tableName
-            + ". Key already exists."
-        )
+    def __init__(self, msg):
+        fullmsg = "Attempt to access an optional variable that is undefined."
+        if msg is not None:
+            fullmsg += " " + msg
         super().__init__(fullmsg)

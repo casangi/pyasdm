@@ -44,6 +44,8 @@ from pyasdm.enumerations.TimeSampling import TimeSampling
 
 from xml.dom import minidom
 
+import copy
+
 
 class MainRow:
     """
@@ -200,6 +202,7 @@ class MainRow:
         self._numAntenna = int(numAntennaNode.firstChild.data)
 
         timeSamplingNode = rowdom.getElementsByTagName("timeSampling")[0]
+
         self._timeSampling = TimeSampling.newTimeSampling(
             timeSamplingNode.firstChild.data
         )
@@ -243,6 +246,7 @@ class MainRow:
         self._fieldId = Tag(fieldIdNode.firstChild.data)
 
         stateIdNode = rowdom.getElementsByTagName("stateId")[0]
+
         stateIdStr = stateIdNode.firstChild.data
         self._stateId = Parser.stringListToLists(stateIdStr, Tag, "Main")
 
@@ -554,11 +558,7 @@ class MainRow:
         return stateId as Tag []
         """
 
-        result = []
-        for i in range(len(self._stateId)):
-            result.append(Tag(self._stateId[i]))
-
-        return result
+        return copy.deepcopy(self._stateId)
 
     def setStateId(self, stateId):
         """
@@ -568,9 +568,28 @@ class MainRow:
 
         """
 
-        self._stateId = []
-        for i in range(len(stateId)):
-            self._stateId.append(Tag(stateId[i]))
+        # value must be a list
+        if not isinstance(stateId, list):
+            raise ValueError("The value of stateId must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(stateId)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of stateId is not correct")
+
+            # the type of the values in the list must be Tag
+            # note : this only checks the first value found
+            if not Parser.checkListType(stateId, Tag):
+                raise ValueError(
+                    "type of the first value in stateId is not Tag as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._stateId = copy.deepcopy(stateId)
+        except Exception as exc:
+            raise ValueError("Invalid stateId : " + str(exc))
 
     # Links
 

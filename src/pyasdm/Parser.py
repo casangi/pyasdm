@@ -80,6 +80,27 @@ class Parser:
         return result
 
     @staticmethod
+    def checkListType(thisList, atype):
+        """
+        Returns True if and only if thisList is a list and the type of
+        the first non-list value found in thisList is an instance of atype
+        or the length of that list is 0.
+        """
+        result = False
+        if isinstance(thisList, list):
+            if len(thisList) > 0:
+                if isinstance(thisList[0], atype):
+                    return True
+                if isinstance(thisList[0], list):
+                    return Parser.checkListType(thisList[0], atype)
+            else:
+                # zero length list is True
+                return True
+        # it's not a list, this means it's not the expected type
+        # I think it can't get here recursively, only if called with a non-list argument
+        return False
+
+    @staticmethod
     def listXMLPrefix(dims):
         """
         Return a string with the dimensions list encoded as expected for XML storage of the associated list.
@@ -158,6 +179,7 @@ class Parser:
         result += "</%s> " % name
         return result
 
+    @staticmethod
     def splitStrToClassLists(splitStr, dims, ListClass):
         result = []
         if len(dims) == 1:
@@ -169,7 +191,9 @@ class Parser:
             return (splitStr, result)
         # else loop through this value and then recursively call this
         for k in range(dims[0]):
-            splitStr, thisResult = splitStrToClassLists(splitStr, dims[1:], ListClass)
+            splitStr, thisResult = Parser.splitStrToClassLists(
+                splitStr, dims[1:], ListClass
+            )
             result.append(thisResult)
         return (splitStr, result)
 

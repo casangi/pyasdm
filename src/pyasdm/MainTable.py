@@ -33,8 +33,9 @@ import pyasdm.ASDM
 
 from .MainRow import MainRow
 from .Representable import Representable
-from .types.Entity import Entity
-from .types.EntityId import EntityId
+
+# All of the extended types are imported
+from pyasdm.types import *
 
 from .exceptions.ConversionException import ConversionException
 from .exceptions.DuplicateKey import DuplicateKey
@@ -314,7 +315,7 @@ class MainTable(Representable):
         The row is inserted in the table in such a way that all rows having the same value of
         ( configDescriptionId, fieldId ) are stored by ascending time.
         """
-        # the original code in the Java template is identical to that for checkAndAdd
+        # the original code in the Java template is identical to that for _checkAndAdd
         # so use that method here.
         return self._checkAndAdd(row)
 
@@ -379,24 +380,26 @@ class MainTable(Representable):
         it simply parents it to this, a call to the add method
         has to be done in order to get the row added (very likely after having modified
         some of its attributes.
-        If row is null then the method returns a new MainRow with default values for its attributes.
+        If row is None then the method returns a new MainRow with default values for its attributes.
         """
 
         return MainRow(self, row)
 
     # ====> Append a row to its table.
 
-    def _checkAndAdd(self, row):
+    def _checkAndAdd(self, newrow):
         """
-        Append a row to it's table, used by the input conversion methods. Not intended for external use.
+        A method to append a row to its table, used by input conversion
+        methods. Not intended for external use.
         Returns the added row.
         """
-        rowKey = MainTable.Key(row.getConfigDescriptionId(), row.getFieldId())
+
+        rowKey = MainTable.Key(newrow.getConfigDescriptionId(), newrow.getFieldId())
 
         if rowKey not in self._context:
             self._context[rowKey] = []
 
-        return self.insertByTime(row, self._context[rowKey])
+        return self.insertByTime(newrow, self._context[rowKey])
 
     # ====> methods returning rows.
 
