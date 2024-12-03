@@ -1,0 +1,728 @@
+# ALMA - Atacama Large Millimeter Array
+# (c) European Southern Observatory, 2002
+# (c) Associated Universities Inc., 2002
+# Copyright by ESO (in the framework of the ALMA collaboration),
+# Copyright by AUI (in the framework of the ALMA collaboration),
+# All rights reserved.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307  USA
+#
+# Warning!
+#  --------------------------------------------------------------------
+# | This is generated code!  Do not modify this file.                  |
+# | If you do, all changes will be lost when the file is re-generated. |
+#  --------------------------------------------------------------------
+#
+# File FocusModelRow.py
+#
+
+import pyasdm.FocusModelTable
+
+from .Parser import Parser
+
+from .exceptions.ConversionException import ConversionException
+
+# All of the extended types are imported
+from pyasdm.types import *
+
+
+from pyasdm.enumerations.PolarizationType import PolarizationType
+
+
+from pyasdm.enumerations.ReceiverBand import ReceiverBand
+
+
+from xml.dom import minidom
+
+import copy
+
+
+class FocusModelRow:
+    """
+    The FocusModelRow class is a row of a FocusModelTable.
+
+    Generated from model's revision -1, branch
+    """
+
+    # the table to which this row belongs.
+    _table = None
+
+    # whether this row has been added to the table or not.
+    _hasBeenAdded = False
+
+    # internal attribute values appear later, with their getters and setters
+
+    def __init__(self, table, row=None):
+        """
+        Create a FocusModelRow.
+        When row is None, create an empty row attached to table, which must be a FocusModelTable.
+        When row is given, copy those values in to the new row. The row argument must be a FocusModelRow.
+        The returned new row is not yet added to table, but it knows about table.
+        """
+        if not isinstance(table, pyasdm.FocusModelTable):
+            raise ValueError("table must be a MainTable")
+
+        self._table = table
+        self._hasBeenAdded = False
+
+        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._polarizationType = PolarizationType.from_int(0)
+
+        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._receiverBand = ReceiverBand.from_int(0)
+
+        if row is not None:
+            if not isinstance(row, FocusModelRow):
+                raise ValueError("row must be a MainRow")
+
+            self._antennaId = Tag(row._antennaId)
+
+            self._focusModelId = row._focusModelId
+
+            # We force the attribute of the result to be not None
+            if row._polarizationType is None:
+                self._polarizationType = PolarizationType.from_int(0)
+            else:
+                self._polarizationType = PolarizationType(row._polarizationType)
+
+            # We force the attribute of the result to be not None
+            if row._receiverBand is None:
+                self._receiverBand = ReceiverBand.from_int(0)
+            else:
+                self._receiverBand = ReceiverBand(row._receiverBand)
+
+            self._numCoeff = row._numCoeff
+
+            # coeffName is a  list , make a deep copy
+            self._coeffName = copy.deepcopy(row._coeffName)
+
+            # coeffFormula is a  list , make a deep copy
+            self._coeffFormula = copy.deepcopy(row._coeffFormula)
+
+            # coeffVal is a  list , make a deep copy
+            self._coeffVal = copy.deepcopy(row._coeffVal)
+
+            self._assocNature = row._assocNature
+
+            self._assocFocusModelId = row._assocFocusModelId
+
+    def isAdded(self):
+        self._hasBeenAdded = True
+
+    def getTable(self):
+        """
+        Return the table to which this row belongs.
+        """
+        return self._table
+
+    def toXML(self):
+        """
+        Return this row in the form of an XML string.
+        """
+        result = ""
+
+        result += "<row> \n"
+
+        # intrinsic attributes
+
+        result += Parser.valueToXML("focusModelId", self._focusModelId)
+
+        result += Parser.valueToXML(
+            "polarizationType", PolarizationType.name(self._polarizationType)
+        )
+
+        result += Parser.valueToXML(
+            "receiverBand", ReceiverBand.name(self._receiverBand)
+        )
+
+        result += Parser.valueToXML("numCoeff", self._numCoeff)
+
+        result += Parser.listValueToXML("coeffName", self._coeffName)
+
+        result += Parser.listValueToXML("coeffFormula", self._coeffFormula)
+
+        result += Parser.listValueToXML("coeffVal", self._coeffVal)
+
+        result += Parser.valueToXML("assocNature", self._assocNature)
+
+        # extrinsic attributes
+
+        result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += Parser.valueToXML("assocFocusModelId", self._assocFocusModelId)
+
+        # links, if any
+
+        result += "</row>\n"
+        return result
+
+    def setFromXML(self, xmlrow):
+        """
+        Fill the values of this row from an XML string
+        that was produced by the toXML() method.
+        If xmlrow is a minidom.Element with a nodeName of row then
+        it will be used as is. Anything else that is not a string
+        is an error.
+        """
+        rowdom = None
+        if isinstance(xmlrow, str):
+            xmldom = minidom.parseString(xmlrow)
+            rowdom = xmldom.firstChild
+        elif isinstance(xmlrow, minidom.Element):
+            rowdom = xmlrow
+        else:
+            raise ConversionException(
+                "xmlrow is not a string or a minidom.Element", "FocusModelTable"
+            )
+
+        if rowdom.nodeName != "row":
+            raise ConversionException("the argument is not a row", "FocusModelTable")
+
+        # intrinsic attribute values
+
+        focusModelIdNode = rowdom.getElementsByTagName("focusModelId")[0]
+
+        self._focusModelId = int(focusModelIdNode.firstChild.data)
+
+        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
+
+        self._polarizationType = PolarizationType.newPolarizationType(
+            polarizationTypeNode.firstChild.data
+        )
+
+        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+
+        self._receiverBand = ReceiverBand.newReceiverBand(
+            receiverBandNode.firstChild.data
+        )
+
+        numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
+
+        self._numCoeff = int(numCoeffNode.firstChild.data)
+
+        coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
+
+        coeffNameStr = coeffNameNode.firstChild.data
+        self._coeffName = Parser.stringListToLists(coeffNameStr, str, "FocusModel")
+
+        coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")[0]
+
+        coeffFormulaStr = coeffFormulaNode.firstChild.data
+        self._coeffFormula = Parser.stringListToLists(
+            coeffFormulaStr, str, "FocusModel"
+        )
+
+        coeffValNode = rowdom.getElementsByTagName("coeffVal")[0]
+
+        coeffValStr = coeffValNode.firstChild.data
+        self._coeffVal = Parser.stringListToLists(coeffValStr, float, "FocusModel")
+
+        assocNatureNode = rowdom.getElementsByTagName("assocNature")[0]
+
+        self._assocNature = str(assocNatureNode.firstChild.data)
+
+        # extrinsic attribute values
+
+        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+
+        self._antennaId = Tag(antennaIdNode.firstChild.data)
+
+        assocFocusModelIdNode = rowdom.getElementsByTagName("assocFocusModelId")[0]
+
+        self._assocFocusModelId = int(assocFocusModelIdNode.firstChild.data)
+
+    def toBin(self):
+        print("not yet implemented")
+
+    # Intrinsic Table Attributes
+
+    # ===> Attribute focusModelId
+
+    _focusModelId = 0
+
+    def getFocusModelId(self):
+        """
+        Get focusModelId.
+        return focusModelId as int
+        """
+
+        return self._focusModelId
+
+    def setFocusModelId(self, focusModelId):
+        """
+        Set focusModelId with the specified int value.
+        focusModelId The int value to which focusModelId is to be set.
+
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
+        """
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the focusModelId field, which is part of the key, after this row has been added to this table."
+            )
+
+        self._focusModelId = int(focusModelId)
+
+    # ===> Attribute polarizationType
+
+    _polarizationType = PolarizationType.from_int(0)
+
+    def getPolarizationType(self):
+        """
+        Get polarizationType.
+        return polarizationType as PolarizationType
+        """
+
+        return self._polarizationType
+
+    def setPolarizationType(self, polarizationType):
+        """
+        Set polarizationType with the specified PolarizationType value.
+        polarizationType The PolarizationType value to which polarizationType is to be set.
+
+
+        """
+
+        self._polarizationType = PolarizationType(polarizationType)
+
+    # ===> Attribute receiverBand
+
+    _receiverBand = ReceiverBand.from_int(0)
+
+    def getReceiverBand(self):
+        """
+        Get receiverBand.
+        return receiverBand as ReceiverBand
+        """
+
+        return self._receiverBand
+
+    def setReceiverBand(self, receiverBand):
+        """
+        Set receiverBand with the specified ReceiverBand value.
+        receiverBand The ReceiverBand value to which receiverBand is to be set.
+
+
+        """
+
+        self._receiverBand = ReceiverBand(receiverBand)
+
+    # ===> Attribute numCoeff
+
+    _numCoeff = 0
+
+    def getNumCoeff(self):
+        """
+        Get numCoeff.
+        return numCoeff as int
+        """
+
+        return self._numCoeff
+
+    def setNumCoeff(self, numCoeff):
+        """
+        Set numCoeff with the specified int value.
+        numCoeff The int value to which numCoeff is to be set.
+
+
+        """
+
+        self._numCoeff = int(numCoeff)
+
+    # ===> Attribute coeffName
+
+    _coeffName = None  # this is a 1D list of str
+
+    def getCoeffName(self):
+        """
+        Get coeffName.
+        return coeffName as str []
+        """
+
+        return copy.deepcopy(self._coeffName)
+
+    def setCoeffName(self, coeffName):
+        """
+        Set coeffName with the specified str []  value.
+        coeffName The str []  value to which coeffName is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(coeffName, list):
+            raise ValueError("The value of coeffName must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(coeffName)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of coeffName is not correct")
+
+            # the type of the values in the list must be str
+            # note : this only checks the first value found
+            if not Parser.checkListType(coeffName, str):
+                raise ValueError(
+                    "type of the first value in coeffName is not str as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._coeffName = copy.deepcopy(coeffName)
+        except Exception as exc:
+            raise ValueError("Invalid coeffName : " + str(exc))
+
+    # ===> Attribute coeffFormula
+
+    _coeffFormula = None  # this is a 1D list of str
+
+    def getCoeffFormula(self):
+        """
+        Get coeffFormula.
+        return coeffFormula as str []
+        """
+
+        return copy.deepcopy(self._coeffFormula)
+
+    def setCoeffFormula(self, coeffFormula):
+        """
+        Set coeffFormula with the specified str []  value.
+        coeffFormula The str []  value to which coeffFormula is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(coeffFormula, list):
+            raise ValueError("The value of coeffFormula must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(coeffFormula)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of coeffFormula is not correct")
+
+            # the type of the values in the list must be str
+            # note : this only checks the first value found
+            if not Parser.checkListType(coeffFormula, str):
+                raise ValueError(
+                    "type of the first value in coeffFormula is not str as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._coeffFormula = copy.deepcopy(coeffFormula)
+        except Exception as exc:
+            raise ValueError("Invalid coeffFormula : " + str(exc))
+
+    # ===> Attribute coeffVal
+
+    _coeffVal = None  # this is a 1D list of float
+
+    def getCoeffVal(self):
+        """
+        Get coeffVal.
+        return coeffVal as float []
+        """
+
+        return copy.deepcopy(self._coeffVal)
+
+    def setCoeffVal(self, coeffVal):
+        """
+        Set coeffVal with the specified float []  value.
+        coeffVal The float []  value to which coeffVal is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(coeffVal, list):
+            raise ValueError("The value of coeffVal must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(coeffVal)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of coeffVal is not correct")
+
+            # the type of the values in the list must be float
+            # note : this only checks the first value found
+            if not Parser.checkListType(coeffVal, float):
+                raise ValueError(
+                    "type of the first value in coeffVal is not float as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._coeffVal = copy.deepcopy(coeffVal)
+        except Exception as exc:
+            raise ValueError("Invalid coeffVal : " + str(exc))
+
+    # ===> Attribute assocNature
+
+    _assocNature = None
+
+    def getAssocNature(self):
+        """
+        Get assocNature.
+        return assocNature as str
+        """
+
+        return self._assocNature
+
+    def setAssocNature(self, assocNature):
+        """
+        Set assocNature with the specified str value.
+        assocNature The str value to which assocNature is to be set.
+
+
+        """
+
+        self._assocNature = str(assocNature)
+
+    # Extrinsic Table Attributes
+
+    # ===> Attribute antennaId
+
+    _antennaId = Tag()
+
+    def getAntennaId(self):
+        """
+        Get antennaId.
+        return antennaId as Tag
+        """
+
+        # make sure it is a copy of Tag
+        return Tag(self._antennaId)
+
+    def setAntennaId(self, antennaId):
+        """
+        Set antennaId with the specified Tag value.
+        antennaId The Tag value to which antennaId is to be set.
+        The value of antennaId can be anything allowed by the Tag constructor.
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
+        """
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the antennaId field, which is part of the key, after this row has been added to this table."
+            )
+
+        self._antennaId = Tag(antennaId)
+
+    # ===> Attribute assocFocusModelId
+
+    _assocFocusModelId = 0
+
+    def getAssocFocusModelId(self):
+        """
+        Get assocFocusModelId.
+        return assocFocusModelId as int
+        """
+
+        return self._assocFocusModelId
+
+    def setAssocFocusModelId(self, assocFocusModelId):
+        """
+        Set assocFocusModelId with the specified int value.
+        assocFocusModelId The int value to which assocFocusModelId is to be set.
+
+
+        """
+
+        self._assocFocusModelId = int(assocFocusModelId)
+
+    # Links
+
+    def getAntennaUsingAntennaId(self):
+        """
+        Returns the row in the Antenna table having Antenna.antennaId == antennaId
+
+        """
+
+        return self._table.getContainer().getAntenna().getRowByKey(self._antennaId)
+
+    # ===> Slice link from a row of FocusModel table to a collection of row of FocusModel table.
+    def getFocusModels(self):
+        """
+        Get the collection of rows in the FocusModel table having focusModelId == this.focusModelId
+        """
+
+        return (
+            self._table.getContainer()
+            .getFocusModel()
+            .getRowByFocusModelId(self._focusModelId)
+        )
+
+    # comparison methods
+
+    def compareNoAutoInc(
+        self,
+        antennaId,
+        polarizationType,
+        receiverBand,
+        numCoeff,
+        coeffName,
+        coeffFormula,
+        coeffVal,
+        assocNature,
+        assocFocusModelId,
+    ):
+        """
+        Compare each attribute except the autoincrementable one of this FocusModelRow with
+        the corresponding parameters and return True if there is a match and False otherwise.
+        """
+
+        # antennaId is a Tag, compare using the equals method.
+        if not self._antennaId.equals(antennaId):
+            return False
+
+        # polarizationType is a PolarizationType, compare using the == operator on the getValue() output
+        if not (self._polarizationType.getValue() == polarizationType.getValue()):
+            return False
+
+        # receiverBand is a ReceiverBand, compare using the == operator on the getValue() output
+        if not (self._receiverBand.getValue() == receiverBand.getValue()):
+            return False
+
+        # numCoeff is a int, compare using the == operator.
+        if not (self._numCoeff == numCoeff):
+            return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._coeffName) != len(coeffName):
+            return False
+        for indx in range(len(coeffName)):
+
+            # coeffName is a list of str, compare using == operator.
+            if not (self._coeffName[indx] == coeffName[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._coeffFormula) != len(coeffFormula):
+            return False
+        for indx in range(len(coeffFormula)):
+
+            # coeffFormula is a list of str, compare using == operator.
+            if not (self._coeffFormula[indx] == coeffFormula[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._coeffVal) != len(coeffVal):
+            return False
+        for indx in range(len(coeffVal)):
+
+            # coeffVal is a list of float, compare using == operator.
+            if not (self._coeffVal[indx] == coeffVal[indx]):
+                return False
+
+        # assocNature is a str, compare using the == operator.
+        if not (self._assocNature == assocNature):
+            return False
+
+        # assocFocusModelId is a int, compare using the == operator.
+        if not (self._assocFocusModelId == assocFocusModelId):
+            return False
+
+        return True
+
+    def equalByRequiredValue(self, otherRow):
+        """
+        Return True if all required attributes of the value part are equal to their homologues
+        in otherRow and False otherwise.
+        """
+
+        return self.compareRequiredValue(
+            otherRow.getPolarizationType(),
+            otherRow.getReceiverBand(),
+            otherRow.getNumCoeff(),
+            otherRow.getCoeffName(),
+            otherRow.getCoeffFormula(),
+            otherRow.getCoeffVal(),
+            otherRow.getAssocNature(),
+            otherRow.getAssocFocusModelId(),
+        )
+
+    def compareRequiredValue(
+        self,
+        polarizationType,
+        receiverBand,
+        numCoeff,
+        coeffName,
+        coeffFormula,
+        coeffVal,
+        assocNature,
+        assocFocusModelId,
+    ):
+
+        # polarizationType is a PolarizationType, compare using the == operator on the getValue() output
+        if not (self._polarizationType.getValue() == polarizationType.getValue()):
+            return False
+
+        # receiverBand is a ReceiverBand, compare using the == operator on the getValue() output
+        if not (self._receiverBand.getValue() == receiverBand.getValue()):
+            return False
+
+        # numCoeff is a int, compare using the == operator.
+        if not (self._numCoeff == numCoeff):
+            return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._coeffName) != len(coeffName):
+            return False
+        for indx in range(len(coeffName)):
+
+            # coeffName is a list of str, compare using == operator.
+            if not (self._coeffName[indx] == coeffName[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._coeffFormula) != len(coeffFormula):
+            return False
+        for indx in range(len(coeffFormula)):
+
+            # coeffFormula is a list of str, compare using == operator.
+            if not (self._coeffFormula[indx] == coeffFormula[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._coeffVal) != len(coeffVal):
+            return False
+        for indx in range(len(coeffVal)):
+
+            # coeffVal is a list of float, compare using == operator.
+            if not (self._coeffVal[indx] == coeffVal[indx]):
+                return False
+
+        # assocNature is a str, compare using the == operator.
+        if not (self._assocNature == assocNature):
+            return False
+
+        # assocFocusModelId is a int, compare using the == operator.
+        if not (self._assocFocusModelId == assocFocusModelId):
+            return False
+
+        return True

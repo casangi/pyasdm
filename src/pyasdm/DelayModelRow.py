@@ -1,0 +1,2350 @@
+# ALMA - Atacama Large Millimeter Array
+# (c) European Southern Observatory, 2002
+# (c) Associated Universities Inc., 2002
+# Copyright by ESO (in the framework of the ALMA collaboration),
+# Copyright by AUI (in the framework of the ALMA collaboration),
+# All rights reserved.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307  USA
+#
+# Warning!
+#  --------------------------------------------------------------------
+# | This is generated code!  Do not modify this file.                  |
+# | If you do, all changes will be lost when the file is re-generated. |
+#  --------------------------------------------------------------------
+#
+# File DelayModelRow.py
+#
+
+import pyasdm.DelayModelTable
+
+from .Parser import Parser
+
+from .exceptions.ConversionException import ConversionException
+
+# All of the extended types are imported
+from pyasdm.types import *
+
+
+from pyasdm.enumerations.PolarizationType import PolarizationType
+
+
+from xml.dom import minidom
+
+import copy
+
+
+class DelayModelRow:
+    """
+    The DelayModelRow class is a row of a DelayModelTable.
+
+    Generated from model's revision -1, branch
+    """
+
+    # the table to which this row belongs.
+    _table = None
+
+    # whether this row has been added to the table or not.
+    _hasBeenAdded = False
+
+    # internal attribute values appear later, with their getters and setters
+
+    def __init__(self, table, row=None):
+        """
+        Create a DelayModelRow.
+        When row is None, create an empty row attached to table, which must be a DelayModelTable.
+        When row is given, copy those values in to the new row. The row argument must be a DelayModelRow.
+        The returned new row is not yet added to table, but it knows about table.
+        """
+        if not isinstance(table, pyasdm.DelayModelTable):
+            raise ValueError("table must be a MainTable")
+
+        self._table = table
+        self._hasBeenAdded = False
+
+        # this is a list of PolarizationType Enumeration, start off with it being empty
+        self._polarizationType = []
+
+        if row is not None:
+            if not isinstance(row, DelayModelRow):
+                raise ValueError("row must be a MainRow")
+
+            self._antennaId = Tag(row._antennaId)
+
+            self._spectralWindowId = Tag(row._spectralWindowId)
+
+            self._timeInterval = ArrayTimeInterval(row._timeInterval)
+
+            self._numPoly = row._numPoly
+
+            # phaseDelay is a  list , make a deep copy
+            self._phaseDelay = copy.deepcopy(row._phaseDelay)
+
+            # phaseDelayRate is a  list , make a deep copy
+            self._phaseDelayRate = copy.deepcopy(row._phaseDelayRate)
+
+            # groupDelay is a  list , make a deep copy
+            self._groupDelay = copy.deepcopy(row._groupDelay)
+
+            # groupDelayRate is a  list , make a deep copy
+            self._groupDelayRate = copy.deepcopy(row._groupDelayRate)
+
+            self._fieldId = Tag(row._fieldId)
+
+            # by default set systematically timeOrigin's value to something not None
+
+            if row._timeOriginExists:
+
+                self._timeOrigin = ArrayTime(row._timeOrigin)
+
+                self._timeOriginExists = True
+
+            # by default set systematically atmosphericGroupDelay's value to something not None
+
+            if row._atmosphericGroupDelayExists:
+
+                self._atmosphericGroupDelay = row._atmosphericGroupDelay
+
+                self._atmosphericGroupDelayExists = True
+
+            # by default set systematically atmosphericGroupDelayRate's value to something not None
+
+            if row._atmosphericGroupDelayRateExists:
+
+                self._atmosphericGroupDelayRate = row._atmosphericGroupDelayRate
+
+                self._atmosphericGroupDelayRateExists = True
+
+            # by default set systematically geometricDelay's value to something not None
+
+            if row._geometricDelayExists:
+
+                self._geometricDelay = row._geometricDelay
+
+                self._geometricDelayExists = True
+
+            # by default set systematically geometricDelayRate's value to something not None
+
+            if row._geometricDelayRateExists:
+
+                self._geometricDelayRate = row._geometricDelayRate
+
+                self._geometricDelayRateExists = True
+
+            # by default set systematically numLO's value to something not None
+
+            if row._numLOExists:
+
+                self._numLO = row._numLO
+
+                self._numLOExists = True
+
+            # by default set systematically LOOffset's value to something not None
+
+            if row._LOOffsetExists:
+
+                # LOOffset is a list, make a deep copy
+                self.LOOffset = copy.deepcopy(row.LOOffset)
+
+                self._LOOffsetExists = True
+
+            # by default set systematically LOOffsetRate's value to something not None
+
+            if row._LOOffsetRateExists:
+
+                # LOOffsetRate is a list, make a deep copy
+                self.LOOffsetRate = copy.deepcopy(row.LOOffsetRate)
+
+                self._LOOffsetRateExists = True
+
+            # by default set systematically dispersiveDelay's value to something not None
+
+            if row._dispersiveDelayExists:
+
+                self._dispersiveDelay = row._dispersiveDelay
+
+                self._dispersiveDelayExists = True
+
+            # by default set systematically dispersiveDelayRate's value to something not None
+
+            if row._dispersiveDelayRateExists:
+
+                self._dispersiveDelayRate = row._dispersiveDelayRate
+
+                self._dispersiveDelayRateExists = True
+
+            # by default set systematically atmosphericDryDelay's value to something not None
+
+            if row._atmosphericDryDelayExists:
+
+                self._atmosphericDryDelay = row._atmosphericDryDelay
+
+                self._atmosphericDryDelayExists = True
+
+            # by default set systematically atmosphericWetDelay's value to something not None
+
+            if row._atmosphericWetDelayExists:
+
+                self._atmosphericWetDelay = row._atmosphericWetDelay
+
+                self._atmosphericWetDelayExists = True
+
+            # by default set systematically padDelay's value to something not None
+
+            if row._padDelayExists:
+
+                self._padDelay = row._padDelay
+
+                self._padDelayExists = True
+
+            # by default set systematically antennaDelay's value to something not None
+
+            if row._antennaDelayExists:
+
+                self._antennaDelay = row._antennaDelay
+
+                self._antennaDelayExists = True
+
+            # by default set systematically numReceptor's value to something not None
+
+            if row._numReceptorExists:
+
+                self._numReceptor = row._numReceptor
+
+                self._numReceptorExists = True
+
+            # by default set systematically polarizationType's value to something not None
+
+            if row._polarizationTypeExists:
+
+                # polarizationType is a list, make a deep copy
+                self.polarizationType = copy.deepcopy(row.polarizationType)
+
+                self._polarizationTypeExists = True
+
+            # by default set systematically electronicDelay's value to something not None
+
+            if row._electronicDelayExists:
+
+                # electronicDelay is a list, make a deep copy
+                self.electronicDelay = copy.deepcopy(row.electronicDelay)
+
+                self._electronicDelayExists = True
+
+            # by default set systematically electronicDelayRate's value to something not None
+
+            if row._electronicDelayRateExists:
+
+                # electronicDelayRate is a list, make a deep copy
+                self.electronicDelayRate = copy.deepcopy(row.electronicDelayRate)
+
+                self._electronicDelayRateExists = True
+
+            # by default set systematically receiverDelay's value to something not None
+
+            if row._receiverDelayExists:
+
+                # receiverDelay is a list, make a deep copy
+                self.receiverDelay = copy.deepcopy(row.receiverDelay)
+
+                self._receiverDelayExists = True
+
+            # by default set systematically IFDelay's value to something not None
+
+            if row._IFDelayExists:
+
+                # IFDelay is a list, make a deep copy
+                self.IFDelay = copy.deepcopy(row.IFDelay)
+
+                self._IFDelayExists = True
+
+            # by default set systematically LODelay's value to something not None
+
+            if row._LODelayExists:
+
+                # LODelay is a list, make a deep copy
+                self.LODelay = copy.deepcopy(row.LODelay)
+
+                self._LODelayExists = True
+
+            # by default set systematically crossPolarizationDelay's value to something not None
+
+            if row._crossPolarizationDelayExists:
+
+                self._crossPolarizationDelay = row._crossPolarizationDelay
+
+                self._crossPolarizationDelayExists = True
+
+    def isAdded(self):
+        self._hasBeenAdded = True
+
+    def getTable(self):
+        """
+        Return the table to which this row belongs.
+        """
+        return self._table
+
+    def toXML(self):
+        """
+        Return this row in the form of an XML string.
+        """
+        result = ""
+
+        result += "<row> \n"
+
+        # intrinsic attributes
+
+        result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += Parser.valueToXML("numPoly", self._numPoly)
+
+        result += Parser.listValueToXML("phaseDelay", self._phaseDelay)
+
+        result += Parser.listValueToXML("phaseDelayRate", self._phaseDelayRate)
+
+        result += Parser.listValueToXML("groupDelay", self._groupDelay)
+
+        result += Parser.listValueToXML("groupDelayRate", self._groupDelayRate)
+
+        if self._timeOriginExists:
+
+            result += Parser.extendedValueToXML("timeOrigin", self._timeOrigin)
+
+        if self._atmosphericGroupDelayExists:
+
+            result += Parser.valueToXML(
+                "atmosphericGroupDelay", self._atmosphericGroupDelay
+            )
+
+        if self._atmosphericGroupDelayRateExists:
+
+            result += Parser.valueToXML(
+                "atmosphericGroupDelayRate", self._atmosphericGroupDelayRate
+            )
+
+        if self._geometricDelayExists:
+
+            result += Parser.valueToXML("geometricDelay", self._geometricDelay)
+
+        if self._geometricDelayRateExists:
+
+            result += Parser.valueToXML("geometricDelayRate", self._geometricDelayRate)
+
+        if self._numLOExists:
+
+            result += Parser.valueToXML("numLO", self._numLO)
+
+        if self._LOOffsetExists:
+
+            result += Parser.listExtendedValueToXML("LOOffset", self._LOOffset)
+
+        if self._LOOffsetRateExists:
+
+            result += Parser.listExtendedValueToXML("LOOffsetRate", self._LOOffsetRate)
+
+        if self._dispersiveDelayExists:
+
+            result += Parser.valueToXML("dispersiveDelay", self._dispersiveDelay)
+
+        if self._dispersiveDelayRateExists:
+
+            result += Parser.valueToXML(
+                "dispersiveDelayRate", self._dispersiveDelayRate
+            )
+
+        if self._atmosphericDryDelayExists:
+
+            result += Parser.valueToXML(
+                "atmosphericDryDelay", self._atmosphericDryDelay
+            )
+
+        if self._atmosphericWetDelayExists:
+
+            result += Parser.valueToXML(
+                "atmosphericWetDelay", self._atmosphericWetDelay
+            )
+
+        if self._padDelayExists:
+
+            result += Parser.valueToXML("padDelay", self._padDelay)
+
+        if self._antennaDelayExists:
+
+            result += Parser.valueToXML("antennaDelay", self._antennaDelay)
+
+        if self._numReceptorExists:
+
+            result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        if self._polarizationTypeExists:
+
+            result += Parser.listEnumValueToXML(
+                "polarizationType", self._polarizationType
+            )
+
+        if self._electronicDelayExists:
+
+            result += Parser.listValueToXML("electronicDelay", self._electronicDelay)
+
+        if self._electronicDelayRateExists:
+
+            result += Parser.listValueToXML(
+                "electronicDelayRate", self._electronicDelayRate
+            )
+
+        if self._receiverDelayExists:
+
+            result += Parser.listValueToXML("receiverDelay", self._receiverDelay)
+
+        if self._IFDelayExists:
+
+            result += Parser.listValueToXML("IFDelay", self._IFDelay)
+
+        if self._LODelayExists:
+
+            result += Parser.listValueToXML("LODelay", self._LODelay)
+
+        if self._crossPolarizationDelayExists:
+
+            result += Parser.valueToXML(
+                "crossPolarizationDelay", self._crossPolarizationDelay
+            )
+
+        # extrinsic attributes
+
+        result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += Parser.extendedValueToXML("fieldId", self._fieldId)
+
+        result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
+
+        # links, if any
+
+        result += "</row>\n"
+        return result
+
+    def setFromXML(self, xmlrow):
+        """
+        Fill the values of this row from an XML string
+        that was produced by the toXML() method.
+        If xmlrow is a minidom.Element with a nodeName of row then
+        it will be used as is. Anything else that is not a string
+        is an error.
+        """
+        rowdom = None
+        if isinstance(xmlrow, str):
+            xmldom = minidom.parseString(xmlrow)
+            rowdom = xmldom.firstChild
+        elif isinstance(xmlrow, minidom.Element):
+            rowdom = xmlrow
+        else:
+            raise ConversionException(
+                "xmlrow is not a string or a minidom.Element", "DelayModelTable"
+            )
+
+        if rowdom.nodeName != "row":
+            raise ConversionException("the argument is not a row", "DelayModelTable")
+
+        # intrinsic attribute values
+
+        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+
+        numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
+
+        self._numPoly = int(numPolyNode.firstChild.data)
+
+        phaseDelayNode = rowdom.getElementsByTagName("phaseDelay")[0]
+
+        phaseDelayStr = phaseDelayNode.firstChild.data
+        self._phaseDelay = Parser.stringListToLists(phaseDelayStr, double, "DelayModel")
+
+        phaseDelayRateNode = rowdom.getElementsByTagName("phaseDelayRate")[0]
+
+        phaseDelayRateStr = phaseDelayRateNode.firstChild.data
+        self._phaseDelayRate = Parser.stringListToLists(
+            phaseDelayRateStr, double, "DelayModel"
+        )
+
+        groupDelayNode = rowdom.getElementsByTagName("groupDelay")[0]
+
+        groupDelayStr = groupDelayNode.firstChild.data
+        self._groupDelay = Parser.stringListToLists(groupDelayStr, double, "DelayModel")
+
+        groupDelayRateNode = rowdom.getElementsByTagName("groupDelayRate")[0]
+
+        groupDelayRateStr = groupDelayRateNode.firstChild.data
+        self._groupDelayRate = Parser.stringListToLists(
+            groupDelayRateStr, double, "DelayModel"
+        )
+
+        timeOriginNode = rowdom.getElementsByTagName("timeOrigin")
+        if len(timeOriginNode) > 0:
+
+            self._timeOrigin = ArrayTime(timeOriginNode[0].firstChild.data)
+
+            self._timeOriginExists = True
+
+        atmosphericGroupDelayNode = rowdom.getElementsByTagName("atmosphericGroupDelay")
+        if len(atmosphericGroupDelayNode) > 0:
+
+            self._atmosphericGroupDelay = double(
+                atmosphericGroupDelayNode[0].firstChild.data
+            )
+
+            self._atmosphericGroupDelayExists = True
+
+        atmosphericGroupDelayRateNode = rowdom.getElementsByTagName(
+            "atmosphericGroupDelayRate"
+        )
+        if len(atmosphericGroupDelayRateNode) > 0:
+
+            self._atmosphericGroupDelayRate = double(
+                atmosphericGroupDelayRateNode[0].firstChild.data
+            )
+
+            self._atmosphericGroupDelayRateExists = True
+
+        geometricDelayNode = rowdom.getElementsByTagName("geometricDelay")
+        if len(geometricDelayNode) > 0:
+
+            self._geometricDelay = double(geometricDelayNode[0].firstChild.data)
+
+            self._geometricDelayExists = True
+
+        geometricDelayRateNode = rowdom.getElementsByTagName("geometricDelayRate")
+        if len(geometricDelayRateNode) > 0:
+
+            self._geometricDelayRate = double(geometricDelayRateNode[0].firstChild.data)
+
+            self._geometricDelayRateExists = True
+
+        numLONode = rowdom.getElementsByTagName("numLO")
+        if len(numLONode) > 0:
+
+            self._numLO = int(numLONode[0].firstChild.data)
+
+            self._numLOExists = True
+
+        LOOffsetNode = rowdom.getElementsByTagName("LOOffset")
+        if len(LOOffsetNode) > 0:
+
+            LOOffsetStr = LOOffsetNode[0].firstChild.data
+            self._LOOffset = Parser.stringListToLists(
+                LOOffsetStr, Frequency, "DelayModel"
+            )
+
+            self._LOOffsetExists = True
+
+        LOOffsetRateNode = rowdom.getElementsByTagName("LOOffsetRate")
+        if len(LOOffsetRateNode) > 0:
+
+            LOOffsetRateStr = LOOffsetRateNode[0].firstChild.data
+            self._LOOffsetRate = Parser.stringListToLists(
+                LOOffsetRateStr, Frequency, "DelayModel"
+            )
+
+            self._LOOffsetRateExists = True
+
+        dispersiveDelayNode = rowdom.getElementsByTagName("dispersiveDelay")
+        if len(dispersiveDelayNode) > 0:
+
+            self._dispersiveDelay = double(dispersiveDelayNode[0].firstChild.data)
+
+            self._dispersiveDelayExists = True
+
+        dispersiveDelayRateNode = rowdom.getElementsByTagName("dispersiveDelayRate")
+        if len(dispersiveDelayRateNode) > 0:
+
+            self._dispersiveDelayRate = double(
+                dispersiveDelayRateNode[0].firstChild.data
+            )
+
+            self._dispersiveDelayRateExists = True
+
+        atmosphericDryDelayNode = rowdom.getElementsByTagName("atmosphericDryDelay")
+        if len(atmosphericDryDelayNode) > 0:
+
+            self._atmosphericDryDelay = double(
+                atmosphericDryDelayNode[0].firstChild.data
+            )
+
+            self._atmosphericDryDelayExists = True
+
+        atmosphericWetDelayNode = rowdom.getElementsByTagName("atmosphericWetDelay")
+        if len(atmosphericWetDelayNode) > 0:
+
+            self._atmosphericWetDelay = double(
+                atmosphericWetDelayNode[0].firstChild.data
+            )
+
+            self._atmosphericWetDelayExists = True
+
+        padDelayNode = rowdom.getElementsByTagName("padDelay")
+        if len(padDelayNode) > 0:
+
+            self._padDelay = double(padDelayNode[0].firstChild.data)
+
+            self._padDelayExists = True
+
+        antennaDelayNode = rowdom.getElementsByTagName("antennaDelay")
+        if len(antennaDelayNode) > 0:
+
+            self._antennaDelay = double(antennaDelayNode[0].firstChild.data)
+
+            self._antennaDelayExists = True
+
+        numReceptorNode = rowdom.getElementsByTagName("numReceptor")
+        if len(numReceptorNode) > 0:
+
+            self._numReceptor = int(numReceptorNode[0].firstChild.data)
+
+            self._numReceptorExists = True
+
+        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")
+        if len(polarizationTypeNode) > 0:
+
+            polarizationTypeStr = polarizationTypeNode[0].firstChild.data
+            self._polarizationType = Parser.stringListToLists(
+                polarizationTypeStr, PolarizationType, "DelayModel"
+            )
+
+            self._polarizationTypeExists = True
+
+        electronicDelayNode = rowdom.getElementsByTagName("electronicDelay")
+        if len(electronicDelayNode) > 0:
+
+            electronicDelayStr = electronicDelayNode[0].firstChild.data
+            self._electronicDelay = Parser.stringListToLists(
+                electronicDelayStr, double, "DelayModel"
+            )
+
+            self._electronicDelayExists = True
+
+        electronicDelayRateNode = rowdom.getElementsByTagName("electronicDelayRate")
+        if len(electronicDelayRateNode) > 0:
+
+            electronicDelayRateStr = electronicDelayRateNode[0].firstChild.data
+            self._electronicDelayRate = Parser.stringListToLists(
+                electronicDelayRateStr, double, "DelayModel"
+            )
+
+            self._electronicDelayRateExists = True
+
+        receiverDelayNode = rowdom.getElementsByTagName("receiverDelay")
+        if len(receiverDelayNode) > 0:
+
+            receiverDelayStr = receiverDelayNode[0].firstChild.data
+            self._receiverDelay = Parser.stringListToLists(
+                receiverDelayStr, double, "DelayModel"
+            )
+
+            self._receiverDelayExists = True
+
+        IFDelayNode = rowdom.getElementsByTagName("IFDelay")
+        if len(IFDelayNode) > 0:
+
+            IFDelayStr = IFDelayNode[0].firstChild.data
+            self._IFDelay = Parser.stringListToLists(IFDelayStr, double, "DelayModel")
+
+            self._IFDelayExists = True
+
+        LODelayNode = rowdom.getElementsByTagName("LODelay")
+        if len(LODelayNode) > 0:
+
+            LODelayStr = LODelayNode[0].firstChild.data
+            self._LODelay = Parser.stringListToLists(LODelayStr, double, "DelayModel")
+
+            self._LODelayExists = True
+
+        crossPolarizationDelayNode = rowdom.getElementsByTagName(
+            "crossPolarizationDelay"
+        )
+        if len(crossPolarizationDelayNode) > 0:
+
+            self._crossPolarizationDelay = double(
+                crossPolarizationDelayNode[0].firstChild.data
+            )
+
+            self._crossPolarizationDelayExists = True
+
+        # extrinsic attribute values
+
+        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+
+        self._antennaId = Tag(antennaIdNode.firstChild.data)
+
+        fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
+
+        self._fieldId = Tag(fieldIdNode.firstChild.data)
+
+        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+
+    def toBin(self):
+        print("not yet implemented")
+
+    # Intrinsic Table Attributes
+
+    # ===> Attribute timeInterval
+
+    _timeInterval = ArrayTimeInterval()
+
+    def getTimeInterval(self):
+        """
+        Get timeInterval.
+        return timeInterval as ArrayTimeInterval
+        """
+
+        # make sure it is a copy of ArrayTimeInterval
+        return ArrayTimeInterval(self._timeInterval)
+
+    def setTimeInterval(self, timeInterval):
+        """
+        Set timeInterval with the specified ArrayTimeInterval value.
+        timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+        The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
+        """
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the timeInterval field, which is part of the key, after this row has been added to this table."
+            )
+
+        self._timeInterval = ArrayTimeInterval(timeInterval)
+
+    # ===> Attribute numPoly
+
+    _numPoly = 0
+
+    def getNumPoly(self):
+        """
+        Get numPoly.
+        return numPoly as int
+        """
+
+        return self._numPoly
+
+    def setNumPoly(self, numPoly):
+        """
+        Set numPoly with the specified int value.
+        numPoly The int value to which numPoly is to be set.
+
+
+        """
+
+        self._numPoly = int(numPoly)
+
+    # ===> Attribute phaseDelay
+
+    _phaseDelay = None  # this is a 1D list of double
+
+    def getPhaseDelay(self):
+        """
+        Get phaseDelay.
+        return phaseDelay as double []
+        """
+
+        return copy.deepcopy(self._phaseDelay)
+
+    def setPhaseDelay(self, phaseDelay):
+        """
+        Set phaseDelay with the specified double []  value.
+        phaseDelay The double []  value to which phaseDelay is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(phaseDelay, list):
+            raise ValueError("The value of phaseDelay must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(phaseDelay)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of phaseDelay is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(phaseDelay, double):
+                raise ValueError(
+                    "type of the first value in phaseDelay is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._phaseDelay = copy.deepcopy(phaseDelay)
+        except Exception as exc:
+            raise ValueError("Invalid phaseDelay : " + str(exc))
+
+    # ===> Attribute phaseDelayRate
+
+    _phaseDelayRate = None  # this is a 1D list of double
+
+    def getPhaseDelayRate(self):
+        """
+        Get phaseDelayRate.
+        return phaseDelayRate as double []
+        """
+
+        return copy.deepcopy(self._phaseDelayRate)
+
+    def setPhaseDelayRate(self, phaseDelayRate):
+        """
+        Set phaseDelayRate with the specified double []  value.
+        phaseDelayRate The double []  value to which phaseDelayRate is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(phaseDelayRate, list):
+            raise ValueError("The value of phaseDelayRate must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(phaseDelayRate)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of phaseDelayRate is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(phaseDelayRate, double):
+                raise ValueError(
+                    "type of the first value in phaseDelayRate is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._phaseDelayRate = copy.deepcopy(phaseDelayRate)
+        except Exception as exc:
+            raise ValueError("Invalid phaseDelayRate : " + str(exc))
+
+    # ===> Attribute groupDelay
+
+    _groupDelay = None  # this is a 1D list of double
+
+    def getGroupDelay(self):
+        """
+        Get groupDelay.
+        return groupDelay as double []
+        """
+
+        return copy.deepcopy(self._groupDelay)
+
+    def setGroupDelay(self, groupDelay):
+        """
+        Set groupDelay with the specified double []  value.
+        groupDelay The double []  value to which groupDelay is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(groupDelay, list):
+            raise ValueError("The value of groupDelay must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(groupDelay)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of groupDelay is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(groupDelay, double):
+                raise ValueError(
+                    "type of the first value in groupDelay is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._groupDelay = copy.deepcopy(groupDelay)
+        except Exception as exc:
+            raise ValueError("Invalid groupDelay : " + str(exc))
+
+    # ===> Attribute groupDelayRate
+
+    _groupDelayRate = None  # this is a 1D list of double
+
+    def getGroupDelayRate(self):
+        """
+        Get groupDelayRate.
+        return groupDelayRate as double []
+        """
+
+        return copy.deepcopy(self._groupDelayRate)
+
+    def setGroupDelayRate(self, groupDelayRate):
+        """
+        Set groupDelayRate with the specified double []  value.
+        groupDelayRate The double []  value to which groupDelayRate is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(groupDelayRate, list):
+            raise ValueError("The value of groupDelayRate must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(groupDelayRate)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of groupDelayRate is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(groupDelayRate, double):
+                raise ValueError(
+                    "type of the first value in groupDelayRate is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._groupDelayRate = copy.deepcopy(groupDelayRate)
+        except Exception as exc:
+            raise ValueError("Invalid groupDelayRate : " + str(exc))
+
+    # ===> Attribute timeOrigin, which is optional
+    _timeOriginExists = False
+
+    _timeOrigin = ArrayTime()
+
+    def isTimeOriginExists(self):
+        """
+        The attribute timeOrigin is optional. Return True if this attribute exists.
+        return True if and only if the timeOrigin attribute exists.
+        """
+        return self._timeOriginExists
+
+    def getTimeOrigin(self):
+        """
+        Get timeOrigin, which is optional.
+        return timeOrigin as ArrayTime
+        raises ValueError If timeOrigin does not exist.
+        """
+        if not self._timeOriginExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + timeOrigin
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        # make sure it is a copy of ArrayTime
+        return ArrayTime(self._timeOrigin)
+
+    def setTimeOrigin(self, timeOrigin):
+        """
+        Set timeOrigin with the specified ArrayTime value.
+        timeOrigin The ArrayTime value to which timeOrigin is to be set.
+        The value of timeOrigin can be anything allowed by the ArrayTime constructor.
+
+        """
+
+        self._timeOrigin = ArrayTime(timeOrigin)
+
+        self._timeOriginExists = True
+
+    def clearTimeOrigin(self):
+        """
+        Mark timeOrigin, which is an optional field, as non-existent.
+        """
+        self._timeOriginExists = False
+
+    # ===> Attribute atmosphericGroupDelay, which is optional
+    _atmosphericGroupDelayExists = False
+
+    _atmosphericGroupDelay = None
+
+    def isAtmosphericGroupDelayExists(self):
+        """
+        The attribute atmosphericGroupDelay is optional. Return True if this attribute exists.
+        return True if and only if the atmosphericGroupDelay attribute exists.
+        """
+        return self._atmosphericGroupDelayExists
+
+    def getAtmosphericGroupDelay(self):
+        """
+        Get atmosphericGroupDelay, which is optional.
+        return atmosphericGroupDelay as double
+        raises ValueError If atmosphericGroupDelay does not exist.
+        """
+        if not self._atmosphericGroupDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + atmosphericGroupDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._atmosphericGroupDelay
+
+    def setAtmosphericGroupDelay(self, atmosphericGroupDelay):
+        """
+        Set atmosphericGroupDelay with the specified double value.
+        atmosphericGroupDelay The double value to which atmosphericGroupDelay is to be set.
+
+
+        """
+
+        self._atmosphericGroupDelay = double(atmosphericGroupDelay)
+
+        self._atmosphericGroupDelayExists = True
+
+    def clearAtmosphericGroupDelay(self):
+        """
+        Mark atmosphericGroupDelay, which is an optional field, as non-existent.
+        """
+        self._atmosphericGroupDelayExists = False
+
+    # ===> Attribute atmosphericGroupDelayRate, which is optional
+    _atmosphericGroupDelayRateExists = False
+
+    _atmosphericGroupDelayRate = None
+
+    def isAtmosphericGroupDelayRateExists(self):
+        """
+        The attribute atmosphericGroupDelayRate is optional. Return True if this attribute exists.
+        return True if and only if the atmosphericGroupDelayRate attribute exists.
+        """
+        return self._atmosphericGroupDelayRateExists
+
+    def getAtmosphericGroupDelayRate(self):
+        """
+        Get atmosphericGroupDelayRate, which is optional.
+        return atmosphericGroupDelayRate as double
+        raises ValueError If atmosphericGroupDelayRate does not exist.
+        """
+        if not self._atmosphericGroupDelayRateExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + atmosphericGroupDelayRate
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._atmosphericGroupDelayRate
+
+    def setAtmosphericGroupDelayRate(self, atmosphericGroupDelayRate):
+        """
+        Set atmosphericGroupDelayRate with the specified double value.
+        atmosphericGroupDelayRate The double value to which atmosphericGroupDelayRate is to be set.
+
+
+        """
+
+        self._atmosphericGroupDelayRate = double(atmosphericGroupDelayRate)
+
+        self._atmosphericGroupDelayRateExists = True
+
+    def clearAtmosphericGroupDelayRate(self):
+        """
+        Mark atmosphericGroupDelayRate, which is an optional field, as non-existent.
+        """
+        self._atmosphericGroupDelayRateExists = False
+
+    # ===> Attribute geometricDelay, which is optional
+    _geometricDelayExists = False
+
+    _geometricDelay = None
+
+    def isGeometricDelayExists(self):
+        """
+        The attribute geometricDelay is optional. Return True if this attribute exists.
+        return True if and only if the geometricDelay attribute exists.
+        """
+        return self._geometricDelayExists
+
+    def getGeometricDelay(self):
+        """
+        Get geometricDelay, which is optional.
+        return geometricDelay as double
+        raises ValueError If geometricDelay does not exist.
+        """
+        if not self._geometricDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + geometricDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._geometricDelay
+
+    def setGeometricDelay(self, geometricDelay):
+        """
+        Set geometricDelay with the specified double value.
+        geometricDelay The double value to which geometricDelay is to be set.
+
+
+        """
+
+        self._geometricDelay = double(geometricDelay)
+
+        self._geometricDelayExists = True
+
+    def clearGeometricDelay(self):
+        """
+        Mark geometricDelay, which is an optional field, as non-existent.
+        """
+        self._geometricDelayExists = False
+
+    # ===> Attribute geometricDelayRate, which is optional
+    _geometricDelayRateExists = False
+
+    _geometricDelayRate = None
+
+    def isGeometricDelayRateExists(self):
+        """
+        The attribute geometricDelayRate is optional. Return True if this attribute exists.
+        return True if and only if the geometricDelayRate attribute exists.
+        """
+        return self._geometricDelayRateExists
+
+    def getGeometricDelayRate(self):
+        """
+        Get geometricDelayRate, which is optional.
+        return geometricDelayRate as double
+        raises ValueError If geometricDelayRate does not exist.
+        """
+        if not self._geometricDelayRateExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + geometricDelayRate
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._geometricDelayRate
+
+    def setGeometricDelayRate(self, geometricDelayRate):
+        """
+        Set geometricDelayRate with the specified double value.
+        geometricDelayRate The double value to which geometricDelayRate is to be set.
+
+
+        """
+
+        self._geometricDelayRate = double(geometricDelayRate)
+
+        self._geometricDelayRateExists = True
+
+    def clearGeometricDelayRate(self):
+        """
+        Mark geometricDelayRate, which is an optional field, as non-existent.
+        """
+        self._geometricDelayRateExists = False
+
+    # ===> Attribute numLO, which is optional
+    _numLOExists = False
+
+    _numLO = 0
+
+    def isNumLOExists(self):
+        """
+        The attribute numLO is optional. Return True if this attribute exists.
+        return True if and only if the numLO attribute exists.
+        """
+        return self._numLOExists
+
+    def getNumLO(self):
+        """
+        Get numLO, which is optional.
+        return numLO as int
+        raises ValueError If numLO does not exist.
+        """
+        if not self._numLOExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + numLO
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._numLO
+
+    def setNumLO(self, numLO):
+        """
+        Set numLO with the specified int value.
+        numLO The int value to which numLO is to be set.
+
+
+        """
+
+        self._numLO = int(numLO)
+
+        self._numLOExists = True
+
+    def clearNumLO(self):
+        """
+        Mark numLO, which is an optional field, as non-existent.
+        """
+        self._numLOExists = False
+
+    # ===> Attribute LOOffset, which is optional
+    _LOOffsetExists = False
+
+    _LOOffset = None  # this is a 1D list of Frequency
+
+    def isLOOffsetExists(self):
+        """
+        The attribute LOOffset is optional. Return True if this attribute exists.
+        return True if and only if the LOOffset attribute exists.
+        """
+        return self._LOOffsetExists
+
+    def getLOOffset(self):
+        """
+        Get LOOffset, which is optional.
+        return LOOffset as Frequency []
+        raises ValueError If LOOffset does not exist.
+        """
+        if not self._LOOffsetExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + LOOffset
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return copy.deepcopy(self._LOOffset)
+
+    def setLOOffset(self, LOOffset):
+        """
+        Set LOOffset with the specified Frequency []  value.
+        LOOffset The Frequency []  value to which LOOffset is to be set.
+        The value of LOOffset can be anything allowed by the Frequency []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(LOOffset, list):
+            raise ValueError("The value of LOOffset must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(LOOffset)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of LOOffset is not correct")
+
+            # the type of the values in the list must be Frequency
+            # note : this only checks the first value found
+            if not Parser.checkListType(LOOffset, Frequency):
+                raise ValueError(
+                    "type of the first value in LOOffset is not Frequency as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._LOOffset = copy.deepcopy(LOOffset)
+        except Exception as exc:
+            raise ValueError("Invalid LOOffset : " + str(exc))
+
+        self._LOOffsetExists = True
+
+    def clearLOOffset(self):
+        """
+        Mark LOOffset, which is an optional field, as non-existent.
+        """
+        self._LOOffsetExists = False
+
+    # ===> Attribute LOOffsetRate, which is optional
+    _LOOffsetRateExists = False
+
+    _LOOffsetRate = None  # this is a 1D list of Frequency
+
+    def isLOOffsetRateExists(self):
+        """
+        The attribute LOOffsetRate is optional. Return True if this attribute exists.
+        return True if and only if the LOOffsetRate attribute exists.
+        """
+        return self._LOOffsetRateExists
+
+    def getLOOffsetRate(self):
+        """
+        Get LOOffsetRate, which is optional.
+        return LOOffsetRate as Frequency []
+        raises ValueError If LOOffsetRate does not exist.
+        """
+        if not self._LOOffsetRateExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + LOOffsetRate
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return copy.deepcopy(self._LOOffsetRate)
+
+    def setLOOffsetRate(self, LOOffsetRate):
+        """
+        Set LOOffsetRate with the specified Frequency []  value.
+        LOOffsetRate The Frequency []  value to which LOOffsetRate is to be set.
+        The value of LOOffsetRate can be anything allowed by the Frequency []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(LOOffsetRate, list):
+            raise ValueError("The value of LOOffsetRate must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(LOOffsetRate)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of LOOffsetRate is not correct")
+
+            # the type of the values in the list must be Frequency
+            # note : this only checks the first value found
+            if not Parser.checkListType(LOOffsetRate, Frequency):
+                raise ValueError(
+                    "type of the first value in LOOffsetRate is not Frequency as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._LOOffsetRate = copy.deepcopy(LOOffsetRate)
+        except Exception as exc:
+            raise ValueError("Invalid LOOffsetRate : " + str(exc))
+
+        self._LOOffsetRateExists = True
+
+    def clearLOOffsetRate(self):
+        """
+        Mark LOOffsetRate, which is an optional field, as non-existent.
+        """
+        self._LOOffsetRateExists = False
+
+    # ===> Attribute dispersiveDelay, which is optional
+    _dispersiveDelayExists = False
+
+    _dispersiveDelay = None
+
+    def isDispersiveDelayExists(self):
+        """
+        The attribute dispersiveDelay is optional. Return True if this attribute exists.
+        return True if and only if the dispersiveDelay attribute exists.
+        """
+        return self._dispersiveDelayExists
+
+    def getDispersiveDelay(self):
+        """
+        Get dispersiveDelay, which is optional.
+        return dispersiveDelay as double
+        raises ValueError If dispersiveDelay does not exist.
+        """
+        if not self._dispersiveDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + dispersiveDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._dispersiveDelay
+
+    def setDispersiveDelay(self, dispersiveDelay):
+        """
+        Set dispersiveDelay with the specified double value.
+        dispersiveDelay The double value to which dispersiveDelay is to be set.
+
+
+        """
+
+        self._dispersiveDelay = double(dispersiveDelay)
+
+        self._dispersiveDelayExists = True
+
+    def clearDispersiveDelay(self):
+        """
+        Mark dispersiveDelay, which is an optional field, as non-existent.
+        """
+        self._dispersiveDelayExists = False
+
+    # ===> Attribute dispersiveDelayRate, which is optional
+    _dispersiveDelayRateExists = False
+
+    _dispersiveDelayRate = None
+
+    def isDispersiveDelayRateExists(self):
+        """
+        The attribute dispersiveDelayRate is optional. Return True if this attribute exists.
+        return True if and only if the dispersiveDelayRate attribute exists.
+        """
+        return self._dispersiveDelayRateExists
+
+    def getDispersiveDelayRate(self):
+        """
+        Get dispersiveDelayRate, which is optional.
+        return dispersiveDelayRate as double
+        raises ValueError If dispersiveDelayRate does not exist.
+        """
+        if not self._dispersiveDelayRateExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + dispersiveDelayRate
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._dispersiveDelayRate
+
+    def setDispersiveDelayRate(self, dispersiveDelayRate):
+        """
+        Set dispersiveDelayRate with the specified double value.
+        dispersiveDelayRate The double value to which dispersiveDelayRate is to be set.
+
+
+        """
+
+        self._dispersiveDelayRate = double(dispersiveDelayRate)
+
+        self._dispersiveDelayRateExists = True
+
+    def clearDispersiveDelayRate(self):
+        """
+        Mark dispersiveDelayRate, which is an optional field, as non-existent.
+        """
+        self._dispersiveDelayRateExists = False
+
+    # ===> Attribute atmosphericDryDelay, which is optional
+    _atmosphericDryDelayExists = False
+
+    _atmosphericDryDelay = None
+
+    def isAtmosphericDryDelayExists(self):
+        """
+        The attribute atmosphericDryDelay is optional. Return True if this attribute exists.
+        return True if and only if the atmosphericDryDelay attribute exists.
+        """
+        return self._atmosphericDryDelayExists
+
+    def getAtmosphericDryDelay(self):
+        """
+        Get atmosphericDryDelay, which is optional.
+        return atmosphericDryDelay as double
+        raises ValueError If atmosphericDryDelay does not exist.
+        """
+        if not self._atmosphericDryDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + atmosphericDryDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._atmosphericDryDelay
+
+    def setAtmosphericDryDelay(self, atmosphericDryDelay):
+        """
+        Set atmosphericDryDelay with the specified double value.
+        atmosphericDryDelay The double value to which atmosphericDryDelay is to be set.
+
+
+        """
+
+        self._atmosphericDryDelay = double(atmosphericDryDelay)
+
+        self._atmosphericDryDelayExists = True
+
+    def clearAtmosphericDryDelay(self):
+        """
+        Mark atmosphericDryDelay, which is an optional field, as non-existent.
+        """
+        self._atmosphericDryDelayExists = False
+
+    # ===> Attribute atmosphericWetDelay, which is optional
+    _atmosphericWetDelayExists = False
+
+    _atmosphericWetDelay = None
+
+    def isAtmosphericWetDelayExists(self):
+        """
+        The attribute atmosphericWetDelay is optional. Return True if this attribute exists.
+        return True if and only if the atmosphericWetDelay attribute exists.
+        """
+        return self._atmosphericWetDelayExists
+
+    def getAtmosphericWetDelay(self):
+        """
+        Get atmosphericWetDelay, which is optional.
+        return atmosphericWetDelay as double
+        raises ValueError If atmosphericWetDelay does not exist.
+        """
+        if not self._atmosphericWetDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + atmosphericWetDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._atmosphericWetDelay
+
+    def setAtmosphericWetDelay(self, atmosphericWetDelay):
+        """
+        Set atmosphericWetDelay with the specified double value.
+        atmosphericWetDelay The double value to which atmosphericWetDelay is to be set.
+
+
+        """
+
+        self._atmosphericWetDelay = double(atmosphericWetDelay)
+
+        self._atmosphericWetDelayExists = True
+
+    def clearAtmosphericWetDelay(self):
+        """
+        Mark atmosphericWetDelay, which is an optional field, as non-existent.
+        """
+        self._atmosphericWetDelayExists = False
+
+    # ===> Attribute padDelay, which is optional
+    _padDelayExists = False
+
+    _padDelay = None
+
+    def isPadDelayExists(self):
+        """
+        The attribute padDelay is optional. Return True if this attribute exists.
+        return True if and only if the padDelay attribute exists.
+        """
+        return self._padDelayExists
+
+    def getPadDelay(self):
+        """
+        Get padDelay, which is optional.
+        return padDelay as double
+        raises ValueError If padDelay does not exist.
+        """
+        if not self._padDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + padDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._padDelay
+
+    def setPadDelay(self, padDelay):
+        """
+        Set padDelay with the specified double value.
+        padDelay The double value to which padDelay is to be set.
+
+
+        """
+
+        self._padDelay = double(padDelay)
+
+        self._padDelayExists = True
+
+    def clearPadDelay(self):
+        """
+        Mark padDelay, which is an optional field, as non-existent.
+        """
+        self._padDelayExists = False
+
+    # ===> Attribute antennaDelay, which is optional
+    _antennaDelayExists = False
+
+    _antennaDelay = None
+
+    def isAntennaDelayExists(self):
+        """
+        The attribute antennaDelay is optional. Return True if this attribute exists.
+        return True if and only if the antennaDelay attribute exists.
+        """
+        return self._antennaDelayExists
+
+    def getAntennaDelay(self):
+        """
+        Get antennaDelay, which is optional.
+        return antennaDelay as double
+        raises ValueError If antennaDelay does not exist.
+        """
+        if not self._antennaDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + antennaDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._antennaDelay
+
+    def setAntennaDelay(self, antennaDelay):
+        """
+        Set antennaDelay with the specified double value.
+        antennaDelay The double value to which antennaDelay is to be set.
+
+
+        """
+
+        self._antennaDelay = double(antennaDelay)
+
+        self._antennaDelayExists = True
+
+    def clearAntennaDelay(self):
+        """
+        Mark antennaDelay, which is an optional field, as non-existent.
+        """
+        self._antennaDelayExists = False
+
+    # ===> Attribute numReceptor, which is optional
+    _numReceptorExists = False
+
+    _numReceptor = 0
+
+    def isNumReceptorExists(self):
+        """
+        The attribute numReceptor is optional. Return True if this attribute exists.
+        return True if and only if the numReceptor attribute exists.
+        """
+        return self._numReceptorExists
+
+    def getNumReceptor(self):
+        """
+        Get numReceptor, which is optional.
+        return numReceptor as int
+        raises ValueError If numReceptor does not exist.
+        """
+        if not self._numReceptorExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + numReceptor
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._numReceptor
+
+    def setNumReceptor(self, numReceptor):
+        """
+        Set numReceptor with the specified int value.
+        numReceptor The int value to which numReceptor is to be set.
+
+
+        """
+
+        self._numReceptor = int(numReceptor)
+
+        self._numReceptorExists = True
+
+    def clearNumReceptor(self):
+        """
+        Mark numReceptor, which is an optional field, as non-existent.
+        """
+        self._numReceptorExists = False
+
+    # ===> Attribute polarizationType, which is optional
+    _polarizationTypeExists = False
+
+    _polarizationType = None  # this is a 1D list of PolarizationType
+
+    def isPolarizationTypeExists(self):
+        """
+        The attribute polarizationType is optional. Return True if this attribute exists.
+        return True if and only if the polarizationType attribute exists.
+        """
+        return self._polarizationTypeExists
+
+    def getPolarizationType(self):
+        """
+        Get polarizationType, which is optional.
+        return polarizationType as PolarizationType []
+        raises ValueError If polarizationType does not exist.
+        """
+        if not self._polarizationTypeExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + polarizationType
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return copy.deepcopy(self._polarizationType)
+
+    def setPolarizationType(self, polarizationType):
+        """
+        Set polarizationType with the specified PolarizationType []  value.
+        polarizationType The PolarizationType []  value to which polarizationType is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(polarizationType, list):
+            raise ValueError("The value of polarizationType must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(polarizationType)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of polarizationType is not correct")
+
+            # the type of the values in the list must be PolarizationType
+            # note : this only checks the first value found
+            if not Parser.checkListType(polarizationType, PolarizationType):
+                raise ValueError(
+                    "type of the first value in polarizationType is not PolarizationType as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._polarizationType = copy.deepcopy(polarizationType)
+        except Exception as exc:
+            raise ValueError("Invalid polarizationType : " + str(exc))
+
+        self._polarizationTypeExists = True
+
+    def clearPolarizationType(self):
+        """
+        Mark polarizationType, which is an optional field, as non-existent.
+        """
+        self._polarizationTypeExists = False
+
+    # ===> Attribute electronicDelay, which is optional
+    _electronicDelayExists = False
+
+    _electronicDelay = None  # this is a 1D list of double
+
+    def isElectronicDelayExists(self):
+        """
+        The attribute electronicDelay is optional. Return True if this attribute exists.
+        return True if and only if the electronicDelay attribute exists.
+        """
+        return self._electronicDelayExists
+
+    def getElectronicDelay(self):
+        """
+        Get electronicDelay, which is optional.
+        return electronicDelay as double []
+        raises ValueError If electronicDelay does not exist.
+        """
+        if not self._electronicDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + electronicDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return copy.deepcopy(self._electronicDelay)
+
+    def setElectronicDelay(self, electronicDelay):
+        """
+        Set electronicDelay with the specified double []  value.
+        electronicDelay The double []  value to which electronicDelay is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(electronicDelay, list):
+            raise ValueError("The value of electronicDelay must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(electronicDelay)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of electronicDelay is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(electronicDelay, double):
+                raise ValueError(
+                    "type of the first value in electronicDelay is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._electronicDelay = copy.deepcopy(electronicDelay)
+        except Exception as exc:
+            raise ValueError("Invalid electronicDelay : " + str(exc))
+
+        self._electronicDelayExists = True
+
+    def clearElectronicDelay(self):
+        """
+        Mark electronicDelay, which is an optional field, as non-existent.
+        """
+        self._electronicDelayExists = False
+
+    # ===> Attribute electronicDelayRate, which is optional
+    _electronicDelayRateExists = False
+
+    _electronicDelayRate = None  # this is a 1D list of double
+
+    def isElectronicDelayRateExists(self):
+        """
+        The attribute electronicDelayRate is optional. Return True if this attribute exists.
+        return True if and only if the electronicDelayRate attribute exists.
+        """
+        return self._electronicDelayRateExists
+
+    def getElectronicDelayRate(self):
+        """
+        Get electronicDelayRate, which is optional.
+        return electronicDelayRate as double []
+        raises ValueError If electronicDelayRate does not exist.
+        """
+        if not self._electronicDelayRateExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + electronicDelayRate
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return copy.deepcopy(self._electronicDelayRate)
+
+    def setElectronicDelayRate(self, electronicDelayRate):
+        """
+        Set electronicDelayRate with the specified double []  value.
+        electronicDelayRate The double []  value to which electronicDelayRate is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(electronicDelayRate, list):
+            raise ValueError("The value of electronicDelayRate must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(electronicDelayRate)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of electronicDelayRate is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(electronicDelayRate, double):
+                raise ValueError(
+                    "type of the first value in electronicDelayRate is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._electronicDelayRate = copy.deepcopy(electronicDelayRate)
+        except Exception as exc:
+            raise ValueError("Invalid electronicDelayRate : " + str(exc))
+
+        self._electronicDelayRateExists = True
+
+    def clearElectronicDelayRate(self):
+        """
+        Mark electronicDelayRate, which is an optional field, as non-existent.
+        """
+        self._electronicDelayRateExists = False
+
+    # ===> Attribute receiverDelay, which is optional
+    _receiverDelayExists = False
+
+    _receiverDelay = None  # this is a 1D list of double
+
+    def isReceiverDelayExists(self):
+        """
+        The attribute receiverDelay is optional. Return True if this attribute exists.
+        return True if and only if the receiverDelay attribute exists.
+        """
+        return self._receiverDelayExists
+
+    def getReceiverDelay(self):
+        """
+        Get receiverDelay, which is optional.
+        return receiverDelay as double []
+        raises ValueError If receiverDelay does not exist.
+        """
+        if not self._receiverDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + receiverDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return copy.deepcopy(self._receiverDelay)
+
+    def setReceiverDelay(self, receiverDelay):
+        """
+        Set receiverDelay with the specified double []  value.
+        receiverDelay The double []  value to which receiverDelay is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(receiverDelay, list):
+            raise ValueError("The value of receiverDelay must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(receiverDelay)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of receiverDelay is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(receiverDelay, double):
+                raise ValueError(
+                    "type of the first value in receiverDelay is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._receiverDelay = copy.deepcopy(receiverDelay)
+        except Exception as exc:
+            raise ValueError("Invalid receiverDelay : " + str(exc))
+
+        self._receiverDelayExists = True
+
+    def clearReceiverDelay(self):
+        """
+        Mark receiverDelay, which is an optional field, as non-existent.
+        """
+        self._receiverDelayExists = False
+
+    # ===> Attribute IFDelay, which is optional
+    _IFDelayExists = False
+
+    _IFDelay = None  # this is a 1D list of double
+
+    def isIFDelayExists(self):
+        """
+        The attribute IFDelay is optional. Return True if this attribute exists.
+        return True if and only if the IFDelay attribute exists.
+        """
+        return self._IFDelayExists
+
+    def getIFDelay(self):
+        """
+        Get IFDelay, which is optional.
+        return IFDelay as double []
+        raises ValueError If IFDelay does not exist.
+        """
+        if not self._IFDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + IFDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return copy.deepcopy(self._IFDelay)
+
+    def setIFDelay(self, IFDelay):
+        """
+        Set IFDelay with the specified double []  value.
+        IFDelay The double []  value to which IFDelay is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(IFDelay, list):
+            raise ValueError("The value of IFDelay must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(IFDelay)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of IFDelay is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(IFDelay, double):
+                raise ValueError(
+                    "type of the first value in IFDelay is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._IFDelay = copy.deepcopy(IFDelay)
+        except Exception as exc:
+            raise ValueError("Invalid IFDelay : " + str(exc))
+
+        self._IFDelayExists = True
+
+    def clearIFDelay(self):
+        """
+        Mark IFDelay, which is an optional field, as non-existent.
+        """
+        self._IFDelayExists = False
+
+    # ===> Attribute LODelay, which is optional
+    _LODelayExists = False
+
+    _LODelay = None  # this is a 1D list of double
+
+    def isLODelayExists(self):
+        """
+        The attribute LODelay is optional. Return True if this attribute exists.
+        return True if and only if the LODelay attribute exists.
+        """
+        return self._LODelayExists
+
+    def getLODelay(self):
+        """
+        Get LODelay, which is optional.
+        return LODelay as double []
+        raises ValueError If LODelay does not exist.
+        """
+        if not self._LODelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + LODelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return copy.deepcopy(self._LODelay)
+
+    def setLODelay(self, LODelay):
+        """
+        Set LODelay with the specified double []  value.
+        LODelay The double []  value to which LODelay is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(LODelay, list):
+            raise ValueError("The value of LODelay must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(LODelay)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of LODelay is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(LODelay, double):
+                raise ValueError(
+                    "type of the first value in LODelay is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._LODelay = copy.deepcopy(LODelay)
+        except Exception as exc:
+            raise ValueError("Invalid LODelay : " + str(exc))
+
+        self._LODelayExists = True
+
+    def clearLODelay(self):
+        """
+        Mark LODelay, which is an optional field, as non-existent.
+        """
+        self._LODelayExists = False
+
+    # ===> Attribute crossPolarizationDelay, which is optional
+    _crossPolarizationDelayExists = False
+
+    _crossPolarizationDelay = None
+
+    def isCrossPolarizationDelayExists(self):
+        """
+        The attribute crossPolarizationDelay is optional. Return True if this attribute exists.
+        return True if and only if the crossPolarizationDelay attribute exists.
+        """
+        return self._crossPolarizationDelayExists
+
+    def getCrossPolarizationDelay(self):
+        """
+        Get crossPolarizationDelay, which is optional.
+        return crossPolarizationDelay as double
+        raises ValueError If crossPolarizationDelay does not exist.
+        """
+        if not self._crossPolarizationDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + crossPolarizationDelay
+                + " attribute in table DelayModel does not exist!"
+            )
+
+        return self._crossPolarizationDelay
+
+    def setCrossPolarizationDelay(self, crossPolarizationDelay):
+        """
+        Set crossPolarizationDelay with the specified double value.
+        crossPolarizationDelay The double value to which crossPolarizationDelay is to be set.
+
+
+        """
+
+        self._crossPolarizationDelay = double(crossPolarizationDelay)
+
+        self._crossPolarizationDelayExists = True
+
+    def clearCrossPolarizationDelay(self):
+        """
+        Mark crossPolarizationDelay, which is an optional field, as non-existent.
+        """
+        self._crossPolarizationDelayExists = False
+
+    # Extrinsic Table Attributes
+
+    # ===> Attribute antennaId
+
+    _antennaId = Tag()
+
+    def getAntennaId(self):
+        """
+        Get antennaId.
+        return antennaId as Tag
+        """
+
+        # make sure it is a copy of Tag
+        return Tag(self._antennaId)
+
+    def setAntennaId(self, antennaId):
+        """
+        Set antennaId with the specified Tag value.
+        antennaId The Tag value to which antennaId is to be set.
+        The value of antennaId can be anything allowed by the Tag constructor.
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
+        """
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the antennaId field, which is part of the key, after this row has been added to this table."
+            )
+
+        self._antennaId = Tag(antennaId)
+
+    # ===> Attribute fieldId
+
+    _fieldId = Tag()
+
+    def getFieldId(self):
+        """
+        Get fieldId.
+        return fieldId as Tag
+        """
+
+        # make sure it is a copy of Tag
+        return Tag(self._fieldId)
+
+    def setFieldId(self, fieldId):
+        """
+        Set fieldId with the specified Tag value.
+        fieldId The Tag value to which fieldId is to be set.
+        The value of fieldId can be anything allowed by the Tag constructor.
+
+        """
+
+        self._fieldId = Tag(fieldId)
+
+    # ===> Attribute spectralWindowId
+
+    _spectralWindowId = Tag()
+
+    def getSpectralWindowId(self):
+        """
+        Get spectralWindowId.
+        return spectralWindowId as Tag
+        """
+
+        # make sure it is a copy of Tag
+        return Tag(self._spectralWindowId)
+
+    def setSpectralWindowId(self, spectralWindowId):
+        """
+        Set spectralWindowId with the specified Tag value.
+        spectralWindowId The Tag value to which spectralWindowId is to be set.
+        The value of spectralWindowId can be anything allowed by the Tag constructor.
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
+        """
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the spectralWindowId field, which is part of the key, after this row has been added to this table."
+            )
+
+        self._spectralWindowId = Tag(spectralWindowId)
+
+    # Links
+
+    def getAntennaUsingAntennaId(self):
+        """
+        Returns the row in the Antenna table having Antenna.antennaId == antennaId
+
+        """
+
+        return self._table.getContainer().getAntenna().getRowByKey(self._antennaId)
+
+    def getSpectralWindowUsingSpectralWindowId(self):
+        """
+        Returns the row in the SpectralWindow table having SpectralWindow.spectralWindowId == spectralWindowId
+
+        """
+
+        return (
+            self._table.getContainer()
+            .getSpectralWindow()
+            .getRowByKey(self._spectralWindowId)
+        )
+
+    def getFieldUsingFieldId(self):
+        """
+        Returns the row in the Field table having Field.fieldId == fieldId
+
+        """
+
+        return self._table.getContainer().getField().getRowByKey(self._fieldId)
+
+    # comparison methods
+
+    def compareNoAutoInc(
+        self,
+        antennaId,
+        spectralWindowId,
+        timeInterval,
+        numPoly,
+        phaseDelay,
+        phaseDelayRate,
+        groupDelay,
+        groupDelayRate,
+        fieldId,
+    ):
+        """
+        Compare each attribute except the autoincrementable one of this DelayModelRow with
+        the corresponding parameters and return True if there is a match and False otherwise.
+        """
+
+        # antennaId is a Tag, compare using the equals method.
+        if not self._antennaId.equals(antennaId):
+            return False
+
+        # spectralWindowId is a Tag, compare using the equals method.
+        if not self._spectralWindowId.equals(spectralWindowId):
+            return False
+
+        # timeInterval is a ArrayTimeInterval, compare using the equals method.
+        if not self._timeInterval.equals(timeInterval):
+            return False
+
+        # numPoly is a int, compare using the == operator.
+        if not (self._numPoly == numPoly):
+            return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._phaseDelay) != len(phaseDelay):
+            return False
+        for indx in range(len(phaseDelay)):
+
+            # phaseDelay is a list of double, compare using == operator.
+            if not (self._phaseDelay[indx] == phaseDelay[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._phaseDelayRate) != len(phaseDelayRate):
+            return False
+        for indx in range(len(phaseDelayRate)):
+
+            # phaseDelayRate is a list of double, compare using == operator.
+            if not (self._phaseDelayRate[indx] == phaseDelayRate[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._groupDelay) != len(groupDelay):
+            return False
+        for indx in range(len(groupDelay)):
+
+            # groupDelay is a list of double, compare using == operator.
+            if not (self._groupDelay[indx] == groupDelay[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._groupDelayRate) != len(groupDelayRate):
+            return False
+        for indx in range(len(groupDelayRate)):
+
+            # groupDelayRate is a list of double, compare using == operator.
+            if not (self._groupDelayRate[indx] == groupDelayRate[indx]):
+                return False
+
+        # fieldId is a Tag, compare using the equals method.
+        if not self._fieldId.equals(fieldId):
+            return False
+
+        return True
+
+    def equalByRequiredValue(self, otherRow):
+        """
+        Return True if all required attributes of the value part are equal to their homologues
+        in otherRow and False otherwise.
+        """
+
+        return self.compareRequiredValue(
+            otherRow.getNumPoly(),
+            otherRow.getPhaseDelay(),
+            otherRow.getPhaseDelayRate(),
+            otherRow.getGroupDelay(),
+            otherRow.getGroupDelayRate(),
+            otherRow.getFieldId(),
+        )
+
+    def compareRequiredValue(
+        self, numPoly, phaseDelay, phaseDelayRate, groupDelay, groupDelayRate, fieldId
+    ):
+
+        # numPoly is a int, compare using the == operator.
+        if not (self._numPoly == numPoly):
+            return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._phaseDelay) != len(phaseDelay):
+            return False
+        for indx in range(len(phaseDelay)):
+
+            # phaseDelay is a list of double, compare using == operator.
+            if not (self._phaseDelay[indx] == phaseDelay[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._phaseDelayRate) != len(phaseDelayRate):
+            return False
+        for indx in range(len(phaseDelayRate)):
+
+            # phaseDelayRate is a list of double, compare using == operator.
+            if not (self._phaseDelayRate[indx] == phaseDelayRate[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._groupDelay) != len(groupDelay):
+            return False
+        for indx in range(len(groupDelay)):
+
+            # groupDelay is a list of double, compare using == operator.
+            if not (self._groupDelay[indx] == groupDelay[indx]):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._groupDelayRate) != len(groupDelayRate):
+            return False
+        for indx in range(len(groupDelayRate)):
+
+            # groupDelayRate is a list of double, compare using == operator.
+            if not (self._groupDelayRate[indx] == groupDelayRate[indx]):
+                return False
+
+        # fieldId is a Tag, compare using the equals method.
+        if not self._fieldId.equals(fieldId):
+            return False
+
+        return True

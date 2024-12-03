@@ -1,0 +1,2575 @@
+# ALMA - Atacama Large Millimeter Array
+# (c) European Southern Observatory, 2002
+# (c) Associated Universities Inc., 2002
+# Copyright by ESO (in the framework of the ALMA collaboration),
+# Copyright by AUI (in the framework of the ALMA collaboration),
+# All rights reserved.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307  USA
+#
+# Warning!
+#  --------------------------------------------------------------------
+# | This is generated code!  Do not modify this file.                  |
+# | If you do, all changes will be lost when the file is re-generated. |
+#  --------------------------------------------------------------------
+#
+# File CalPointingRow.py
+#
+
+import pyasdm.CalPointingTable
+
+from .Parser import Parser
+
+from .exceptions.ConversionException import ConversionException
+
+# All of the extended types are imported
+from pyasdm.types import *
+
+
+from pyasdm.enumerations.ReceiverBand import ReceiverBand
+
+
+from pyasdm.enumerations.AntennaMake import AntennaMake
+
+
+from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
+
+
+from pyasdm.enumerations.PointingModelMode import PointingModelMode
+
+
+from pyasdm.enumerations.PointingMethod import PointingMethod
+
+
+from pyasdm.enumerations.PolarizationType import PolarizationType
+
+
+from xml.dom import minidom
+
+import copy
+
+
+class CalPointingRow:
+    """
+    The CalPointingRow class is a row of a CalPointingTable.
+
+    Generated from model's revision -1, branch
+    """
+
+    # the table to which this row belongs.
+    _table = None
+
+    # whether this row has been added to the table or not.
+    _hasBeenAdded = False
+
+    # internal attribute values appear later, with their getters and setters
+
+    def __init__(self, table, row=None):
+        """
+        Create a CalPointingRow.
+        When row is None, create an empty row attached to table, which must be a CalPointingTable.
+        When row is given, copy those values in to the new row. The row argument must be a CalPointingRow.
+        The returned new row is not yet added to table, but it knows about table.
+        """
+        if not isinstance(table, pyasdm.CalPointingTable):
+            raise ValueError("table must be a MainTable")
+
+        self._table = table
+        self._hasBeenAdded = False
+
+        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._receiverBand = ReceiverBand.from_int(0)
+
+        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._antennaMake = AntennaMake.from_int(0)
+
+        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
+
+        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._pointingModelMode = PointingModelMode.from_int(0)
+
+        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._pointingMethod = PointingMethod.from_int(0)
+
+        # this is a list of PolarizationType Enumeration, start off with it being empty
+        self._polarizationTypes = []
+
+        if row is not None:
+            if not isinstance(row, CalPointingRow):
+                raise ValueError("row must be a MainRow")
+
+            self._antennaName = row._antennaName
+
+            # We force the attribute of the result to be not None
+            if row._receiverBand is None:
+                self._receiverBand = ReceiverBand.from_int(0)
+            else:
+                self._receiverBand = ReceiverBand(row._receiverBand)
+
+            self._calDataId = Tag(row._calDataId)
+
+            self._calReductionId = Tag(row._calReductionId)
+
+            self._startValidTime = ArrayTime(row._startValidTime)
+
+            self._endValidTime = ArrayTime(row._endValidTime)
+
+            self._ambientTemperature = Temperature(row._ambientTemperature)
+
+            # We force the attribute of the result to be not None
+            if row._antennaMake is None:
+                self._antennaMake = AntennaMake.from_int(0)
+            else:
+                self._antennaMake = AntennaMake(row._antennaMake)
+
+            # We force the attribute of the result to be not None
+            if row._atmPhaseCorrection is None:
+                self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
+            else:
+                self._atmPhaseCorrection = AtmPhaseCorrection(row._atmPhaseCorrection)
+
+            # direction is a  list , make a deep copy
+            self._direction = copy.deepcopy(row._direction)
+
+            # frequencyRange is a  list , make a deep copy
+            self._frequencyRange = copy.deepcopy(row._frequencyRange)
+
+            # We force the attribute of the result to be not None
+            if row._pointingModelMode is None:
+                self._pointingModelMode = PointingModelMode.from_int(0)
+            else:
+                self._pointingModelMode = PointingModelMode(row._pointingModelMode)
+
+            # We force the attribute of the result to be not None
+            if row._pointingMethod is None:
+                self._pointingMethod = PointingMethod.from_int(0)
+            else:
+                self._pointingMethod = PointingMethod(row._pointingMethod)
+
+            self._numReceptor = row._numReceptor
+
+            # polarizationTypes is a  list , make a deep copy
+            self._polarizationTypes = copy.deepcopy(row._polarizationTypes)
+
+            # collOffsetRelative is a  list , make a deep copy
+            self._collOffsetRelative = copy.deepcopy(row._collOffsetRelative)
+
+            # collOffsetAbsolute is a  list , make a deep copy
+            self._collOffsetAbsolute = copy.deepcopy(row._collOffsetAbsolute)
+
+            # collError is a  list , make a deep copy
+            self._collError = copy.deepcopy(row._collError)
+
+            # collOffsetTied is a  list , make a deep copy
+            self._collOffsetTied = copy.deepcopy(row._collOffsetTied)
+
+            # reducedChiSquared is a  list , make a deep copy
+            self._reducedChiSquared = copy.deepcopy(row._reducedChiSquared)
+
+            # by default set systematically averagedPolarizations's value to something not None
+
+            if row._averagedPolarizationsExists:
+
+                self._averagedPolarizations = row._averagedPolarizations
+
+                self._averagedPolarizationsExists = True
+
+            # by default set systematically beamPA's value to something not None
+
+            if row._beamPAExists:
+
+                # beamPA is a list, make a deep copy
+                self.beamPA = copy.deepcopy(row.beamPA)
+
+                self._beamPAExists = True
+
+            # by default set systematically beamPAError's value to something not None
+
+            if row._beamPAErrorExists:
+
+                # beamPAError is a list, make a deep copy
+                self.beamPAError = copy.deepcopy(row.beamPAError)
+
+                self._beamPAErrorExists = True
+
+            # by default set systematically beamPAWasFixed's value to something not None
+
+            if row._beamPAWasFixedExists:
+
+                self._beamPAWasFixed = row._beamPAWasFixed
+
+                self._beamPAWasFixedExists = True
+
+            # by default set systematically beamWidth's value to something not None
+
+            if row._beamWidthExists:
+
+                # beamWidth is a list, make a deep copy
+                self.beamWidth = copy.deepcopy(row.beamWidth)
+
+                self._beamWidthExists = True
+
+            # by default set systematically beamWidthError's value to something not None
+
+            if row._beamWidthErrorExists:
+
+                # beamWidthError is a list, make a deep copy
+                self.beamWidthError = copy.deepcopy(row.beamWidthError)
+
+                self._beamWidthErrorExists = True
+
+            # by default set systematically beamWidthWasFixed's value to something not None
+
+            if row._beamWidthWasFixedExists:
+
+                # beamWidthWasFixed is a list, make a deep copy
+                self.beamWidthWasFixed = copy.deepcopy(row.beamWidthWasFixed)
+
+                self._beamWidthWasFixedExists = True
+
+            # by default set systematically offIntensity's value to something not None
+
+            if row._offIntensityExists:
+
+                # offIntensity is a list, make a deep copy
+                self.offIntensity = copy.deepcopy(row.offIntensity)
+
+                self._offIntensityExists = True
+
+            # by default set systematically offIntensityError's value to something not None
+
+            if row._offIntensityErrorExists:
+
+                # offIntensityError is a list, make a deep copy
+                self.offIntensityError = copy.deepcopy(row.offIntensityError)
+
+                self._offIntensityErrorExists = True
+
+            # by default set systematically offIntensityWasFixed's value to something not None
+
+            if row._offIntensityWasFixedExists:
+
+                self._offIntensityWasFixed = row._offIntensityWasFixed
+
+                self._offIntensityWasFixedExists = True
+
+            # by default set systematically peakIntensity's value to something not None
+
+            if row._peakIntensityExists:
+
+                # peakIntensity is a list, make a deep copy
+                self.peakIntensity = copy.deepcopy(row.peakIntensity)
+
+                self._peakIntensityExists = True
+
+            # by default set systematically peakIntensityError's value to something not None
+
+            if row._peakIntensityErrorExists:
+
+                # peakIntensityError is a list, make a deep copy
+                self.peakIntensityError = copy.deepcopy(row.peakIntensityError)
+
+                self._peakIntensityErrorExists = True
+
+            # by default set systematically peakIntensityWasFixed's value to something not None
+
+            if row._peakIntensityWasFixedExists:
+
+                self._peakIntensityWasFixed = row._peakIntensityWasFixed
+
+                self._peakIntensityWasFixedExists = True
+
+    def isAdded(self):
+        self._hasBeenAdded = True
+
+    def getTable(self):
+        """
+        Return the table to which this row belongs.
+        """
+        return self._table
+
+    def toXML(self):
+        """
+        Return this row in the form of an XML string.
+        """
+        result = ""
+
+        result += "<row> \n"
+
+        # intrinsic attributes
+
+        result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += Parser.valueToXML(
+            "receiverBand", ReceiverBand.name(self._receiverBand)
+        )
+
+        result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += Parser.extendedValueToXML(
+            "ambientTemperature", self._ambientTemperature
+        )
+
+        result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += Parser.valueToXML(
+            "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
+        )
+
+        result += Parser.listExtendedValueToXML("direction", self._direction)
+
+        result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
+
+        result += Parser.valueToXML(
+            "pointingModelMode", PointingModelMode.name(self._pointingModelMode)
+        )
+
+        result += Parser.valueToXML(
+            "pointingMethod", PointingMethod.name(self._pointingMethod)
+        )
+
+        result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += Parser.listEnumValueToXML(
+            "polarizationTypes", self._polarizationTypes
+        )
+
+        result += Parser.listExtendedValueToXML(
+            "collOffsetRelative", self._collOffsetRelative
+        )
+
+        result += Parser.listExtendedValueToXML(
+            "collOffsetAbsolute", self._collOffsetAbsolute
+        )
+
+        result += Parser.listExtendedValueToXML("collError", self._collError)
+
+        result += Parser.listValueToXML("collOffsetTied", self._collOffsetTied)
+
+        result += Parser.listValueToXML("reducedChiSquared", self._reducedChiSquared)
+
+        if self._averagedPolarizationsExists:
+
+            result += Parser.valueToXML(
+                "averagedPolarizations", self._averagedPolarizations
+            )
+
+        if self._beamPAExists:
+
+            result += Parser.listExtendedValueToXML("beamPA", self._beamPA)
+
+        if self._beamPAErrorExists:
+
+            result += Parser.listExtendedValueToXML("beamPAError", self._beamPAError)
+
+        if self._beamPAWasFixedExists:
+
+            result += Parser.valueToXML("beamPAWasFixed", self._beamPAWasFixed)
+
+        if self._beamWidthExists:
+
+            result += Parser.listExtendedValueToXML("beamWidth", self._beamWidth)
+
+        if self._beamWidthErrorExists:
+
+            result += Parser.listExtendedValueToXML(
+                "beamWidthError", self._beamWidthError
+            )
+
+        if self._beamWidthWasFixedExists:
+
+            result += Parser.listValueToXML(
+                "beamWidthWasFixed", self._beamWidthWasFixed
+            )
+
+        if self._offIntensityExists:
+
+            result += Parser.listExtendedValueToXML("offIntensity", self._offIntensity)
+
+        if self._offIntensityErrorExists:
+
+            result += Parser.listExtendedValueToXML(
+                "offIntensityError", self._offIntensityError
+            )
+
+        if self._offIntensityWasFixedExists:
+
+            result += Parser.valueToXML(
+                "offIntensityWasFixed", self._offIntensityWasFixed
+            )
+
+        if self._peakIntensityExists:
+
+            result += Parser.listExtendedValueToXML(
+                "peakIntensity", self._peakIntensity
+            )
+
+        if self._peakIntensityErrorExists:
+
+            result += Parser.listExtendedValueToXML(
+                "peakIntensityError", self._peakIntensityError
+            )
+
+        if self._peakIntensityWasFixedExists:
+
+            result += Parser.valueToXML(
+                "peakIntensityWasFixed", self._peakIntensityWasFixed
+            )
+
+        # extrinsic attributes
+
+        result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
+
+        # links, if any
+
+        result += "</row>\n"
+        return result
+
+    def setFromXML(self, xmlrow):
+        """
+        Fill the values of this row from an XML string
+        that was produced by the toXML() method.
+        If xmlrow is a minidom.Element with a nodeName of row then
+        it will be used as is. Anything else that is not a string
+        is an error.
+        """
+        rowdom = None
+        if isinstance(xmlrow, str):
+            xmldom = minidom.parseString(xmlrow)
+            rowdom = xmldom.firstChild
+        elif isinstance(xmlrow, minidom.Element):
+            rowdom = xmlrow
+        else:
+            raise ConversionException(
+                "xmlrow is not a string or a minidom.Element", "CalPointingTable"
+            )
+
+        if rowdom.nodeName != "row":
+            raise ConversionException("the argument is not a row", "CalPointingTable")
+
+        # intrinsic attribute values
+
+        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+
+        self._antennaName = str(antennaNameNode.firstChild.data)
+
+        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+
+        self._receiverBand = ReceiverBand.newReceiverBand(
+            receiverBandNode.firstChild.data
+        )
+
+        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+
+        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+
+        ambientTemperatureNode = rowdom.getElementsByTagName("ambientTemperature")[0]
+
+        self._ambientTemperature = Temperature(ambientTemperatureNode.firstChild.data)
+
+        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+
+        self._antennaMake = AntennaMake.newAntennaMake(antennaMakeNode.firstChild.data)
+
+        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+
+        self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
+            atmPhaseCorrectionNode.firstChild.data
+        )
+
+        directionNode = rowdom.getElementsByTagName("direction")[0]
+
+        directionStr = directionNode.firstChild.data
+        self._direction = Parser.stringListToLists(directionStr, Angle, "CalPointing")
+
+        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+
+        frequencyRangeStr = frequencyRangeNode.firstChild.data
+        self._frequencyRange = Parser.stringListToLists(
+            frequencyRangeStr, Frequency, "CalPointing"
+        )
+
+        pointingModelModeNode = rowdom.getElementsByTagName("pointingModelMode")[0]
+
+        self._pointingModelMode = PointingModelMode.newPointingModelMode(
+            pointingModelModeNode.firstChild.data
+        )
+
+        pointingMethodNode = rowdom.getElementsByTagName("pointingMethod")[0]
+
+        self._pointingMethod = PointingMethod.newPointingMethod(
+            pointingMethodNode.firstChild.data
+        )
+
+        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+
+        self._numReceptor = int(numReceptorNode.firstChild.data)
+
+        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+
+        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        self._polarizationTypes = Parser.stringListToLists(
+            polarizationTypesStr, PolarizationType, "CalPointing"
+        )
+
+        collOffsetRelativeNode = rowdom.getElementsByTagName("collOffsetRelative")[0]
+
+        collOffsetRelativeStr = collOffsetRelativeNode.firstChild.data
+        self._collOffsetRelative = Parser.stringListToLists(
+            collOffsetRelativeStr, Angle, "CalPointing"
+        )
+
+        collOffsetAbsoluteNode = rowdom.getElementsByTagName("collOffsetAbsolute")[0]
+
+        collOffsetAbsoluteStr = collOffsetAbsoluteNode.firstChild.data
+        self._collOffsetAbsolute = Parser.stringListToLists(
+            collOffsetAbsoluteStr, Angle, "CalPointing"
+        )
+
+        collErrorNode = rowdom.getElementsByTagName("collError")[0]
+
+        collErrorStr = collErrorNode.firstChild.data
+        self._collError = Parser.stringListToLists(collErrorStr, Angle, "CalPointing")
+
+        collOffsetTiedNode = rowdom.getElementsByTagName("collOffsetTied")[0]
+
+        collOffsetTiedStr = collOffsetTiedNode.firstChild.data
+        self._collOffsetTied = Parser.stringListToLists(
+            collOffsetTiedStr, bool, "CalPointing"
+        )
+
+        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+
+        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data
+        self._reducedChiSquared = Parser.stringListToLists(
+            reducedChiSquaredStr, double, "CalPointing"
+        )
+
+        averagedPolarizationsNode = rowdom.getElementsByTagName("averagedPolarizations")
+        if len(averagedPolarizationsNode) > 0:
+
+            self._averagedPolarizations = bool(
+                averagedPolarizationsNode[0].firstChild.data
+            )
+
+            self._averagedPolarizationsExists = True
+
+        beamPANode = rowdom.getElementsByTagName("beamPA")
+        if len(beamPANode) > 0:
+
+            beamPAStr = beamPANode[0].firstChild.data
+            self._beamPA = Parser.stringListToLists(beamPAStr, Angle, "CalPointing")
+
+            self._beamPAExists = True
+
+        beamPAErrorNode = rowdom.getElementsByTagName("beamPAError")
+        if len(beamPAErrorNode) > 0:
+
+            beamPAErrorStr = beamPAErrorNode[0].firstChild.data
+            self._beamPAError = Parser.stringListToLists(
+                beamPAErrorStr, Angle, "CalPointing"
+            )
+
+            self._beamPAErrorExists = True
+
+        beamPAWasFixedNode = rowdom.getElementsByTagName("beamPAWasFixed")
+        if len(beamPAWasFixedNode) > 0:
+
+            self._beamPAWasFixed = bool(beamPAWasFixedNode[0].firstChild.data)
+
+            self._beamPAWasFixedExists = True
+
+        beamWidthNode = rowdom.getElementsByTagName("beamWidth")
+        if len(beamWidthNode) > 0:
+
+            beamWidthStr = beamWidthNode[0].firstChild.data
+            self._beamWidth = Parser.stringListToLists(
+                beamWidthStr, Angle, "CalPointing"
+            )
+
+            self._beamWidthExists = True
+
+        beamWidthErrorNode = rowdom.getElementsByTagName("beamWidthError")
+        if len(beamWidthErrorNode) > 0:
+
+            beamWidthErrorStr = beamWidthErrorNode[0].firstChild.data
+            self._beamWidthError = Parser.stringListToLists(
+                beamWidthErrorStr, Angle, "CalPointing"
+            )
+
+            self._beamWidthErrorExists = True
+
+        beamWidthWasFixedNode = rowdom.getElementsByTagName("beamWidthWasFixed")
+        if len(beamWidthWasFixedNode) > 0:
+
+            beamWidthWasFixedStr = beamWidthWasFixedNode[0].firstChild.data
+            self._beamWidthWasFixed = Parser.stringListToLists(
+                beamWidthWasFixedStr, bool, "CalPointing"
+            )
+
+            self._beamWidthWasFixedExists = True
+
+        offIntensityNode = rowdom.getElementsByTagName("offIntensity")
+        if len(offIntensityNode) > 0:
+
+            offIntensityStr = offIntensityNode[0].firstChild.data
+            self._offIntensity = Parser.stringListToLists(
+                offIntensityStr, Temperature, "CalPointing"
+            )
+
+            self._offIntensityExists = True
+
+        offIntensityErrorNode = rowdom.getElementsByTagName("offIntensityError")
+        if len(offIntensityErrorNode) > 0:
+
+            offIntensityErrorStr = offIntensityErrorNode[0].firstChild.data
+            self._offIntensityError = Parser.stringListToLists(
+                offIntensityErrorStr, Temperature, "CalPointing"
+            )
+
+            self._offIntensityErrorExists = True
+
+        offIntensityWasFixedNode = rowdom.getElementsByTagName("offIntensityWasFixed")
+        if len(offIntensityWasFixedNode) > 0:
+
+            self._offIntensityWasFixed = bool(
+                offIntensityWasFixedNode[0].firstChild.data
+            )
+
+            self._offIntensityWasFixedExists = True
+
+        peakIntensityNode = rowdom.getElementsByTagName("peakIntensity")
+        if len(peakIntensityNode) > 0:
+
+            peakIntensityStr = peakIntensityNode[0].firstChild.data
+            self._peakIntensity = Parser.stringListToLists(
+                peakIntensityStr, Temperature, "CalPointing"
+            )
+
+            self._peakIntensityExists = True
+
+        peakIntensityErrorNode = rowdom.getElementsByTagName("peakIntensityError")
+        if len(peakIntensityErrorNode) > 0:
+
+            peakIntensityErrorStr = peakIntensityErrorNode[0].firstChild.data
+            self._peakIntensityError = Parser.stringListToLists(
+                peakIntensityErrorStr, Temperature, "CalPointing"
+            )
+
+            self._peakIntensityErrorExists = True
+
+        peakIntensityWasFixedNode = rowdom.getElementsByTagName("peakIntensityWasFixed")
+        if len(peakIntensityWasFixedNode) > 0:
+
+            self._peakIntensityWasFixed = bool(
+                peakIntensityWasFixedNode[0].firstChild.data
+            )
+
+            self._peakIntensityWasFixedExists = True
+
+        # extrinsic attribute values
+
+        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+
+        self._calDataId = Tag(calDataIdNode.firstChild.data)
+
+        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+
+    def toBin(self):
+        print("not yet implemented")
+
+    # Intrinsic Table Attributes
+
+    # ===> Attribute antennaName
+
+    _antennaName = None
+
+    def getAntennaName(self):
+        """
+        Get antennaName.
+        return antennaName as str
+        """
+
+        return self._antennaName
+
+    def setAntennaName(self, antennaName):
+        """
+        Set antennaName with the specified str value.
+        antennaName The str value to which antennaName is to be set.
+
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
+        """
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the antennaName field, which is part of the key, after this row has been added to this table."
+            )
+
+        self._antennaName = str(antennaName)
+
+    # ===> Attribute receiverBand
+
+    _receiverBand = ReceiverBand.from_int(0)
+
+    def getReceiverBand(self):
+        """
+        Get receiverBand.
+        return receiverBand as ReceiverBand
+        """
+
+        return self._receiverBand
+
+    def setReceiverBand(self, receiverBand):
+        """
+        Set receiverBand with the specified ReceiverBand value.
+        receiverBand The ReceiverBand value to which receiverBand is to be set.
+
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
+        """
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the receiverBand field, which is part of the key, after this row has been added to this table."
+            )
+
+        self._receiverBand = ReceiverBand(receiverBand)
+
+    # ===> Attribute startValidTime
+
+    _startValidTime = ArrayTime()
+
+    def getStartValidTime(self):
+        """
+        Get startValidTime.
+        return startValidTime as ArrayTime
+        """
+
+        # make sure it is a copy of ArrayTime
+        return ArrayTime(self._startValidTime)
+
+    def setStartValidTime(self, startValidTime):
+        """
+        Set startValidTime with the specified ArrayTime value.
+        startValidTime The ArrayTime value to which startValidTime is to be set.
+        The value of startValidTime can be anything allowed by the ArrayTime constructor.
+
+        """
+
+        self._startValidTime = ArrayTime(startValidTime)
+
+    # ===> Attribute endValidTime
+
+    _endValidTime = ArrayTime()
+
+    def getEndValidTime(self):
+        """
+        Get endValidTime.
+        return endValidTime as ArrayTime
+        """
+
+        # make sure it is a copy of ArrayTime
+        return ArrayTime(self._endValidTime)
+
+    def setEndValidTime(self, endValidTime):
+        """
+        Set endValidTime with the specified ArrayTime value.
+        endValidTime The ArrayTime value to which endValidTime is to be set.
+        The value of endValidTime can be anything allowed by the ArrayTime constructor.
+
+        """
+
+        self._endValidTime = ArrayTime(endValidTime)
+
+    # ===> Attribute ambientTemperature
+
+    _ambientTemperature = Temperature()
+
+    def getAmbientTemperature(self):
+        """
+        Get ambientTemperature.
+        return ambientTemperature as Temperature
+        """
+
+        # make sure it is a copy of Temperature
+        return Temperature(self._ambientTemperature)
+
+    def setAmbientTemperature(self, ambientTemperature):
+        """
+        Set ambientTemperature with the specified Temperature value.
+        ambientTemperature The Temperature value to which ambientTemperature is to be set.
+        The value of ambientTemperature can be anything allowed by the Temperature constructor.
+
+        """
+
+        self._ambientTemperature = Temperature(ambientTemperature)
+
+    # ===> Attribute antennaMake
+
+    _antennaMake = AntennaMake.from_int(0)
+
+    def getAntennaMake(self):
+        """
+        Get antennaMake.
+        return antennaMake as AntennaMake
+        """
+
+        return self._antennaMake
+
+    def setAntennaMake(self, antennaMake):
+        """
+        Set antennaMake with the specified AntennaMake value.
+        antennaMake The AntennaMake value to which antennaMake is to be set.
+
+
+        """
+
+        self._antennaMake = AntennaMake(antennaMake)
+
+    # ===> Attribute atmPhaseCorrection
+
+    _atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
+
+    def getAtmPhaseCorrection(self):
+        """
+        Get atmPhaseCorrection.
+        return atmPhaseCorrection as AtmPhaseCorrection
+        """
+
+        return self._atmPhaseCorrection
+
+    def setAtmPhaseCorrection(self, atmPhaseCorrection):
+        """
+        Set atmPhaseCorrection with the specified AtmPhaseCorrection value.
+        atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
+
+
+        """
+
+        self._atmPhaseCorrection = AtmPhaseCorrection(atmPhaseCorrection)
+
+    # ===> Attribute direction
+
+    _direction = None  # this is a 1D list of Angle
+
+    def getDirection(self):
+        """
+        Get direction.
+        return direction as Angle []
+        """
+
+        return copy.deepcopy(self._direction)
+
+    def setDirection(self, direction):
+        """
+        Set direction with the specified Angle []  value.
+        direction The Angle []  value to which direction is to be set.
+        The value of direction can be anything allowed by the Angle []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(direction, list):
+            raise ValueError("The value of direction must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(direction)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of direction is not correct")
+
+            # the type of the values in the list must be Angle
+            # note : this only checks the first value found
+            if not Parser.checkListType(direction, Angle):
+                raise ValueError(
+                    "type of the first value in direction is not Angle as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._direction = copy.deepcopy(direction)
+        except Exception as exc:
+            raise ValueError("Invalid direction : " + str(exc))
+
+    # ===> Attribute frequencyRange
+
+    _frequencyRange = None  # this is a 1D list of Frequency
+
+    def getFrequencyRange(self):
+        """
+        Get frequencyRange.
+        return frequencyRange as Frequency []
+        """
+
+        return copy.deepcopy(self._frequencyRange)
+
+    def setFrequencyRange(self, frequencyRange):
+        """
+        Set frequencyRange with the specified Frequency []  value.
+        frequencyRange The Frequency []  value to which frequencyRange is to be set.
+        The value of frequencyRange can be anything allowed by the Frequency []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(frequencyRange, list):
+            raise ValueError("The value of frequencyRange must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(frequencyRange)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of frequencyRange is not correct")
+
+            # the type of the values in the list must be Frequency
+            # note : this only checks the first value found
+            if not Parser.checkListType(frequencyRange, Frequency):
+                raise ValueError(
+                    "type of the first value in frequencyRange is not Frequency as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._frequencyRange = copy.deepcopy(frequencyRange)
+        except Exception as exc:
+            raise ValueError("Invalid frequencyRange : " + str(exc))
+
+    # ===> Attribute pointingModelMode
+
+    _pointingModelMode = PointingModelMode.from_int(0)
+
+    def getPointingModelMode(self):
+        """
+        Get pointingModelMode.
+        return pointingModelMode as PointingModelMode
+        """
+
+        return self._pointingModelMode
+
+    def setPointingModelMode(self, pointingModelMode):
+        """
+        Set pointingModelMode with the specified PointingModelMode value.
+        pointingModelMode The PointingModelMode value to which pointingModelMode is to be set.
+
+
+        """
+
+        self._pointingModelMode = PointingModelMode(pointingModelMode)
+
+    # ===> Attribute pointingMethod
+
+    _pointingMethod = PointingMethod.from_int(0)
+
+    def getPointingMethod(self):
+        """
+        Get pointingMethod.
+        return pointingMethod as PointingMethod
+        """
+
+        return self._pointingMethod
+
+    def setPointingMethod(self, pointingMethod):
+        """
+        Set pointingMethod with the specified PointingMethod value.
+        pointingMethod The PointingMethod value to which pointingMethod is to be set.
+
+
+        """
+
+        self._pointingMethod = PointingMethod(pointingMethod)
+
+    # ===> Attribute numReceptor
+
+    _numReceptor = 0
+
+    def getNumReceptor(self):
+        """
+        Get numReceptor.
+        return numReceptor as int
+        """
+
+        return self._numReceptor
+
+    def setNumReceptor(self, numReceptor):
+        """
+        Set numReceptor with the specified int value.
+        numReceptor The int value to which numReceptor is to be set.
+
+
+        """
+
+        self._numReceptor = int(numReceptor)
+
+    # ===> Attribute polarizationTypes
+
+    _polarizationTypes = None  # this is a 1D list of PolarizationType
+
+    def getPolarizationTypes(self):
+        """
+        Get polarizationTypes.
+        return polarizationTypes as PolarizationType []
+        """
+
+        return copy.deepcopy(self._polarizationTypes)
+
+    def setPolarizationTypes(self, polarizationTypes):
+        """
+        Set polarizationTypes with the specified PolarizationType []  value.
+        polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(polarizationTypes, list):
+            raise ValueError("The value of polarizationTypes must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(polarizationTypes)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of polarizationTypes is not correct")
+
+            # the type of the values in the list must be PolarizationType
+            # note : this only checks the first value found
+            if not Parser.checkListType(polarizationTypes, PolarizationType):
+                raise ValueError(
+                    "type of the first value in polarizationTypes is not PolarizationType as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._polarizationTypes = copy.deepcopy(polarizationTypes)
+        except Exception as exc:
+            raise ValueError("Invalid polarizationTypes : " + str(exc))
+
+    # ===> Attribute collOffsetRelative
+
+    _collOffsetRelative = None  # this is a 2D list of Angle
+
+    def getCollOffsetRelative(self):
+        """
+        Get collOffsetRelative.
+        return collOffsetRelative as Angle []  []
+        """
+
+        return copy.deepcopy(self._collOffsetRelative)
+
+    def setCollOffsetRelative(self, collOffsetRelative):
+        """
+        Set collOffsetRelative with the specified Angle []  []  value.
+        collOffsetRelative The Angle []  []  value to which collOffsetRelative is to be set.
+        The value of collOffsetRelative can be anything allowed by the Angle []  []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(collOffsetRelative, list):
+            raise ValueError("The value of collOffsetRelative must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(collOffsetRelative)
+
+            shapeOK = len(listDims) == 2
+
+            if not shapeOK:
+                raise ValueError("shape of collOffsetRelative is not correct")
+
+            # the type of the values in the list must be Angle
+            # note : this only checks the first value found
+            if not Parser.checkListType(collOffsetRelative, Angle):
+                raise ValueError(
+                    "type of the first value in collOffsetRelative is not Angle as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._collOffsetRelative = copy.deepcopy(collOffsetRelative)
+        except Exception as exc:
+            raise ValueError("Invalid collOffsetRelative : " + str(exc))
+
+    # ===> Attribute collOffsetAbsolute
+
+    _collOffsetAbsolute = None  # this is a 2D list of Angle
+
+    def getCollOffsetAbsolute(self):
+        """
+        Get collOffsetAbsolute.
+        return collOffsetAbsolute as Angle []  []
+        """
+
+        return copy.deepcopy(self._collOffsetAbsolute)
+
+    def setCollOffsetAbsolute(self, collOffsetAbsolute):
+        """
+        Set collOffsetAbsolute with the specified Angle []  []  value.
+        collOffsetAbsolute The Angle []  []  value to which collOffsetAbsolute is to be set.
+        The value of collOffsetAbsolute can be anything allowed by the Angle []  []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(collOffsetAbsolute, list):
+            raise ValueError("The value of collOffsetAbsolute must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(collOffsetAbsolute)
+
+            shapeOK = len(listDims) == 2
+
+            if not shapeOK:
+                raise ValueError("shape of collOffsetAbsolute is not correct")
+
+            # the type of the values in the list must be Angle
+            # note : this only checks the first value found
+            if not Parser.checkListType(collOffsetAbsolute, Angle):
+                raise ValueError(
+                    "type of the first value in collOffsetAbsolute is not Angle as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._collOffsetAbsolute = copy.deepcopy(collOffsetAbsolute)
+        except Exception as exc:
+            raise ValueError("Invalid collOffsetAbsolute : " + str(exc))
+
+    # ===> Attribute collError
+
+    _collError = None  # this is a 2D list of Angle
+
+    def getCollError(self):
+        """
+        Get collError.
+        return collError as Angle []  []
+        """
+
+        return copy.deepcopy(self._collError)
+
+    def setCollError(self, collError):
+        """
+        Set collError with the specified Angle []  []  value.
+        collError The Angle []  []  value to which collError is to be set.
+        The value of collError can be anything allowed by the Angle []  []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(collError, list):
+            raise ValueError("The value of collError must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(collError)
+
+            shapeOK = len(listDims) == 2
+
+            if not shapeOK:
+                raise ValueError("shape of collError is not correct")
+
+            # the type of the values in the list must be Angle
+            # note : this only checks the first value found
+            if not Parser.checkListType(collError, Angle):
+                raise ValueError(
+                    "type of the first value in collError is not Angle as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._collError = copy.deepcopy(collError)
+        except Exception as exc:
+            raise ValueError("Invalid collError : " + str(exc))
+
+    # ===> Attribute collOffsetTied
+
+    _collOffsetTied = None  # this is a 2D list of bool
+
+    def getCollOffsetTied(self):
+        """
+        Get collOffsetTied.
+        return collOffsetTied as bool []  []
+        """
+
+        return copy.deepcopy(self._collOffsetTied)
+
+    def setCollOffsetTied(self, collOffsetTied):
+        """
+        Set collOffsetTied with the specified bool []  []  value.
+        collOffsetTied The bool []  []  value to which collOffsetTied is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(collOffsetTied, list):
+            raise ValueError("The value of collOffsetTied must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(collOffsetTied)
+
+            shapeOK = len(listDims) == 2
+
+            if not shapeOK:
+                raise ValueError("shape of collOffsetTied is not correct")
+
+            # the type of the values in the list must be bool
+            # note : this only checks the first value found
+            if not Parser.checkListType(collOffsetTied, bool):
+                raise ValueError(
+                    "type of the first value in collOffsetTied is not bool as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._collOffsetTied = copy.deepcopy(collOffsetTied)
+        except Exception as exc:
+            raise ValueError("Invalid collOffsetTied : " + str(exc))
+
+    # ===> Attribute reducedChiSquared
+
+    _reducedChiSquared = None  # this is a 1D list of double
+
+    def getReducedChiSquared(self):
+        """
+        Get reducedChiSquared.
+        return reducedChiSquared as double []
+        """
+
+        return copy.deepcopy(self._reducedChiSquared)
+
+    def setReducedChiSquared(self, reducedChiSquared):
+        """
+        Set reducedChiSquared with the specified double []  value.
+        reducedChiSquared The double []  value to which reducedChiSquared is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(reducedChiSquared, list):
+            raise ValueError("The value of reducedChiSquared must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(reducedChiSquared)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of reducedChiSquared is not correct")
+
+            # the type of the values in the list must be double
+            # note : this only checks the first value found
+            if not Parser.checkListType(reducedChiSquared, double):
+                raise ValueError(
+                    "type of the first value in reducedChiSquared is not double as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._reducedChiSquared = copy.deepcopy(reducedChiSquared)
+        except Exception as exc:
+            raise ValueError("Invalid reducedChiSquared : " + str(exc))
+
+    # ===> Attribute averagedPolarizations, which is optional
+    _averagedPolarizationsExists = False
+
+    _averagedPolarizations = None
+
+    def isAveragedPolarizationsExists(self):
+        """
+        The attribute averagedPolarizations is optional. Return True if this attribute exists.
+        return True if and only if the averagedPolarizations attribute exists.
+        """
+        return self._averagedPolarizationsExists
+
+    def getAveragedPolarizations(self):
+        """
+        Get averagedPolarizations, which is optional.
+        return averagedPolarizations as bool
+        raises ValueError If averagedPolarizations does not exist.
+        """
+        if not self._averagedPolarizationsExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + averagedPolarizations
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return self._averagedPolarizations
+
+    def setAveragedPolarizations(self, averagedPolarizations):
+        """
+        Set averagedPolarizations with the specified bool value.
+        averagedPolarizations The bool value to which averagedPolarizations is to be set.
+
+
+        """
+
+        self._averagedPolarizations = bool(averagedPolarizations)
+
+        self._averagedPolarizationsExists = True
+
+    def clearAveragedPolarizations(self):
+        """
+        Mark averagedPolarizations, which is an optional field, as non-existent.
+        """
+        self._averagedPolarizationsExists = False
+
+    # ===> Attribute beamPA, which is optional
+    _beamPAExists = False
+
+    _beamPA = None  # this is a 1D list of Angle
+
+    def isBeamPAExists(self):
+        """
+        The attribute beamPA is optional. Return True if this attribute exists.
+        return True if and only if the beamPA attribute exists.
+        """
+        return self._beamPAExists
+
+    def getBeamPA(self):
+        """
+        Get beamPA, which is optional.
+        return beamPA as Angle []
+        raises ValueError If beamPA does not exist.
+        """
+        if not self._beamPAExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + beamPA
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return copy.deepcopy(self._beamPA)
+
+    def setBeamPA(self, beamPA):
+        """
+        Set beamPA with the specified Angle []  value.
+        beamPA The Angle []  value to which beamPA is to be set.
+        The value of beamPA can be anything allowed by the Angle []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(beamPA, list):
+            raise ValueError("The value of beamPA must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(beamPA)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of beamPA is not correct")
+
+            # the type of the values in the list must be Angle
+            # note : this only checks the first value found
+            if not Parser.checkListType(beamPA, Angle):
+                raise ValueError(
+                    "type of the first value in beamPA is not Angle as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._beamPA = copy.deepcopy(beamPA)
+        except Exception as exc:
+            raise ValueError("Invalid beamPA : " + str(exc))
+
+        self._beamPAExists = True
+
+    def clearBeamPA(self):
+        """
+        Mark beamPA, which is an optional field, as non-existent.
+        """
+        self._beamPAExists = False
+
+    # ===> Attribute beamPAError, which is optional
+    _beamPAErrorExists = False
+
+    _beamPAError = None  # this is a 1D list of Angle
+
+    def isBeamPAErrorExists(self):
+        """
+        The attribute beamPAError is optional. Return True if this attribute exists.
+        return True if and only if the beamPAError attribute exists.
+        """
+        return self._beamPAErrorExists
+
+    def getBeamPAError(self):
+        """
+        Get beamPAError, which is optional.
+        return beamPAError as Angle []
+        raises ValueError If beamPAError does not exist.
+        """
+        if not self._beamPAErrorExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + beamPAError
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return copy.deepcopy(self._beamPAError)
+
+    def setBeamPAError(self, beamPAError):
+        """
+        Set beamPAError with the specified Angle []  value.
+        beamPAError The Angle []  value to which beamPAError is to be set.
+        The value of beamPAError can be anything allowed by the Angle []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(beamPAError, list):
+            raise ValueError("The value of beamPAError must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(beamPAError)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of beamPAError is not correct")
+
+            # the type of the values in the list must be Angle
+            # note : this only checks the first value found
+            if not Parser.checkListType(beamPAError, Angle):
+                raise ValueError(
+                    "type of the first value in beamPAError is not Angle as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._beamPAError = copy.deepcopy(beamPAError)
+        except Exception as exc:
+            raise ValueError("Invalid beamPAError : " + str(exc))
+
+        self._beamPAErrorExists = True
+
+    def clearBeamPAError(self):
+        """
+        Mark beamPAError, which is an optional field, as non-existent.
+        """
+        self._beamPAErrorExists = False
+
+    # ===> Attribute beamPAWasFixed, which is optional
+    _beamPAWasFixedExists = False
+
+    _beamPAWasFixed = None
+
+    def isBeamPAWasFixedExists(self):
+        """
+        The attribute beamPAWasFixed is optional. Return True if this attribute exists.
+        return True if and only if the beamPAWasFixed attribute exists.
+        """
+        return self._beamPAWasFixedExists
+
+    def getBeamPAWasFixed(self):
+        """
+        Get beamPAWasFixed, which is optional.
+        return beamPAWasFixed as bool
+        raises ValueError If beamPAWasFixed does not exist.
+        """
+        if not self._beamPAWasFixedExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + beamPAWasFixed
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return self._beamPAWasFixed
+
+    def setBeamPAWasFixed(self, beamPAWasFixed):
+        """
+        Set beamPAWasFixed with the specified bool value.
+        beamPAWasFixed The bool value to which beamPAWasFixed is to be set.
+
+
+        """
+
+        self._beamPAWasFixed = bool(beamPAWasFixed)
+
+        self._beamPAWasFixedExists = True
+
+    def clearBeamPAWasFixed(self):
+        """
+        Mark beamPAWasFixed, which is an optional field, as non-existent.
+        """
+        self._beamPAWasFixedExists = False
+
+    # ===> Attribute beamWidth, which is optional
+    _beamWidthExists = False
+
+    _beamWidth = None  # this is a 2D list of Angle
+
+    def isBeamWidthExists(self):
+        """
+        The attribute beamWidth is optional. Return True if this attribute exists.
+        return True if and only if the beamWidth attribute exists.
+        """
+        return self._beamWidthExists
+
+    def getBeamWidth(self):
+        """
+        Get beamWidth, which is optional.
+        return beamWidth as Angle []  []
+        raises ValueError If beamWidth does not exist.
+        """
+        if not self._beamWidthExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + beamWidth
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return copy.deepcopy(self._beamWidth)
+
+    def setBeamWidth(self, beamWidth):
+        """
+        Set beamWidth with the specified Angle []  []  value.
+        beamWidth The Angle []  []  value to which beamWidth is to be set.
+        The value of beamWidth can be anything allowed by the Angle []  []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(beamWidth, list):
+            raise ValueError("The value of beamWidth must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(beamWidth)
+
+            shapeOK = len(listDims) == 2
+
+            if not shapeOK:
+                raise ValueError("shape of beamWidth is not correct")
+
+            # the type of the values in the list must be Angle
+            # note : this only checks the first value found
+            if not Parser.checkListType(beamWidth, Angle):
+                raise ValueError(
+                    "type of the first value in beamWidth is not Angle as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._beamWidth = copy.deepcopy(beamWidth)
+        except Exception as exc:
+            raise ValueError("Invalid beamWidth : " + str(exc))
+
+        self._beamWidthExists = True
+
+    def clearBeamWidth(self):
+        """
+        Mark beamWidth, which is an optional field, as non-existent.
+        """
+        self._beamWidthExists = False
+
+    # ===> Attribute beamWidthError, which is optional
+    _beamWidthErrorExists = False
+
+    _beamWidthError = None  # this is a 2D list of Angle
+
+    def isBeamWidthErrorExists(self):
+        """
+        The attribute beamWidthError is optional. Return True if this attribute exists.
+        return True if and only if the beamWidthError attribute exists.
+        """
+        return self._beamWidthErrorExists
+
+    def getBeamWidthError(self):
+        """
+        Get beamWidthError, which is optional.
+        return beamWidthError as Angle []  []
+        raises ValueError If beamWidthError does not exist.
+        """
+        if not self._beamWidthErrorExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + beamWidthError
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return copy.deepcopy(self._beamWidthError)
+
+    def setBeamWidthError(self, beamWidthError):
+        """
+        Set beamWidthError with the specified Angle []  []  value.
+        beamWidthError The Angle []  []  value to which beamWidthError is to be set.
+        The value of beamWidthError can be anything allowed by the Angle []  []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(beamWidthError, list):
+            raise ValueError("The value of beamWidthError must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(beamWidthError)
+
+            shapeOK = len(listDims) == 2
+
+            if not shapeOK:
+                raise ValueError("shape of beamWidthError is not correct")
+
+            # the type of the values in the list must be Angle
+            # note : this only checks the first value found
+            if not Parser.checkListType(beamWidthError, Angle):
+                raise ValueError(
+                    "type of the first value in beamWidthError is not Angle as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._beamWidthError = copy.deepcopy(beamWidthError)
+        except Exception as exc:
+            raise ValueError("Invalid beamWidthError : " + str(exc))
+
+        self._beamWidthErrorExists = True
+
+    def clearBeamWidthError(self):
+        """
+        Mark beamWidthError, which is an optional field, as non-existent.
+        """
+        self._beamWidthErrorExists = False
+
+    # ===> Attribute beamWidthWasFixed, which is optional
+    _beamWidthWasFixedExists = False
+
+    _beamWidthWasFixed = None  # this is a 1D list of bool
+
+    def isBeamWidthWasFixedExists(self):
+        """
+        The attribute beamWidthWasFixed is optional. Return True if this attribute exists.
+        return True if and only if the beamWidthWasFixed attribute exists.
+        """
+        return self._beamWidthWasFixedExists
+
+    def getBeamWidthWasFixed(self):
+        """
+        Get beamWidthWasFixed, which is optional.
+        return beamWidthWasFixed as bool []
+        raises ValueError If beamWidthWasFixed does not exist.
+        """
+        if not self._beamWidthWasFixedExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + beamWidthWasFixed
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return copy.deepcopy(self._beamWidthWasFixed)
+
+    def setBeamWidthWasFixed(self, beamWidthWasFixed):
+        """
+        Set beamWidthWasFixed with the specified bool []  value.
+        beamWidthWasFixed The bool []  value to which beamWidthWasFixed is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(beamWidthWasFixed, list):
+            raise ValueError("The value of beamWidthWasFixed must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(beamWidthWasFixed)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of beamWidthWasFixed is not correct")
+
+            # the type of the values in the list must be bool
+            # note : this only checks the first value found
+            if not Parser.checkListType(beamWidthWasFixed, bool):
+                raise ValueError(
+                    "type of the first value in beamWidthWasFixed is not bool as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._beamWidthWasFixed = copy.deepcopy(beamWidthWasFixed)
+        except Exception as exc:
+            raise ValueError("Invalid beamWidthWasFixed : " + str(exc))
+
+        self._beamWidthWasFixedExists = True
+
+    def clearBeamWidthWasFixed(self):
+        """
+        Mark beamWidthWasFixed, which is an optional field, as non-existent.
+        """
+        self._beamWidthWasFixedExists = False
+
+    # ===> Attribute offIntensity, which is optional
+    _offIntensityExists = False
+
+    _offIntensity = None  # this is a 1D list of Temperature
+
+    def isOffIntensityExists(self):
+        """
+        The attribute offIntensity is optional. Return True if this attribute exists.
+        return True if and only if the offIntensity attribute exists.
+        """
+        return self._offIntensityExists
+
+    def getOffIntensity(self):
+        """
+        Get offIntensity, which is optional.
+        return offIntensity as Temperature []
+        raises ValueError If offIntensity does not exist.
+        """
+        if not self._offIntensityExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + offIntensity
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return copy.deepcopy(self._offIntensity)
+
+    def setOffIntensity(self, offIntensity):
+        """
+        Set offIntensity with the specified Temperature []  value.
+        offIntensity The Temperature []  value to which offIntensity is to be set.
+        The value of offIntensity can be anything allowed by the Temperature []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(offIntensity, list):
+            raise ValueError("The value of offIntensity must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(offIntensity)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of offIntensity is not correct")
+
+            # the type of the values in the list must be Temperature
+            # note : this only checks the first value found
+            if not Parser.checkListType(offIntensity, Temperature):
+                raise ValueError(
+                    "type of the first value in offIntensity is not Temperature as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._offIntensity = copy.deepcopy(offIntensity)
+        except Exception as exc:
+            raise ValueError("Invalid offIntensity : " + str(exc))
+
+        self._offIntensityExists = True
+
+    def clearOffIntensity(self):
+        """
+        Mark offIntensity, which is an optional field, as non-existent.
+        """
+        self._offIntensityExists = False
+
+    # ===> Attribute offIntensityError, which is optional
+    _offIntensityErrorExists = False
+
+    _offIntensityError = None  # this is a 1D list of Temperature
+
+    def isOffIntensityErrorExists(self):
+        """
+        The attribute offIntensityError is optional. Return True if this attribute exists.
+        return True if and only if the offIntensityError attribute exists.
+        """
+        return self._offIntensityErrorExists
+
+    def getOffIntensityError(self):
+        """
+        Get offIntensityError, which is optional.
+        return offIntensityError as Temperature []
+        raises ValueError If offIntensityError does not exist.
+        """
+        if not self._offIntensityErrorExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + offIntensityError
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return copy.deepcopy(self._offIntensityError)
+
+    def setOffIntensityError(self, offIntensityError):
+        """
+        Set offIntensityError with the specified Temperature []  value.
+        offIntensityError The Temperature []  value to which offIntensityError is to be set.
+        The value of offIntensityError can be anything allowed by the Temperature []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(offIntensityError, list):
+            raise ValueError("The value of offIntensityError must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(offIntensityError)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of offIntensityError is not correct")
+
+            # the type of the values in the list must be Temperature
+            # note : this only checks the first value found
+            if not Parser.checkListType(offIntensityError, Temperature):
+                raise ValueError(
+                    "type of the first value in offIntensityError is not Temperature as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._offIntensityError = copy.deepcopy(offIntensityError)
+        except Exception as exc:
+            raise ValueError("Invalid offIntensityError : " + str(exc))
+
+        self._offIntensityErrorExists = True
+
+    def clearOffIntensityError(self):
+        """
+        Mark offIntensityError, which is an optional field, as non-existent.
+        """
+        self._offIntensityErrorExists = False
+
+    # ===> Attribute offIntensityWasFixed, which is optional
+    _offIntensityWasFixedExists = False
+
+    _offIntensityWasFixed = None
+
+    def isOffIntensityWasFixedExists(self):
+        """
+        The attribute offIntensityWasFixed is optional. Return True if this attribute exists.
+        return True if and only if the offIntensityWasFixed attribute exists.
+        """
+        return self._offIntensityWasFixedExists
+
+    def getOffIntensityWasFixed(self):
+        """
+        Get offIntensityWasFixed, which is optional.
+        return offIntensityWasFixed as bool
+        raises ValueError If offIntensityWasFixed does not exist.
+        """
+        if not self._offIntensityWasFixedExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + offIntensityWasFixed
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return self._offIntensityWasFixed
+
+    def setOffIntensityWasFixed(self, offIntensityWasFixed):
+        """
+        Set offIntensityWasFixed with the specified bool value.
+        offIntensityWasFixed The bool value to which offIntensityWasFixed is to be set.
+
+
+        """
+
+        self._offIntensityWasFixed = bool(offIntensityWasFixed)
+
+        self._offIntensityWasFixedExists = True
+
+    def clearOffIntensityWasFixed(self):
+        """
+        Mark offIntensityWasFixed, which is an optional field, as non-existent.
+        """
+        self._offIntensityWasFixedExists = False
+
+    # ===> Attribute peakIntensity, which is optional
+    _peakIntensityExists = False
+
+    _peakIntensity = None  # this is a 1D list of Temperature
+
+    def isPeakIntensityExists(self):
+        """
+        The attribute peakIntensity is optional. Return True if this attribute exists.
+        return True if and only if the peakIntensity attribute exists.
+        """
+        return self._peakIntensityExists
+
+    def getPeakIntensity(self):
+        """
+        Get peakIntensity, which is optional.
+        return peakIntensity as Temperature []
+        raises ValueError If peakIntensity does not exist.
+        """
+        if not self._peakIntensityExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + peakIntensity
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return copy.deepcopy(self._peakIntensity)
+
+    def setPeakIntensity(self, peakIntensity):
+        """
+        Set peakIntensity with the specified Temperature []  value.
+        peakIntensity The Temperature []  value to which peakIntensity is to be set.
+        The value of peakIntensity can be anything allowed by the Temperature []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(peakIntensity, list):
+            raise ValueError("The value of peakIntensity must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(peakIntensity)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of peakIntensity is not correct")
+
+            # the type of the values in the list must be Temperature
+            # note : this only checks the first value found
+            if not Parser.checkListType(peakIntensity, Temperature):
+                raise ValueError(
+                    "type of the first value in peakIntensity is not Temperature as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._peakIntensity = copy.deepcopy(peakIntensity)
+        except Exception as exc:
+            raise ValueError("Invalid peakIntensity : " + str(exc))
+
+        self._peakIntensityExists = True
+
+    def clearPeakIntensity(self):
+        """
+        Mark peakIntensity, which is an optional field, as non-existent.
+        """
+        self._peakIntensityExists = False
+
+    # ===> Attribute peakIntensityError, which is optional
+    _peakIntensityErrorExists = False
+
+    _peakIntensityError = None  # this is a 1D list of Temperature
+
+    def isPeakIntensityErrorExists(self):
+        """
+        The attribute peakIntensityError is optional. Return True if this attribute exists.
+        return True if and only if the peakIntensityError attribute exists.
+        """
+        return self._peakIntensityErrorExists
+
+    def getPeakIntensityError(self):
+        """
+        Get peakIntensityError, which is optional.
+        return peakIntensityError as Temperature []
+        raises ValueError If peakIntensityError does not exist.
+        """
+        if not self._peakIntensityErrorExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + peakIntensityError
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return copy.deepcopy(self._peakIntensityError)
+
+    def setPeakIntensityError(self, peakIntensityError):
+        """
+        Set peakIntensityError with the specified Temperature []  value.
+        peakIntensityError The Temperature []  value to which peakIntensityError is to be set.
+        The value of peakIntensityError can be anything allowed by the Temperature []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(peakIntensityError, list):
+            raise ValueError("The value of peakIntensityError must be a list")
+        # check the shape
+        try:
+            listDims = Parser.getListDims(peakIntensityError)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of peakIntensityError is not correct")
+
+            # the type of the values in the list must be Temperature
+            # note : this only checks the first value found
+            if not Parser.checkListType(peakIntensityError, Temperature):
+                raise ValueError(
+                    "type of the first value in peakIntensityError is not Temperature as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._peakIntensityError = copy.deepcopy(peakIntensityError)
+        except Exception as exc:
+            raise ValueError("Invalid peakIntensityError : " + str(exc))
+
+        self._peakIntensityErrorExists = True
+
+    def clearPeakIntensityError(self):
+        """
+        Mark peakIntensityError, which is an optional field, as non-existent.
+        """
+        self._peakIntensityErrorExists = False
+
+    # ===> Attribute peakIntensityWasFixed, which is optional
+    _peakIntensityWasFixedExists = False
+
+    _peakIntensityWasFixed = None
+
+    def isPeakIntensityWasFixedExists(self):
+        """
+        The attribute peakIntensityWasFixed is optional. Return True if this attribute exists.
+        return True if and only if the peakIntensityWasFixed attribute exists.
+        """
+        return self._peakIntensityWasFixedExists
+
+    def getPeakIntensityWasFixed(self):
+        """
+        Get peakIntensityWasFixed, which is optional.
+        return peakIntensityWasFixed as bool
+        raises ValueError If peakIntensityWasFixed does not exist.
+        """
+        if not self._peakIntensityWasFixedExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + peakIntensityWasFixed
+                + " attribute in table CalPointing does not exist!"
+            )
+
+        return self._peakIntensityWasFixed
+
+    def setPeakIntensityWasFixed(self, peakIntensityWasFixed):
+        """
+        Set peakIntensityWasFixed with the specified bool value.
+        peakIntensityWasFixed The bool value to which peakIntensityWasFixed is to be set.
+
+
+        """
+
+        self._peakIntensityWasFixed = bool(peakIntensityWasFixed)
+
+        self._peakIntensityWasFixedExists = True
+
+    def clearPeakIntensityWasFixed(self):
+        """
+        Mark peakIntensityWasFixed, which is an optional field, as non-existent.
+        """
+        self._peakIntensityWasFixedExists = False
+
+    # Extrinsic Table Attributes
+
+    # ===> Attribute calDataId
+
+    _calDataId = Tag()
+
+    def getCalDataId(self):
+        """
+        Get calDataId.
+        return calDataId as Tag
+        """
+
+        # make sure it is a copy of Tag
+        return Tag(self._calDataId)
+
+    def setCalDataId(self, calDataId):
+        """
+        Set calDataId with the specified Tag value.
+        calDataId The Tag value to which calDataId is to be set.
+        The value of calDataId can be anything allowed by the Tag constructor.
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
+        """
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the calDataId field, which is part of the key, after this row has been added to this table."
+            )
+
+        self._calDataId = Tag(calDataId)
+
+    # ===> Attribute calReductionId
+
+    _calReductionId = Tag()
+
+    def getCalReductionId(self):
+        """
+        Get calReductionId.
+        return calReductionId as Tag
+        """
+
+        # make sure it is a copy of Tag
+        return Tag(self._calReductionId)
+
+    def setCalReductionId(self, calReductionId):
+        """
+        Set calReductionId with the specified Tag value.
+        calReductionId The Tag value to which calReductionId is to be set.
+        The value of calReductionId can be anything allowed by the Tag constructor.
+
+        Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
+
+        """
+
+        if self._hasBeenAdded:
+            raise ValueError(
+                "Attempt to change the calReductionId field, which is part of the key, after this row has been added to this table."
+            )
+
+        self._calReductionId = Tag(calReductionId)
+
+    # Links
+
+    def getCalDataUsingCalDataId(self):
+        """
+        Returns the row in the CalData table having CalData.calDataId == calDataId
+
+        """
+
+        return self._table.getContainer().getCalData().getRowByKey(self._calDataId)
+
+    def getCalReductionUsingCalReductionId(self):
+        """
+        Returns the row in the CalReduction table having CalReduction.calReductionId == calReductionId
+
+        """
+
+        return (
+            self._table.getContainer()
+            .getCalReduction()
+            .getRowByKey(self._calReductionId)
+        )
+
+    # comparison methods
+
+    def compareNoAutoInc(
+        self,
+        antennaName,
+        receiverBand,
+        calDataId,
+        calReductionId,
+        startValidTime,
+        endValidTime,
+        ambientTemperature,
+        antennaMake,
+        atmPhaseCorrection,
+        direction,
+        frequencyRange,
+        pointingModelMode,
+        pointingMethod,
+        numReceptor,
+        polarizationTypes,
+        collOffsetRelative,
+        collOffsetAbsolute,
+        collError,
+        collOffsetTied,
+        reducedChiSquared,
+    ):
+        """
+        Compare each attribute except the autoincrementable one of this CalPointingRow with
+        the corresponding parameters and return True if there is a match and False otherwise.
+        """
+
+        # antennaName is a str, compare using the == operator.
+        if not (self._antennaName == antennaName):
+            return False
+
+        # receiverBand is a ReceiverBand, compare using the == operator on the getValue() output
+        if not (self._receiverBand.getValue() == receiverBand.getValue()):
+            return False
+
+        # calDataId is a Tag, compare using the equals method.
+        if not self._calDataId.equals(calDataId):
+            return False
+
+        # calReductionId is a Tag, compare using the equals method.
+        if not self._calReductionId.equals(calReductionId):
+            return False
+
+        # startValidTime is a ArrayTime, compare using the equals method.
+        if not self._startValidTime.equals(startValidTime):
+            return False
+
+        # endValidTime is a ArrayTime, compare using the equals method.
+        if not self._endValidTime.equals(endValidTime):
+            return False
+
+        # ambientTemperature is a Temperature, compare using the almostEquals method.
+        if not self._ambientTemperature.almostEquals(
+            ambientTemperature, self.getTable().getAmbientTemperatureEqTolerance()
+        ):
+            return False
+
+        # antennaMake is a AntennaMake, compare using the == operator on the getValue() output
+        if not (self._antennaMake.getValue() == antennaMake.getValue()):
+            return False
+
+        # atmPhaseCorrection is a AtmPhaseCorrection, compare using the == operator on the getValue() output
+        if not (self._atmPhaseCorrection.getValue() == atmPhaseCorrection.getValue()):
+            return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._direction) != len(direction):
+            return False
+        for indx in range(len(direction)):
+
+            # direction is a list of Angle, compare using the almostEquals method.
+            if not self._direction[indx].almostEquals(
+                direction[indx], self.getTable().getDirectionEqTolerance()
+            ):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._frequencyRange) != len(frequencyRange):
+            return False
+        for indx in range(len(frequencyRange)):
+
+            # frequencyRange is a list of Frequency, compare using the almostEquals method.
+            if not self._frequencyRange[indx].almostEquals(
+                frequencyRange[indx], self.getTable().getFrequencyRangeEqTolerance()
+            ):
+                return False
+
+        # pointingModelMode is a PointingModelMode, compare using the == operator on the getValue() output
+        if not (self._pointingModelMode.getValue() == pointingModelMode.getValue()):
+            return False
+
+        # pointingMethod is a PointingMethod, compare using the == operator on the getValue() output
+        if not (self._pointingMethod.getValue() == pointingMethod.getValue()):
+            return False
+
+        # numReceptor is a int, compare using the == operator.
+        if not (self._numReceptor == numReceptor):
+            return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._polarizationTypes) != len(polarizationTypes):
+            return False
+        for indx in range(len(polarizationTypes)):
+
+            # polarizationTypes is a list of PolarizationType, compare using == operator.
+            if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
+                return False
+
+        # We compare two 2D arrays (lists)
+        if collOffsetRelative is not None:
+            if self._collOffsetRelative is None:
+                return False
+            # both lists are not None, assume they are at least lists at this point
+            # Compare first their dimensions and then their values.
+            collOffsetRelative_dims = Parser.getListDims(collOffsetRelative)
+            this_collOffsetRelative_dims = Parser.getListDims(self._collOffsetRelative)
+            if collOffsetRelative_dims != this_collOffsetRelative_dims:
+                return False
+            # assumes they are both 2D arrays, the internal one should be
+
+            for i in range(collOffsetRelative_dims[0]):
+                for j in range(collOffsetRelative_dims[0]):
+
+                    # collOffsetRelative is a Angle, compare using the almostEquals method.
+                    if not (
+                        self._collOffsetRelative[i][j].almostEquals(
+                            collOffsetRelative[i][j],
+                            this.getTable().getCollOffsetRelativeEqTolerance(),
+                        )
+                    ):
+                        return False
+
+        # We compare two 2D arrays (lists)
+        if collOffsetAbsolute is not None:
+            if self._collOffsetAbsolute is None:
+                return False
+            # both lists are not None, assume they are at least lists at this point
+            # Compare first their dimensions and then their values.
+            collOffsetAbsolute_dims = Parser.getListDims(collOffsetAbsolute)
+            this_collOffsetAbsolute_dims = Parser.getListDims(self._collOffsetAbsolute)
+            if collOffsetAbsolute_dims != this_collOffsetAbsolute_dims:
+                return False
+            # assumes they are both 2D arrays, the internal one should be
+
+            for i in range(collOffsetAbsolute_dims[0]):
+                for j in range(collOffsetAbsolute_dims[0]):
+
+                    # collOffsetAbsolute is a Angle, compare using the almostEquals method.
+                    if not (
+                        self._collOffsetAbsolute[i][j].almostEquals(
+                            collOffsetAbsolute[i][j],
+                            this.getTable().getCollOffsetAbsoluteEqTolerance(),
+                        )
+                    ):
+                        return False
+
+        # We compare two 2D arrays (lists)
+        if collError is not None:
+            if self._collError is None:
+                return False
+            # both lists are not None, assume they are at least lists at this point
+            # Compare first their dimensions and then their values.
+            collError_dims = Parser.getListDims(collError)
+            this_collError_dims = Parser.getListDims(self._collError)
+            if collError_dims != this_collError_dims:
+                return False
+            # assumes they are both 2D arrays, the internal one should be
+
+            for i in range(collError_dims[0]):
+                for j in range(collError_dims[0]):
+
+                    # collError is a Angle, compare using the almostEquals method.
+                    if not (
+                        self._collError[i][j].almostEquals(
+                            collError[i][j], this.getTable().getCollErrorEqTolerance()
+                        )
+                    ):
+                        return False
+
+        # We compare two 2D arrays (lists)
+        if collOffsetTied is not None:
+            if self._collOffsetTied is None:
+                return False
+            # both lists are not None, assume they are at least lists at this point
+            # Compare first their dimensions and then their values.
+            collOffsetTied_dims = Parser.getListDims(collOffsetTied)
+            this_collOffsetTied_dims = Parser.getListDims(self._collOffsetTied)
+            if collOffsetTied_dims != this_collOffsetTied_dims:
+                return False
+            # assumes they are both 2D arrays, the internal one should be
+
+            for i in range(collOffsetTied_dims[0]):
+                for j in range(collOffsetTied_dims[0]):
+
+                    # collOffsetTied is an array of bool, compare using == operator.
+                    if not (self._collOffsetTied[i][j] == collOffsetTied[i][j]):
+                        return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._reducedChiSquared) != len(reducedChiSquared):
+            return False
+        for indx in range(len(reducedChiSquared)):
+
+            # reducedChiSquared is a list of double, compare using == operator.
+            if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
+                return False
+
+        return True
+
+    def equalByRequiredValue(self, otherRow):
+        """
+        Return True if all required attributes of the value part are equal to their homologues
+        in otherRow and False otherwise.
+        """
+
+        return self.compareRequiredValue(
+            otherRow.getStartValidTime(),
+            otherRow.getEndValidTime(),
+            otherRow.getAmbientTemperature(),
+            otherRow.getAntennaMake(),
+            otherRow.getAtmPhaseCorrection(),
+            otherRow.getDirection(),
+            otherRow.getFrequencyRange(),
+            otherRow.getPointingModelMode(),
+            otherRow.getPointingMethod(),
+            otherRow.getNumReceptor(),
+            otherRow.getPolarizationTypes(),
+            otherRow.getCollOffsetRelative(),
+            otherRow.getCollOffsetAbsolute(),
+            otherRow.getCollError(),
+            otherRow.getCollOffsetTied(),
+            otherRow.getReducedChiSquared(),
+        )
+
+    def compareRequiredValue(
+        self,
+        startValidTime,
+        endValidTime,
+        ambientTemperature,
+        antennaMake,
+        atmPhaseCorrection,
+        direction,
+        frequencyRange,
+        pointingModelMode,
+        pointingMethod,
+        numReceptor,
+        polarizationTypes,
+        collOffsetRelative,
+        collOffsetAbsolute,
+        collError,
+        collOffsetTied,
+        reducedChiSquared,
+    ):
+
+        # startValidTime is a ArrayTime, compare using the equals method.
+        if not self._startValidTime.equals(startValidTime):
+            return False
+
+        # endValidTime is a ArrayTime, compare using the equals method.
+        if not self._endValidTime.equals(endValidTime):
+            return False
+
+        # ambientTemperature is a Temperature, compare using the almostEquals method.
+        if not self._ambientTemperature.almostEquals(
+            ambientTemperature, self.getTable().getAmbientTemperatureEqTolerance()
+        ):
+            return False
+
+        # antennaMake is a AntennaMake, compare using the == operator on the getValue() output
+        if not (self._antennaMake.getValue() == antennaMake.getValue()):
+            return False
+
+        # atmPhaseCorrection is a AtmPhaseCorrection, compare using the == operator on the getValue() output
+        if not (self._atmPhaseCorrection.getValue() == atmPhaseCorrection.getValue()):
+            return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._direction) != len(direction):
+            return False
+        for indx in range(len(direction)):
+
+            # direction is a list of Angle, compare using the almostEquals method.
+            if not self._direction[indx].almostEquals(
+                direction[indx], self.getTable().getDirectionEqTolerance()
+            ):
+                return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._frequencyRange) != len(frequencyRange):
+            return False
+        for indx in range(len(frequencyRange)):
+
+            # frequencyRange is a list of Frequency, compare using the almostEquals method.
+            if not self._frequencyRange[indx].almostEquals(
+                frequencyRange[indx], self.getTable().getFrequencyRangeEqTolerance()
+            ):
+                return False
+
+        # pointingModelMode is a PointingModelMode, compare using the == operator on the getValue() output
+        if not (self._pointingModelMode.getValue() == pointingModelMode.getValue()):
+            return False
+
+        # pointingMethod is a PointingMethod, compare using the == operator on the getValue() output
+        if not (self._pointingMethod.getValue() == pointingMethod.getValue()):
+            return False
+
+        # numReceptor is a int, compare using the == operator.
+        if not (self._numReceptor == numReceptor):
+            return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._polarizationTypes) != len(polarizationTypes):
+            return False
+        for indx in range(len(polarizationTypes)):
+
+            # polarizationTypes is a list of PolarizationType, compare using == operator.
+            if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
+                return False
+
+        # We compare two 2D arrays (lists)
+        if collOffsetRelative is not None:
+            if self._collOffsetRelative is None:
+                return False
+            # both lists are not None, assume they are at least lists at this point
+            # Compare first their dimensions and then their values.
+            collOffsetRelative_dims = Parser.getListDims(collOffsetRelative)
+            this_collOffsetRelative_dims = Parser.getListDims(self._collOffsetRelative)
+            if collOffsetRelative_dims != this_collOffsetRelative_dims:
+                return False
+            # assumes they are both 2D arrays, the internal one should be
+
+            for i in range(collOffsetRelative_dims[0]):
+                for j in range(collOffsetRelative_dims[0]):
+
+                    # collOffsetRelative is a Angle, compare using the almostEquals method.
+                    if not (
+                        self._collOffsetRelative[i][j].almostEquals(
+                            collOffsetRelative[i][j],
+                            this.getTable().getCollOffsetRelativeEqTolerance(),
+                        )
+                    ):
+                        return False
+
+        # We compare two 2D arrays (lists)
+        if collOffsetAbsolute is not None:
+            if self._collOffsetAbsolute is None:
+                return False
+            # both lists are not None, assume they are at least lists at this point
+            # Compare first their dimensions and then their values.
+            collOffsetAbsolute_dims = Parser.getListDims(collOffsetAbsolute)
+            this_collOffsetAbsolute_dims = Parser.getListDims(self._collOffsetAbsolute)
+            if collOffsetAbsolute_dims != this_collOffsetAbsolute_dims:
+                return False
+            # assumes they are both 2D arrays, the internal one should be
+
+            for i in range(collOffsetAbsolute_dims[0]):
+                for j in range(collOffsetAbsolute_dims[0]):
+
+                    # collOffsetAbsolute is a Angle, compare using the almostEquals method.
+                    if not (
+                        self._collOffsetAbsolute[i][j].almostEquals(
+                            collOffsetAbsolute[i][j],
+                            this.getTable().getCollOffsetAbsoluteEqTolerance(),
+                        )
+                    ):
+                        return False
+
+        # We compare two 2D arrays (lists)
+        if collError is not None:
+            if self._collError is None:
+                return False
+            # both lists are not None, assume they are at least lists at this point
+            # Compare first their dimensions and then their values.
+            collError_dims = Parser.getListDims(collError)
+            this_collError_dims = Parser.getListDims(self._collError)
+            if collError_dims != this_collError_dims:
+                return False
+            # assumes they are both 2D arrays, the internal one should be
+
+            for i in range(collError_dims[0]):
+                for j in range(collError_dims[0]):
+
+                    # collError is a Angle, compare using the almostEquals method.
+                    if not (
+                        self._collError[i][j].almostEquals(
+                            collError[i][j], this.getTable().getCollErrorEqTolerance()
+                        )
+                    ):
+                        return False
+
+        # We compare two 2D arrays (lists)
+        if collOffsetTied is not None:
+            if self._collOffsetTied is None:
+                return False
+            # both lists are not None, assume they are at least lists at this point
+            # Compare first their dimensions and then their values.
+            collOffsetTied_dims = Parser.getListDims(collOffsetTied)
+            this_collOffsetTied_dims = Parser.getListDims(self._collOffsetTied)
+            if collOffsetTied_dims != this_collOffsetTied_dims:
+                return False
+            # assumes they are both 2D arrays, the internal one should be
+
+            for i in range(collOffsetTied_dims[0]):
+                for j in range(collOffsetTied_dims[0]):
+
+                    # collOffsetTied is an array of bool, compare using == operator.
+                    if not (self._collOffsetTied[i][j] == collOffsetTied[i][j]):
+                        return False
+
+        # We compare two 1D arrays.
+        # Compare firstly their dimensions and then their values.
+        if len(self._reducedChiSquared) != len(reducedChiSquared):
+            return False
+        for indx in range(len(reducedChiSquared)):
+
+            # reducedChiSquared is a list of double, compare using == operator.
+            if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
+                return False
+
+        return True
