@@ -63,11 +63,17 @@ class TimeSampling:
     _name = None
 
     def __init__(self, timeSampling):
-        # construct a TimeSampling from an integer or another TimeSampling
+        # construct a TimeSampling from an integer, a string, or another TimeSampling
+        # if timeSampling is a string, convert it to an instance of this class using literal
         if isinstance(timeSampling, TimeSampling):
             # copy constructor
             self._value = timeSampling.getValue()
             self._name = timeSampling.getName()
+        elif isinstance(timeSampling, str):
+            # convert it to an instance of this class using literal
+            thisEnum = TimeSampling.literal(timeSampling)
+            self._value = thisEnum.getValue()
+            self._name = thisEnum.getName()
         else:
             # it must be in the names dictionary
             if timeSampling not in _timeSamplingNames:

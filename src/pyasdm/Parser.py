@@ -114,9 +114,10 @@ class Parser:
     @staticmethod
     def listValuesAsString(theList, dims):
         """
-        Turns a list (including a list of lists as used here) into a string for use in an XML output
+        Turns a list (including a list of lists as used here) into a string for use in an XML output.
         Values in the list are turned into a string by use of str(value).
         """
+        result = ""
         if len(dims) > 1:
             for kk in range(dims[0]):
                 result += Parser.listValuesAsString(theList[kk], dims[1:])
@@ -129,8 +130,8 @@ class Parser:
     @staticmethod
     def listExtendedValuesAsString(theList, dims):
         """
-        Turns a list (including a list of lists as used here) into a string for use in an XML output
-        Values in the list extended type values and are turned into a string by use of
+        Turns a list (including a list of lists as used here) into a string for use in an XML output.
+        Values in the list are extended type values and are turned into a string by use of
         the toString method that is part of extended types.
         """
         result = ""
@@ -141,6 +142,22 @@ class Parser:
             # these are actual values
             for jj in range(dims[0]):
                 result += theList[jj].toString() + " "
+        return result
+
+    @staticmethod
+    def listEnumValuesAsString(theList, dims):
+        """
+        Turns a list (including a list of lists as used here) into a string for use in an XML output.
+        Values in the list are Enumerations and are turned into a string by use of the getName method.
+        """
+        result = ""
+        if len(dims) > 1:
+            for kk in range(dims[0]):
+                result += Parser.listEnumValuesAsString()(theList[kk], dims[1:])
+        else:
+            # these are actual values
+            for jj in range(dims[0]):
+                result += theList[jj].getName() + " "
         return result
 
     @staticmethod
@@ -176,6 +193,24 @@ class Parser:
         result = "<%s> " % name
         result += Parser.listXMLPrefix(listDims)
         result += Parser.listExtendedValuesAsString(value, listDims)
+        result += "</%s> " % name
+        return result
+
+    @staticmethod
+    def listEnumValueToXML(name, value):
+        """
+        Return a string of the form '<name> list values </name>' to be used in the XML
+        output. The list values are encoded such that they can be read and the list
+        (which may be a list of lists, i.e. an ND array of values) be fully reconstructed
+        from that XML.
+        For use with enumeration which can be expressed as a string using their name() member function.
+        Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
+        and the most rapidly varying dimension among the values is the last dimension.
+        """
+        listDims = Parser.getListDims(value)
+        result = "<%s> " % name
+        result += Parser.listXMLPrefix(listDims)
+        result += Parser.listEnumValuesAsString(value, listDims)
         result += "</%s> " % name
         return result
 
@@ -230,20 +265,17 @@ class Parser:
         if len(splitStr) < (count + 2):
             raise ConversionException(
                 "invalid strlist, not enough elements in string, ListClass is "
-                + type(ListClass),
+                + str(ListClass),
                 tableName,
             )
         try:
-            str, result = Parser.splitStrToClassLists(
+            newstr, result = Parser.splitStrToClassLists(
                 splitStr[(ndim + 1) :], dims, ListClass
             )
         except Exception as exc:
             # raise a ConversionException for anything this unexpected
             raise ConversionException(
-                "Unexpected exception "
-                + str(exc)
-                + ", ListClass is "
-                + type(ListClass),
+                "Unexpected exception " + str(exc) + ", ListClass is " + str(ListClass),
                 tableName,
             ) from None
 

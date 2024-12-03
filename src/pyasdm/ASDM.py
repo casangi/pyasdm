@@ -33,7 +33,12 @@ from xml.dom import minidom
 
 # will need to import each table type here
 from pyasdm.MainTable import MainTable
+from pyasdm.ConfigDescriptionTable import ConfigDescriptionTable
+from pyasdm.ExecBlockTable import ExecBlockTable
+
+# from pyasdm.FeedTable import FeedTable
 from pyasdm.FieldTable import FieldTable
+from pyasdm.StateTable import StateTable
 
 from pyasdm.exceptions.ConversionException import ConversionException
 
@@ -76,6 +81,8 @@ class ASDM:
 
     _field = None
 
+    _configDescription = None
+
     # defer on getTables() until necessary, would return a list or array of all of the tables
 
     # default constructor makes an empty ASDM
@@ -100,7 +107,11 @@ class ASDM:
         )
 
         self._main = MainTable(self)
+        self._configDescription = ConfigDescriptionTable(self)
+        self._execBlock = ExecBlockTable(self)
+        #        self._feeld = FeedTable(self)
         self._field = FieldTable(self)
+        self._state = StateTable(self)
 
     # getters and setters
     def getMain(self):
@@ -110,12 +121,40 @@ class ASDM:
         self._main.checkPresenceInMemory()
         return self._main
 
+    def getConfigDescription(self):
+        """
+        get the ConfigDescriptionTable
+        """
+        self._configDescription.checkPresenceInMemory()
+        return self._configDescription
+
+    def getExecBlock(self):
+        """
+        get the ExecBlockTable
+        """
+        self._execBlock.checkPresenceInMemory()
+        return self._execBlock
+
+    #    def getFeed(self):
+    #        """
+    #        get the FeeldTable
+    #        """
+    #        self._feeld.checkPresenceInMemory()
+    #        return self._feeld
+
     def getField(self):
         """
         get the FieldTable
         """
         self._field.checkPresenceInMemory()
         return self._field
+
+    def getState(self):
+        """
+        get the StateTable
+        """
+        self._state.checkPresenceInMemory()
+        return self._state
 
     def getEntity(self):
         return self._entity
@@ -185,6 +224,26 @@ class ASDM:
 
         self._xmlnsPrefix = xmlnsPrefix
 
+    def addTableRowToXML(self, xmlstr, atable):
+        """
+        Appends the XML row for the given table to the given XML string, returning the new XML string.
+        """
+        xmlstr += "<Table> "
+        xmlstr += "<Name> "
+        xmlstr += atable.getName()
+        xmlstr += " "
+        xmlstr += "</Name> "
+        xmlstr += "<NumberRows> "
+        xmlstr += str(atable.size())
+        xmlstr += " "
+        xmlstr += "</NumberRows> "
+        if atable.size() > 0:
+            if atable.getEntity().isNull():
+                raise ConversionException("Table entity is null.", atable.getName())
+            xmlstr += atable.getEntity().toXML()
+        xmlstr += "</Table>\n"
+        return xmlstr
+
     def toXML(self):
         """
         Produces the XML representation of this.
@@ -200,48 +259,16 @@ class ASDM:
         result += "<TimeOfCreation> "
         result += self._timeOfCreation.toFITS()
         result += " "
-        result += "</TimeOfCreation>"
+        result += "</TimeOfCreation>\n"
         # this ultimately needs a list of tables, just do these for now
 
-        # MainTable
-        # this makes sure it's populated
-        mainTable = self.getMain()
-        result += "<Table> "
-        result += "<Name> "
-        result += self._main.getName()
-        result += " "
-        result += "</Name> "
-        result += "<NumberRows> "
-        result += str(self._main.size())
-        result += " "
-        result += "</NumberRows> "
-        if self._main.size() > 0:
-            if self._main.getEntity().isNull():
-                raise ConversionException("Table entity is null.", self._main.getName())
-            result += self._main.getEntity().toXML()
-        result += "</Table> "
+        result = self.addTableRowToXML(result, self.getMain())
+        result = self.addTableRowToXML(result, self.getConfigDescription())
+        result = self.addTableRowToXML(result, self.getExecBlock())
+        #        result = self.addTableRowToXML(result, self.getFeed())
+        result = self.addTableRowToXML(result, self.getField())
+        result = self.addTableRowToXML(result, self.getState())
 
-        # FieldTable
-        # this makes sure it's populated
-        fieldTable = self.getField()
-        result += "<Table> "
-        result += "<Name> "
-        result += self._field.getName()
-        result += " "
-        result += "</Name> "
-        result += "<NumberRows> "
-        result += str(self._field.size())
-        result += " "
-        result += "</NumberRows> "
-        if self._field.size() > 0:
-            if self._field.getEntity().isNull():
-                raise ConversionException(
-                    "Table entity is null.", self._field.getName()
-                )
-            result += self._field.getEntity().toXML()
-        result += "</Table> "
-
-        result += "</ASDM>"
         return result
 
     def setFromFile(self, directory):
@@ -284,8 +311,20 @@ class ASDM:
         if "Main" in self._tableEntity:
             self._main.setNotPresentInMemory()
 
+        if "ConfigDescription" in self._tableEntity:
+            self._configDescription.setNotPresentInMemory()
+
+        if "ExecBlock" in self._tableEntity:
+            self._execBlock.setNotPresentInMemory()
+
+        #        if "Feed" in self._tableEntity:
+        #            self._feed.setNotPresentInMemory()
+
         if "Field" in self._tableEntity:
             self._field.setNotPresentInMemory()
+
+        if "State" in self._tableEntity:
+            self._state.setNotPresentInMemory()
 
     def fromXML(self, xmlstr):
         """
@@ -441,5 +480,17 @@ class ASDM:
         if self.getMain().size() > 0:
             self.getMain().toFile(directory)
 
+        if self.getConfigDescription().size() > 0:
+            self.getConfigDescription().toFile(directory)
+
+        if self.getExecBlock().size() > 0:
+            self.getExecBlock().toFile(directory)
+
+        #        if self.getFeed().size() > 0:
+        #            self.getFeed().toFile(directory)
+
         if self.getField().size() > 0:
             self.getField().toFile(directory)
+
+        if self.getState().size() > 0:
+            self.getState().toFile(directory)

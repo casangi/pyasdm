@@ -76,8 +76,7 @@ class MainRow:
         self._hasBeenAdded = False
 
         # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
-
-        timeSampling = TimeSampling.from_int(0)
+        self._timeSampling = TimeSampling.from_int(0)
 
         if row is not None:
             if not isinstance(row, MainRow):
@@ -136,6 +135,8 @@ class MainRow:
 
         result += "<row> \n"
 
+        # intrinsic attributes
+
         result += Parser.extendedValueToXML("time", self._time)
 
         result += Parser.valueToXML("numAntenna", self._numAntenna)
@@ -156,6 +157,8 @@ class MainRow:
 
         result += Parser.extendedValueToXML("dataUID", self._dataUID)
 
+        # extrinsic attributes
+
         result += Parser.extendedValueToXML(
             "configDescriptionId", self._configDescriptionId
         )
@@ -165,6 +168,8 @@ class MainRow:
         result += Parser.extendedValueToXML("fieldId", self._fieldId)
 
         result += Parser.listExtendedValueToXML("stateId", self._stateId)
+
+        # links, if any
 
         result += "</row>\n"
         return result
@@ -693,15 +698,15 @@ class MainRow:
         """
 
         # time is a ArrayTime, compare using the equals method.
-        if not (self._time.equals(time)):
+        if not self._time.equals(time):
             return False
 
         # configDescriptionId is a Tag, compare using the equals method.
-        if not (self._configDescriptionId.equals(configDescriptionId)):
+        if not self._configDescriptionId.equals(configDescriptionId):
             return False
 
         # fieldId is a Tag, compare using the equals method.
-        if not (self._fieldId.equals(fieldId)):
+        if not self._fieldId.equals(fieldId):
             return False
 
         # numAntenna is a int, compare using the == operator.
@@ -713,7 +718,7 @@ class MainRow:
             return False
 
         # interval is a Interval, compare using the equals method.
-        if not (self._interval.equals(interval)):
+        if not self._interval.equals(interval):
             return False
 
         # numIntegration is a int, compare using the == operator.
@@ -733,7 +738,7 @@ class MainRow:
             return False
 
         # dataUID is a EntityRef, compare using the equals method.
-        if not (self._dataUID.equals(dataUID)):
+        if not self._dataUID.equals(dataUID):
             return False
 
         # stateId is an extrinsic attribute which is a list of Tag.
@@ -747,7 +752,7 @@ class MainRow:
                 return False
 
         # execBlockId is a Tag, compare using the equals method.
-        if not (self._execBlockId.equals(execBlockId)):
+        if not self._execBlockId.equals(execBlockId):
             return False
 
         return True
@@ -794,7 +799,7 @@ class MainRow:
             return False
 
         # interval is a Interval, compare using the equals method.
-        if not (self._interval.equals(interval)):
+        if not self._interval.equals(interval):
             return False
 
         # numIntegration is a int, compare using the == operator.
@@ -814,7 +819,7 @@ class MainRow:
             return False
 
         # dataUID is a EntityRef, compare using the equals method.
-        if not (self._dataUID.equals(dataUID)):
+        if not self._dataUID.equals(dataUID):
             return False
 
         # stateId is an extrinsic attribute which is a list of Tag.
@@ -828,7 +833,7 @@ class MainRow:
                 return False
 
         # execBlockId is a Tag, compare using the equals method.
-        if not (self._execBlockId.equals(execBlockId)):
+        if not self._execBlockId.equals(execBlockId):
             return False
 
         return True

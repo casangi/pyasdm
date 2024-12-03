@@ -307,10 +307,10 @@ class MainTable(Representable):
 
     def add(self, row):
         """
-        Add a row to this table. 'row' is the MainRow to be added.
-        If this table contains a MainRow whose attributes (key and mandatory values) are equal to those in 'row'
-        then this returns that MainRow, otherwise 'row' is returned.
-        If this table contains a MainRow with a key equal to that of 'row'
+        Add a row to this table. 'row' is the row to be added.
+        If this table contains a row whose attributes (key and mandatory values) are equal to those in 'row'
+        then this returns that row, otherwise 'row' is returned.
+        If this table contains a row with a key equal to that of 'row'
         but having a value section different from 'row' then an exception is raised.
         The row is inserted in the table in such a way that all rows having the same value of
         ( configDescriptionId, fieldId ) are stored by ascending time.

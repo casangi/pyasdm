@@ -76,8 +76,7 @@ class FieldRow:
         self._hasBeenAdded = False
 
         # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
-
-        directionCode = DirectionReferenceCode.from_int(0)
+        self._directionCode = DirectionReferenceCode.from_int(0)
 
         if row is not None:
             if not isinstance(row, FieldRow):
@@ -89,17 +88,14 @@ class FieldRow:
 
             self._numPoly = row._numPoly
 
-            # delayDir is a  list , let's use the copyDelayDir method.
-            # TBD : not yet implemented, unsure it will even look like this
-            self._delayDir = copyDelayDir(row._delayDir)
+            # delayDir is a  list , make a deep copy
+            self._delayDir = copy.deepcopy(row._delayDir)
 
-            # phaseDir is a  list , let's use the copyPhaseDir method.
-            # TBD : not yet implemented, unsure it will even look like this
-            self._phaseDir = copyPhaseDir(row._phaseDir)
+            # phaseDir is a  list , make a deep copy
+            self._phaseDir = copy.deepcopy(row._phaseDir)
 
-            # referenceDir is a  list , let's use the copyReferenceDir method.
-            # TBD : not yet implemented, unsure it will even look like this
-            self._referenceDir = copyReferenceDir(row._referenceDir)
+            # referenceDir is a  list , make a deep copy
+            self._referenceDir = copy.deepcopy(row._referenceDir)
 
             # by default set systematically time's value to something not None
 
@@ -185,6 +181,8 @@ class FieldRow:
 
         result += "<row> \n"
 
+        # intrinsic attributes
+
         result += Parser.extendedValueToXML("fieldId", self._fieldId)
 
         result += Parser.valueToXML("fieldName", self._fieldName)
@@ -206,6 +204,7 @@ class FieldRow:
             result += Parser.valueToXML("code", self._code)
 
         if self._directionCodeExists:
+
             result += Parser.valueToXML(
                 "directionCode", DirectionReferenceCode.name(self._directionCode)
             )
@@ -220,6 +219,8 @@ class FieldRow:
 
             result += Parser.valueToXML("assocNature", self._assocNature)
 
+        # extrinsic attributes
+
         if self._assocFieldIdExists:
 
             result += Parser.extendedValueToXML("assocFieldId", self._assocFieldId)
@@ -231,6 +232,8 @@ class FieldRow:
         if self._sourceIdExists:
 
             result += Parser.valueToXML("sourceId", self._sourceId)
+
+        # links, if any
 
         result += "</row>\n"
         return result

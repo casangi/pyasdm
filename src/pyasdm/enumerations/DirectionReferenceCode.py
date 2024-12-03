@@ -181,11 +181,17 @@ class DirectionReferenceCode:
     _name = None
 
     def __init__(self, directionReferenceCode):
-        # construct a DirectionReferenceCode from an integer or another DirectionReferenceCode
+        # construct a DirectionReferenceCode from an integer, a string, or another DirectionReferenceCode
+        # if directionReferenceCode is a string, convert it to an instance of this class using literal
         if isinstance(directionReferenceCode, DirectionReferenceCode):
             # copy constructor
             self._value = directionReferenceCode.getValue()
             self._name = directionReferenceCode.getName()
+        elif isinstance(directionReferenceCode, str):
+            # convert it to an instance of this class using literal
+            thisEnum = DirectionReferenceCode.literal(directionReferenceCode)
+            self._value = thisEnum.getValue()
+            self._name = thisEnum.getName()
         else:
             # it must be in the names dictionary
             if directionReferenceCode not in _directionReferenceCodeNames:

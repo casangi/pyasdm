@@ -66,8 +66,6 @@ class Angle:
     # A list of strings containing the allowable units of Angle.
     AllowedUnits = [RADIAN, DEGREE, HOUR, ARCSECOND]
 
-    # Return the canonical unit associated with this Angle, radian.
-    # The unit associated with this Angle, always returns RADIAN.
     @staticmethod
     def unit():
         """
@@ -126,7 +124,7 @@ class Angle:
         specified factor, a / factor.
         a The base angle
         factor The factor that is used to divide the value.
-        return A new Angle that is the product of a specified
+        return A new Angle that is the quotient of a specified
         angle and some specified factor, a / factor.
         """
         if not isinstance(a, Angle):
@@ -142,9 +140,10 @@ class Angle:
         Create an Angle with an initial value and units.
         The default Angle (no arguments) is zero (0.0) radians.
         The default units (none specified) is RADIAN.
-        If value is a string then it is converted to a float as is.
         The units must be one of the 4 recognized units: RADIAN,
         DEGREE, HOUR, and ARCSECOND.
+        Any value that is not an Angle is valid so long as it can
+        be converted to a float as float(value) (including a parseable string).
         If value is an Angle instance then this is the copy constructor
         and any value of units other than None is illegal.
         """
@@ -176,7 +175,8 @@ class Angle:
     def set(self, value, units=None):
         """
         Set the value of this angle to the specified value in the specified units.
-        If the value is a string it is first converted to a float.
+        Any value is valid so long as it can be converted into a float using float(value)
+        (including a parseable string).
         The units default to RADIAN.
         Recognized units are RADIAN, DEGREE, HOUR, and ARCSECOND.
         """
@@ -194,14 +194,14 @@ class Angle:
         elif units == self.ARCSECOND:
             self._angle = value * self.arcsecondToRad
         else:
-            raise ValueError(str(units) + " is not al allowable unit.")
+            raise ValueError(str(units) + " is not an allowable unit.")
 
     def toString(self, units=None):
         """
         Return the value of this Angle as a string in the given units.
         The units default to RADIAN if not specified.
         The units must be one of the recognized units of RADIAN, DEGREE,
-        HOUR, and ARCSECOND
+        HOUR, and ARCSECOND.
         """
         return str(self.get(units))
 
@@ -253,7 +253,7 @@ class Angle:
     def almostEquals(self, otherAngle, toleranceAngle):
         """
         Returns True if and only if otherAngle and toleranceAngle are both Angles
-        and if the distance (absolute value of the difference) between this angle
+        and if the distance (absolute value of the difference) between this Angle
         and otherAngle is less than the absolute value of toleranceAngle.
         """
         result = False
@@ -270,9 +270,9 @@ class Angle:
 
     def compareTo(self, otherAngle):
         """
-        Compare this angle to the specified other angle, which must be an angle.
-        Returning -1, 0, or +1 if this angle is less than, equal to, or greater
-        than the other angle.
+        Compare this Angle to the specified otherAngle, which must be an Angle.
+        Returning -1, 0, or +1 if this Angle is less than, equal to, or greater
+        than the other Angle.
         """
         if not isinstance(otherAngle, Angle):
             raise ValueError("otherAngle must be an Angle")
@@ -287,26 +287,26 @@ class Angle:
 
     def eq(self, otherAngle):
         """
-        Returns True if and only if this angle is equal to the otherAngle.
+        Returns True if and only if this Angle is equal to the otherAngle.
         This is equivalent to the equals method.
         """
         return self.equals(otherAngle)
 
     def ne(self, otherAngle):
         """
-        Returns True if and only if this angle is not equal to otherAngle
+        Returns True if and only if this Angle is not equal to otherAngle
         """
         return isinstance(otherAngle, Angle) and (self._angle != otherAngle._angle)
 
     def lt(self, otherAngle):
         """
-        Returns True if and only if this angle is less than otherAngle
+        Returns True if and only if this Angle is less than otherAngle
         """
         return isinstance(otherAngle, Angle) and (self._angle < otherAngle._angle)
 
     def le(self, otherAngle):
         """
-        Returns True if and only if this angle is less than or equal to otherAngle
+        Returns True if and only if this Angle is less than or equal to otherAngle
         """
         return isinstance(otherAngle, Angle) and (self._angle <= otherAngle._angle)
 

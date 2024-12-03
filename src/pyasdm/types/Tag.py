@@ -101,14 +101,14 @@ class Tag:
 
         typeValue = s.split("_")
         if len(typeValue) != 2:
-            raise ("Error: '" + s + "' cannot be parsed into a Tag")
+            raise ValueError("Error: '" + s + "' cannot be parsed into a Tag")
 
         if typeValue[0] == "null":
             return Tag()
 
         type = TagType.getTagType(typeValue[0])
         if type is None:
-            raise (
+            raise ValueError(
                 "Error: '" + s + "' has an invalid Tag type part '" + typeValue[0] + "'"
             )
 
