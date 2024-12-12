@@ -32,96 +32,103 @@
 import pyasdm.ASDM
 
 from .CalAppPhaseRow import CalAppPhaseRow
-from .Representable import Representable
 
 # All of the extended types are imported
 from pyasdm.types import *
 
 from .exceptions.ConversionException import ConversionException
 from .exceptions.DuplicateKey import DuplicateKey
+from .exceptions.UniquenessViolationException import UniquenessViolationException
 
-# using minidom instead of Parser
 from xml.dom import minidom
 
 import os
 
 
-class CalAppPhaseTable(Representable):
+class CalAppPhaseTable:
     """
     The CalAppPhaseTable class is an Alma table.
 
-     Role
-     The CalAppPhase table is relevant to the ALMA observatory when the antennas are being phased to form a coherent sum during the observation. For each scan, the table provides information about which antennas are included in the sum, their relative phase adjustments, the efficiency of the sum (relative to best performance) and the quality of each antenna participating in the system. This data is used in real-time to provide the phased sum signal, and after the observation to analyze the result.
+    Role
+    The CalAppPhase table is relevant to the ALMA observatory when the antennas are being phased to form a coherent sum during the observation. For each scan, the table provides information about which antennas are included in the sum, their relative phase adjustments, the efficiency of the sum (relative to best performance) and the quality of each antenna participating in the system. This data is used in real-time to provide the phased sum signal, and after the observation to analyze the result.
 
-     Generated from model's revision -1, branch
+    Generated from model's revision -1, branch
 
-     Attributes of CalAppPhase
+    Attributes of CalAppPhase
 
-                  Key
+                 Key
 
-    basebandName BasebandName identifies the baseband.
 
-    scanNumber int The number of the scan processed by TELCAL. Along with an ExecBlock Id (which should be ExecBlock\_0 most of the time), the value of scanNumber can be used as the key to retrieve informations related to the scan (e.g. its start time).
-
-    calDataId Tag identifies a unique row in the CalData table.
-
-    calReductionId Tag identifies a unique row in the CalReduction table.
+    basebandName BasebandName identifies the baseband. </TD>
 
 
 
-                  Value (Mandatory)
-
-    startValidTime ArrayTime  start of phasing solution validity.
-
-    endValidTime ArrayTime  end of phasing solution validity.
-
-    adjustTime ArrayTime  The time of the last adjustment to the phasing analysis via the \c ParameterTuning  interface.
-
-    adjustToken str  A parameter supplied via the \c ParameterTuning interface to indicate the form of adjustment(s) made at adjustTime. Note that TELCAL merely passes this datum and adjustTime through to this table.
-
-    phasingMode str  The mode in which the phasing system is being operated.
-
-    numPhasedAntennas int  the number of antennas in phased sum, \f$N_p\f$.
-
-    phasedAntennas str []   numPhasedAntennas  the names of the phased antennas.
-
-    refAntennaIndex int  the index of the reference antenna in the array \c phasedAntennas . It must be an integer value in the interval \f$ [0, N_p-1]\f$.
-
-    candRefAntennaIndex int  tne index of a candidate (new) reference antenna in the array phasedAntennas; it must be a integer in the interval \f$[0, N_p-1]\f$.
-
-    phasePacking str  how to unpack \c phaseValues.
-
-    numReceptors int  the number of receptors per antenna, \f$N_r\f$.The number (\f$N_r \le 2 \f$) of receptors per antenna, usually two (polarizations), but it might be one in special cases.
-
-    numChannels int  the number of data channels, \f$N_d\f$.
-
-    numPhaseValues int  The number  of phase data values present in the table, \f$N_v\f$.
-
-    phaseValues float []   numPhaseValues  the array of phase data values.
-
-    numCompare int  the number of comparison antennas, \f$N_c\f$.
-
-    numEfficiencies int  the number of efficiencies, \f$N_e\f$.
-
-    compareArray str []   numCompare  the names of the comparison antennas.
-
-    efficiencyIndices int []   numEfficiencies  indices of the antenna(s) in \c compareArray used to calculate \c efficiencies; they must be distinct integers in the interval \f$[0, N_c]\f$.
-
-    efficiencies float []  []   numEfficiencies, numChannels  an array of efficiencies of phased sum.
-
-    quality float []   numPhasedAntennas+numCompare  quality of phased antennas.
-
-    phasedSumAntenna str  the name of the phased sum antenna.
+    scanNumber int The number of the scan processed by TELCAL. Along with an ExecBlock Id (which should be ExecBlock\_0 most of the time), the value of scanNumber can be used as the key to retrieve informations related to the scan (e.g. its start time).  </TD>
 
 
 
-                  Value (Optional)
+    calDataId Tag identifies a unique row in the CalData table. </TD>
 
-    typeSupports str  encoding of supporting data values.
 
-    numSupports int  the number of supporting data values, \f$N_s\f$.
 
-    phaseSupports float []   numSupports  an array of supporting data values.
+    calReductionId Tag identifies a unique row in the CalReduction table. </TD>
+
+
+
+
+                 Value (Mandatory)
+
+    startValidTime  ArrayTime  start of phasing solution validity.
+
+    endValidTime  ArrayTime  end of phasing solution validity.
+
+    adjustTime  ArrayTime  The time of the last adjustment to the phasing analysis via the \c ParameterTuning  interface.
+
+    adjustToken  str  A parameter supplied via the \c ParameterTuning interface to indicate the form of adjustment(s) made at adjustTime. Note that TELCAL merely passes this datum and adjustTime through to this table.
+
+    phasingMode  str  The mode in which the phasing system is being operated.
+
+    numPhasedAntennas (numPhasedAntennas) int  the number of antennas in phased sum, \f$N_p\f$.
+
+    phasedAntennas  str []   numPhasedAntennas  the names of the phased antennas.
+
+    refAntennaIndex  int  the index of the reference antenna in the array \c phasedAntennas . It must be an integer value in the interval \f$ [0, N_p-1]\f$.
+
+    candRefAntennaIndex  int  tne index of a candidate (new) reference antenna in the array phasedAntennas; it must be a integer in the interval \f$[0, N_p-1]\f$.
+
+    phasePacking  str  how to unpack \c phaseValues.
+
+    numReceptors (numReceptors) int  the number of receptors per antenna, \f$N_r\f$.The number (\f$N_r \le 2 \f$) of receptors per antenna, usually two (polarizations), but it might be one in special cases.
+
+    numChannels (numChannels) int  the number of data channels, \f$N_d\f$.
+
+    numPhaseValues (numPhaseValues) int  The number  of phase data values present in the table, \f$N_v\f$.
+
+    phaseValues  float []   numPhaseValues  the array of phase data values.
+
+    numCompare (numCompare) int  the number of comparison antennas, \f$N_c\f$.
+
+    numEfficiencies (numEfficiencies) int  the number of efficiencies, \f$N_e\f$.
+
+    compareArray  str []   numCompare  the names of the comparison antennas.
+
+    efficiencyIndices  int []   numEfficiencies  indices of the antenna(s) in \c compareArray used to calculate \c efficiencies; they must be distinct integers in the interval \f$[0, N_c]\f$.
+
+    efficiencies  float []  []   numEfficiencies, numChannels  an array of efficiencies of phased sum.
+
+    quality  float []   numPhasedAntennas+numCompare  quality of phased antennas.
+
+    phasedSumAntenna  str  the name of the phased sum antenna.
+
+
+
+                 Value (Optional)
+
+    typeSupports  str  encoding of supporting data values.
+
+    numSupports (numSupports) int  the number of supporting data values, \f$N_s\f$.
+
+    phaseSupports  float []   numSupports  an array of supporting data values.
 
 
     """
@@ -134,21 +141,24 @@ class CalAppPhaseTable(Representable):
     # set to True while the file is loading, just in case
     _loadInProgress = False
 
-    # the name of this table.
+    # The name of this table.
     _tableName = "CalAppPhase"
 
-    # the list of field names that make up key 'key'.
+    # The list of field names that make up key 'key'.
     _key = ["basebandName", "scanNumber", "calDataId", "calReductionId"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # _archiveAsBin not used by python implementation
-    # _archiveAsBin = True  # if True archive binary else archive XML
-    _fileAsBin = True  # if True file binary else file XML
+    # archive as bin not used by python implementation
+    # _archiveAsBin = True # If True archive binary else archive XML
+    _fileAsBin = True  # If True file binary else file XML
 
-    # A list to store the CalAppPhaseRow instances
+    # A data structure to store the CalAppPhaseRow s.
+    # In all cases we maintain a private list of CalAppPhaseRow s.
     _privateRows = []
+
+    # non-temporal ASDM in Java had a private row element here to also hold  CalAppPhaseRow s. Not needed in python.
 
     # the Entity of this table
     _entity = None
@@ -158,20 +168,19 @@ class CalAppPhaseTable(Representable):
 
     def getKeyName(self):
         """
-        Return the list of field names that make up "key" as a list of strings
+        Return the list of field names that make up key key
+        as a list of strings.
         """
         return self._key
 
-    @staticmethod
-    def Key(basebandName, scanNumber, calDataId, calReductionId):
+    def Key(self, basebandName, scanNumber, calDataId, calReductionId):
         """
         Returns a string built by concatenating the ascii representation of the
         parameters values suffixed with a "_" character.
-        The parameter values are assumed to be the appropriate type for that parameter.
         """
         result = ""
 
-        result += scanNumber() + "_"
+        result += str(scanNumber) + "_"
 
         result += calDataId.toString() + "_"
 
@@ -181,9 +190,12 @@ class CalAppPhaseTable(Representable):
 
     def __init__(self, container):
         """
-        Create a CalAppPhaseTable attached to container, which must be a ASDM instance
-        All tables must know the container to which they belong.
+        Create a CalAppPhaseTable attached to container.
+
+        container must be a ASDM instance
+        All tables must know the container
         """
+
         if not isinstance(container, pyasdm.ASDM):
             raise (ValueError("CalAppPhaseTable constructor must use a ASDM instance"))
 
@@ -200,6 +212,10 @@ class CalAppPhaseTable(Representable):
         self._presentInMemory = True
         self._loadInProgress = False
 
+        self._privateRows = []
+
+        self._version = 0
+
     def setNotPresentInMemory(self):
         """
         Set the state to indicate it is not present in memory and needs to be loaded before being used.
@@ -213,11 +229,12 @@ class CalAppPhaseTable(Representable):
         Check if the table is present in memory. If not, load the table from the file using the
         directory of the container.
         """
-        # NOTE: if setFromFile throws an exception then presentInMemory will remain False
+        # NOTE: if setFromFile raises an exception then presentInMemory will remain False
         # and loadInProgress will remain True, preventing another attempt at loading.
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
+            print("CalAppPhase is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -226,6 +243,7 @@ class CalAppPhaseTable(Representable):
     def getContainer(self):
         """
         Return the container to which this table belongs.
+        return a ASDM.
         """
         return self._container
 
@@ -259,28 +277,32 @@ class CalAppPhaseTable(Representable):
         thisRow = CalAppPhaseRow(self)
         return thisRow
 
-    def add(self, newrow):
+    def add(self, x):
         """
         Add a row.
-        raises a DuplicateKey if the new row has a key that is already in the table.
-        If newrow is a list then this method is called recursively on each element of that list.
-        In that case None is returned.
-        returns newrow
+        raises a DuplicateKey Thrown if the new row has a key that is already in the table.
+        If x is a list then this method is called recursively on each element of that list.
+        In that case, None is returned.
+        returns the row that was added.
         """
-        if isinstance(newrow, list):
-            for thisrow in newrow:
+
+        if isinstance(x, list):
+            for thisrow in x:
+                # check on correct type of thisrow happens in add
                 self.add(thisrow)
-            # return None for the list case only
+            # return None fo the list case only
             return None
 
         # the single row case
+        if not isinstance(x, CalAppPhaseRow):
+            raise ValueError("x must be a  CalAppPhaseRow instance.")
 
         if (
             self.getRowByKey(
-                newrow.getBasebandName(),
-                newrow.getScanNumber(),
-                newrow.getCalDataId(),
-                newrow.getCalReductionId(),
+                x.getBasebandName(),
+                x.getScanNumber(),
+                x.getCalDataId(),
+                x.getCalReductionId(),
             )
             is not None
         ):
@@ -297,10 +319,9 @@ class CalAppPhaseTable(Representable):
                 "CalAppPhase",
             )
 
-        row.add(newrow)
-        privateRows.add(newrow)
-        newrow.isAdded()
-        return newrow
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     def newRow(
         self,
@@ -331,7 +352,9 @@ class CalAppPhaseTable(Representable):
         phasedSumAntenna,
     ):
         """
-        Create a new CalAppPhaseRow. The new row is not added to this table, but it does know about it.
+        Create a new CalAppPhaseRow initialized to the specified values.
+
+        The new row is not added to this table, but it does know about it.
         (the autoincrementable attribute, if any, is not in the parameter list)
         """
 
@@ -406,35 +429,40 @@ class CalAppPhaseTable(Representable):
 
     # ====> Append a row to its table.
 
-    def _checkAndAdd(self, newrow):
+    def checkAndAdd(self, x):
         """
-        A private method to append a row to its table, used by input conversion
-        methods. Not intended for external use.
+        A method to append a row to it's table, used by input conversion methods.
+        Not indended for external use.
 
-        If this table has an autoincrementable attribute then check if newrow verifies the rule of uniqueness and raise an exception if not.
-        Returns newrow.
+        If this table has an autoincrementable attribute then check if
+        x verifies the rule of uniqueness and raise an exception if not.
+
+        Append x to its table.
+        x is the row to be appended.
+        returns x.
         """
 
         if (
             self.getRowByKey(
-                newrow.getBasebandName(),
-                newrow.getScanNumber(),
-                newrow.getCalDataId(),
-                newrow.getCalReductionId(),
+                x.getBasebandName(),
+                x.getScanNumber(),
+                x.getCalDataId(),
+                x.getCalReductionId(),
             )
             is not None
         ):
             raise DuplicateKey("Duplicate key exception in ", "CalAppPhaseTable")
 
-        self._privateRows.append(newrow)
-        newrow.isAdded()
-        return newrow
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     # ====> methods returning rows.
 
     def get(self):
         """
-        Get all rows as an array of CalAppPhaseRow
+        Get all rows.
+        return Alls rows as a list of CalAppPhaseRow
         """
         return self._privateRows
 
@@ -444,13 +472,13 @@ class CalAppPhaseTable(Representable):
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
 
-        @param basebandName.
+        param basebandName.
 
-        @param scanNumber.
+        param scanNumber.
 
-        @param calDataId.
+        param calDataId.
 
-        @param calReductionId.
+        param calReductionId.
 
         """
         for row in self._privateRows:
@@ -467,8 +495,8 @@ class CalAppPhaseTable(Representable):
             if not row.getCalReductionId().equals(calReductionId):
                 continue
 
-            # this row matches these parameters
             return row
+
         # no match found
         return None
 
@@ -501,7 +529,7 @@ class CalAppPhaseTable(Representable):
         phasedSumAntenna,
     ):
         """
-                Look up the table for a row whose all attributes
+        Look up the table for a row whose all attributes
         are equal to the corresponding parameters of the method.
         return this row if any, None otherwise.
 
@@ -589,6 +617,12 @@ class CalAppPhaseTable(Representable):
 
         return None
 
+    def getRows(self):
+        """
+        get the rows, synonymous with the get method.
+        """
+        return self.get()
+
     # ====> conversion Methods
 
     def toXML(self):
@@ -596,7 +630,7 @@ class CalAppPhaseTable(Representable):
         Translate this table to an XML representation conforming
         to the schema defined for CalAppPhase (CalAppPhaseTable.xsd).
 
-        Returns a string containing the XML representation.
+        returns a string containing the XML representation.
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
@@ -616,27 +650,28 @@ class CalAppPhaseTable(Representable):
         Populate this table from the content of a XML document that is required to
         conform to the XML schema defined for a CalAppPhase (CalAppPhaseTable.xsd).
         """
+        if not isinstance(xmlstr, str):
+            raise ConversionException("xmlstr must be a string")
+
         xmldom = minidom.parseString(xmlstr)
-        # this should have at least one child node with a name of CalAppPhaseTable.
+        # this should have at least one child node with a name of "CalAppPhaseTable".
         if (
             not xmldom.hasChildNodes()
             or xmldom.firstChild.nodeName != "CalAppPhaseTable"
         ):
             raise ConversionException(
-                "XML is not from a the expected table", "CalAppPhaseTable."
+                "XML is not from the expected table", "CalAppPhaseTable"
             )
 
         # ignore everything but the first child node
         tabdom = xmldom.firstChild
 
-        # get the version from the schemaVersion attribute, which must be there
-        if (not tabdom.hasAttributes()) or (
-            tabdom.attributes.getNamedItem("schemaVersion") is None
+        # get the version from the schemaVersion attribute, which is not always there
+        versionStr = "-1"
+        if tabdom.hasAttributes() and (
+            tabdom.attributes.getNamedItem("schemaVersion") is not None
         ):
-            raise ConversionException(
-                "schemaVersion not found in XML", "CalAppPhaseTable"
-            )
-        versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
+            versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
         # raises a ValueError if not an integer
         try:
             self.setVersion(int(versionStr))
@@ -680,10 +715,10 @@ class CalAppPhaseTable(Representable):
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
-                    self._checkAndAdd(row)
+                    self.checkAndAdd(row)
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
-                    raise ConversionException(str, "CalAppPhaseTable") from None
+                    raise ConversionException(str(exc), "CalAppPhaseTable") from None
 
         if tabEntity is None:
             raise ConversionException("No Entity seen in XML", "CalAppPhaseTable")
@@ -692,12 +727,307 @@ class CalAppPhaseTable(Representable):
 
         self.setEntity(tabEntity)
 
+    def MIMEXMLPart(self):
+        print("MIMEXMLPart not implemented for <CalAppPhaseTable")
+        return
+        # the JAVA code looks like this
+        # String UID = this.getEntity().getEntityId().toString();
+        # String withoutUID = UID.substring(6);
+        # String containerUID = this.getContainer().getEntity().getEntityId().toString();
+        #
+        # StringBuffer sb = new StringBuffer()
+        # .append("<?xml version='1.0'  encoding='ISO-8859-1'?>")
+        # .append("\n")
+        # .append("<CalAppPhaseTable xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:calaph=\"http://Alma/XASDM/CalAppPhaseTable\" xsi:schemaLocation=\"http://Alma/XASDM/CalAppPhaseTable http://almaobservatory.org/XML/XASDM/4/CalAppPhaseTable.xsd\" schemaVersion=\"4\" schemaRevision=\"-1\">\n")
+        # .append("<Entity entityId='")
+        # .append(UID)
+        # .append("' entityIdEncrypted='na' entityTypeName='CalAppPhaseTable' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<ContainerEntity entityId='")
+        # .append(containerUID)
+        # .append("' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<BulkStoreRef file_id='")
+        # .append(withoutUID)
+        # .append("' byteOrder='Big_Endian' />\n")
+        # .append("<Attributes>\n")
+
+        # .append("<basebandName/>\n")
+        # .append("<scanNumber/>\n")
+        # .append("<calDataId/>\n")
+        # .append("<calReductionId/>\n")
+        # .append("<startValidTime/>\n")
+        # .append("<endValidTime/>\n")
+        # .append("<adjustTime/>\n")
+        # .append("<adjustToken/>\n")
+        # .append("<phasingMode/>\n")
+        # .append("<numPhasedAntennas/>\n")
+        # .append("<phasedAntennas/>\n")
+        # .append("<refAntennaIndex/>\n")
+        # .append("<candRefAntennaIndex/>\n")
+        # .append("<phasePacking/>\n")
+        # .append("<numReceptors/>\n")
+        # .append("<numChannels/>\n")
+        # .append("<numPhaseValues/>\n")
+        # .append("<phaseValues/>\n")
+        # .append("<numCompare/>\n")
+        # .append("<numEfficiencies/>\n")
+        # .append("<compareArray/>\n")
+        # .append("<efficiencyIndices/>\n")
+        # .append("<efficiencies/>\n")
+        # .append("<quality/>\n")
+        # .append("<phasedSumAntenna/>\n")
+
+        # .append("<typeSupports/>\n")
+        # .append("<numSupports/>\n")
+        # .append("<phaseSupports/>\n")
+        # .append("</Attributes>\n")
+        # .append("</CalAppPhaseTable>\n");
+        # return sb.toString();
+
+    def toMIME(self):
+        """
+        Serialize this into a stream of bytes and encapsulates that stream into a MIME message.
+        returns a string containing the MIME message.
+        """
+        print("toMIME not yet implemented for CalAppPhase")
+        return
+        # the Java code looks like this - returns a Byte array
+        # ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        # DataOutputStream dos = new DataOutputStream(bos);
+
+        # String UID = this.getEntity().getEntityId().toString();
+        # String execBlockUID = this.getContainer().getEntity().getEntityId().toString();
+        # try {
+        #     // The XML Header part.
+        #     dos.writeBytes("MIME-Version: 1.0");
+        #     dos.writeBytes("\n");
+        #    dos
+        #     .writeBytes("Content-Type: Multipart/Related; boundary='MIME_boundary'; type='text/xml'; start= '<header.xml>'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Description: Correlator");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("alma-uid:" + UID);
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part header.
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: text/xml; charset='ISO-8859-1'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Transfer-Encoding: 8bit");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <header.xml>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part content.
+        #    dos.writeBytes(MIMEXMLPart());
+        #    // have updated their code to the new XML header.
+        #    //
+        #    //dos.writeBytes(oldMIMEXMLPart());
+        #
+        #    // The MIME binary part header
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: binary/octet-stream");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <content.bin>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The binary part.
+        #    entity.toBin(dos);
+        #    container.getEntity().toBin(dos);
+        #    dos.writeInt(size());
+
+        #    for (CalAppPhaseRow row: privateRows) row.toBin(dos);
+
+        #    // The closing MIME boundary
+        #    dos.writeBytes("\n--MIME_boundary--");
+        #    dos.writeBytes("\n");
+
+        # } catch (IOException e) {
+        #    throw new ConversionException(
+        #            "Error while reading binary data , the message was "
+        #            + e.getMessage(), "CalAppPhase");
+        # }
+
+        # return bos.toByteArray();
+
+    # Java code looks like this
+    # static private boolean binaryPartFound(DataInputStream dis, String s, int pos) throws IOException {
+    #    int posl = pos;
+    #    int count = 0;
+    #    dis.mark(1000000);
+    #    try {
+    #        while (dis.readByte() != s.charAt(posl)){
+    #            count ++;
+    #        }
+    #    }
+    #    catch (EOFException e) {
+    #        return false;
+    #    }
+    #
+    #    if (posl == (s.length() - 1)) return true;
+    #
+    #    if (pos == 0) {
+    #        posl++;
+    #        return binaryPartFound(dis, s, posl);
+    #    }
+    #    else {
+    #        if (count > 0) { dis.reset();  return binaryPartFound(dis, s, 0) ; }
+    #        else {
+    #            posl++;
+    #            return binaryPartFound(dis, s, posl);
+    #        }
+    #    }
+    # }
+
+    # private String xmlHeaderPart (String s) throws ConversionException {
+    #    String xmlPartMIMEHeader = "Content-ID: <header.xml>\n\n";
+    #    String binPartMIMEHeader = "--MIME_boundary\nContent-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    #
+    #    // Detect the XML header.
+    #    int loc0 = s.indexOf(xmlPartMIMEHeader);
+    #    if (loc0 == -1 ) throw new ConversionException("Failed to detect the beginning of the XML header", "CalAppPhase");
+    #
+    #    loc0 += xmlPartMIMEHeader.length();
+    #
+    #    // Look for the string announcing the binary part.
+    #    int loc1 = s.indexOf(binPartMIMEHeader, loc0);
+    #    if (loc1 == -1) throw new ConversionException("Failed to detect the beginning of the binary part", "CalAppPhase");
+    #
+    #    return s.substring(loc0, loc1).trim();
+    # }
+
+    # setFromMIME(byte[]   data) throws ConversionException {
+    # *
+    # Extracts the binary part of a MIME message and deserialize its content
+    # to fill this with the result of the deserialization.
+    # @param data the string containing the MIME message.
+    # @throws ConversionException
+    # /
+    # ByteOrder byteOrder = null;
+    # //
+    # // Look for the part containing the XML header.
+    # // Very empirically we assume that the first MIME part , the one which contains the
+    # // XML header, always fits in the first 1000 bytes of the MIME message !!
+    # //
+    # String header = xmlHeaderPart(new String(data, 0, Math.min(10000, data.length)));
+    # org.jdom.Document document = null;
+    # SAXBuilder sxb = new SAXBuilder();
+    #
+    # // Firstly build a document out of the XML.
+    # try {
+    #    document = sxb.build(new ByteArrayInputStream(header.getBytes()));
+    # }
+    # catch (Exception e) {
+    #     throw new ConversionException(e.getMessage(), "CalAppPhase");
+    # }
+    #
+    # //
+    # // Let's define a default order for the sequence of attributes.
+    # //
+    # ArrayList<String> attributesSeq = new ArrayList<String> ();
+
+    #     attributesSeq.add("basebandName"); attributesSeq.add("scanNumber"); attributesSeq.add("calDataId"); attributesSeq.add("calReductionId"); attributesSeq.add("startValidTime"); attributesSeq.add("endValidTime"); attributesSeq.add("adjustTime"); attributesSeq.add("adjustToken"); attributesSeq.add("phasingMode"); attributesSeq.add("numPhasedAntennas"); attributesSeq.add("phasedAntennas"); attributesSeq.add("refAntennaIndex"); attributesSeq.add("candRefAntennaIndex"); attributesSeq.add("phasePacking"); attributesSeq.add("numReceptors"); attributesSeq.add("numChannels"); attributesSeq.add("numPhaseValues"); attributesSeq.add("phaseValues"); attributesSeq.add("numCompare"); attributesSeq.add("numEfficiencies"); attributesSeq.add("compareArray"); attributesSeq.add("efficiencyIndices"); attributesSeq.add("efficiencies"); attributesSeq.add("quality"); attributesSeq.add("phasedSumAntenna");
+    #     attributesSeq.add("typeSupports");  attributesSeq.add("numSupports");  attributesSeq.add("phaseSupports");
+
+    # XPath xpath = null;
+    # //
+    # // And then look for the possible XML contents.
+    # try {
+    #     // Is it an "<ASDMBinaryTable ...." document (old) ?
+    #    if (XPath.newInstance("/ASDMBinaryTable")
+    #            .selectSingleNode(document) != null)
+    #        byteOrder = ByteOrder.BIG_ENDIAN;
+    #    else {
+    #        // Then it must be a "<CalAppPhaseTable ...." document
+    #        // With a BulkStoreRef child element....
+    #        XPath xpa = XPath.newInstance("/CalAppPhaseTable/BulkStoreRef/@byteOrder");
+    #        Object node = xpa.selectSingleNode(document.getRootElement());
+    #        if (node == null)
+    #            throw new ConversionException("No element found for the XPath expression '/CalAppPhaseTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalAppPhase");
+    #
+    #        // Yes ? then it must have a "BulkStoreRef" element with a
+    #        // "byteOrder" attribute.
+    #        String bo = xpa.valueOf(document.getRootElement());
+    #        if (bo.equals("Little_Endian"))
+    #            byteOrder = ByteOrder.LITTLE_ENDIAN;
+    #        else if (bo.equals("Big_Endian"))
+    #            byteOrder = ByteOrder.BIG_ENDIAN;
+    #        else
+    #            throw new ConversionException("No valid value retrieved for the node '/CalAppPhaseTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalAppPhase");
+    #
+    #        // And also it must have an Attributes element with children.
+    #        xpa = XPath.newInstance("/CalAppPhaseTable/Attributes#");
+    #        List nodes = xpa.selectNodes(document.getRootElement());
+    #        if (nodes==null || nodes.size()==0)
+    #            throw new ConversionException("No element found for the XPath expression '/CalAppPhaseTable/Attributes#'. Invalid XML header '"+header+"'.", "CalAppPhase");
+    #
+    #        Iterator iter = nodes.iterator();
+    #        attributesSeq.clear();
+    #        int i = 0;
+    #        while (iter.hasNext()){
+    #            attributesSeq.add(((Element) iter.next()).getName());
+    #            i += 1;
+    #        }
+    #    }
+    # } catch (Exception e) {
+    #    throw new ConversionException(e.getMessage(), "CalAppPhase");
+    # }
+
+    # //
+    # // Now that we know what is the byte order of the binary data
+    # // Let's extract them from the second MIME part and parse them
+    # //
+    # ByteArrayInputStream bis = new ByteArrayInputStream(data);
+    # DataInputStream dis = new DataInputStream(bis);
+    # BODataInputStream bodis = new BODataInputStream(dis, byteOrder);
+    #
+    # String terminator = "Content-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    # entity = null;
+    # try {
+    #    if (binaryPartFound(dis, terminator, 0) == false) {
+    #        throw new ConversionException ("Failed to detect the beginning of the binary part", "CalAppPhase");
+    #    }
+    #
+    #    entity = Entity.fromBin(bodis);
+    #
+    #    Entity containerEntity = Entity.fromBin(bodis);
+    #
+    #    int numRows = bodis.readInt();
+    #    for (int i = 0; i < numRows; i++) {
+    #    this.checkAndAdd(CalAppPhaseRow.fromBin(bodis, this, attributesSeq.toArray(new String[0])));
+    #    }
+    # } catch (TagFormatException e) {
+    #    throw new ConversionException( "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalAppPhase");
+    # }catch (IOException e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalAppPhase");
+    # } catch (DuplicateKey e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalAppPhase");
+    # }catch (Exception e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalAppPhase");
+    # }
+    # }
+
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a CalAppPhaseTable as those produced by the toFile method.
+        Reads and parses a file containing a representation of a CalAppPhaseTable as those produced  by the toFile method.
         This table is populated with the result of the parsing.
-        The directory value is the name of the directory containing the file to be read and parsed.
+        param directory The name of the directory containing the file te be read and parsed.
+        raises ConversionException If any error occurs while reading the
+        files in the directory or parsing them.
         """
+        if not isinstance(directory, str):
+            print("directory must be a string")
 
         # directory must exist as a directory
         if not os.path.isdir(directory):
@@ -709,44 +1039,101 @@ class CalAppPhaseTable(Representable):
         if os.path.exists(os.path.join(directory, "CalAppPhase.xml")):
             self.setFromXMLFile(directory)
         elif os.path.exists(os.path.join(directory, "CalAppPhase.bin")):
-            setFromMIMEFile(directory)
+            self.setFromMIMEFile(directory)
         else:
             raise ConversionException(
                 "No file found for the CalAppPhase table", "CalAppPhaseTable"
             )
 
     def setFromMIMEFile(self, directory):
-        print("setFromMIMEFile not implemented yet")
+        """
+        Set this table from a MIME file.
+        Used internally by setFromFile. Not intented for external use.
+        """
+        print("setFromMIME file not yet implemented for CalAppPhaseTable")
+        return
+
+        # java code looks like this
+        # File file = new File(directory+"/CalAppPhase.bin");
+        #
+        # byte[] bytes = null;
+        #
+        # try {
+        #     InputStream is = new FileInputStream(file);
+        #     long length = file.length();
+        #     if (length > Integer.MAX_VALUE)
+        #         throw new ConversionException ("File " + file.getName() + " is too large", "CalAppPhase");
+        #
+        #    bytes = new byte[(int)length];
+        #    int offset = 0;
+        #    int numRead = 0;
+        #
+        #   while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+        #       offset += numRead;
+        #   }
+        #
+        #    if (offset < bytes.length) {
+        #        throw new ConversionException("Could not completely read file "+file.getName(), "CalAppPhase");
+        #    }
+        #    is.close();
+        # }
+        # catch (IOException e) {
+        #    throw new ConversionException("Error while reading "+file.getName()+". The message was " + e.getMessage(),
+        #    "CalAppPhase");
+        # }
+
+        # setFromMIME(bytes);
+        # // Changed 24 Sep, 2015 - The export policy cannot be changed by what has been observed at import time. M Caillat
+        # // archiveAsBin = true;
+        # // fileAsBin = true;
+
+    # }
 
     def setFromXMLFile(self, directory):
         """
         This is the function used by setFromFile when the file is an XML file
+        Not intended for external use.
         """
 
         # setFromFile has already established that this exists
         # read the entire file into a string
         xmlstr = None
-        with open(os.path.join(directory, "CalAppPhase.xml")) as f:
-            xmlstr = f.read()
-
-        if xmlstr is None:
-            raise ConversionException("CalAppPhase.xml is empty", "CalAppPhaseTable")
+        try:
+            with open(os.path.join(directory, "CalAppPhase.xml")) as f:
+                xmlstr = f.read()
+        except Exception as exc:
+            # reraise it as a ConversionException
+            raise ConversionException(str(exc), "CalAppPhaseTable") from None
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
             self.setFromMIMEFile(directory)
         else:
             self.fromXML(xmlstr)
+            # TBD: when fileAsBin is implemented this should be removed
+            # this will at least preserve the case where fileAsBin was changed for
+            # a table such that the archive has it in XML but the current rule is to
+            # write it out as binary
+            if self._fileAsBin:
+                print(
+                    "CalAppPhase found as XML but it should be written as binary, which is not yet implemetned. Setting to write as XML to preserve this content."
+                )
+                self._fileAsBin = False
 
     def toFile(self, directory):
         """
         Stores a representation (binary or XML) of this table into a file.
 
-        Depending on the boolean value of _fileAsBin, a binary serialization
-        of this (_fileAsBin=True) will be saved in a file 'CalAppPhase.bin' or an
-        XML representation (_fileAsBin==False) will be saved in a file 'CalAppPhase.xml'.
+        Depending on the boolean value of its _fileAsBin data member a binary serialization
+        of this (_fileAsBin==True) will be saved in a file "CalAppPhase.bin" or
+        an XML representation (_fileAsBin==False) will be saved in a file "CalAppPhase.xml".
         The file is always written in a directory whose name is passed as a parameter.
+        param directory The name of directory where the file containing the table's
+        representation will be saved.
+        raises ConversionException for any errors while writing that file.
         """
+        if not isinstance(directory, str):
+            raise ConversionException("directory must be a string")
 
         if os.path.exists(directory) and not os.path.isdir(directory):
             raise ConversionException(
@@ -755,21 +1142,86 @@ class CalAppPhaseTable(Representable):
                 "CalAppPhaseTable",
             )
 
-        if not os.path.exists(directory):
-            # assume it can be created there, if not this will raise a FileNotFound exception here
-            os.mkdir(directory)
+        # if not let's create it.
+        try:
+            if not os.path.exists(directory):
+                # if it can't be created a FileNotFound exception is the most likely result
+                os.mkdir(directory)
+        except Exception as exc:
+            # reraise any exception as a ConversionException
+            raise ConversionException(
+                "Could not create directory "
+                + directory
+                + " exception caught "
+                + str(exc),
+                "CalAppPhaseTable",
+            ) from None
 
         if self._fileAsBin:
             print("fileAsBin not yet implemented for CalAppPhase")
+            # the Java code looks like this
+            #
+            # The table is exported in a binary format.
+            # (actually a short XML file + a possibly long MIME file)
+            #
+            # File xmlFile = new File(directory+"/CalAppPhase.xml");
+            # if (xmlFile.exists())
+            #    if (!xmlFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+xmlFile.toString()+"'", "CalAppPhase");
+            #
+            # File binFile = new File(directory+"/CalAppPhase.bin");
+            # if (binFile.exists())
+            #    if (!binFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+binFile.toString()+"'", "CalAppPhase");
+            #
+            # try {
+            #    BufferedWriter out = new BufferedWriter(new FileWriter(xmlFile));
+            #    out.write(MIMEXMLPart());
+            #    out.close();
+            #
+
+            #  OutputStream osBin = new FileOutputStream(binFile);
+            #  osBin.write(toMIME());
+            #  osBin.close();
+
+        # }
+        # catch (FileNotFoundException e) {
+        #     throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalAppPhase");
+        # }
+        # catch (IOException e) {
+        #      throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalAppPhase");
+        # }
+        # }
         else:
-            # exported as an XML file.
+            # The table is totally exported in a XML file.
             filePath = os.path.join(directory, "CalAppPhase.xml")
             if os.path.exists(filePath):
-                # try to delete it, this will raise an exception if the user does not have permission to do that
-                os.remove(filePath)
-            with open(filePath, "w") as f:
-                f.write(self.toXML())
-                f.close()
+                try:
+                    # try to delete it, this will raise an exception if the user does not have permission to do that
+                    os.remove(filePath)
+                except Exception as exc:
+                    # reraise it as a ConversionException
+                    raise ConversionException(
+                        "Could not remove existing "
+                        + filePath
+                        + " exception caught "
+                        + str(exc),
+                        "CalAppPhaseTable",
+                    ) from None
+
+            try:
+                with open(filePath, "w") as f:
+                    f.write(self.toXML())
+                    f.close()
+
+                    # Java code uses a BufferedWriter to capture the output of toXML to the file
+            except Exception as exc:
+                # reraise it as a ConversionException
+                raise ConversionException(
+                    "Problem while writing the XML representation, the message was : "
+                    + str(exc),
+                    "CalAppPhase",
+                ) from None
 
     def getEntity(self):
         """

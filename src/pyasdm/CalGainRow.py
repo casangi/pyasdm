@@ -72,9 +72,39 @@ class CalGainRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._gain = None
+
+        self._gainValid = None
+
+        self._fit = None
+
+        self._fitWeight = None
+
+        self._totalGainValid = None
+
+        self._totalFit = None
+
+        self._totalFitWeight = None
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
+
         if row is not None:
             if not isinstance(row, CalGainRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._calDataId = Tag(row._calDataId)
 
@@ -172,49 +202,49 @@ class CalGainRow:
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         gainNode = rowdom.getElementsByTagName("gain")[0]
 
-        self._gain = float(gainNode.firstChild.data)
+        self._gain = float(gainNode.firstChild.data.strip())
 
         gainValidNode = rowdom.getElementsByTagName("gainValid")[0]
 
-        self._gainValid = bool(gainValidNode.firstChild.data)
+        self._gainValid = bool(gainValidNode.firstChild.data.strip())
 
         fitNode = rowdom.getElementsByTagName("fit")[0]
 
-        self._fit = float(fitNode.firstChild.data)
+        self._fit = float(fitNode.firstChild.data.strip())
 
         fitWeightNode = rowdom.getElementsByTagName("fitWeight")[0]
 
-        self._fitWeight = float(fitWeightNode.firstChild.data)
+        self._fitWeight = float(fitWeightNode.firstChild.data.strip())
 
         totalGainValidNode = rowdom.getElementsByTagName("totalGainValid")[0]
 
-        self._totalGainValid = bool(totalGainValidNode.firstChild.data)
+        self._totalGainValid = bool(totalGainValidNode.firstChild.data.strip())
 
         totalFitNode = rowdom.getElementsByTagName("totalFit")[0]
 
-        self._totalFit = float(totalFitNode.firstChild.data)
+        self._totalFit = float(totalFitNode.firstChild.data.strip())
 
         totalFitWeightNode = rowdom.getElementsByTagName("totalFitWeight")[0]
 
-        self._totalFitWeight = float(totalFitWeightNode.firstChild.data)
+        self._totalFitWeight = float(totalFitWeightNode.firstChild.data.strip())
 
         # extrinsic attribute values
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

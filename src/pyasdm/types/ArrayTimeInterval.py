@@ -28,6 +28,12 @@ from .Interval import Interval
 
 import math
 
+# these needs to be somewhere that it can be set globally when the ASDM is loaded
+# set using the static setters for these values
+
+_readStartTimeDurationInXML = False
+_readStartTimeDurationInBin = False
+
 
 class ArrayTimeInterval:
     """
@@ -37,13 +43,10 @@ class ArrayTimeInterval:
     _start = ArrayTime(0)
     _duration = Interval(0)
 
-    _readStartTimeDurationInXML_ = False
-    _readStartTimeDurationInBin_ = False
-
     # python doesn't have a maximum integer, but use this where it's needed here
     _max_duration = int(math.pow(2, 63)) - 1
 
-    def __init(self, start=None, duration=None):
+    def __init__(self, start=None, duration=None):
         """
         Construct an ArrayTimeInterval.
 
@@ -69,6 +72,11 @@ class ArrayTimeInterval:
         giving the start and duration. If duration is not given and start is an
         integer then duration is set to the highest possible value given the
         start time.
+
+        If start is a string then that string is parsed as if it was written
+        to an XML field : two integers separated by a space giving the mid point
+        and duration of the ArrayTimeInterval. It is an error to specify a duration
+        in that case.
         """
 
         self._start = ArrayTime(0)
@@ -86,7 +94,36 @@ class ArrayTimeInterval:
                 )
             # copy constructor
             self._start = ArrayTime(start.getStart())
-            self._duration = Interval(duration.getDuration())
+            self._duration = Interval(start.getDuration())
+            return
+
+        # if start is a string then parse this as if it came from an XML output
+        if isinstance(start, str):
+            if duration is not None:
+                raise ValueError("duration must be None if start is a string")
+            vals = start.split()
+            if len(vals) != 2:
+                raise ValueError("start string does not contain exactly 2 values")
+            try:
+                l1 = int(vals[0])
+                l2 = int(vals[1])
+
+                # the Java code makes use of this, but it does not use that
+                # when writing these values out, perhaps only old ASDMs use this
+                if self.readStartTimeDurationInXML():
+                    # use as is, start and duration
+                    self._start = ArrayTime(l1)
+                    self._duration = Interval(l2)
+                else:
+                    # midpoint and duration
+                    self._start = ArrayTime(int(l1 - l2 / 2))
+                    self._duration = Interval(l2)
+            except Exception as exc:
+                raise ValueError(
+                    "there was a problem parsing the ArrayTimeInterval string. "
+                    + str(exc)
+                ) from None
+            return
 
         if isinstance(start, ArrayTime):
             self._start = ArrayTime(start)
@@ -106,7 +143,7 @@ class ArrayTimeInterval:
                     "When start is an ArrayTime duration must be either None, Interval, or ArrayTime"
                 )
         elif isinstance(start, float):
-            sel._start = ArrayTime(start)
+            self._start = ArrayTime(start)
             if duration is None:
                 # largest possible value given start
                 self._duration = Interval(self._max_duration - self._start.get())
@@ -130,12 +167,14 @@ class ArrayTimeInterval:
                     "When start is an int duration must be either None or int"
                 )
         else:
+            print("type of start : " + str(type(start)))
+            print("start : " + str(start))
             raise ValueError(
                 "unrecognized type for start, must be one of None, ArrayTimeInterval, ArrayTime, float or int"
             )
 
         # always make sure duration is less than the max value
-        self._duration.set(math.min(self._duration.get(), self._max_duration))
+        self._duration.set(min(self._duration.get(), self._max_duration))
 
     # Setters
     def setStart(self, start):
@@ -159,7 +198,7 @@ class ArrayTimeInterval:
 
         # make sure duration is less than the max value after setting start
         self._duration.set(
-            math.min(self._duration.get(), (self._max_duration - self._start.get()))
+            min(self._duration.get(), (self._max_duration - self._start.get()))
         )
 
     def setDuration(self, duration):
@@ -181,7 +220,7 @@ class ArrayTimeInterval:
 
         # make sure duration is less than the max value using start
         self._duration.set(
-            math.min(self._duration.get(), (self._max_duration - self._start.get()))
+            min(self._duration.get(), (self._max_duration - self._start.get()))
         )
 
     # Getters
@@ -257,7 +296,7 @@ class ArrayTimeInterval:
             start2 >= start1 and start2 <= end1
         )
 
-    def contains(self, ati):
+    def containsArrayTimeInterval(self, ati):
         """
         Checks if this ArrayTimeInterval "contains" the one passed as a parameter.
 
@@ -272,7 +311,7 @@ class ArrayTimeInterval:
 
         return (start2 >= start1) and (end2 <= end1)
 
-    def contains(self, at):
+    def containsArrayTime(self, at):
         """
         Checks if this ArrayTimeInterval "contains" the ArrayTime passed as a parameter.
 
@@ -284,6 +323,22 @@ class ArrayTimeInterval:
 
         atTime = at.get()
         return atTime >= start1 and atTime < end1
+
+    def contains(self, atORati):
+        """
+        Checks if this ArrayTimeInterval "contains" either an ArrayTime or an
+        ArrayTimeInterval.
+
+        param atOrati is either an ArrayTime or an ArrayTimeInterval to be
+        checked for the "contains" relationship.
+        return True if and only if this contains at.
+        """
+        if isinstance(atORati, ArrayTime):
+            return self.containsArrayTime(atORati)
+        elif isinstance(atORati, ArrayTimeInterval):
+            return self.containsArrayTimeInterval(atORati)
+        else:
+            raise ValueError("contains argument must be an ArrayTime or an ArrayTimeInterval.")
 
     # Formatter
     def toString(self):
@@ -303,64 +358,109 @@ class ArrayTimeInterval:
         """
         raise RuntimeError("ArrayTimeInterval.toBin not yet implemented")
 
-    def setReadStartTimeDurationInBin(self, torf):
+    @staticmethod
+    def setReadStartTimeDurationInBin(torf):
         """
         Defines how the representation of an ArrayTimeInterval found in subsequent reads of
         a document containing table exported in binary must be interpreted. The interpretation depends on the value of the argument torf :
         torf == True means that it must be interpreted as (startTime, duration)
         torf == False means that it must be interpreted as (midPoint, duration)
 
+        This sets a value found in this module outside of this class.
+
         param b a boolean value.
         """
+        global _readStartTimeDurationInBin
         if not isinstance(torf, bool):
             raise ValueError("torf must be a bool")
 
-        self._readStartTimeDurationInBin = torf
+        _readStartTimeDurationInBin = torf
 
-    def readStartTimeDurationInBin(self):
+    @staticmethod
+    def readStartTimeDurationInBin():
         """
         Returns a boolean value whose meaning is defined as follows:
         True <=> the representation of ArrayTimeInterval object found in any binary table will be considered as (startTime, duration).
         False <=> the representation of ArrayTimeInterval object found in any binary table will be considered as (midPoint, duration).
-        """
-        return self._readStartTimeDurationInBin
 
-    def setReadStartTimeDurationInXML(self, torf):
+        This returns a value found in this module outside of this class.
+        """
+        return _readStartTimeDurationInBin
+
+    @staticmethod
+    def setReadStartTimeDurationInXML(torf):
         """
         Defines how the representation of an ArrayTimeInterval found in subsequent reads of
         a document containing table exported in XML  must be interpreted. The interpretation depends on the value of the argument torf :
         torf == True means that it must be interpreted as (startTime, duration)
         torf == false means that it must be interpreted as (midPoint, duration)
 
+        This sets a value found in this module outside of this class.
+
         param torf is a bool value.
         """
-        self._readStartTimeDurationInXML = torf
+        global _readStartTimeDurationInXML
+        if not isinstance(torf, bool):
+            raise ValueError("torf must be a bool")
 
-    def readStartTimeDurationInXML(self):
+        _readStartTimeDurationInXML = torf
+
+    @staticmethod
+    def readStartTimeDurationInXML():
         """
         Returns a boolean value whose meaning is defined as follows:
         True <=> the representation of ArrayTimeInterval object found in any binary table will be considered as (startTime, duration).
         False <=> the representation of ArrayTimeInterval object found in any binary table will be considered as (midPoint, duration).
+
+        This returns a value found in this module outside of this class.
         """
-        return self.readStartTimeDurationInXML
+        return _readStartTimeDurationInXML
 
-        def fromBin(self):
-            """
-            Read the binary representation of an ArrayTimeInterval
-            and use the read value to set an  ArrayTimeInterval.
+    def fromBin(self):
+        """
+        Read the binary representation of an ArrayTimeInterval
+        and use the read value to set an  ArrayTimeInterval.
 
-            return an ArrayTimeInterval
+        return an ArrayTimeInterval
 
-            Remember that it reads two long integers (64 bits). The first one is considered as the midpoint of the interval
-            and the second one is the duration.
+        Remember that it reads two long integers (64 bits). The first one is considered as the midpoint of the interval
+        and the second one is the duration.
 
-            """
-            raise RuntimeError("fromBin is not yet implemented")
+        """
+        raise RuntimeError("fromBin is not yet implemented")
 
-        def from1DBin(self):
-            """
-            Read the binary representation of a 1D array of  ArrayTimeInterval
-            and use the read value to set a 1D list of  ArrayTimeInterval.
-            return a 1D list of ArrayTimeInterval
-            """
-            raise RuntimeError("from1DBin is not yet implemented")
+    def from1DBin(self):
+        """
+        Read the binary representation of a 1D array of  ArrayTimeInterval
+        and use the read value to set a 1D list of  ArrayTimeInterval.
+        return a 1D list of ArrayTimeInterval
+        """
+        raise RuntimeError("from1DBin is not yet implemented")
+
+    @staticmethod
+    def getInstance(stringList):
+        """
+        Retrieve two values from a list of strings and convert that to an ArrayTimeInterval
+
+        This is used when parsing ArrayTimeInterval lists from an XML representation to
+        eventually construct a list of ArrayTimeInterval instances. The values are expected
+        to be integers representing nanoseconds with the first value being either the
+        midpoint or start of an interval and the second value being the duration.
+        readStartTimeDurationInXML() is used to determine how that first value is interepreted.
+
+        Returns a tuple of (ArrayTimeInterval, stringList) where ArrayTimeInterval is the
+        new ArrayTimeInterval created by this call and stringList is the remaining,
+        unused, part of stringList after removing the first element.
+        """
+        if not isinstance(stringList, list):
+            raise ValueError("stringList is not a list")
+
+        # this will raise an error if there aren't enough elements on stringList
+        intVal1 = int(stringList[0])
+        intVal2 = int(stringList[1])
+
+        if not ArrayTimeInterval.readStartTimeDurationInXML():
+            # it's the midpoint, correct it to the start time, it must still be an integer
+            intVal1 = intVal1 - int(intVal2 / 2)
+
+        return (ArrayTimeInterval(intVal1, intVal2), stringList[2:])

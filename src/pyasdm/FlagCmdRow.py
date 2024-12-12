@@ -72,9 +72,29 @@ class FlagCmdRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._type = None
+
+        self._reason = None
+
+        self._level = 0
+
+        self._severity = 0
+
+        self._applied = None
+
+        self._command = None
+
         if row is not None:
             if not isinstance(row, FlagCmdRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._timeInterval = ArrayTimeInterval(row._timeInterval)
 
@@ -154,31 +174,31 @@ class FlagCmdRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         typeNode = rowdom.getElementsByTagName("type")[0]
 
-        self._type = str(typeNode.firstChild.data)
+        self._type = str(typeNode.firstChild.data.strip())
 
         reasonNode = rowdom.getElementsByTagName("reason")[0]
 
-        self._reason = str(reasonNode.firstChild.data)
+        self._reason = str(reasonNode.firstChild.data.strip())
 
         levelNode = rowdom.getElementsByTagName("level")[0]
 
-        self._level = int(levelNode.firstChild.data)
+        self._level = int(levelNode.firstChild.data.strip())
 
         severityNode = rowdom.getElementsByTagName("severity")[0]
 
-        self._severity = int(severityNode.firstChild.data)
+        self._severity = int(severityNode.firstChild.data.strip())
 
         appliedNode = rowdom.getElementsByTagName("applied")[0]
 
-        self._applied = bool(appliedNode.firstChild.data)
+        self._applied = bool(appliedNode.firstChild.data.strip())
 
         commandNode = rowdom.getElementsByTagName("command")[0]
 
-        self._command = str(commandNode.firstChild.data)
+        self._command = str(commandNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

@@ -84,21 +84,25 @@ class ScaleRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._scaleId = Tag()
+
         self._timeScale = TimeScale.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._crossDataScale = DataScale.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._autoDataScale = DataScale.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._weightType = WeightType.from_int(0)
 
         if row is not None:
             if not isinstance(row, ScaleRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._scaleId = Tag(row._scaleId)
 
@@ -190,25 +194,29 @@ class ScaleRow:
 
         scaleIdNode = rowdom.getElementsByTagName("scaleId")[0]
 
-        self._scaleId = Tag(scaleIdNode.firstChild.data)
+        self._scaleId = Tag(scaleIdNode.firstChild.data.strip())
 
         timeScaleNode = rowdom.getElementsByTagName("timeScale")[0]
 
-        self._timeScale = TimeScale.newTimeScale(timeScaleNode.firstChild.data)
+        self._timeScale = TimeScale.newTimeScale(timeScaleNode.firstChild.data.strip())
 
         crossDataScaleNode = rowdom.getElementsByTagName("crossDataScale")[0]
 
         self._crossDataScale = DataScale.newDataScale(
-            crossDataScaleNode.firstChild.data
+            crossDataScaleNode.firstChild.data.strip()
         )
 
         autoDataScaleNode = rowdom.getElementsByTagName("autoDataScale")[0]
 
-        self._autoDataScale = DataScale.newDataScale(autoDataScaleNode.firstChild.data)
+        self._autoDataScale = DataScale.newDataScale(
+            autoDataScaleNode.firstChild.data.strip()
+        )
 
         weightTypeNode = rowdom.getElementsByTagName("weightType")[0]
 
-        self._weightType = WeightType.newWeightType(weightTypeNode.firstChild.data)
+        self._weightType = WeightType.newWeightType(
+            weightTypeNode.firstChild.data.strip()
+        )
 
     def toBin(self):
         print("not yet implemented")

@@ -75,12 +75,123 @@ class DelayModelRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationType = []
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._numPoly = 0
+
+        self._phaseDelay = []  # this is a list of float []
+
+        self._phaseDelayRate = []  # this is a list of float []
+
+        self._groupDelay = []  # this is a list of float []
+
+        self._groupDelayRate = []  # this is a list of float []
+
+        self._timeOriginExists = False
+
+        self._timeOrigin = ArrayTime()
+
+        self._atmosphericGroupDelayExists = False
+
+        self._atmosphericGroupDelay = None
+
+        self._atmosphericGroupDelayRateExists = False
+
+        self._atmosphericGroupDelayRate = None
+
+        self._geometricDelayExists = False
+
+        self._geometricDelay = None
+
+        self._geometricDelayRateExists = False
+
+        self._geometricDelayRate = None
+
+        self._numLOExists = False
+
+        self._numLO = 0
+
+        self._LOOffsetExists = False
+
+        self._LOOffset = []  # this is a list of Frequency []
+
+        self._LOOffsetRateExists = False
+
+        self._LOOffsetRate = []  # this is a list of Frequency []
+
+        self._dispersiveDelayExists = False
+
+        self._dispersiveDelay = None
+
+        self._dispersiveDelayRateExists = False
+
+        self._dispersiveDelayRate = None
+
+        self._atmosphericDryDelayExists = False
+
+        self._atmosphericDryDelay = None
+
+        self._atmosphericWetDelayExists = False
+
+        self._atmosphericWetDelay = None
+
+        self._padDelayExists = False
+
+        self._padDelay = None
+
+        self._antennaDelayExists = False
+
+        self._antennaDelay = None
+
+        self._numReceptorExists = False
+
+        self._numReceptor = 0
+
+        self._polarizationTypeExists = False
+
+        self._polarizationType = []  # this is a list of PolarizationType []
+
+        self._electronicDelayExists = False
+
+        self._electronicDelay = []  # this is a list of float []
+
+        self._electronicDelayRateExists = False
+
+        self._electronicDelayRate = []  # this is a list of float []
+
+        self._receiverDelayExists = False
+
+        self._receiverDelay = []  # this is a list of float []
+
+        self._IFDelayExists = False
+
+        self._IFDelay = []  # this is a list of float []
+
+        self._LODelayExists = False
+
+        self._LODelay = []  # this is a list of float []
+
+        self._crossPolarizationDelayExists = False
+
+        self._crossPolarizationDelay = None
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._fieldId = Tag()
+
+        self._spectralWindowId = Tag()
 
         if row is not None:
             if not isinstance(row, DelayModelRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -462,48 +573,56 @@ class DelayModelRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data)
+        self._numPoly = int(numPolyNode.firstChild.data.strip())
 
         phaseDelayNode = rowdom.getElementsByTagName("phaseDelay")[0]
 
-        phaseDelayStr = phaseDelayNode.firstChild.data
-        self._phaseDelay = Parser.stringListToLists(phaseDelayStr, double, "DelayModel")
+        phaseDelayStr = phaseDelayNode.firstChild.data.strip()
+
+        self._phaseDelay = Parser.stringListToLists(
+            phaseDelayStr, float, "DelayModel", False
+        )
 
         phaseDelayRateNode = rowdom.getElementsByTagName("phaseDelayRate")[0]
 
-        phaseDelayRateStr = phaseDelayRateNode.firstChild.data
+        phaseDelayRateStr = phaseDelayRateNode.firstChild.data.strip()
+
         self._phaseDelayRate = Parser.stringListToLists(
-            phaseDelayRateStr, double, "DelayModel"
+            phaseDelayRateStr, float, "DelayModel", False
         )
 
         groupDelayNode = rowdom.getElementsByTagName("groupDelay")[0]
 
-        groupDelayStr = groupDelayNode.firstChild.data
-        self._groupDelay = Parser.stringListToLists(groupDelayStr, double, "DelayModel")
+        groupDelayStr = groupDelayNode.firstChild.data.strip()
+
+        self._groupDelay = Parser.stringListToLists(
+            groupDelayStr, float, "DelayModel", False
+        )
 
         groupDelayRateNode = rowdom.getElementsByTagName("groupDelayRate")[0]
 
-        groupDelayRateStr = groupDelayRateNode.firstChild.data
+        groupDelayRateStr = groupDelayRateNode.firstChild.data.strip()
+
         self._groupDelayRate = Parser.stringListToLists(
-            groupDelayRateStr, double, "DelayModel"
+            groupDelayRateStr, float, "DelayModel", False
         )
 
         timeOriginNode = rowdom.getElementsByTagName("timeOrigin")
         if len(timeOriginNode) > 0:
 
-            self._timeOrigin = ArrayTime(timeOriginNode[0].firstChild.data)
+            self._timeOrigin = ArrayTime(timeOriginNode[0].firstChild.data.strip())
 
             self._timeOriginExists = True
 
         atmosphericGroupDelayNode = rowdom.getElementsByTagName("atmosphericGroupDelay")
         if len(atmosphericGroupDelayNode) > 0:
 
-            self._atmosphericGroupDelay = double(
-                atmosphericGroupDelayNode[0].firstChild.data
+            self._atmosphericGroupDelay = float(
+                atmosphericGroupDelayNode[0].firstChild.data.strip()
             )
 
             self._atmosphericGroupDelayExists = True
@@ -513,8 +632,8 @@ class DelayModelRow:
         )
         if len(atmosphericGroupDelayRateNode) > 0:
 
-            self._atmosphericGroupDelayRate = double(
-                atmosphericGroupDelayRateNode[0].firstChild.data
+            self._atmosphericGroupDelayRate = float(
+                atmosphericGroupDelayRateNode[0].firstChild.data.strip()
             )
 
             self._atmosphericGroupDelayRateExists = True
@@ -522,30 +641,33 @@ class DelayModelRow:
         geometricDelayNode = rowdom.getElementsByTagName("geometricDelay")
         if len(geometricDelayNode) > 0:
 
-            self._geometricDelay = double(geometricDelayNode[0].firstChild.data)
+            self._geometricDelay = float(geometricDelayNode[0].firstChild.data.strip())
 
             self._geometricDelayExists = True
 
         geometricDelayRateNode = rowdom.getElementsByTagName("geometricDelayRate")
         if len(geometricDelayRateNode) > 0:
 
-            self._geometricDelayRate = double(geometricDelayRateNode[0].firstChild.data)
+            self._geometricDelayRate = float(
+                geometricDelayRateNode[0].firstChild.data.strip()
+            )
 
             self._geometricDelayRateExists = True
 
         numLONode = rowdom.getElementsByTagName("numLO")
         if len(numLONode) > 0:
 
-            self._numLO = int(numLONode[0].firstChild.data)
+            self._numLO = int(numLONode[0].firstChild.data.strip())
 
             self._numLOExists = True
 
         LOOffsetNode = rowdom.getElementsByTagName("LOOffset")
         if len(LOOffsetNode) > 0:
 
-            LOOffsetStr = LOOffsetNode[0].firstChild.data
+            LOOffsetStr = LOOffsetNode[0].firstChild.data.strip()
+
             self._LOOffset = Parser.stringListToLists(
-                LOOffsetStr, Frequency, "DelayModel"
+                LOOffsetStr, Frequency, "DelayModel", True
             )
 
             self._LOOffsetExists = True
@@ -553,9 +675,10 @@ class DelayModelRow:
         LOOffsetRateNode = rowdom.getElementsByTagName("LOOffsetRate")
         if len(LOOffsetRateNode) > 0:
 
-            LOOffsetRateStr = LOOffsetRateNode[0].firstChild.data
+            LOOffsetRateStr = LOOffsetRateNode[0].firstChild.data.strip()
+
             self._LOOffsetRate = Parser.stringListToLists(
-                LOOffsetRateStr, Frequency, "DelayModel"
+                LOOffsetRateStr, Frequency, "DelayModel", True
             )
 
             self._LOOffsetRateExists = True
@@ -563,15 +686,17 @@ class DelayModelRow:
         dispersiveDelayNode = rowdom.getElementsByTagName("dispersiveDelay")
         if len(dispersiveDelayNode) > 0:
 
-            self._dispersiveDelay = double(dispersiveDelayNode[0].firstChild.data)
+            self._dispersiveDelay = float(
+                dispersiveDelayNode[0].firstChild.data.strip()
+            )
 
             self._dispersiveDelayExists = True
 
         dispersiveDelayRateNode = rowdom.getElementsByTagName("dispersiveDelayRate")
         if len(dispersiveDelayRateNode) > 0:
 
-            self._dispersiveDelayRate = double(
-                dispersiveDelayRateNode[0].firstChild.data
+            self._dispersiveDelayRate = float(
+                dispersiveDelayRateNode[0].firstChild.data.strip()
             )
 
             self._dispersiveDelayRateExists = True
@@ -579,8 +704,8 @@ class DelayModelRow:
         atmosphericDryDelayNode = rowdom.getElementsByTagName("atmosphericDryDelay")
         if len(atmosphericDryDelayNode) > 0:
 
-            self._atmosphericDryDelay = double(
-                atmosphericDryDelayNode[0].firstChild.data
+            self._atmosphericDryDelay = float(
+                atmosphericDryDelayNode[0].firstChild.data.strip()
             )
 
             self._atmosphericDryDelayExists = True
@@ -588,8 +713,8 @@ class DelayModelRow:
         atmosphericWetDelayNode = rowdom.getElementsByTagName("atmosphericWetDelay")
         if len(atmosphericWetDelayNode) > 0:
 
-            self._atmosphericWetDelay = double(
-                atmosphericWetDelayNode[0].firstChild.data
+            self._atmosphericWetDelay = float(
+                atmosphericWetDelayNode[0].firstChild.data.strip()
             )
 
             self._atmosphericWetDelayExists = True
@@ -597,30 +722,30 @@ class DelayModelRow:
         padDelayNode = rowdom.getElementsByTagName("padDelay")
         if len(padDelayNode) > 0:
 
-            self._padDelay = double(padDelayNode[0].firstChild.data)
+            self._padDelay = float(padDelayNode[0].firstChild.data.strip())
 
             self._padDelayExists = True
 
         antennaDelayNode = rowdom.getElementsByTagName("antennaDelay")
         if len(antennaDelayNode) > 0:
 
-            self._antennaDelay = double(antennaDelayNode[0].firstChild.data)
+            self._antennaDelay = float(antennaDelayNode[0].firstChild.data.strip())
 
             self._antennaDelayExists = True
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")
         if len(numReceptorNode) > 0:
 
-            self._numReceptor = int(numReceptorNode[0].firstChild.data)
+            self._numReceptor = int(numReceptorNode[0].firstChild.data.strip())
 
             self._numReceptorExists = True
 
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")
         if len(polarizationTypeNode) > 0:
 
-            polarizationTypeStr = polarizationTypeNode[0].firstChild.data
+            polarizationTypeStr = polarizationTypeNode[0].firstChild.data.strip()
             self._polarizationType = Parser.stringListToLists(
-                polarizationTypeStr, PolarizationType, "DelayModel"
+                polarizationTypeStr, PolarizationType, "DelayModel", False
             )
 
             self._polarizationTypeExists = True
@@ -628,9 +753,10 @@ class DelayModelRow:
         electronicDelayNode = rowdom.getElementsByTagName("electronicDelay")
         if len(electronicDelayNode) > 0:
 
-            electronicDelayStr = electronicDelayNode[0].firstChild.data
+            electronicDelayStr = electronicDelayNode[0].firstChild.data.strip()
+
             self._electronicDelay = Parser.stringListToLists(
-                electronicDelayStr, double, "DelayModel"
+                electronicDelayStr, float, "DelayModel", False
             )
 
             self._electronicDelayExists = True
@@ -638,9 +764,10 @@ class DelayModelRow:
         electronicDelayRateNode = rowdom.getElementsByTagName("electronicDelayRate")
         if len(electronicDelayRateNode) > 0:
 
-            electronicDelayRateStr = electronicDelayRateNode[0].firstChild.data
+            electronicDelayRateStr = electronicDelayRateNode[0].firstChild.data.strip()
+
             self._electronicDelayRate = Parser.stringListToLists(
-                electronicDelayRateStr, double, "DelayModel"
+                electronicDelayRateStr, float, "DelayModel", False
             )
 
             self._electronicDelayRateExists = True
@@ -648,9 +775,10 @@ class DelayModelRow:
         receiverDelayNode = rowdom.getElementsByTagName("receiverDelay")
         if len(receiverDelayNode) > 0:
 
-            receiverDelayStr = receiverDelayNode[0].firstChild.data
+            receiverDelayStr = receiverDelayNode[0].firstChild.data.strip()
+
             self._receiverDelay = Parser.stringListToLists(
-                receiverDelayStr, double, "DelayModel"
+                receiverDelayStr, float, "DelayModel", False
             )
 
             self._receiverDelayExists = True
@@ -658,16 +786,22 @@ class DelayModelRow:
         IFDelayNode = rowdom.getElementsByTagName("IFDelay")
         if len(IFDelayNode) > 0:
 
-            IFDelayStr = IFDelayNode[0].firstChild.data
-            self._IFDelay = Parser.stringListToLists(IFDelayStr, double, "DelayModel")
+            IFDelayStr = IFDelayNode[0].firstChild.data.strip()
+
+            self._IFDelay = Parser.stringListToLists(
+                IFDelayStr, float, "DelayModel", False
+            )
 
             self._IFDelayExists = True
 
         LODelayNode = rowdom.getElementsByTagName("LODelay")
         if len(LODelayNode) > 0:
 
-            LODelayStr = LODelayNode[0].firstChild.data
-            self._LODelay = Parser.stringListToLists(LODelayStr, double, "DelayModel")
+            LODelayStr = LODelayNode[0].firstChild.data.strip()
+
+            self._LODelay = Parser.stringListToLists(
+                LODelayStr, float, "DelayModel", False
+            )
 
             self._LODelayExists = True
 
@@ -676,8 +810,8 @@ class DelayModelRow:
         )
         if len(crossPolarizationDelayNode) > 0:
 
-            self._crossPolarizationDelay = double(
-                crossPolarizationDelayNode[0].firstChild.data
+            self._crossPolarizationDelay = float(
+                crossPolarizationDelayNode[0].firstChild.data.strip()
             )
 
             self._crossPolarizationDelayExists = True
@@ -686,15 +820,15 @@ class DelayModelRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
 
-        self._fieldId = Tag(fieldIdNode.firstChild.data)
+        self._fieldId = Tag(fieldIdNode.firstChild.data.strip())
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -755,20 +889,20 @@ class DelayModelRow:
 
     # ===> Attribute phaseDelay
 
-    _phaseDelay = None  # this is a 1D list of double
+    _phaseDelay = None  # this is a 1D list of float
 
     def getPhaseDelay(self):
         """
         Get phaseDelay.
-        return phaseDelay as double []
+        return phaseDelay as float []
         """
 
         return copy.deepcopy(self._phaseDelay)
 
     def setPhaseDelay(self, phaseDelay):
         """
-        Set phaseDelay with the specified double []  value.
-        phaseDelay The double []  value to which phaseDelay is to be set.
+        Set phaseDelay with the specified float []  value.
+        phaseDelay The float []  value to which phaseDelay is to be set.
 
 
         """
@@ -785,11 +919,11 @@ class DelayModelRow:
             if not shapeOK:
                 raise ValueError("shape of phaseDelay is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseDelay, double):
+            if not Parser.checkListType(phaseDelay, float):
                 raise ValueError(
-                    "type of the first value in phaseDelay is not double as expected"
+                    "type of the first value in phaseDelay is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._phaseDelay = copy.deepcopy(phaseDelay)
@@ -798,20 +932,20 @@ class DelayModelRow:
 
     # ===> Attribute phaseDelayRate
 
-    _phaseDelayRate = None  # this is a 1D list of double
+    _phaseDelayRate = None  # this is a 1D list of float
 
     def getPhaseDelayRate(self):
         """
         Get phaseDelayRate.
-        return phaseDelayRate as double []
+        return phaseDelayRate as float []
         """
 
         return copy.deepcopy(self._phaseDelayRate)
 
     def setPhaseDelayRate(self, phaseDelayRate):
         """
-        Set phaseDelayRate with the specified double []  value.
-        phaseDelayRate The double []  value to which phaseDelayRate is to be set.
+        Set phaseDelayRate with the specified float []  value.
+        phaseDelayRate The float []  value to which phaseDelayRate is to be set.
 
 
         """
@@ -828,11 +962,11 @@ class DelayModelRow:
             if not shapeOK:
                 raise ValueError("shape of phaseDelayRate is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseDelayRate, double):
+            if not Parser.checkListType(phaseDelayRate, float):
                 raise ValueError(
-                    "type of the first value in phaseDelayRate is not double as expected"
+                    "type of the first value in phaseDelayRate is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._phaseDelayRate = copy.deepcopy(phaseDelayRate)
@@ -841,20 +975,20 @@ class DelayModelRow:
 
     # ===> Attribute groupDelay
 
-    _groupDelay = None  # this is a 1D list of double
+    _groupDelay = None  # this is a 1D list of float
 
     def getGroupDelay(self):
         """
         Get groupDelay.
-        return groupDelay as double []
+        return groupDelay as float []
         """
 
         return copy.deepcopy(self._groupDelay)
 
     def setGroupDelay(self, groupDelay):
         """
-        Set groupDelay with the specified double []  value.
-        groupDelay The double []  value to which groupDelay is to be set.
+        Set groupDelay with the specified float []  value.
+        groupDelay The float []  value to which groupDelay is to be set.
 
 
         """
@@ -871,11 +1005,11 @@ class DelayModelRow:
             if not shapeOK:
                 raise ValueError("shape of groupDelay is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(groupDelay, double):
+            if not Parser.checkListType(groupDelay, float):
                 raise ValueError(
-                    "type of the first value in groupDelay is not double as expected"
+                    "type of the first value in groupDelay is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._groupDelay = copy.deepcopy(groupDelay)
@@ -884,20 +1018,20 @@ class DelayModelRow:
 
     # ===> Attribute groupDelayRate
 
-    _groupDelayRate = None  # this is a 1D list of double
+    _groupDelayRate = None  # this is a 1D list of float
 
     def getGroupDelayRate(self):
         """
         Get groupDelayRate.
-        return groupDelayRate as double []
+        return groupDelayRate as float []
         """
 
         return copy.deepcopy(self._groupDelayRate)
 
     def setGroupDelayRate(self, groupDelayRate):
         """
-        Set groupDelayRate with the specified double []  value.
-        groupDelayRate The double []  value to which groupDelayRate is to be set.
+        Set groupDelayRate with the specified float []  value.
+        groupDelayRate The float []  value to which groupDelayRate is to be set.
 
 
         """
@@ -914,11 +1048,11 @@ class DelayModelRow:
             if not shapeOK:
                 raise ValueError("shape of groupDelayRate is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(groupDelayRate, double):
+            if not Parser.checkListType(groupDelayRate, float):
                 raise ValueError(
-                    "type of the first value in groupDelayRate is not double as expected"
+                    "type of the first value in groupDelayRate is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._groupDelayRate = copy.deepcopy(groupDelayRate)
@@ -986,7 +1120,7 @@ class DelayModelRow:
     def getAtmosphericGroupDelay(self):
         """
         Get atmosphericGroupDelay, which is optional.
-        return atmosphericGroupDelay as double
+        return atmosphericGroupDelay as float
         raises ValueError If atmosphericGroupDelay does not exist.
         """
         if not self._atmosphericGroupDelayExists:
@@ -1000,13 +1134,13 @@ class DelayModelRow:
 
     def setAtmosphericGroupDelay(self, atmosphericGroupDelay):
         """
-        Set atmosphericGroupDelay with the specified double value.
-        atmosphericGroupDelay The double value to which atmosphericGroupDelay is to be set.
+        Set atmosphericGroupDelay with the specified float value.
+        atmosphericGroupDelay The float value to which atmosphericGroupDelay is to be set.
 
 
         """
 
-        self._atmosphericGroupDelay = double(atmosphericGroupDelay)
+        self._atmosphericGroupDelay = float(atmosphericGroupDelay)
 
         self._atmosphericGroupDelayExists = True
 
@@ -1031,7 +1165,7 @@ class DelayModelRow:
     def getAtmosphericGroupDelayRate(self):
         """
         Get atmosphericGroupDelayRate, which is optional.
-        return atmosphericGroupDelayRate as double
+        return atmosphericGroupDelayRate as float
         raises ValueError If atmosphericGroupDelayRate does not exist.
         """
         if not self._atmosphericGroupDelayRateExists:
@@ -1045,13 +1179,13 @@ class DelayModelRow:
 
     def setAtmosphericGroupDelayRate(self, atmosphericGroupDelayRate):
         """
-        Set atmosphericGroupDelayRate with the specified double value.
-        atmosphericGroupDelayRate The double value to which atmosphericGroupDelayRate is to be set.
+        Set atmosphericGroupDelayRate with the specified float value.
+        atmosphericGroupDelayRate The float value to which atmosphericGroupDelayRate is to be set.
 
 
         """
 
-        self._atmosphericGroupDelayRate = double(atmosphericGroupDelayRate)
+        self._atmosphericGroupDelayRate = float(atmosphericGroupDelayRate)
 
         self._atmosphericGroupDelayRateExists = True
 
@@ -1076,7 +1210,7 @@ class DelayModelRow:
     def getGeometricDelay(self):
         """
         Get geometricDelay, which is optional.
-        return geometricDelay as double
+        return geometricDelay as float
         raises ValueError If geometricDelay does not exist.
         """
         if not self._geometricDelayExists:
@@ -1090,13 +1224,13 @@ class DelayModelRow:
 
     def setGeometricDelay(self, geometricDelay):
         """
-        Set geometricDelay with the specified double value.
-        geometricDelay The double value to which geometricDelay is to be set.
+        Set geometricDelay with the specified float value.
+        geometricDelay The float value to which geometricDelay is to be set.
 
 
         """
 
-        self._geometricDelay = double(geometricDelay)
+        self._geometricDelay = float(geometricDelay)
 
         self._geometricDelayExists = True
 
@@ -1121,7 +1255,7 @@ class DelayModelRow:
     def getGeometricDelayRate(self):
         """
         Get geometricDelayRate, which is optional.
-        return geometricDelayRate as double
+        return geometricDelayRate as float
         raises ValueError If geometricDelayRate does not exist.
         """
         if not self._geometricDelayRateExists:
@@ -1135,13 +1269,13 @@ class DelayModelRow:
 
     def setGeometricDelayRate(self, geometricDelayRate):
         """
-        Set geometricDelayRate with the specified double value.
-        geometricDelayRate The double value to which geometricDelayRate is to be set.
+        Set geometricDelayRate with the specified float value.
+        geometricDelayRate The float value to which geometricDelayRate is to be set.
 
 
         """
 
-        self._geometricDelayRate = double(geometricDelayRate)
+        self._geometricDelayRate = float(geometricDelayRate)
 
         self._geometricDelayRateExists = True
 
@@ -1343,7 +1477,7 @@ class DelayModelRow:
     def getDispersiveDelay(self):
         """
         Get dispersiveDelay, which is optional.
-        return dispersiveDelay as double
+        return dispersiveDelay as float
         raises ValueError If dispersiveDelay does not exist.
         """
         if not self._dispersiveDelayExists:
@@ -1357,13 +1491,13 @@ class DelayModelRow:
 
     def setDispersiveDelay(self, dispersiveDelay):
         """
-        Set dispersiveDelay with the specified double value.
-        dispersiveDelay The double value to which dispersiveDelay is to be set.
+        Set dispersiveDelay with the specified float value.
+        dispersiveDelay The float value to which dispersiveDelay is to be set.
 
 
         """
 
-        self._dispersiveDelay = double(dispersiveDelay)
+        self._dispersiveDelay = float(dispersiveDelay)
 
         self._dispersiveDelayExists = True
 
@@ -1388,7 +1522,7 @@ class DelayModelRow:
     def getDispersiveDelayRate(self):
         """
         Get dispersiveDelayRate, which is optional.
-        return dispersiveDelayRate as double
+        return dispersiveDelayRate as float
         raises ValueError If dispersiveDelayRate does not exist.
         """
         if not self._dispersiveDelayRateExists:
@@ -1402,13 +1536,13 @@ class DelayModelRow:
 
     def setDispersiveDelayRate(self, dispersiveDelayRate):
         """
-        Set dispersiveDelayRate with the specified double value.
-        dispersiveDelayRate The double value to which dispersiveDelayRate is to be set.
+        Set dispersiveDelayRate with the specified float value.
+        dispersiveDelayRate The float value to which dispersiveDelayRate is to be set.
 
 
         """
 
-        self._dispersiveDelayRate = double(dispersiveDelayRate)
+        self._dispersiveDelayRate = float(dispersiveDelayRate)
 
         self._dispersiveDelayRateExists = True
 
@@ -1433,7 +1567,7 @@ class DelayModelRow:
     def getAtmosphericDryDelay(self):
         """
         Get atmosphericDryDelay, which is optional.
-        return atmosphericDryDelay as double
+        return atmosphericDryDelay as float
         raises ValueError If atmosphericDryDelay does not exist.
         """
         if not self._atmosphericDryDelayExists:
@@ -1447,13 +1581,13 @@ class DelayModelRow:
 
     def setAtmosphericDryDelay(self, atmosphericDryDelay):
         """
-        Set atmosphericDryDelay with the specified double value.
-        atmosphericDryDelay The double value to which atmosphericDryDelay is to be set.
+        Set atmosphericDryDelay with the specified float value.
+        atmosphericDryDelay The float value to which atmosphericDryDelay is to be set.
 
 
         """
 
-        self._atmosphericDryDelay = double(atmosphericDryDelay)
+        self._atmosphericDryDelay = float(atmosphericDryDelay)
 
         self._atmosphericDryDelayExists = True
 
@@ -1478,7 +1612,7 @@ class DelayModelRow:
     def getAtmosphericWetDelay(self):
         """
         Get atmosphericWetDelay, which is optional.
-        return atmosphericWetDelay as double
+        return atmosphericWetDelay as float
         raises ValueError If atmosphericWetDelay does not exist.
         """
         if not self._atmosphericWetDelayExists:
@@ -1492,13 +1626,13 @@ class DelayModelRow:
 
     def setAtmosphericWetDelay(self, atmosphericWetDelay):
         """
-        Set atmosphericWetDelay with the specified double value.
-        atmosphericWetDelay The double value to which atmosphericWetDelay is to be set.
+        Set atmosphericWetDelay with the specified float value.
+        atmosphericWetDelay The float value to which atmosphericWetDelay is to be set.
 
 
         """
 
-        self._atmosphericWetDelay = double(atmosphericWetDelay)
+        self._atmosphericWetDelay = float(atmosphericWetDelay)
 
         self._atmosphericWetDelayExists = True
 
@@ -1523,7 +1657,7 @@ class DelayModelRow:
     def getPadDelay(self):
         """
         Get padDelay, which is optional.
-        return padDelay as double
+        return padDelay as float
         raises ValueError If padDelay does not exist.
         """
         if not self._padDelayExists:
@@ -1537,13 +1671,13 @@ class DelayModelRow:
 
     def setPadDelay(self, padDelay):
         """
-        Set padDelay with the specified double value.
-        padDelay The double value to which padDelay is to be set.
+        Set padDelay with the specified float value.
+        padDelay The float value to which padDelay is to be set.
 
 
         """
 
-        self._padDelay = double(padDelay)
+        self._padDelay = float(padDelay)
 
         self._padDelayExists = True
 
@@ -1568,7 +1702,7 @@ class DelayModelRow:
     def getAntennaDelay(self):
         """
         Get antennaDelay, which is optional.
-        return antennaDelay as double
+        return antennaDelay as float
         raises ValueError If antennaDelay does not exist.
         """
         if not self._antennaDelayExists:
@@ -1582,13 +1716,13 @@ class DelayModelRow:
 
     def setAntennaDelay(self, antennaDelay):
         """
-        Set antennaDelay with the specified double value.
-        antennaDelay The double value to which antennaDelay is to be set.
+        Set antennaDelay with the specified float value.
+        antennaDelay The float value to which antennaDelay is to be set.
 
 
         """
 
-        self._antennaDelay = double(antennaDelay)
+        self._antennaDelay = float(antennaDelay)
 
         self._antennaDelayExists = True
 
@@ -1712,7 +1846,7 @@ class DelayModelRow:
     # ===> Attribute electronicDelay, which is optional
     _electronicDelayExists = False
 
-    _electronicDelay = None  # this is a 1D list of double
+    _electronicDelay = None  # this is a 1D list of float
 
     def isElectronicDelayExists(self):
         """
@@ -1724,7 +1858,7 @@ class DelayModelRow:
     def getElectronicDelay(self):
         """
         Get electronicDelay, which is optional.
-        return electronicDelay as double []
+        return electronicDelay as float []
         raises ValueError If electronicDelay does not exist.
         """
         if not self._electronicDelayExists:
@@ -1738,8 +1872,8 @@ class DelayModelRow:
 
     def setElectronicDelay(self, electronicDelay):
         """
-        Set electronicDelay with the specified double []  value.
-        electronicDelay The double []  value to which electronicDelay is to be set.
+        Set electronicDelay with the specified float []  value.
+        electronicDelay The float []  value to which electronicDelay is to be set.
 
 
         """
@@ -1756,11 +1890,11 @@ class DelayModelRow:
             if not shapeOK:
                 raise ValueError("shape of electronicDelay is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(electronicDelay, double):
+            if not Parser.checkListType(electronicDelay, float):
                 raise ValueError(
-                    "type of the first value in electronicDelay is not double as expected"
+                    "type of the first value in electronicDelay is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._electronicDelay = copy.deepcopy(electronicDelay)
@@ -1778,7 +1912,7 @@ class DelayModelRow:
     # ===> Attribute electronicDelayRate, which is optional
     _electronicDelayRateExists = False
 
-    _electronicDelayRate = None  # this is a 1D list of double
+    _electronicDelayRate = None  # this is a 1D list of float
 
     def isElectronicDelayRateExists(self):
         """
@@ -1790,7 +1924,7 @@ class DelayModelRow:
     def getElectronicDelayRate(self):
         """
         Get electronicDelayRate, which is optional.
-        return electronicDelayRate as double []
+        return electronicDelayRate as float []
         raises ValueError If electronicDelayRate does not exist.
         """
         if not self._electronicDelayRateExists:
@@ -1804,8 +1938,8 @@ class DelayModelRow:
 
     def setElectronicDelayRate(self, electronicDelayRate):
         """
-        Set electronicDelayRate with the specified double []  value.
-        electronicDelayRate The double []  value to which electronicDelayRate is to be set.
+        Set electronicDelayRate with the specified float []  value.
+        electronicDelayRate The float []  value to which electronicDelayRate is to be set.
 
 
         """
@@ -1822,11 +1956,11 @@ class DelayModelRow:
             if not shapeOK:
                 raise ValueError("shape of electronicDelayRate is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(electronicDelayRate, double):
+            if not Parser.checkListType(electronicDelayRate, float):
                 raise ValueError(
-                    "type of the first value in electronicDelayRate is not double as expected"
+                    "type of the first value in electronicDelayRate is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._electronicDelayRate = copy.deepcopy(electronicDelayRate)
@@ -1844,7 +1978,7 @@ class DelayModelRow:
     # ===> Attribute receiverDelay, which is optional
     _receiverDelayExists = False
 
-    _receiverDelay = None  # this is a 1D list of double
+    _receiverDelay = None  # this is a 1D list of float
 
     def isReceiverDelayExists(self):
         """
@@ -1856,7 +1990,7 @@ class DelayModelRow:
     def getReceiverDelay(self):
         """
         Get receiverDelay, which is optional.
-        return receiverDelay as double []
+        return receiverDelay as float []
         raises ValueError If receiverDelay does not exist.
         """
         if not self._receiverDelayExists:
@@ -1870,8 +2004,8 @@ class DelayModelRow:
 
     def setReceiverDelay(self, receiverDelay):
         """
-        Set receiverDelay with the specified double []  value.
-        receiverDelay The double []  value to which receiverDelay is to be set.
+        Set receiverDelay with the specified float []  value.
+        receiverDelay The float []  value to which receiverDelay is to be set.
 
 
         """
@@ -1888,11 +2022,11 @@ class DelayModelRow:
             if not shapeOK:
                 raise ValueError("shape of receiverDelay is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(receiverDelay, double):
+            if not Parser.checkListType(receiverDelay, float):
                 raise ValueError(
-                    "type of the first value in receiverDelay is not double as expected"
+                    "type of the first value in receiverDelay is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._receiverDelay = copy.deepcopy(receiverDelay)
@@ -1910,7 +2044,7 @@ class DelayModelRow:
     # ===> Attribute IFDelay, which is optional
     _IFDelayExists = False
 
-    _IFDelay = None  # this is a 1D list of double
+    _IFDelay = None  # this is a 1D list of float
 
     def isIFDelayExists(self):
         """
@@ -1922,7 +2056,7 @@ class DelayModelRow:
     def getIFDelay(self):
         """
         Get IFDelay, which is optional.
-        return IFDelay as double []
+        return IFDelay as float []
         raises ValueError If IFDelay does not exist.
         """
         if not self._IFDelayExists:
@@ -1936,8 +2070,8 @@ class DelayModelRow:
 
     def setIFDelay(self, IFDelay):
         """
-        Set IFDelay with the specified double []  value.
-        IFDelay The double []  value to which IFDelay is to be set.
+        Set IFDelay with the specified float []  value.
+        IFDelay The float []  value to which IFDelay is to be set.
 
 
         """
@@ -1954,11 +2088,11 @@ class DelayModelRow:
             if not shapeOK:
                 raise ValueError("shape of IFDelay is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(IFDelay, double):
+            if not Parser.checkListType(IFDelay, float):
                 raise ValueError(
-                    "type of the first value in IFDelay is not double as expected"
+                    "type of the first value in IFDelay is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._IFDelay = copy.deepcopy(IFDelay)
@@ -1976,7 +2110,7 @@ class DelayModelRow:
     # ===> Attribute LODelay, which is optional
     _LODelayExists = False
 
-    _LODelay = None  # this is a 1D list of double
+    _LODelay = None  # this is a 1D list of float
 
     def isLODelayExists(self):
         """
@@ -1988,7 +2122,7 @@ class DelayModelRow:
     def getLODelay(self):
         """
         Get LODelay, which is optional.
-        return LODelay as double []
+        return LODelay as float []
         raises ValueError If LODelay does not exist.
         """
         if not self._LODelayExists:
@@ -2002,8 +2136,8 @@ class DelayModelRow:
 
     def setLODelay(self, LODelay):
         """
-        Set LODelay with the specified double []  value.
-        LODelay The double []  value to which LODelay is to be set.
+        Set LODelay with the specified float []  value.
+        LODelay The float []  value to which LODelay is to be set.
 
 
         """
@@ -2020,11 +2154,11 @@ class DelayModelRow:
             if not shapeOK:
                 raise ValueError("shape of LODelay is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(LODelay, double):
+            if not Parser.checkListType(LODelay, float):
                 raise ValueError(
-                    "type of the first value in LODelay is not double as expected"
+                    "type of the first value in LODelay is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._LODelay = copy.deepcopy(LODelay)
@@ -2054,7 +2188,7 @@ class DelayModelRow:
     def getCrossPolarizationDelay(self):
         """
         Get crossPolarizationDelay, which is optional.
-        return crossPolarizationDelay as double
+        return crossPolarizationDelay as float
         raises ValueError If crossPolarizationDelay does not exist.
         """
         if not self._crossPolarizationDelayExists:
@@ -2068,13 +2202,13 @@ class DelayModelRow:
 
     def setCrossPolarizationDelay(self, crossPolarizationDelay):
         """
-        Set crossPolarizationDelay with the specified double value.
-        crossPolarizationDelay The double value to which crossPolarizationDelay is to be set.
+        Set crossPolarizationDelay with the specified float value.
+        crossPolarizationDelay The float value to which crossPolarizationDelay is to be set.
 
 
         """
 
-        self._crossPolarizationDelay = double(crossPolarizationDelay)
+        self._crossPolarizationDelay = float(crossPolarizationDelay)
 
         self._crossPolarizationDelayExists = True
 
@@ -2240,7 +2374,7 @@ class DelayModelRow:
             return False
         for indx in range(len(phaseDelay)):
 
-            # phaseDelay is a list of double, compare using == operator.
+            # phaseDelay is a list of float, compare using == operator.
             if not (self._phaseDelay[indx] == phaseDelay[indx]):
                 return False
 
@@ -2250,7 +2384,7 @@ class DelayModelRow:
             return False
         for indx in range(len(phaseDelayRate)):
 
-            # phaseDelayRate is a list of double, compare using == operator.
+            # phaseDelayRate is a list of float, compare using == operator.
             if not (self._phaseDelayRate[indx] == phaseDelayRate[indx]):
                 return False
 
@@ -2260,7 +2394,7 @@ class DelayModelRow:
             return False
         for indx in range(len(groupDelay)):
 
-            # groupDelay is a list of double, compare using == operator.
+            # groupDelay is a list of float, compare using == operator.
             if not (self._groupDelay[indx] == groupDelay[indx]):
                 return False
 
@@ -2270,7 +2404,7 @@ class DelayModelRow:
             return False
         for indx in range(len(groupDelayRate)):
 
-            # groupDelayRate is a list of double, compare using == operator.
+            # groupDelayRate is a list of float, compare using == operator.
             if not (self._groupDelayRate[indx] == groupDelayRate[indx]):
                 return False
 
@@ -2309,7 +2443,7 @@ class DelayModelRow:
             return False
         for indx in range(len(phaseDelay)):
 
-            # phaseDelay is a list of double, compare using == operator.
+            # phaseDelay is a list of float, compare using == operator.
             if not (self._phaseDelay[indx] == phaseDelay[indx]):
                 return False
 
@@ -2319,7 +2453,7 @@ class DelayModelRow:
             return False
         for indx in range(len(phaseDelayRate)):
 
-            # phaseDelayRate is a list of double, compare using == operator.
+            # phaseDelayRate is a list of float, compare using == operator.
             if not (self._phaseDelayRate[indx] == phaseDelayRate[indx]):
                 return False
 
@@ -2329,7 +2463,7 @@ class DelayModelRow:
             return False
         for indx in range(len(groupDelay)):
 
-            # groupDelay is a list of double, compare using == operator.
+            # groupDelay is a list of float, compare using == operator.
             if not (self._groupDelay[indx] == groupDelay[indx]):
                 return False
 
@@ -2339,7 +2473,7 @@ class DelayModelRow:
             return False
         for indx in range(len(groupDelayRate)):
 
-            # groupDelayRate is a list of double, compare using == operator.
+            # groupDelayRate is a list of float, compare using == operator.
             if not (self._groupDelayRate[indx] == groupDelayRate[indx]):
                 return False
 

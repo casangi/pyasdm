@@ -75,12 +75,63 @@ class FeedRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._feedId = 0
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._numReceptor = 0
+
+        self._beamOffset = []  # this is a list of float []  []
+
+        self._focusReference = []  # this is a list of Length []  []
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._polResponse = []  # this is a list of Complex []  []
+
+        self._receptorAngle = []  # this is a list of Angle []
+
+        self._feedNumExists = False
+
+        self._feedNum = 0
+
+        self._illumOffsetExists = False
+
+        self._illumOffset = []  # this is a list of Length []
+
+        self._positionExists = False
+
+        self._position = []  # this is a list of Length []
+
+        self._skyCouplingExists = False
+
+        self._skyCoupling = None
+
+        self._numChanExists = False
+
+        self._numChan = 0
+
+        self._skyCouplingSpectrumExists = False
+
+        self._skyCouplingSpectrum = []  # this is a list of float []
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._receiverId = []  # this is a list of int []
+
+        self._spectralWindowId = Tag()
 
         if row is not None:
             if not isinstance(row, FeedRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -268,88 +319,101 @@ class FeedRow:
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data)
+        self._feedId = int(feedIdNode.firstChild.data.strip())
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         beamOffsetNode = rowdom.getElementsByTagName("beamOffset")[0]
 
-        beamOffsetStr = beamOffsetNode.firstChild.data
-        self._beamOffset = Parser.stringListToLists(beamOffsetStr, double, "Feed")
+        beamOffsetStr = beamOffsetNode.firstChild.data.strip()
+
+        self._beamOffset = Parser.stringListToLists(beamOffsetStr, float, "Feed", False)
 
         focusReferenceNode = rowdom.getElementsByTagName("focusReference")[0]
 
-        focusReferenceStr = focusReferenceNode.firstChild.data
+        focusReferenceStr = focusReferenceNode.firstChild.data.strip()
+
         self._focusReference = Parser.stringListToLists(
-            focusReferenceStr, Length, "Feed"
+            focusReferenceStr, Length, "Feed", True
         )
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "Feed"
+            polarizationTypesStr, PolarizationType, "Feed", False
         )
 
         polResponseNode = rowdom.getElementsByTagName("polResponse")[0]
 
-        polResponseStr = polResponseNode.firstChild.data
-        self._polResponse = Parser.stringListToLists(polResponseStr, Complex, "Feed")
+        polResponseStr = polResponseNode.firstChild.data.strip()
+
+        self._polResponse = Parser.stringListToLists(
+            polResponseStr, Complex, "Feed", True
+        )
 
         receptorAngleNode = rowdom.getElementsByTagName("receptorAngle")[0]
 
-        receptorAngleStr = receptorAngleNode.firstChild.data
-        self._receptorAngle = Parser.stringListToLists(receptorAngleStr, Angle, "Feed")
+        receptorAngleStr = receptorAngleNode.firstChild.data.strip()
+
+        self._receptorAngle = Parser.stringListToLists(
+            receptorAngleStr, Angle, "Feed", True
+        )
 
         feedNumNode = rowdom.getElementsByTagName("feedNum")
         if len(feedNumNode) > 0:
 
-            self._feedNum = int(feedNumNode[0].firstChild.data)
+            self._feedNum = int(feedNumNode[0].firstChild.data.strip())
 
             self._feedNumExists = True
 
         illumOffsetNode = rowdom.getElementsByTagName("illumOffset")
         if len(illumOffsetNode) > 0:
 
-            illumOffsetStr = illumOffsetNode[0].firstChild.data
-            self._illumOffset = Parser.stringListToLists(illumOffsetStr, Length, "Feed")
+            illumOffsetStr = illumOffsetNode[0].firstChild.data.strip()
+
+            self._illumOffset = Parser.stringListToLists(
+                illumOffsetStr, Length, "Feed", True
+            )
 
             self._illumOffsetExists = True
 
         positionNode = rowdom.getElementsByTagName("position")
         if len(positionNode) > 0:
 
-            positionStr = positionNode[0].firstChild.data
-            self._position = Parser.stringListToLists(positionStr, Length, "Feed")
+            positionStr = positionNode[0].firstChild.data.strip()
+
+            self._position = Parser.stringListToLists(positionStr, Length, "Feed", True)
 
             self._positionExists = True
 
         skyCouplingNode = rowdom.getElementsByTagName("skyCoupling")
         if len(skyCouplingNode) > 0:
 
-            self._skyCoupling = float(skyCouplingNode[0].firstChild.data)
+            self._skyCoupling = float(skyCouplingNode[0].firstChild.data.strip())
 
             self._skyCouplingExists = True
 
         numChanNode = rowdom.getElementsByTagName("numChan")
         if len(numChanNode) > 0:
 
-            self._numChan = int(numChanNode[0].firstChild.data)
+            self._numChan = int(numChanNode[0].firstChild.data.strip())
 
             self._numChanExists = True
 
         skyCouplingSpectrumNode = rowdom.getElementsByTagName("skyCouplingSpectrum")
         if len(skyCouplingSpectrumNode) > 0:
 
-            skyCouplingSpectrumStr = skyCouplingSpectrumNode[0].firstChild.data
+            skyCouplingSpectrumStr = skyCouplingSpectrumNode[0].firstChild.data.strip()
+
             self._skyCouplingSpectrum = Parser.stringListToLists(
-                skyCouplingSpectrumStr, float, "Feed"
+                skyCouplingSpectrumStr, float, "Feed", False
             )
 
             self._skyCouplingSpectrumExists = True
@@ -358,16 +422,17 @@ class FeedRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
 
-        receiverIdStr = receiverIdNode.firstChild.data
-        self._receiverId = Parser.stringListToLists(receiverIdStr, int, "Feed")
+        receiverIdStr = receiverIdNode.firstChild.data.strip()
+
+        self._receiverId = Parser.stringListToLists(receiverIdStr, int, "Feed", False)
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -457,20 +522,20 @@ class FeedRow:
 
     # ===> Attribute beamOffset
 
-    _beamOffset = None  # this is a 2D list of double
+    _beamOffset = None  # this is a 2D list of float
 
     def getBeamOffset(self):
         """
         Get beamOffset.
-        return beamOffset as double []  []
+        return beamOffset as float []  []
         """
 
         return copy.deepcopy(self._beamOffset)
 
     def setBeamOffset(self, beamOffset):
         """
-        Set beamOffset with the specified double []  []  value.
-        beamOffset The double []  []  value to which beamOffset is to be set.
+        Set beamOffset with the specified float []  []  value.
+        beamOffset The float []  []  value to which beamOffset is to be set.
 
 
         """
@@ -487,11 +552,11 @@ class FeedRow:
             if not shapeOK:
                 raise ValueError("shape of beamOffset is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(beamOffset, double):
+            if not Parser.checkListType(beamOffset, float):
                 raise ValueError(
-                    "type of the first value in beamOffset is not double as expected"
+                    "type of the first value in beamOffset is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._beamOffset = copy.deepcopy(beamOffset)
@@ -1229,7 +1294,7 @@ class FeedRow:
             for i in range(beamOffset_dims[0]):
                 for j in range(beamOffset_dims[0]):
 
-                    # beamOffset is an array of double, compare using == operator.
+                    # beamOffset is an array of float, compare using == operator.
                     if not (self._beamOffset[i][j] == beamOffset[i][j]):
                         return False
 
@@ -1356,7 +1421,7 @@ class FeedRow:
             for i in range(beamOffset_dims[0]):
                 for j in range(beamOffset_dims[0]):
 
-                    # beamOffset is an array of double, compare using == operator.
+                    # beamOffset is an array of float, compare using == operator.
                     if not (self._beamOffset[i][j] == beamOffset[i][j]):
                         return False
 

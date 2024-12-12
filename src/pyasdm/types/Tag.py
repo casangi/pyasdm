@@ -214,3 +214,22 @@ class Tag:
         Return True if this Tag is null, i.e. if it's TagType field is None
         """
         return self._type is None
+
+    @staticmethod
+    def getInstance(stringList):
+        """
+        Retrieve value from a list of strings and convert that to a Tag.
+
+        This is used when parsing Tag lists from an XML representation to 
+        eventually construct a list of Tag instances. The string value is
+        used as is with Tag.parseTag to make a Tag instance.
+
+        Returns a tuple of (Tag, stringList) where Tag is the new Tag
+        created by this call and stringList is the remaining, unused, part of
+        stringList after removing the first element.
+        """
+        if not isinstance(stringList, list):
+            raise ValueError("stringList is not a list")
+
+        # this will raise an error if there aren't any elements on stringList
+        return (Tag.parseTag(stringList[0]), stringList[1:])

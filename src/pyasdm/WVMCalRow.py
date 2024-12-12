@@ -75,12 +75,39 @@ class WVMCalRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
         self._wvrMethod = WVRMethod.from_int(0)
+
+        self._polyFreqLimits = []  # this is a list of Frequency []
+
+        self._numInputAntenna = 0
+
+        self._numChan = 0
+
+        self._numPoly = 0
+
+        self._pathCoeff = []  # this is a list of float []  []  []
+
+        self._refTemp = []  # this is a list of Temperature []  []
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._inputAntennaId = []  # this is a list of Tag []
+
+        self._spectralWindowId = Tag()
 
         if row is not None:
             if not isinstance(row, WVMCalRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -191,57 +218,63 @@ class WVMCalRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         wvrMethodNode = rowdom.getElementsByTagName("wvrMethod")[0]
 
-        self._wvrMethod = WVRMethod.newWVRMethod(wvrMethodNode.firstChild.data)
+        self._wvrMethod = WVRMethod.newWVRMethod(wvrMethodNode.firstChild.data.strip())
 
         polyFreqLimitsNode = rowdom.getElementsByTagName("polyFreqLimits")[0]
 
-        polyFreqLimitsStr = polyFreqLimitsNode.firstChild.data
+        polyFreqLimitsStr = polyFreqLimitsNode.firstChild.data.strip()
+
         self._polyFreqLimits = Parser.stringListToLists(
-            polyFreqLimitsStr, Frequency, "WVMCal"
+            polyFreqLimitsStr, Frequency, "WVMCal", True
         )
 
         numInputAntennaNode = rowdom.getElementsByTagName("numInputAntenna")[0]
 
-        self._numInputAntenna = int(numInputAntennaNode.firstChild.data)
+        self._numInputAntenna = int(numInputAntennaNode.firstChild.data.strip())
 
         numChanNode = rowdom.getElementsByTagName("numChan")[0]
 
-        self._numChan = int(numChanNode.firstChild.data)
+        self._numChan = int(numChanNode.firstChild.data.strip())
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data)
+        self._numPoly = int(numPolyNode.firstChild.data.strip())
 
         pathCoeffNode = rowdom.getElementsByTagName("pathCoeff")[0]
 
-        pathCoeffStr = pathCoeffNode.firstChild.data
-        self._pathCoeff = Parser.stringListToLists(pathCoeffStr, float, "WVMCal")
+        pathCoeffStr = pathCoeffNode.firstChild.data.strip()
+
+        self._pathCoeff = Parser.stringListToLists(pathCoeffStr, float, "WVMCal", False)
 
         refTempNode = rowdom.getElementsByTagName("refTemp")[0]
 
-        refTempStr = refTempNode.firstChild.data
-        self._refTemp = Parser.stringListToLists(refTempStr, Temperature, "WVMCal")
+        refTempStr = refTempNode.firstChild.data.strip()
+
+        self._refTemp = Parser.stringListToLists(
+            refTempStr, Temperature, "WVMCal", True
+        )
 
         # extrinsic attribute values
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         inputAntennaIdNode = rowdom.getElementsByTagName("inputAntennaId")[0]
 
-        inputAntennaIdStr = inputAntennaIdNode.firstChild.data
+        inputAntennaIdStr = inputAntennaIdNode.firstChild.data.strip()
+
         self._inputAntennaId = Parser.stringListToLists(
-            inputAntennaIdStr, Tag, "WVMCal"
+            inputAntennaIdStr, Tag, "WVMCal", True
         )
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

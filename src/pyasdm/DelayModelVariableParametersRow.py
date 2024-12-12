@@ -78,15 +78,53 @@ class DelayModelVariableParametersRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._delayModelVariableParametersId = Tag()
+
+        self._time = ArrayTime()
+
+        self._ut1_utc = None
+
+        self._iat_utc = None
+
         self._timeType = DifferenceType.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._gstAtUt0 = Angle()
+
+        self._earthRotationRate = AngularRate()
+
+        self._polarOffsets = []  # this is a list of float []
+
         self._polarOffsetsType = DifferenceType.from_int(0)
+
+        self._nutationInLongitudeExists = False
+
+        self._nutationInLongitude = Angle()
+
+        self._nutationInLongitudeRateExists = False
+
+        self._nutationInLongitudeRate = AngularRate()
+
+        self._nutationInObliquityExists = False
+
+        self._nutationInObliquity = Angle()
+
+        self._nutationInObliquityRateExists = False
+
+        self._nutationInObliquityRate = AngularRate()
+
+        # extrinsic attributes
+
+        self._delayModelFixedParametersId = Tag()
 
         if row is not None:
             if not isinstance(row, DelayModelVariableParametersRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._delayModelVariableParametersId = Tag(
                 row._delayModelVariableParametersId
@@ -265,51 +303,56 @@ class DelayModelVariableParametersRow:
         )[0]
 
         self._delayModelVariableParametersId = Tag(
-            delayModelVariableParametersIdNode.firstChild.data
+            delayModelVariableParametersIdNode.firstChild.data.strip()
         )
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data)
+        self._time = ArrayTime(timeNode.firstChild.data.strip())
 
         ut1_utcNode = rowdom.getElementsByTagName("ut1_utc")[0]
 
-        self._ut1_utc = double(ut1_utcNode.firstChild.data)
+        self._ut1_utc = float(ut1_utcNode.firstChild.data.strip())
 
         iat_utcNode = rowdom.getElementsByTagName("iat_utc")[0]
 
-        self._iat_utc = double(iat_utcNode.firstChild.data)
+        self._iat_utc = float(iat_utcNode.firstChild.data.strip())
 
         timeTypeNode = rowdom.getElementsByTagName("timeType")[0]
 
-        self._timeType = DifferenceType.newDifferenceType(timeTypeNode.firstChild.data)
+        self._timeType = DifferenceType.newDifferenceType(
+            timeTypeNode.firstChild.data.strip()
+        )
 
         gstAtUt0Node = rowdom.getElementsByTagName("gstAtUt0")[0]
 
-        self._gstAtUt0 = Angle(gstAtUt0Node.firstChild.data)
+        self._gstAtUt0 = Angle(gstAtUt0Node.firstChild.data.strip())
 
         earthRotationRateNode = rowdom.getElementsByTagName("earthRotationRate")[0]
 
-        self._earthRotationRate = AngularRate(earthRotationRateNode.firstChild.data)
+        self._earthRotationRate = AngularRate(
+            earthRotationRateNode.firstChild.data.strip()
+        )
 
         polarOffsetsNode = rowdom.getElementsByTagName("polarOffsets")[0]
 
-        polarOffsetsStr = polarOffsetsNode.firstChild.data
+        polarOffsetsStr = polarOffsetsNode.firstChild.data.strip()
+
         self._polarOffsets = Parser.stringListToLists(
-            polarOffsetsStr, double, "DelayModelVariableParameters"
+            polarOffsetsStr, float, "DelayModelVariableParameters", False
         )
 
         polarOffsetsTypeNode = rowdom.getElementsByTagName("polarOffsetsType")[0]
 
         self._polarOffsetsType = DifferenceType.newDifferenceType(
-            polarOffsetsTypeNode.firstChild.data
+            polarOffsetsTypeNode.firstChild.data.strip()
         )
 
         nutationInLongitudeNode = rowdom.getElementsByTagName("nutationInLongitude")
         if len(nutationInLongitudeNode) > 0:
 
             self._nutationInLongitude = Angle(
-                nutationInLongitudeNode[0].firstChild.data
+                nutationInLongitudeNode[0].firstChild.data.strip()
             )
 
             self._nutationInLongitudeExists = True
@@ -320,7 +363,7 @@ class DelayModelVariableParametersRow:
         if len(nutationInLongitudeRateNode) > 0:
 
             self._nutationInLongitudeRate = AngularRate(
-                nutationInLongitudeRateNode[0].firstChild.data
+                nutationInLongitudeRateNode[0].firstChild.data.strip()
             )
 
             self._nutationInLongitudeRateExists = True
@@ -329,7 +372,7 @@ class DelayModelVariableParametersRow:
         if len(nutationInObliquityNode) > 0:
 
             self._nutationInObliquity = Angle(
-                nutationInObliquityNode[0].firstChild.data
+                nutationInObliquityNode[0].firstChild.data.strip()
             )
 
             self._nutationInObliquityExists = True
@@ -340,7 +383,7 @@ class DelayModelVariableParametersRow:
         if len(nutationInObliquityRateNode) > 0:
 
             self._nutationInObliquityRate = AngularRate(
-                nutationInObliquityRateNode[0].firstChild.data
+                nutationInObliquityRateNode[0].firstChild.data.strip()
             )
 
             self._nutationInObliquityRateExists = True
@@ -352,7 +395,7 @@ class DelayModelVariableParametersRow:
         )[0]
 
         self._delayModelFixedParametersId = Tag(
-            delayModelFixedParametersIdNode.firstChild.data
+            delayModelFixedParametersIdNode.firstChild.data.strip()
         )
 
     def toBin(self):
@@ -420,20 +463,20 @@ class DelayModelVariableParametersRow:
     def getUt1_utc(self):
         """
         Get ut1_utc.
-        return ut1_utc as double
+        return ut1_utc as float
         """
 
         return self._ut1_utc
 
     def setUt1_utc(self, ut1_utc):
         """
-        Set ut1_utc with the specified double value.
-        ut1_utc The double value to which ut1_utc is to be set.
+        Set ut1_utc with the specified float value.
+        ut1_utc The float value to which ut1_utc is to be set.
 
 
         """
 
-        self._ut1_utc = double(ut1_utc)
+        self._ut1_utc = float(ut1_utc)
 
     # ===> Attribute iat_utc
 
@@ -442,20 +485,20 @@ class DelayModelVariableParametersRow:
     def getIat_utc(self):
         """
         Get iat_utc.
-        return iat_utc as double
+        return iat_utc as float
         """
 
         return self._iat_utc
 
     def setIat_utc(self, iat_utc):
         """
-        Set iat_utc with the specified double value.
-        iat_utc The double value to which iat_utc is to be set.
+        Set iat_utc with the specified float value.
+        iat_utc The float value to which iat_utc is to be set.
 
 
         """
 
-        self._iat_utc = double(iat_utc)
+        self._iat_utc = float(iat_utc)
 
     # ===> Attribute timeType
 
@@ -527,20 +570,20 @@ class DelayModelVariableParametersRow:
 
     # ===> Attribute polarOffsets
 
-    _polarOffsets = None  # this is a 1D list of double
+    _polarOffsets = None  # this is a 1D list of float
 
     def getPolarOffsets(self):
         """
         Get polarOffsets.
-        return polarOffsets as double []
+        return polarOffsets as float []
         """
 
         return copy.deepcopy(self._polarOffsets)
 
     def setPolarOffsets(self, polarOffsets):
         """
-        Set polarOffsets with the specified double []  value.
-        polarOffsets The double []  value to which polarOffsets is to be set.
+        Set polarOffsets with the specified float []  value.
+        polarOffsets The float []  value to which polarOffsets is to be set.
 
 
         """
@@ -557,11 +600,11 @@ class DelayModelVariableParametersRow:
             if not shapeOK:
                 raise ValueError("shape of polarOffsets is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(polarOffsets, double):
+            if not Parser.checkListType(polarOffsets, float):
                 raise ValueError(
-                    "type of the first value in polarOffsets is not double as expected"
+                    "type of the first value in polarOffsets is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._polarOffsets = copy.deepcopy(polarOffsets)
@@ -836,11 +879,11 @@ class DelayModelVariableParametersRow:
         if not self._time.equals(time):
             return False
 
-        # ut1_utc is a double, compare using the == operator.
+        # ut1_utc is a float, compare using the == operator.
         if not (self._ut1_utc == ut1_utc):
             return False
 
-        # iat_utc is a double, compare using the == operator.
+        # iat_utc is a float, compare using the == operator.
         if not (self._iat_utc == iat_utc):
             return False
 
@@ -866,7 +909,7 @@ class DelayModelVariableParametersRow:
             return False
         for indx in range(len(polarOffsets)):
 
-            # polarOffsets is a list of double, compare using == operator.
+            # polarOffsets is a list of float, compare using == operator.
             if not (self._polarOffsets[indx] == polarOffsets[indx]):
                 return False
 
@@ -915,11 +958,11 @@ class DelayModelVariableParametersRow:
         if not self._time.equals(time):
             return False
 
-        # ut1_utc is a double, compare using the == operator.
+        # ut1_utc is a float, compare using the == operator.
         if not (self._ut1_utc == ut1_utc):
             return False
 
-        # iat_utc is a double, compare using the == operator.
+        # iat_utc is a float, compare using the == operator.
         if not (self._iat_utc == iat_utc):
             return False
 
@@ -945,7 +988,7 @@ class DelayModelVariableParametersRow:
             return False
         for indx in range(len(polarOffsets)):
 
-            # polarOffsets is a list of double, compare using == operator.
+            # polarOffsets is a list of float, compare using == operator.
             if not (self._polarOffsets[indx] == polarOffsets[indx]):
                 return False
 

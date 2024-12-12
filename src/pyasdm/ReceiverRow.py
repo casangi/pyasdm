@@ -81,18 +81,35 @@ class ReceiverRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._receiverId = 0
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._name = None
+
+        self._numLO = 0
+
         self._frequencyBand = ReceiverBand.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._freqLO = []  # this is a list of Frequency []
+
         self._receiverSideband = ReceiverSideband.from_int(0)
 
-        # this is a list of NetSideband Enumeration, start off with it being empty
-        self._sidebandLO = []
+        self._sidebandLO = []  # this is a list of NetSideband []
+
+        # extrinsic attributes
+
+        self._spectralWindowId = Tag()
 
         if row is not None:
             if not isinstance(row, ReceiverRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._receiverId = row._receiverId
 
@@ -196,49 +213,50 @@ class ReceiverRow:
 
         receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
 
-        self._receiverId = int(receiverIdNode.firstChild.data)
+        self._receiverId = int(receiverIdNode.firstChild.data.strip())
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         nameNode = rowdom.getElementsByTagName("name")[0]
 
-        self._name = str(nameNode.firstChild.data)
+        self._name = str(nameNode.firstChild.data.strip())
 
         numLONode = rowdom.getElementsByTagName("numLO")[0]
 
-        self._numLO = int(numLONode.firstChild.data)
+        self._numLO = int(numLONode.firstChild.data.strip())
 
         frequencyBandNode = rowdom.getElementsByTagName("frequencyBand")[0]
 
         self._frequencyBand = ReceiverBand.newReceiverBand(
-            frequencyBandNode.firstChild.data
+            frequencyBandNode.firstChild.data.strip()
         )
 
         freqLONode = rowdom.getElementsByTagName("freqLO")[0]
 
-        freqLOStr = freqLONode.firstChild.data
-        self._freqLO = Parser.stringListToLists(freqLOStr, Frequency, "Receiver")
+        freqLOStr = freqLONode.firstChild.data.strip()
+
+        self._freqLO = Parser.stringListToLists(freqLOStr, Frequency, "Receiver", True)
 
         receiverSidebandNode = rowdom.getElementsByTagName("receiverSideband")[0]
 
         self._receiverSideband = ReceiverSideband.newReceiverSideband(
-            receiverSidebandNode.firstChild.data
+            receiverSidebandNode.firstChild.data.strip()
         )
 
         sidebandLONode = rowdom.getElementsByTagName("sidebandLO")[0]
 
-        sidebandLOStr = sidebandLONode.firstChild.data
+        sidebandLOStr = sidebandLONode.firstChild.data.strip()
         self._sidebandLO = Parser.stringListToLists(
-            sidebandLOStr, NetSideband, "Receiver"
+            sidebandLOStr, NetSideband, "Receiver", False
         )
 
         # extrinsic attribute values
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

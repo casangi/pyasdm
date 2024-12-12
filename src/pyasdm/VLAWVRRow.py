@@ -72,9 +72,39 @@ class VLAWVRRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._numChan = 0
+
+        self._hiValues = []  # this is a list of float []
+
+        self._loValues = []  # this is a list of float []
+
+        self._chanFreqCenterExists = False
+
+        self._chanFreqCenter = []  # this is a list of Frequency []
+
+        self._chanWidthExists = False
+
+        self._chanWidth = []  # this is a list of Frequency []
+
+        self._wvrIdExists = False
+
+        self._wvrId = None
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
         if row is not None:
             if not isinstance(row, VLAWVRRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -190,28 +220,31 @@ class VLAWVRRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         numChanNode = rowdom.getElementsByTagName("numChan")[0]
 
-        self._numChan = int(numChanNode.firstChild.data)
+        self._numChan = int(numChanNode.firstChild.data.strip())
 
         hiValuesNode = rowdom.getElementsByTagName("hiValues")[0]
 
-        hiValuesStr = hiValuesNode.firstChild.data
-        self._hiValues = Parser.stringListToLists(hiValuesStr, float, "VLAWVR")
+        hiValuesStr = hiValuesNode.firstChild.data.strip()
+
+        self._hiValues = Parser.stringListToLists(hiValuesStr, float, "VLAWVR", False)
 
         loValuesNode = rowdom.getElementsByTagName("loValues")[0]
 
-        loValuesStr = loValuesNode.firstChild.data
-        self._loValues = Parser.stringListToLists(loValuesStr, float, "VLAWVR")
+        loValuesStr = loValuesNode.firstChild.data.strip()
+
+        self._loValues = Parser.stringListToLists(loValuesStr, float, "VLAWVR", False)
 
         chanFreqCenterNode = rowdom.getElementsByTagName("chanFreqCenter")
         if len(chanFreqCenterNode) > 0:
 
-            chanFreqCenterStr = chanFreqCenterNode[0].firstChild.data
+            chanFreqCenterStr = chanFreqCenterNode[0].firstChild.data.strip()
+
             self._chanFreqCenter = Parser.stringListToLists(
-                chanFreqCenterStr, Frequency, "VLAWVR"
+                chanFreqCenterStr, Frequency, "VLAWVR", True
             )
 
             self._chanFreqCenterExists = True
@@ -219,9 +252,10 @@ class VLAWVRRow:
         chanWidthNode = rowdom.getElementsByTagName("chanWidth")
         if len(chanWidthNode) > 0:
 
-            chanWidthStr = chanWidthNode[0].firstChild.data
+            chanWidthStr = chanWidthNode[0].firstChild.data.strip()
+
             self._chanWidth = Parser.stringListToLists(
-                chanWidthStr, Frequency, "VLAWVR"
+                chanWidthStr, Frequency, "VLAWVR", True
             )
 
             self._chanWidthExists = True
@@ -229,7 +263,7 @@ class VLAWVRRow:
         wvrIdNode = rowdom.getElementsByTagName("wvrId")
         if len(wvrIdNode) > 0:
 
-            self._wvrId = str(wvrIdNode[0].firstChild.data)
+            self._wvrId = str(wvrIdNode[0].firstChild.data.strip())
 
             self._wvrIdExists = True
 
@@ -237,7 +271,7 @@ class VLAWVRRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

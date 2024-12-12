@@ -87,24 +87,35 @@ class CorrelatorModeRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of BasebandName Enumeration, start off with it being empty
-        self._basebandNames = []
+        # initialize attribute values
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # intrinsic attributes
+
+        self._correlatorModeId = Tag()
+
+        self._numBaseband = 0
+
+        self._basebandNames = []  # this is a list of BasebandName []
+
+        self._basebandConfig = []  # this is a list of int []
+
         self._accumMode = AccumMode.from_int(0)
 
-        # this is a list of AxisName Enumeration, start off with it being empty
-        self._axesOrderArray = []
+        self._binMode = 0
 
-        # this is a list of FilterMode Enumeration, start off with it being empty
-        self._filterMode = []
+        self._numAxes = 0
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._axesOrderArray = []  # this is a list of AxisName []
+
+        self._filterMode = []  # this is a list of FilterMode []
+
         self._correlatorName = CorrelatorName.from_int(0)
 
         if row is not None:
             if not isinstance(row, CorrelatorModeRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._correlatorModeId = Tag(row._correlatorModeId)
 
@@ -212,56 +223,57 @@ class CorrelatorModeRow:
 
         correlatorModeIdNode = rowdom.getElementsByTagName("correlatorModeId")[0]
 
-        self._correlatorModeId = Tag(correlatorModeIdNode.firstChild.data)
+        self._correlatorModeId = Tag(correlatorModeIdNode.firstChild.data.strip())
 
         numBasebandNode = rowdom.getElementsByTagName("numBaseband")[0]
 
-        self._numBaseband = int(numBasebandNode.firstChild.data)
+        self._numBaseband = int(numBasebandNode.firstChild.data.strip())
 
         basebandNamesNode = rowdom.getElementsByTagName("basebandNames")[0]
 
-        basebandNamesStr = basebandNamesNode.firstChild.data
+        basebandNamesStr = basebandNamesNode.firstChild.data.strip()
         self._basebandNames = Parser.stringListToLists(
-            basebandNamesStr, BasebandName, "CorrelatorMode"
+            basebandNamesStr, BasebandName, "CorrelatorMode", False
         )
 
         basebandConfigNode = rowdom.getElementsByTagName("basebandConfig")[0]
 
-        basebandConfigStr = basebandConfigNode.firstChild.data
+        basebandConfigStr = basebandConfigNode.firstChild.data.strip()
+
         self._basebandConfig = Parser.stringListToLists(
-            basebandConfigStr, int, "CorrelatorMode"
+            basebandConfigStr, int, "CorrelatorMode", False
         )
 
         accumModeNode = rowdom.getElementsByTagName("accumMode")[0]
 
-        self._accumMode = AccumMode.newAccumMode(accumModeNode.firstChild.data)
+        self._accumMode = AccumMode.newAccumMode(accumModeNode.firstChild.data.strip())
 
         binModeNode = rowdom.getElementsByTagName("binMode")[0]
 
-        self._binMode = int(binModeNode.firstChild.data)
+        self._binMode = int(binModeNode.firstChild.data.strip())
 
         numAxesNode = rowdom.getElementsByTagName("numAxes")[0]
 
-        self._numAxes = int(numAxesNode.firstChild.data)
+        self._numAxes = int(numAxesNode.firstChild.data.strip())
 
         axesOrderArrayNode = rowdom.getElementsByTagName("axesOrderArray")[0]
 
-        axesOrderArrayStr = axesOrderArrayNode.firstChild.data
+        axesOrderArrayStr = axesOrderArrayNode.firstChild.data.strip()
         self._axesOrderArray = Parser.stringListToLists(
-            axesOrderArrayStr, AxisName, "CorrelatorMode"
+            axesOrderArrayStr, AxisName, "CorrelatorMode", False
         )
 
         filterModeNode = rowdom.getElementsByTagName("filterMode")[0]
 
-        filterModeStr = filterModeNode.firstChild.data
+        filterModeStr = filterModeNode.firstChild.data.strip()
         self._filterMode = Parser.stringListToLists(
-            filterModeStr, FilterMode, "CorrelatorMode"
+            filterModeStr, FilterMode, "CorrelatorMode", False
         )
 
         correlatorNameNode = rowdom.getElementsByTagName("correlatorName")[0]
 
         self._correlatorName = CorrelatorName.newCorrelatorName(
-            correlatorNameNode.firstChild.data
+            correlatorNameNode.firstChild.data.strip()
         )
 
     def toBin(self):

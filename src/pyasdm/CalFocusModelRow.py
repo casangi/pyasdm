@@ -81,18 +81,53 @@ class CalFocusModelRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._antennaName = None
+
         self._receiverBand = ReceiverBand.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._polarizationType = PolarizationType.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
         self._antennaMake = AntennaMake.from_int(0)
+
+        self._numCoeff = 0
+
+        self._numSourceObs = 0
+
+        self._coeffName = []  # this is a list of str []
+
+        self._coeffFormula = []  # this is a list of str []
+
+        self._coeffValue = []  # this is a list of float []
+
+        self._coeffError = []  # this is a list of float []
+
+        self._coeffFixed = []  # this is a list of bool []
+
+        self._focusModel = None
+
+        self._focusRMS = []  # this is a list of Length []
+
+        self._reducedChiSquared = None
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalFocusModelRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -240,95 +275,107 @@ class CalFocusModelRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
 
         self._polarizationType = PolarizationType.newPolarizationType(
-            polarizationTypeNode.firstChild.data
+            polarizationTypeNode.firstChild.data.strip()
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
 
-        self._antennaMake = AntennaMake.newAntennaMake(antennaMakeNode.firstChild.data)
+        self._antennaMake = AntennaMake.newAntennaMake(
+            antennaMakeNode.firstChild.data.strip()
+        )
 
         numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
 
-        self._numCoeff = int(numCoeffNode.firstChild.data)
+        self._numCoeff = int(numCoeffNode.firstChild.data.strip())
 
         numSourceObsNode = rowdom.getElementsByTagName("numSourceObs")[0]
 
-        self._numSourceObs = int(numSourceObsNode.firstChild.data)
+        self._numSourceObs = int(numSourceObsNode.firstChild.data.strip())
 
         coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
 
-        coeffNameStr = coeffNameNode.firstChild.data
-        self._coeffName = Parser.stringListToLists(coeffNameStr, str, "CalFocusModel")
+        coeffNameStr = coeffNameNode.firstChild.data.strip()
+
+        self._coeffName = Parser.stringListToLists(
+            coeffNameStr, str, "CalFocusModel", False
+        )
 
         coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")[0]
 
-        coeffFormulaStr = coeffFormulaNode.firstChild.data
+        coeffFormulaStr = coeffFormulaNode.firstChild.data.strip()
+
         self._coeffFormula = Parser.stringListToLists(
-            coeffFormulaStr, str, "CalFocusModel"
+            coeffFormulaStr, str, "CalFocusModel", False
         )
 
         coeffValueNode = rowdom.getElementsByTagName("coeffValue")[0]
 
-        coeffValueStr = coeffValueNode.firstChild.data
+        coeffValueStr = coeffValueNode.firstChild.data.strip()
+
         self._coeffValue = Parser.stringListToLists(
-            coeffValueStr, float, "CalFocusModel"
+            coeffValueStr, float, "CalFocusModel", False
         )
 
         coeffErrorNode = rowdom.getElementsByTagName("coeffError")[0]
 
-        coeffErrorStr = coeffErrorNode.firstChild.data
+        coeffErrorStr = coeffErrorNode.firstChild.data.strip()
+
         self._coeffError = Parser.stringListToLists(
-            coeffErrorStr, float, "CalFocusModel"
+            coeffErrorStr, float, "CalFocusModel", False
         )
 
         coeffFixedNode = rowdom.getElementsByTagName("coeffFixed")[0]
 
-        coeffFixedStr = coeffFixedNode.firstChild.data
+        coeffFixedStr = coeffFixedNode.firstChild.data.strip()
+
         self._coeffFixed = Parser.stringListToLists(
-            coeffFixedStr, bool, "CalFocusModel"
+            coeffFixedStr, bool, "CalFocusModel", False
         )
 
         focusModelNode = rowdom.getElementsByTagName("focusModel")[0]
 
-        self._focusModel = str(focusModelNode.firstChild.data)
+        self._focusModel = str(focusModelNode.firstChild.data.strip())
 
         focusRMSNode = rowdom.getElementsByTagName("focusRMS")[0]
 
-        focusRMSStr = focusRMSNode.firstChild.data
-        self._focusRMS = Parser.stringListToLists(focusRMSStr, Length, "CalFocusModel")
+        focusRMSStr = focusRMSNode.firstChild.data.strip()
+
+        self._focusRMS = Parser.stringListToLists(
+            focusRMSStr, Length, "CalFocusModel", True
+        )
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        self._reducedChiSquared = double(reducedChiSquaredNode.firstChild.data)
+        self._reducedChiSquared = float(reducedChiSquaredNode.firstChild.data.strip())
 
         # extrinsic attribute values
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -821,20 +868,20 @@ class CalFocusModelRow:
     def getReducedChiSquared(self):
         """
         Get reducedChiSquared.
-        return reducedChiSquared as double
+        return reducedChiSquared as float
         """
 
         return self._reducedChiSquared
 
     def setReducedChiSquared(self, reducedChiSquared):
         """
-        Set reducedChiSquared with the specified double value.
-        reducedChiSquared The double value to which reducedChiSquared is to be set.
+        Set reducedChiSquared with the specified float value.
+        reducedChiSquared The float value to which reducedChiSquared is to be set.
 
 
         """
 
-        self._reducedChiSquared = double(reducedChiSquared)
+        self._reducedChiSquared = float(reducedChiSquared)
 
     # Extrinsic Table Attributes
 
@@ -1054,7 +1101,7 @@ class CalFocusModelRow:
             ):
                 return False
 
-        # reducedChiSquared is a double, compare using the == operator.
+        # reducedChiSquared is a float, compare using the == operator.
         if not (self._reducedChiSquared == reducedChiSquared):
             return False
 
@@ -1185,7 +1232,7 @@ class CalFocusModelRow:
             ):
                 return False
 
-        # reducedChiSquared is a double, compare using the == operator.
+        # reducedChiSquared is a float, compare using the == operator.
         if not (self._reducedChiSquared == reducedChiSquared):
             return False
 

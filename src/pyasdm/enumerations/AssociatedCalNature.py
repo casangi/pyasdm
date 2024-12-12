@@ -1,0 +1,160 @@
+# ALMA - Atacama Large Millimeter Array
+# (c) European Southern Observatory, 2002
+# (c) Associated Universities Inc., 2002
+# Copyright by ESO (in the framework of the ALMA collaboration),
+# Copyright by AUI (in the framework of the ALMA collaboration),
+# All rights reserved.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307  USA
+#
+# /////////////////////////////////////////////////////////////////
+# // WARNING!  DO NOT MODIFY THIS FILE!                          //
+# //  ---------------------------------------------------------  //
+# // | This is generated code!  Do not modify this file.       | //
+# // | Any changes will be lost when the file is re-generated. | //
+# //  ---------------------------------------------------------  //
+# /////////////////////////////////////////////////////////////////
+#
+# File AssociatedCalNature.py
+
+# to keep track of the attributes added to this class for each value of this enumeration
+
+_associatedCalNatureDict = {}
+
+# the possible enumerations
+
+_ASSOCIATED_EXECBLOCK = (
+    0  # The associated execblock id concatenated to produce the data set
+)
+
+
+# their names in a dictionary
+_associatedCalNatureNames = {}
+
+_associatedCalNatureNames[_ASSOCIATED_EXECBLOCK] = "ASSOCIATED_EXECBLOCK"
+
+
+class AssociatedCalNature:
+    """
+    A class for the AssociatedCalNature enumeration.
+    """
+
+    # The value of this AssociatedCalNature, one of the possible enumerations.
+    _value = None
+
+    # its name
+    _name = None
+
+    def __init__(self, associatedCalNature):
+        # construct a AssociatedCalNature from an integer, a string, or another AssociatedCalNature
+        # if associatedCalNature is a string, convert it to an instance of this class using literal
+        if isinstance(associatedCalNature, AssociatedCalNature):
+            # copy constructor
+            self._value = associatedCalNature.getValue()
+            self._name = associatedCalNature.getName()
+        elif isinstance(associatedCalNature, str):
+            # convert it to an instance of this class using literal
+            thisEnum = AssociatedCalNature.literal(associatedCalNature)
+            self._value = thisEnum.getValue()
+            self._name = thisEnum.getName()
+        else:
+            # it must be in the names dictionary
+            if associatedCalNature not in _associatedCalNatureNames:
+                raise ValueError("unrecognized AssociatedCalNature")
+            self._value = associatedCalNature
+            self._name = _associatedCalNatureNames[associatedCalNature]
+            if self._name not in _associatedCalNatureDict:
+                # add this AssociatedCalNature as an attribute to this class using its name
+                setattr(AssociatedCalNature, self._name, self)
+                _associatedCalNatureDict[self._name] = getattr(
+                    AssociatedCalNature, self._name
+                )
+
+    def getValue(self):
+        return self._value
+
+    def getName(self):
+        return self._name
+
+    # by convention with the other languages, these are all static methods
+    @staticmethod
+    def revision():
+        """
+        revision as a string.
+        """
+        return "-1"
+
+    @staticmethod
+    def version():
+        """
+        the major version number as an int.
+        """
+        return 1
+
+    @staticmethod
+    def size():
+        """
+        the number of known enumerators in AssociatedCalNature
+        """
+        return len(_associatedCalNatureNames)
+
+    @staticmethod
+    def name(associatedCalNature):
+        """
+        Returns the string form of the AssociatedCalNature
+        """
+        return associatedCalNature.getName()
+
+    @staticmethod
+    def toString(associatedCalNature):
+        """
+        Equivalent to the name method
+        """
+        return AssociatedCalNature.name(associatedCalNature)
+
+    @staticmethod
+    def names():
+        """
+        Return the list of all known AssociatedCalNature enumeration names
+        """
+        return list(_associatedCalNatureNames.values())
+
+    @staticmethod
+    def newAssociatedCalNature(name):
+        """
+        Equivalent to the literal method
+        """
+        return AssociatedCalNature.literal(name)
+
+    @staticmethod
+    def literal(name):
+        """
+        Return the AssociatedCalNature enumerator value given a string
+        """
+        # it must be available as an attribute
+        if not hasattr(AssociatedCalNature, name):
+            raise ValueError("Unrecognized AssociatedCalNature name")
+        return AssociatedCalNature(getattr(AssociatedCalNature, name).getValue())
+
+    @staticmethod
+    def from_int(i):
+        """
+        Return a AssociatedCalNature from an integration matching an enumeration.
+        """
+        return AssociatedCalNature(i)
+
+
+ASSOCIATED_EXECBLOCK = AssociatedCalNature(_ASSOCIATED_EXECBLOCK)

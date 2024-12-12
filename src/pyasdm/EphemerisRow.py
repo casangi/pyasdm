@@ -72,9 +72,43 @@ class EphemerisRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._ephemerisId = 0
+
+        self._observerLocation = []  # this is a list of float []
+
+        self._equinoxEquator = None
+
+        self._numPolyDir = 0
+
+        self._dir = []  # this is a list of float []  []
+
+        self._numPolyDist = 0
+
+        self._distance = []  # this is a list of float []
+
+        self._timeOrigin = ArrayTime()
+
+        self._origin = None
+
+        self._numPolyRadVelExists = False
+
+        self._numPolyRadVel = 0
+
+        self._radVelExists = False
+
+        self._radVel = []  # this is a list of float []
+
         if row is not None:
             if not isinstance(row, EphemerisRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._timeInterval = ArrayTimeInterval(row._timeInterval)
 
@@ -194,61 +228,69 @@ class EphemerisRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         ephemerisIdNode = rowdom.getElementsByTagName("ephemerisId")[0]
 
-        self._ephemerisId = int(ephemerisIdNode.firstChild.data)
+        self._ephemerisId = int(ephemerisIdNode.firstChild.data.strip())
 
         observerLocationNode = rowdom.getElementsByTagName("observerLocation")[0]
 
-        observerLocationStr = observerLocationNode.firstChild.data
+        observerLocationStr = observerLocationNode.firstChild.data.strip()
+
         self._observerLocation = Parser.stringListToLists(
-            observerLocationStr, double, "Ephemeris"
+            observerLocationStr, float, "Ephemeris", False
         )
 
         equinoxEquatorNode = rowdom.getElementsByTagName("equinoxEquator")[0]
 
-        self._equinoxEquator = double(equinoxEquatorNode.firstChild.data)
+        self._equinoxEquator = float(equinoxEquatorNode.firstChild.data.strip())
 
         numPolyDirNode = rowdom.getElementsByTagName("numPolyDir")[0]
 
-        self._numPolyDir = int(numPolyDirNode.firstChild.data)
+        self._numPolyDir = int(numPolyDirNode.firstChild.data.strip())
 
         dirNode = rowdom.getElementsByTagName("dir")[0]
 
-        dirStr = dirNode.firstChild.data
-        self._dir = Parser.stringListToLists(dirStr, double, "Ephemeris")
+        dirStr = dirNode.firstChild.data.strip()
+
+        self._dir = Parser.stringListToLists(dirStr, float, "Ephemeris", False)
 
         numPolyDistNode = rowdom.getElementsByTagName("numPolyDist")[0]
 
-        self._numPolyDist = int(numPolyDistNode.firstChild.data)
+        self._numPolyDist = int(numPolyDistNode.firstChild.data.strip())
 
         distanceNode = rowdom.getElementsByTagName("distance")[0]
 
-        distanceStr = distanceNode.firstChild.data
-        self._distance = Parser.stringListToLists(distanceStr, double, "Ephemeris")
+        distanceStr = distanceNode.firstChild.data.strip()
+
+        self._distance = Parser.stringListToLists(
+            distanceStr, float, "Ephemeris", False
+        )
 
         timeOriginNode = rowdom.getElementsByTagName("timeOrigin")[0]
 
-        self._timeOrigin = ArrayTime(timeOriginNode.firstChild.data)
+        self._timeOrigin = ArrayTime(timeOriginNode.firstChild.data.strip())
 
         originNode = rowdom.getElementsByTagName("origin")[0]
 
-        self._origin = str(originNode.firstChild.data)
+        self._origin = str(originNode.firstChild.data.strip())
 
         numPolyRadVelNode = rowdom.getElementsByTagName("numPolyRadVel")
         if len(numPolyRadVelNode) > 0:
 
-            self._numPolyRadVel = int(numPolyRadVelNode[0].firstChild.data)
+            self._numPolyRadVel = int(numPolyRadVelNode[0].firstChild.data.strip())
 
             self._numPolyRadVelExists = True
 
         radVelNode = rowdom.getElementsByTagName("radVel")
         if len(radVelNode) > 0:
 
-            radVelStr = radVelNode[0].firstChild.data
-            self._radVel = Parser.stringListToLists(radVelStr, double, "Ephemeris")
+            radVelStr = radVelNode[0].firstChild.data.strip()
+
+            self._radVel = Parser.stringListToLists(
+                radVelStr, float, "Ephemeris", False
+            )
 
             self._radVelExists = True
 
@@ -318,20 +360,20 @@ class EphemerisRow:
 
     # ===> Attribute observerLocation
 
-    _observerLocation = None  # this is a 1D list of double
+    _observerLocation = None  # this is a 1D list of float
 
     def getObserverLocation(self):
         """
         Get observerLocation.
-        return observerLocation as double []
+        return observerLocation as float []
         """
 
         return copy.deepcopy(self._observerLocation)
 
     def setObserverLocation(self, observerLocation):
         """
-        Set observerLocation with the specified double []  value.
-        observerLocation The double []  value to which observerLocation is to be set.
+        Set observerLocation with the specified float []  value.
+        observerLocation The float []  value to which observerLocation is to be set.
 
 
         """
@@ -348,11 +390,11 @@ class EphemerisRow:
             if not shapeOK:
                 raise ValueError("shape of observerLocation is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(observerLocation, double):
+            if not Parser.checkListType(observerLocation, float):
                 raise ValueError(
-                    "type of the first value in observerLocation is not double as expected"
+                    "type of the first value in observerLocation is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._observerLocation = copy.deepcopy(observerLocation)
@@ -366,20 +408,20 @@ class EphemerisRow:
     def getEquinoxEquator(self):
         """
         Get equinoxEquator.
-        return equinoxEquator as double
+        return equinoxEquator as float
         """
 
         return self._equinoxEquator
 
     def setEquinoxEquator(self, equinoxEquator):
         """
-        Set equinoxEquator with the specified double value.
-        equinoxEquator The double value to which equinoxEquator is to be set.
+        Set equinoxEquator with the specified float value.
+        equinoxEquator The float value to which equinoxEquator is to be set.
 
 
         """
 
-        self._equinoxEquator = double(equinoxEquator)
+        self._equinoxEquator = float(equinoxEquator)
 
     # ===> Attribute numPolyDir
 
@@ -405,20 +447,20 @@ class EphemerisRow:
 
     # ===> Attribute dir
 
-    _dir = None  # this is a 2D list of double
+    _dir = None  # this is a 2D list of float
 
     def getDir(self):
         """
         Get dir.
-        return dir as double []  []
+        return dir as float []  []
         """
 
         return copy.deepcopy(self._dir)
 
     def setDir(self, dir):
         """
-        Set dir with the specified double []  []  value.
-        dir The double []  []  value to which dir is to be set.
+        Set dir with the specified float []  []  value.
+        dir The float []  []  value to which dir is to be set.
 
 
         """
@@ -435,11 +477,11 @@ class EphemerisRow:
             if not shapeOK:
                 raise ValueError("shape of dir is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(dir, double):
+            if not Parser.checkListType(dir, float):
                 raise ValueError(
-                    "type of the first value in dir is not double as expected"
+                    "type of the first value in dir is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._dir = copy.deepcopy(dir)
@@ -470,20 +512,20 @@ class EphemerisRow:
 
     # ===> Attribute distance
 
-    _distance = None  # this is a 1D list of double
+    _distance = None  # this is a 1D list of float
 
     def getDistance(self):
         """
         Get distance.
-        return distance as double []
+        return distance as float []
         """
 
         return copy.deepcopy(self._distance)
 
     def setDistance(self, distance):
         """
-        Set distance with the specified double []  value.
-        distance The double []  value to which distance is to be set.
+        Set distance with the specified float []  value.
+        distance The float []  value to which distance is to be set.
 
 
         """
@@ -500,11 +542,11 @@ class EphemerisRow:
             if not shapeOK:
                 raise ValueError("shape of distance is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(distance, double):
+            if not Parser.checkListType(distance, float):
                 raise ValueError(
-                    "type of the first value in distance is not double as expected"
+                    "type of the first value in distance is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._distance = copy.deepcopy(distance)
@@ -604,7 +646,7 @@ class EphemerisRow:
     # ===> Attribute radVel, which is optional
     _radVelExists = False
 
-    _radVel = None  # this is a 1D list of double
+    _radVel = None  # this is a 1D list of float
 
     def isRadVelExists(self):
         """
@@ -616,7 +658,7 @@ class EphemerisRow:
     def getRadVel(self):
         """
         Get radVel, which is optional.
-        return radVel as double []
+        return radVel as float []
         raises ValueError If radVel does not exist.
         """
         if not self._radVelExists:
@@ -630,8 +672,8 @@ class EphemerisRow:
 
     def setRadVel(self, radVel):
         """
-        Set radVel with the specified double []  value.
-        radVel The double []  value to which radVel is to be set.
+        Set radVel with the specified float []  value.
+        radVel The float []  value to which radVel is to be set.
 
 
         """
@@ -648,11 +690,11 @@ class EphemerisRow:
             if not shapeOK:
                 raise ValueError("shape of radVel is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(radVel, double):
+            if not Parser.checkListType(radVel, float):
                 raise ValueError(
-                    "type of the first value in radVel is not double as expected"
+                    "type of the first value in radVel is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._radVel = copy.deepcopy(radVel)
@@ -705,11 +747,11 @@ class EphemerisRow:
             return False
         for indx in range(len(observerLocation)):
 
-            # observerLocation is a list of double, compare using == operator.
+            # observerLocation is a list of float, compare using == operator.
             if not (self._observerLocation[indx] == observerLocation[indx]):
                 return False
 
-        # equinoxEquator is a double, compare using the == operator.
+        # equinoxEquator is a float, compare using the == operator.
         if not (self._equinoxEquator == equinoxEquator):
             return False
 
@@ -732,7 +774,7 @@ class EphemerisRow:
             for i in range(dir_dims[0]):
                 for j in range(dir_dims[0]):
 
-                    # dir is an array of double, compare using == operator.
+                    # dir is an array of float, compare using == operator.
                     if not (self._dir[i][j] == dir[i][j]):
                         return False
 
@@ -746,7 +788,7 @@ class EphemerisRow:
             return False
         for indx in range(len(distance)):
 
-            # distance is a list of double, compare using == operator.
+            # distance is a list of float, compare using == operator.
             if not (self._distance[indx] == distance[indx]):
                 return False
 
@@ -795,11 +837,11 @@ class EphemerisRow:
             return False
         for indx in range(len(observerLocation)):
 
-            # observerLocation is a list of double, compare using == operator.
+            # observerLocation is a list of float, compare using == operator.
             if not (self._observerLocation[indx] == observerLocation[indx]):
                 return False
 
-        # equinoxEquator is a double, compare using the == operator.
+        # equinoxEquator is a float, compare using the == operator.
         if not (self._equinoxEquator == equinoxEquator):
             return False
 
@@ -822,7 +864,7 @@ class EphemerisRow:
             for i in range(dir_dims[0]):
                 for j in range(dir_dims[0]):
 
-                    # dir is an array of double, compare using == operator.
+                    # dir is an array of float, compare using == operator.
                     if not (self._dir[i][j] == dir[i][j]):
                         return False
 
@@ -836,7 +878,7 @@ class EphemerisRow:
             return False
         for indx in range(len(distance)):
 
-            # distance is a list of double, compare using == operator.
+            # distance is a list of float, compare using == operator.
             if not (self._distance[indx] == distance[indx]):
                 return False
 

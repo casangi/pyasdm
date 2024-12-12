@@ -203,3 +203,14 @@ class Entity:
         if not isinstance(instanceVersion, str):
             raise ValueError("instanceVersion is not a string")
         self._instanceVersion = instanceVersion
+
+    @staticmethod
+    def getInstance(stringList):
+        """
+        This mirrors similar functions in the other types.
+        This should not be used to construct an Entity because of the
+        complexity of that object. It is included here in case
+        the translation from java includes such a use. If used it
+        will raise a RuntimeError.
+        """
+        raise RuntimeError("Entity.getEntity called, not supported in pyasdm.")

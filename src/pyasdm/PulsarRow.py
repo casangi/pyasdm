@@ -72,9 +72,53 @@ class PulsarRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._pulsarId = Tag()
+
+        self._refTime = ArrayTime()
+
+        self._refPulseFreq = Frequency()
+
+        self._refPhase = None
+
+        self._numBin = 0
+
+        self._numPolyExists = False
+
+        self._numPoly = 0
+
+        self._phasePolyExists = False
+
+        self._phasePoly = []  # this is a list of float []
+
+        self._timeSpanExists = False
+
+        self._timeSpan = Interval()
+
+        self._startPhaseBinExists = False
+
+        self._startPhaseBin = []  # this is a list of float []
+
+        self._endPhaseBinExists = False
+
+        self._endPhaseBin = []  # this is a list of float []
+
+        self._dispersionMeasureExists = False
+
+        self._dispersionMeasure = None
+
+        self._refFrequencyExists = False
+
+        self._refFrequency = Frequency()
+
         if row is not None:
             if not isinstance(row, PulsarRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._pulsarId = Tag(row._pulsarId)
 
@@ -233,52 +277,56 @@ class PulsarRow:
 
         pulsarIdNode = rowdom.getElementsByTagName("pulsarId")[0]
 
-        self._pulsarId = Tag(pulsarIdNode.firstChild.data)
+        self._pulsarId = Tag(pulsarIdNode.firstChild.data.strip())
 
         refTimeNode = rowdom.getElementsByTagName("refTime")[0]
 
-        self._refTime = ArrayTime(refTimeNode.firstChild.data)
+        self._refTime = ArrayTime(refTimeNode.firstChild.data.strip())
 
         refPulseFreqNode = rowdom.getElementsByTagName("refPulseFreq")[0]
 
-        self._refPulseFreq = Frequency(refPulseFreqNode.firstChild.data)
+        self._refPulseFreq = Frequency(refPulseFreqNode.firstChild.data.strip())
 
         refPhaseNode = rowdom.getElementsByTagName("refPhase")[0]
 
-        self._refPhase = double(refPhaseNode.firstChild.data)
+        self._refPhase = float(refPhaseNode.firstChild.data.strip())
 
         numBinNode = rowdom.getElementsByTagName("numBin")[0]
 
-        self._numBin = int(numBinNode.firstChild.data)
+        self._numBin = int(numBinNode.firstChild.data.strip())
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")
         if len(numPolyNode) > 0:
 
-            self._numPoly = int(numPolyNode[0].firstChild.data)
+            self._numPoly = int(numPolyNode[0].firstChild.data.strip())
 
             self._numPolyExists = True
 
         phasePolyNode = rowdom.getElementsByTagName("phasePoly")
         if len(phasePolyNode) > 0:
 
-            phasePolyStr = phasePolyNode[0].firstChild.data
-            self._phasePoly = Parser.stringListToLists(phasePolyStr, double, "Pulsar")
+            phasePolyStr = phasePolyNode[0].firstChild.data.strip()
+
+            self._phasePoly = Parser.stringListToLists(
+                phasePolyStr, float, "Pulsar", False
+            )
 
             self._phasePolyExists = True
 
         timeSpanNode = rowdom.getElementsByTagName("timeSpan")
         if len(timeSpanNode) > 0:
 
-            self._timeSpan = Interval(timeSpanNode[0].firstChild.data)
+            self._timeSpan = Interval(timeSpanNode[0].firstChild.data.strip())
 
             self._timeSpanExists = True
 
         startPhaseBinNode = rowdom.getElementsByTagName("startPhaseBin")
         if len(startPhaseBinNode) > 0:
 
-            startPhaseBinStr = startPhaseBinNode[0].firstChild.data
+            startPhaseBinStr = startPhaseBinNode[0].firstChild.data.strip()
+
             self._startPhaseBin = Parser.stringListToLists(
-                startPhaseBinStr, float, "Pulsar"
+                startPhaseBinStr, float, "Pulsar", False
             )
 
             self._startPhaseBinExists = True
@@ -286,9 +334,10 @@ class PulsarRow:
         endPhaseBinNode = rowdom.getElementsByTagName("endPhaseBin")
         if len(endPhaseBinNode) > 0:
 
-            endPhaseBinStr = endPhaseBinNode[0].firstChild.data
+            endPhaseBinStr = endPhaseBinNode[0].firstChild.data.strip()
+
             self._endPhaseBin = Parser.stringListToLists(
-                endPhaseBinStr, float, "Pulsar"
+                endPhaseBinStr, float, "Pulsar", False
             )
 
             self._endPhaseBinExists = True
@@ -296,14 +345,16 @@ class PulsarRow:
         dispersionMeasureNode = rowdom.getElementsByTagName("dispersionMeasure")
         if len(dispersionMeasureNode) > 0:
 
-            self._dispersionMeasure = double(dispersionMeasureNode[0].firstChild.data)
+            self._dispersionMeasure = float(
+                dispersionMeasureNode[0].firstChild.data.strip()
+            )
 
             self._dispersionMeasureExists = True
 
         refFrequencyNode = rowdom.getElementsByTagName("refFrequency")
         if len(refFrequencyNode) > 0:
 
-            self._refFrequency = Frequency(refFrequencyNode[0].firstChild.data)
+            self._refFrequency = Frequency(refFrequencyNode[0].firstChild.data.strip())
 
             self._refFrequencyExists = True
 
@@ -395,20 +446,20 @@ class PulsarRow:
     def getRefPhase(self):
         """
         Get refPhase.
-        return refPhase as double
+        return refPhase as float
         """
 
         return self._refPhase
 
     def setRefPhase(self, refPhase):
         """
-        Set refPhase with the specified double value.
-        refPhase The double value to which refPhase is to be set.
+        Set refPhase with the specified float value.
+        refPhase The float value to which refPhase is to be set.
 
 
         """
 
-        self._refPhase = double(refPhase)
+        self._refPhase = float(refPhase)
 
     # ===> Attribute numBin
 
@@ -480,7 +531,7 @@ class PulsarRow:
     # ===> Attribute phasePoly, which is optional
     _phasePolyExists = False
 
-    _phasePoly = None  # this is a 1D list of double
+    _phasePoly = None  # this is a 1D list of float
 
     def isPhasePolyExists(self):
         """
@@ -492,7 +543,7 @@ class PulsarRow:
     def getPhasePoly(self):
         """
         Get phasePoly, which is optional.
-        return phasePoly as double []
+        return phasePoly as float []
         raises ValueError If phasePoly does not exist.
         """
         if not self._phasePolyExists:
@@ -506,8 +557,8 @@ class PulsarRow:
 
     def setPhasePoly(self, phasePoly):
         """
-        Set phasePoly with the specified double []  value.
-        phasePoly The double []  value to which phasePoly is to be set.
+        Set phasePoly with the specified float []  value.
+        phasePoly The float []  value to which phasePoly is to be set.
 
 
         """
@@ -524,11 +575,11 @@ class PulsarRow:
             if not shapeOK:
                 raise ValueError("shape of phasePoly is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phasePoly, double):
+            if not Parser.checkListType(phasePoly, float):
                 raise ValueError(
-                    "type of the first value in phasePoly is not double as expected"
+                    "type of the first value in phasePoly is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._phasePoly = copy.deepcopy(phasePoly)
@@ -736,7 +787,7 @@ class PulsarRow:
     def getDispersionMeasure(self):
         """
         Get dispersionMeasure, which is optional.
-        return dispersionMeasure as double
+        return dispersionMeasure as float
         raises ValueError If dispersionMeasure does not exist.
         """
         if not self._dispersionMeasureExists:
@@ -750,13 +801,13 @@ class PulsarRow:
 
     def setDispersionMeasure(self, dispersionMeasure):
         """
-        Set dispersionMeasure with the specified double value.
-        dispersionMeasure The double value to which dispersionMeasure is to be set.
+        Set dispersionMeasure with the specified float value.
+        dispersionMeasure The float value to which dispersionMeasure is to be set.
 
 
         """
 
-        self._dispersionMeasure = double(dispersionMeasure)
+        self._dispersionMeasure = float(dispersionMeasure)
 
         self._dispersionMeasureExists = True
 
@@ -834,7 +885,7 @@ class PulsarRow:
         ):
             return False
 
-        # refPhase is a double, compare using the == operator.
+        # refPhase is a float, compare using the == operator.
         if not (self._refPhase == refPhase):
             return False
 
@@ -869,7 +920,7 @@ class PulsarRow:
         ):
             return False
 
-        # refPhase is a double, compare using the == operator.
+        # refPhase is a float, compare using the == operator.
         if not (self._refPhase == refPhase):
             return False
 

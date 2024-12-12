@@ -72,9 +72,35 @@ class HistoryRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._time = ArrayTime()
+
+        self._message = None
+
+        self._priority = None
+
+        self._origin = None
+
+        self._objectId = None
+
+        self._application = None
+
+        self._cliCommand = None
+
+        self._appParms = None
+
+        # extrinsic attributes
+
+        self._execBlockId = Tag()
+
         if row is not None:
             if not isinstance(row, HistoryRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._execBlockId = Tag(row._execBlockId)
 
@@ -164,41 +190,41 @@ class HistoryRow:
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data)
+        self._time = ArrayTime(timeNode.firstChild.data.strip())
 
         messageNode = rowdom.getElementsByTagName("message")[0]
 
-        self._message = str(messageNode.firstChild.data)
+        self._message = str(messageNode.firstChild.data.strip())
 
         priorityNode = rowdom.getElementsByTagName("priority")[0]
 
-        self._priority = str(priorityNode.firstChild.data)
+        self._priority = str(priorityNode.firstChild.data.strip())
 
         originNode = rowdom.getElementsByTagName("origin")[0]
 
-        self._origin = str(originNode.firstChild.data)
+        self._origin = str(originNode.firstChild.data.strip())
 
         objectIdNode = rowdom.getElementsByTagName("objectId")[0]
 
-        self._objectId = str(objectIdNode.firstChild.data)
+        self._objectId = str(objectIdNode.firstChild.data.strip())
 
         applicationNode = rowdom.getElementsByTagName("application")[0]
 
-        self._application = str(applicationNode.firstChild.data)
+        self._application = str(applicationNode.firstChild.data.strip())
 
         cliCommandNode = rowdom.getElementsByTagName("cliCommand")[0]
 
-        self._cliCommand = str(cliCommandNode.firstChild.data)
+        self._cliCommand = str(cliCommandNode.firstChild.data.strip())
 
         appParmsNode = rowdom.getElementsByTagName("appParms")[0]
 
-        self._appParms = str(appParmsNode.firstChild.data)
+        self._appParms = str(appParmsNode.firstChild.data.strip())
 
         # extrinsic attribute values
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data)
+        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

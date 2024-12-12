@@ -75,12 +75,25 @@ class HolographyRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of HolographyChannelType Enumeration, start off with it being empty
-        self._type = []
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._holographyId = Tag()
+
+        self._distance = Length()
+
+        self._focus = Length()
+
+        self._numCorr = 0
+
+        self._type = []  # this is a list of HolographyChannelType []
 
         if row is not None:
             if not isinstance(row, HolographyRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._holographyId = Tag(row._holographyId)
 
@@ -153,25 +166,25 @@ class HolographyRow:
 
         holographyIdNode = rowdom.getElementsByTagName("holographyId")[0]
 
-        self._holographyId = Tag(holographyIdNode.firstChild.data)
+        self._holographyId = Tag(holographyIdNode.firstChild.data.strip())
 
         distanceNode = rowdom.getElementsByTagName("distance")[0]
 
-        self._distance = Length(distanceNode.firstChild.data)
+        self._distance = Length(distanceNode.firstChild.data.strip())
 
         focusNode = rowdom.getElementsByTagName("focus")[0]
 
-        self._focus = Length(focusNode.firstChild.data)
+        self._focus = Length(focusNode.firstChild.data.strip())
 
         numCorrNode = rowdom.getElementsByTagName("numCorr")[0]
 
-        self._numCorr = int(numCorrNode.firstChild.data)
+        self._numCorr = int(numCorrNode.firstChild.data.strip())
 
         typeNode = rowdom.getElementsByTagName("type")[0]
 
-        typeStr = typeNode.firstChild.data
+        typeStr = typeNode.firstChild.data.strip()
         self._type = Parser.stringListToLists(
-            typeStr, HolographyChannelType, "Holography"
+            typeStr, HolographyChannelType, "Holography", False
         )
 
     def toBin(self):

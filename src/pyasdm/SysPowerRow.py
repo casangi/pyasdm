@@ -72,9 +72,39 @@ class SysPowerRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._numReceptor = 0
+
+        self._switchedPowerDifferenceExists = False
+
+        self._switchedPowerDifference = []  # this is a list of float []
+
+        self._switchedPowerSumExists = False
+
+        self._switchedPowerSum = []  # this is a list of float []
+
+        self._requantizerGainExists = False
+
+        self._requantizerGain = []  # this is a list of float []
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._feedId = 0
+
+        self._spectralWindowId = Tag()
+
         if row is not None:
             if not isinstance(row, SysPowerRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -191,20 +221,23 @@ class SysPowerRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         switchedPowerDifferenceNode = rowdom.getElementsByTagName(
             "switchedPowerDifference"
         )
         if len(switchedPowerDifferenceNode) > 0:
 
-            switchedPowerDifferenceStr = switchedPowerDifferenceNode[0].firstChild.data
+            switchedPowerDifferenceStr = switchedPowerDifferenceNode[
+                0
+            ].firstChild.data.strip()
+
             self._switchedPowerDifference = Parser.stringListToLists(
-                switchedPowerDifferenceStr, float, "SysPower"
+                switchedPowerDifferenceStr, float, "SysPower", False
             )
 
             self._switchedPowerDifferenceExists = True
@@ -212,9 +245,10 @@ class SysPowerRow:
         switchedPowerSumNode = rowdom.getElementsByTagName("switchedPowerSum")
         if len(switchedPowerSumNode) > 0:
 
-            switchedPowerSumStr = switchedPowerSumNode[0].firstChild.data
+            switchedPowerSumStr = switchedPowerSumNode[0].firstChild.data.strip()
+
             self._switchedPowerSum = Parser.stringListToLists(
-                switchedPowerSumStr, float, "SysPower"
+                switchedPowerSumStr, float, "SysPower", False
             )
 
             self._switchedPowerSumExists = True
@@ -222,9 +256,10 @@ class SysPowerRow:
         requantizerGainNode = rowdom.getElementsByTagName("requantizerGain")
         if len(requantizerGainNode) > 0:
 
-            requantizerGainStr = requantizerGainNode[0].firstChild.data
+            requantizerGainStr = requantizerGainNode[0].firstChild.data.strip()
+
             self._requantizerGain = Parser.stringListToLists(
-                requantizerGainStr, float, "SysPower"
+                requantizerGainStr, float, "SysPower", False
             )
 
             self._requantizerGainExists = True
@@ -233,15 +268,15 @@ class SysPowerRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data)
+        self._feedId = int(feedIdNode.firstChild.data.strip())
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

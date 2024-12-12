@@ -81,18 +81,87 @@ class CalHolographyRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._antennaName = None
+
         self._antennaMake = AntennaMake.from_int(0)
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        self._startValidTime = ArrayTime()
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._endValidTime = ArrayTime()
+
+        self._ambientTemperature = Temperature()
+
+        self._focusPosition = []  # this is a list of Length []
+
+        self._frequencyRange = []  # this is a list of Frequency []
+
+        self._illuminationTaper = None
+
+        self._numReceptor = 0
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._numPanelModes = 0
+
         self._receiverBand = ReceiverBand.from_int(0)
+
+        self._beamMapUID = EntityRef()
+
+        self._rawRMS = Length()
+
+        self._weightedRMS = Length()
+
+        self._surfaceMapUID = EntityRef()
+
+        self._direction = []  # this is a list of Angle []
+
+        self._numScrewExists = False
+
+        self._numScrew = 0
+
+        self._screwNameExists = False
+
+        self._screwName = []  # this is a list of str []
+
+        self._screwMotionExists = False
+
+        self._screwMotion = []  # this is a list of Length []
+
+        self._screwMotionErrorExists = False
+
+        self._screwMotionError = []  # this is a list of Length []
+
+        self._gravCorrectionExists = False
+
+        self._gravCorrection = None
+
+        self._gravOptRangeExists = False
+
+        self._gravOptRange = []  # this is a list of Angle []
+
+        self._tempCorrectionExists = False
+
+        self._tempCorrection = None
+
+        self._tempOptRangeExists = False
+
+        self._tempOptRange = []  # this is a list of Temperature []
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalHolographyRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -343,61 +412,67 @@ class CalHolographyRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
 
-        self._antennaMake = AntennaMake.newAntennaMake(antennaMakeNode.firstChild.data)
+        self._antennaMake = AntennaMake.newAntennaMake(
+            antennaMakeNode.firstChild.data.strip()
+        )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         ambientTemperatureNode = rowdom.getElementsByTagName("ambientTemperature")[0]
 
-        self._ambientTemperature = Temperature(ambientTemperatureNode.firstChild.data)
+        self._ambientTemperature = Temperature(
+            ambientTemperatureNode.firstChild.data.strip()
+        )
 
         focusPositionNode = rowdom.getElementsByTagName("focusPosition")[0]
 
-        focusPositionStr = focusPositionNode.firstChild.data
+        focusPositionStr = focusPositionNode.firstChild.data.strip()
+
         self._focusPosition = Parser.stringListToLists(
-            focusPositionStr, Length, "CalHolography"
+            focusPositionStr, Length, "CalHolography", True
         )
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data
+        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+
         self._frequencyRange = Parser.stringListToLists(
-            frequencyRangeStr, Frequency, "CalHolography"
+            frequencyRangeStr, Frequency, "CalHolography", True
         )
 
         illuminationTaperNode = rowdom.getElementsByTagName("illuminationTaper")[0]
 
-        self._illuminationTaper = double(illuminationTaperNode.firstChild.data)
+        self._illuminationTaper = float(illuminationTaperNode.firstChild.data.strip())
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "CalHolography"
+            polarizationTypesStr, PolarizationType, "CalHolography", False
         )
 
         numPanelModesNode = rowdom.getElementsByTagName("numPanelModes")[0]
 
-        self._numPanelModes = int(numPanelModesNode.firstChild.data)
+        self._numPanelModes = int(numPanelModesNode.firstChild.data.strip())
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         beamMapUIDNode = rowdom.getElementsByTagName("beamMapUID")[0]
@@ -406,11 +481,11 @@ class CalHolographyRow:
 
         rawRMSNode = rowdom.getElementsByTagName("rawRMS")[0]
 
-        self._rawRMS = Length(rawRMSNode.firstChild.data)
+        self._rawRMS = Length(rawRMSNode.firstChild.data.strip())
 
         weightedRMSNode = rowdom.getElementsByTagName("weightedRMS")[0]
 
-        self._weightedRMS = Length(weightedRMSNode.firstChild.data)
+        self._weightedRMS = Length(weightedRMSNode.firstChild.data.strip())
 
         surfaceMapUIDNode = rowdom.getElementsByTagName("surfaceMapUID")[0]
 
@@ -418,22 +493,26 @@ class CalHolographyRow:
 
         directionNode = rowdom.getElementsByTagName("direction")[0]
 
-        directionStr = directionNode.firstChild.data
-        self._direction = Parser.stringListToLists(directionStr, Angle, "CalHolography")
+        directionStr = directionNode.firstChild.data.strip()
+
+        self._direction = Parser.stringListToLists(
+            directionStr, Angle, "CalHolography", True
+        )
 
         numScrewNode = rowdom.getElementsByTagName("numScrew")
         if len(numScrewNode) > 0:
 
-            self._numScrew = int(numScrewNode[0].firstChild.data)
+            self._numScrew = int(numScrewNode[0].firstChild.data.strip())
 
             self._numScrewExists = True
 
         screwNameNode = rowdom.getElementsByTagName("screwName")
         if len(screwNameNode) > 0:
 
-            screwNameStr = screwNameNode[0].firstChild.data
+            screwNameStr = screwNameNode[0].firstChild.data.strip()
+
             self._screwName = Parser.stringListToLists(
-                screwNameStr, str, "CalHolography"
+                screwNameStr, str, "CalHolography", False
             )
 
             self._screwNameExists = True
@@ -441,9 +520,10 @@ class CalHolographyRow:
         screwMotionNode = rowdom.getElementsByTagName("screwMotion")
         if len(screwMotionNode) > 0:
 
-            screwMotionStr = screwMotionNode[0].firstChild.data
+            screwMotionStr = screwMotionNode[0].firstChild.data.strip()
+
             self._screwMotion = Parser.stringListToLists(
-                screwMotionStr, Length, "CalHolography"
+                screwMotionStr, Length, "CalHolography", True
             )
 
             self._screwMotionExists = True
@@ -451,9 +531,10 @@ class CalHolographyRow:
         screwMotionErrorNode = rowdom.getElementsByTagName("screwMotionError")
         if len(screwMotionErrorNode) > 0:
 
-            screwMotionErrorStr = screwMotionErrorNode[0].firstChild.data
+            screwMotionErrorStr = screwMotionErrorNode[0].firstChild.data.strip()
+
             self._screwMotionError = Parser.stringListToLists(
-                screwMotionErrorStr, Length, "CalHolography"
+                screwMotionErrorStr, Length, "CalHolography", True
             )
 
             self._screwMotionErrorExists = True
@@ -461,16 +542,17 @@ class CalHolographyRow:
         gravCorrectionNode = rowdom.getElementsByTagName("gravCorrection")
         if len(gravCorrectionNode) > 0:
 
-            self._gravCorrection = bool(gravCorrectionNode[0].firstChild.data)
+            self._gravCorrection = bool(gravCorrectionNode[0].firstChild.data.strip())
 
             self._gravCorrectionExists = True
 
         gravOptRangeNode = rowdom.getElementsByTagName("gravOptRange")
         if len(gravOptRangeNode) > 0:
 
-            gravOptRangeStr = gravOptRangeNode[0].firstChild.data
+            gravOptRangeStr = gravOptRangeNode[0].firstChild.data.strip()
+
             self._gravOptRange = Parser.stringListToLists(
-                gravOptRangeStr, Angle, "CalHolography"
+                gravOptRangeStr, Angle, "CalHolography", True
             )
 
             self._gravOptRangeExists = True
@@ -478,16 +560,17 @@ class CalHolographyRow:
         tempCorrectionNode = rowdom.getElementsByTagName("tempCorrection")
         if len(tempCorrectionNode) > 0:
 
-            self._tempCorrection = bool(tempCorrectionNode[0].firstChild.data)
+            self._tempCorrection = bool(tempCorrectionNode[0].firstChild.data.strip())
 
             self._tempCorrectionExists = True
 
         tempOptRangeNode = rowdom.getElementsByTagName("tempOptRange")
         if len(tempOptRangeNode) > 0:
 
-            tempOptRangeStr = tempOptRangeNode[0].firstChild.data
+            tempOptRangeStr = tempOptRangeNode[0].firstChild.data.strip()
+
             self._tempOptRange = Parser.stringListToLists(
-                tempOptRangeStr, Temperature, "CalHolography"
+                tempOptRangeStr, Temperature, "CalHolography", True
             )
 
             self._tempOptRangeExists = True
@@ -496,11 +579,11 @@ class CalHolographyRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -720,20 +803,20 @@ class CalHolographyRow:
     def getIlluminationTaper(self):
         """
         Get illuminationTaper.
-        return illuminationTaper as double
+        return illuminationTaper as float
         """
 
         return self._illuminationTaper
 
     def setIlluminationTaper(self, illuminationTaper):
         """
-        Set illuminationTaper with the specified double value.
-        illuminationTaper The double value to which illuminationTaper is to be set.
+        Set illuminationTaper with the specified float value.
+        illuminationTaper The float value to which illuminationTaper is to be set.
 
 
         """
 
-        self._illuminationTaper = double(illuminationTaper)
+        self._illuminationTaper = float(illuminationTaper)
 
     # ===> Attribute numReceptor
 
@@ -1611,7 +1694,7 @@ class CalHolographyRow:
             ):
                 return False
 
-        # illuminationTaper is a double, compare using the == operator.
+        # illuminationTaper is a float, compare using the == operator.
         if not (self._illuminationTaper == illuminationTaper):
             return False
 
@@ -1758,7 +1841,7 @@ class CalHolographyRow:
             ):
                 return False
 
-        # illuminationTaper is a double, compare using the == operator.
+        # illuminationTaper is a float, compare using the == operator.
         if not (self._illuminationTaper == illuminationTaper):
             return False
 

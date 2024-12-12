@@ -75,12 +75,57 @@ class CalWVRRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
         self._wvrMethod = WVRMethod.from_int(0)
+
+        self._antennaName = None
+
+        self._numInputAntennas = 0
+
+        self._inputAntennaNames = []  # this is a list of str []
+
+        self._numChan = 0
+
+        self._chanFreq = []  # this is a list of Frequency []
+
+        self._chanWidth = []  # this is a list of Frequency []
+
+        self._refTemp = []  # this is a list of Temperature []  []
+
+        self._numPoly = 0
+
+        self._pathCoeff = []  # this is a list of float []  []  []
+
+        self._polyFreqLimits = []  # this is a list of Frequency []
+
+        self._wetPath = []  # this is a list of float []
+
+        self._dryPath = []  # this is a list of float []
+
+        self._water = Length()
+
+        self._tauBaselineExists = False
+
+        self._tauBaseline = None
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalWVRRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -230,84 +275,98 @@ class CalWVRRow:
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         wvrMethodNode = rowdom.getElementsByTagName("wvrMethod")[0]
 
-        self._wvrMethod = WVRMethod.newWVRMethod(wvrMethodNode.firstChild.data)
+        self._wvrMethod = WVRMethod.newWVRMethod(wvrMethodNode.firstChild.data.strip())
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         numInputAntennasNode = rowdom.getElementsByTagName("numInputAntennas")[0]
 
-        self._numInputAntennas = int(numInputAntennasNode.firstChild.data)
+        self._numInputAntennas = int(numInputAntennasNode.firstChild.data.strip())
 
         inputAntennaNamesNode = rowdom.getElementsByTagName("inputAntennaNames")[0]
 
-        inputAntennaNamesStr = inputAntennaNamesNode.firstChild.data
+        inputAntennaNamesStr = inputAntennaNamesNode.firstChild.data.strip()
+
         self._inputAntennaNames = Parser.stringListToLists(
-            inputAntennaNamesStr, str, "CalWVR"
+            inputAntennaNamesStr, str, "CalWVR", False
         )
 
         numChanNode = rowdom.getElementsByTagName("numChan")[0]
 
-        self._numChan = int(numChanNode.firstChild.data)
+        self._numChan = int(numChanNode.firstChild.data.strip())
 
         chanFreqNode = rowdom.getElementsByTagName("chanFreq")[0]
 
-        chanFreqStr = chanFreqNode.firstChild.data
-        self._chanFreq = Parser.stringListToLists(chanFreqStr, Frequency, "CalWVR")
+        chanFreqStr = chanFreqNode.firstChild.data.strip()
+
+        self._chanFreq = Parser.stringListToLists(
+            chanFreqStr, Frequency, "CalWVR", True
+        )
 
         chanWidthNode = rowdom.getElementsByTagName("chanWidth")[0]
 
-        chanWidthStr = chanWidthNode.firstChild.data
-        self._chanWidth = Parser.stringListToLists(chanWidthStr, Frequency, "CalWVR")
+        chanWidthStr = chanWidthNode.firstChild.data.strip()
+
+        self._chanWidth = Parser.stringListToLists(
+            chanWidthStr, Frequency, "CalWVR", True
+        )
 
         refTempNode = rowdom.getElementsByTagName("refTemp")[0]
 
-        refTempStr = refTempNode.firstChild.data
-        self._refTemp = Parser.stringListToLists(refTempStr, Temperature, "CalWVR")
+        refTempStr = refTempNode.firstChild.data.strip()
+
+        self._refTemp = Parser.stringListToLists(
+            refTempStr, Temperature, "CalWVR", True
+        )
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data)
+        self._numPoly = int(numPolyNode.firstChild.data.strip())
 
         pathCoeffNode = rowdom.getElementsByTagName("pathCoeff")[0]
 
-        pathCoeffStr = pathCoeffNode.firstChild.data
-        self._pathCoeff = Parser.stringListToLists(pathCoeffStr, float, "CalWVR")
+        pathCoeffStr = pathCoeffNode.firstChild.data.strip()
+
+        self._pathCoeff = Parser.stringListToLists(pathCoeffStr, float, "CalWVR", False)
 
         polyFreqLimitsNode = rowdom.getElementsByTagName("polyFreqLimits")[0]
 
-        polyFreqLimitsStr = polyFreqLimitsNode.firstChild.data
+        polyFreqLimitsStr = polyFreqLimitsNode.firstChild.data.strip()
+
         self._polyFreqLimits = Parser.stringListToLists(
-            polyFreqLimitsStr, Frequency, "CalWVR"
+            polyFreqLimitsStr, Frequency, "CalWVR", True
         )
 
         wetPathNode = rowdom.getElementsByTagName("wetPath")[0]
 
-        wetPathStr = wetPathNode.firstChild.data
-        self._wetPath = Parser.stringListToLists(wetPathStr, float, "CalWVR")
+        wetPathStr = wetPathNode.firstChild.data.strip()
+
+        self._wetPath = Parser.stringListToLists(wetPathStr, float, "CalWVR", False)
 
         dryPathNode = rowdom.getElementsByTagName("dryPath")[0]
 
-        dryPathStr = dryPathNode.firstChild.data
-        self._dryPath = Parser.stringListToLists(dryPathStr, float, "CalWVR")
+        dryPathStr = dryPathNode.firstChild.data.strip()
+
+        self._dryPath = Parser.stringListToLists(dryPathStr, float, "CalWVR", False)
 
         waterNode = rowdom.getElementsByTagName("water")[0]
 
-        self._water = Length(waterNode.firstChild.data)
+        self._water = Length(waterNode.firstChild.data.strip())
 
         tauBaselineNode = rowdom.getElementsByTagName("tauBaseline")
         if len(tauBaselineNode) > 0:
 
-            self._tauBaseline = float(tauBaselineNode[0].firstChild.data)
+            self._tauBaseline = float(tauBaselineNode[0].firstChild.data.strip())
 
             self._tauBaselineExists = True
 
@@ -315,11 +374,11 @@ class CalWVRRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

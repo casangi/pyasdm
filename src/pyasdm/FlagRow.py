@@ -75,12 +75,61 @@ class FlagRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationType = []
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._flagId = Tag()
+
+        self._startTime = ArrayTime()
+
+        self._endTime = ArrayTime()
+
+        self._reason = None
+
+        self._numAntenna = 0
+
+        self._numPolarizationTypeExists = False
+
+        self._numPolarizationType = 0
+
+        self._numSpectralWindowExists = False
+
+        self._numSpectralWindow = 0
+
+        self._numPairedAntennaExists = False
+
+        self._numPairedAntenna = 0
+
+        self._numChanExists = False
+
+        self._numChan = 0
+
+        self._polarizationTypeExists = False
+
+        self._polarizationType = []  # this is a list of PolarizationType []
+
+        self._channelExists = False
+
+        self._channel = []  # this is a list of int []  []
+
+        # extrinsic attributes
+
+        self._antennaId = []  # this is a list of Tag []
+
+        self._pairedAntennaIdExists = False
+
+        self._pairedAntennaId = []  # this is a list of Tag []
+
+        self._spectralWindowIdExists = False
+
+        self._spectralWindowId = []  # this is a list of Tag []
 
         if row is not None:
             if not isinstance(row, FlagRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._flagId = Tag(row._flagId)
 
@@ -280,58 +329,64 @@ class FlagRow:
 
         flagIdNode = rowdom.getElementsByTagName("flagId")[0]
 
-        self._flagId = Tag(flagIdNode.firstChild.data)
+        self._flagId = Tag(flagIdNode.firstChild.data.strip())
 
         startTimeNode = rowdom.getElementsByTagName("startTime")[0]
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data)
+        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
 
         endTimeNode = rowdom.getElementsByTagName("endTime")[0]
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data)
+        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
 
         reasonNode = rowdom.getElementsByTagName("reason")[0]
 
-        self._reason = str(reasonNode.firstChild.data)
+        self._reason = str(reasonNode.firstChild.data.strip())
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data)
+        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
 
         numPolarizationTypeNode = rowdom.getElementsByTagName("numPolarizationType")
         if len(numPolarizationTypeNode) > 0:
 
-            self._numPolarizationType = int(numPolarizationTypeNode[0].firstChild.data)
+            self._numPolarizationType = int(
+                numPolarizationTypeNode[0].firstChild.data.strip()
+            )
 
             self._numPolarizationTypeExists = True
 
         numSpectralWindowNode = rowdom.getElementsByTagName("numSpectralWindow")
         if len(numSpectralWindowNode) > 0:
 
-            self._numSpectralWindow = int(numSpectralWindowNode[0].firstChild.data)
+            self._numSpectralWindow = int(
+                numSpectralWindowNode[0].firstChild.data.strip()
+            )
 
             self._numSpectralWindowExists = True
 
         numPairedAntennaNode = rowdom.getElementsByTagName("numPairedAntenna")
         if len(numPairedAntennaNode) > 0:
 
-            self._numPairedAntenna = int(numPairedAntennaNode[0].firstChild.data)
+            self._numPairedAntenna = int(
+                numPairedAntennaNode[0].firstChild.data.strip()
+            )
 
             self._numPairedAntennaExists = True
 
         numChanNode = rowdom.getElementsByTagName("numChan")
         if len(numChanNode) > 0:
 
-            self._numChan = int(numChanNode[0].firstChild.data)
+            self._numChan = int(numChanNode[0].firstChild.data.strip())
 
             self._numChanExists = True
 
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")
         if len(polarizationTypeNode) > 0:
 
-            polarizationTypeStr = polarizationTypeNode[0].firstChild.data
+            polarizationTypeStr = polarizationTypeNode[0].firstChild.data.strip()
             self._polarizationType = Parser.stringListToLists(
-                polarizationTypeStr, PolarizationType, "Flag"
+                polarizationTypeStr, PolarizationType, "Flag", False
             )
 
             self._polarizationTypeExists = True
@@ -339,8 +394,9 @@ class FlagRow:
         channelNode = rowdom.getElementsByTagName("channel")
         if len(channelNode) > 0:
 
-            channelStr = channelNode[0].firstChild.data
-            self._channel = Parser.stringListToLists(channelStr, int, "Flag")
+            channelStr = channelNode[0].firstChild.data.strip()
+
+            self._channel = Parser.stringListToLists(channelStr, int, "Flag", False)
 
             self._channelExists = True
 
@@ -348,15 +404,17 @@ class FlagRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        antennaIdStr = antennaIdNode.firstChild.data
-        self._antennaId = Parser.stringListToLists(antennaIdStr, Tag, "Flag")
+        antennaIdStr = antennaIdNode.firstChild.data.strip()
+
+        self._antennaId = Parser.stringListToLists(antennaIdStr, Tag, "Flag", True)
 
         pairedAntennaIdNode = rowdom.getElementsByTagName("pairedAntennaId")
         if len(pairedAntennaIdNode) > 0:
 
-            pairedAntennaIdStr = pairedAntennaIdNode[0].firstChild.data
+            pairedAntennaIdStr = pairedAntennaIdNode[0].firstChild.data.strip()
+
             self._pairedAntennaId = Parser.stringListToLists(
-                pairedAntennaIdStr, Tag, "Flag"
+                pairedAntennaIdStr, Tag, "Flag", True
             )
 
             self._pairedAntennaIdExists = True
@@ -364,9 +422,10 @@ class FlagRow:
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")
         if len(spectralWindowIdNode) > 0:
 
-            spectralWindowIdStr = spectralWindowIdNode[0].firstChild.data
+            spectralWindowIdStr = spectralWindowIdNode[0].firstChild.data.strip()
+
             self._spectralWindowId = Parser.stringListToLists(
-                spectralWindowIdStr, Tag, "Flag"
+                spectralWindowIdStr, Tag, "Flag", True
             )
 
             self._spectralWindowIdExists = True

@@ -90,27 +90,109 @@ class CalPointingRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._antennaName = None
+
         self._receiverBand = ReceiverBand.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._ambientTemperature = Temperature()
+
         self._antennaMake = AntennaMake.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._direction = []  # this is a list of Angle []
+
+        self._frequencyRange = []  # this is a list of Frequency []
+
         self._pointingModelMode = PointingModelMode.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._pointingMethod = PointingMethod.from_int(0)
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        self._numReceptor = 0
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._collOffsetRelative = []  # this is a list of Angle []  []
+
+        self._collOffsetAbsolute = []  # this is a list of Angle []  []
+
+        self._collError = []  # this is a list of Angle []  []
+
+        self._collOffsetTied = []  # this is a list of bool []  []
+
+        self._reducedChiSquared = []  # this is a list of float []
+
+        self._averagedPolarizationsExists = False
+
+        self._averagedPolarizations = None
+
+        self._beamPAExists = False
+
+        self._beamPA = []  # this is a list of Angle []
+
+        self._beamPAErrorExists = False
+
+        self._beamPAError = []  # this is a list of Angle []
+
+        self._beamPAWasFixedExists = False
+
+        self._beamPAWasFixed = None
+
+        self._beamWidthExists = False
+
+        self._beamWidth = []  # this is a list of Angle []  []
+
+        self._beamWidthErrorExists = False
+
+        self._beamWidthError = []  # this is a list of Angle []  []
+
+        self._beamWidthWasFixedExists = False
+
+        self._beamWidthWasFixed = []  # this is a list of bool []
+
+        self._offIntensityExists = False
+
+        self._offIntensity = []  # this is a list of Temperature []
+
+        self._offIntensityErrorExists = False
+
+        self._offIntensityError = []  # this is a list of Temperature []
+
+        self._offIntensityWasFixedExists = False
+
+        self._offIntensityWasFixed = None
+
+        self._peakIntensityExists = False
+
+        self._peakIntensity = []  # this is a list of Temperature []
+
+        self._peakIntensityErrorExists = False
+
+        self._peakIntensityError = []  # this is a list of Temperature []
+
+        self._peakIntensityWasFixedExists = False
+
+        self._peakIntensityWasFixed = None
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalPointingRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -469,109 +551,124 @@ class CalPointingRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         ambientTemperatureNode = rowdom.getElementsByTagName("ambientTemperature")[0]
 
-        self._ambientTemperature = Temperature(ambientTemperatureNode.firstChild.data)
+        self._ambientTemperature = Temperature(
+            ambientTemperatureNode.firstChild.data.strip()
+        )
 
         antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
 
-        self._antennaMake = AntennaMake.newAntennaMake(antennaMakeNode.firstChild.data)
+        self._antennaMake = AntennaMake.newAntennaMake(
+            antennaMakeNode.firstChild.data.strip()
+        )
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data
+            atmPhaseCorrectionNode.firstChild.data.strip()
         )
 
         directionNode = rowdom.getElementsByTagName("direction")[0]
 
-        directionStr = directionNode.firstChild.data
-        self._direction = Parser.stringListToLists(directionStr, Angle, "CalPointing")
+        directionStr = directionNode.firstChild.data.strip()
+
+        self._direction = Parser.stringListToLists(
+            directionStr, Angle, "CalPointing", True
+        )
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data
+        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+
         self._frequencyRange = Parser.stringListToLists(
-            frequencyRangeStr, Frequency, "CalPointing"
+            frequencyRangeStr, Frequency, "CalPointing", True
         )
 
         pointingModelModeNode = rowdom.getElementsByTagName("pointingModelMode")[0]
 
         self._pointingModelMode = PointingModelMode.newPointingModelMode(
-            pointingModelModeNode.firstChild.data
+            pointingModelModeNode.firstChild.data.strip()
         )
 
         pointingMethodNode = rowdom.getElementsByTagName("pointingMethod")[0]
 
         self._pointingMethod = PointingMethod.newPointingMethod(
-            pointingMethodNode.firstChild.data
+            pointingMethodNode.firstChild.data.strip()
         )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "CalPointing"
+            polarizationTypesStr, PolarizationType, "CalPointing", False
         )
 
         collOffsetRelativeNode = rowdom.getElementsByTagName("collOffsetRelative")[0]
 
-        collOffsetRelativeStr = collOffsetRelativeNode.firstChild.data
+        collOffsetRelativeStr = collOffsetRelativeNode.firstChild.data.strip()
+
         self._collOffsetRelative = Parser.stringListToLists(
-            collOffsetRelativeStr, Angle, "CalPointing"
+            collOffsetRelativeStr, Angle, "CalPointing", True
         )
 
         collOffsetAbsoluteNode = rowdom.getElementsByTagName("collOffsetAbsolute")[0]
 
-        collOffsetAbsoluteStr = collOffsetAbsoluteNode.firstChild.data
+        collOffsetAbsoluteStr = collOffsetAbsoluteNode.firstChild.data.strip()
+
         self._collOffsetAbsolute = Parser.stringListToLists(
-            collOffsetAbsoluteStr, Angle, "CalPointing"
+            collOffsetAbsoluteStr, Angle, "CalPointing", True
         )
 
         collErrorNode = rowdom.getElementsByTagName("collError")[0]
 
-        collErrorStr = collErrorNode.firstChild.data
-        self._collError = Parser.stringListToLists(collErrorStr, Angle, "CalPointing")
+        collErrorStr = collErrorNode.firstChild.data.strip()
+
+        self._collError = Parser.stringListToLists(
+            collErrorStr, Angle, "CalPointing", True
+        )
 
         collOffsetTiedNode = rowdom.getElementsByTagName("collOffsetTied")[0]
 
-        collOffsetTiedStr = collOffsetTiedNode.firstChild.data
+        collOffsetTiedStr = collOffsetTiedNode.firstChild.data.strip()
+
         self._collOffsetTied = Parser.stringListToLists(
-            collOffsetTiedStr, bool, "CalPointing"
+            collOffsetTiedStr, bool, "CalPointing", False
         )
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data
+        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+
         self._reducedChiSquared = Parser.stringListToLists(
-            reducedChiSquaredStr, double, "CalPointing"
+            reducedChiSquaredStr, float, "CalPointing", False
         )
 
         averagedPolarizationsNode = rowdom.getElementsByTagName("averagedPolarizations")
         if len(averagedPolarizationsNode) > 0:
 
             self._averagedPolarizations = bool(
-                averagedPolarizationsNode[0].firstChild.data
+                averagedPolarizationsNode[0].firstChild.data.strip()
             )
 
             self._averagedPolarizationsExists = True
@@ -579,17 +676,21 @@ class CalPointingRow:
         beamPANode = rowdom.getElementsByTagName("beamPA")
         if len(beamPANode) > 0:
 
-            beamPAStr = beamPANode[0].firstChild.data
-            self._beamPA = Parser.stringListToLists(beamPAStr, Angle, "CalPointing")
+            beamPAStr = beamPANode[0].firstChild.data.strip()
+
+            self._beamPA = Parser.stringListToLists(
+                beamPAStr, Angle, "CalPointing", True
+            )
 
             self._beamPAExists = True
 
         beamPAErrorNode = rowdom.getElementsByTagName("beamPAError")
         if len(beamPAErrorNode) > 0:
 
-            beamPAErrorStr = beamPAErrorNode[0].firstChild.data
+            beamPAErrorStr = beamPAErrorNode[0].firstChild.data.strip()
+
             self._beamPAError = Parser.stringListToLists(
-                beamPAErrorStr, Angle, "CalPointing"
+                beamPAErrorStr, Angle, "CalPointing", True
             )
 
             self._beamPAErrorExists = True
@@ -597,16 +698,17 @@ class CalPointingRow:
         beamPAWasFixedNode = rowdom.getElementsByTagName("beamPAWasFixed")
         if len(beamPAWasFixedNode) > 0:
 
-            self._beamPAWasFixed = bool(beamPAWasFixedNode[0].firstChild.data)
+            self._beamPAWasFixed = bool(beamPAWasFixedNode[0].firstChild.data.strip())
 
             self._beamPAWasFixedExists = True
 
         beamWidthNode = rowdom.getElementsByTagName("beamWidth")
         if len(beamWidthNode) > 0:
 
-            beamWidthStr = beamWidthNode[0].firstChild.data
+            beamWidthStr = beamWidthNode[0].firstChild.data.strip()
+
             self._beamWidth = Parser.stringListToLists(
-                beamWidthStr, Angle, "CalPointing"
+                beamWidthStr, Angle, "CalPointing", True
             )
 
             self._beamWidthExists = True
@@ -614,9 +716,10 @@ class CalPointingRow:
         beamWidthErrorNode = rowdom.getElementsByTagName("beamWidthError")
         if len(beamWidthErrorNode) > 0:
 
-            beamWidthErrorStr = beamWidthErrorNode[0].firstChild.data
+            beamWidthErrorStr = beamWidthErrorNode[0].firstChild.data.strip()
+
             self._beamWidthError = Parser.stringListToLists(
-                beamWidthErrorStr, Angle, "CalPointing"
+                beamWidthErrorStr, Angle, "CalPointing", True
             )
 
             self._beamWidthErrorExists = True
@@ -624,9 +727,10 @@ class CalPointingRow:
         beamWidthWasFixedNode = rowdom.getElementsByTagName("beamWidthWasFixed")
         if len(beamWidthWasFixedNode) > 0:
 
-            beamWidthWasFixedStr = beamWidthWasFixedNode[0].firstChild.data
+            beamWidthWasFixedStr = beamWidthWasFixedNode[0].firstChild.data.strip()
+
             self._beamWidthWasFixed = Parser.stringListToLists(
-                beamWidthWasFixedStr, bool, "CalPointing"
+                beamWidthWasFixedStr, bool, "CalPointing", False
             )
 
             self._beamWidthWasFixedExists = True
@@ -634,9 +738,10 @@ class CalPointingRow:
         offIntensityNode = rowdom.getElementsByTagName("offIntensity")
         if len(offIntensityNode) > 0:
 
-            offIntensityStr = offIntensityNode[0].firstChild.data
+            offIntensityStr = offIntensityNode[0].firstChild.data.strip()
+
             self._offIntensity = Parser.stringListToLists(
-                offIntensityStr, Temperature, "CalPointing"
+                offIntensityStr, Temperature, "CalPointing", True
             )
 
             self._offIntensityExists = True
@@ -644,9 +749,10 @@ class CalPointingRow:
         offIntensityErrorNode = rowdom.getElementsByTagName("offIntensityError")
         if len(offIntensityErrorNode) > 0:
 
-            offIntensityErrorStr = offIntensityErrorNode[0].firstChild.data
+            offIntensityErrorStr = offIntensityErrorNode[0].firstChild.data.strip()
+
             self._offIntensityError = Parser.stringListToLists(
-                offIntensityErrorStr, Temperature, "CalPointing"
+                offIntensityErrorStr, Temperature, "CalPointing", True
             )
 
             self._offIntensityErrorExists = True
@@ -655,7 +761,7 @@ class CalPointingRow:
         if len(offIntensityWasFixedNode) > 0:
 
             self._offIntensityWasFixed = bool(
-                offIntensityWasFixedNode[0].firstChild.data
+                offIntensityWasFixedNode[0].firstChild.data.strip()
             )
 
             self._offIntensityWasFixedExists = True
@@ -663,9 +769,10 @@ class CalPointingRow:
         peakIntensityNode = rowdom.getElementsByTagName("peakIntensity")
         if len(peakIntensityNode) > 0:
 
-            peakIntensityStr = peakIntensityNode[0].firstChild.data
+            peakIntensityStr = peakIntensityNode[0].firstChild.data.strip()
+
             self._peakIntensity = Parser.stringListToLists(
-                peakIntensityStr, Temperature, "CalPointing"
+                peakIntensityStr, Temperature, "CalPointing", True
             )
 
             self._peakIntensityExists = True
@@ -673,9 +780,10 @@ class CalPointingRow:
         peakIntensityErrorNode = rowdom.getElementsByTagName("peakIntensityError")
         if len(peakIntensityErrorNode) > 0:
 
-            peakIntensityErrorStr = peakIntensityErrorNode[0].firstChild.data
+            peakIntensityErrorStr = peakIntensityErrorNode[0].firstChild.data.strip()
+
             self._peakIntensityError = Parser.stringListToLists(
-                peakIntensityErrorStr, Temperature, "CalPointing"
+                peakIntensityErrorStr, Temperature, "CalPointing", True
             )
 
             self._peakIntensityErrorExists = True
@@ -684,7 +792,7 @@ class CalPointingRow:
         if len(peakIntensityWasFixedNode) > 0:
 
             self._peakIntensityWasFixed = bool(
-                peakIntensityWasFixedNode[0].firstChild.data
+                peakIntensityWasFixedNode[0].firstChild.data.strip()
             )
 
             self._peakIntensityWasFixedExists = True
@@ -693,11 +801,11 @@ class CalPointingRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -1244,20 +1352,20 @@ class CalPointingRow:
 
     # ===> Attribute reducedChiSquared
 
-    _reducedChiSquared = None  # this is a 1D list of double
+    _reducedChiSquared = None  # this is a 1D list of float
 
     def getReducedChiSquared(self):
         """
         Get reducedChiSquared.
-        return reducedChiSquared as double []
+        return reducedChiSquared as float []
         """
 
         return copy.deepcopy(self._reducedChiSquared)
 
     def setReducedChiSquared(self, reducedChiSquared):
         """
-        Set reducedChiSquared with the specified double []  value.
-        reducedChiSquared The double []  value to which reducedChiSquared is to be set.
+        Set reducedChiSquared with the specified float []  value.
+        reducedChiSquared The float []  value to which reducedChiSquared is to be set.
 
 
         """
@@ -1274,11 +1382,11 @@ class CalPointingRow:
             if not shapeOK:
                 raise ValueError("shape of reducedChiSquared is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, double):
+            if not Parser.checkListType(reducedChiSquared, float):
                 raise ValueError(
-                    "type of the first value in reducedChiSquared is not double as expected"
+                    "type of the first value in reducedChiSquared is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._reducedChiSquared = copy.deepcopy(reducedChiSquared)
@@ -2353,7 +2461,7 @@ class CalPointingRow:
             return False
         for indx in range(len(reducedChiSquared)):
 
-            # reducedChiSquared is a list of double, compare using == operator.
+            # reducedChiSquared is a list of float, compare using == operator.
             if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
                 return False
 
@@ -2568,7 +2676,7 @@ class CalPointingRow:
             return False
         for indx in range(len(reducedChiSquared)):
 
-            # reducedChiSquared is a list of double, compare using == operator.
+            # reducedChiSquared is a list of float, compare using == operator.
             if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
                 return False
 

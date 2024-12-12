@@ -61,6 +61,26 @@ class Interval:
         # it should never get here
         return None
 
+    @staticmethod
+    def getInstance(stringList):
+        """
+        Retrieve a value from a list of strings and convert that to an Interval
+
+        This is used when parsing Interval lists from an XML representation to
+        eventually construct a list of Interval instances. The string values
+        are integer representation of an integer representing an interval in nanoseconds.
+
+        Returns a tuple of (Interval, stringList) where Interval is the new Interval
+        created by this call and stringList is the remaining, unused, part of
+        stringList after removing the first element.
+        """
+        if not isinstance(stringList, list):
+            raise ValueError("stringList is not a list")
+
+        # this will raise an error if there aren't any elements on stringList
+        intVal = int(stringList[0])
+        return (Interval(intVal), stringList[1:])
+
     # create an interval of time, defaults to 0
     #
     # The value is the length of the interval, in nanoseconds

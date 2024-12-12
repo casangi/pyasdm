@@ -72,9 +72,17 @@ class ObservationRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._observationId = Tag()
+
         if row is not None:
             if not isinstance(row, ObservationRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._observationId = Tag(row._observationId)
 
@@ -130,7 +138,7 @@ class ObservationRow:
 
         observationIdNode = rowdom.getElementsByTagName("observationId")[0]
 
-        self._observationId = Tag(observationIdNode.firstChild.data)
+        self._observationId = Tag(observationIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

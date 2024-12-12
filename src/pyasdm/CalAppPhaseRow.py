@@ -75,12 +75,79 @@ class CalAppPhaseRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
         self._basebandName = BasebandName.from_int(0)
+
+        self._scanNumber = 0
+
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._adjustTime = ArrayTime()
+
+        self._adjustToken = None
+
+        self._phasingMode = None
+
+        self._numPhasedAntennas = 0
+
+        self._phasedAntennas = []  # this is a list of str []
+
+        self._refAntennaIndex = 0
+
+        self._candRefAntennaIndex = 0
+
+        self._phasePacking = None
+
+        self._numReceptors = 0
+
+        self._numChannels = 0
+
+        self._numPhaseValues = 0
+
+        self._phaseValues = []  # this is a list of float []
+
+        self._numCompare = 0
+
+        self._numEfficiencies = 0
+
+        self._compareArray = []  # this is a list of str []
+
+        self._efficiencyIndices = []  # this is a list of int []
+
+        self._efficiencies = []  # this is a list of float []  []
+
+        self._quality = []  # this is a list of float []
+
+        self._phasedSumAntenna = None
+
+        self._typeSupportsExists = False
+
+        self._typeSupports = None
+
+        self._numSupportsExists = False
+
+        self._numSupports = 0
+
+        self._phaseSupportsExists = False
+
+        self._phaseSupports = []  # this is a list of float []
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalAppPhaseRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             # We force the attribute of the result to be not None
             if row._basebandName is None:
@@ -284,133 +351,142 @@ class CalAppPhaseRow:
         basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data
+            basebandNameNode.firstChild.data.strip()
         )
 
         scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
 
-        self._scanNumber = int(scanNumberNode.firstChild.data)
+        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         adjustTimeNode = rowdom.getElementsByTagName("adjustTime")[0]
 
-        self._adjustTime = ArrayTime(adjustTimeNode.firstChild.data)
+        self._adjustTime = ArrayTime(adjustTimeNode.firstChild.data.strip())
 
         adjustTokenNode = rowdom.getElementsByTagName("adjustToken")[0]
 
-        self._adjustToken = str(adjustTokenNode.firstChild.data)
+        self._adjustToken = str(adjustTokenNode.firstChild.data.strip())
 
         phasingModeNode = rowdom.getElementsByTagName("phasingMode")[0]
 
-        self._phasingMode = str(phasingModeNode.firstChild.data)
+        self._phasingMode = str(phasingModeNode.firstChild.data.strip())
 
         numPhasedAntennasNode = rowdom.getElementsByTagName("numPhasedAntennas")[0]
 
-        self._numPhasedAntennas = int(numPhasedAntennasNode.firstChild.data)
+        self._numPhasedAntennas = int(numPhasedAntennasNode.firstChild.data.strip())
 
         phasedAntennasNode = rowdom.getElementsByTagName("phasedAntennas")[0]
 
-        phasedAntennasStr = phasedAntennasNode.firstChild.data
+        phasedAntennasStr = phasedAntennasNode.firstChild.data.strip()
+
         self._phasedAntennas = Parser.stringListToLists(
-            phasedAntennasStr, str, "CalAppPhase"
+            phasedAntennasStr, str, "CalAppPhase", False
         )
 
         refAntennaIndexNode = rowdom.getElementsByTagName("refAntennaIndex")[0]
 
-        self._refAntennaIndex = int(refAntennaIndexNode.firstChild.data)
+        self._refAntennaIndex = int(refAntennaIndexNode.firstChild.data.strip())
 
         candRefAntennaIndexNode = rowdom.getElementsByTagName("candRefAntennaIndex")[0]
 
-        self._candRefAntennaIndex = int(candRefAntennaIndexNode.firstChild.data)
+        self._candRefAntennaIndex = int(candRefAntennaIndexNode.firstChild.data.strip())
 
         phasePackingNode = rowdom.getElementsByTagName("phasePacking")[0]
 
-        self._phasePacking = str(phasePackingNode.firstChild.data)
+        self._phasePacking = str(phasePackingNode.firstChild.data.strip())
 
         numReceptorsNode = rowdom.getElementsByTagName("numReceptors")[0]
 
-        self._numReceptors = int(numReceptorsNode.firstChild.data)
+        self._numReceptors = int(numReceptorsNode.firstChild.data.strip())
 
         numChannelsNode = rowdom.getElementsByTagName("numChannels")[0]
 
-        self._numChannels = int(numChannelsNode.firstChild.data)
+        self._numChannels = int(numChannelsNode.firstChild.data.strip())
 
         numPhaseValuesNode = rowdom.getElementsByTagName("numPhaseValues")[0]
 
-        self._numPhaseValues = int(numPhaseValuesNode.firstChild.data)
+        self._numPhaseValues = int(numPhaseValuesNode.firstChild.data.strip())
 
         phaseValuesNode = rowdom.getElementsByTagName("phaseValues")[0]
 
-        phaseValuesStr = phaseValuesNode.firstChild.data
+        phaseValuesStr = phaseValuesNode.firstChild.data.strip()
+
         self._phaseValues = Parser.stringListToLists(
-            phaseValuesStr, float, "CalAppPhase"
+            phaseValuesStr, float, "CalAppPhase", False
         )
 
         numCompareNode = rowdom.getElementsByTagName("numCompare")[0]
 
-        self._numCompare = int(numCompareNode.firstChild.data)
+        self._numCompare = int(numCompareNode.firstChild.data.strip())
 
         numEfficienciesNode = rowdom.getElementsByTagName("numEfficiencies")[0]
 
-        self._numEfficiencies = int(numEfficienciesNode.firstChild.data)
+        self._numEfficiencies = int(numEfficienciesNode.firstChild.data.strip())
 
         compareArrayNode = rowdom.getElementsByTagName("compareArray")[0]
 
-        compareArrayStr = compareArrayNode.firstChild.data
+        compareArrayStr = compareArrayNode.firstChild.data.strip()
+
         self._compareArray = Parser.stringListToLists(
-            compareArrayStr, str, "CalAppPhase"
+            compareArrayStr, str, "CalAppPhase", False
         )
 
         efficiencyIndicesNode = rowdom.getElementsByTagName("efficiencyIndices")[0]
 
-        efficiencyIndicesStr = efficiencyIndicesNode.firstChild.data
+        efficiencyIndicesStr = efficiencyIndicesNode.firstChild.data.strip()
+
         self._efficiencyIndices = Parser.stringListToLists(
-            efficiencyIndicesStr, int, "CalAppPhase"
+            efficiencyIndicesStr, int, "CalAppPhase", False
         )
 
         efficienciesNode = rowdom.getElementsByTagName("efficiencies")[0]
 
-        efficienciesStr = efficienciesNode.firstChild.data
+        efficienciesStr = efficienciesNode.firstChild.data.strip()
+
         self._efficiencies = Parser.stringListToLists(
-            efficienciesStr, float, "CalAppPhase"
+            efficienciesStr, float, "CalAppPhase", False
         )
 
         qualityNode = rowdom.getElementsByTagName("quality")[0]
 
-        qualityStr = qualityNode.firstChild.data
-        self._quality = Parser.stringListToLists(qualityStr, float, "CalAppPhase")
+        qualityStr = qualityNode.firstChild.data.strip()
+
+        self._quality = Parser.stringListToLists(
+            qualityStr, float, "CalAppPhase", False
+        )
 
         phasedSumAntennaNode = rowdom.getElementsByTagName("phasedSumAntenna")[0]
 
-        self._phasedSumAntenna = str(phasedSumAntennaNode.firstChild.data)
+        self._phasedSumAntenna = str(phasedSumAntennaNode.firstChild.data.strip())
 
         typeSupportsNode = rowdom.getElementsByTagName("typeSupports")
         if len(typeSupportsNode) > 0:
 
-            self._typeSupports = str(typeSupportsNode[0].firstChild.data)
+            self._typeSupports = str(typeSupportsNode[0].firstChild.data.strip())
 
             self._typeSupportsExists = True
 
         numSupportsNode = rowdom.getElementsByTagName("numSupports")
         if len(numSupportsNode) > 0:
 
-            self._numSupports = int(numSupportsNode[0].firstChild.data)
+            self._numSupports = int(numSupportsNode[0].firstChild.data.strip())
 
             self._numSupportsExists = True
 
         phaseSupportsNode = rowdom.getElementsByTagName("phaseSupports")
         if len(phaseSupportsNode) > 0:
 
-            phaseSupportsStr = phaseSupportsNode[0].firstChild.data
+            phaseSupportsStr = phaseSupportsNode[0].firstChild.data.strip()
+
             self._phaseSupports = Parser.stringListToLists(
-                phaseSupportsStr, float, "CalAppPhase"
+                phaseSupportsStr, float, "CalAppPhase", False
             )
 
             self._phaseSupportsExists = True
@@ -419,11 +495,11 @@ class CalAppPhaseRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

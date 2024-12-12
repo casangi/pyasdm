@@ -75,12 +75,53 @@ class CalSeeingRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
         self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
+
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._frequencyRange = []  # this is a list of Frequency []
+
+        self._integrationTime = Interval()
+
+        self._numBaseLengths = 0
+
+        self._baselineLengths = []  # this is a list of Length []
+
+        self._phaseRMS = []  # this is a list of Angle []
+
+        self._seeing = Angle()
+
+        self._seeingError = Angle()
+
+        self._exponentExists = False
+
+        self._exponent = None
+
+        self._outerScaleExists = False
+
+        self._outerScale = Length()
+
+        self._outerScaleRMSExists = False
+
+        self._outerScaleRMS = Angle()
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalSeeingRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             # We force the attribute of the result to be not None
             if row._atmPhaseCorrection is None:
@@ -230,70 +271,73 @@ class CalSeeingRow:
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data
+            atmPhaseCorrectionNode.firstChild.data.strip()
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data
+        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+
         self._frequencyRange = Parser.stringListToLists(
-            frequencyRangeStr, Frequency, "CalSeeing"
+            frequencyRangeStr, Frequency, "CalSeeing", True
         )
 
         integrationTimeNode = rowdom.getElementsByTagName("integrationTime")[0]
 
-        self._integrationTime = Interval(integrationTimeNode.firstChild.data)
+        self._integrationTime = Interval(integrationTimeNode.firstChild.data.strip())
 
         numBaseLengthsNode = rowdom.getElementsByTagName("numBaseLengths")[0]
 
-        self._numBaseLengths = int(numBaseLengthsNode.firstChild.data)
+        self._numBaseLengths = int(numBaseLengthsNode.firstChild.data.strip())
 
         baselineLengthsNode = rowdom.getElementsByTagName("baselineLengths")[0]
 
-        baselineLengthsStr = baselineLengthsNode.firstChild.data
+        baselineLengthsStr = baselineLengthsNode.firstChild.data.strip()
+
         self._baselineLengths = Parser.stringListToLists(
-            baselineLengthsStr, Length, "CalSeeing"
+            baselineLengthsStr, Length, "CalSeeing", True
         )
 
         phaseRMSNode = rowdom.getElementsByTagName("phaseRMS")[0]
 
-        phaseRMSStr = phaseRMSNode.firstChild.data
-        self._phaseRMS = Parser.stringListToLists(phaseRMSStr, Angle, "CalSeeing")
+        phaseRMSStr = phaseRMSNode.firstChild.data.strip()
+
+        self._phaseRMS = Parser.stringListToLists(phaseRMSStr, Angle, "CalSeeing", True)
 
         seeingNode = rowdom.getElementsByTagName("seeing")[0]
 
-        self._seeing = Angle(seeingNode.firstChild.data)
+        self._seeing = Angle(seeingNode.firstChild.data.strip())
 
         seeingErrorNode = rowdom.getElementsByTagName("seeingError")[0]
 
-        self._seeingError = Angle(seeingErrorNode.firstChild.data)
+        self._seeingError = Angle(seeingErrorNode.firstChild.data.strip())
 
         exponentNode = rowdom.getElementsByTagName("exponent")
         if len(exponentNode) > 0:
 
-            self._exponent = float(exponentNode[0].firstChild.data)
+            self._exponent = float(exponentNode[0].firstChild.data.strip())
 
             self._exponentExists = True
 
         outerScaleNode = rowdom.getElementsByTagName("outerScale")
         if len(outerScaleNode) > 0:
 
-            self._outerScale = Length(outerScaleNode[0].firstChild.data)
+            self._outerScale = Length(outerScaleNode[0].firstChild.data.strip())
 
             self._outerScaleExists = True
 
         outerScaleRMSNode = rowdom.getElementsByTagName("outerScaleRMS")
         if len(outerScaleRMSNode) > 0:
 
-            self._outerScaleRMS = Angle(outerScaleRMSNode[0].firstChild.data)
+            self._outerScaleRMS = Angle(outerScaleRMSNode[0].firstChild.data.strip())
 
             self._outerScaleRMSExists = True
 
@@ -301,11 +345,11 @@ class CalSeeingRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

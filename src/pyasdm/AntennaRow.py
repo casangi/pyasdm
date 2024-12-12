@@ -78,15 +78,39 @@ class AntennaRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._name = None
+
         self._antennaMake = AntennaMake.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._antennaType = AntennaType.from_int(0)
+
+        self._dishDiameter = Length()
+
+        self._position = []  # this is a list of Length []
+
+        self._offset = []  # this is a list of Length []
+
+        self._time = ArrayTime()
+
+        # extrinsic attributes
+
+        self._assocAntennaIdExists = False
+
+        self._assocAntennaId = Tag()
+
+        self._stationId = Tag()
 
         if row is not None:
             if not isinstance(row, AntennaRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -198,50 +222,56 @@ class AntennaRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         nameNode = rowdom.getElementsByTagName("name")[0]
 
-        self._name = str(nameNode.firstChild.data)
+        self._name = str(nameNode.firstChild.data.strip())
 
         antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
 
-        self._antennaMake = AntennaMake.newAntennaMake(antennaMakeNode.firstChild.data)
+        self._antennaMake = AntennaMake.newAntennaMake(
+            antennaMakeNode.firstChild.data.strip()
+        )
 
         antennaTypeNode = rowdom.getElementsByTagName("antennaType")[0]
 
-        self._antennaType = AntennaType.newAntennaType(antennaTypeNode.firstChild.data)
+        self._antennaType = AntennaType.newAntennaType(
+            antennaTypeNode.firstChild.data.strip()
+        )
 
         dishDiameterNode = rowdom.getElementsByTagName("dishDiameter")[0]
 
-        self._dishDiameter = Length(dishDiameterNode.firstChild.data)
+        self._dishDiameter = Length(dishDiameterNode.firstChild.data.strip())
 
         positionNode = rowdom.getElementsByTagName("position")[0]
 
-        positionStr = positionNode.firstChild.data
-        self._position = Parser.stringListToLists(positionStr, Length, "Antenna")
+        positionStr = positionNode.firstChild.data.strip()
+
+        self._position = Parser.stringListToLists(positionStr, Length, "Antenna", True)
 
         offsetNode = rowdom.getElementsByTagName("offset")[0]
 
-        offsetStr = offsetNode.firstChild.data
-        self._offset = Parser.stringListToLists(offsetStr, Length, "Antenna")
+        offsetStr = offsetNode.firstChild.data.strip()
+
+        self._offset = Parser.stringListToLists(offsetStr, Length, "Antenna", True)
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data)
+        self._time = ArrayTime(timeNode.firstChild.data.strip())
 
         # extrinsic attribute values
 
         assocAntennaIdNode = rowdom.getElementsByTagName("assocAntennaId")
         if len(assocAntennaIdNode) > 0:
 
-            self._assocAntennaId = Tag(assocAntennaIdNode[0].firstChild.data)
+            self._assocAntennaId = Tag(assocAntennaIdNode[0].firstChild.data.strip())
 
             self._assocAntennaIdExists = True
 
         stationIdNode = rowdom.getElementsByTagName("stationId")[0]
 
-        self._stationId = Tag(stationIdNode.firstChild.data)
+        self._stationId = Tag(stationIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

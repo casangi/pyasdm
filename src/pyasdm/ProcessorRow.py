@@ -78,15 +78,23 @@ class ProcessorRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._processorId = Tag()
+
+        self._modeId = Tag()
+
         self._processorType = ProcessorType.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._processorSubType = ProcessorSubType.from_int(0)
 
         if row is not None:
             if not isinstance(row, ProcessorRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._processorId = Tag(row._processorId)
 
@@ -166,22 +174,22 @@ class ProcessorRow:
 
         processorIdNode = rowdom.getElementsByTagName("processorId")[0]
 
-        self._processorId = Tag(processorIdNode.firstChild.data)
+        self._processorId = Tag(processorIdNode.firstChild.data.strip())
 
         modeIdNode = rowdom.getElementsByTagName("modeId")[0]
 
-        self._modeId = Tag(modeIdNode.firstChild.data)
+        self._modeId = Tag(modeIdNode.firstChild.data.strip())
 
         processorTypeNode = rowdom.getElementsByTagName("processorType")[0]
 
         self._processorType = ProcessorType.newProcessorType(
-            processorTypeNode.firstChild.data
+            processorTypeNode.firstChild.data.strip()
         )
 
         processorSubTypeNode = rowdom.getElementsByTagName("processorSubType")[0]
 
         self._processorSubType = ProcessorSubType.newProcessorSubType(
-            processorSubTypeNode.firstChild.data
+            processorSubTypeNode.firstChild.data.strip()
         )
 
     def toBin(self):

@@ -75,12 +75,37 @@ class CalReductionRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of InvalidatingCondition Enumeration, start off with it being empty
-        self._invalidConditions = []
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._calReductionId = Tag()
+
+        self._numApplied = 0
+
+        self._appliedCalibrations = []  # this is a list of str []
+
+        self._numParam = 0
+
+        self._paramSet = []  # this is a list of str []
+
+        self._numInvalidConditions = 0
+
+        self._invalidConditions = []  # this is a list of InvalidatingCondition []
+
+        self._timeReduced = ArrayTime()
+
+        self._messages = None
+
+        self._software = None
+
+        self._softwareVersion = None
 
         if row is not None:
             if not isinstance(row, CalReductionRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._calReductionId = Tag(row._calReductionId)
 
@@ -183,56 +208,62 @@ class CalReductionRow:
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
         numAppliedNode = rowdom.getElementsByTagName("numApplied")[0]
 
-        self._numApplied = int(numAppliedNode.firstChild.data)
+        self._numApplied = int(numAppliedNode.firstChild.data.strip())
 
         appliedCalibrationsNode = rowdom.getElementsByTagName("appliedCalibrations")[0]
 
-        appliedCalibrationsStr = appliedCalibrationsNode.firstChild.data
+        appliedCalibrationsStr = appliedCalibrationsNode.firstChild.data.strip()
+
         self._appliedCalibrations = Parser.stringListToLists(
-            appliedCalibrationsStr, str, "CalReduction"
+            appliedCalibrationsStr, str, "CalReduction", False
         )
 
         numParamNode = rowdom.getElementsByTagName("numParam")[0]
 
-        self._numParam = int(numParamNode.firstChild.data)
+        self._numParam = int(numParamNode.firstChild.data.strip())
 
         paramSetNode = rowdom.getElementsByTagName("paramSet")[0]
 
-        paramSetStr = paramSetNode.firstChild.data
-        self._paramSet = Parser.stringListToLists(paramSetStr, str, "CalReduction")
+        paramSetStr = paramSetNode.firstChild.data.strip()
+
+        self._paramSet = Parser.stringListToLists(
+            paramSetStr, str, "CalReduction", False
+        )
 
         numInvalidConditionsNode = rowdom.getElementsByTagName("numInvalidConditions")[
             0
         ]
 
-        self._numInvalidConditions = int(numInvalidConditionsNode.firstChild.data)
+        self._numInvalidConditions = int(
+            numInvalidConditionsNode.firstChild.data.strip()
+        )
 
         invalidConditionsNode = rowdom.getElementsByTagName("invalidConditions")[0]
 
-        invalidConditionsStr = invalidConditionsNode.firstChild.data
+        invalidConditionsStr = invalidConditionsNode.firstChild.data.strip()
         self._invalidConditions = Parser.stringListToLists(
-            invalidConditionsStr, InvalidatingCondition, "CalReduction"
+            invalidConditionsStr, InvalidatingCondition, "CalReduction", False
         )
 
         timeReducedNode = rowdom.getElementsByTagName("timeReduced")[0]
 
-        self._timeReduced = ArrayTime(timeReducedNode.firstChild.data)
+        self._timeReduced = ArrayTime(timeReducedNode.firstChild.data.strip())
 
         messagesNode = rowdom.getElementsByTagName("messages")[0]
 
-        self._messages = str(messagesNode.firstChild.data)
+        self._messages = str(messagesNode.firstChild.data.strip())
 
         softwareNode = rowdom.getElementsByTagName("software")[0]
 
-        self._software = str(softwareNode.firstChild.data)
+        self._software = str(softwareNode.firstChild.data.strip())
 
         softwareVersionNode = rowdom.getElementsByTagName("softwareVersion")[0]
 
-        self._softwareVersion = str(softwareVersionNode.firstChild.data)
+        self._softwareVersion = str(softwareVersionNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

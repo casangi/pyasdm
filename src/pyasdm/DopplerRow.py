@@ -75,12 +75,25 @@ class DopplerRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._dopplerId = 0
+
+        self._transitionIndex = 0
+
         self._velDef = DopplerReferenceCode.from_int(0)
+
+        # extrinsic attributes
+
+        self._sourceId = 0
 
         if row is not None:
             if not isinstance(row, DopplerRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._dopplerId = row._dopplerId
 
@@ -154,23 +167,23 @@ class DopplerRow:
 
         dopplerIdNode = rowdom.getElementsByTagName("dopplerId")[0]
 
-        self._dopplerId = int(dopplerIdNode.firstChild.data)
+        self._dopplerId = int(dopplerIdNode.firstChild.data.strip())
 
         transitionIndexNode = rowdom.getElementsByTagName("transitionIndex")[0]
 
-        self._transitionIndex = int(transitionIndexNode.firstChild.data)
+        self._transitionIndex = int(transitionIndexNode.firstChild.data.strip())
 
         velDefNode = rowdom.getElementsByTagName("velDef")[0]
 
         self._velDef = DopplerReferenceCode.newDopplerReferenceCode(
-            velDefNode.firstChild.data
+            velDefNode.firstChild.data.strip()
         )
 
         # extrinsic attribute values
 
         sourceIdNode = rowdom.getElementsByTagName("sourceId")[0]
 
-        self._sourceId = int(sourceIdNode.firstChild.data)
+        self._sourceId = int(sourceIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

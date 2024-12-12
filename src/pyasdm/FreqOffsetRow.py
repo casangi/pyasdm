@@ -72,9 +72,27 @@ class FreqOffsetRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._offset = Frequency()
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._feedId = 0
+
+        self._spectralWindowId = Tag()
+
         if row is not None:
             if not isinstance(row, FreqOffsetRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -148,25 +166,25 @@ class FreqOffsetRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         offsetNode = rowdom.getElementsByTagName("offset")[0]
 
-        self._offset = Frequency(offsetNode.firstChild.data)
+        self._offset = Frequency(offsetNode.firstChild.data.strip())
 
         # extrinsic attribute values
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data)
+        self._feedId = int(feedIdNode.firstChild.data.strip())
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

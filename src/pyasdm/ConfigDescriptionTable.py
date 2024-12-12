@@ -32,76 +32,77 @@
 import pyasdm.ASDM
 
 from .ConfigDescriptionRow import ConfigDescriptionRow
-from .Representable import Representable
 
 # All of the extended types are imported
 from pyasdm.types import *
 
 from .exceptions.ConversionException import ConversionException
 from .exceptions.DuplicateKey import DuplicateKey
+from .exceptions.UniquenessViolationException import UniquenessViolationException
 
-# using minidom instead of Parser
 from xml.dom import minidom
 
 import os
 
 
-class ConfigDescriptionTable(Representable):
+class ConfigDescriptionTable:
     """
     The ConfigDescriptionTable class is an Alma table.
 
-     Role
-     Defines the hardware configuration used to  obtain the science data.
+    Role
+    Defines the hardware configuration used to  obtain the science data.
 
-     Generated from model's revision -1, branch
+    Generated from model's revision -1, branch
 
-     Attributes of ConfigDescription
+    Attributes of ConfigDescription
 
-                  Key
-
-    configDescriptionId Tag identifies a unique row in the table.
+                 Key
 
 
-
-                  Value (Mandatory)
-
-    numAntenna int  the number of antennas.
-
-    numDataDescription int  the number of data descriptions.
-
-    numFeed int  the number of feeds.
-
-    correlationMode CorrelationMode  identifies the correlation mode.
-
-    numAtmPhaseCorrection int  the number of descriptions of the atmospheric phase correction.
-
-    atmPhaseCorrection AtmPhaseCorrection []   numAtmPhaseCorrection  describe how the atmospheric phase corrections have been applied (one value per correction).
-
-    processorType ProcessorType  identifies the generic processor's type.
-
-    spectralType SpectralResolutionType  identifies the spectral type of the data.
-
-    antennaId Tag []   numAntenna  identifies numAntenna rows in AntennaTable.
-
-    feedId int []   numAntenna*numFeed  refers to many collections of rows in the Feed Table.
-
-    switchCycleId Tag []   numDataDescription  refers to a unique row in the SwitchCycle Table.
-
-    dataDescriptionId Tag []   numDataDescription  refers to one or more rows in DataDescriptionTable.
-
-    processorId Tag  refers to a unique row in ProcessorTable.
+    configDescriptionId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
 
 
 
-                  Value (Optional)
 
-    phasedArrayList int []   numAntenna  phased array identifiers.
+                 Value (Mandatory)
 
-    numAssocValues int  the number of associated config descriptions.
+    numAntenna (numAntenna) int  the number of antennas.
 
-    assocNature SpectralResolutionType []   numAssocValues  the natures of the associations with other config descriptions (one value per association).
+    numDataDescription (numDataDescription) int  the number of data descriptions.
 
-    assocConfigDescriptionId Tag []   numAssocValues  refers to one or more rows in ConfigDescriptionTable.
+    numFeed (numFeed) int  the number of feeds.
+
+    correlationMode  CorrelationMode  identifies the correlation mode.
+
+    numAtmPhaseCorrection (numAtmPhaseCorrection) int  the number of descriptions of the atmospheric phase correction.
+
+    atmPhaseCorrection  AtmPhaseCorrection []   numAtmPhaseCorrection  describe how the atmospheric phase corrections have been applied (one value per correction).
+
+    processorType  ProcessorType  identifies the generic processor's type.
+
+    spectralType  SpectralResolutionType  identifies the spectral type of the data.
+
+    antennaId  Tag []   numAntenna  identifies numAntenna rows in AntennaTable.
+
+    feedId  int []   numAntenna*numFeed  refers to many collections of rows in the Feed Table.
+
+    switchCycleId  Tag []   numDataDescription  refers to a unique row in the SwitchCycle Table.
+
+    dataDescriptionId  Tag []   numDataDescription  refers to one or more rows in DataDescriptionTable.
+
+    processorId  Tag  refers to a unique row in ProcessorTable.
+
+
+
+                 Value (Optional)
+
+    phasedArrayList  int []   numAntenna  phased array identifiers.
+
+    numAssocValues (numAssocValues) int  the number of associated config descriptions.
+
+    assocNature  SpectralResolutionType []   numAssocValues  the natures of the associations with other config descriptions (one value per association).
+
+    assocConfigDescriptionId  Tag []   numAssocValues  refers to one or more rows in ConfigDescriptionTable.
 
 
     """
@@ -114,21 +115,24 @@ class ConfigDescriptionTable(Representable):
     # set to True while the file is loading, just in case
     _loadInProgress = False
 
-    # the name of this table.
+    # The name of this table.
     _tableName = "ConfigDescription"
 
-    # the list of field names that make up key 'key'.
+    # The list of field names that make up key 'key'.
     _key = ["configDescriptionId"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # _archiveAsBin not used by python implementation
-    # _archiveAsBin = False  # if True archive binary else archive XML
-    _fileAsBin = False  # if True file binary else file XML
+    # archive as bin not used by python implementation
+    # _archiveAsBin = False # If True archive binary else archive XML
+    _fileAsBin = False  # If True file binary else file XML
 
-    # A list to store the ConfigDescriptionRow instances
+    # A data structure to store the ConfigDescriptionRow s.
+    # In all cases we maintain a private list of ConfigDescriptionRow s.
     _privateRows = []
+
+    # non-temporal ASDM in Java had a private row element here to also hold  ConfigDescriptionRow s. Not needed in python.
 
     # the Entity of this table
     _entity = None
@@ -138,15 +142,48 @@ class ConfigDescriptionTable(Representable):
 
     def getKeyName(self):
         """
-        Return the list of field names that make up "key" as a list of strings
+        Return the list of field names that make up key key
+        as a list of strings.
         """
         return self._key
 
+    # a dictionary for the autoincrementation algorithm
+    # the key is the key, excluding that auto-incrementable
+    # the value is an integer that's the largest auto-incrementable for that key
+    _noAutoIncIds = {}
+
+    def autoIncrement(self, key, x):
+        """
+        For internal use.
+        key is a key string
+        x is a row.
+        """
+        if key not in self._noAutoIncIds:
+            # There is not yet a combination of the non autoinc attributes values in the dict
+
+            # Initialize  configDescriptionId to Tag(0).
+            x.setConfigDescriptionId(Tag(0, TagType.ConfigDescription))
+
+            # Record it in the dict.
+            self._noAutoIncIds[key] = 0
+        else:
+            # There is already a combination of the non autoinc attributes values in the dict
+            nextInt = int(self._noAutoIncIds[key]) + 1
+
+            # Initialize  configDescriptionId to Tag(nextInt).
+            x.setConfigDescriptionId(Tag(nextInt, TagType.ConfigDescription))
+
+            # Record it in the hashtable.
+            self._noAutoIncIds[key] = nextInt
+
     def __init__(self, container):
         """
-        Create a ConfigDescriptionTable attached to container, which must be a ASDM instance
-        All tables must know the container to which they belong.
+        Create a ConfigDescriptionTable attached to container.
+
+        container must be a ASDM instance
+        All tables must know the container
         """
+
         if not isinstance(container, pyasdm.ASDM):
             raise (
                 ValueError(
@@ -167,6 +204,12 @@ class ConfigDescriptionTable(Representable):
         self._presentInMemory = True
         self._loadInProgress = False
 
+        self._privateRows = []
+
+        self._noAutoIncIds = {}
+
+        self._version = 0
+
     def setNotPresentInMemory(self):
         """
         Set the state to indicate it is not present in memory and needs to be loaded before being used.
@@ -180,11 +223,12 @@ class ConfigDescriptionTable(Representable):
         Check if the table is present in memory. If not, load the table from the file using the
         directory of the container.
         """
-        # NOTE: if setFromFile throws an exception then presentInMemory will remain False
+        # NOTE: if setFromFile raises an exception then presentInMemory will remain False
         # and loadInProgress will remain True, preventing another attempt at loading.
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
+            print("ConfigDescription is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -193,6 +237,7 @@ class ConfigDescriptionTable(Representable):
     def getContainer(self):
         """
         Return the container to which this table belongs.
+        return a ASDM.
         """
         return self._container
 
@@ -226,38 +271,42 @@ class ConfigDescriptionTable(Representable):
         thisRow = ConfigDescriptionRow(self)
         return thisRow
 
-    def add(self, newrow):
+    def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in newrow.  If a row is found return that row else autoincrement newrow.configDescriptionId,
-        add newrow to its table and return newrow.
+        homologues in x.  If a row is found that row else autoincrement x.\configDescriptionId,
+        add x to its table and returns x.
 
         returns a ConfigDescriptionRow.
+        x. A row to be added.
         """
+        if not isinstance(x, ConfigDescriptionRow):
+            raise ValueError("x must be a  ConfigDescriptionRow instance.")
 
         aRow = self.lookup(
-            newrow.getNumAntenna(),
-            newrow.getNumDataDescription(),
-            newrow.getNumFeed(),
-            newrow.getCorrelationMode(),
-            newrow.getNumAtmPhaseCorrection(),
-            newrow.getAtmPhaseCorrection(),
-            newrow.getProcessorType(),
-            newrow.getSpectralType(),
-            newrow.getAntennaId(),
-            newrow.getFeedId(),
-            newrow.getSwitchCycleId(),
-            newrow.getDataDescriptionId(),
-            newrow.getProcessorId(),
+            x.getNumAntenna(),
+            x.getNumDataDescription(),
+            x.getNumFeed(),
+            x.getCorrelationMode(),
+            x.getNumAtmPhaseCorrection(),
+            x.getAtmPhaseCorrection(),
+            x.getProcessorType(),
+            x.getSpectralType(),
+            x.getAntennaId(),
+            x.getFeedId(),
+            x.getSwitchCycleId(),
+            x.getDataDescriptionId(),
+            x.getProcessorId(),
         )
         if aRow is not None:
             return aRow
 
-        # Autoincrement configDescriptionId, same as the number of this row in the table
-        newrow.setConfigDescriptionId(Tag(size(), TagType.ConfigDescription))
+        # Autoincrement configDescriptionId
+        x.setConfigDescriptionId(Tag(self.size(), TagType.ConfigDescription))
 
-        newrow.isAdded()
-        return newrow
+        self._privateRows.add(x)
+        x.isAdded()
+        return x
 
     def newRow(
         self,
@@ -276,7 +325,9 @@ class ConfigDescriptionTable(Representable):
         processorId,
     ):
         """
-        Create a new ConfigDescriptionRow. The new row is not added to this table, but it does know about it.
+        Create a new ConfigDescriptionRow initialized to the specified values.
+
+        The new row is not added to this table, but it does know about it.
         (the autoincrementable attribute, if any, is not in the parameter list)
         """
 
@@ -327,30 +378,34 @@ class ConfigDescriptionTable(Representable):
 
     # ====> Append a row to its table.
 
-    def _checkAndAdd(self, newrow):
+    def checkAndAdd(self, x):
         """
-        A private method to append a row to its table, used by input conversion
-        methods. Not intended for external use.
+        A method to append a row to it's table, used by input conversion methods.
+        Not indended for external use.
 
-        If this table has an autoincrementable attribute then check if newrow verifies the rule of uniqueness and raise an exception if not.
-        Returns newrow.
+        If this table has an autoincrementable attribute then check if
+        x verifies the rule of uniqueness and raise an exception if not.
+
+        Append x to its table.
+        x is the row to be appended.
+        returns x.
         """
 
         if (
             self.lookup(
-                newrow.getNumAntenna(),
-                newrow.getNumDataDescription(),
-                newrow.getNumFeed(),
-                newrow.getCorrelationMode(),
-                newrow.getNumAtmPhaseCorrection(),
-                newrow.getAtmPhaseCorrection(),
-                newrow.getProcessorType(),
-                newrow.getSpectralType(),
-                newrow.getAntennaId(),
-                newrow.getFeedId(),
-                newrow.getSwitchCycleId(),
-                newrow.getDataDescriptionId(),
-                newrow.getProcessorId(),
+                x.getNumAntenna(),
+                x.getNumDataDescription(),
+                x.getNumFeed(),
+                x.getCorrelationMode(),
+                x.getNumAtmPhaseCorrection(),
+                x.getAtmPhaseCorrection(),
+                x.getProcessorType(),
+                x.getSpectralType(),
+                x.getAntennaId(),
+                x.getFeedId(),
+                x.getSwitchCycleId(),
+                x.getDataDescriptionId(),
+                x.getProcessorId(),
             )
             is not None
         ):
@@ -358,18 +413,19 @@ class ConfigDescriptionTable(Representable):
                 "Uniqueness violation exception in table ConfigDescriptionTable"
             )
 
-        if self.getRowByKey(newrow.getConfigDescriptionId()) is not None:
+        if self.getRowByKey(x.getConfigDescriptionId()) is not None:
             raise DuplicateKey("Duplicate key exception in ", "ConfigDescriptionTable")
 
-        self._privateRows.append(newrow)
-        newrow.isAdded()
-        return newrow
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     # ====> methods returning rows.
 
     def get(self):
         """
-        Get all rows as an array of ConfigDescriptionRow
+        Get all rows.
+        return Alls rows as a list of ConfigDescriptionRow
         """
         return self._privateRows
 
@@ -379,7 +435,7 @@ class ConfigDescriptionTable(Representable):
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
 
-        @param configDescriptionId.
+        param configDescriptionId.
 
         """
         for row in self._privateRows:
@@ -387,8 +443,8 @@ class ConfigDescriptionTable(Representable):
             if not row.getConfigDescriptionId().equals(configDescriptionId):
                 continue
 
-            # this row matches these parameters
             return row
+
         # no match found
         return None
 
@@ -409,7 +465,7 @@ class ConfigDescriptionTable(Representable):
         processorId,
     ):
         """
-                Look up the table for a row whose all attributes  except the autoincrementable one
+        Look up the table for a row whose all attributes  except the autoincrementable one
         are equal to the corresponding parameters of the method.
         return this row if any, None otherwise.
 
@@ -461,6 +517,12 @@ class ConfigDescriptionTable(Representable):
 
         return None
 
+    def getRows(self):
+        """
+        get the rows, synonymous with the get method.
+        """
+        return self.get()
+
     # ====> conversion Methods
 
     def toXML(self):
@@ -468,7 +530,7 @@ class ConfigDescriptionTable(Representable):
         Translate this table to an XML representation conforming
         to the schema defined for ConfigDescription (ConfigDescriptionTable.xsd).
 
-        Returns a string containing the XML representation.
+        returns a string containing the XML representation.
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
@@ -488,27 +550,28 @@ class ConfigDescriptionTable(Representable):
         Populate this table from the content of a XML document that is required to
         conform to the XML schema defined for a ConfigDescription (ConfigDescriptionTable.xsd).
         """
+        if not isinstance(xmlstr, str):
+            raise ConversionException("xmlstr must be a string")
+
         xmldom = minidom.parseString(xmlstr)
-        # this should have at least one child node with a name of ConfigDescriptionTable.
+        # this should have at least one child node with a name of "ConfigDescriptionTable".
         if (
             not xmldom.hasChildNodes()
             or xmldom.firstChild.nodeName != "ConfigDescriptionTable"
         ):
             raise ConversionException(
-                "XML is not from a the expected table", "ConfigDescriptionTable."
+                "XML is not from the expected table", "ConfigDescriptionTable"
             )
 
         # ignore everything but the first child node
         tabdom = xmldom.firstChild
 
-        # get the version from the schemaVersion attribute, which must be there
-        if (not tabdom.hasAttributes()) or (
-            tabdom.attributes.getNamedItem("schemaVersion") is None
+        # get the version from the schemaVersion attribute, which is not always there
+        versionStr = "-1"
+        if tabdom.hasAttributes() and (
+            tabdom.attributes.getNamedItem("schemaVersion") is not None
         ):
-            raise ConversionException(
-                "schemaVersion not found in XML", "ConfigDescriptionTable"
-            )
-        versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
+            versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
         # raises a ValueError if not an integer
         try:
             self.setVersion(int(versionStr))
@@ -553,13 +616,14 @@ class ConfigDescriptionTable(Representable):
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
-                    self._checkAndAdd(row)
+                    self.checkAndAdd(row)
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
-                    raise ConversionException(str, "ConfigDescriptionTable") from None
+                    raise ConversionException(
+                        str(exc), "ConfigDescriptionTable"
+                    ) from None
 
-                except ValueError as exc:
-                    # TBD when this turns up via template
+                except UniquenessViolationException as exc:
                     msg = (
                         "UniquenessViolationException in row in ConfigDescriptionTable : %s"
                         % str(exc)
@@ -572,12 +636,297 @@ class ConfigDescriptionTable(Representable):
 
         self.setEntity(tabEntity)
 
+    def MIMEXMLPart(self):
+        print("MIMEXMLPart not implemented for <ConfigDescriptionTable")
+        return
+        # the JAVA code looks like this
+        # String UID = this.getEntity().getEntityId().toString();
+        # String withoutUID = UID.substring(6);
+        # String containerUID = this.getContainer().getEntity().getEntityId().toString();
+        #
+        # StringBuffer sb = new StringBuffer()
+        # .append("<?xml version='1.0'  encoding='ISO-8859-1'?>")
+        # .append("\n")
+        # .append("<ConfigDescriptionTable xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:cnfdsc=\"http://Alma/XASDM/ConfigDescriptionTable\" xsi:schemaLocation=\"http://Alma/XASDM/ConfigDescriptionTable http://almaobservatory.org/XML/XASDM/4/ConfigDescriptionTable.xsd\" schemaVersion=\"4\" schemaRevision=\"-1\">\n")
+        # .append("<Entity entityId='")
+        # .append(UID)
+        # .append("' entityIdEncrypted='na' entityTypeName='ConfigDescriptionTable' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<ContainerEntity entityId='")
+        # .append(containerUID)
+        # .append("' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<BulkStoreRef file_id='")
+        # .append(withoutUID)
+        # .append("' byteOrder='Big_Endian' />\n")
+        # .append("<Attributes>\n")
+
+        # .append("<configDescriptionId/>\n")
+        # .append("<numAntenna/>\n")
+        # .append("<numDataDescription/>\n")
+        # .append("<numFeed/>\n")
+        # .append("<correlationMode/>\n")
+        # .append("<numAtmPhaseCorrection/>\n")
+        # .append("<atmPhaseCorrection/>\n")
+        # .append("<processorType/>\n")
+        # .append("<spectralType/>\n")
+        # .append("<antennaId/>\n")
+        # .append("<feedId/>\n")
+        # .append("<switchCycleId/>\n")
+        # .append("<dataDescriptionId/>\n")
+        # .append("<processorId/>\n")
+
+        # .append("<phasedArrayList/>\n")
+        # .append("<numAssocValues/>\n")
+        # .append("<assocNature/>\n")
+        # .append("<assocConfigDescriptionId/>\n")
+        # .append("</Attributes>\n")
+        # .append("</ConfigDescriptionTable>\n");
+        # return sb.toString();
+
+    def toMIME(self):
+        """
+        Serialize this into a stream of bytes and encapsulates that stream into a MIME message.
+        returns a string containing the MIME message.
+        """
+        print("toMIME not yet implemented for ConfigDescription")
+        return
+        # the Java code looks like this - returns a Byte array
+        # ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        # DataOutputStream dos = new DataOutputStream(bos);
+
+        # String UID = this.getEntity().getEntityId().toString();
+        # String execBlockUID = this.getContainer().getEntity().getEntityId().toString();
+        # try {
+        #     // The XML Header part.
+        #     dos.writeBytes("MIME-Version: 1.0");
+        #     dos.writeBytes("\n");
+        #    dos
+        #     .writeBytes("Content-Type: Multipart/Related; boundary='MIME_boundary'; type='text/xml'; start= '<header.xml>'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Description: Correlator");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("alma-uid:" + UID);
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part header.
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: text/xml; charset='ISO-8859-1'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Transfer-Encoding: 8bit");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <header.xml>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part content.
+        #    dos.writeBytes(MIMEXMLPart());
+        #    // have updated their code to the new XML header.
+        #    //
+        #    //dos.writeBytes(oldMIMEXMLPart());
+        #
+        #    // The MIME binary part header
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: binary/octet-stream");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <content.bin>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The binary part.
+        #    entity.toBin(dos);
+        #    container.getEntity().toBin(dos);
+        #    dos.writeInt(size());
+
+        #    for (ConfigDescriptionRow row: privateRows) row.toBin(dos);
+
+        #    // The closing MIME boundary
+        #    dos.writeBytes("\n--MIME_boundary--");
+        #    dos.writeBytes("\n");
+
+        # } catch (IOException e) {
+        #    throw new ConversionException(
+        #            "Error while reading binary data , the message was "
+        #            + e.getMessage(), "ConfigDescription");
+        # }
+
+        # return bos.toByteArray();
+
+    # Java code looks like this
+    # static private boolean binaryPartFound(DataInputStream dis, String s, int pos) throws IOException {
+    #    int posl = pos;
+    #    int count = 0;
+    #    dis.mark(1000000);
+    #    try {
+    #        while (dis.readByte() != s.charAt(posl)){
+    #            count ++;
+    #        }
+    #    }
+    #    catch (EOFException e) {
+    #        return false;
+    #    }
+    #
+    #    if (posl == (s.length() - 1)) return true;
+    #
+    #    if (pos == 0) {
+    #        posl++;
+    #        return binaryPartFound(dis, s, posl);
+    #    }
+    #    else {
+    #        if (count > 0) { dis.reset();  return binaryPartFound(dis, s, 0) ; }
+    #        else {
+    #            posl++;
+    #            return binaryPartFound(dis, s, posl);
+    #        }
+    #    }
+    # }
+
+    # private String xmlHeaderPart (String s) throws ConversionException {
+    #    String xmlPartMIMEHeader = "Content-ID: <header.xml>\n\n";
+    #    String binPartMIMEHeader = "--MIME_boundary\nContent-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    #
+    #    // Detect the XML header.
+    #    int loc0 = s.indexOf(xmlPartMIMEHeader);
+    #    if (loc0 == -1 ) throw new ConversionException("Failed to detect the beginning of the XML header", "ConfigDescription");
+    #
+    #    loc0 += xmlPartMIMEHeader.length();
+    #
+    #    // Look for the string announcing the binary part.
+    #    int loc1 = s.indexOf(binPartMIMEHeader, loc0);
+    #    if (loc1 == -1) throw new ConversionException("Failed to detect the beginning of the binary part", "ConfigDescription");
+    #
+    #    return s.substring(loc0, loc1).trim();
+    # }
+
+    # setFromMIME(byte[]   data) throws ConversionException {
+    # *
+    # Extracts the binary part of a MIME message and deserialize its content
+    # to fill this with the result of the deserialization.
+    # @param data the string containing the MIME message.
+    # @throws ConversionException
+    # /
+    # ByteOrder byteOrder = null;
+    # //
+    # // Look for the part containing the XML header.
+    # // Very empirically we assume that the first MIME part , the one which contains the
+    # // XML header, always fits in the first 1000 bytes of the MIME message !!
+    # //
+    # String header = xmlHeaderPart(new String(data, 0, Math.min(10000, data.length)));
+    # org.jdom.Document document = null;
+    # SAXBuilder sxb = new SAXBuilder();
+    #
+    # // Firstly build a document out of the XML.
+    # try {
+    #    document = sxb.build(new ByteArrayInputStream(header.getBytes()));
+    # }
+    # catch (Exception e) {
+    #     throw new ConversionException(e.getMessage(), "ConfigDescription");
+    # }
+    #
+    # //
+    # // Let's define a default order for the sequence of attributes.
+    # //
+    # ArrayList<String> attributesSeq = new ArrayList<String> ();
+
+    #     attributesSeq.add("configDescriptionId"); attributesSeq.add("numAntenna"); attributesSeq.add("numDataDescription"); attributesSeq.add("numFeed"); attributesSeq.add("correlationMode"); attributesSeq.add("numAtmPhaseCorrection"); attributesSeq.add("atmPhaseCorrection"); attributesSeq.add("processorType"); attributesSeq.add("spectralType"); attributesSeq.add("antennaId"); attributesSeq.add("feedId"); attributesSeq.add("switchCycleId"); attributesSeq.add("dataDescriptionId"); attributesSeq.add("processorId");
+    #     attributesSeq.add("phasedArrayList");  attributesSeq.add("numAssocValues");  attributesSeq.add("assocNature");  attributesSeq.add("assocConfigDescriptionId");
+
+    # XPath xpath = null;
+    # //
+    # // And then look for the possible XML contents.
+    # try {
+    #     // Is it an "<ASDMBinaryTable ...." document (old) ?
+    #    if (XPath.newInstance("/ASDMBinaryTable")
+    #            .selectSingleNode(document) != null)
+    #        byteOrder = ByteOrder.BIG_ENDIAN;
+    #    else {
+    #        // Then it must be a "<ConfigDescriptionTable ...." document
+    #        // With a BulkStoreRef child element....
+    #        XPath xpa = XPath.newInstance("/ConfigDescriptionTable/BulkStoreRef/@byteOrder");
+    #        Object node = xpa.selectSingleNode(document.getRootElement());
+    #        if (node == null)
+    #            throw new ConversionException("No element found for the XPath expression '/ConfigDescriptionTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "ConfigDescription");
+    #
+    #        // Yes ? then it must have a "BulkStoreRef" element with a
+    #        // "byteOrder" attribute.
+    #        String bo = xpa.valueOf(document.getRootElement());
+    #        if (bo.equals("Little_Endian"))
+    #            byteOrder = ByteOrder.LITTLE_ENDIAN;
+    #        else if (bo.equals("Big_Endian"))
+    #            byteOrder = ByteOrder.BIG_ENDIAN;
+    #        else
+    #            throw new ConversionException("No valid value retrieved for the node '/ConfigDescriptionTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "ConfigDescription");
+    #
+    #        // And also it must have an Attributes element with children.
+    #        xpa = XPath.newInstance("/ConfigDescriptionTable/Attributes#");
+    #        List nodes = xpa.selectNodes(document.getRootElement());
+    #        if (nodes==null || nodes.size()==0)
+    #            throw new ConversionException("No element found for the XPath expression '/ConfigDescriptionTable/Attributes#'. Invalid XML header '"+header+"'.", "ConfigDescription");
+    #
+    #        Iterator iter = nodes.iterator();
+    #        attributesSeq.clear();
+    #        int i = 0;
+    #        while (iter.hasNext()){
+    #            attributesSeq.add(((Element) iter.next()).getName());
+    #            i += 1;
+    #        }
+    #    }
+    # } catch (Exception e) {
+    #    throw new ConversionException(e.getMessage(), "ConfigDescription");
+    # }
+
+    # //
+    # // Now that we know what is the byte order of the binary data
+    # // Let's extract them from the second MIME part and parse them
+    # //
+    # ByteArrayInputStream bis = new ByteArrayInputStream(data);
+    # DataInputStream dis = new DataInputStream(bis);
+    # BODataInputStream bodis = new BODataInputStream(dis, byteOrder);
+    #
+    # String terminator = "Content-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    # entity = null;
+    # try {
+    #    if (binaryPartFound(dis, terminator, 0) == false) {
+    #        throw new ConversionException ("Failed to detect the beginning of the binary part", "ConfigDescription");
+    #    }
+    #
+    #    entity = Entity.fromBin(bodis);
+    #
+    #    Entity containerEntity = Entity.fromBin(bodis);
+    #
+    #    int numRows = bodis.readInt();
+    #    for (int i = 0; i < numRows; i++) {
+    #    this.checkAndAdd(ConfigDescriptionRow.fromBin(bodis, this, attributesSeq.toArray(new String[0])));
+    #    }
+    # } catch (TagFormatException e) {
+    #    throw new ConversionException( "Error while reading binary data , the message was "
+    #        + e.getMessage(), "ConfigDescription");
+    # }catch (IOException e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "ConfigDescription");
+    # } catch (DuplicateKey e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "ConfigDescription");
+    # }catch (Exception e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "ConfigDescription");
+    # }
+    # }
+
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a ConfigDescriptionTable as those produced by the toFile method.
+        Reads and parses a file containing a representation of a ConfigDescriptionTable as those produced  by the toFile method.
         This table is populated with the result of the parsing.
-        The directory value is the name of the directory containing the file to be read and parsed.
+        param directory The name of the directory containing the file te be read and parsed.
+        raises ConversionException If any error occurs while reading the
+        files in the directory or parsing them.
         """
+        if not isinstance(directory, str):
+            print("directory must be a string")
 
         # directory must exist as a directory
         if not os.path.isdir(directory):
@@ -589,7 +938,7 @@ class ConfigDescriptionTable(Representable):
         if os.path.exists(os.path.join(directory, "ConfigDescription.xml")):
             self.setFromXMLFile(directory)
         elif os.path.exists(os.path.join(directory, "ConfigDescription.bin")):
-            setFromMIMEFile(directory)
+            self.setFromMIMEFile(directory)
         else:
             raise ConversionException(
                 "No file found for the ConfigDescription table",
@@ -597,39 +946,94 @@ class ConfigDescriptionTable(Representable):
             )
 
     def setFromMIMEFile(self, directory):
-        print("setFromMIMEFile not implemented yet")
+        """
+        Set this table from a MIME file.
+        Used internally by setFromFile. Not intented for external use.
+        """
+        print("setFromMIME file not yet implemented for ConfigDescriptionTable")
+        return
+
+        # java code looks like this
+        # File file = new File(directory+"/ConfigDescription.bin");
+        #
+        # byte[] bytes = null;
+        #
+        # try {
+        #     InputStream is = new FileInputStream(file);
+        #     long length = file.length();
+        #     if (length > Integer.MAX_VALUE)
+        #         throw new ConversionException ("File " + file.getName() + " is too large", "ConfigDescription");
+        #
+        #    bytes = new byte[(int)length];
+        #    int offset = 0;
+        #    int numRead = 0;
+        #
+        #   while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+        #       offset += numRead;
+        #   }
+        #
+        #    if (offset < bytes.length) {
+        #        throw new ConversionException("Could not completely read file "+file.getName(), "ConfigDescription");
+        #    }
+        #    is.close();
+        # }
+        # catch (IOException e) {
+        #    throw new ConversionException("Error while reading "+file.getName()+". The message was " + e.getMessage(),
+        #    "ConfigDescription");
+        # }
+
+        # setFromMIME(bytes);
+        # // Changed 24 Sep, 2015 - The export policy cannot be changed by what has been observed at import time. M Caillat
+        # // archiveAsBin = true;
+        # // fileAsBin = true;
+
+    # }
 
     def setFromXMLFile(self, directory):
         """
         This is the function used by setFromFile when the file is an XML file
+        Not intended for external use.
         """
 
         # setFromFile has already established that this exists
         # read the entire file into a string
         xmlstr = None
-        with open(os.path.join(directory, "ConfigDescription.xml")) as f:
-            xmlstr = f.read()
-
-        if xmlstr is None:
-            raise ConversionException(
-                "ConfigDescription.xml is empty", "ConfigDescriptionTable"
-            )
+        try:
+            with open(os.path.join(directory, "ConfigDescription.xml")) as f:
+                xmlstr = f.read()
+        except Exception as exc:
+            # reraise it as a ConversionException
+            raise ConversionException(str(exc), "ConfigDescriptionTable") from None
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
             self.setFromMIMEFile(directory)
         else:
             self.fromXML(xmlstr)
+            # TBD: when fileAsBin is implemented this should be removed
+            # this will at least preserve the case where fileAsBin was changed for
+            # a table such that the archive has it in XML but the current rule is to
+            # write it out as binary
+            if self._fileAsBin:
+                print(
+                    "ConfigDescription found as XML but it should be written as binary, which is not yet implemetned. Setting to write as XML to preserve this content."
+                )
+                self._fileAsBin = False
 
     def toFile(self, directory):
         """
         Stores a representation (binary or XML) of this table into a file.
 
-        Depending on the boolean value of _fileAsBin, a binary serialization
-        of this (_fileAsBin=True) will be saved in a file 'ConfigDescription.bin' or an
-        XML representation (_fileAsBin==False) will be saved in a file 'ConfigDescription.xml'.
+        Depending on the boolean value of its _fileAsBin data member a binary serialization
+        of this (_fileAsBin==True) will be saved in a file "ConfigDescription.bin" or
+        an XML representation (_fileAsBin==False) will be saved in a file "ConfigDescription.xml".
         The file is always written in a directory whose name is passed as a parameter.
+        param directory The name of directory where the file containing the table's
+        representation will be saved.
+        raises ConversionException for any errors while writing that file.
         """
+        if not isinstance(directory, str):
+            raise ConversionException("directory must be a string")
 
         if os.path.exists(directory) and not os.path.isdir(directory):
             raise ConversionException(
@@ -638,21 +1042,86 @@ class ConfigDescriptionTable(Representable):
                 "ConfigDescriptionTable",
             )
 
-        if not os.path.exists(directory):
-            # assume it can be created there, if not this will raise a FileNotFound exception here
-            os.mkdir(directory)
+        # if not let's create it.
+        try:
+            if not os.path.exists(directory):
+                # if it can't be created a FileNotFound exception is the most likely result
+                os.mkdir(directory)
+        except Exception as exc:
+            # reraise any exception as a ConversionException
+            raise ConversionException(
+                "Could not create directory "
+                + directory
+                + " exception caught "
+                + str(exc),
+                "ConfigDescriptionTable",
+            ) from None
 
         if self._fileAsBin:
             print("fileAsBin not yet implemented for ConfigDescription")
+            # the Java code looks like this
+            #
+            # The table is exported in a binary format.
+            # (actually a short XML file + a possibly long MIME file)
+            #
+            # File xmlFile = new File(directory+"/ConfigDescription.xml");
+            # if (xmlFile.exists())
+            #    if (!xmlFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+xmlFile.toString()+"'", "ConfigDescription");
+            #
+            # File binFile = new File(directory+"/ConfigDescription.bin");
+            # if (binFile.exists())
+            #    if (!binFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+binFile.toString()+"'", "ConfigDescription");
+            #
+            # try {
+            #    BufferedWriter out = new BufferedWriter(new FileWriter(xmlFile));
+            #    out.write(MIMEXMLPart());
+            #    out.close();
+            #
+
+            #  OutputStream osBin = new FileOutputStream(binFile);
+            #  osBin.write(toMIME());
+            #  osBin.close();
+
+        # }
+        # catch (FileNotFoundException e) {
+        #     throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "ConfigDescription");
+        # }
+        # catch (IOException e) {
+        #      throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "ConfigDescription");
+        # }
+        # }
         else:
-            # exported as an XML file.
+            # The table is totally exported in a XML file.
             filePath = os.path.join(directory, "ConfigDescription.xml")
             if os.path.exists(filePath):
-                # try to delete it, this will raise an exception if the user does not have permission to do that
-                os.remove(filePath)
-            with open(filePath, "w") as f:
-                f.write(self.toXML())
-                f.close()
+                try:
+                    # try to delete it, this will raise an exception if the user does not have permission to do that
+                    os.remove(filePath)
+                except Exception as exc:
+                    # reraise it as a ConversionException
+                    raise ConversionException(
+                        "Could not remove existing "
+                        + filePath
+                        + " exception caught "
+                        + str(exc),
+                        "ConfigDescriptionTable",
+                    ) from None
+
+            try:
+                with open(filePath, "w") as f:
+                    f.write(self.toXML())
+                    f.close()
+
+                    # Java code uses a BufferedWriter to capture the output of toXML to the file
+            except Exception as exc:
+                # reraise it as a ConversionException
+                raise ConversionException(
+                    "Problem while writing the XML representation, the message was : "
+                    + str(exc),
+                    "ConfigDescription",
+                ) from None
 
     def getEntity(self):
         """

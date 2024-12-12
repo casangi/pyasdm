@@ -75,12 +75,29 @@ class StateRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._stateId = Tag()
+
         self._calDeviceName = CalibrationDevice.from_int(0)
+
+        self._sig = None
+
+        self._ref = None
+
+        self._onSky = None
+
+        self._weightExists = False
+
+        self._weight = None
 
         if row is not None:
             if not isinstance(row, StateRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._stateId = Tag(row._stateId)
 
@@ -170,30 +187,30 @@ class StateRow:
 
         stateIdNode = rowdom.getElementsByTagName("stateId")[0]
 
-        self._stateId = Tag(stateIdNode.firstChild.data)
+        self._stateId = Tag(stateIdNode.firstChild.data.strip())
 
         calDeviceNameNode = rowdom.getElementsByTagName("calDeviceName")[0]
 
         self._calDeviceName = CalibrationDevice.newCalibrationDevice(
-            calDeviceNameNode.firstChild.data
+            calDeviceNameNode.firstChild.data.strip()
         )
 
         sigNode = rowdom.getElementsByTagName("sig")[0]
 
-        self._sig = bool(sigNode.firstChild.data)
+        self._sig = bool(sigNode.firstChild.data.strip())
 
         refNode = rowdom.getElementsByTagName("ref")[0]
 
-        self._ref = bool(refNode.firstChild.data)
+        self._ref = bool(refNode.firstChild.data.strip())
 
         onSkyNode = rowdom.getElementsByTagName("onSky")[0]
 
-        self._onSky = bool(onSkyNode.firstChild.data)
+        self._onSky = bool(onSkyNode.firstChild.data.strip())
 
         weightNode = rowdom.getElementsByTagName("weight")
         if len(weightNode) > 0:
 
-            self._weight = float(weightNode[0].firstChild.data)
+            self._weight = float(weightNode[0].firstChild.data.strip())
 
             self._weightExists = True
 

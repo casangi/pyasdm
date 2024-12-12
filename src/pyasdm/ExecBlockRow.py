@@ -72,9 +72,91 @@ class ExecBlockRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._execBlockId = Tag()
+
+        self._startTime = ArrayTime()
+
+        self._endTime = ArrayTime()
+
+        self._execBlockNum = 0
+
+        self._execBlockUID = EntityRef()
+
+        self._projectUID = EntityRef()
+
+        self._configName = None
+
+        self._telescopeName = None
+
+        self._observerName = None
+
+        self._numObservingLog = 0
+
+        self._observingLog = []  # this is a list of str []
+
+        self._sessionReference = EntityRef()
+
+        self._baseRangeMin = Length()
+
+        self._baseRangeMax = Length()
+
+        self._baseRmsMinor = Length()
+
+        self._baseRmsMajor = Length()
+
+        self._basePa = Angle()
+
+        self._aborted = None
+
+        self._numAntenna = 0
+
+        self._releaseDateExists = False
+
+        self._releaseDate = ArrayTime()
+
+        self._schedulerModeExists = False
+
+        self._schedulerMode = None
+
+        self._siteAltitudeExists = False
+
+        self._siteAltitude = Length()
+
+        self._siteLongitudeExists = False
+
+        self._siteLongitude = Angle()
+
+        self._siteLatitudeExists = False
+
+        self._siteLatitude = Angle()
+
+        self._observingScriptExists = False
+
+        self._observingScript = None
+
+        self._observingScriptUIDExists = False
+
+        self._observingScriptUID = EntityRef()
+
+        # extrinsic attributes
+
+        self._antennaId = []  # this is a list of Tag []
+
+        self._sBSummaryId = Tag()
+
+        self._scaleIdExists = False
+
+        self._scaleId = Tag()
+
         if row is not None:
             if not isinstance(row, ExecBlockRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._execBlockId = Tag(row._execBlockId)
 
@@ -317,19 +399,19 @@ class ExecBlockRow:
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data)
+        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
         startTimeNode = rowdom.getElementsByTagName("startTime")[0]
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data)
+        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
 
         endTimeNode = rowdom.getElementsByTagName("endTime")[0]
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data)
+        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
 
         execBlockNumNode = rowdom.getElementsByTagName("execBlockNum")[0]
 
-        self._execBlockNum = int(execBlockNumNode.firstChild.data)
+        self._execBlockNum = int(execBlockNumNode.firstChild.data.strip())
 
         execBlockUIDNode = rowdom.getElementsByTagName("execBlockUID")[0]
 
@@ -341,24 +423,27 @@ class ExecBlockRow:
 
         configNameNode = rowdom.getElementsByTagName("configName")[0]
 
-        self._configName = str(configNameNode.firstChild.data)
+        self._configName = str(configNameNode.firstChild.data.strip())
 
         telescopeNameNode = rowdom.getElementsByTagName("telescopeName")[0]
 
-        self._telescopeName = str(telescopeNameNode.firstChild.data)
+        self._telescopeName = str(telescopeNameNode.firstChild.data.strip())
 
         observerNameNode = rowdom.getElementsByTagName("observerName")[0]
 
-        self._observerName = str(observerNameNode.firstChild.data)
+        self._observerName = str(observerNameNode.firstChild.data.strip())
 
         numObservingLogNode = rowdom.getElementsByTagName("numObservingLog")[0]
 
-        self._numObservingLog = int(numObservingLogNode.firstChild.data)
+        self._numObservingLog = int(numObservingLogNode.firstChild.data.strip())
 
         observingLogNode = rowdom.getElementsByTagName("observingLog")[0]
 
-        observingLogStr = observingLogNode.firstChild.data
-        self._observingLog = Parser.stringListToLists(observingLogStr, str, "ExecBlock")
+        observingLogStr = observingLogNode.firstChild.data.strip()
+
+        self._observingLog = Parser.stringListToLists(
+            observingLogStr, str, "ExecBlock", False
+        )
 
         sessionReferenceNode = rowdom.getElementsByTagName("sessionReference")[0]
 
@@ -366,71 +451,71 @@ class ExecBlockRow:
 
         baseRangeMinNode = rowdom.getElementsByTagName("baseRangeMin")[0]
 
-        self._baseRangeMin = Length(baseRangeMinNode.firstChild.data)
+        self._baseRangeMin = Length(baseRangeMinNode.firstChild.data.strip())
 
         baseRangeMaxNode = rowdom.getElementsByTagName("baseRangeMax")[0]
 
-        self._baseRangeMax = Length(baseRangeMaxNode.firstChild.data)
+        self._baseRangeMax = Length(baseRangeMaxNode.firstChild.data.strip())
 
         baseRmsMinorNode = rowdom.getElementsByTagName("baseRmsMinor")[0]
 
-        self._baseRmsMinor = Length(baseRmsMinorNode.firstChild.data)
+        self._baseRmsMinor = Length(baseRmsMinorNode.firstChild.data.strip())
 
         baseRmsMajorNode = rowdom.getElementsByTagName("baseRmsMajor")[0]
 
-        self._baseRmsMajor = Length(baseRmsMajorNode.firstChild.data)
+        self._baseRmsMajor = Length(baseRmsMajorNode.firstChild.data.strip())
 
         basePaNode = rowdom.getElementsByTagName("basePa")[0]
 
-        self._basePa = Angle(basePaNode.firstChild.data)
+        self._basePa = Angle(basePaNode.firstChild.data.strip())
 
         abortedNode = rowdom.getElementsByTagName("aborted")[0]
 
-        self._aborted = bool(abortedNode.firstChild.data)
+        self._aborted = bool(abortedNode.firstChild.data.strip())
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data)
+        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
 
         releaseDateNode = rowdom.getElementsByTagName("releaseDate")
         if len(releaseDateNode) > 0:
 
-            self._releaseDate = ArrayTime(releaseDateNode[0].firstChild.data)
+            self._releaseDate = ArrayTime(releaseDateNode[0].firstChild.data.strip())
 
             self._releaseDateExists = True
 
         schedulerModeNode = rowdom.getElementsByTagName("schedulerMode")
         if len(schedulerModeNode) > 0:
 
-            self._schedulerMode = str(schedulerModeNode[0].firstChild.data)
+            self._schedulerMode = str(schedulerModeNode[0].firstChild.data.strip())
 
             self._schedulerModeExists = True
 
         siteAltitudeNode = rowdom.getElementsByTagName("siteAltitude")
         if len(siteAltitudeNode) > 0:
 
-            self._siteAltitude = Length(siteAltitudeNode[0].firstChild.data)
+            self._siteAltitude = Length(siteAltitudeNode[0].firstChild.data.strip())
 
             self._siteAltitudeExists = True
 
         siteLongitudeNode = rowdom.getElementsByTagName("siteLongitude")
         if len(siteLongitudeNode) > 0:
 
-            self._siteLongitude = Angle(siteLongitudeNode[0].firstChild.data)
+            self._siteLongitude = Angle(siteLongitudeNode[0].firstChild.data.strip())
 
             self._siteLongitudeExists = True
 
         siteLatitudeNode = rowdom.getElementsByTagName("siteLatitude")
         if len(siteLatitudeNode) > 0:
 
-            self._siteLatitude = Angle(siteLatitudeNode[0].firstChild.data)
+            self._siteLatitude = Angle(siteLatitudeNode[0].firstChild.data.strip())
 
             self._siteLatitudeExists = True
 
         observingScriptNode = rowdom.getElementsByTagName("observingScript")
         if len(observingScriptNode) > 0:
 
-            self._observingScript = str(observingScriptNode[0].firstChild.data)
+            self._observingScript = str(observingScriptNode[0].firstChild.data.strip())
 
             self._observingScriptExists = True
 
@@ -438,7 +523,7 @@ class ExecBlockRow:
         if len(observingScriptUIDNode) > 0:
 
             self._observingScriptUID = EntityRef(
-                observingScriptUIDNode[0].firstChild.data
+                observingScriptUIDNode[0].firstChild.data.strip()
             )
 
             self._observingScriptUIDExists = True
@@ -447,17 +532,18 @@ class ExecBlockRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        antennaIdStr = antennaIdNode.firstChild.data
-        self._antennaId = Parser.stringListToLists(antennaIdStr, Tag, "ExecBlock")
+        antennaIdStr = antennaIdNode.firstChild.data.strip()
+
+        self._antennaId = Parser.stringListToLists(antennaIdStr, Tag, "ExecBlock", True)
 
         sBSummaryIdNode = rowdom.getElementsByTagName("sBSummaryId")[0]
 
-        self._sBSummaryId = Tag(sBSummaryIdNode.firstChild.data)
+        self._sBSummaryId = Tag(sBSummaryIdNode.firstChild.data.strip())
 
         scaleIdNode = rowdom.getElementsByTagName("scaleId")
         if len(scaleIdNode) > 0:
 
-            self._scaleId = Tag(scaleIdNode[0].firstChild.data)
+            self._scaleId = Tag(scaleIdNode[0].firstChild.data.strip())
 
             self._scaleIdExists = True
 

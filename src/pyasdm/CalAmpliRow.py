@@ -84,21 +84,47 @@ class CalAmpliRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._antennaName = None
+
         self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._receiverBand = ReceiverBand.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._basebandName = BasebandName.from_int(0)
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        self._numReceptor = 0
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._frequencyRange = []  # this is a list of Frequency []
+
+        self._apertureEfficiency = []  # this is a list of float []
+
+        self._apertureEfficiencyError = []  # this is a list of float []
+
+        self._correctionValidityExists = False
+
+        self._correctionValidity = None
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalAmpliRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -242,72 +268,77 @@ class CalAmpliRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data
+            atmPhaseCorrectionNode.firstChild.data.strip()
         )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data
+            basebandNameNode.firstChild.data.strip()
         )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "CalAmpli"
+            polarizationTypesStr, PolarizationType, "CalAmpli", False
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data
+        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+
         self._frequencyRange = Parser.stringListToLists(
-            frequencyRangeStr, Frequency, "CalAmpli"
+            frequencyRangeStr, Frequency, "CalAmpli", True
         )
 
         apertureEfficiencyNode = rowdom.getElementsByTagName("apertureEfficiency")[0]
 
-        apertureEfficiencyStr = apertureEfficiencyNode.firstChild.data
+        apertureEfficiencyStr = apertureEfficiencyNode.firstChild.data.strip()
+
         self._apertureEfficiency = Parser.stringListToLists(
-            apertureEfficiencyStr, float, "CalAmpli"
+            apertureEfficiencyStr, float, "CalAmpli", False
         )
 
         apertureEfficiencyErrorNode = rowdom.getElementsByTagName(
             "apertureEfficiencyError"
         )[0]
 
-        apertureEfficiencyErrorStr = apertureEfficiencyErrorNode.firstChild.data
+        apertureEfficiencyErrorStr = apertureEfficiencyErrorNode.firstChild.data.strip()
+
         self._apertureEfficiencyError = Parser.stringListToLists(
-            apertureEfficiencyErrorStr, float, "CalAmpli"
+            apertureEfficiencyErrorStr, float, "CalAmpli", False
         )
 
         correctionValidityNode = rowdom.getElementsByTagName("correctionValidity")
         if len(correctionValidityNode) > 0:
 
-            self._correctionValidity = bool(correctionValidityNode[0].firstChild.data)
+            self._correctionValidity = bool(
+                correctionValidityNode[0].firstChild.data.strip()
+            )
 
             self._correctionValidityExists = True
 
@@ -315,11 +346,11 @@ class CalAmpliRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

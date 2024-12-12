@@ -72,9 +72,27 @@ class SeeingRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._numBaseLength = 0
+
+        self._baseLength = []  # this is a list of Length []
+
+        self._phaseRms = []  # this is a list of Angle []
+
+        self._seeing = None
+
+        self._exponent = None
+
         if row is not None:
             if not isinstance(row, SeeingRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._timeInterval = ArrayTimeInterval(row._timeInterval)
 
@@ -152,29 +170,33 @@ class SeeingRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         numBaseLengthNode = rowdom.getElementsByTagName("numBaseLength")[0]
 
-        self._numBaseLength = int(numBaseLengthNode.firstChild.data)
+        self._numBaseLength = int(numBaseLengthNode.firstChild.data.strip())
 
         baseLengthNode = rowdom.getElementsByTagName("baseLength")[0]
 
-        baseLengthStr = baseLengthNode.firstChild.data
-        self._baseLength = Parser.stringListToLists(baseLengthStr, Length, "Seeing")
+        baseLengthStr = baseLengthNode.firstChild.data.strip()
+
+        self._baseLength = Parser.stringListToLists(
+            baseLengthStr, Length, "Seeing", True
+        )
 
         phaseRmsNode = rowdom.getElementsByTagName("phaseRms")[0]
 
-        phaseRmsStr = phaseRmsNode.firstChild.data
-        self._phaseRms = Parser.stringListToLists(phaseRmsStr, Angle, "Seeing")
+        phaseRmsStr = phaseRmsNode.firstChild.data.strip()
+
+        self._phaseRms = Parser.stringListToLists(phaseRmsStr, Angle, "Seeing", True)
 
         seeingNode = rowdom.getElementsByTagName("seeing")[0]
 
-        self._seeing = float(seeingNode.firstChild.data)
+        self._seeing = float(seeingNode.firstChild.data.strip())
 
         exponentNode = rowdom.getElementsByTagName("exponent")[0]
 
-        self._exponent = float(exponentNode.firstChild.data)
+        self._exponent = float(exponentNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

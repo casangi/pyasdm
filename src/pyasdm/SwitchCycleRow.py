@@ -75,12 +75,35 @@ class SwitchCycleRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._switchCycleId = Tag()
+
+        self._numStep = 0
+
+        self._weightArray = []  # this is a list of float []
+
+        self._dirOffsetArray = []  # this is a list of Angle []  []
+
+        self._freqOffsetArray = []  # this is a list of Frequency []
+
+        self._stepDurationArray = []  # this is a list of Interval []
+
+        self._directionCodeExists = False
+
         self._directionCode = DirectionReferenceCode.from_int(0)
+
+        self._directionEquinoxExists = False
+
+        self._directionEquinox = ArrayTime()
 
         if row is not None:
             if not isinstance(row, SwitchCycleRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._switchCycleId = Tag(row._switchCycleId)
 
@@ -195,45 +218,49 @@ class SwitchCycleRow:
 
         switchCycleIdNode = rowdom.getElementsByTagName("switchCycleId")[0]
 
-        self._switchCycleId = Tag(switchCycleIdNode.firstChild.data)
+        self._switchCycleId = Tag(switchCycleIdNode.firstChild.data.strip())
 
         numStepNode = rowdom.getElementsByTagName("numStep")[0]
 
-        self._numStep = int(numStepNode.firstChild.data)
+        self._numStep = int(numStepNode.firstChild.data.strip())
 
         weightArrayNode = rowdom.getElementsByTagName("weightArray")[0]
 
-        weightArrayStr = weightArrayNode.firstChild.data
+        weightArrayStr = weightArrayNode.firstChild.data.strip()
+
         self._weightArray = Parser.stringListToLists(
-            weightArrayStr, float, "SwitchCycle"
+            weightArrayStr, float, "SwitchCycle", False
         )
 
         dirOffsetArrayNode = rowdom.getElementsByTagName("dirOffsetArray")[0]
 
-        dirOffsetArrayStr = dirOffsetArrayNode.firstChild.data
+        dirOffsetArrayStr = dirOffsetArrayNode.firstChild.data.strip()
+
         self._dirOffsetArray = Parser.stringListToLists(
-            dirOffsetArrayStr, Angle, "SwitchCycle"
+            dirOffsetArrayStr, Angle, "SwitchCycle", True
         )
 
         freqOffsetArrayNode = rowdom.getElementsByTagName("freqOffsetArray")[0]
 
-        freqOffsetArrayStr = freqOffsetArrayNode.firstChild.data
+        freqOffsetArrayStr = freqOffsetArrayNode.firstChild.data.strip()
+
         self._freqOffsetArray = Parser.stringListToLists(
-            freqOffsetArrayStr, Frequency, "SwitchCycle"
+            freqOffsetArrayStr, Frequency, "SwitchCycle", True
         )
 
         stepDurationArrayNode = rowdom.getElementsByTagName("stepDurationArray")[0]
 
-        stepDurationArrayStr = stepDurationArrayNode.firstChild.data
+        stepDurationArrayStr = stepDurationArrayNode.firstChild.data.strip()
+
         self._stepDurationArray = Parser.stringListToLists(
-            stepDurationArrayStr, Interval, "SwitchCycle"
+            stepDurationArrayStr, Interval, "SwitchCycle", True
         )
 
         directionCodeNode = rowdom.getElementsByTagName("directionCode")
         if len(directionCodeNode) > 0:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data
+                directionCodeNode[0].firstChild.data.strip()
             )
 
             self._directionCodeExists = True
@@ -241,7 +268,9 @@ class SwitchCycleRow:
         directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
         if len(directionEquinoxNode) > 0:
 
-            self._directionEquinox = ArrayTime(directionEquinoxNode[0].firstChild.data)
+            self._directionEquinox = ArrayTime(
+                directionEquinoxNode[0].firstChild.data.strip()
+            )
 
             self._directionEquinoxExists = True
 

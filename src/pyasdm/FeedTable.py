@@ -32,74 +32,81 @@
 import pyasdm.ASDM
 
 from .FeedRow import FeedRow
-from .Representable import Representable
 
 # All of the extended types are imported
 from pyasdm.types import *
 
 from .exceptions.ConversionException import ConversionException
 from .exceptions.DuplicateKey import DuplicateKey
+from .exceptions.UniquenessViolationException import UniquenessViolationException
 
-# using minidom instead of Parser
 from xml.dom import minidom
 
 import os
 
 
-class FeedTable(Representable):
+class FeedTable:
     """
     The FeedTable class is an Alma table.
 
-     Role
-     Contains characteristics of the feeds.
+    Role
+    Contains characteristics of the feeds.
 
-     Generated from model's revision -1, branch
+    Generated from model's revision -1, branch
 
-     Attributes of Feed
+    Attributes of Feed
 
-                  Key
+                 Key
 
-    antennaId Tag refers to a unique row in AntennaTable.
 
-    spectralWindowId Tag refers to a unique row in SpectralWindowTable.
-
-    timeInterval ArrayTimeInterval the time interval of validity of the content of the row.
-
-    feedId int identifies a collection of rows in the table.
+    antennaId Tag refers to a unique row in AntennaTable. </TD>
 
 
 
-                  Value (Mandatory)
-
-    numReceptor int  the number of receptors.
-
-    beamOffset double []  []   numReceptor, 2  the offsets of the beam (one pair per receptor).
-
-    focusReference Length []  []   numReceptor, 3  the references for the focus position (one triple per receptor).
-
-    polarizationTypes PolarizationType []   numReceptor  identifies the polarization types (one value per receptor).
-
-    polResponse Complex []  []   numReceptor, numReceptor  the polarization response (one value per pair of receptors).
-
-    receptorAngle Angle []   numReceptor  the receptors angles (one value per receptor).
-
-    receiverId int []   numReceptor  refers to one or more collections of rows in ReceiverTable.
+    spectralWindowId Tag refers to a unique row in SpectralWindowTable. </TD>
 
 
 
-                  Value (Optional)
+    timeInterval ArrayTimeInterval the time interval of validity of the content of the row. </TD>
 
-    feedNum int  the feed number to be used for multi-feed receivers.
 
-    illumOffset Length []   2  the illumination offset.
 
-    position Length []   3  the position of the feed.
+    feedId int (auto-incrementable)     identifies a collection of rows in the table. </TD>
 
-    skyCoupling float  the sky coupling is the coupling efficiency to the sky of the WVR radiometer's. Note that in general one expects to see whether \b no sky coupling efficiency recorded or \b only \b one of the two forms  scalar (skyCoupling) or array (skyCouplingSpectrum, numChan).
 
-    numChan int  the size of skyCouplingSpectrum. This attribute must be present when the (array) attribute skyCouplingSpectrum is present since it defines its number of elements. The value of this attribute must be equal to the value of numChan in the row of the SpectralWindow table refered to by spectralWindowId.
 
-    skyCouplingSpectrum float []   numChan  the sky coupling is the coupling efficiency to the sky of the WVR radiometer's. This column differs from the skyCoupling column because it contains one value for each of the individual channels of that spectralWindow. See the documentation of numChan for the size and the presence of this attribute. Note that in general one expects to see whether \b no sky coupling efficiency recorded or \b only \b one of the two forms  scalar (skyCoupling) or array (skyCouplingSpectrum, numChan).
+
+                 Value (Mandatory)
+
+    numReceptor (numReceptor) int  the number of receptors.
+
+    beamOffset  float []  []   numReceptor, 2  the offsets of the beam (one pair per receptor).
+
+    focusReference  Length []  []   numReceptor, 3  the references for the focus position (one triple per receptor).
+
+    polarizationTypes  PolarizationType []   numReceptor  identifies the polarization types (one value per receptor).
+
+    polResponse  Complex []  []   numReceptor, numReceptor  the polarization response (one value per pair of receptors).
+
+    receptorAngle  Angle []   numReceptor  the receptors angles (one value per receptor).
+
+    receiverId  int []   numReceptor  refers to one or more collections of rows in ReceiverTable.
+
+
+
+                 Value (Optional)
+
+    feedNum  int  the feed number to be used for multi-feed receivers.
+
+    illumOffset  Length []   2  the illumination offset.
+
+    position  Length []   3  the position of the feed.
+
+    skyCoupling  float  the sky coupling is the coupling efficiency to the sky of the WVR radiometer's. Note that in general one expects to see whether \b no sky coupling efficiency recorded or \b only \b one of the two forms  scalar (skyCoupling) or array (skyCouplingSpectrum, numChan).
+
+    numChan (numChan) int  the size of skyCouplingSpectrum. This attribute must be present when the (array) attribute skyCouplingSpectrum is present since it defines its number of elements. The value of this attribute must be equal to the value of numChan in the row of the SpectralWindow table refered to by spectralWindowId.
+
+    skyCouplingSpectrum  float []   numChan  the sky coupling is the coupling efficiency to the sky of the WVR radiometer's. This column differs from the skyCoupling column because it contains one value for each of the individual channels of that spectralWindow. See the documentation of numChan for the size and the presence of this attribute. Note that in general one expects to see whether \b no sky coupling efficiency recorded or \b only \b one of the two forms  scalar (skyCoupling) or array (skyCouplingSpectrum, numChan).
 
 
     """
@@ -112,25 +119,30 @@ class FeedTable(Representable):
     # set to True while the file is loading, just in case
     _loadInProgress = False
 
-    # the name of this table.
+    # The name of this table.
     _tableName = "Feed"
 
-    # the list of field names that make up key 'key'.
+    # The list of field names that make up key 'key'.
     _key = ["antennaId", "spectralWindowId", "timeInterval", "feedId"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # _archiveAsBin not used by python implementation
-    # _archiveAsBin = False  # if True archive binary else archive XML
-    _fileAsBin = False  # if True file binary else file XML
+    # archive as bin not used by python implementation
+    # _archiveAsBin = False # If True archive binary else archive XML
+    _fileAsBin = False  # If True file binary else file XML
 
-    # A list to store the FeedRow instances
+    # A data structure to store the FeedRow s.
+    # In all cases we maintain a private list of FeedRow s.
     _privateRows = []
 
-    # context is dictionary of lists of rows where each key is a string resulting
-    # from a call to the method Key and the value is list of rows sharing that key,
-    # maintained sorted in time-order.
+    # this table has a temporal key, an auto-incremetable key, and other key fields
+    # context is a dictionary where the key is the key without the temporal and auto
+    # incrementable fields.
+    # the value is a list of lists, where the outer list is index by the auto-incrementable
+    # key value and the inner list is the list of rows having that auto-incrementable
+    # value.
+    # Each list of rows is kept in temporal order
     _context = {}
 
     # the Entity of this table
@@ -146,12 +158,15 @@ class FeedTable(Representable):
         """
         A setter for the tolerance on focusReference
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._focusReferenceEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on focusReference
     def getFocusReferenceEqTolerance(self):
         """
         A getter for the tolerance on focusReference
+        Returns the tolerance as a  Length
         """
         return self._focusReferenceEqTolerance
 
@@ -162,12 +177,15 @@ class FeedTable(Representable):
         """
         A setter for the tolerance on receptorAngle
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._receptorAngleEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on receptorAngle
     def getReceptorAngleEqTolerance(self):
         """
         A getter for the tolerance on receptorAngle
+        Returns the tolerance as a  Angle
         """
         return self._receptorAngleEqTolerance
 
@@ -178,12 +196,15 @@ class FeedTable(Representable):
         """
         A setter for the tolerance on illumOffset
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._illumOffsetEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on illumOffset
     def getIllumOffsetEqTolerance(self):
         """
         A getter for the tolerance on illumOffset
+        Returns the tolerance as a  Length
         """
         return self._illumOffsetEqTolerance
 
@@ -194,27 +215,29 @@ class FeedTable(Representable):
         """
         A setter for the tolerance on position
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._positionEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on position
     def getPositionEqTolerance(self):
         """
         A getter for the tolerance on position
+        Returns the tolerance as a  Length
         """
         return self._positionEqTolerance
 
     def getKeyName(self):
         """
-        Return the list of field names that make up "key" as a list of strings
+        Return the list of field names that make up key key
+        as a list of strings.
         """
         return self._key
 
-    @staticmethod
-    def Key(antennaId, spectralWindowId):
+    def Key(self, antennaId, spectralWindowId):
         """
         Returns a string built by concatenating the ascii representation of the
         parameters values suffixed with a "_" character.
-        The parameter values are assumed to be the appropriate type for that parameter.
         """
         result = ""
 
@@ -228,130 +251,122 @@ class FeedTable(Representable):
         """
         Insert a FeedRow in a list of FeedRow so that it's ordered by ascending start time.
 
-        x is a FeedRow to be inserted.
-        rowlist is the list where to x is to be inserted.
+        x The FeedRow to be inserted.
+        rowlist The list where x is to be inserted.
 
-        The inserted row is returned.
+        The inserted row is returned. If x already exists in rowlist then it is not added and
+        the row in rowlist is returned.
+
+        If a row matching the value of the start time of timeInterval is
+        found in rowlist but the other required parameters do not have the same value
+        then a DuplicateKey exception is raised.
         """
-        insertionIndex = 0
 
-        # get the ArrayTime at the start of the interval found in x.
-        start = x.timeInterval.getStart()
+        # get the ArrayTime value at the start of the ArrayTimeInterval found in x
+        xTimeStart = x.getTimeInterval().getStart().get()
 
-        # is the rowlist None
-        if rowlist is None:
-            rowlist = []
-        # is rowlist empty
-        if len(rowlist) == 0:
-            rowlist.append(x)
-            self._privateRows.append(x)
-            x.isAdded()
-            return x
-
-        # case where x goes at the end of rowlist
-        # the last row in the list
-        last = rowlist[-1]
-
-        if start.get() > last.timeInterval.getStart().get():
-            # Modify the duration of last if and only if the start time of x
-            # is located strictly before the end time of last.
-
-            if start.get() < (
-                last.timeInterval.getStart().get()
-                + last.timeInterval.getDuration().get()
-            ):
-                last.timeInterval.setDuration(
-                    start.get() - last.timeInterval.getStart().get()
-                )
-
-            rowlist.append(x)
-            self._privateRows.append(x)
-            x.isAdded()
-            return x
-
-        # case where x goes at the beginning of rowlist
-        # the first row in the list
-        first = rowlist[0]
-
-        if start.get() < first.timeInterval.getStart().get():
-            # Modify the duration of x if and only if the start time of first
+        # work out where to add x to rowlist
+        if (len(rowlist) == 0) or (
+            xTimeStart > (rowlist[-1].getTimeInterval().getStart().get())
+        ):
+            # it belongs at the end
+            if len(rowlist) > 0:
+                lastRow = rowlist[-1]
+                # Modify the duration of lastRow if and only if the start time of x
+                # is located strictly before the end time of last.
+                if xTimeStart < (
+                    lastRow.getTimeInterval().getStart().get()
+                    + lastRow.getTimeInterval().getDuration().get()
+                ):
+                    astRow.getTimeInterval().setDuration(
+                        xTimeStart - lastRow.getTimeInterval().getStart().get()
+                    )
+                rowlist.append(x)
+        elif xTimeStart < rowlist[0].getTimeInterval().getStart().get():
+            # it belongs at the start
+            firstRow = rowlist[0]
+            # Modify the duration of x if and only if the start time of firstRow
             # is located strictly before the end time of x.
-
-            if first.timeInterval.getStart().get() < (
-                start.get() + x.timeInterval.getDuration().get()
+            if firstRow.getTimeInterval().getStart().get() < (
+                xTimeStart + x.getTimeInterval().getDuration().get()
             ):
-                x.timeInterval.setDuration(
-                    first.timeInterval.getStart().get() - start.get()
+                x.getTimeInterval().setDuration(
+                    firstRow.getTimeInterval().getStart().get() - xTimeStart
                 )
-            x.timeInterval.setDuration(
-                first.timeInterval.getStart().get() - start.get()
-            )
-            rowlist.insert(0, x)
-            self._privateRows.add(x)
-            x.isAdded()
-            return x
 
-        # Case where x has to be inserted inside rowlist
-        # let's use a dichotomy method to find the insertion index.
+                rowlist.insert(0, x)
+        else:
+            # x is inserted somewhere inside rowlist; let's use a dichotomoy
+            # method to find the insertion index.
 
-        k0 = 0
-        k1 = len(rowlist) - 1
+            k0 = 0
+            k1 = len(rowlist) - 1
 
-        while k0 != (k1 - 1):
-            if start.get() == rowlist[k0].timeInterval.getStart().get():
+            while k0 != (k1 - 1):
+                if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
+                    if rowlist[k0].equalByRequiredValue(x):
+                        # this row already exists at k0, nothing to insert or add, return that row
+                        return rowlist[k0]
+                    else:
+                        # the start time matches, but the rest of the required parameters do not
+                        raise DuplicateKey("DuplicateKey exception in ", "FeedTable")
+                elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
+                    if rowlist[k1].equalByRequiredValue(x):
+                        # this row already exists at k1, nothing to insert or add, return that row
+                        return rowlist[k1]
+                    else:
+                        # the start time matches, but the rest of the required parameters do not
+                        raise DuplicateKey("DuplicateKey exception in ", "FeedTable")
+                else:
+                    # make sure new index is an integer
+                    newIndex = int((k0 + k1) / 2)
+                    if (
+                        xTimeStart
+                        <= rowlist[newIndex].getTimeInterval().getStart().get()
+                    ):
+                        k1 = newIndex
+                    else:
+                        k0 = newIndex
+
+            if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
                 if rowlist[k0].equalByRequiredValue(x):
                     # this row already exists at k0, nothing to insert or add, return that row
                     return rowlist[k0]
                 else:
-                    # the time matches, but the rest of the required parameters do not, duplicate keys
+                    # the start time matches, but the rest of the required paramters do not
                     raise DuplicateKey("DuplicateKey exception in ", "FeedTable")
-            elif start.get() == rowlist[k1].timeInterval.getStart().get():
+            elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
                 if rowlist[k1].equalByRequiredValue(x):
                     # this row already exists at k1, nothing to insert or add, return that row
                     return rowlist[k1]
                 else:
-                    # the time matches, but the rest of the required parameters do not, duplicate keys
+                    # the start time matches, but the rest of the required parameters do not
                     raise DuplicateKey("DuplicateKey exception in ", "FeedTable")
-            else:
-                # make sure integers are used throughout this step
-                if (
-                    start.get()
-                    <= rowlist[int((k0 + k1) / 2)].timeInterval.getStart().get()
-                ):
-                    k1 = int((k0 + k1) / 2)
-                else:
-                    k0 = int((k0 + k1) / 2)
 
-        if start.get() == rowlist[k0].timeInterval.getStart().get():
-            if row.get[k0].equalByRequiredValue(x):
-                # this row already exists at k0, nothing to insert or add, return that row
-                return rowlist[k0]
-            else:
-                # the time matches, but the rest of the required parameters do not, duplicate keys
-                raise DuplicateKey("DuplicateKey exception in ", "FeedTable")
-        elif start.get() == rowlist[k1].timeInterval.getStart().get():
-            if rowlist[k1].equalByRequiredValue(x):
-                return rowlist[k1]
-            else:
-                # the time matches, but the rest of the required parameters do not, duplicate keys
-                raise DuplicateKey("DuplicateKey exception in ", "FeedTable")
+            # if it reaches here, it should be added, set the duration as appropriate for
+            # insertion at k1, after k0, adjust duration of k0 as appropriate
+            rowlist[k0].getTimeInterval().setDuration(
+                xTimeStart - rowlist[k0].getTimeInterval().getStart().get()
+            )
+            x.getTimeInterval().setDuration(
+                rowlist[k0 + 1].getTimeInterval().getStart().get() - xTimeStart
+            )
+            rowlist.insert(k1, x)
 
-        rowlist[k0].timeInterval.setDuration(
-            start.get() - rowlist[k0].timeInterval.getStart().get()
-        )
-        x.timeInterval.setDuration(
-            rowlist[k0 + 1].timeInterval.getStart().get() - start.get()
-        )
-        row.insertElementAt(k1, x)
-        self._privateRows.add(x)
+        # if it reaches here then x has already been addded to rowlist and it needs to be
+        # appended to privateRows and marked as added internally before being returned
+        self._privateRows.append(x)
         x.isAdded()
         return x
 
     def __init__(self, container):
         """
-        Create a FeedTable attached to container, which must be a ASDM instance
-        All tables must know the container to which they belong.
+        Create a FeedTable attached to container.
+
+        container must be a ASDM instance
+        All tables must know the container
         """
+
         if not isinstance(container, pyasdm.ASDM):
             raise (ValueError("FeedTable constructor must use a ASDM instance"))
 
@@ -368,6 +383,12 @@ class FeedTable(Representable):
         self._presentInMemory = True
         self._loadInProgress = False
 
+        self._privateRows = []
+
+        self._context = {}
+
+        self._version = 0
+
     def setNotPresentInMemory(self):
         """
         Set the state to indicate it is not present in memory and needs to be loaded before being used.
@@ -381,11 +402,12 @@ class FeedTable(Representable):
         Check if the table is present in memory. If not, load the table from the file using the
         directory of the container.
         """
-        # NOTE: if setFromFile throws an exception then presentInMemory will remain False
+        # NOTE: if setFromFile raises an exception then presentInMemory will remain False
         # and loadInProgress will remain True, preventing another attempt at loading.
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
+            print("Feed is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -394,6 +416,7 @@ class FeedTable(Representable):
     def getContainer(self):
         """
         Return the container to which this table belongs.
+        return a ASDM.
         """
         return self._container
 
@@ -427,7 +450,7 @@ class FeedTable(Representable):
         thisRow = FeedRow(self)
         return thisRow
 
-    def add(self, row):
+    def add(self, x):
         """
         Append a row to a FeedTable which has simply
         1) an autoincrementable attribute  (feedId)
@@ -437,27 +460,26 @@ class FeedTable(Representable):
         whose value section is equal to x's one then return this row, otherwise add x to the collection
         of rows.
         """
-        # Get the start time of the row to be inserted (an ArrayTime)
+        if not isinstance(x, FeedRow):
+            raise ValueError("x must be a  FeedRow instance.")
+
+        # Get the start time of the time interval of the row to be inserted (an ArrayTime)
         startTime = x.getTimeInterval().getStart()
 
         insertionId = 0
 
-        # The key from the appropriates attributes.
-        keystr = Key(x.getAntennaId(), x.getSpectralWindowId())
+        # the key from the appropriate attributes
+        keystr = self.Key(x.getAntennaId(), x.getSpectralWindowId())
 
         # Determine the insertion index for the row x, possibly returning a pointer to a row identical to x.
-        contextRows = []
         if keystr in self._context:
             contextRows = self._context[keystr]
-            for i in range(len(contextRows)):
-                # print("Looking for a start time in i = " + i)
-                # each element of contextRows is a list of rows
-                v = contextRows[i]
-                for j in range(len(v)):
-                    r = v.get[j]
-                    # print("starttime = "+startTime+" + str(r.startTime ="+r.getTimeInterval().getStart()))
-                    if startTime.eq(r.getTimeInterval().getStart()):
-                        if r.compareRequiredValue(
+            # look through all of the auto-incrementable lists to see there is any
+            # row that matches this time and other required values
+            for autoIncList in range(len(contextRows)):
+                for thisRow in autoIncList:
+                    if startTime.eq(thisRow.getTimeInterval().getStart()):
+                        if thisRow.compareRequiredValue(
                             x.getNumReceptor(),
                             x.getBeamOffset(),
                             x.getFocusReference(),
@@ -466,31 +488,32 @@ class FeedTable(Representable):
                             x.getReceptorAngle(),
                             x.getReceiverId(),
                         ):
-                            # We have found a FeedRow with the same value. Return it.
-                            # print("A row equal to x has been found, I return it")
-                            return r
+                            # We have found a FeedRow with the same value then return it.
+                            return thisRow
 
-                        # Otherwise we must autoincrement feedId and
+                        # otherwise this has the same time but different other values so
+                        # we must autoincrement feedId and
                         # insert a new FeedRow with this autoincremented value.
-                        # print("A row has been found with the same start time but different value , increment id")
+                        # System.out.println("A row has been found with the same start time but different value , increment id")
                         insertionId = i + 1
 
                         # And directly goto next id value
                         break
-                # System.out.println("No row with the same time than x, it will be inserted in row with id = 0")
         else:
             # There is not yet a context...
             # Create and initialize an entry in the context map for this combination....
-            # print("Starting a new context")
-            context[k] = contextRows
+            self._context[keystr] = []
             insertionId = 0
 
         x.setFeedId(insertionId)
 
-        # because contextRows is a list from self._context, manipulating that list with list methods will
-        # also manipulate the list in self._context - no copy is created
+        contextRows = self._context[keystr]
+        # make sure there are enough rows in contextRows to hold insertionId
+        # probably this just adds one list to contextRows
         while len(contextRows) <= insertionId:
-            contextRows.append([])
+            contetRows.append([])
+
+        # and insert this row into the list at insertionId so that list remains ordered in time
         result = self.insertByStartTime(x, contextRows[insertionId])
         return result
 
@@ -508,7 +531,9 @@ class FeedTable(Representable):
         receiverId,
     ):
         """
-        Create a new FeedRow. The new row is not added to this table, but it does know about it.
+        Create a new FeedRow initialized to the specified values.
+
+        The new row is not added to this table, but it does know about it.
         (the autoincrementable attribute, if any, is not in the parameter list)
         """
 
@@ -553,30 +578,36 @@ class FeedTable(Representable):
 
     # ====> Append a row to its table.
 
-    def _checkAndAdd(self, newrow):
+    def checkAndAdd(self, x):
         """
         A method to append a row to its table, used by input conversion methods.
-        Not intended for external use.
+        Not indended for external use.
 
-        If this table has an autoincrementable attribute then check if newrow verifies the rule of uniqueness and raise an exception if not.
-        Check if newrow verifies the key uniqueness rule and throw an exception if not.
-        Append newrow to its table.
-        returns  newrow
+        If this table has an autoincrementable attribute then check if
+        x verifies the rule of uniqueness and throw exception if not.
+
+        This method is appropriate for an auto-incrementable attribute with a
+        temporal field either with or without additional keywords.
+
+        Append x to its table.
+        x The row to be appended.
+        returns  x.
         """
-        startTime = newrow.getTimeInterval().getStart()
+        # startTime is an ArrayTimeInterval
+        startTime = x.getTimeInterval().getStart()
 
         if (
             self.lookup(
-                newrow.getAntennaId(),
-                newrow.getSpectralWindowId(),
-                newrow.getTimeInterval(),
-                newrow.getNumReceptor(),
-                newrow.getBeamOffset(),
-                newrow.getFocusReference(),
-                newrow.getPolarizationTypes(),
-                newrow.getPolResponse(),
-                newrow.getReceptorAngle(),
-                newrow.getReceiverId(),
+                x.getAntennaId(),
+                x.getSpectralWindowId(),
+                x.getTimeInterval(),
+                x.getNumReceptor(),
+                x.getBeamOffset(),
+                x.getFocusReference(),
+                x.getPolarizationTypes(),
+                x.getPolResponse(),
+                x.getReceptorAngle(),
+                x.getReceiverId(),
             )
             is not None
         ):
@@ -586,45 +617,50 @@ class FeedTable(Representable):
 
         if (
             self.getRowByKey(
-                newrow.getAntennaId(),
-                newrow.getSpectralWindowId(),
-                newrow.getTimeInterval(),
-                newrow.getFeedId(),
+                x.getAntennaId(),
+                x.getSpectralWindowId(),
+                x.getTimeInterval(),
+                x.getFeedId(),
             )
-        ) is not None:
+            is not None
+        ):
             raise DuplicateKey(
                 "Duplicate key exception . ("
                 + "antennaId="
-                + newrow.getAntennaId()
+                + x.getAntennaId()
                 + " "
                 + "spectralWindowId="
-                + newrow.getSpectralWindowId()
+                + x.getSpectralWindowId()
                 + " "
                 + "timeInterval="
-                + newrow.getTimeInterval()
+                + x.getTimeInterval()
                 + " "
                 + "feedId="
-                + newrow.getFeedId()
+                + x.getFeedId()
                 + " "
                 + ") in ",
                 "FeedTable.",
             )
 
-        thisKey = self.Key(newrow.getAntennaId(), newrow.getSpectralWindowId())
+        keystr = self.Key(x.getAntennaId(), x.getSpectralWindowId())
 
-        i = newrow.getFeedId()
+        i = x.getFeedId()
 
-        # add this key to context if not there
-        if thisKey not in self._context:
-            self._context[thisKey] = []
+        # make sure keystr is known to context and that there enough elements to retrieve
+        # the list at element "i"
+        if keystr not in self._context:
+            self._context[keystr] = []
+        while len(self._context[keystr]) <= i:
+            self._context[keystr].append([])
 
-        return self.insertByStartTime(newrow, self._context[thisKey])
+        return self.insertByStartTime(x, self._context[keystr][i])
 
     # ====> methods returning rows.
 
     def get(self):
         """
-        Get all rows as a list of FeedRow
+        Get all rows.
+        return all rows as list of FeedRow
         """
         return self._privateRows
 
@@ -634,36 +670,46 @@ class FeedTable(Representable):
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
         """
+
+        # the ArrayTime at the start of the requested time interval
         start = timeInterval.getStart()
 
-        keystr = Key(antennaId, spectralWindowId)
-        if keystr in self._context:
+        keystr = self.Key(antennaId, spectralWindowId)
+        if keystr not in self._context:
+            return None
 
-            id = feedId
+        id = int(feedId)
 
-            contextList = self._context[keystr]
-            for aRow in contextList:
+        contextRows = self._context[keystr]
+        # the first list is indexed by id so it must exist for this to find a row
+        if id < len(contextRows):
+            idRows = contextRows[id]
+            for aRow in idRows:
                 if aRow.getTimeInterval().equals(timeInterval):
                     return aRow
 
+        # never found
         return None
 
     def getRowByFeedId(self, feedId):
         """
-        Returns a list of all rows whose key element feedId
-        is equal to the parameter feedId, which is a int.
-        return an array of FeedRow. A returned array of size 0 means that no row has been found.
-        param feedId int contains the value of
+        Returns a list of rows whose key element feedId
+        is equal to the parameter feedId.
+        return a list of FeedRow. A returned list of size 0 means that no row has been found.
+        feedId is of type int and contains the value of
         the autoincrementable attribute that is looked up in the table.
         """
         result = []
-        for thisValue in self._context.values():
-            # each value is a list of lists, with one list for each feedId
-            if feedId < len(thisValue):
-                # append all of the feedId rows to result
-                result.extend(thisValue[feedId])
 
-    return result
+        # any of the context strings could contain a list appropriate for the requested value
+        for thisKeyValue in self._context.values():
+            # if this has the requested value, that value can be used to index into this list
+            if feedId < len(thisKeyValue):
+                # this value contains rows with the requested value
+                # append all of them to the result
+                result.extend(thisKeyValue[feedId])
+
+        return result
 
     def lookup(
         self,
@@ -704,26 +750,35 @@ class FeedTable(Representable):
         param receiverId.
 
         """
-        keystr = Key(antennaId, spectralWindowId)
+        keystr = self.Key(antennaId, spectralWindowId)
         if keystr in self._context:
-            for thisList in self._context[keystr]:
-                for thisRow in thisList:
-                    if thisRow.getTimeInterval().contains(
-                        timeInterval
-                    ) and thisRow.compareNoAutoInc(
-                        antennaId,
-                        spectralWindowId,
-                        timeInterval,
-                        numReceptor,
-                        beamOffset,
-                        focusReference,
-                        polarizationTypes,
-                        polResponse,
-                        receptorAngle,
-                        receiverId,
-                    ):
-                        return thisRow
+            # it may be found in any of the list of lists
+            for thisKeyValueList in self._context.values():
+                for thisList in thisKeyValueList:
+                    for thisRow in thisList:
+                        if thisRow.getTimeInterval().contains(
+                            timeInterval
+                        ) and thisRow.compareNoAutoInc(
+                            antennaId,
+                            spectralWindowId,
+                            timeInterval,
+                            numReceptor,
+                            beamOffset,
+                            focusReference,
+                            polarizationTypes,
+                            polResponse,
+                            receptorAngle,
+                            receiverId,
+                        ):
+                            return thisRow
+
         return None
+
+    def getRows(self):
+        """
+        get the rows, synonymous with the get method.
+        """
+        return self.get()
 
     # ====> conversion Methods
 
@@ -732,7 +787,7 @@ class FeedTable(Representable):
         Translate this table to an XML representation conforming
         to the schema defined for Feed (FeedTable.xsd).
 
-        Returns a string containing the XML representation.
+        returns a string containing the XML representation.
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
@@ -752,22 +807,23 @@ class FeedTable(Representable):
         Populate this table from the content of a XML document that is required to
         conform to the XML schema defined for a Feed (FeedTable.xsd).
         """
+        if not isinstance(xmlstr, str):
+            raise ConversionException("xmlstr must be a string")
+
         xmldom = minidom.parseString(xmlstr)
-        # this should have at least one child node with a name of FeedTable.
+        # this should have at least one child node with a name of "FeedTable".
         if not xmldom.hasChildNodes() or xmldom.firstChild.nodeName != "FeedTable":
-            raise ConversionException(
-                "XML is not from a the expected table", "FeedTable."
-            )
+            raise ConversionException("XML is not from the expected table", "FeedTable")
 
         # ignore everything but the first child node
         tabdom = xmldom.firstChild
 
-        # get the version from the schemaVersion attribute, which must be there
-        if (not tabdom.hasAttributes()) or (
-            tabdom.attributes.getNamedItem("schemaVersion") is None
+        # get the version from the schemaVersion attribute, which is not always there
+        versionStr = "-1"
+        if tabdom.hasAttributes() and (
+            tabdom.attributes.getNamedItem("schemaVersion") is not None
         ):
-            raise ConversionException("schemaVersion not found in XML", "FeedTable")
-        versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
+            versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
         # raises a ValueError if not an integer
         try:
             self.setVersion(int(versionStr))
@@ -811,13 +867,12 @@ class FeedTable(Representable):
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
-                    self._checkAndAdd(row)
+                    self.checkAndAdd(row)
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
-                    raise ConversionException(str, "FeedTable") from None
+                    raise ConversionException(str(exc), "FeedTable") from None
 
-                except ValueError as exc:
-                    # TBD when this turns up via template
+                except UniquenessViolationException as exc:
                     msg = "UniquenessViolationException in row in FeedTable : %s" % str(
                         exc
                     )
@@ -829,12 +884,296 @@ class FeedTable(Representable):
 
         self.setEntity(tabEntity)
 
+    def MIMEXMLPart(self):
+        print("MIMEXMLPart not implemented for <FeedTable")
+        return
+        # the JAVA code looks like this
+        # String UID = this.getEntity().getEntityId().toString();
+        # String withoutUID = UID.substring(6);
+        # String containerUID = this.getContainer().getEntity().getEntityId().toString();
+        #
+        # StringBuffer sb = new StringBuffer()
+        # .append("<?xml version='1.0'  encoding='ISO-8859-1'?>")
+        # .append("\n")
+        # .append("<FeedTable xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:feed=\"http://Alma/XASDM/FeedTable\" xsi:schemaLocation=\"http://Alma/XASDM/FeedTable http://almaobservatory.org/XML/XASDM/4/FeedTable.xsd\" schemaVersion=\"4\" schemaRevision=\"-1\">\n")
+        # .append("<Entity entityId='")
+        # .append(UID)
+        # .append("' entityIdEncrypted='na' entityTypeName='FeedTable' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<ContainerEntity entityId='")
+        # .append(containerUID)
+        # .append("' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<BulkStoreRef file_id='")
+        # .append(withoutUID)
+        # .append("' byteOrder='Big_Endian' />\n")
+        # .append("<Attributes>\n")
+
+        # .append("<antennaId/>\n")
+        # .append("<spectralWindowId/>\n")
+        # .append("<timeInterval/>\n")
+        # .append("<feedId/>\n")
+        # .append("<numReceptor/>\n")
+        # .append("<beamOffset/>\n")
+        # .append("<focusReference/>\n")
+        # .append("<polarizationTypes/>\n")
+        # .append("<polResponse/>\n")
+        # .append("<receptorAngle/>\n")
+        # .append("<receiverId/>\n")
+
+        # .append("<feedNum/>\n")
+        # .append("<illumOffset/>\n")
+        # .append("<position/>\n")
+        # .append("<skyCoupling/>\n")
+        # .append("<numChan/>\n")
+        # .append("<skyCouplingSpectrum/>\n")
+        # .append("</Attributes>\n")
+        # .append("</FeedTable>\n");
+        # return sb.toString();
+
+    def toMIME(self):
+        """
+        Serialize this into a stream of bytes and encapsulates that stream into a MIME message.
+        returns a string containing the MIME message.
+        """
+        print("toMIME not yet implemented for Feed")
+        return
+        # the Java code looks like this - returns a Byte array
+        # ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        # DataOutputStream dos = new DataOutputStream(bos);
+
+        # String UID = this.getEntity().getEntityId().toString();
+        # String execBlockUID = this.getContainer().getEntity().getEntityId().toString();
+        # try {
+        #     // The XML Header part.
+        #     dos.writeBytes("MIME-Version: 1.0");
+        #     dos.writeBytes("\n");
+        #    dos
+        #     .writeBytes("Content-Type: Multipart/Related; boundary='MIME_boundary'; type='text/xml'; start= '<header.xml>'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Description: Correlator");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("alma-uid:" + UID);
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part header.
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: text/xml; charset='ISO-8859-1'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Transfer-Encoding: 8bit");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <header.xml>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part content.
+        #    dos.writeBytes(MIMEXMLPart());
+        #    // have updated their code to the new XML header.
+        #    //
+        #    //dos.writeBytes(oldMIMEXMLPart());
+        #
+        #    // The MIME binary part header
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: binary/octet-stream");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <content.bin>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The binary part.
+        #    entity.toBin(dos);
+        #    container.getEntity().toBin(dos);
+        #    dos.writeInt(size());
+
+        #    for (FeedRow row: privateRows) row.toBin(dos);
+
+        #    // The closing MIME boundary
+        #    dos.writeBytes("\n--MIME_boundary--");
+        #    dos.writeBytes("\n");
+
+        # } catch (IOException e) {
+        #    throw new ConversionException(
+        #            "Error while reading binary data , the message was "
+        #            + e.getMessage(), "Feed");
+        # }
+
+        # return bos.toByteArray();
+
+    # Java code looks like this
+    # static private boolean binaryPartFound(DataInputStream dis, String s, int pos) throws IOException {
+    #    int posl = pos;
+    #    int count = 0;
+    #    dis.mark(1000000);
+    #    try {
+    #        while (dis.readByte() != s.charAt(posl)){
+    #            count ++;
+    #        }
+    #    }
+    #    catch (EOFException e) {
+    #        return false;
+    #    }
+    #
+    #    if (posl == (s.length() - 1)) return true;
+    #
+    #    if (pos == 0) {
+    #        posl++;
+    #        return binaryPartFound(dis, s, posl);
+    #    }
+    #    else {
+    #        if (count > 0) { dis.reset();  return binaryPartFound(dis, s, 0) ; }
+    #        else {
+    #            posl++;
+    #            return binaryPartFound(dis, s, posl);
+    #        }
+    #    }
+    # }
+
+    # private String xmlHeaderPart (String s) throws ConversionException {
+    #    String xmlPartMIMEHeader = "Content-ID: <header.xml>\n\n";
+    #    String binPartMIMEHeader = "--MIME_boundary\nContent-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    #
+    #    // Detect the XML header.
+    #    int loc0 = s.indexOf(xmlPartMIMEHeader);
+    #    if (loc0 == -1 ) throw new ConversionException("Failed to detect the beginning of the XML header", "Feed");
+    #
+    #    loc0 += xmlPartMIMEHeader.length();
+    #
+    #    // Look for the string announcing the binary part.
+    #    int loc1 = s.indexOf(binPartMIMEHeader, loc0);
+    #    if (loc1 == -1) throw new ConversionException("Failed to detect the beginning of the binary part", "Feed");
+    #
+    #    return s.substring(loc0, loc1).trim();
+    # }
+
+    # setFromMIME(byte[]   data) throws ConversionException {
+    # *
+    # Extracts the binary part of a MIME message and deserialize its content
+    # to fill this with the result of the deserialization.
+    # @param data the string containing the MIME message.
+    # @throws ConversionException
+    # /
+    # ByteOrder byteOrder = null;
+    # //
+    # // Look for the part containing the XML header.
+    # // Very empirically we assume that the first MIME part , the one which contains the
+    # // XML header, always fits in the first 1000 bytes of the MIME message !!
+    # //
+    # String header = xmlHeaderPart(new String(data, 0, Math.min(10000, data.length)));
+    # org.jdom.Document document = null;
+    # SAXBuilder sxb = new SAXBuilder();
+    #
+    # // Firstly build a document out of the XML.
+    # try {
+    #    document = sxb.build(new ByteArrayInputStream(header.getBytes()));
+    # }
+    # catch (Exception e) {
+    #     throw new ConversionException(e.getMessage(), "Feed");
+    # }
+    #
+    # //
+    # // Let's define a default order for the sequence of attributes.
+    # //
+    # ArrayList<String> attributesSeq = new ArrayList<String> ();
+
+    #     attributesSeq.add("antennaId"); attributesSeq.add("spectralWindowId"); attributesSeq.add("timeInterval"); attributesSeq.add("feedId"); attributesSeq.add("numReceptor"); attributesSeq.add("beamOffset"); attributesSeq.add("focusReference"); attributesSeq.add("polarizationTypes"); attributesSeq.add("polResponse"); attributesSeq.add("receptorAngle"); attributesSeq.add("receiverId");
+    #     attributesSeq.add("feedNum");  attributesSeq.add("illumOffset");  attributesSeq.add("position");  attributesSeq.add("skyCoupling");  attributesSeq.add("numChan");  attributesSeq.add("skyCouplingSpectrum");
+
+    # XPath xpath = null;
+    # //
+    # // And then look for the possible XML contents.
+    # try {
+    #     // Is it an "<ASDMBinaryTable ...." document (old) ?
+    #    if (XPath.newInstance("/ASDMBinaryTable")
+    #            .selectSingleNode(document) != null)
+    #        byteOrder = ByteOrder.BIG_ENDIAN;
+    #    else {
+    #        // Then it must be a "<FeedTable ...." document
+    #        // With a BulkStoreRef child element....
+    #        XPath xpa = XPath.newInstance("/FeedTable/BulkStoreRef/@byteOrder");
+    #        Object node = xpa.selectSingleNode(document.getRootElement());
+    #        if (node == null)
+    #            throw new ConversionException("No element found for the XPath expression '/FeedTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "Feed");
+    #
+    #        // Yes ? then it must have a "BulkStoreRef" element with a
+    #        // "byteOrder" attribute.
+    #        String bo = xpa.valueOf(document.getRootElement());
+    #        if (bo.equals("Little_Endian"))
+    #            byteOrder = ByteOrder.LITTLE_ENDIAN;
+    #        else if (bo.equals("Big_Endian"))
+    #            byteOrder = ByteOrder.BIG_ENDIAN;
+    #        else
+    #            throw new ConversionException("No valid value retrieved for the node '/FeedTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "Feed");
+    #
+    #        // And also it must have an Attributes element with children.
+    #        xpa = XPath.newInstance("/FeedTable/Attributes#");
+    #        List nodes = xpa.selectNodes(document.getRootElement());
+    #        if (nodes==null || nodes.size()==0)
+    #            throw new ConversionException("No element found for the XPath expression '/FeedTable/Attributes#'. Invalid XML header '"+header+"'.", "Feed");
+    #
+    #        Iterator iter = nodes.iterator();
+    #        attributesSeq.clear();
+    #        int i = 0;
+    #        while (iter.hasNext()){
+    #            attributesSeq.add(((Element) iter.next()).getName());
+    #            i += 1;
+    #        }
+    #    }
+    # } catch (Exception e) {
+    #    throw new ConversionException(e.getMessage(), "Feed");
+    # }
+
+    # //
+    # // Now that we know what is the byte order of the binary data
+    # // Let's extract them from the second MIME part and parse them
+    # //
+    # ByteArrayInputStream bis = new ByteArrayInputStream(data);
+    # DataInputStream dis = new DataInputStream(bis);
+    # BODataInputStream bodis = new BODataInputStream(dis, byteOrder);
+    #
+    # String terminator = "Content-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    # entity = null;
+    # try {
+    #    if (binaryPartFound(dis, terminator, 0) == false) {
+    #        throw new ConversionException ("Failed to detect the beginning of the binary part", "Feed");
+    #    }
+    #
+    #    entity = Entity.fromBin(bodis);
+    #
+    #    Entity containerEntity = Entity.fromBin(bodis);
+    #
+    #    int numRows = bodis.readInt();
+    #    for (int i = 0; i < numRows; i++) {
+    #    this.checkAndAdd(FeedRow.fromBin(bodis, this, attributesSeq.toArray(new String[0])));
+    #    }
+    # } catch (TagFormatException e) {
+    #    throw new ConversionException( "Error while reading binary data , the message was "
+    #        + e.getMessage(), "Feed");
+    # }catch (IOException e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "Feed");
+    # } catch (DuplicateKey e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "Feed");
+    # }catch (Exception e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "Feed");
+    # }
+    # }
+
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a FeedTable as those produced by the toFile method.
+        Reads and parses a file containing a representation of a FeedTable as those produced  by the toFile method.
         This table is populated with the result of the parsing.
-        The directory value is the name of the directory containing the file to be read and parsed.
+        param directory The name of the directory containing the file te be read and parsed.
+        raises ConversionException If any error occurs while reading the
+        files in the directory or parsing them.
         """
+        if not isinstance(directory, str):
+            print("directory must be a string")
 
         # directory must exist as a directory
         if not os.path.isdir(directory):
@@ -846,42 +1185,99 @@ class FeedTable(Representable):
         if os.path.exists(os.path.join(directory, "Feed.xml")):
             self.setFromXMLFile(directory)
         elif os.path.exists(os.path.join(directory, "Feed.bin")):
-            setFromMIMEFile(directory)
+            self.setFromMIMEFile(directory)
         else:
             raise ConversionException("No file found for the Feed table", "FeedTable")
 
     def setFromMIMEFile(self, directory):
-        print("setFromMIMEFile not implemented yet")
+        """
+        Set this table from a MIME file.
+        Used internally by setFromFile. Not intented for external use.
+        """
+        print("setFromMIME file not yet implemented for FeedTable")
+        return
+
+        # java code looks like this
+        # File file = new File(directory+"/Feed.bin");
+        #
+        # byte[] bytes = null;
+        #
+        # try {
+        #     InputStream is = new FileInputStream(file);
+        #     long length = file.length();
+        #     if (length > Integer.MAX_VALUE)
+        #         throw new ConversionException ("File " + file.getName() + " is too large", "Feed");
+        #
+        #    bytes = new byte[(int)length];
+        #    int offset = 0;
+        #    int numRead = 0;
+        #
+        #   while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+        #       offset += numRead;
+        #   }
+        #
+        #    if (offset < bytes.length) {
+        #        throw new ConversionException("Could not completely read file "+file.getName(), "Feed");
+        #    }
+        #    is.close();
+        # }
+        # catch (IOException e) {
+        #    throw new ConversionException("Error while reading "+file.getName()+". The message was " + e.getMessage(),
+        #    "Feed");
+        # }
+
+        # setFromMIME(bytes);
+        # // Changed 24 Sep, 2015 - The export policy cannot be changed by what has been observed at import time. M Caillat
+        # // archiveAsBin = true;
+        # // fileAsBin = true;
+
+    # }
 
     def setFromXMLFile(self, directory):
         """
         This is the function used by setFromFile when the file is an XML file
+        Not intended for external use.
         """
 
         # setFromFile has already established that this exists
         # read the entire file into a string
         xmlstr = None
-        with open(os.path.join(directory, "Feed.xml")) as f:
-            xmlstr = f.read()
-
-        if xmlstr is None:
-            raise ConversionException("Feed.xml is empty", "FeedTable")
+        try:
+            with open(os.path.join(directory, "Feed.xml")) as f:
+                xmlstr = f.read()
+        except Exception as exc:
+            # reraise it as a ConversionException
+            raise ConversionException(str(exc), "FeedTable") from None
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
             self.setFromMIMEFile(directory)
         else:
             self.fromXML(xmlstr)
+            # TBD: when fileAsBin is implemented this should be removed
+            # this will at least preserve the case where fileAsBin was changed for
+            # a table such that the archive has it in XML but the current rule is to
+            # write it out as binary
+            if self._fileAsBin:
+                print(
+                    "Feed found as XML but it should be written as binary, which is not yet implemetned. Setting to write as XML to preserve this content."
+                )
+                self._fileAsBin = False
 
     def toFile(self, directory):
         """
         Stores a representation (binary or XML) of this table into a file.
 
-        Depending on the boolean value of _fileAsBin, a binary serialization
-        of this (_fileAsBin=True) will be saved in a file 'Feed.bin' or an
-        XML representation (_fileAsBin==False) will be saved in a file 'Feed.xml'.
+        Depending on the boolean value of its _fileAsBin data member a binary serialization
+        of this (_fileAsBin==True) will be saved in a file "Feed.bin" or
+        an XML representation (_fileAsBin==False) will be saved in a file "Feed.xml".
         The file is always written in a directory whose name is passed as a parameter.
+        param directory The name of directory where the file containing the table's
+        representation will be saved.
+        raises ConversionException for any errors while writing that file.
         """
+        if not isinstance(directory, str):
+            raise ConversionException("directory must be a string")
 
         if os.path.exists(directory) and not os.path.isdir(directory):
             raise ConversionException(
@@ -890,21 +1286,86 @@ class FeedTable(Representable):
                 "FeedTable",
             )
 
-        if not os.path.exists(directory):
-            # assume it can be created there, if not this will raise a FileNotFound exception here
-            os.mkdir(directory)
+        # if not let's create it.
+        try:
+            if not os.path.exists(directory):
+                # if it can't be created a FileNotFound exception is the most likely result
+                os.mkdir(directory)
+        except Exception as exc:
+            # reraise any exception as a ConversionException
+            raise ConversionException(
+                "Could not create directory "
+                + directory
+                + " exception caught "
+                + str(exc),
+                "FeedTable",
+            ) from None
 
         if self._fileAsBin:
             print("fileAsBin not yet implemented for Feed")
+            # the Java code looks like this
+            #
+            # The table is exported in a binary format.
+            # (actually a short XML file + a possibly long MIME file)
+            #
+            # File xmlFile = new File(directory+"/Feed.xml");
+            # if (xmlFile.exists())
+            #    if (!xmlFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+xmlFile.toString()+"'", "Feed");
+            #
+            # File binFile = new File(directory+"/Feed.bin");
+            # if (binFile.exists())
+            #    if (!binFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+binFile.toString()+"'", "Feed");
+            #
+            # try {
+            #    BufferedWriter out = new BufferedWriter(new FileWriter(xmlFile));
+            #    out.write(MIMEXMLPart());
+            #    out.close();
+            #
+
+            #  OutputStream osBin = new FileOutputStream(binFile);
+            #  osBin.write(toMIME());
+            #  osBin.close();
+
+        # }
+        # catch (FileNotFoundException e) {
+        #     throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "Feed");
+        # }
+        # catch (IOException e) {
+        #      throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "Feed");
+        # }
+        # }
         else:
-            # exported as an XML file.
+            # The table is totally exported in a XML file.
             filePath = os.path.join(directory, "Feed.xml")
             if os.path.exists(filePath):
-                # try to delete it, this will raise an exception if the user does not have permission to do that
-                os.remove(filePath)
-            with open(filePath, "w") as f:
-                f.write(self.toXML())
-                f.close()
+                try:
+                    # try to delete it, this will raise an exception if the user does not have permission to do that
+                    os.remove(filePath)
+                except Exception as exc:
+                    # reraise it as a ConversionException
+                    raise ConversionException(
+                        "Could not remove existing "
+                        + filePath
+                        + " exception caught "
+                        + str(exc),
+                        "FeedTable",
+                    ) from None
+
+            try:
+                with open(filePath, "w") as f:
+                    f.write(self.toXML())
+                    f.close()
+
+                    # Java code uses a BufferedWriter to capture the output of toXML to the file
+            except Exception as exc:
+                # reraise it as a ConversionException
+                raise ConversionException(
+                    "Problem while writing the XML representation, the message was : "
+                    + str(exc),
+                    "Feed",
+                ) from None
 
     def getEntity(self):
         """

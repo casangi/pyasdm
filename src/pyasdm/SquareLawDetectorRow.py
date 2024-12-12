@@ -75,12 +75,21 @@ class SquareLawDetectorRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._squareLawDetectorId = Tag()
+
+        self._numBand = 0
+
         self._bandType = DetectorBandType.from_int(0)
 
         if row is not None:
             if not isinstance(row, SquareLawDetectorRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._squareLawDetectorId = Tag(row._squareLawDetectorId)
 
@@ -152,16 +161,16 @@ class SquareLawDetectorRow:
 
         squareLawDetectorIdNode = rowdom.getElementsByTagName("squareLawDetectorId")[0]
 
-        self._squareLawDetectorId = Tag(squareLawDetectorIdNode.firstChild.data)
+        self._squareLawDetectorId = Tag(squareLawDetectorIdNode.firstChild.data.strip())
 
         numBandNode = rowdom.getElementsByTagName("numBand")[0]
 
-        self._numBand = int(numBandNode.firstChild.data)
+        self._numBand = int(numBandNode.firstChild.data.strip())
 
         bandTypeNode = rowdom.getElementsByTagName("bandType")[0]
 
         self._bandType = DetectorBandType.newDetectorBandType(
-            bandTypeNode.firstChild.data
+            bandTypeNode.firstChild.data.strip()
         )
 
     def toBin(self):

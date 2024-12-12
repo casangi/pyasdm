@@ -52,6 +52,11 @@ class EntityRef:
         entityTypeName, and instanceVersion. All strings that express the
         4 components of an EntityRef.
         """
+        _entityId = EntityId()
+        _partId = None
+        _entityTypeName = None
+        _instanceVersion = None
+        
         if len(args) == 0:
             # default, nothing to do
             pass
@@ -260,3 +265,14 @@ class EntityRef:
         sets the instanceVersion to the given string
         """
         self._instanceVersion = instranceVersion
+
+    @staticmethod
+    def getInstance(stringList):
+        """
+        This mirrors similar functions in the other types.
+        This should not be used to construct an EntityRef because of the
+        complexity of that object. It is included here in case
+        the translation from java includes such a use. If used it
+        will raise a RuntimeError.
+        """
+        raise RuntimeError("Entity.getEntityRef called, not supported in pyasdm.")

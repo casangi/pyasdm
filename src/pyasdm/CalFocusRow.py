@@ -84,21 +84,123 @@ class CalFocusRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._antennaName = None
+
         self._receiverBand = ReceiverBand.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._ambientTemperature = Temperature()
+
         self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._focusMethod = FocusMethod.from_int(0)
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        self._frequencyRange = []  # this is a list of Frequency []
+
+        self._pointingDirection = []  # this is a list of Angle []
+
+        self._numReceptor = 0
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._wereFixed = []  # this is a list of bool []
+
+        self._offset = []  # this is a list of Length []  []
+
+        self._offsetError = []  # this is a list of Length []  []
+
+        self._offsetWasTied = []  # this is a list of bool []  []
+
+        self._reducedChiSquared = []  # this is a list of float []  []
+
+        self._position = []  # this is a list of Length []  []
+
+        self._polarizationsAveragedExists = False
+
+        self._polarizationsAveraged = None
+
+        self._focusCurveWidthExists = False
+
+        self._focusCurveWidth = []  # this is a list of Length []  []
+
+        self._focusCurveWidthErrorExists = False
+
+        self._focusCurveWidthError = []  # this is a list of Length []  []
+
+        self._focusCurveWasFixedExists = False
+
+        self._focusCurveWasFixed = []  # this is a list of bool []
+
+        self._offIntensityExists = False
+
+        self._offIntensity = []  # this is a list of Temperature []
+
+        self._offIntensityErrorExists = False
+
+        self._offIntensityError = []  # this is a list of Temperature []
+
+        self._offIntensityWasFixedExists = False
+
+        self._offIntensityWasFixed = None
+
+        self._peakIntensityExists = False
+
+        self._peakIntensity = []  # this is a list of Temperature []
+
+        self._peakIntensityErrorExists = False
+
+        self._peakIntensityError = []  # this is a list of Temperature []
+
+        self._peakIntensityWasFixedExists = False
+
+        self._peakIntensityWasFixed = None
+
+        self._astigmPlusExists = False
+
+        self._astigmPlus = []  # this is a list of Length []
+
+        self._astigmPlusErrorExists = False
+
+        self._astigmPlusError = []  # this is a list of Length []
+
+        self._astigmMultExists = False
+
+        self._astigmMult = []  # this is a list of Length []
+
+        self._astigmMultErrorExists = False
+
+        self._astigmMultError = []  # this is a list of Length []
+
+        self._illumOffsetExists = False
+
+        self._illumOffset = []  # this is a list of Length []  []
+
+        self._illumOffsetErrorExists = False
+
+        self._illumOffsetError = []  # this is a list of Length []  []
+
+        self._fitRMSExists = False
+
+        self._fitRMS = []  # this is a list of Length []
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalFocusRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -501,100 +603,116 @@ class CalFocusRow:
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         ambientTemperatureNode = rowdom.getElementsByTagName("ambientTemperature")[0]
 
-        self._ambientTemperature = Temperature(ambientTemperatureNode.firstChild.data)
+        self._ambientTemperature = Temperature(
+            ambientTemperatureNode.firstChild.data.strip()
+        )
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data
+            atmPhaseCorrectionNode.firstChild.data.strip()
         )
 
         focusMethodNode = rowdom.getElementsByTagName("focusMethod")[0]
 
-        self._focusMethod = FocusMethod.newFocusMethod(focusMethodNode.firstChild.data)
+        self._focusMethod = FocusMethod.newFocusMethod(
+            focusMethodNode.firstChild.data.strip()
+        )
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data
+        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+
         self._frequencyRange = Parser.stringListToLists(
-            frequencyRangeStr, Frequency, "CalFocus"
+            frequencyRangeStr, Frequency, "CalFocus", True
         )
 
         pointingDirectionNode = rowdom.getElementsByTagName("pointingDirection")[0]
 
-        pointingDirectionStr = pointingDirectionNode.firstChild.data
+        pointingDirectionStr = pointingDirectionNode.firstChild.data.strip()
+
         self._pointingDirection = Parser.stringListToLists(
-            pointingDirectionStr, Angle, "CalFocus"
+            pointingDirectionStr, Angle, "CalFocus", True
         )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "CalFocus"
+            polarizationTypesStr, PolarizationType, "CalFocus", False
         )
 
         wereFixedNode = rowdom.getElementsByTagName("wereFixed")[0]
 
-        wereFixedStr = wereFixedNode.firstChild.data
-        self._wereFixed = Parser.stringListToLists(wereFixedStr, bool, "CalFocus")
+        wereFixedStr = wereFixedNode.firstChild.data.strip()
+
+        self._wereFixed = Parser.stringListToLists(
+            wereFixedStr, bool, "CalFocus", False
+        )
 
         offsetNode = rowdom.getElementsByTagName("offset")[0]
 
-        offsetStr = offsetNode.firstChild.data
-        self._offset = Parser.stringListToLists(offsetStr, Length, "CalFocus")
+        offsetStr = offsetNode.firstChild.data.strip()
+
+        self._offset = Parser.stringListToLists(offsetStr, Length, "CalFocus", True)
 
         offsetErrorNode = rowdom.getElementsByTagName("offsetError")[0]
 
-        offsetErrorStr = offsetErrorNode.firstChild.data
-        self._offsetError = Parser.stringListToLists(offsetErrorStr, Length, "CalFocus")
+        offsetErrorStr = offsetErrorNode.firstChild.data.strip()
+
+        self._offsetError = Parser.stringListToLists(
+            offsetErrorStr, Length, "CalFocus", True
+        )
 
         offsetWasTiedNode = rowdom.getElementsByTagName("offsetWasTied")[0]
 
-        offsetWasTiedStr = offsetWasTiedNode.firstChild.data
+        offsetWasTiedStr = offsetWasTiedNode.firstChild.data.strip()
+
         self._offsetWasTied = Parser.stringListToLists(
-            offsetWasTiedStr, bool, "CalFocus"
+            offsetWasTiedStr, bool, "CalFocus", False
         )
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data
+        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+
         self._reducedChiSquared = Parser.stringListToLists(
-            reducedChiSquaredStr, double, "CalFocus"
+            reducedChiSquaredStr, float, "CalFocus", False
         )
 
         positionNode = rowdom.getElementsByTagName("position")[0]
 
-        positionStr = positionNode.firstChild.data
-        self._position = Parser.stringListToLists(positionStr, Length, "CalFocus")
+        positionStr = positionNode.firstChild.data.strip()
+
+        self._position = Parser.stringListToLists(positionStr, Length, "CalFocus", True)
 
         polarizationsAveragedNode = rowdom.getElementsByTagName("polarizationsAveraged")
         if len(polarizationsAveragedNode) > 0:
 
             self._polarizationsAveraged = bool(
-                polarizationsAveragedNode[0].firstChild.data
+                polarizationsAveragedNode[0].firstChild.data.strip()
             )
 
             self._polarizationsAveragedExists = True
@@ -602,9 +720,10 @@ class CalFocusRow:
         focusCurveWidthNode = rowdom.getElementsByTagName("focusCurveWidth")
         if len(focusCurveWidthNode) > 0:
 
-            focusCurveWidthStr = focusCurveWidthNode[0].firstChild.data
+            focusCurveWidthStr = focusCurveWidthNode[0].firstChild.data.strip()
+
             self._focusCurveWidth = Parser.stringListToLists(
-                focusCurveWidthStr, Length, "CalFocus"
+                focusCurveWidthStr, Length, "CalFocus", True
             )
 
             self._focusCurveWidthExists = True
@@ -612,9 +731,12 @@ class CalFocusRow:
         focusCurveWidthErrorNode = rowdom.getElementsByTagName("focusCurveWidthError")
         if len(focusCurveWidthErrorNode) > 0:
 
-            focusCurveWidthErrorStr = focusCurveWidthErrorNode[0].firstChild.data
+            focusCurveWidthErrorStr = focusCurveWidthErrorNode[
+                0
+            ].firstChild.data.strip()
+
             self._focusCurveWidthError = Parser.stringListToLists(
-                focusCurveWidthErrorStr, Length, "CalFocus"
+                focusCurveWidthErrorStr, Length, "CalFocus", True
             )
 
             self._focusCurveWidthErrorExists = True
@@ -622,9 +744,10 @@ class CalFocusRow:
         focusCurveWasFixedNode = rowdom.getElementsByTagName("focusCurveWasFixed")
         if len(focusCurveWasFixedNode) > 0:
 
-            focusCurveWasFixedStr = focusCurveWasFixedNode[0].firstChild.data
+            focusCurveWasFixedStr = focusCurveWasFixedNode[0].firstChild.data.strip()
+
             self._focusCurveWasFixed = Parser.stringListToLists(
-                focusCurveWasFixedStr, bool, "CalFocus"
+                focusCurveWasFixedStr, bool, "CalFocus", False
             )
 
             self._focusCurveWasFixedExists = True
@@ -632,9 +755,10 @@ class CalFocusRow:
         offIntensityNode = rowdom.getElementsByTagName("offIntensity")
         if len(offIntensityNode) > 0:
 
-            offIntensityStr = offIntensityNode[0].firstChild.data
+            offIntensityStr = offIntensityNode[0].firstChild.data.strip()
+
             self._offIntensity = Parser.stringListToLists(
-                offIntensityStr, Temperature, "CalFocus"
+                offIntensityStr, Temperature, "CalFocus", True
             )
 
             self._offIntensityExists = True
@@ -642,9 +766,10 @@ class CalFocusRow:
         offIntensityErrorNode = rowdom.getElementsByTagName("offIntensityError")
         if len(offIntensityErrorNode) > 0:
 
-            offIntensityErrorStr = offIntensityErrorNode[0].firstChild.data
+            offIntensityErrorStr = offIntensityErrorNode[0].firstChild.data.strip()
+
             self._offIntensityError = Parser.stringListToLists(
-                offIntensityErrorStr, Temperature, "CalFocus"
+                offIntensityErrorStr, Temperature, "CalFocus", True
             )
 
             self._offIntensityErrorExists = True
@@ -653,7 +778,7 @@ class CalFocusRow:
         if len(offIntensityWasFixedNode) > 0:
 
             self._offIntensityWasFixed = bool(
-                offIntensityWasFixedNode[0].firstChild.data
+                offIntensityWasFixedNode[0].firstChild.data.strip()
             )
 
             self._offIntensityWasFixedExists = True
@@ -661,9 +786,10 @@ class CalFocusRow:
         peakIntensityNode = rowdom.getElementsByTagName("peakIntensity")
         if len(peakIntensityNode) > 0:
 
-            peakIntensityStr = peakIntensityNode[0].firstChild.data
+            peakIntensityStr = peakIntensityNode[0].firstChild.data.strip()
+
             self._peakIntensity = Parser.stringListToLists(
-                peakIntensityStr, Temperature, "CalFocus"
+                peakIntensityStr, Temperature, "CalFocus", True
             )
 
             self._peakIntensityExists = True
@@ -671,9 +797,10 @@ class CalFocusRow:
         peakIntensityErrorNode = rowdom.getElementsByTagName("peakIntensityError")
         if len(peakIntensityErrorNode) > 0:
 
-            peakIntensityErrorStr = peakIntensityErrorNode[0].firstChild.data
+            peakIntensityErrorStr = peakIntensityErrorNode[0].firstChild.data.strip()
+
             self._peakIntensityError = Parser.stringListToLists(
-                peakIntensityErrorStr, Temperature, "CalFocus"
+                peakIntensityErrorStr, Temperature, "CalFocus", True
             )
 
             self._peakIntensityErrorExists = True
@@ -682,7 +809,7 @@ class CalFocusRow:
         if len(peakIntensityWasFixedNode) > 0:
 
             self._peakIntensityWasFixed = bool(
-                peakIntensityWasFixedNode[0].firstChild.data
+                peakIntensityWasFixedNode[0].firstChild.data.strip()
             )
 
             self._peakIntensityWasFixedExists = True
@@ -690,9 +817,10 @@ class CalFocusRow:
         astigmPlusNode = rowdom.getElementsByTagName("astigmPlus")
         if len(astigmPlusNode) > 0:
 
-            astigmPlusStr = astigmPlusNode[0].firstChild.data
+            astigmPlusStr = astigmPlusNode[0].firstChild.data.strip()
+
             self._astigmPlus = Parser.stringListToLists(
-                astigmPlusStr, Length, "CalFocus"
+                astigmPlusStr, Length, "CalFocus", True
             )
 
             self._astigmPlusExists = True
@@ -700,9 +828,10 @@ class CalFocusRow:
         astigmPlusErrorNode = rowdom.getElementsByTagName("astigmPlusError")
         if len(astigmPlusErrorNode) > 0:
 
-            astigmPlusErrorStr = astigmPlusErrorNode[0].firstChild.data
+            astigmPlusErrorStr = astigmPlusErrorNode[0].firstChild.data.strip()
+
             self._astigmPlusError = Parser.stringListToLists(
-                astigmPlusErrorStr, Length, "CalFocus"
+                astigmPlusErrorStr, Length, "CalFocus", True
             )
 
             self._astigmPlusErrorExists = True
@@ -710,9 +839,10 @@ class CalFocusRow:
         astigmMultNode = rowdom.getElementsByTagName("astigmMult")
         if len(astigmMultNode) > 0:
 
-            astigmMultStr = astigmMultNode[0].firstChild.data
+            astigmMultStr = astigmMultNode[0].firstChild.data.strip()
+
             self._astigmMult = Parser.stringListToLists(
-                astigmMultStr, Length, "CalFocus"
+                astigmMultStr, Length, "CalFocus", True
             )
 
             self._astigmMultExists = True
@@ -720,9 +850,10 @@ class CalFocusRow:
         astigmMultErrorNode = rowdom.getElementsByTagName("astigmMultError")
         if len(astigmMultErrorNode) > 0:
 
-            astigmMultErrorStr = astigmMultErrorNode[0].firstChild.data
+            astigmMultErrorStr = astigmMultErrorNode[0].firstChild.data.strip()
+
             self._astigmMultError = Parser.stringListToLists(
-                astigmMultErrorStr, Length, "CalFocus"
+                astigmMultErrorStr, Length, "CalFocus", True
             )
 
             self._astigmMultErrorExists = True
@@ -730,9 +861,10 @@ class CalFocusRow:
         illumOffsetNode = rowdom.getElementsByTagName("illumOffset")
         if len(illumOffsetNode) > 0:
 
-            illumOffsetStr = illumOffsetNode[0].firstChild.data
+            illumOffsetStr = illumOffsetNode[0].firstChild.data.strip()
+
             self._illumOffset = Parser.stringListToLists(
-                illumOffsetStr, Length, "CalFocus"
+                illumOffsetStr, Length, "CalFocus", True
             )
 
             self._illumOffsetExists = True
@@ -740,9 +872,10 @@ class CalFocusRow:
         illumOffsetErrorNode = rowdom.getElementsByTagName("illumOffsetError")
         if len(illumOffsetErrorNode) > 0:
 
-            illumOffsetErrorStr = illumOffsetErrorNode[0].firstChild.data
+            illumOffsetErrorStr = illumOffsetErrorNode[0].firstChild.data.strip()
+
             self._illumOffsetError = Parser.stringListToLists(
-                illumOffsetErrorStr, Length, "CalFocus"
+                illumOffsetErrorStr, Length, "CalFocus", True
             )
 
             self._illumOffsetErrorExists = True
@@ -750,8 +883,9 @@ class CalFocusRow:
         fitRMSNode = rowdom.getElementsByTagName("fitRMS")
         if len(fitRMSNode) > 0:
 
-            fitRMSStr = fitRMSNode[0].firstChild.data
-            self._fitRMS = Parser.stringListToLists(fitRMSStr, Length, "CalFocus")
+            fitRMSStr = fitRMSNode[0].firstChild.data.strip()
+
+            self._fitRMS = Parser.stringListToLists(fitRMSStr, Length, "CalFocus", True)
 
             self._fitRMSExists = True
 
@@ -759,11 +893,11 @@ class CalFocusRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -1266,20 +1400,20 @@ class CalFocusRow:
 
     # ===> Attribute reducedChiSquared
 
-    _reducedChiSquared = None  # this is a 2D list of double
+    _reducedChiSquared = None  # this is a 2D list of float
 
     def getReducedChiSquared(self):
         """
         Get reducedChiSquared.
-        return reducedChiSquared as double []  []
+        return reducedChiSquared as float []  []
         """
 
         return copy.deepcopy(self._reducedChiSquared)
 
     def setReducedChiSquared(self, reducedChiSquared):
         """
-        Set reducedChiSquared with the specified double []  []  value.
-        reducedChiSquared The double []  []  value to which reducedChiSquared is to be set.
+        Set reducedChiSquared with the specified float []  []  value.
+        reducedChiSquared The float []  []  value to which reducedChiSquared is to be set.
 
 
         """
@@ -1296,11 +1430,11 @@ class CalFocusRow:
             if not shapeOK:
                 raise ValueError("shape of reducedChiSquared is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, double):
+            if not Parser.checkListType(reducedChiSquared, float):
                 raise ValueError(
-                    "type of the first value in reducedChiSquared is not double as expected"
+                    "type of the first value in reducedChiSquared is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._reducedChiSquared = copy.deepcopy(reducedChiSquared)
@@ -2690,7 +2824,7 @@ class CalFocusRow:
             for i in range(reducedChiSquared_dims[0]):
                 for j in range(reducedChiSquared_dims[0]):
 
-                    # reducedChiSquared is an array of double, compare using == operator.
+                    # reducedChiSquared is an array of float, compare using == operator.
                     if not (self._reducedChiSquared[i][j] == reducedChiSquared[i][j]):
                         return False
 
@@ -2914,7 +3048,7 @@ class CalFocusRow:
             for i in range(reducedChiSquared_dims[0]):
                 for j in range(reducedChiSquared_dims[0]):
 
-                    # reducedChiSquared is an array of double, compare using == operator.
+                    # reducedChiSquared is an array of float, compare using == operator.
                     if not (self._reducedChiSquared[i][j] == reducedChiSquared[i][j]):
                         return False
 

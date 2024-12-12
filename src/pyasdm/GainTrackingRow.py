@@ -75,12 +75,47 @@ class GainTrackingRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationType = []
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._numReceptor = 0
+
+        self._attenuator = []  # this is a list of float []
+
+        self._polarizationType = []  # this is a list of PolarizationType []
+
+        self._samplingLevelExists = False
+
+        self._samplingLevel = None
+
+        self._numAttFreqExists = False
+
+        self._numAttFreq = 0
+
+        self._attFreqExists = False
+
+        self._attFreq = []  # this is a list of float []
+
+        self._attSpectrumExists = False
+
+        self._attSpectrum = []  # this is a list of Complex []
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._feedId = 0
+
+        self._spectralWindowId = Tag()
 
         if row is not None:
             if not isinstance(row, GainTrackingRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -214,54 +249,59 @@ class GainTrackingRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         attenuatorNode = rowdom.getElementsByTagName("attenuator")[0]
 
-        attenuatorStr = attenuatorNode.firstChild.data
+        attenuatorStr = attenuatorNode.firstChild.data.strip()
+
         self._attenuator = Parser.stringListToLists(
-            attenuatorStr, float, "GainTracking"
+            attenuatorStr, float, "GainTracking", False
         )
 
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
 
-        polarizationTypeStr = polarizationTypeNode.firstChild.data
+        polarizationTypeStr = polarizationTypeNode.firstChild.data.strip()
         self._polarizationType = Parser.stringListToLists(
-            polarizationTypeStr, PolarizationType, "GainTracking"
+            polarizationTypeStr, PolarizationType, "GainTracking", False
         )
 
         samplingLevelNode = rowdom.getElementsByTagName("samplingLevel")
         if len(samplingLevelNode) > 0:
 
-            self._samplingLevel = float(samplingLevelNode[0].firstChild.data)
+            self._samplingLevel = float(samplingLevelNode[0].firstChild.data.strip())
 
             self._samplingLevelExists = True
 
         numAttFreqNode = rowdom.getElementsByTagName("numAttFreq")
         if len(numAttFreqNode) > 0:
 
-            self._numAttFreq = int(numAttFreqNode[0].firstChild.data)
+            self._numAttFreq = int(numAttFreqNode[0].firstChild.data.strip())
 
             self._numAttFreqExists = True
 
         attFreqNode = rowdom.getElementsByTagName("attFreq")
         if len(attFreqNode) > 0:
 
-            attFreqStr = attFreqNode[0].firstChild.data
-            self._attFreq = Parser.stringListToLists(attFreqStr, double, "GainTracking")
+            attFreqStr = attFreqNode[0].firstChild.data.strip()
+
+            self._attFreq = Parser.stringListToLists(
+                attFreqStr, float, "GainTracking", False
+            )
 
             self._attFreqExists = True
 
         attSpectrumNode = rowdom.getElementsByTagName("attSpectrum")
         if len(attSpectrumNode) > 0:
 
-            attSpectrumStr = attSpectrumNode[0].firstChild.data
+            attSpectrumStr = attSpectrumNode[0].firstChild.data.strip()
+
             self._attSpectrum = Parser.stringListToLists(
-                attSpectrumStr, Complex, "GainTracking"
+                attSpectrumStr, Complex, "GainTracking", True
             )
 
             self._attSpectrumExists = True
@@ -270,15 +310,15 @@ class GainTrackingRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data)
+        self._feedId = int(feedIdNode.firstChild.data.strip())
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -516,7 +556,7 @@ class GainTrackingRow:
     # ===> Attribute attFreq, which is optional
     _attFreqExists = False
 
-    _attFreq = None  # this is a 1D list of double
+    _attFreq = None  # this is a 1D list of float
 
     def isAttFreqExists(self):
         """
@@ -528,7 +568,7 @@ class GainTrackingRow:
     def getAttFreq(self):
         """
         Get attFreq, which is optional.
-        return attFreq as double []
+        return attFreq as float []
         raises ValueError If attFreq does not exist.
         """
         if not self._attFreqExists:
@@ -542,8 +582,8 @@ class GainTrackingRow:
 
     def setAttFreq(self, attFreq):
         """
-        Set attFreq with the specified double []  value.
-        attFreq The double []  value to which attFreq is to be set.
+        Set attFreq with the specified float []  value.
+        attFreq The float []  value to which attFreq is to be set.
 
 
         """
@@ -560,11 +600,11 @@ class GainTrackingRow:
             if not shapeOK:
                 raise ValueError("shape of attFreq is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(attFreq, double):
+            if not Parser.checkListType(attFreq, float):
                 raise ValueError(
-                    "type of the first value in attFreq is not double as expected"
+                    "type of the first value in attFreq is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._attFreq = copy.deepcopy(attFreq)

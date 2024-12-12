@@ -81,18 +81,43 @@ class SubscanRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._scanNumber = 0
+
+        self._subscanNumber = 0
+
+        self._startTime = ArrayTime()
+
+        self._endTime = ArrayTime()
+
+        self._fieldName = None
+
         self._subscanIntent = SubscanIntent.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._subscanModeExists = False
+
         self._subscanMode = SwitchingMode.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._numIntegration = 0
+
+        self._numSubintegration = []  # this is a list of int []
+
+        self._correlatorCalibrationExists = False
+
         self._correlatorCalibration = CorrelatorCalibration.from_int(0)
+
+        # extrinsic attributes
+
+        self._execBlockId = Tag()
 
         if row is not None:
             if not isinstance(row, SubscanRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._execBlockId = Tag(row._execBlockId)
 
@@ -224,48 +249,49 @@ class SubscanRow:
 
         scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
 
-        self._scanNumber = int(scanNumberNode.firstChild.data)
+        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
 
         subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
 
-        self._subscanNumber = int(subscanNumberNode.firstChild.data)
+        self._subscanNumber = int(subscanNumberNode.firstChild.data.strip())
 
         startTimeNode = rowdom.getElementsByTagName("startTime")[0]
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data)
+        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
 
         endTimeNode = rowdom.getElementsByTagName("endTime")[0]
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data)
+        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
 
         fieldNameNode = rowdom.getElementsByTagName("fieldName")[0]
 
-        self._fieldName = str(fieldNameNode.firstChild.data)
+        self._fieldName = str(fieldNameNode.firstChild.data.strip())
 
         subscanIntentNode = rowdom.getElementsByTagName("subscanIntent")[0]
 
         self._subscanIntent = SubscanIntent.newSubscanIntent(
-            subscanIntentNode.firstChild.data
+            subscanIntentNode.firstChild.data.strip()
         )
 
         subscanModeNode = rowdom.getElementsByTagName("subscanMode")
         if len(subscanModeNode) > 0:
 
             self._subscanMode = SwitchingMode.newSwitchingMode(
-                subscanModeNode[0].firstChild.data
+                subscanModeNode[0].firstChild.data.strip()
             )
 
             self._subscanModeExists = True
 
         numIntegrationNode = rowdom.getElementsByTagName("numIntegration")[0]
 
-        self._numIntegration = int(numIntegrationNode.firstChild.data)
+        self._numIntegration = int(numIntegrationNode.firstChild.data.strip())
 
         numSubintegrationNode = rowdom.getElementsByTagName("numSubintegration")[0]
 
-        numSubintegrationStr = numSubintegrationNode.firstChild.data
+        numSubintegrationStr = numSubintegrationNode.firstChild.data.strip()
+
         self._numSubintegration = Parser.stringListToLists(
-            numSubintegrationStr, int, "Subscan"
+            numSubintegrationStr, int, "Subscan", False
         )
 
         correlatorCalibrationNode = rowdom.getElementsByTagName("correlatorCalibration")
@@ -273,7 +299,7 @@ class SubscanRow:
 
             self._correlatorCalibration = (
                 CorrelatorCalibration.newCorrelatorCalibration(
-                    correlatorCalibrationNode[0].firstChild.data
+                    correlatorCalibrationNode[0].firstChild.data.strip()
                 )
             )
 
@@ -283,7 +309,7 @@ class SubscanRow:
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data)
+        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

@@ -81,18 +81,63 @@ class CalPositionRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._antennaName = None
+
         self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._antennaPosition = []  # this is a list of Length []
+
+        self._stationName = None
+
+        self._stationPosition = []  # this is a list of Length []
+
         self._positionMethod = PositionMethod.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._receiverBand = ReceiverBand.from_int(0)
+
+        self._numAntenna = 0
+
+        self._refAntennaNames = []  # this is a list of str []
+
+        self._axesOffset = Length()
+
+        self._axesOffsetErr = Length()
+
+        self._axesOffsetFixed = None
+
+        self._positionOffset = []  # this is a list of Length []
+
+        self._positionErr = []  # this is a list of Length []
+
+        self._reducedChiSquared = None
+
+        self._delayRmsExists = False
+
+        self._delayRms = None
+
+        self._phaseRmsExists = False
+
+        self._phaseRms = Angle()
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalPositionRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -273,104 +318,109 @@ class CalPositionRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data
+            atmPhaseCorrectionNode.firstChild.data.strip()
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         antennaPositionNode = rowdom.getElementsByTagName("antennaPosition")[0]
 
-        antennaPositionStr = antennaPositionNode.firstChild.data
+        antennaPositionStr = antennaPositionNode.firstChild.data.strip()
+
         self._antennaPosition = Parser.stringListToLists(
-            antennaPositionStr, Length, "CalPosition"
+            antennaPositionStr, Length, "CalPosition", True
         )
 
         stationNameNode = rowdom.getElementsByTagName("stationName")[0]
 
-        self._stationName = str(stationNameNode.firstChild.data)
+        self._stationName = str(stationNameNode.firstChild.data.strip())
 
         stationPositionNode = rowdom.getElementsByTagName("stationPosition")[0]
 
-        stationPositionStr = stationPositionNode.firstChild.data
+        stationPositionStr = stationPositionNode.firstChild.data.strip()
+
         self._stationPosition = Parser.stringListToLists(
-            stationPositionStr, Length, "CalPosition"
+            stationPositionStr, Length, "CalPosition", True
         )
 
         positionMethodNode = rowdom.getElementsByTagName("positionMethod")[0]
 
         self._positionMethod = PositionMethod.newPositionMethod(
-            positionMethodNode.firstChild.data
+            positionMethodNode.firstChild.data.strip()
         )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data)
+        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
 
         refAntennaNamesNode = rowdom.getElementsByTagName("refAntennaNames")[0]
 
-        refAntennaNamesStr = refAntennaNamesNode.firstChild.data
+        refAntennaNamesStr = refAntennaNamesNode.firstChild.data.strip()
+
         self._refAntennaNames = Parser.stringListToLists(
-            refAntennaNamesStr, str, "CalPosition"
+            refAntennaNamesStr, str, "CalPosition", False
         )
 
         axesOffsetNode = rowdom.getElementsByTagName("axesOffset")[0]
 
-        self._axesOffset = Length(axesOffsetNode.firstChild.data)
+        self._axesOffset = Length(axesOffsetNode.firstChild.data.strip())
 
         axesOffsetErrNode = rowdom.getElementsByTagName("axesOffsetErr")[0]
 
-        self._axesOffsetErr = Length(axesOffsetErrNode.firstChild.data)
+        self._axesOffsetErr = Length(axesOffsetErrNode.firstChild.data.strip())
 
         axesOffsetFixedNode = rowdom.getElementsByTagName("axesOffsetFixed")[0]
 
-        self._axesOffsetFixed = bool(axesOffsetFixedNode.firstChild.data)
+        self._axesOffsetFixed = bool(axesOffsetFixedNode.firstChild.data.strip())
 
         positionOffsetNode = rowdom.getElementsByTagName("positionOffset")[0]
 
-        positionOffsetStr = positionOffsetNode.firstChild.data
+        positionOffsetStr = positionOffsetNode.firstChild.data.strip()
+
         self._positionOffset = Parser.stringListToLists(
-            positionOffsetStr, Length, "CalPosition"
+            positionOffsetStr, Length, "CalPosition", True
         )
 
         positionErrNode = rowdom.getElementsByTagName("positionErr")[0]
 
-        positionErrStr = positionErrNode.firstChild.data
+        positionErrStr = positionErrNode.firstChild.data.strip()
+
         self._positionErr = Parser.stringListToLists(
-            positionErrStr, Length, "CalPosition"
+            positionErrStr, Length, "CalPosition", True
         )
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        self._reducedChiSquared = double(reducedChiSquaredNode.firstChild.data)
+        self._reducedChiSquared = float(reducedChiSquaredNode.firstChild.data.strip())
 
         delayRmsNode = rowdom.getElementsByTagName("delayRms")
         if len(delayRmsNode) > 0:
 
-            self._delayRms = double(delayRmsNode[0].firstChild.data)
+            self._delayRms = float(delayRmsNode[0].firstChild.data.strip())
 
             self._delayRmsExists = True
 
         phaseRmsNode = rowdom.getElementsByTagName("phaseRms")
         if len(phaseRmsNode) > 0:
 
-            self._phaseRms = Angle(phaseRmsNode[0].firstChild.data)
+            self._phaseRms = Angle(phaseRmsNode[0].firstChild.data.strip())
 
             self._phaseRmsExists = True
 
@@ -378,11 +428,11 @@ class CalPositionRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -871,20 +921,20 @@ class CalPositionRow:
     def getReducedChiSquared(self):
         """
         Get reducedChiSquared.
-        return reducedChiSquared as double
+        return reducedChiSquared as float
         """
 
         return self._reducedChiSquared
 
     def setReducedChiSquared(self, reducedChiSquared):
         """
-        Set reducedChiSquared with the specified double value.
-        reducedChiSquared The double value to which reducedChiSquared is to be set.
+        Set reducedChiSquared with the specified float value.
+        reducedChiSquared The float value to which reducedChiSquared is to be set.
 
 
         """
 
-        self._reducedChiSquared = double(reducedChiSquared)
+        self._reducedChiSquared = float(reducedChiSquared)
 
     # ===> Attribute delayRms, which is optional
     _delayRmsExists = False
@@ -901,7 +951,7 @@ class CalPositionRow:
     def getDelayRms(self):
         """
         Get delayRms, which is optional.
-        return delayRms as double
+        return delayRms as float
         raises ValueError If delayRms does not exist.
         """
         if not self._delayRmsExists:
@@ -915,13 +965,13 @@ class CalPositionRow:
 
     def setDelayRms(self, delayRms):
         """
-        Set delayRms with the specified double value.
-        delayRms The double value to which delayRms is to be set.
+        Set delayRms with the specified float value.
+        delayRms The float value to which delayRms is to be set.
 
 
         """
 
-        self._delayRms = double(delayRms)
+        self._delayRms = float(delayRms)
 
         self._delayRmsExists = True
 
@@ -1204,7 +1254,7 @@ class CalPositionRow:
             ):
                 return False
 
-        # reducedChiSquared is a double, compare using the == operator.
+        # reducedChiSquared is a float, compare using the == operator.
         if not (self._reducedChiSquared == reducedChiSquared):
             return False
 
@@ -1351,7 +1401,7 @@ class CalPositionRow:
             ):
                 return False
 
-        # reducedChiSquared is a double, compare using the == operator.
+        # reducedChiSquared is a float, compare using the == operator.
         if not (self._reducedChiSquared == reducedChiSquared):
             return False
 

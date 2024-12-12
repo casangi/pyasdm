@@ -87,24 +87,61 @@ class ConfigDescriptionRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._numAntenna = 0
+
+        self._numDataDescription = 0
+
+        self._numFeed = 0
+
         self._correlationMode = CorrelationMode.from_int(0)
 
-        # this is a list of AtmPhaseCorrection Enumeration, start off with it being empty
-        self._atmPhaseCorrection = []
+        self._configDescriptionId = Tag()
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._numAtmPhaseCorrection = 0
+
+        self._atmPhaseCorrection = []  # this is a list of AtmPhaseCorrection []
+
         self._processorType = ProcessorType.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._phasedArrayListExists = False
+
+        self._phasedArrayList = []  # this is a list of int []
+
         self._spectralType = SpectralResolutionType.from_int(0)
 
-        # this is a list of SpectralResolutionType Enumeration, start off with it being empty
-        self._assocNature = []
+        self._numAssocValuesExists = False
+
+        self._numAssocValues = 0
+
+        self._assocNatureExists = False
+
+        self._assocNature = []  # this is a list of SpectralResolutionType []
+
+        # extrinsic attributes
+
+        self._antennaId = []  # this is a list of Tag []
+
+        self._assocConfigDescriptionIdExists = False
+
+        self._assocConfigDescriptionId = []  # this is a list of Tag []
+
+        self._dataDescriptionId = []  # this is a list of Tag []
+
+        self._feedId = []  # this is a list of int []
+
+        self._processorId = Tag()
+
+        self._switchCycleId = []  # this is a list of Tag []
 
         if row is not None:
             if not isinstance(row, ConfigDescriptionRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._configDescriptionId = Tag(row._configDescriptionId)
 
@@ -326,51 +363,54 @@ class ConfigDescriptionRow:
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data)
+        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
 
         numDataDescriptionNode = rowdom.getElementsByTagName("numDataDescription")[0]
 
-        self._numDataDescription = int(numDataDescriptionNode.firstChild.data)
+        self._numDataDescription = int(numDataDescriptionNode.firstChild.data.strip())
 
         numFeedNode = rowdom.getElementsByTagName("numFeed")[0]
 
-        self._numFeed = int(numFeedNode.firstChild.data)
+        self._numFeed = int(numFeedNode.firstChild.data.strip())
 
         correlationModeNode = rowdom.getElementsByTagName("correlationMode")[0]
 
         self._correlationMode = CorrelationMode.newCorrelationMode(
-            correlationModeNode.firstChild.data
+            correlationModeNode.firstChild.data.strip()
         )
 
         configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
 
-        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data)
+        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data.strip())
 
         numAtmPhaseCorrectionNode = rowdom.getElementsByTagName(
             "numAtmPhaseCorrection"
         )[0]
 
-        self._numAtmPhaseCorrection = int(numAtmPhaseCorrectionNode.firstChild.data)
+        self._numAtmPhaseCorrection = int(
+            numAtmPhaseCorrectionNode.firstChild.data.strip()
+        )
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
-        atmPhaseCorrectionStr = atmPhaseCorrectionNode.firstChild.data
+        atmPhaseCorrectionStr = atmPhaseCorrectionNode.firstChild.data.strip()
         self._atmPhaseCorrection = Parser.stringListToLists(
-            atmPhaseCorrectionStr, AtmPhaseCorrection, "ConfigDescription"
+            atmPhaseCorrectionStr, AtmPhaseCorrection, "ConfigDescription", False
         )
 
         processorTypeNode = rowdom.getElementsByTagName("processorType")[0]
 
         self._processorType = ProcessorType.newProcessorType(
-            processorTypeNode.firstChild.data
+            processorTypeNode.firstChild.data.strip()
         )
 
         phasedArrayListNode = rowdom.getElementsByTagName("phasedArrayList")
         if len(phasedArrayListNode) > 0:
 
-            phasedArrayListStr = phasedArrayListNode[0].firstChild.data
+            phasedArrayListStr = phasedArrayListNode[0].firstChild.data.strip()
+
             self._phasedArrayList = Parser.stringListToLists(
-                phasedArrayListStr, int, "ConfigDescription"
+                phasedArrayListStr, int, "ConfigDescription", False
             )
 
             self._phasedArrayListExists = True
@@ -378,22 +418,22 @@ class ConfigDescriptionRow:
         spectralTypeNode = rowdom.getElementsByTagName("spectralType")[0]
 
         self._spectralType = SpectralResolutionType.newSpectralResolutionType(
-            spectralTypeNode.firstChild.data
+            spectralTypeNode.firstChild.data.strip()
         )
 
         numAssocValuesNode = rowdom.getElementsByTagName("numAssocValues")
         if len(numAssocValuesNode) > 0:
 
-            self._numAssocValues = int(numAssocValuesNode[0].firstChild.data)
+            self._numAssocValues = int(numAssocValuesNode[0].firstChild.data.strip())
 
             self._numAssocValuesExists = True
 
         assocNatureNode = rowdom.getElementsByTagName("assocNature")
         if len(assocNatureNode) > 0:
 
-            assocNatureStr = assocNatureNode[0].firstChild.data
+            assocNatureStr = assocNatureNode[0].firstChild.data.strip()
             self._assocNature = Parser.stringListToLists(
-                assocNatureStr, SpectralResolutionType, "ConfigDescription"
+                assocNatureStr, SpectralResolutionType, "ConfigDescription", False
             )
 
             self._assocNatureExists = True
@@ -402,9 +442,10 @@ class ConfigDescriptionRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        antennaIdStr = antennaIdNode.firstChild.data
+        antennaIdStr = antennaIdNode.firstChild.data.strip()
+
         self._antennaId = Parser.stringListToLists(
-            antennaIdStr, Tag, "ConfigDescription"
+            antennaIdStr, Tag, "ConfigDescription", True
         )
 
         assocConfigDescriptionIdNode = rowdom.getElementsByTagName(
@@ -414,34 +455,40 @@ class ConfigDescriptionRow:
 
             assocConfigDescriptionIdStr = assocConfigDescriptionIdNode[
                 0
-            ].firstChild.data
+            ].firstChild.data.strip()
+
             self._assocConfigDescriptionId = Parser.stringListToLists(
-                assocConfigDescriptionIdStr, Tag, "ConfigDescription"
+                assocConfigDescriptionIdStr, Tag, "ConfigDescription", True
             )
 
             self._assocConfigDescriptionIdExists = True
 
         dataDescriptionIdNode = rowdom.getElementsByTagName("dataDescriptionId")[0]
 
-        dataDescriptionIdStr = dataDescriptionIdNode.firstChild.data
+        dataDescriptionIdStr = dataDescriptionIdNode.firstChild.data.strip()
+
         self._dataDescriptionId = Parser.stringListToLists(
-            dataDescriptionIdStr, Tag, "ConfigDescription"
+            dataDescriptionIdStr, Tag, "ConfigDescription", True
         )
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        feedIdStr = feedIdNode.firstChild.data
-        self._feedId = Parser.stringListToLists(feedIdStr, int, "ConfigDescription")
+        feedIdStr = feedIdNode.firstChild.data.strip()
+
+        self._feedId = Parser.stringListToLists(
+            feedIdStr, int, "ConfigDescription", False
+        )
 
         processorIdNode = rowdom.getElementsByTagName("processorId")[0]
 
-        self._processorId = Tag(processorIdNode.firstChild.data)
+        self._processorId = Tag(processorIdNode.firstChild.data.strip())
 
         switchCycleIdNode = rowdom.getElementsByTagName("switchCycleId")[0]
 
-        switchCycleIdStr = switchCycleIdNode.firstChild.data
+        switchCycleIdStr = switchCycleIdNode.firstChild.data.strip()
+
         self._switchCycleId = Parser.stringListToLists(
-            switchCycleIdStr, Tag, "ConfigDescription"
+            switchCycleIdStr, Tag, "ConfigDescription", True
         )
 
     def toBin(self):

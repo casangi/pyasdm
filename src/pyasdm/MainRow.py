@@ -75,12 +75,43 @@ class MainRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._time = ArrayTime()
+
+        self._numAntenna = 0
+
         self._timeSampling = TimeSampling.from_int(0)
+
+        self._interval = Interval()
+
+        self._numIntegration = 0
+
+        self._scanNumber = 0
+
+        self._subscanNumber = 0
+
+        self._dataSize = 0
+
+        self._dataUID = EntityRef()
+
+        # extrinsic attributes
+
+        self._configDescriptionId = Tag()
+
+        self._execBlockId = Tag()
+
+        self._fieldId = Tag()
+
+        self._stateId = []  # this is a list of Tag []
 
         if row is not None:
             if not isinstance(row, MainRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._time = ArrayTime(row._time)
 
@@ -200,37 +231,37 @@ class MainRow:
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data)
+        self._time = ArrayTime(timeNode.firstChild.data.strip())
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data)
+        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
 
         timeSamplingNode = rowdom.getElementsByTagName("timeSampling")[0]
 
         self._timeSampling = TimeSampling.newTimeSampling(
-            timeSamplingNode.firstChild.data
+            timeSamplingNode.firstChild.data.strip()
         )
 
         intervalNode = rowdom.getElementsByTagName("interval")[0]
 
-        self._interval = Interval(intervalNode.firstChild.data)
+        self._interval = Interval(intervalNode.firstChild.data.strip())
 
         numIntegrationNode = rowdom.getElementsByTagName("numIntegration")[0]
 
-        self._numIntegration = int(numIntegrationNode.firstChild.data)
+        self._numIntegration = int(numIntegrationNode.firstChild.data.strip())
 
         scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
 
-        self._scanNumber = int(scanNumberNode.firstChild.data)
+        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
 
         subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
 
-        self._subscanNumber = int(subscanNumberNode.firstChild.data)
+        self._subscanNumber = int(subscanNumberNode.firstChild.data.strip())
 
         dataSizeNode = rowdom.getElementsByTagName("dataSize")[0]
 
-        self._dataSize = int(dataSizeNode.firstChild.data)
+        self._dataSize = int(dataSizeNode.firstChild.data.strip())
 
         dataUIDNode = rowdom.getElementsByTagName("dataUID")[0]
 
@@ -240,20 +271,21 @@ class MainRow:
 
         configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
 
-        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data)
+        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data.strip())
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data)
+        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
         fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
 
-        self._fieldId = Tag(fieldIdNode.firstChild.data)
+        self._fieldId = Tag(fieldIdNode.firstChild.data.strip())
 
         stateIdNode = rowdom.getElementsByTagName("stateId")[0]
 
-        stateIdStr = stateIdNode.firstChild.data
-        self._stateId = Parser.stringListToLists(stateIdStr, Tag, "Main")
+        stateIdStr = stateIdNode.firstChild.data.strip()
+
+        self._stateId = Parser.stringListToLists(stateIdStr, Tag, "Main", True)
 
     def toBin(self):
         print("not yet implemented")

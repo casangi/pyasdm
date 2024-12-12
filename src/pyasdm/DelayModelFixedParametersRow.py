@@ -72,9 +72,91 @@ class DelayModelFixedParametersRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._delayModelFixedParametersId = Tag()
+
+        self._delayModelVersion = None
+
+        self._gaussConstantExists = False
+
+        self._gaussConstant = AngularRate()
+
+        self._newtonianConstantExists = False
+
+        self._newtonianConstant = None
+
+        self._gravityExists = False
+
+        self._gravity = None
+
+        self._earthFlatteningExists = False
+
+        self._earthFlattening = None
+
+        self._earthRadiusExists = False
+
+        self._earthRadius = Length()
+
+        self._moonEarthMassRatioExists = False
+
+        self._moonEarthMassRatio = None
+
+        self._ephemerisEpochExists = False
+
+        self._ephemerisEpoch = None
+
+        self._earthTideLagExists = False
+
+        self._earthTideLag = None
+
+        self._earthGMExists = False
+
+        self._earthGM = None
+
+        self._moonGMExists = False
+
+        self._moonGM = None
+
+        self._sunGMExists = False
+
+        self._sunGM = None
+
+        self._loveNumberHExists = False
+
+        self._loveNumberH = None
+
+        self._loveNumberLExists = False
+
+        self._loveNumberL = None
+
+        self._precessionConstantExists = False
+
+        self._precessionConstant = AngularRate()
+
+        self._lightTime1AUExists = False
+
+        self._lightTime1AU = None
+
+        self._speedOfLightExists = False
+
+        self._speedOfLight = Speed()
+
+        self._delayModelFlagsExists = False
+
+        self._delayModelFlags = None
+
+        # extrinsic attributes
+
+        self._execBlockId = Tag()
+
         if row is not None:
             if not isinstance(row, DelayModelFixedParametersRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._delayModelFixedParametersId = Tag(row._delayModelFixedParametersId)
 
@@ -354,101 +436,109 @@ class DelayModelFixedParametersRow:
         )[0]
 
         self._delayModelFixedParametersId = Tag(
-            delayModelFixedParametersIdNode.firstChild.data
+            delayModelFixedParametersIdNode.firstChild.data.strip()
         )
 
         delayModelVersionNode = rowdom.getElementsByTagName("delayModelVersion")[0]
 
-        self._delayModelVersion = str(delayModelVersionNode.firstChild.data)
+        self._delayModelVersion = str(delayModelVersionNode.firstChild.data.strip())
 
         gaussConstantNode = rowdom.getElementsByTagName("gaussConstant")
         if len(gaussConstantNode) > 0:
 
-            self._gaussConstant = AngularRate(gaussConstantNode[0].firstChild.data)
+            self._gaussConstant = AngularRate(
+                gaussConstantNode[0].firstChild.data.strip()
+            )
 
             self._gaussConstantExists = True
 
         newtonianConstantNode = rowdom.getElementsByTagName("newtonianConstant")
         if len(newtonianConstantNode) > 0:
 
-            self._newtonianConstant = double(newtonianConstantNode[0].firstChild.data)
+            self._newtonianConstant = float(
+                newtonianConstantNode[0].firstChild.data.strip()
+            )
 
             self._newtonianConstantExists = True
 
         gravityNode = rowdom.getElementsByTagName("gravity")
         if len(gravityNode) > 0:
 
-            self._gravity = double(gravityNode[0].firstChild.data)
+            self._gravity = float(gravityNode[0].firstChild.data.strip())
 
             self._gravityExists = True
 
         earthFlatteningNode = rowdom.getElementsByTagName("earthFlattening")
         if len(earthFlatteningNode) > 0:
 
-            self._earthFlattening = double(earthFlatteningNode[0].firstChild.data)
+            self._earthFlattening = float(
+                earthFlatteningNode[0].firstChild.data.strip()
+            )
 
             self._earthFlatteningExists = True
 
         earthRadiusNode = rowdom.getElementsByTagName("earthRadius")
         if len(earthRadiusNode) > 0:
 
-            self._earthRadius = Length(earthRadiusNode[0].firstChild.data)
+            self._earthRadius = Length(earthRadiusNode[0].firstChild.data.strip())
 
             self._earthRadiusExists = True
 
         moonEarthMassRatioNode = rowdom.getElementsByTagName("moonEarthMassRatio")
         if len(moonEarthMassRatioNode) > 0:
 
-            self._moonEarthMassRatio = double(moonEarthMassRatioNode[0].firstChild.data)
+            self._moonEarthMassRatio = float(
+                moonEarthMassRatioNode[0].firstChild.data.strip()
+            )
 
             self._moonEarthMassRatioExists = True
 
         ephemerisEpochNode = rowdom.getElementsByTagName("ephemerisEpoch")
         if len(ephemerisEpochNode) > 0:
 
-            self._ephemerisEpoch = str(ephemerisEpochNode[0].firstChild.data)
+            self._ephemerisEpoch = str(ephemerisEpochNode[0].firstChild.data.strip())
 
             self._ephemerisEpochExists = True
 
         earthTideLagNode = rowdom.getElementsByTagName("earthTideLag")
         if len(earthTideLagNode) > 0:
 
-            self._earthTideLag = double(earthTideLagNode[0].firstChild.data)
+            self._earthTideLag = float(earthTideLagNode[0].firstChild.data.strip())
 
             self._earthTideLagExists = True
 
         earthGMNode = rowdom.getElementsByTagName("earthGM")
         if len(earthGMNode) > 0:
 
-            self._earthGM = double(earthGMNode[0].firstChild.data)
+            self._earthGM = float(earthGMNode[0].firstChild.data.strip())
 
             self._earthGMExists = True
 
         moonGMNode = rowdom.getElementsByTagName("moonGM")
         if len(moonGMNode) > 0:
 
-            self._moonGM = double(moonGMNode[0].firstChild.data)
+            self._moonGM = float(moonGMNode[0].firstChild.data.strip())
 
             self._moonGMExists = True
 
         sunGMNode = rowdom.getElementsByTagName("sunGM")
         if len(sunGMNode) > 0:
 
-            self._sunGM = double(sunGMNode[0].firstChild.data)
+            self._sunGM = float(sunGMNode[0].firstChild.data.strip())
 
             self._sunGMExists = True
 
         loveNumberHNode = rowdom.getElementsByTagName("loveNumberH")
         if len(loveNumberHNode) > 0:
 
-            self._loveNumberH = double(loveNumberHNode[0].firstChild.data)
+            self._loveNumberH = float(loveNumberHNode[0].firstChild.data.strip())
 
             self._loveNumberHExists = True
 
         loveNumberLNode = rowdom.getElementsByTagName("loveNumberL")
         if len(loveNumberLNode) > 0:
 
-            self._loveNumberL = double(loveNumberLNode[0].firstChild.data)
+            self._loveNumberL = float(loveNumberLNode[0].firstChild.data.strip())
 
             self._loveNumberLExists = True
 
@@ -456,7 +546,7 @@ class DelayModelFixedParametersRow:
         if len(precessionConstantNode) > 0:
 
             self._precessionConstant = AngularRate(
-                precessionConstantNode[0].firstChild.data
+                precessionConstantNode[0].firstChild.data.strip()
             )
 
             self._precessionConstantExists = True
@@ -464,21 +554,21 @@ class DelayModelFixedParametersRow:
         lightTime1AUNode = rowdom.getElementsByTagName("lightTime1AU")
         if len(lightTime1AUNode) > 0:
 
-            self._lightTime1AU = double(lightTime1AUNode[0].firstChild.data)
+            self._lightTime1AU = float(lightTime1AUNode[0].firstChild.data.strip())
 
             self._lightTime1AUExists = True
 
         speedOfLightNode = rowdom.getElementsByTagName("speedOfLight")
         if len(speedOfLightNode) > 0:
 
-            self._speedOfLight = Speed(speedOfLightNode[0].firstChild.data)
+            self._speedOfLight = Speed(speedOfLightNode[0].firstChild.data.strip())
 
             self._speedOfLightExists = True
 
         delayModelFlagsNode = rowdom.getElementsByTagName("delayModelFlags")
         if len(delayModelFlagsNode) > 0:
 
-            self._delayModelFlags = str(delayModelFlagsNode[0].firstChild.data)
+            self._delayModelFlags = str(delayModelFlagsNode[0].firstChild.data.strip())
 
             self._delayModelFlagsExists = True
 
@@ -486,7 +576,7 @@ class DelayModelFixedParametersRow:
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data)
+        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -606,7 +696,7 @@ class DelayModelFixedParametersRow:
     def getNewtonianConstant(self):
         """
         Get newtonianConstant, which is optional.
-        return newtonianConstant as double
+        return newtonianConstant as float
         raises ValueError If newtonianConstant does not exist.
         """
         if not self._newtonianConstantExists:
@@ -620,13 +710,13 @@ class DelayModelFixedParametersRow:
 
     def setNewtonianConstant(self, newtonianConstant):
         """
-        Set newtonianConstant with the specified double value.
-        newtonianConstant The double value to which newtonianConstant is to be set.
+        Set newtonianConstant with the specified float value.
+        newtonianConstant The float value to which newtonianConstant is to be set.
 
 
         """
 
-        self._newtonianConstant = double(newtonianConstant)
+        self._newtonianConstant = float(newtonianConstant)
 
         self._newtonianConstantExists = True
 
@@ -651,7 +741,7 @@ class DelayModelFixedParametersRow:
     def getGravity(self):
         """
         Get gravity, which is optional.
-        return gravity as double
+        return gravity as float
         raises ValueError If gravity does not exist.
         """
         if not self._gravityExists:
@@ -665,13 +755,13 @@ class DelayModelFixedParametersRow:
 
     def setGravity(self, gravity):
         """
-        Set gravity with the specified double value.
-        gravity The double value to which gravity is to be set.
+        Set gravity with the specified float value.
+        gravity The float value to which gravity is to be set.
 
 
         """
 
-        self._gravity = double(gravity)
+        self._gravity = float(gravity)
 
         self._gravityExists = True
 
@@ -696,7 +786,7 @@ class DelayModelFixedParametersRow:
     def getEarthFlattening(self):
         """
         Get earthFlattening, which is optional.
-        return earthFlattening as double
+        return earthFlattening as float
         raises ValueError If earthFlattening does not exist.
         """
         if not self._earthFlatteningExists:
@@ -710,13 +800,13 @@ class DelayModelFixedParametersRow:
 
     def setEarthFlattening(self, earthFlattening):
         """
-        Set earthFlattening with the specified double value.
-        earthFlattening The double value to which earthFlattening is to be set.
+        Set earthFlattening with the specified float value.
+        earthFlattening The float value to which earthFlattening is to be set.
 
 
         """
 
-        self._earthFlattening = double(earthFlattening)
+        self._earthFlattening = float(earthFlattening)
 
         self._earthFlatteningExists = True
 
@@ -787,7 +877,7 @@ class DelayModelFixedParametersRow:
     def getMoonEarthMassRatio(self):
         """
         Get moonEarthMassRatio, which is optional.
-        return moonEarthMassRatio as double
+        return moonEarthMassRatio as float
         raises ValueError If moonEarthMassRatio does not exist.
         """
         if not self._moonEarthMassRatioExists:
@@ -801,13 +891,13 @@ class DelayModelFixedParametersRow:
 
     def setMoonEarthMassRatio(self, moonEarthMassRatio):
         """
-        Set moonEarthMassRatio with the specified double value.
-        moonEarthMassRatio The double value to which moonEarthMassRatio is to be set.
+        Set moonEarthMassRatio with the specified float value.
+        moonEarthMassRatio The float value to which moonEarthMassRatio is to be set.
 
 
         """
 
-        self._moonEarthMassRatio = double(moonEarthMassRatio)
+        self._moonEarthMassRatio = float(moonEarthMassRatio)
 
         self._moonEarthMassRatioExists = True
 
@@ -877,7 +967,7 @@ class DelayModelFixedParametersRow:
     def getEarthTideLag(self):
         """
         Get earthTideLag, which is optional.
-        return earthTideLag as double
+        return earthTideLag as float
         raises ValueError If earthTideLag does not exist.
         """
         if not self._earthTideLagExists:
@@ -891,13 +981,13 @@ class DelayModelFixedParametersRow:
 
     def setEarthTideLag(self, earthTideLag):
         """
-        Set earthTideLag with the specified double value.
-        earthTideLag The double value to which earthTideLag is to be set.
+        Set earthTideLag with the specified float value.
+        earthTideLag The float value to which earthTideLag is to be set.
 
 
         """
 
-        self._earthTideLag = double(earthTideLag)
+        self._earthTideLag = float(earthTideLag)
 
         self._earthTideLagExists = True
 
@@ -922,7 +1012,7 @@ class DelayModelFixedParametersRow:
     def getEarthGM(self):
         """
         Get earthGM, which is optional.
-        return earthGM as double
+        return earthGM as float
         raises ValueError If earthGM does not exist.
         """
         if not self._earthGMExists:
@@ -936,13 +1026,13 @@ class DelayModelFixedParametersRow:
 
     def setEarthGM(self, earthGM):
         """
-        Set earthGM with the specified double value.
-        earthGM The double value to which earthGM is to be set.
+        Set earthGM with the specified float value.
+        earthGM The float value to which earthGM is to be set.
 
 
         """
 
-        self._earthGM = double(earthGM)
+        self._earthGM = float(earthGM)
 
         self._earthGMExists = True
 
@@ -967,7 +1057,7 @@ class DelayModelFixedParametersRow:
     def getMoonGM(self):
         """
         Get moonGM, which is optional.
-        return moonGM as double
+        return moonGM as float
         raises ValueError If moonGM does not exist.
         """
         if not self._moonGMExists:
@@ -981,13 +1071,13 @@ class DelayModelFixedParametersRow:
 
     def setMoonGM(self, moonGM):
         """
-        Set moonGM with the specified double value.
-        moonGM The double value to which moonGM is to be set.
+        Set moonGM with the specified float value.
+        moonGM The float value to which moonGM is to be set.
 
 
         """
 
-        self._moonGM = double(moonGM)
+        self._moonGM = float(moonGM)
 
         self._moonGMExists = True
 
@@ -1012,7 +1102,7 @@ class DelayModelFixedParametersRow:
     def getSunGM(self):
         """
         Get sunGM, which is optional.
-        return sunGM as double
+        return sunGM as float
         raises ValueError If sunGM does not exist.
         """
         if not self._sunGMExists:
@@ -1026,13 +1116,13 @@ class DelayModelFixedParametersRow:
 
     def setSunGM(self, sunGM):
         """
-        Set sunGM with the specified double value.
-        sunGM The double value to which sunGM is to be set.
+        Set sunGM with the specified float value.
+        sunGM The float value to which sunGM is to be set.
 
 
         """
 
-        self._sunGM = double(sunGM)
+        self._sunGM = float(sunGM)
 
         self._sunGMExists = True
 
@@ -1057,7 +1147,7 @@ class DelayModelFixedParametersRow:
     def getLoveNumberH(self):
         """
         Get loveNumberH, which is optional.
-        return loveNumberH as double
+        return loveNumberH as float
         raises ValueError If loveNumberH does not exist.
         """
         if not self._loveNumberHExists:
@@ -1071,13 +1161,13 @@ class DelayModelFixedParametersRow:
 
     def setLoveNumberH(self, loveNumberH):
         """
-        Set loveNumberH with the specified double value.
-        loveNumberH The double value to which loveNumberH is to be set.
+        Set loveNumberH with the specified float value.
+        loveNumberH The float value to which loveNumberH is to be set.
 
 
         """
 
-        self._loveNumberH = double(loveNumberH)
+        self._loveNumberH = float(loveNumberH)
 
         self._loveNumberHExists = True
 
@@ -1102,7 +1192,7 @@ class DelayModelFixedParametersRow:
     def getLoveNumberL(self):
         """
         Get loveNumberL, which is optional.
-        return loveNumberL as double
+        return loveNumberL as float
         raises ValueError If loveNumberL does not exist.
         """
         if not self._loveNumberLExists:
@@ -1116,13 +1206,13 @@ class DelayModelFixedParametersRow:
 
     def setLoveNumberL(self, loveNumberL):
         """
-        Set loveNumberL with the specified double value.
-        loveNumberL The double value to which loveNumberL is to be set.
+        Set loveNumberL with the specified float value.
+        loveNumberL The float value to which loveNumberL is to be set.
 
 
         """
 
-        self._loveNumberL = double(loveNumberL)
+        self._loveNumberL = float(loveNumberL)
 
         self._loveNumberLExists = True
 
@@ -1193,7 +1283,7 @@ class DelayModelFixedParametersRow:
     def getLightTime1AU(self):
         """
         Get lightTime1AU, which is optional.
-        return lightTime1AU as double
+        return lightTime1AU as float
         raises ValueError If lightTime1AU does not exist.
         """
         if not self._lightTime1AUExists:
@@ -1207,13 +1297,13 @@ class DelayModelFixedParametersRow:
 
     def setLightTime1AU(self, lightTime1AU):
         """
-        Set lightTime1AU with the specified double value.
-        lightTime1AU The double value to which lightTime1AU is to be set.
+        Set lightTime1AU with the specified float value.
+        lightTime1AU The float value to which lightTime1AU is to be set.
 
 
         """
 
-        self._lightTime1AU = double(lightTime1AU)
+        self._lightTime1AU = float(lightTime1AU)
 
         self._lightTime1AUExists = True
 

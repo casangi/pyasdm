@@ -111,3 +111,14 @@ class EntityId:
         return True if the value is an empty string, else False
         """
         return len(self._id) == 0
+
+    @staticmethod
+    def getInstance(stringList):
+        """
+        This mirrors similar functions in the other types.
+        This should not be used to construct an EntityId because of the
+        complexity of that object. It is included here in case
+        the translation from java includes such a use. If used it
+        will raise a RuntimeError.
+        """
+        raise RuntimeError("Entity.getEntityId called, not supported in pyasdm.")

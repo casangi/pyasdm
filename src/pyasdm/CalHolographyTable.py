@@ -32,94 +32,99 @@
 import pyasdm.ASDM
 
 from .CalHolographyRow import CalHolographyRow
-from .Representable import Representable
 
 # All of the extended types are imported
 from pyasdm.types import *
 
 from .exceptions.ConversionException import ConversionException
 from .exceptions.DuplicateKey import DuplicateKey
+from .exceptions.UniquenessViolationException import UniquenessViolationException
 
-# using minidom instead of Parser
 from xml.dom import minidom
 
 import os
 
 
-class CalHolographyTable(Representable):
+class CalHolographyTable:
     """
     The CalHolographyTable class is an Alma table.
 
-     Role
-     Result of holography calibration performed by TelCal.
+    Role
+    Result of holography calibration performed by TelCal.
 
-     Generated from model's revision -1, branch
+    Generated from model's revision -1, branch
 
-     Attributes of CalHolography
+    Attributes of CalHolography
 
-                  Key
+                 Key
 
-    antennaName str the name of the antenna.
 
-    calDataId Tag refers to a unique row in CalData Table.
-
-    calReductionId Tag refers to a unique row in CalReduction Table.
+    antennaName str the name of the antenna. </TD>
 
 
 
-                  Value (Mandatory)
-
-    antennaMake AntennaMake  identifies the antenna make.
-
-    startValidTime ArrayTime  Start time of result validity period
-
-    endValidTime ArrayTime  the end time of result validity period.
-
-    ambientTemperature Temperature  the ambient temperature.
-
-    focusPosition Length []   3  the focus position.
-
-    frequencyRange Frequency []   2  the range of frequencies for which the measurement is valid.
-
-    illuminationTaper double  the amplitude illumination taper.
-
-    numReceptor int  the number of receptors.
-
-    polarizationTypes PolarizationType []   numReceptor  identifies the polarization types (one value per receptor).
-
-    numPanelModes int  the number panel modes fitted.
-
-    receiverBand ReceiverBand  identifies the receiver band.
-
-    beamMapUID EntityRef  refers to the beam map image.
-
-    rawRMS Length  the RMS of the pathlength residuals.
-
-    weightedRMS Length  the weigthted RMS of the pathlength residuals.
-
-    surfaceMapUID EntityRef  refers to the resulting antenna surface map image.
-
-    direction Angle []   2  the direction of the source.
+    calDataId Tag refers to a unique row in CalData Table. </TD>
 
 
 
-                  Value (Optional)
+    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
 
-    numScrew int  the number of screws.
 
-    screwName str []   numScrew  the names of the screws (one value per screw).
 
-    screwMotion Length []   numScrew  the prescribed screw motions (one value per screw).
 
-    screwMotionError Length []   numScrew  the uncertainties on the prescribed screw  motions (one value per screw).
+                 Value (Mandatory)
 
-    gravCorrection bool  indicates if a gravitational correction was applied (true) or not (false).
+    antennaMake  AntennaMake  identifies the antenna make.
 
-    gravOptRange Angle []   2  the range of gravitational optimization.
+    startValidTime  ArrayTime  Start time of result validity period
 
-    tempCorrection bool  indicates if a temperature correction was applied (true) or not (false).
+    endValidTime  ArrayTime  the end time of result validity period.
 
-    tempOptRange Temperature []   2  the range of temperature optimization.
+    ambientTemperature  Temperature  the ambient temperature.
+
+    focusPosition  Length []   3  the focus position.
+
+    frequencyRange  Frequency []   2  the range of frequencies for which the measurement is valid.
+
+    illuminationTaper  float  the amplitude illumination taper.
+
+    numReceptor (numReceptor) int  the number of receptors.
+
+    polarizationTypes  PolarizationType []   numReceptor  identifies the polarization types (one value per receptor).
+
+    numPanelModes (numPanelModes) int  the number panel modes fitted.
+
+    receiverBand  ReceiverBand  identifies the receiver band.
+
+    beamMapUID  EntityRef  refers to the beam map image.
+
+    rawRMS  Length  the RMS of the pathlength residuals.
+
+    weightedRMS  Length  the weigthted RMS of the pathlength residuals.
+
+    surfaceMapUID  EntityRef  refers to the resulting antenna surface map image.
+
+    direction  Angle []   2  the direction of the source.
+
+
+
+                 Value (Optional)
+
+    numScrew (numScrew) int  the number of screws.
+
+    screwName  str []   numScrew  the names of the screws (one value per screw).
+
+    screwMotion  Length []   numScrew  the prescribed screw motions (one value per screw).
+
+    screwMotionError  Length []   numScrew  the uncertainties on the prescribed screw  motions (one value per screw).
+
+    gravCorrection  bool  indicates if a gravitational correction was applied (true) or not (false).
+
+    gravOptRange  Angle []   2  the range of gravitational optimization.
+
+    tempCorrection  bool  indicates if a temperature correction was applied (true) or not (false).
+
+    tempOptRange  Temperature []   2  the range of temperature optimization.
 
 
     """
@@ -132,21 +137,24 @@ class CalHolographyTable(Representable):
     # set to True while the file is loading, just in case
     _loadInProgress = False
 
-    # the name of this table.
+    # The name of this table.
     _tableName = "CalHolography"
 
-    # the list of field names that make up key 'key'.
+    # The list of field names that make up key 'key'.
     _key = ["antennaName", "calDataId", "calReductionId"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # _archiveAsBin not used by python implementation
-    # _archiveAsBin = True  # if True archive binary else archive XML
-    _fileAsBin = True  # if True file binary else file XML
+    # archive as bin not used by python implementation
+    # _archiveAsBin = True # If True archive binary else archive XML
+    _fileAsBin = True  # If True file binary else file XML
 
-    # A list to store the CalHolographyRow instances
+    # A data structure to store the CalHolographyRow s.
+    # In all cases we maintain a private list of CalHolographyRow s.
     _privateRows = []
+
+    # non-temporal ASDM in Java had a private row element here to also hold  CalHolographyRow s. Not needed in python.
 
     # the Entity of this table
     _entity = None
@@ -161,12 +169,15 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on ambientTemperature
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._ambientTemperatureEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on ambientTemperature
     def getAmbientTemperatureEqTolerance(self):
         """
         A getter for the tolerance on ambientTemperature
+        Returns the tolerance as a  Temperature
         """
         return self._ambientTemperatureEqTolerance
 
@@ -177,12 +188,15 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on focusPosition
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._focusPositionEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on focusPosition
     def getFocusPositionEqTolerance(self):
         """
         A getter for the tolerance on focusPosition
+        Returns the tolerance as a  Length
         """
         return self._focusPositionEqTolerance
 
@@ -193,12 +207,15 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on frequencyRange
         """
+        if not isinstance(tolerance, Frequency):
+            print("tolerance must be a  Frequency instance")
+
         self._frequencyRangeEqTolerance = Frequency(tolerance)
 
-    # A getter for the tolerance on frequencyRange
     def getFrequencyRangeEqTolerance(self):
         """
         A getter for the tolerance on frequencyRange
+        Returns the tolerance as a  Frequency
         """
         return self._frequencyRangeEqTolerance
 
@@ -209,12 +226,15 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on rawRMS
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._rawRMSEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on rawRMS
     def getRawRMSEqTolerance(self):
         """
         A getter for the tolerance on rawRMS
+        Returns the tolerance as a  Length
         """
         return self._rawRMSEqTolerance
 
@@ -225,12 +245,15 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on weightedRMS
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._weightedRMSEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on weightedRMS
     def getWeightedRMSEqTolerance(self):
         """
         A getter for the tolerance on weightedRMS
+        Returns the tolerance as a  Length
         """
         return self._weightedRMSEqTolerance
 
@@ -241,12 +264,15 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on direction
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._directionEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on direction
     def getDirectionEqTolerance(self):
         """
         A getter for the tolerance on direction
+        Returns the tolerance as a  Angle
         """
         return self._directionEqTolerance
 
@@ -257,12 +283,15 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on screwMotion
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._screwMotionEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on screwMotion
     def getScrewMotionEqTolerance(self):
         """
         A getter for the tolerance on screwMotion
+        Returns the tolerance as a  Length
         """
         return self._screwMotionEqTolerance
 
@@ -273,12 +302,15 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on screwMotionError
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._screwMotionErrorEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on screwMotionError
     def getScrewMotionErrorEqTolerance(self):
         """
         A getter for the tolerance on screwMotionError
+        Returns the tolerance as a  Length
         """
         return self._screwMotionErrorEqTolerance
 
@@ -289,12 +321,15 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on gravOptRange
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._gravOptRangeEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on gravOptRange
     def getGravOptRangeEqTolerance(self):
         """
         A getter for the tolerance on gravOptRange
+        Returns the tolerance as a  Angle
         """
         return self._gravOptRangeEqTolerance
 
@@ -305,27 +340,29 @@ class CalHolographyTable(Representable):
         """
         A setter for the tolerance on tempOptRange
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._tempOptRangeEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on tempOptRange
     def getTempOptRangeEqTolerance(self):
         """
         A getter for the tolerance on tempOptRange
+        Returns the tolerance as a  Temperature
         """
         return self._tempOptRangeEqTolerance
 
     def getKeyName(self):
         """
-        Return the list of field names that make up "key" as a list of strings
+        Return the list of field names that make up key key
+        as a list of strings.
         """
         return self._key
 
-    @staticmethod
-    def Key(antennaName, calDataId, calReductionId):
+    def Key(self, antennaName, calDataId, calReductionId):
         """
         Returns a string built by concatenating the ascii representation of the
         parameters values suffixed with a "_" character.
-        The parameter values are assumed to be the appropriate type for that parameter.
         """
         result = ""
 
@@ -337,9 +374,12 @@ class CalHolographyTable(Representable):
 
     def __init__(self, container):
         """
-        Create a CalHolographyTable attached to container, which must be a ASDM instance
-        All tables must know the container to which they belong.
+        Create a CalHolographyTable attached to container.
+
+        container must be a ASDM instance
+        All tables must know the container
         """
+
         if not isinstance(container, pyasdm.ASDM):
             raise (
                 ValueError("CalHolographyTable constructor must use a ASDM instance")
@@ -358,6 +398,10 @@ class CalHolographyTable(Representable):
         self._presentInMemory = True
         self._loadInProgress = False
 
+        self._privateRows = []
+
+        self._version = 0
+
     def setNotPresentInMemory(self):
         """
         Set the state to indicate it is not present in memory and needs to be loaded before being used.
@@ -371,11 +415,12 @@ class CalHolographyTable(Representable):
         Check if the table is present in memory. If not, load the table from the file using the
         directory of the container.
         """
-        # NOTE: if setFromFile throws an exception then presentInMemory will remain False
+        # NOTE: if setFromFile raises an exception then presentInMemory will remain False
         # and loadInProgress will remain True, preventing another attempt at loading.
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
+            print("CalHolography is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -384,6 +429,7 @@ class CalHolographyTable(Representable):
     def getContainer(self):
         """
         Return the container to which this table belongs.
+        return a ASDM.
         """
         return self._container
 
@@ -417,27 +463,29 @@ class CalHolographyTable(Representable):
         thisRow = CalHolographyRow(self)
         return thisRow
 
-    def add(self, newrow):
+    def add(self, x):
         """
         Add a row.
-        raises a DuplicateKey if the new row has a key that is already in the table.
-        If newrow is a list then this method is called recursively on each element of that list.
-        In that case None is returned.
-        returns newrow
+        raises a DuplicateKey Thrown if the new row has a key that is already in the table.
+        If x is a list then this method is called recursively on each element of that list.
+        In that case, None is returned.
+        returns the row that was added.
         """
-        if isinstance(newrow, list):
-            for thisrow in newrow:
+
+        if isinstance(x, list):
+            for thisrow in x:
+                # check on correct type of thisrow happens in add
                 self.add(thisrow)
-            # return None for the list case only
+            # return None fo the list case only
             return None
 
         # the single row case
+        if not isinstance(x, CalHolographyRow):
+            raise ValueError("x must be a  CalHolographyRow instance.")
 
         if (
             self.getRowByKey(
-                newrow.getAntennaName(),
-                newrow.getCalDataId(),
-                newrow.getCalReductionId(),
+                x.getAntennaName(), x.getCalDataId(), x.getCalReductionId()
             )
             is not None
         ):
@@ -452,10 +500,9 @@ class CalHolographyTable(Representable):
                 "CalHolography",
             )
 
-        row.add(newrow)
-        privateRows.add(newrow)
-        newrow.isAdded()
-        return newrow
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     def newRow(
         self,
@@ -480,7 +527,9 @@ class CalHolographyTable(Representable):
         direction,
     ):
         """
-        Create a new CalHolographyRow. The new row is not added to this table, but it does know about it.
+        Create a new CalHolographyRow initialized to the specified values.
+
+        The new row is not added to this table, but it does know about it.
         (the autoincrementable attribute, if any, is not in the parameter list)
         """
 
@@ -543,34 +592,37 @@ class CalHolographyTable(Representable):
 
     # ====> Append a row to its table.
 
-    def _checkAndAdd(self, newrow):
+    def checkAndAdd(self, x):
         """
-        A private method to append a row to its table, used by input conversion
-        methods. Not intended for external use.
+        A method to append a row to it's table, used by input conversion methods.
+        Not indended for external use.
 
-        If this table has an autoincrementable attribute then check if newrow verifies the rule of uniqueness and raise an exception if not.
-        Returns newrow.
+        If this table has an autoincrementable attribute then check if
+        x verifies the rule of uniqueness and raise an exception if not.
+
+        Append x to its table.
+        x is the row to be appended.
+        returns x.
         """
 
         if (
             self.getRowByKey(
-                newrow.getAntennaName(),
-                newrow.getCalDataId(),
-                newrow.getCalReductionId(),
+                x.getAntennaName(), x.getCalDataId(), x.getCalReductionId()
             )
             is not None
         ):
             raise DuplicateKey("Duplicate key exception in ", "CalHolographyTable")
 
-        self._privateRows.append(newrow)
-        newrow.isAdded()
-        return newrow
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     # ====> methods returning rows.
 
     def get(self):
         """
-        Get all rows as an array of CalHolographyRow
+        Get all rows.
+        return Alls rows as a list of CalHolographyRow
         """
         return self._privateRows
 
@@ -580,11 +632,11 @@ class CalHolographyTable(Representable):
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
 
-        @param antennaName.
+        param antennaName.
 
-        @param calDataId.
+        param calDataId.
 
-        @param calReductionId.
+        param calReductionId.
 
         """
         for row in self._privateRows:
@@ -598,8 +650,8 @@ class CalHolographyTable(Representable):
             if not row.getCalReductionId().equals(calReductionId):
                 continue
 
-            # this row matches these parameters
             return row
+
         # no match found
         return None
 
@@ -626,7 +678,7 @@ class CalHolographyTable(Representable):
         direction,
     ):
         """
-                Look up the table for a row whose all attributes
+        Look up the table for a row whose all attributes
         are equal to the corresponding parameters of the method.
         return this row if any, None otherwise.
 
@@ -696,6 +748,12 @@ class CalHolographyTable(Representable):
 
         return None
 
+    def getRows(self):
+        """
+        get the rows, synonymous with the get method.
+        """
+        return self.get()
+
     # ====> conversion Methods
 
     def toXML(self):
@@ -703,7 +761,7 @@ class CalHolographyTable(Representable):
         Translate this table to an XML representation conforming
         to the schema defined for CalHolography (CalHolographyTable.xsd).
 
-        Returns a string containing the XML representation.
+        returns a string containing the XML representation.
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
@@ -723,27 +781,28 @@ class CalHolographyTable(Representable):
         Populate this table from the content of a XML document that is required to
         conform to the XML schema defined for a CalHolography (CalHolographyTable.xsd).
         """
+        if not isinstance(xmlstr, str):
+            raise ConversionException("xmlstr must be a string")
+
         xmldom = minidom.parseString(xmlstr)
-        # this should have at least one child node with a name of CalHolographyTable.
+        # this should have at least one child node with a name of "CalHolographyTable".
         if (
             not xmldom.hasChildNodes()
             or xmldom.firstChild.nodeName != "CalHolographyTable"
         ):
             raise ConversionException(
-                "XML is not from a the expected table", "CalHolographyTable."
+                "XML is not from the expected table", "CalHolographyTable"
             )
 
         # ignore everything but the first child node
         tabdom = xmldom.firstChild
 
-        # get the version from the schemaVersion attribute, which must be there
-        if (not tabdom.hasAttributes()) or (
-            tabdom.attributes.getNamedItem("schemaVersion") is None
+        # get the version from the schemaVersion attribute, which is not always there
+        versionStr = "-1"
+        if tabdom.hasAttributes() and (
+            tabdom.attributes.getNamedItem("schemaVersion") is not None
         ):
-            raise ConversionException(
-                "schemaVersion not found in XML", "CalHolographyTable"
-            )
-        versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
+            versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
         # raises a ValueError if not an integer
         try:
             self.setVersion(int(versionStr))
@@ -788,10 +847,10 @@ class CalHolographyTable(Representable):
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
-                    self._checkAndAdd(row)
+                    self.checkAndAdd(row)
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
-                    raise ConversionException(str, "CalHolographyTable") from None
+                    raise ConversionException(str(exc), "CalHolographyTable") from None
 
         if tabEntity is None:
             raise ConversionException("No Entity seen in XML", "CalHolographyTable")
@@ -800,12 +859,306 @@ class CalHolographyTable(Representable):
 
         self.setEntity(tabEntity)
 
+    def MIMEXMLPart(self):
+        print("MIMEXMLPart not implemented for <CalHolographyTable")
+        return
+        # the JAVA code looks like this
+        # String UID = this.getEntity().getEntityId().toString();
+        # String withoutUID = UID.substring(6);
+        # String containerUID = this.getContainer().getEntity().getEntityId().toString();
+        #
+        # StringBuffer sb = new StringBuffer()
+        # .append("<?xml version='1.0'  encoding='ISO-8859-1'?>")
+        # .append("\n")
+        # .append("<CalHolographyTable xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:clholo=\"http://Alma/XASDM/CalHolographyTable\" xsi:schemaLocation=\"http://Alma/XASDM/CalHolographyTable http://almaobservatory.org/XML/XASDM/4/CalHolographyTable.xsd\" schemaVersion=\"4\" schemaRevision=\"-1\">\n")
+        # .append("<Entity entityId='")
+        # .append(UID)
+        # .append("' entityIdEncrypted='na' entityTypeName='CalHolographyTable' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<ContainerEntity entityId='")
+        # .append(containerUID)
+        # .append("' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<BulkStoreRef file_id='")
+        # .append(withoutUID)
+        # .append("' byteOrder='Big_Endian' />\n")
+        # .append("<Attributes>\n")
+
+        # .append("<antennaName/>\n")
+        # .append("<calDataId/>\n")
+        # .append("<calReductionId/>\n")
+        # .append("<antennaMake/>\n")
+        # .append("<startValidTime/>\n")
+        # .append("<endValidTime/>\n")
+        # .append("<ambientTemperature/>\n")
+        # .append("<focusPosition/>\n")
+        # .append("<frequencyRange/>\n")
+        # .append("<illuminationTaper/>\n")
+        # .append("<numReceptor/>\n")
+        # .append("<polarizationTypes/>\n")
+        # .append("<numPanelModes/>\n")
+        # .append("<receiverBand/>\n")
+        # .append("<beamMapUID/>\n")
+        # .append("<rawRMS/>\n")
+        # .append("<weightedRMS/>\n")
+        # .append("<surfaceMapUID/>\n")
+        # .append("<direction/>\n")
+
+        # .append("<numScrew/>\n")
+        # .append("<screwName/>\n")
+        # .append("<screwMotion/>\n")
+        # .append("<screwMotionError/>\n")
+        # .append("<gravCorrection/>\n")
+        # .append("<gravOptRange/>\n")
+        # .append("<tempCorrection/>\n")
+        # .append("<tempOptRange/>\n")
+        # .append("</Attributes>\n")
+        # .append("</CalHolographyTable>\n");
+        # return sb.toString();
+
+    def toMIME(self):
+        """
+        Serialize this into a stream of bytes and encapsulates that stream into a MIME message.
+        returns a string containing the MIME message.
+        """
+        print("toMIME not yet implemented for CalHolography")
+        return
+        # the Java code looks like this - returns a Byte array
+        # ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        # DataOutputStream dos = new DataOutputStream(bos);
+
+        # String UID = this.getEntity().getEntityId().toString();
+        # String execBlockUID = this.getContainer().getEntity().getEntityId().toString();
+        # try {
+        #     // The XML Header part.
+        #     dos.writeBytes("MIME-Version: 1.0");
+        #     dos.writeBytes("\n");
+        #    dos
+        #     .writeBytes("Content-Type: Multipart/Related; boundary='MIME_boundary'; type='text/xml'; start= '<header.xml>'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Description: Correlator");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("alma-uid:" + UID);
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part header.
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: text/xml; charset='ISO-8859-1'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Transfer-Encoding: 8bit");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <header.xml>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part content.
+        #    dos.writeBytes(MIMEXMLPart());
+        #    // have updated their code to the new XML header.
+        #    //
+        #    //dos.writeBytes(oldMIMEXMLPart());
+        #
+        #    // The MIME binary part header
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: binary/octet-stream");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <content.bin>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The binary part.
+        #    entity.toBin(dos);
+        #    container.getEntity().toBin(dos);
+        #    dos.writeInt(size());
+
+        #    for (CalHolographyRow row: privateRows) row.toBin(dos);
+
+        #    // The closing MIME boundary
+        #    dos.writeBytes("\n--MIME_boundary--");
+        #    dos.writeBytes("\n");
+
+        # } catch (IOException e) {
+        #    throw new ConversionException(
+        #            "Error while reading binary data , the message was "
+        #            + e.getMessage(), "CalHolography");
+        # }
+
+        # return bos.toByteArray();
+
+    # Java code looks like this
+    # static private boolean binaryPartFound(DataInputStream dis, String s, int pos) throws IOException {
+    #    int posl = pos;
+    #    int count = 0;
+    #    dis.mark(1000000);
+    #    try {
+    #        while (dis.readByte() != s.charAt(posl)){
+    #            count ++;
+    #        }
+    #    }
+    #    catch (EOFException e) {
+    #        return false;
+    #    }
+    #
+    #    if (posl == (s.length() - 1)) return true;
+    #
+    #    if (pos == 0) {
+    #        posl++;
+    #        return binaryPartFound(dis, s, posl);
+    #    }
+    #    else {
+    #        if (count > 0) { dis.reset();  return binaryPartFound(dis, s, 0) ; }
+    #        else {
+    #            posl++;
+    #            return binaryPartFound(dis, s, posl);
+    #        }
+    #    }
+    # }
+
+    # private String xmlHeaderPart (String s) throws ConversionException {
+    #    String xmlPartMIMEHeader = "Content-ID: <header.xml>\n\n";
+    #    String binPartMIMEHeader = "--MIME_boundary\nContent-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    #
+    #    // Detect the XML header.
+    #    int loc0 = s.indexOf(xmlPartMIMEHeader);
+    #    if (loc0 == -1 ) throw new ConversionException("Failed to detect the beginning of the XML header", "CalHolography");
+    #
+    #    loc0 += xmlPartMIMEHeader.length();
+    #
+    #    // Look for the string announcing the binary part.
+    #    int loc1 = s.indexOf(binPartMIMEHeader, loc0);
+    #    if (loc1 == -1) throw new ConversionException("Failed to detect the beginning of the binary part", "CalHolography");
+    #
+    #    return s.substring(loc0, loc1).trim();
+    # }
+
+    # setFromMIME(byte[]   data) throws ConversionException {
+    # *
+    # Extracts the binary part of a MIME message and deserialize its content
+    # to fill this with the result of the deserialization.
+    # @param data the string containing the MIME message.
+    # @throws ConversionException
+    # /
+    # ByteOrder byteOrder = null;
+    # //
+    # // Look for the part containing the XML header.
+    # // Very empirically we assume that the first MIME part , the one which contains the
+    # // XML header, always fits in the first 1000 bytes of the MIME message !!
+    # //
+    # String header = xmlHeaderPart(new String(data, 0, Math.min(10000, data.length)));
+    # org.jdom.Document document = null;
+    # SAXBuilder sxb = new SAXBuilder();
+    #
+    # // Firstly build a document out of the XML.
+    # try {
+    #    document = sxb.build(new ByteArrayInputStream(header.getBytes()));
+    # }
+    # catch (Exception e) {
+    #     throw new ConversionException(e.getMessage(), "CalHolography");
+    # }
+    #
+    # //
+    # // Let's define a default order for the sequence of attributes.
+    # //
+    # ArrayList<String> attributesSeq = new ArrayList<String> ();
+
+    #     attributesSeq.add("antennaName"); attributesSeq.add("calDataId"); attributesSeq.add("calReductionId"); attributesSeq.add("antennaMake"); attributesSeq.add("startValidTime"); attributesSeq.add("endValidTime"); attributesSeq.add("ambientTemperature"); attributesSeq.add("focusPosition"); attributesSeq.add("frequencyRange"); attributesSeq.add("illuminationTaper"); attributesSeq.add("numReceptor"); attributesSeq.add("polarizationTypes"); attributesSeq.add("numPanelModes"); attributesSeq.add("receiverBand"); attributesSeq.add("beamMapUID"); attributesSeq.add("rawRMS"); attributesSeq.add("weightedRMS"); attributesSeq.add("surfaceMapUID"); attributesSeq.add("direction");
+    #     attributesSeq.add("numScrew");  attributesSeq.add("screwName");  attributesSeq.add("screwMotion");  attributesSeq.add("screwMotionError");  attributesSeq.add("gravCorrection");  attributesSeq.add("gravOptRange");  attributesSeq.add("tempCorrection");  attributesSeq.add("tempOptRange");
+
+    # XPath xpath = null;
+    # //
+    # // And then look for the possible XML contents.
+    # try {
+    #     // Is it an "<ASDMBinaryTable ...." document (old) ?
+    #    if (XPath.newInstance("/ASDMBinaryTable")
+    #            .selectSingleNode(document) != null)
+    #        byteOrder = ByteOrder.BIG_ENDIAN;
+    #    else {
+    #        // Then it must be a "<CalHolographyTable ...." document
+    #        // With a BulkStoreRef child element....
+    #        XPath xpa = XPath.newInstance("/CalHolographyTable/BulkStoreRef/@byteOrder");
+    #        Object node = xpa.selectSingleNode(document.getRootElement());
+    #        if (node == null)
+    #            throw new ConversionException("No element found for the XPath expression '/CalHolographyTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalHolography");
+    #
+    #        // Yes ? then it must have a "BulkStoreRef" element with a
+    #        // "byteOrder" attribute.
+    #        String bo = xpa.valueOf(document.getRootElement());
+    #        if (bo.equals("Little_Endian"))
+    #            byteOrder = ByteOrder.LITTLE_ENDIAN;
+    #        else if (bo.equals("Big_Endian"))
+    #            byteOrder = ByteOrder.BIG_ENDIAN;
+    #        else
+    #            throw new ConversionException("No valid value retrieved for the node '/CalHolographyTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalHolography");
+    #
+    #        // And also it must have an Attributes element with children.
+    #        xpa = XPath.newInstance("/CalHolographyTable/Attributes#");
+    #        List nodes = xpa.selectNodes(document.getRootElement());
+    #        if (nodes==null || nodes.size()==0)
+    #            throw new ConversionException("No element found for the XPath expression '/CalHolographyTable/Attributes#'. Invalid XML header '"+header+"'.", "CalHolography");
+    #
+    #        Iterator iter = nodes.iterator();
+    #        attributesSeq.clear();
+    #        int i = 0;
+    #        while (iter.hasNext()){
+    #            attributesSeq.add(((Element) iter.next()).getName());
+    #            i += 1;
+    #        }
+    #    }
+    # } catch (Exception e) {
+    #    throw new ConversionException(e.getMessage(), "CalHolography");
+    # }
+
+    # //
+    # // Now that we know what is the byte order of the binary data
+    # // Let's extract them from the second MIME part and parse them
+    # //
+    # ByteArrayInputStream bis = new ByteArrayInputStream(data);
+    # DataInputStream dis = new DataInputStream(bis);
+    # BODataInputStream bodis = new BODataInputStream(dis, byteOrder);
+    #
+    # String terminator = "Content-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    # entity = null;
+    # try {
+    #    if (binaryPartFound(dis, terminator, 0) == false) {
+    #        throw new ConversionException ("Failed to detect the beginning of the binary part", "CalHolography");
+    #    }
+    #
+    #    entity = Entity.fromBin(bodis);
+    #
+    #    Entity containerEntity = Entity.fromBin(bodis);
+    #
+    #    int numRows = bodis.readInt();
+    #    for (int i = 0; i < numRows; i++) {
+    #    this.checkAndAdd(CalHolographyRow.fromBin(bodis, this, attributesSeq.toArray(new String[0])));
+    #    }
+    # } catch (TagFormatException e) {
+    #    throw new ConversionException( "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalHolography");
+    # }catch (IOException e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalHolography");
+    # } catch (DuplicateKey e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalHolography");
+    # }catch (Exception e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalHolography");
+    # }
+    # }
+
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a CalHolographyTable as those produced by the toFile method.
+        Reads and parses a file containing a representation of a CalHolographyTable as those produced  by the toFile method.
         This table is populated with the result of the parsing.
-        The directory value is the name of the directory containing the file to be read and parsed.
+        param directory The name of the directory containing the file te be read and parsed.
+        raises ConversionException If any error occurs while reading the
+        files in the directory or parsing them.
         """
+        if not isinstance(directory, str):
+            print("directory must be a string")
 
         # directory must exist as a directory
         if not os.path.isdir(directory):
@@ -817,46 +1170,101 @@ class CalHolographyTable(Representable):
         if os.path.exists(os.path.join(directory, "CalHolography.xml")):
             self.setFromXMLFile(directory)
         elif os.path.exists(os.path.join(directory, "CalHolography.bin")):
-            setFromMIMEFile(directory)
+            self.setFromMIMEFile(directory)
         else:
             raise ConversionException(
                 "No file found for the CalHolography table", "CalHolographyTable"
             )
 
     def setFromMIMEFile(self, directory):
-        print("setFromMIMEFile not implemented yet")
+        """
+        Set this table from a MIME file.
+        Used internally by setFromFile. Not intented for external use.
+        """
+        print("setFromMIME file not yet implemented for CalHolographyTable")
+        return
+
+        # java code looks like this
+        # File file = new File(directory+"/CalHolography.bin");
+        #
+        # byte[] bytes = null;
+        #
+        # try {
+        #     InputStream is = new FileInputStream(file);
+        #     long length = file.length();
+        #     if (length > Integer.MAX_VALUE)
+        #         throw new ConversionException ("File " + file.getName() + " is too large", "CalHolography");
+        #
+        #    bytes = new byte[(int)length];
+        #    int offset = 0;
+        #    int numRead = 0;
+        #
+        #   while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+        #       offset += numRead;
+        #   }
+        #
+        #    if (offset < bytes.length) {
+        #        throw new ConversionException("Could not completely read file "+file.getName(), "CalHolography");
+        #    }
+        #    is.close();
+        # }
+        # catch (IOException e) {
+        #    throw new ConversionException("Error while reading "+file.getName()+". The message was " + e.getMessage(),
+        #    "CalHolography");
+        # }
+
+        # setFromMIME(bytes);
+        # // Changed 24 Sep, 2015 - The export policy cannot be changed by what has been observed at import time. M Caillat
+        # // archiveAsBin = true;
+        # // fileAsBin = true;
+
+    # }
 
     def setFromXMLFile(self, directory):
         """
         This is the function used by setFromFile when the file is an XML file
+        Not intended for external use.
         """
 
         # setFromFile has already established that this exists
         # read the entire file into a string
         xmlstr = None
-        with open(os.path.join(directory, "CalHolography.xml")) as f:
-            xmlstr = f.read()
-
-        if xmlstr is None:
-            raise ConversionException(
-                "CalHolography.xml is empty", "CalHolographyTable"
-            )
+        try:
+            with open(os.path.join(directory, "CalHolography.xml")) as f:
+                xmlstr = f.read()
+        except Exception as exc:
+            # reraise it as a ConversionException
+            raise ConversionException(str(exc), "CalHolographyTable") from None
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
             self.setFromMIMEFile(directory)
         else:
             self.fromXML(xmlstr)
+            # TBD: when fileAsBin is implemented this should be removed
+            # this will at least preserve the case where fileAsBin was changed for
+            # a table such that the archive has it in XML but the current rule is to
+            # write it out as binary
+            if self._fileAsBin:
+                print(
+                    "CalHolography found as XML but it should be written as binary, which is not yet implemetned. Setting to write as XML to preserve this content."
+                )
+                self._fileAsBin = False
 
     def toFile(self, directory):
         """
         Stores a representation (binary or XML) of this table into a file.
 
-        Depending on the boolean value of _fileAsBin, a binary serialization
-        of this (_fileAsBin=True) will be saved in a file 'CalHolography.bin' or an
-        XML representation (_fileAsBin==False) will be saved in a file 'CalHolography.xml'.
+        Depending on the boolean value of its _fileAsBin data member a binary serialization
+        of this (_fileAsBin==True) will be saved in a file "CalHolography.bin" or
+        an XML representation (_fileAsBin==False) will be saved in a file "CalHolography.xml".
         The file is always written in a directory whose name is passed as a parameter.
+        param directory The name of directory where the file containing the table's
+        representation will be saved.
+        raises ConversionException for any errors while writing that file.
         """
+        if not isinstance(directory, str):
+            raise ConversionException("directory must be a string")
 
         if os.path.exists(directory) and not os.path.isdir(directory):
             raise ConversionException(
@@ -865,21 +1273,86 @@ class CalHolographyTable(Representable):
                 "CalHolographyTable",
             )
 
-        if not os.path.exists(directory):
-            # assume it can be created there, if not this will raise a FileNotFound exception here
-            os.mkdir(directory)
+        # if not let's create it.
+        try:
+            if not os.path.exists(directory):
+                # if it can't be created a FileNotFound exception is the most likely result
+                os.mkdir(directory)
+        except Exception as exc:
+            # reraise any exception as a ConversionException
+            raise ConversionException(
+                "Could not create directory "
+                + directory
+                + " exception caught "
+                + str(exc),
+                "CalHolographyTable",
+            ) from None
 
         if self._fileAsBin:
             print("fileAsBin not yet implemented for CalHolography")
+            # the Java code looks like this
+            #
+            # The table is exported in a binary format.
+            # (actually a short XML file + a possibly long MIME file)
+            #
+            # File xmlFile = new File(directory+"/CalHolography.xml");
+            # if (xmlFile.exists())
+            #    if (!xmlFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+xmlFile.toString()+"'", "CalHolography");
+            #
+            # File binFile = new File(directory+"/CalHolography.bin");
+            # if (binFile.exists())
+            #    if (!binFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+binFile.toString()+"'", "CalHolography");
+            #
+            # try {
+            #    BufferedWriter out = new BufferedWriter(new FileWriter(xmlFile));
+            #    out.write(MIMEXMLPart());
+            #    out.close();
+            #
+
+            #  OutputStream osBin = new FileOutputStream(binFile);
+            #  osBin.write(toMIME());
+            #  osBin.close();
+
+        # }
+        # catch (FileNotFoundException e) {
+        #     throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalHolography");
+        # }
+        # catch (IOException e) {
+        #      throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalHolography");
+        # }
+        # }
         else:
-            # exported as an XML file.
+            # The table is totally exported in a XML file.
             filePath = os.path.join(directory, "CalHolography.xml")
             if os.path.exists(filePath):
-                # try to delete it, this will raise an exception if the user does not have permission to do that
-                os.remove(filePath)
-            with open(filePath, "w") as f:
-                f.write(self.toXML())
-                f.close()
+                try:
+                    # try to delete it, this will raise an exception if the user does not have permission to do that
+                    os.remove(filePath)
+                except Exception as exc:
+                    # reraise it as a ConversionException
+                    raise ConversionException(
+                        "Could not remove existing "
+                        + filePath
+                        + " exception caught "
+                        + str(exc),
+                        "CalHolographyTable",
+                    ) from None
+
+            try:
+                with open(filePath, "w") as f:
+                    f.write(self.toXML())
+                    f.close()
+
+                    # Java code uses a BufferedWriter to capture the output of toXML to the file
+            except Exception as exc:
+                # reraise it as a ConversionException
+                raise ConversionException(
+                    "Problem while writing the XML representation, the message was : "
+                    + str(exc),
+                    "CalHolography",
+                ) from None
 
     def getEntity(self):
         """

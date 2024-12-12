@@ -87,24 +87,71 @@ class CalDelayRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._antennaName = None
+
         self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._basebandName = BasebandName.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._receiverBand = ReceiverBand.from_int(0)
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        self._startValidTime = ArrayTime()
 
-        # this is a list of ReceiverSideband Enumeration, start off with it being empty
-        self._sidebands = []
+        self._endValidTime = ArrayTime()
+
+        self._refAntennaName = None
+
+        self._numReceptor = 0
+
+        self._delayError = []  # this is a list of float []
+
+        self._delayOffset = []  # this is a list of float []
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._reducedChiSquared = []  # this is a list of float []
+
+        self._appliedDelay = []  # this is a list of float []
+
+        self._crossDelayOffsetExists = False
+
+        self._crossDelayOffset = None
+
+        self._crossDelayOffsetErrorExists = False
+
+        self._crossDelayOffsetError = None
+
+        self._numSidebandExists = False
+
+        self._numSideband = 0
+
+        self._refFreqExists = False
+
+        self._refFreq = []  # this is a list of Frequency []
+
+        self._refFreqPhaseExists = False
+
+        self._refFreqPhase = []  # this is a list of Angle []
+
+        self._sidebandsExists = False
+
+        self._sidebands = []  # this is a list of ReceiverSideband []
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalDelayRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -320,85 +367,95 @@ class CalDelayRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data
+            atmPhaseCorrectionNode.firstChild.data.strip()
         )
 
         basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data
+            basebandNameNode.firstChild.data.strip()
         )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
 
-        self._refAntennaName = str(refAntennaNameNode.firstChild.data)
+        self._refAntennaName = str(refAntennaNameNode.firstChild.data.strip())
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         delayErrorNode = rowdom.getElementsByTagName("delayError")[0]
 
-        delayErrorStr = delayErrorNode.firstChild.data
-        self._delayError = Parser.stringListToLists(delayErrorStr, double, "CalDelay")
+        delayErrorStr = delayErrorNode.firstChild.data.strip()
+
+        self._delayError = Parser.stringListToLists(
+            delayErrorStr, float, "CalDelay", False
+        )
 
         delayOffsetNode = rowdom.getElementsByTagName("delayOffset")[0]
 
-        delayOffsetStr = delayOffsetNode.firstChild.data
-        self._delayOffset = Parser.stringListToLists(delayOffsetStr, double, "CalDelay")
+        delayOffsetStr = delayOffsetNode.firstChild.data.strip()
+
+        self._delayOffset = Parser.stringListToLists(
+            delayOffsetStr, float, "CalDelay", False
+        )
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "CalDelay"
+            polarizationTypesStr, PolarizationType, "CalDelay", False
         )
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data
+        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+
         self._reducedChiSquared = Parser.stringListToLists(
-            reducedChiSquaredStr, double, "CalDelay"
+            reducedChiSquaredStr, float, "CalDelay", False
         )
 
         appliedDelayNode = rowdom.getElementsByTagName("appliedDelay")[0]
 
-        appliedDelayStr = appliedDelayNode.firstChild.data
+        appliedDelayStr = appliedDelayNode.firstChild.data.strip()
+
         self._appliedDelay = Parser.stringListToLists(
-            appliedDelayStr, double, "CalDelay"
+            appliedDelayStr, float, "CalDelay", False
         )
 
         crossDelayOffsetNode = rowdom.getElementsByTagName("crossDelayOffset")
         if len(crossDelayOffsetNode) > 0:
 
-            self._crossDelayOffset = double(crossDelayOffsetNode[0].firstChild.data)
+            self._crossDelayOffset = float(
+                crossDelayOffsetNode[0].firstChild.data.strip()
+            )
 
             self._crossDelayOffsetExists = True
 
         crossDelayOffsetErrorNode = rowdom.getElementsByTagName("crossDelayOffsetError")
         if len(crossDelayOffsetErrorNode) > 0:
 
-            self._crossDelayOffsetError = double(
-                crossDelayOffsetErrorNode[0].firstChild.data
+            self._crossDelayOffsetError = float(
+                crossDelayOffsetErrorNode[0].firstChild.data.strip()
             )
 
             self._crossDelayOffsetErrorExists = True
@@ -406,24 +463,28 @@ class CalDelayRow:
         numSidebandNode = rowdom.getElementsByTagName("numSideband")
         if len(numSidebandNode) > 0:
 
-            self._numSideband = int(numSidebandNode[0].firstChild.data)
+            self._numSideband = int(numSidebandNode[0].firstChild.data.strip())
 
             self._numSidebandExists = True
 
         refFreqNode = rowdom.getElementsByTagName("refFreq")
         if len(refFreqNode) > 0:
 
-            refFreqStr = refFreqNode[0].firstChild.data
-            self._refFreq = Parser.stringListToLists(refFreqStr, Frequency, "CalDelay")
+            refFreqStr = refFreqNode[0].firstChild.data.strip()
+
+            self._refFreq = Parser.stringListToLists(
+                refFreqStr, Frequency, "CalDelay", True
+            )
 
             self._refFreqExists = True
 
         refFreqPhaseNode = rowdom.getElementsByTagName("refFreqPhase")
         if len(refFreqPhaseNode) > 0:
 
-            refFreqPhaseStr = refFreqPhaseNode[0].firstChild.data
+            refFreqPhaseStr = refFreqPhaseNode[0].firstChild.data.strip()
+
             self._refFreqPhase = Parser.stringListToLists(
-                refFreqPhaseStr, Angle, "CalDelay"
+                refFreqPhaseStr, Angle, "CalDelay", True
             )
 
             self._refFreqPhaseExists = True
@@ -431,9 +492,9 @@ class CalDelayRow:
         sidebandsNode = rowdom.getElementsByTagName("sidebands")
         if len(sidebandsNode) > 0:
 
-            sidebandsStr = sidebandsNode[0].firstChild.data
+            sidebandsStr = sidebandsNode[0].firstChild.data.strip()
             self._sidebands = Parser.stringListToLists(
-                sidebandsStr, ReceiverSideband, "CalDelay"
+                sidebandsStr, ReceiverSideband, "CalDelay", False
             )
 
             self._sidebandsExists = True
@@ -442,11 +503,11 @@ class CalDelayRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -661,20 +722,20 @@ class CalDelayRow:
 
     # ===> Attribute delayError
 
-    _delayError = None  # this is a 1D list of double
+    _delayError = None  # this is a 1D list of float
 
     def getDelayError(self):
         """
         Get delayError.
-        return delayError as double []
+        return delayError as float []
         """
 
         return copy.deepcopy(self._delayError)
 
     def setDelayError(self, delayError):
         """
-        Set delayError with the specified double []  value.
-        delayError The double []  value to which delayError is to be set.
+        Set delayError with the specified float []  value.
+        delayError The float []  value to which delayError is to be set.
 
 
         """
@@ -691,11 +752,11 @@ class CalDelayRow:
             if not shapeOK:
                 raise ValueError("shape of delayError is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(delayError, double):
+            if not Parser.checkListType(delayError, float):
                 raise ValueError(
-                    "type of the first value in delayError is not double as expected"
+                    "type of the first value in delayError is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._delayError = copy.deepcopy(delayError)
@@ -704,20 +765,20 @@ class CalDelayRow:
 
     # ===> Attribute delayOffset
 
-    _delayOffset = None  # this is a 1D list of double
+    _delayOffset = None  # this is a 1D list of float
 
     def getDelayOffset(self):
         """
         Get delayOffset.
-        return delayOffset as double []
+        return delayOffset as float []
         """
 
         return copy.deepcopy(self._delayOffset)
 
     def setDelayOffset(self, delayOffset):
         """
-        Set delayOffset with the specified double []  value.
-        delayOffset The double []  value to which delayOffset is to be set.
+        Set delayOffset with the specified float []  value.
+        delayOffset The float []  value to which delayOffset is to be set.
 
 
         """
@@ -734,11 +795,11 @@ class CalDelayRow:
             if not shapeOK:
                 raise ValueError("shape of delayOffset is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(delayOffset, double):
+            if not Parser.checkListType(delayOffset, float):
                 raise ValueError(
-                    "type of the first value in delayOffset is not double as expected"
+                    "type of the first value in delayOffset is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._delayOffset = copy.deepcopy(delayOffset)
@@ -790,20 +851,20 @@ class CalDelayRow:
 
     # ===> Attribute reducedChiSquared
 
-    _reducedChiSquared = None  # this is a 1D list of double
+    _reducedChiSquared = None  # this is a 1D list of float
 
     def getReducedChiSquared(self):
         """
         Get reducedChiSquared.
-        return reducedChiSquared as double []
+        return reducedChiSquared as float []
         """
 
         return copy.deepcopy(self._reducedChiSquared)
 
     def setReducedChiSquared(self, reducedChiSquared):
         """
-        Set reducedChiSquared with the specified double []  value.
-        reducedChiSquared The double []  value to which reducedChiSquared is to be set.
+        Set reducedChiSquared with the specified float []  value.
+        reducedChiSquared The float []  value to which reducedChiSquared is to be set.
 
 
         """
@@ -820,11 +881,11 @@ class CalDelayRow:
             if not shapeOK:
                 raise ValueError("shape of reducedChiSquared is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, double):
+            if not Parser.checkListType(reducedChiSquared, float):
                 raise ValueError(
-                    "type of the first value in reducedChiSquared is not double as expected"
+                    "type of the first value in reducedChiSquared is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._reducedChiSquared = copy.deepcopy(reducedChiSquared)
@@ -833,20 +894,20 @@ class CalDelayRow:
 
     # ===> Attribute appliedDelay
 
-    _appliedDelay = None  # this is a 1D list of double
+    _appliedDelay = None  # this is a 1D list of float
 
     def getAppliedDelay(self):
         """
         Get appliedDelay.
-        return appliedDelay as double []
+        return appliedDelay as float []
         """
 
         return copy.deepcopy(self._appliedDelay)
 
     def setAppliedDelay(self, appliedDelay):
         """
-        Set appliedDelay with the specified double []  value.
-        appliedDelay The double []  value to which appliedDelay is to be set.
+        Set appliedDelay with the specified float []  value.
+        appliedDelay The float []  value to which appliedDelay is to be set.
 
 
         """
@@ -863,11 +924,11 @@ class CalDelayRow:
             if not shapeOK:
                 raise ValueError("shape of appliedDelay is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(appliedDelay, double):
+            if not Parser.checkListType(appliedDelay, float):
                 raise ValueError(
-                    "type of the first value in appliedDelay is not double as expected"
+                    "type of the first value in appliedDelay is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._appliedDelay = copy.deepcopy(appliedDelay)
@@ -889,7 +950,7 @@ class CalDelayRow:
     def getCrossDelayOffset(self):
         """
         Get crossDelayOffset, which is optional.
-        return crossDelayOffset as double
+        return crossDelayOffset as float
         raises ValueError If crossDelayOffset does not exist.
         """
         if not self._crossDelayOffsetExists:
@@ -903,13 +964,13 @@ class CalDelayRow:
 
     def setCrossDelayOffset(self, crossDelayOffset):
         """
-        Set crossDelayOffset with the specified double value.
-        crossDelayOffset The double value to which crossDelayOffset is to be set.
+        Set crossDelayOffset with the specified float value.
+        crossDelayOffset The float value to which crossDelayOffset is to be set.
 
 
         """
 
-        self._crossDelayOffset = double(crossDelayOffset)
+        self._crossDelayOffset = float(crossDelayOffset)
 
         self._crossDelayOffsetExists = True
 
@@ -934,7 +995,7 @@ class CalDelayRow:
     def getCrossDelayOffsetError(self):
         """
         Get crossDelayOffsetError, which is optional.
-        return crossDelayOffsetError as double
+        return crossDelayOffsetError as float
         raises ValueError If crossDelayOffsetError does not exist.
         """
         if not self._crossDelayOffsetErrorExists:
@@ -948,13 +1009,13 @@ class CalDelayRow:
 
     def setCrossDelayOffsetError(self, crossDelayOffsetError):
         """
-        Set crossDelayOffsetError with the specified double value.
-        crossDelayOffsetError The double value to which crossDelayOffsetError is to be set.
+        Set crossDelayOffsetError with the specified float value.
+        crossDelayOffsetError The float value to which crossDelayOffsetError is to be set.
 
 
         """
 
-        self._crossDelayOffsetError = double(crossDelayOffsetError)
+        self._crossDelayOffsetError = float(crossDelayOffsetError)
 
         self._crossDelayOffsetErrorExists = True
 
@@ -1362,7 +1423,7 @@ class CalDelayRow:
             return False
         for indx in range(len(delayError)):
 
-            # delayError is a list of double, compare using == operator.
+            # delayError is a list of float, compare using == operator.
             if not (self._delayError[indx] == delayError[indx]):
                 return False
 
@@ -1372,7 +1433,7 @@ class CalDelayRow:
             return False
         for indx in range(len(delayOffset)):
 
-            # delayOffset is a list of double, compare using == operator.
+            # delayOffset is a list of float, compare using == operator.
             if not (self._delayOffset[indx] == delayOffset[indx]):
                 return False
 
@@ -1392,7 +1453,7 @@ class CalDelayRow:
             return False
         for indx in range(len(reducedChiSquared)):
 
-            # reducedChiSquared is a list of double, compare using == operator.
+            # reducedChiSquared is a list of float, compare using == operator.
             if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
                 return False
 
@@ -1402,7 +1463,7 @@ class CalDelayRow:
             return False
         for indx in range(len(appliedDelay)):
 
-            # appliedDelay is a list of double, compare using == operator.
+            # appliedDelay is a list of float, compare using == operator.
             if not (self._appliedDelay[indx] == appliedDelay[indx]):
                 return False
 
@@ -1461,7 +1522,7 @@ class CalDelayRow:
             return False
         for indx in range(len(delayError)):
 
-            # delayError is a list of double, compare using == operator.
+            # delayError is a list of float, compare using == operator.
             if not (self._delayError[indx] == delayError[indx]):
                 return False
 
@@ -1471,7 +1532,7 @@ class CalDelayRow:
             return False
         for indx in range(len(delayOffset)):
 
-            # delayOffset is a list of double, compare using == operator.
+            # delayOffset is a list of float, compare using == operator.
             if not (self._delayOffset[indx] == delayOffset[indx]):
                 return False
 
@@ -1491,7 +1552,7 @@ class CalDelayRow:
             return False
         for indx in range(len(reducedChiSquared)):
 
-            # reducedChiSquared is a list of double, compare using == operator.
+            # reducedChiSquared is a list of float, compare using == operator.
             if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
                 return False
 
@@ -1501,7 +1562,7 @@ class CalDelayRow:
             return False
         for indx in range(len(appliedDelay)):
 
-            # appliedDelay is a list of double, compare using == operator.
+            # appliedDelay is a list of float, compare using == operator.
             if not (self._appliedDelay[indx] == appliedDelay[indx]):
                 return False
 

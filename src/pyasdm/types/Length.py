@@ -52,7 +52,7 @@ class Length:
         Return the canonical unit associated with this Length, meter.
         return The unit associated with this Length.
         """
-        return METER
+        return Length.METER
 
     @staticmethod
     def sum(l1, l2):
@@ -82,6 +82,7 @@ class Length:
 
         return Length(l1.length - l2.length)
 
+    @staticmethod
     def multiply(l, factor):
         """
         Return a new Length that is the product of a specified
@@ -92,10 +93,11 @@ class Length:
         some specified factor, l * factor.
         """
         if not isinstance(l, Length):
-            raise ValueError("l be a Length")
+            raise ValueError("l must be a Length")
 
         return Length(l.length * factor)
 
+    @staticmethod
     def divide(l, factor):
         """
         Return a new Length that is a specified length divided by a
@@ -109,6 +111,26 @@ class Length:
             raise ValueError("l be a Length")
 
         return Length(l.length / factor)
+
+    @staticmethod
+    def getInstance(stringList):
+        """
+        Retrieve a value from a list of strings and convert that to a Length
+
+        This is used when parsing Length lists from an XML representation to
+        eventually construct a list of Length instances. The string values
+        are float representation of a length in meters
+
+        Returns a tuple of (Length, stringList) where Length is the new Length
+        created by this call and stringList is the remaining, unused, part of
+        stringList after removing the first element.
+        """
+        if not isinstance(stringList, list):
+            raise ValueError("stringList is not a list")
+
+        # this will raise an error if there aren't any elements on stringList
+        floatVal = float(stringList[0])
+        return (Length(floatVal), stringList[1:])
 
     # The length in meters.
     _length = 0.0
@@ -129,7 +151,6 @@ class Length:
             if units is not None:
                 raise ValueError("units can not be specied when value is a Length")
             self._length = value._length
-
         else:
             self.set(value, units)
 
@@ -152,18 +173,18 @@ class Length:
 
     def set(self, value, units=None):
         """
-        Set the value of this length to the specified string in the specified units.
+        Set the value of this length to the given value in the specified units.
         Any value is valid so long as it can be converted into a float using float(value)
         (including a parseable string).
-        The units default to METER.
-        Recognized units are METER, KILOMETER, CENTIMETER, and MILLIMETER.
+        The units is a string argument that detaults to METER as defined here.
+        Recognized units are METER, KILOMETER, CENTIMETER, and MILLIMETER (also definied here).
         """
 
         # make sure that this is a float even if the value is an int or a string
         # other types probably work, too
         value = float(value)
 
-        if units is None or units == slf.METER:
+        if units is None or units == self.METER:
             self._length = value
         elif units == self.KILOMETER:
             self._length = value * 1000.0
@@ -189,10 +210,10 @@ class Length:
         return a list of floats containing the value of the list of Length objects
         passed in the items argument.
         items may also be a list of lists (2D array) of Length objects. If the first
-        item is a list then this method assumes that items is a list of list and the
+        item is a list then this method assumes that items is a list of lists and the
         return value is a list of lists of floats.
-        The list of lists case is done by calling this method recursively and so should
-        work for higher levels of lists of lists. That use case is not tested.
+        The list of lists case is done by calling this method recursively and so it should
+        work for higher orders of lists of lists. That use case is not tested.
         """
         result = []
         if isinstance(items[0], list):
@@ -201,7 +222,9 @@ class Length:
                 thisResult = Length.values(item)
                 result.append(thisResult)
         else:
-            # assume this is a list of Length objects
+            if not isinstance(items[0], Length):
+                raise ValueError("items must contain Length instances")
+            # only check the first item
             for item in items:
                 result.append(item.get())
         return result
@@ -223,8 +246,8 @@ class Length:
 
     def equals(self, otherLength):
         """
-        Return True if and only if the specified other length has
-        a value that is equal to this length.
+        Return True if and only if the specified other length is a Length
+        that has a value that is equal to this length.
         """
         return isinstance(otherLength, Length) and (self._length == otherLength._length)
 
@@ -255,7 +278,7 @@ class Length:
         than the other Length.
         """
         if not isinstance(otherLength, Length):
-            raise ValueError("otherLength must be a Length")
+            raise ValueError("Attempt to compare a Length to a non-Length.")
 
         result = 0
         if self._length < otherLength._length:

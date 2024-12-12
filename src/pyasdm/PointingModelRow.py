@@ -78,15 +78,39 @@ class PointingModelRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._pointingModelId = 0
+
+        self._numCoeff = 0
+
+        self._coeffName = []  # this is a list of str []
+
+        self._coeffVal = []  # this is a list of float []
+
         self._polarizationType = PolarizationType.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._receiverBand = ReceiverBand.from_int(0)
+
+        self._assocNature = None
+
+        self._coeffFormulaExists = False
+
+        self._coeffFormula = []  # this is a list of str []
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._assocPointingModelId = 0
 
         if row is not None:
             if not isinstance(row, PointingModelRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -203,44 +227,51 @@ class PointingModelRow:
 
         pointingModelIdNode = rowdom.getElementsByTagName("pointingModelId")[0]
 
-        self._pointingModelId = int(pointingModelIdNode.firstChild.data)
+        self._pointingModelId = int(pointingModelIdNode.firstChild.data.strip())
 
         numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
 
-        self._numCoeff = int(numCoeffNode.firstChild.data)
+        self._numCoeff = int(numCoeffNode.firstChild.data.strip())
 
         coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
 
-        coeffNameStr = coeffNameNode.firstChild.data
-        self._coeffName = Parser.stringListToLists(coeffNameStr, str, "PointingModel")
+        coeffNameStr = coeffNameNode.firstChild.data.strip()
+
+        self._coeffName = Parser.stringListToLists(
+            coeffNameStr, str, "PointingModel", False
+        )
 
         coeffValNode = rowdom.getElementsByTagName("coeffVal")[0]
 
-        coeffValStr = coeffValNode.firstChild.data
-        self._coeffVal = Parser.stringListToLists(coeffValStr, float, "PointingModel")
+        coeffValStr = coeffValNode.firstChild.data.strip()
+
+        self._coeffVal = Parser.stringListToLists(
+            coeffValStr, float, "PointingModel", False
+        )
 
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
 
         self._polarizationType = PolarizationType.newPolarizationType(
-            polarizationTypeNode.firstChild.data
+            polarizationTypeNode.firstChild.data.strip()
         )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         assocNatureNode = rowdom.getElementsByTagName("assocNature")[0]
 
-        self._assocNature = str(assocNatureNode.firstChild.data)
+        self._assocNature = str(assocNatureNode.firstChild.data.strip())
 
         coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")
         if len(coeffFormulaNode) > 0:
 
-            coeffFormulaStr = coeffFormulaNode[0].firstChild.data
+            coeffFormulaStr = coeffFormulaNode[0].firstChild.data.strip()
+
             self._coeffFormula = Parser.stringListToLists(
-                coeffFormulaStr, str, "PointingModel"
+                coeffFormulaStr, str, "PointingModel", False
             )
 
             self._coeffFormulaExists = True
@@ -249,13 +280,15 @@ class PointingModelRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         assocPointingModelIdNode = rowdom.getElementsByTagName("assocPointingModelId")[
             0
         ]
 
-        self._assocPointingModelId = int(assocPointingModelIdNode.firstChild.data)
+        self._assocPointingModelId = int(
+            assocPointingModelIdNode.firstChild.data.strip()
+        )
 
     def toBin(self):
         print("not yet implemented")

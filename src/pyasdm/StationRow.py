@@ -75,12 +75,27 @@ class StationRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._stationId = Tag()
+
+        self._name = None
+
+        self._position = []  # this is a list of Length []
+
         self._type = StationType.from_int(0)
+
+        self._timeExists = False
+
+        self._time = ArrayTime()
 
         if row is not None:
             if not isinstance(row, StationRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._stationId = Tag(row._stationId)
 
@@ -165,25 +180,26 @@ class StationRow:
 
         stationIdNode = rowdom.getElementsByTagName("stationId")[0]
 
-        self._stationId = Tag(stationIdNode.firstChild.data)
+        self._stationId = Tag(stationIdNode.firstChild.data.strip())
 
         nameNode = rowdom.getElementsByTagName("name")[0]
 
-        self._name = str(nameNode.firstChild.data)
+        self._name = str(nameNode.firstChild.data.strip())
 
         positionNode = rowdom.getElementsByTagName("position")[0]
 
-        positionStr = positionNode.firstChild.data
-        self._position = Parser.stringListToLists(positionStr, Length, "Station")
+        positionStr = positionNode.firstChild.data.strip()
+
+        self._position = Parser.stringListToLists(positionStr, Length, "Station", True)
 
         typeNode = rowdom.getElementsByTagName("type")[0]
 
-        self._type = StationType.newStationType(typeNode.firstChild.data)
+        self._type = StationType.newStationType(typeNode.firstChild.data.strip())
 
         timeNode = rowdom.getElementsByTagName("time")
         if len(timeNode) > 0:
 
-            self._time = ArrayTime(timeNode[0].firstChild.data)
+            self._time = ArrayTime(timeNode[0].firstChild.data.strip())
 
             self._timeExists = True
 

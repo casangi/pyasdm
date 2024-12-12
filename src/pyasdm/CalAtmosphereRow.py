@@ -84,21 +84,101 @@ class CalAtmosphereRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
         self._receiverBand = ReceiverBand.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._antennaName = None
+
         self._basebandName = BasebandName.from_int(0)
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        self._startValidTime = ArrayTime()
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._endValidTime = ArrayTime()
+
+        self._numFreq = 0
+
+        self._numLoad = 0
+
+        self._numReceptor = 0
+
+        self._forwardEffSpectrum = []  # this is a list of float []  []
+
+        self._frequencyRange = []  # this is a list of Frequency []
+
+        self._groundPressure = Pressure()
+
+        self._groundRelHumidity = Humidity()
+
+        self._frequencySpectrum = []  # this is a list of Frequency []
+
+        self._groundTemperature = Temperature()
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._powerSkySpectrum = []  # this is a list of float []  []
+
+        self._powerLoadSpectrum = []  # this is a list of float []  []  []
+
         self._syscalType = SyscalMethod.from_int(0)
+
+        self._tAtmSpectrum = []  # this is a list of Temperature []  []
+
+        self._tRecSpectrum = []  # this is a list of Temperature []  []
+
+        self._tSysSpectrum = []  # this is a list of Temperature []  []
+
+        self._tauSpectrum = []  # this is a list of float []  []
+
+        self._tAtm = []  # this is a list of Temperature []
+
+        self._tRec = []  # this is a list of Temperature []
+
+        self._tSys = []  # this is a list of Temperature []
+
+        self._tau = []  # this is a list of float []
+
+        self._water = []  # this is a list of Length []
+
+        self._waterError = []  # this is a list of Length []
+
+        self._alphaSpectrumExists = False
+
+        self._alphaSpectrum = []  # this is a list of float []  []
+
+        self._forwardEfficiencyExists = False
+
+        self._forwardEfficiency = []  # this is a list of float []
+
+        self._forwardEfficiencyErrorExists = False
+
+        self._forwardEfficiencyError = []  # this is a list of float []
+
+        self._sbGainExists = False
+
+        self._sbGain = []  # this is a list of float []
+
+        self._sbGainErrorExists = False
+
+        self._sbGainError = []  # this is a list of float []
+
+        self._sbGainSpectrumExists = False
+
+        self._sbGainSpectrum = []  # this is a list of float []  []
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalAtmosphereRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -395,163 +475,191 @@ class CalAtmosphereRow:
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data
+            basebandNameNode.firstChild.data.strip()
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         numFreqNode = rowdom.getElementsByTagName("numFreq")[0]
 
-        self._numFreq = int(numFreqNode.firstChild.data)
+        self._numFreq = int(numFreqNode.firstChild.data.strip())
 
         numLoadNode = rowdom.getElementsByTagName("numLoad")[0]
 
-        self._numLoad = int(numLoadNode.firstChild.data)
+        self._numLoad = int(numLoadNode.firstChild.data.strip())
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         forwardEffSpectrumNode = rowdom.getElementsByTagName("forwardEffSpectrum")[0]
 
-        forwardEffSpectrumStr = forwardEffSpectrumNode.firstChild.data
+        forwardEffSpectrumStr = forwardEffSpectrumNode.firstChild.data.strip()
+
         self._forwardEffSpectrum = Parser.stringListToLists(
-            forwardEffSpectrumStr, float, "CalAtmosphere"
+            forwardEffSpectrumStr, float, "CalAtmosphere", False
         )
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data
+        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+
         self._frequencyRange = Parser.stringListToLists(
-            frequencyRangeStr, Frequency, "CalAtmosphere"
+            frequencyRangeStr, Frequency, "CalAtmosphere", True
         )
 
         groundPressureNode = rowdom.getElementsByTagName("groundPressure")[0]
 
-        self._groundPressure = Pressure(groundPressureNode.firstChild.data)
+        self._groundPressure = Pressure(groundPressureNode.firstChild.data.strip())
 
         groundRelHumidityNode = rowdom.getElementsByTagName("groundRelHumidity")[0]
 
-        self._groundRelHumidity = Humidity(groundRelHumidityNode.firstChild.data)
+        self._groundRelHumidity = Humidity(
+            groundRelHumidityNode.firstChild.data.strip()
+        )
 
         frequencySpectrumNode = rowdom.getElementsByTagName("frequencySpectrum")[0]
 
-        frequencySpectrumStr = frequencySpectrumNode.firstChild.data
+        frequencySpectrumStr = frequencySpectrumNode.firstChild.data.strip()
+
         self._frequencySpectrum = Parser.stringListToLists(
-            frequencySpectrumStr, Frequency, "CalAtmosphere"
+            frequencySpectrumStr, Frequency, "CalAtmosphere", True
         )
 
         groundTemperatureNode = rowdom.getElementsByTagName("groundTemperature")[0]
 
-        self._groundTemperature = Temperature(groundTemperatureNode.firstChild.data)
+        self._groundTemperature = Temperature(
+            groundTemperatureNode.firstChild.data.strip()
+        )
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "CalAtmosphere"
+            polarizationTypesStr, PolarizationType, "CalAtmosphere", False
         )
 
         powerSkySpectrumNode = rowdom.getElementsByTagName("powerSkySpectrum")[0]
 
-        powerSkySpectrumStr = powerSkySpectrumNode.firstChild.data
+        powerSkySpectrumStr = powerSkySpectrumNode.firstChild.data.strip()
+
         self._powerSkySpectrum = Parser.stringListToLists(
-            powerSkySpectrumStr, float, "CalAtmosphere"
+            powerSkySpectrumStr, float, "CalAtmosphere", False
         )
 
         powerLoadSpectrumNode = rowdom.getElementsByTagName("powerLoadSpectrum")[0]
 
-        powerLoadSpectrumStr = powerLoadSpectrumNode.firstChild.data
+        powerLoadSpectrumStr = powerLoadSpectrumNode.firstChild.data.strip()
+
         self._powerLoadSpectrum = Parser.stringListToLists(
-            powerLoadSpectrumStr, float, "CalAtmosphere"
+            powerLoadSpectrumStr, float, "CalAtmosphere", False
         )
 
         syscalTypeNode = rowdom.getElementsByTagName("syscalType")[0]
 
-        self._syscalType = SyscalMethod.newSyscalMethod(syscalTypeNode.firstChild.data)
+        self._syscalType = SyscalMethod.newSyscalMethod(
+            syscalTypeNode.firstChild.data.strip()
+        )
 
         tAtmSpectrumNode = rowdom.getElementsByTagName("tAtmSpectrum")[0]
 
-        tAtmSpectrumStr = tAtmSpectrumNode.firstChild.data
+        tAtmSpectrumStr = tAtmSpectrumNode.firstChild.data.strip()
+
         self._tAtmSpectrum = Parser.stringListToLists(
-            tAtmSpectrumStr, Temperature, "CalAtmosphere"
+            tAtmSpectrumStr, Temperature, "CalAtmosphere", True
         )
 
         tRecSpectrumNode = rowdom.getElementsByTagName("tRecSpectrum")[0]
 
-        tRecSpectrumStr = tRecSpectrumNode.firstChild.data
+        tRecSpectrumStr = tRecSpectrumNode.firstChild.data.strip()
+
         self._tRecSpectrum = Parser.stringListToLists(
-            tRecSpectrumStr, Temperature, "CalAtmosphere"
+            tRecSpectrumStr, Temperature, "CalAtmosphere", True
         )
 
         tSysSpectrumNode = rowdom.getElementsByTagName("tSysSpectrum")[0]
 
-        tSysSpectrumStr = tSysSpectrumNode.firstChild.data
+        tSysSpectrumStr = tSysSpectrumNode.firstChild.data.strip()
+
         self._tSysSpectrum = Parser.stringListToLists(
-            tSysSpectrumStr, Temperature, "CalAtmosphere"
+            tSysSpectrumStr, Temperature, "CalAtmosphere", True
         )
 
         tauSpectrumNode = rowdom.getElementsByTagName("tauSpectrum")[0]
 
-        tauSpectrumStr = tauSpectrumNode.firstChild.data
+        tauSpectrumStr = tauSpectrumNode.firstChild.data.strip()
+
         self._tauSpectrum = Parser.stringListToLists(
-            tauSpectrumStr, float, "CalAtmosphere"
+            tauSpectrumStr, float, "CalAtmosphere", False
         )
 
         tAtmNode = rowdom.getElementsByTagName("tAtm")[0]
 
-        tAtmStr = tAtmNode.firstChild.data
-        self._tAtm = Parser.stringListToLists(tAtmStr, Temperature, "CalAtmosphere")
+        tAtmStr = tAtmNode.firstChild.data.strip()
+
+        self._tAtm = Parser.stringListToLists(
+            tAtmStr, Temperature, "CalAtmosphere", True
+        )
 
         tRecNode = rowdom.getElementsByTagName("tRec")[0]
 
-        tRecStr = tRecNode.firstChild.data
-        self._tRec = Parser.stringListToLists(tRecStr, Temperature, "CalAtmosphere")
+        tRecStr = tRecNode.firstChild.data.strip()
+
+        self._tRec = Parser.stringListToLists(
+            tRecStr, Temperature, "CalAtmosphere", True
+        )
 
         tSysNode = rowdom.getElementsByTagName("tSys")[0]
 
-        tSysStr = tSysNode.firstChild.data
-        self._tSys = Parser.stringListToLists(tSysStr, Temperature, "CalAtmosphere")
+        tSysStr = tSysNode.firstChild.data.strip()
+
+        self._tSys = Parser.stringListToLists(
+            tSysStr, Temperature, "CalAtmosphere", True
+        )
 
         tauNode = rowdom.getElementsByTagName("tau")[0]
 
-        tauStr = tauNode.firstChild.data
-        self._tau = Parser.stringListToLists(tauStr, float, "CalAtmosphere")
+        tauStr = tauNode.firstChild.data.strip()
+
+        self._tau = Parser.stringListToLists(tauStr, float, "CalAtmosphere", False)
 
         waterNode = rowdom.getElementsByTagName("water")[0]
 
-        waterStr = waterNode.firstChild.data
-        self._water = Parser.stringListToLists(waterStr, Length, "CalAtmosphere")
+        waterStr = waterNode.firstChild.data.strip()
+
+        self._water = Parser.stringListToLists(waterStr, Length, "CalAtmosphere", True)
 
         waterErrorNode = rowdom.getElementsByTagName("waterError")[0]
 
-        waterErrorStr = waterErrorNode.firstChild.data
+        waterErrorStr = waterErrorNode.firstChild.data.strip()
+
         self._waterError = Parser.stringListToLists(
-            waterErrorStr, Length, "CalAtmosphere"
+            waterErrorStr, Length, "CalAtmosphere", True
         )
 
         alphaSpectrumNode = rowdom.getElementsByTagName("alphaSpectrum")
         if len(alphaSpectrumNode) > 0:
 
-            alphaSpectrumStr = alphaSpectrumNode[0].firstChild.data
+            alphaSpectrumStr = alphaSpectrumNode[0].firstChild.data.strip()
+
             self._alphaSpectrum = Parser.stringListToLists(
-                alphaSpectrumStr, float, "CalAtmosphere"
+                alphaSpectrumStr, float, "CalAtmosphere", False
             )
 
             self._alphaSpectrumExists = True
@@ -559,9 +667,10 @@ class CalAtmosphereRow:
         forwardEfficiencyNode = rowdom.getElementsByTagName("forwardEfficiency")
         if len(forwardEfficiencyNode) > 0:
 
-            forwardEfficiencyStr = forwardEfficiencyNode[0].firstChild.data
+            forwardEfficiencyStr = forwardEfficiencyNode[0].firstChild.data.strip()
+
             self._forwardEfficiency = Parser.stringListToLists(
-                forwardEfficiencyStr, float, "CalAtmosphere"
+                forwardEfficiencyStr, float, "CalAtmosphere", False
             )
 
             self._forwardEfficiencyExists = True
@@ -571,9 +680,12 @@ class CalAtmosphereRow:
         )
         if len(forwardEfficiencyErrorNode) > 0:
 
-            forwardEfficiencyErrorStr = forwardEfficiencyErrorNode[0].firstChild.data
+            forwardEfficiencyErrorStr = forwardEfficiencyErrorNode[
+                0
+            ].firstChild.data.strip()
+
             self._forwardEfficiencyError = Parser.stringListToLists(
-                forwardEfficiencyErrorStr, double, "CalAtmosphere"
+                forwardEfficiencyErrorStr, float, "CalAtmosphere", False
             )
 
             self._forwardEfficiencyErrorExists = True
@@ -581,17 +693,21 @@ class CalAtmosphereRow:
         sbGainNode = rowdom.getElementsByTagName("sbGain")
         if len(sbGainNode) > 0:
 
-            sbGainStr = sbGainNode[0].firstChild.data
-            self._sbGain = Parser.stringListToLists(sbGainStr, float, "CalAtmosphere")
+            sbGainStr = sbGainNode[0].firstChild.data.strip()
+
+            self._sbGain = Parser.stringListToLists(
+                sbGainStr, float, "CalAtmosphere", False
+            )
 
             self._sbGainExists = True
 
         sbGainErrorNode = rowdom.getElementsByTagName("sbGainError")
         if len(sbGainErrorNode) > 0:
 
-            sbGainErrorStr = sbGainErrorNode[0].firstChild.data
+            sbGainErrorStr = sbGainErrorNode[0].firstChild.data.strip()
+
             self._sbGainError = Parser.stringListToLists(
-                sbGainErrorStr, float, "CalAtmosphere"
+                sbGainErrorStr, float, "CalAtmosphere", False
             )
 
             self._sbGainErrorExists = True
@@ -599,9 +715,10 @@ class CalAtmosphereRow:
         sbGainSpectrumNode = rowdom.getElementsByTagName("sbGainSpectrum")
         if len(sbGainSpectrumNode) > 0:
 
-            sbGainSpectrumStr = sbGainSpectrumNode[0].firstChild.data
+            sbGainSpectrumStr = sbGainSpectrumNode[0].firstChild.data.strip()
+
             self._sbGainSpectrum = Parser.stringListToLists(
-                sbGainSpectrumStr, float, "CalAtmosphere"
+                sbGainSpectrumStr, float, "CalAtmosphere", False
             )
 
             self._sbGainSpectrumExists = True
@@ -610,11 +727,11 @@ class CalAtmosphereRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -1734,7 +1851,7 @@ class CalAtmosphereRow:
     # ===> Attribute forwardEfficiencyError, which is optional
     _forwardEfficiencyErrorExists = False
 
-    _forwardEfficiencyError = None  # this is a 1D list of double
+    _forwardEfficiencyError = None  # this is a 1D list of float
 
     def isForwardEfficiencyErrorExists(self):
         """
@@ -1746,7 +1863,7 @@ class CalAtmosphereRow:
     def getForwardEfficiencyError(self):
         """
         Get forwardEfficiencyError, which is optional.
-        return forwardEfficiencyError as double []
+        return forwardEfficiencyError as float []
         raises ValueError If forwardEfficiencyError does not exist.
         """
         if not self._forwardEfficiencyErrorExists:
@@ -1760,8 +1877,8 @@ class CalAtmosphereRow:
 
     def setForwardEfficiencyError(self, forwardEfficiencyError):
         """
-        Set forwardEfficiencyError with the specified double []  value.
-        forwardEfficiencyError The double []  value to which forwardEfficiencyError is to be set.
+        Set forwardEfficiencyError with the specified float []  value.
+        forwardEfficiencyError The float []  value to which forwardEfficiencyError is to be set.
 
 
         """
@@ -1778,11 +1895,11 @@ class CalAtmosphereRow:
             if not shapeOK:
                 raise ValueError("shape of forwardEfficiencyError is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(forwardEfficiencyError, double):
+            if not Parser.checkListType(forwardEfficiencyError, float):
                 raise ValueError(
-                    "type of the first value in forwardEfficiencyError is not double as expected"
+                    "type of the first value in forwardEfficiencyError is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._forwardEfficiencyError = copy.deepcopy(forwardEfficiencyError)

@@ -72,9 +72,85 @@ class SysCalRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._numReceptor = 0
+
+        self._numChan = 0
+
+        self._tcalFlagExists = False
+
+        self._tcalFlag = None
+
+        self._tcalSpectrumExists = False
+
+        self._tcalSpectrum = []  # this is a list of Temperature []  []
+
+        self._trxFlagExists = False
+
+        self._trxFlag = None
+
+        self._trxSpectrumExists = False
+
+        self._trxSpectrum = []  # this is a list of Temperature []  []
+
+        self._tskyFlagExists = False
+
+        self._tskyFlag = None
+
+        self._tskySpectrumExists = False
+
+        self._tskySpectrum = []  # this is a list of Temperature []  []
+
+        self._tsysFlagExists = False
+
+        self._tsysFlag = None
+
+        self._tsysSpectrumExists = False
+
+        self._tsysSpectrum = []  # this is a list of Temperature []  []
+
+        self._tantFlagExists = False
+
+        self._tantFlag = None
+
+        self._tantSpectrumExists = False
+
+        self._tantSpectrum = []  # this is a list of float []  []
+
+        self._tantTsysFlagExists = False
+
+        self._tantTsysFlag = None
+
+        self._tantTsysSpectrumExists = False
+
+        self._tantTsysSpectrum = []  # this is a list of float []  []
+
+        self._phaseDiffFlagExists = False
+
+        self._phaseDiffFlag = None
+
+        self._phaseDiffSpectrumExists = False
+
+        self._phaseDiffSpectrum = []  # this is a list of float []  []
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._feedId = 0
+
+        self._spectralWindowId = Tag()
+
         if row is not None:
             if not isinstance(row, SysCalRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -329,29 +405,30 @@ class SysCalRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         numChanNode = rowdom.getElementsByTagName("numChan")[0]
 
-        self._numChan = int(numChanNode.firstChild.data)
+        self._numChan = int(numChanNode.firstChild.data.strip())
 
         tcalFlagNode = rowdom.getElementsByTagName("tcalFlag")
         if len(tcalFlagNode) > 0:
 
-            self._tcalFlag = bool(tcalFlagNode[0].firstChild.data)
+            self._tcalFlag = bool(tcalFlagNode[0].firstChild.data.strip())
 
             self._tcalFlagExists = True
 
         tcalSpectrumNode = rowdom.getElementsByTagName("tcalSpectrum")
         if len(tcalSpectrumNode) > 0:
 
-            tcalSpectrumStr = tcalSpectrumNode[0].firstChild.data
+            tcalSpectrumStr = tcalSpectrumNode[0].firstChild.data.strip()
+
             self._tcalSpectrum = Parser.stringListToLists(
-                tcalSpectrumStr, Temperature, "SysCal"
+                tcalSpectrumStr, Temperature, "SysCal", True
             )
 
             self._tcalSpectrumExists = True
@@ -359,16 +436,17 @@ class SysCalRow:
         trxFlagNode = rowdom.getElementsByTagName("trxFlag")
         if len(trxFlagNode) > 0:
 
-            self._trxFlag = bool(trxFlagNode[0].firstChild.data)
+            self._trxFlag = bool(trxFlagNode[0].firstChild.data.strip())
 
             self._trxFlagExists = True
 
         trxSpectrumNode = rowdom.getElementsByTagName("trxSpectrum")
         if len(trxSpectrumNode) > 0:
 
-            trxSpectrumStr = trxSpectrumNode[0].firstChild.data
+            trxSpectrumStr = trxSpectrumNode[0].firstChild.data.strip()
+
             self._trxSpectrum = Parser.stringListToLists(
-                trxSpectrumStr, Temperature, "SysCal"
+                trxSpectrumStr, Temperature, "SysCal", True
             )
 
             self._trxSpectrumExists = True
@@ -376,16 +454,17 @@ class SysCalRow:
         tskyFlagNode = rowdom.getElementsByTagName("tskyFlag")
         if len(tskyFlagNode) > 0:
 
-            self._tskyFlag = bool(tskyFlagNode[0].firstChild.data)
+            self._tskyFlag = bool(tskyFlagNode[0].firstChild.data.strip())
 
             self._tskyFlagExists = True
 
         tskySpectrumNode = rowdom.getElementsByTagName("tskySpectrum")
         if len(tskySpectrumNode) > 0:
 
-            tskySpectrumStr = tskySpectrumNode[0].firstChild.data
+            tskySpectrumStr = tskySpectrumNode[0].firstChild.data.strip()
+
             self._tskySpectrum = Parser.stringListToLists(
-                tskySpectrumStr, Temperature, "SysCal"
+                tskySpectrumStr, Temperature, "SysCal", True
             )
 
             self._tskySpectrumExists = True
@@ -393,16 +472,17 @@ class SysCalRow:
         tsysFlagNode = rowdom.getElementsByTagName("tsysFlag")
         if len(tsysFlagNode) > 0:
 
-            self._tsysFlag = bool(tsysFlagNode[0].firstChild.data)
+            self._tsysFlag = bool(tsysFlagNode[0].firstChild.data.strip())
 
             self._tsysFlagExists = True
 
         tsysSpectrumNode = rowdom.getElementsByTagName("tsysSpectrum")
         if len(tsysSpectrumNode) > 0:
 
-            tsysSpectrumStr = tsysSpectrumNode[0].firstChild.data
+            tsysSpectrumStr = tsysSpectrumNode[0].firstChild.data.strip()
+
             self._tsysSpectrum = Parser.stringListToLists(
-                tsysSpectrumStr, Temperature, "SysCal"
+                tsysSpectrumStr, Temperature, "SysCal", True
             )
 
             self._tsysSpectrumExists = True
@@ -410,16 +490,17 @@ class SysCalRow:
         tantFlagNode = rowdom.getElementsByTagName("tantFlag")
         if len(tantFlagNode) > 0:
 
-            self._tantFlag = bool(tantFlagNode[0].firstChild.data)
+            self._tantFlag = bool(tantFlagNode[0].firstChild.data.strip())
 
             self._tantFlagExists = True
 
         tantSpectrumNode = rowdom.getElementsByTagName("tantSpectrum")
         if len(tantSpectrumNode) > 0:
 
-            tantSpectrumStr = tantSpectrumNode[0].firstChild.data
+            tantSpectrumStr = tantSpectrumNode[0].firstChild.data.strip()
+
             self._tantSpectrum = Parser.stringListToLists(
-                tantSpectrumStr, float, "SysCal"
+                tantSpectrumStr, float, "SysCal", False
             )
 
             self._tantSpectrumExists = True
@@ -427,16 +508,17 @@ class SysCalRow:
         tantTsysFlagNode = rowdom.getElementsByTagName("tantTsysFlag")
         if len(tantTsysFlagNode) > 0:
 
-            self._tantTsysFlag = bool(tantTsysFlagNode[0].firstChild.data)
+            self._tantTsysFlag = bool(tantTsysFlagNode[0].firstChild.data.strip())
 
             self._tantTsysFlagExists = True
 
         tantTsysSpectrumNode = rowdom.getElementsByTagName("tantTsysSpectrum")
         if len(tantTsysSpectrumNode) > 0:
 
-            tantTsysSpectrumStr = tantTsysSpectrumNode[0].firstChild.data
+            tantTsysSpectrumStr = tantTsysSpectrumNode[0].firstChild.data.strip()
+
             self._tantTsysSpectrum = Parser.stringListToLists(
-                tantTsysSpectrumStr, float, "SysCal"
+                tantTsysSpectrumStr, float, "SysCal", False
             )
 
             self._tantTsysSpectrumExists = True
@@ -444,16 +526,17 @@ class SysCalRow:
         phaseDiffFlagNode = rowdom.getElementsByTagName("phaseDiffFlag")
         if len(phaseDiffFlagNode) > 0:
 
-            self._phaseDiffFlag = bool(phaseDiffFlagNode[0].firstChild.data)
+            self._phaseDiffFlag = bool(phaseDiffFlagNode[0].firstChild.data.strip())
 
             self._phaseDiffFlagExists = True
 
         phaseDiffSpectrumNode = rowdom.getElementsByTagName("phaseDiffSpectrum")
         if len(phaseDiffSpectrumNode) > 0:
 
-            phaseDiffSpectrumStr = phaseDiffSpectrumNode[0].firstChild.data
+            phaseDiffSpectrumStr = phaseDiffSpectrumNode[0].firstChild.data.strip()
+
             self._phaseDiffSpectrum = Parser.stringListToLists(
-                phaseDiffSpectrumStr, float, "SysCal"
+                phaseDiffSpectrumStr, float, "SysCal", False
             )
 
             self._phaseDiffSpectrumExists = True
@@ -462,15 +545,15 @@ class SysCalRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data)
+        self._feedId = int(feedIdNode.firstChild.data.strip())
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

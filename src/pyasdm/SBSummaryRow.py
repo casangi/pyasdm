@@ -81,18 +81,57 @@ class SBSummaryRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._sBSummaryId = Tag()
+
+        self._sbSummaryUID = EntityRef()
+
+        self._projectUID = EntityRef()
+
+        self._obsUnitSetUID = EntityRef()
+
+        self._frequency = None
+
         self._frequencyBand = ReceiverBand.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._sbType = SBType.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._sbDuration = Interval()
+
+        self._numObservingMode = 0
+
+        self._observingMode = []  # this is a list of str []
+
+        self._numberRepeats = 0
+
+        self._numScienceGoal = 0
+
+        self._scienceGoal = []  # this is a list of str []
+
+        self._numWeatherConstraint = 0
+
+        self._weatherConstraint = []  # this is a list of str []
+
+        self._centerDirectionExists = False
+
+        self._centerDirection = []  # this is a list of Angle []
+
+        self._centerDirectionCodeExists = False
+
         self._centerDirectionCode = DirectionReferenceCode.from_int(0)
+
+        self._centerDirectionEquinoxExists = False
+
+        self._centerDirectionEquinox = ArrayTime()
 
         if row is not None:
             if not isinstance(row, SBSummaryRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._sBSummaryId = Tag(row._sBSummaryId)
 
@@ -264,7 +303,7 @@ class SBSummaryRow:
 
         sBSummaryIdNode = rowdom.getElementsByTagName("sBSummaryId")[0]
 
-        self._sBSummaryId = Tag(sBSummaryIdNode.firstChild.data)
+        self._sBSummaryId = Tag(sBSummaryIdNode.firstChild.data.strip())
 
         sbSummaryUIDNode = rowdom.getElementsByTagName("sbSummaryUID")[0]
 
@@ -280,65 +319,73 @@ class SBSummaryRow:
 
         frequencyNode = rowdom.getElementsByTagName("frequency")[0]
 
-        self._frequency = double(frequencyNode.firstChild.data)
+        self._frequency = float(frequencyNode.firstChild.data.strip())
 
         frequencyBandNode = rowdom.getElementsByTagName("frequencyBand")[0]
 
         self._frequencyBand = ReceiverBand.newReceiverBand(
-            frequencyBandNode.firstChild.data
+            frequencyBandNode.firstChild.data.strip()
         )
 
         sbTypeNode = rowdom.getElementsByTagName("sbType")[0]
 
-        self._sbType = SBType.newSBType(sbTypeNode.firstChild.data)
+        self._sbType = SBType.newSBType(sbTypeNode.firstChild.data.strip())
 
         sbDurationNode = rowdom.getElementsByTagName("sbDuration")[0]
 
-        self._sbDuration = Interval(sbDurationNode.firstChild.data)
+        self._sbDuration = Interval(sbDurationNode.firstChild.data.strip())
 
         numObservingModeNode = rowdom.getElementsByTagName("numObservingMode")[0]
 
-        self._numObservingMode = int(numObservingModeNode.firstChild.data)
+        self._numObservingMode = int(numObservingModeNode.firstChild.data.strip())
 
         observingModeNode = rowdom.getElementsByTagName("observingMode")[0]
 
-        observingModeStr = observingModeNode.firstChild.data
+        observingModeStr = observingModeNode.firstChild.data.strip()
+
         self._observingMode = Parser.stringListToLists(
-            observingModeStr, str, "SBSummary"
+            observingModeStr, str, "SBSummary", False
         )
 
         numberRepeatsNode = rowdom.getElementsByTagName("numberRepeats")[0]
 
-        self._numberRepeats = int(numberRepeatsNode.firstChild.data)
+        self._numberRepeats = int(numberRepeatsNode.firstChild.data.strip())
 
         numScienceGoalNode = rowdom.getElementsByTagName("numScienceGoal")[0]
 
-        self._numScienceGoal = int(numScienceGoalNode.firstChild.data)
+        self._numScienceGoal = int(numScienceGoalNode.firstChild.data.strip())
 
         scienceGoalNode = rowdom.getElementsByTagName("scienceGoal")[0]
 
-        scienceGoalStr = scienceGoalNode.firstChild.data
-        self._scienceGoal = Parser.stringListToLists(scienceGoalStr, str, "SBSummary")
+        scienceGoalStr = scienceGoalNode.firstChild.data.strip()
+
+        self._scienceGoal = Parser.stringListToLists(
+            scienceGoalStr, str, "SBSummary", False
+        )
 
         numWeatherConstraintNode = rowdom.getElementsByTagName("numWeatherConstraint")[
             0
         ]
 
-        self._numWeatherConstraint = int(numWeatherConstraintNode.firstChild.data)
+        self._numWeatherConstraint = int(
+            numWeatherConstraintNode.firstChild.data.strip()
+        )
 
         weatherConstraintNode = rowdom.getElementsByTagName("weatherConstraint")[0]
 
-        weatherConstraintStr = weatherConstraintNode.firstChild.data
+        weatherConstraintStr = weatherConstraintNode.firstChild.data.strip()
+
         self._weatherConstraint = Parser.stringListToLists(
-            weatherConstraintStr, str, "SBSummary"
+            weatherConstraintStr, str, "SBSummary", False
         )
 
         centerDirectionNode = rowdom.getElementsByTagName("centerDirection")
         if len(centerDirectionNode) > 0:
 
-            centerDirectionStr = centerDirectionNode[0].firstChild.data
+            centerDirectionStr = centerDirectionNode[0].firstChild.data.strip()
+
             self._centerDirection = Parser.stringListToLists(
-                centerDirectionStr, Angle, "SBSummary"
+                centerDirectionStr, Angle, "SBSummary", True
             )
 
             self._centerDirectionExists = True
@@ -348,7 +395,7 @@ class SBSummaryRow:
 
             self._centerDirectionCode = (
                 DirectionReferenceCode.newDirectionReferenceCode(
-                    centerDirectionCodeNode[0].firstChild.data
+                    centerDirectionCodeNode[0].firstChild.data.strip()
                 )
             )
 
@@ -360,7 +407,7 @@ class SBSummaryRow:
         if len(centerDirectionEquinoxNode) > 0:
 
             self._centerDirectionEquinox = ArrayTime(
-                centerDirectionEquinoxNode[0].firstChild.data
+                centerDirectionEquinoxNode[0].firstChild.data.strip()
             )
 
             self._centerDirectionEquinoxExists = True
@@ -476,20 +523,20 @@ class SBSummaryRow:
     def getFrequency(self):
         """
         Get frequency.
-        return frequency as double
+        return frequency as float
         """
 
         return self._frequency
 
     def setFrequency(self, frequency):
         """
-        Set frequency with the specified double value.
-        frequency The double value to which frequency is to be set.
+        Set frequency with the specified float value.
+        frequency The float value to which frequency is to be set.
 
 
         """
 
-        self._frequency = double(frequency)
+        self._frequency = float(frequency)
 
     # ===> Attribute frequencyBand
 
@@ -972,7 +1019,7 @@ class SBSummaryRow:
         if not self._obsUnitSetUID.equals(obsUnitSetUID):
             return False
 
-        # frequency is a double, compare using the == operator.
+        # frequency is a float, compare using the == operator.
         if not (self._frequency == frequency):
             return False
 
@@ -1089,7 +1136,7 @@ class SBSummaryRow:
         if not self._obsUnitSetUID.equals(obsUnitSetUID):
             return False
 
-        # frequency is a double, compare using the == operator.
+        # frequency is a float, compare using the == operator.
         if not (self._frequency == frequency):
             return False
 

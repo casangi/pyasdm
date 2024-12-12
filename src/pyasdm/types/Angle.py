@@ -132,6 +132,26 @@ class Angle:
 
         return Angle(a._angle / factor)
 
+    @staticmethod
+    def getInstance(stringList):
+        """
+        Retrieve a value from a list of strings and convert that to an Angle.
+
+        This is used when parsing Angle lists from an XML representation to
+        eventually construct a list of Angle instances. The strings are
+        float representations of the angle in radians.
+
+        Returns a tuple of (Angle, stringList) where Angle is the new Angle
+        created by this call and stringList is the remaining, unused, part of
+        stringList after removing the first element.
+        """
+        if not isinstance(stringList, list):
+            raise ValueError("stringList is not a list")
+
+        # this will raise an error if there aren't any elements on stringList
+        floatVal = float(stringList[0])
+        return (Angle(floatVal), stringList[1:])
+
     # the angle in radians
     _angle = 0.0
 

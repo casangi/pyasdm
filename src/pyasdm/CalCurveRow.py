@@ -84,21 +84,57 @@ class CalCurveRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
         self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._typeCurve = CalCurveType.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._receiverBand = ReceiverBand.from_int(0)
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._frequencyRange = []  # this is a list of Frequency []
+
+        self._numAntenna = 0
+
+        self._numPoly = 0
+
+        self._numReceptor = 0
+
+        self._antennaNames = []  # this is a list of str []
+
+        self._refAntennaName = None
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._curve = []  # this is a list of float []  []  []
+
+        self._reducedChiSquared = []  # this is a list of float []
+
+        self._numBaselineExists = False
+
+        self._numBaseline = 0
+
+        self._rmsExists = False
+
+        self._rms = []  # this is a list of float []  []
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalCurveRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             # We force the attribute of the result to be not None
             if row._atmPhaseCorrection is None:
@@ -265,86 +301,95 @@ class CalCurveRow:
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data
+            atmPhaseCorrectionNode.firstChild.data.strip()
         )
 
         typeCurveNode = rowdom.getElementsByTagName("typeCurve")[0]
 
-        self._typeCurve = CalCurveType.newCalCurveType(typeCurveNode.firstChild.data)
+        self._typeCurve = CalCurveType.newCalCurveType(
+            typeCurveNode.firstChild.data.strip()
+        )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data
+        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+
         self._frequencyRange = Parser.stringListToLists(
-            frequencyRangeStr, Frequency, "CalCurve"
+            frequencyRangeStr, Frequency, "CalCurve", True
         )
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data)
+        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data)
+        self._numPoly = int(numPolyNode.firstChild.data.strip())
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         antennaNamesNode = rowdom.getElementsByTagName("antennaNames")[0]
 
-        antennaNamesStr = antennaNamesNode.firstChild.data
-        self._antennaNames = Parser.stringListToLists(antennaNamesStr, str, "CalCurve")
+        antennaNamesStr = antennaNamesNode.firstChild.data.strip()
+
+        self._antennaNames = Parser.stringListToLists(
+            antennaNamesStr, str, "CalCurve", False
+        )
 
         refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
 
-        self._refAntennaName = str(refAntennaNameNode.firstChild.data)
+        self._refAntennaName = str(refAntennaNameNode.firstChild.data.strip())
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "CalCurve"
+            polarizationTypesStr, PolarizationType, "CalCurve", False
         )
 
         curveNode = rowdom.getElementsByTagName("curve")[0]
 
-        curveStr = curveNode.firstChild.data
-        self._curve = Parser.stringListToLists(curveStr, float, "CalCurve")
+        curveStr = curveNode.firstChild.data.strip()
+
+        self._curve = Parser.stringListToLists(curveStr, float, "CalCurve", False)
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data
+        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+
         self._reducedChiSquared = Parser.stringListToLists(
-            reducedChiSquaredStr, double, "CalCurve"
+            reducedChiSquaredStr, float, "CalCurve", False
         )
 
         numBaselineNode = rowdom.getElementsByTagName("numBaseline")
         if len(numBaselineNode) > 0:
 
-            self._numBaseline = int(numBaselineNode[0].firstChild.data)
+            self._numBaseline = int(numBaselineNode[0].firstChild.data.strip())
 
             self._numBaselineExists = True
 
         rmsNode = rowdom.getElementsByTagName("rms")
         if len(rmsNode) > 0:
 
-            rmsStr = rmsNode[0].firstChild.data
-            self._rms = Parser.stringListToLists(rmsStr, float, "CalCurve")
+            rmsStr = rmsNode[0].firstChild.data.strip()
+
+            self._rms = Parser.stringListToLists(rmsStr, float, "CalCurve", False)
 
             self._rmsExists = True
 
@@ -352,11 +397,11 @@ class CalCurveRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -758,20 +803,20 @@ class CalCurveRow:
 
     # ===> Attribute reducedChiSquared
 
-    _reducedChiSquared = None  # this is a 1D list of double
+    _reducedChiSquared = None  # this is a 1D list of float
 
     def getReducedChiSquared(self):
         """
         Get reducedChiSquared.
-        return reducedChiSquared as double []
+        return reducedChiSquared as float []
         """
 
         return copy.deepcopy(self._reducedChiSquared)
 
     def setReducedChiSquared(self, reducedChiSquared):
         """
-        Set reducedChiSquared with the specified double []  value.
-        reducedChiSquared The double []  value to which reducedChiSquared is to be set.
+        Set reducedChiSquared with the specified float []  value.
+        reducedChiSquared The float []  value to which reducedChiSquared is to be set.
 
 
         """
@@ -788,11 +833,11 @@ class CalCurveRow:
             if not shapeOK:
                 raise ValueError("shape of reducedChiSquared is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, double):
+            if not Parser.checkListType(reducedChiSquared, float):
                 raise ValueError(
-                    "type of the first value in reducedChiSquared is not double as expected"
+                    "type of the first value in reducedChiSquared is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._reducedChiSquared = copy.deepcopy(reducedChiSquared)
@@ -1122,7 +1167,7 @@ class CalCurveRow:
             return False
         for indx in range(len(reducedChiSquared)):
 
-            # reducedChiSquared is a list of double, compare using == operator.
+            # reducedChiSquared is a list of float, compare using == operator.
             if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
                 return False
 
@@ -1245,7 +1290,7 @@ class CalCurveRow:
             return False
         for indx in range(len(reducedChiSquared)):
 
-            # reducedChiSquared is a list of double, compare using == operator.
+            # reducedChiSquared is a list of float, compare using == operator.
             if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
                 return False
 

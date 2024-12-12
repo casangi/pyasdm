@@ -23,7 +23,7 @@
 # File Parser.py
 
 from pyasdm.exceptions.ConversionException import ConversionException
-
+from pyasdm.types.ArrayTimeInterval import ArrayTimeInterval
 
 class Parser:
     """
@@ -63,8 +63,20 @@ class Parser:
         Return a string of the form '<name> value </name>' to be used in the XML output.
         The value must have a toString member used to convert that value to a string
         representation. Extended type values all have that function.
+
+        ArrayTimeInterval is the exception. The toString method there is not
+        used here following the similar case Java.
         """
-        return Parser.nameStringToXML(name, value.toString())
+        valueStr = None
+        if isinstance(value, ArrayTimeInterval):
+            # the string is the mid point and duration values separated by a space
+            valueStr = (
+                str(value.getMidPoint().get()) + " " + str(value.getDuration().get())
+            )
+        else:
+            valueStr = value.toString()
+
+        return Parser.nameStringToXML(name, valueStr)
 
     @staticmethod
     def getListDims(thisList):
@@ -140,8 +152,12 @@ class Parser:
                 result += Parser.listExtendedValuesAsString(theList[kk], dims[1:])
         else:
             # these are actual values
-            for jj in range(dims[0]):
-                result += theList[jj].toString() + " "
+            try:
+                for jj in range(dims[0]):
+                    result += theList[jj].toString() + " "
+            except:
+                print("exception seen for type " + str(type(theList[jj])))
+                raise
         return result
 
     @staticmethod
@@ -153,7 +169,7 @@ class Parser:
         result = ""
         if len(dims) > 1:
             for kk in range(dims[0]):
-                result += Parser.listEnumValuesAsString()(theList[kk], dims[1:])
+                result += Parser.listEnumValuesAsString(theList[kk], dims[1:])
         else:
             # these are actual values
             for jj in range(dims[0]):
@@ -233,11 +249,31 @@ class Parser:
         return (splitStr, result)
 
     @staticmethod
-    def stringListToLists(strlist, ListClass, tableName):
+    def splitStrToExtendedClassLists(splitStr, dims, ListClass):
+        result = []
+        if len(dims) == 1:
+            # this is the result
+            # pull the values off of splitStr and return the altered splitStr and the list it made
+            for k in range(dims[0]):
+                thisItem, splitStr = ListClass.getInstance(splitStr)
+                result.append(thisItem)
+            return (splitStr, result)
+        # else loop through this value and then recursively call this
+        for k in range(dims[0]):
+            splitStr, thisResult = Parser.splitStrToExtendedClassLists(
+                splitStr, dims[1:], ListClass
+            )
+            result.append(thisResult)
+        return (splitStr, result)
+
+    @staticmethod
+    def stringListToLists(strlist, ListClass, tableName, isExtendedType):
         """
         Parse an array expessed in strlist into a list (including lists of list)
         made up of elements of ListClass that can all be constructed
-        from a single string in that list.
+        from strings in that list. Some extended type instances use more than
+        one element. When isExtendedType is True then the appropriate function
+        to extra extended type values is used.
         The tableName is used when raising ConversionException to indicate the responsible table.
         """
         splitStr = strlist.split()
@@ -262,6 +298,7 @@ class Parser:
         for i in range(1, (ndim + 1)):
             dims.append(int(splitStr[i]))
             count *= dims[i - 1]
+
         if len(splitStr) < (count + 2):
             raise ConversionException(
                 "invalid strlist, not enough elements in string, ListClass is "
@@ -269,14 +306,19 @@ class Parser:
                 tableName,
             )
         try:
-            newstr, result = Parser.splitStrToClassLists(
-                splitStr[(ndim + 1) :], dims, ListClass
-            )
+            if isExtendedType:
+                newstr, result = Parser.splitStrToExtendedClassLists(
+                    splitStr[(ndim + 1) :], dims, ListClass
+                )
+            else:
+                newstr, result = Parser.splitStrToClassLists(
+                    splitStr[(ndim + 1) :], dims, ListClass
+                )
         except Exception as exc:
             # raise a ConversionException for anything this unexpected
             raise ConversionException(
                 "Unexpected exception " + str(exc) + ", ListClass is " + str(ListClass),
                 tableName,
-            ) from None
+            )
 
         return result

@@ -32,112 +32,121 @@
 import pyasdm.ASDM
 
 from .CalAtmosphereRow import CalAtmosphereRow
-from .Representable import Representable
 
 # All of the extended types are imported
 from pyasdm.types import *
 
 from .exceptions.ConversionException import ConversionException
 from .exceptions.DuplicateKey import DuplicateKey
+from .exceptions.UniquenessViolationException import UniquenessViolationException
 
-# using minidom instead of Parser
 from xml.dom import minidom
 
 import os
 
 
-class CalAtmosphereTable(Representable):
+class CalAtmosphereTable:
     """
     The CalAtmosphereTable class is an Alma table.
 
-     Role
-     Results of atmosphere calibration by TelCal. This calibration determines the system temperatures corrected for atmospheric absorption. Ionospheric effects are not dealt with in the Table.
+    Role
+    Results of atmosphere calibration by TelCal. This calibration determines the system temperatures corrected for atmospheric absorption. Ionospheric effects are not dealt with in the Table.
 
-     Generated from model's revision -1, branch
+    Generated from model's revision -1, branch
 
-     Attributes of CalAtmosphere
+    Attributes of CalAtmosphere
 
-                  Key
+                 Key
 
-    antennaName str the name of the antenna.
 
-    receiverBand ReceiverBand identifies the receiver band.
-
-    basebandName BasebandName identifies the baseband.
-
-    calDataId Tag refers to a unique row in CalData Table.
-
-    calReductionId Tag refers to a unique row in CalReduction Table.
+    antennaName str the name of the antenna. </TD>
 
 
 
-                  Value (Mandatory)
-
-    startValidTime ArrayTime  the start time of result validity period.
-
-    endValidTime ArrayTime  the end time of result validity period.
-
-    numFreq int  the number of frequency points.
-
-    numLoad int  the number of loads.
-
-    numReceptor int  the number of receptors.
-
-    forwardEffSpectrum float []  []   numReceptor, numFreq  the spectra of forward efficiencies (one value per receptor, per frequency).
-
-    frequencyRange Frequency []   2  the frequency range.
-
-    groundPressure Pressure  the ground pressure.
-
-    groundRelHumidity Humidity  the ground relative humidity.
-
-    frequencySpectrum Frequency []   numFreq  the frequencies.
-
-    groundTemperature Temperature  the ground temperature.
-
-    polarizationTypes PolarizationType []   numReceptor  the polarizations of the receptors (an array with one value per receptor).
-
-    powerSkySpectrum float []  []   numReceptor, numFreq  the powers on the sky (one value per receptor per frequency).
-
-    powerLoadSpectrum float []  []  []   numLoad, numReceptor, numFreq  the powers on the loads (one value per load per receptor per frequency).
-
-    syscalType SyscalMethod  the type of calibration used.
-
-    tAtmSpectrum Temperature []  []   numReceptor, numFreq  the spectra of atmosphere physical  temperatures (one value per receptor per frequency).
-
-    tRecSpectrum Temperature []  []   numReceptor, numFreq  the spectra of the receptors temperatures (one value  per receptor per frequency).
-
-    tSysSpectrum Temperature []  []   numReceptor, numFreq  the spectra of system temperatures (one value  per receptor per frequency).
-
-    tauSpectrum float []  []   numReceptor, numFreq  the spectra of atmosheric optical depths (one value  per receptor per frequency).
-
-    tAtm Temperature []   numReceptor  the atmosphere physical temperatures (one value per receptor).
-
-    tRec Temperature []   numReceptor  the receptors temperatures (one value per receptor).
-
-    tSys Temperature []   numReceptor  the system temperatures (one value per receptor).
-
-    tau float []   numReceptor  the atmospheric optical depths (one value per receptor).
-
-    water Length []   numReceptor  the water vapor path lengths (one value per receptor).
-
-    waterError Length []   numReceptor  the uncertainties of water vapor contents (one value per receptor).
+    receiverBand ReceiverBand identifies the receiver band. </TD>
 
 
 
-                  Value (Optional)
+    basebandName BasebandName identifies the baseband. </TD>
 
-    alphaSpectrum float []  []   numReceptor, numFreq  the alpha coefficients, two loads only (one value per receptor per frequency).
 
-    forwardEfficiency float []   numReceptor  the forward efficiencies (one value per receptor).
 
-    forwardEfficiencyError double []   numReceptor  the uncertainties on forwardEfficiency (one value per receptor).
+    calDataId Tag refers to a unique row in CalData Table. </TD>
 
-    sbGain float []   numReceptor  the relative gains of LO1 sideband (one value per receptor).
 
-    sbGainError float []   numReceptor  the uncertainties on the relative gains of LO1 sideband (one value per receptor).
 
-    sbGainSpectrum float []  []   numReceptor, numFreq  the spectra of relative sideband gains (one value  per receptor per frequency).
+    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
+
+
+
+
+                 Value (Mandatory)
+
+    startValidTime  ArrayTime  the start time of result validity period.
+
+    endValidTime  ArrayTime  the end time of result validity period.
+
+    numFreq (numFreq) int  the number of frequency points.
+
+    numLoad (numLoad) int  the number of loads.
+
+    numReceptor (numReceptor) int  the number of receptors.
+
+    forwardEffSpectrum  float []  []   numReceptor, numFreq  the spectra of forward efficiencies (one value per receptor, per frequency).
+
+    frequencyRange  Frequency []   2  the frequency range.
+
+    groundPressure  Pressure  the ground pressure.
+
+    groundRelHumidity  Humidity  the ground relative humidity.
+
+    frequencySpectrum  Frequency []   numFreq  the frequencies.
+
+    groundTemperature  Temperature  the ground temperature.
+
+    polarizationTypes  PolarizationType []   numReceptor  the polarizations of the receptors (an array with one value per receptor).
+
+    powerSkySpectrum  float []  []   numReceptor, numFreq  the powers on the sky (one value per receptor per frequency).
+
+    powerLoadSpectrum  float []  []  []   numLoad, numReceptor, numFreq  the powers on the loads (one value per load per receptor per frequency).
+
+    syscalType  SyscalMethod  the type of calibration used.
+
+    tAtmSpectrum  Temperature []  []   numReceptor, numFreq  the spectra of atmosphere physical  temperatures (one value per receptor per frequency).
+
+    tRecSpectrum  Temperature []  []   numReceptor, numFreq  the spectra of the receptors temperatures (one value  per receptor per frequency).
+
+    tSysSpectrum  Temperature []  []   numReceptor, numFreq  the spectra of system temperatures (one value  per receptor per frequency).
+
+    tauSpectrum  float []  []   numReceptor, numFreq  the spectra of atmosheric optical depths (one value  per receptor per frequency).
+
+    tAtm  Temperature []   numReceptor  the atmosphere physical temperatures (one value per receptor).
+
+    tRec  Temperature []   numReceptor  the receptors temperatures (one value per receptor).
+
+    tSys  Temperature []   numReceptor  the system temperatures (one value per receptor).
+
+    tau  float []   numReceptor  the atmospheric optical depths (one value per receptor).
+
+    water  Length []   numReceptor  the water vapor path lengths (one value per receptor).
+
+    waterError  Length []   numReceptor  the uncertainties of water vapor contents (one value per receptor).
+
+
+
+                 Value (Optional)
+
+    alphaSpectrum  float []  []   numReceptor, numFreq  the alpha coefficients, two loads only (one value per receptor per frequency).
+
+    forwardEfficiency  float []   numReceptor  the forward efficiencies (one value per receptor).
+
+    forwardEfficiencyError  float []   numReceptor  the uncertainties on forwardEfficiency (one value per receptor).
+
+    sbGain  float []   numReceptor  the relative gains of LO1 sideband (one value per receptor).
+
+    sbGainError  float []   numReceptor  the uncertainties on the relative gains of LO1 sideband (one value per receptor).
+
+    sbGainSpectrum  float []  []   numReceptor, numFreq  the spectra of relative sideband gains (one value  per receptor per frequency).
 
 
     """
@@ -150,10 +159,10 @@ class CalAtmosphereTable(Representable):
     # set to True while the file is loading, just in case
     _loadInProgress = False
 
-    # the name of this table.
+    # The name of this table.
     _tableName = "CalAtmosphere"
 
-    # the list of field names that make up key 'key'.
+    # The list of field names that make up key 'key'.
     _key = [
         "antennaName",
         "receiverBand",
@@ -165,12 +174,15 @@ class CalAtmosphereTable(Representable):
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # _archiveAsBin not used by python implementation
-    # _archiveAsBin = True  # if True archive binary else archive XML
-    _fileAsBin = True  # if True file binary else file XML
+    # archive as bin not used by python implementation
+    # _archiveAsBin = True # If True archive binary else archive XML
+    _fileAsBin = True  # If True file binary else file XML
 
-    # A list to store the CalAtmosphereRow instances
+    # A data structure to store the CalAtmosphereRow s.
+    # In all cases we maintain a private list of CalAtmosphereRow s.
     _privateRows = []
+
+    # non-temporal ASDM in Java had a private row element here to also hold  CalAtmosphereRow s. Not needed in python.
 
     # the Entity of this table
     _entity = None
@@ -185,12 +197,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on frequencyRange
         """
+        if not isinstance(tolerance, Frequency):
+            print("tolerance must be a  Frequency instance")
+
         self._frequencyRangeEqTolerance = Frequency(tolerance)
 
-    # A getter for the tolerance on frequencyRange
     def getFrequencyRangeEqTolerance(self):
         """
         A getter for the tolerance on frequencyRange
+        Returns the tolerance as a  Frequency
         """
         return self._frequencyRangeEqTolerance
 
@@ -201,12 +216,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on groundPressure
         """
+        if not isinstance(tolerance, Pressure):
+            print("tolerance must be a  Pressure instance")
+
         self._groundPressureEqTolerance = Pressure(tolerance)
 
-    # A getter for the tolerance on groundPressure
     def getGroundPressureEqTolerance(self):
         """
         A getter for the tolerance on groundPressure
+        Returns the tolerance as a  Pressure
         """
         return self._groundPressureEqTolerance
 
@@ -217,12 +235,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on groundRelHumidity
         """
+        if not isinstance(tolerance, Humidity):
+            print("tolerance must be a  Humidity instance")
+
         self._groundRelHumidityEqTolerance = Humidity(tolerance)
 
-    # A getter for the tolerance on groundRelHumidity
     def getGroundRelHumidityEqTolerance(self):
         """
         A getter for the tolerance on groundRelHumidity
+        Returns the tolerance as a  Humidity
         """
         return self._groundRelHumidityEqTolerance
 
@@ -233,12 +254,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on frequencySpectrum
         """
+        if not isinstance(tolerance, Frequency):
+            print("tolerance must be a  Frequency instance")
+
         self._frequencySpectrumEqTolerance = Frequency(tolerance)
 
-    # A getter for the tolerance on frequencySpectrum
     def getFrequencySpectrumEqTolerance(self):
         """
         A getter for the tolerance on frequencySpectrum
+        Returns the tolerance as a  Frequency
         """
         return self._frequencySpectrumEqTolerance
 
@@ -249,12 +273,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on groundTemperature
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._groundTemperatureEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on groundTemperature
     def getGroundTemperatureEqTolerance(self):
         """
         A getter for the tolerance on groundTemperature
+        Returns the tolerance as a  Temperature
         """
         return self._groundTemperatureEqTolerance
 
@@ -265,12 +292,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on tAtmSpectrum
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._tAtmSpectrumEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on tAtmSpectrum
     def getTAtmSpectrumEqTolerance(self):
         """
         A getter for the tolerance on tAtmSpectrum
+        Returns the tolerance as a  Temperature
         """
         return self._tAtmSpectrumEqTolerance
 
@@ -281,12 +311,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on tRecSpectrum
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._tRecSpectrumEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on tRecSpectrum
     def getTRecSpectrumEqTolerance(self):
         """
         A getter for the tolerance on tRecSpectrum
+        Returns the tolerance as a  Temperature
         """
         return self._tRecSpectrumEqTolerance
 
@@ -297,12 +330,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on tSysSpectrum
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._tSysSpectrumEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on tSysSpectrum
     def getTSysSpectrumEqTolerance(self):
         """
         A getter for the tolerance on tSysSpectrum
+        Returns the tolerance as a  Temperature
         """
         return self._tSysSpectrumEqTolerance
 
@@ -313,12 +349,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on tAtm
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._tAtmEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on tAtm
     def getTAtmEqTolerance(self):
         """
         A getter for the tolerance on tAtm
+        Returns the tolerance as a  Temperature
         """
         return self._tAtmEqTolerance
 
@@ -329,12 +368,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on tRec
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._tRecEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on tRec
     def getTRecEqTolerance(self):
         """
         A getter for the tolerance on tRec
+        Returns the tolerance as a  Temperature
         """
         return self._tRecEqTolerance
 
@@ -345,12 +387,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on tSys
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._tSysEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on tSys
     def getTSysEqTolerance(self):
         """
         A getter for the tolerance on tSys
+        Returns the tolerance as a  Temperature
         """
         return self._tSysEqTolerance
 
@@ -361,12 +406,15 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on water
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._waterEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on water
     def getWaterEqTolerance(self):
         """
         A getter for the tolerance on water
+        Returns the tolerance as a  Length
         """
         return self._waterEqTolerance
 
@@ -377,27 +425,29 @@ class CalAtmosphereTable(Representable):
         """
         A setter for the tolerance on waterError
         """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
         self._waterErrorEqTolerance = Length(tolerance)
 
-    # A getter for the tolerance on waterError
     def getWaterErrorEqTolerance(self):
         """
         A getter for the tolerance on waterError
+        Returns the tolerance as a  Length
         """
         return self._waterErrorEqTolerance
 
     def getKeyName(self):
         """
-        Return the list of field names that make up "key" as a list of strings
+        Return the list of field names that make up key key
+        as a list of strings.
         """
         return self._key
 
-    @staticmethod
-    def Key(antennaName, receiverBand, basebandName, calDataId, calReductionId):
+    def Key(self, antennaName, receiverBand, basebandName, calDataId, calReductionId):
         """
         Returns a string built by concatenating the ascii representation of the
         parameters values suffixed with a "_" character.
-        The parameter values are assumed to be the appropriate type for that parameter.
         """
         result = ""
 
@@ -409,9 +459,12 @@ class CalAtmosphereTable(Representable):
 
     def __init__(self, container):
         """
-        Create a CalAtmosphereTable attached to container, which must be a ASDM instance
-        All tables must know the container to which they belong.
+        Create a CalAtmosphereTable attached to container.
+
+        container must be a ASDM instance
+        All tables must know the container
         """
+
         if not isinstance(container, pyasdm.ASDM):
             raise (
                 ValueError("CalAtmosphereTable constructor must use a ASDM instance")
@@ -430,6 +483,10 @@ class CalAtmosphereTable(Representable):
         self._presentInMemory = True
         self._loadInProgress = False
 
+        self._privateRows = []
+
+        self._version = 0
+
     def setNotPresentInMemory(self):
         """
         Set the state to indicate it is not present in memory and needs to be loaded before being used.
@@ -443,11 +500,12 @@ class CalAtmosphereTable(Representable):
         Check if the table is present in memory. If not, load the table from the file using the
         directory of the container.
         """
-        # NOTE: if setFromFile throws an exception then presentInMemory will remain False
+        # NOTE: if setFromFile raises an exception then presentInMemory will remain False
         # and loadInProgress will remain True, preventing another attempt at loading.
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
+            print("CalAtmosphere is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -456,6 +514,7 @@ class CalAtmosphereTable(Representable):
     def getContainer(self):
         """
         Return the container to which this table belongs.
+        return a ASDM.
         """
         return self._container
 
@@ -489,29 +548,33 @@ class CalAtmosphereTable(Representable):
         thisRow = CalAtmosphereRow(self)
         return thisRow
 
-    def add(self, newrow):
+    def add(self, x):
         """
         Add a row.
-        raises a DuplicateKey if the new row has a key that is already in the table.
-        If newrow is a list then this method is called recursively on each element of that list.
-        In that case None is returned.
-        returns newrow
+        raises a DuplicateKey Thrown if the new row has a key that is already in the table.
+        If x is a list then this method is called recursively on each element of that list.
+        In that case, None is returned.
+        returns the row that was added.
         """
-        if isinstance(newrow, list):
-            for thisrow in newrow:
+
+        if isinstance(x, list):
+            for thisrow in x:
+                # check on correct type of thisrow happens in add
                 self.add(thisrow)
-            # return None for the list case only
+            # return None fo the list case only
             return None
 
         # the single row case
+        if not isinstance(x, CalAtmosphereRow):
+            raise ValueError("x must be a  CalAtmosphereRow instance.")
 
         if (
             self.getRowByKey(
-                newrow.getAntennaName(),
-                newrow.getReceiverBand(),
-                newrow.getBasebandName(),
-                newrow.getCalDataId(),
-                newrow.getCalReductionId(),
+                x.getAntennaName(),
+                x.getReceiverBand(),
+                x.getBasebandName(),
+                x.getCalDataId(),
+                x.getCalReductionId(),
             )
             is not None
         ):
@@ -530,10 +593,9 @@ class CalAtmosphereTable(Representable):
                 "CalAtmosphere",
             )
 
-        row.add(newrow)
-        privateRows.add(newrow)
-        newrow.isAdded()
-        return newrow
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     def newRow(
         self,
@@ -569,7 +631,9 @@ class CalAtmosphereTable(Representable):
         waterError,
     ):
         """
-        Create a new CalAtmosphereRow. The new row is not added to this table, but it does know about it.
+        Create a new CalAtmosphereRow initialized to the specified values.
+
+        The new row is not added to this table, but it does know about it.
         (the autoincrementable attribute, if any, is not in the parameter list)
         """
 
@@ -654,36 +718,41 @@ class CalAtmosphereTable(Representable):
 
     # ====> Append a row to its table.
 
-    def _checkAndAdd(self, newrow):
+    def checkAndAdd(self, x):
         """
-        A private method to append a row to its table, used by input conversion
-        methods. Not intended for external use.
+        A method to append a row to it's table, used by input conversion methods.
+        Not indended for external use.
 
-        If this table has an autoincrementable attribute then check if newrow verifies the rule of uniqueness and raise an exception if not.
-        Returns newrow.
+        If this table has an autoincrementable attribute then check if
+        x verifies the rule of uniqueness and raise an exception if not.
+
+        Append x to its table.
+        x is the row to be appended.
+        returns x.
         """
 
         if (
             self.getRowByKey(
-                newrow.getAntennaName(),
-                newrow.getReceiverBand(),
-                newrow.getBasebandName(),
-                newrow.getCalDataId(),
-                newrow.getCalReductionId(),
+                x.getAntennaName(),
+                x.getReceiverBand(),
+                x.getBasebandName(),
+                x.getCalDataId(),
+                x.getCalReductionId(),
             )
             is not None
         ):
             raise DuplicateKey("Duplicate key exception in ", "CalAtmosphereTable")
 
-        self._privateRows.append(newrow)
-        newrow.isAdded()
-        return newrow
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     # ====> methods returning rows.
 
     def get(self):
         """
-        Get all rows as an array of CalAtmosphereRow
+        Get all rows.
+        return Alls rows as a list of CalAtmosphereRow
         """
         return self._privateRows
 
@@ -695,15 +764,15 @@ class CalAtmosphereTable(Representable):
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
 
-        @param antennaName.
+        param antennaName.
 
-        @param receiverBand.
+        param receiverBand.
 
-        @param basebandName.
+        param basebandName.
 
-        @param calDataId.
+        param calDataId.
 
-        @param calReductionId.
+        param calReductionId.
 
         """
         for row in self._privateRows:
@@ -723,8 +792,8 @@ class CalAtmosphereTable(Representable):
             if not row.getCalReductionId().equals(calReductionId):
                 continue
 
-            # this row matches these parameters
             return row
+
         # no match found
         return None
 
@@ -762,7 +831,7 @@ class CalAtmosphereTable(Representable):
         waterError,
     ):
         """
-                Look up the table for a row whose all attributes
+        Look up the table for a row whose all attributes
         are equal to the corresponding parameters of the method.
         return this row if any, None otherwise.
 
@@ -865,6 +934,12 @@ class CalAtmosphereTable(Representable):
 
         return None
 
+    def getRows(self):
+        """
+        get the rows, synonymous with the get method.
+        """
+        return self.get()
+
     # ====> conversion Methods
 
     def toXML(self):
@@ -872,7 +947,7 @@ class CalAtmosphereTable(Representable):
         Translate this table to an XML representation conforming
         to the schema defined for CalAtmosphere (CalAtmosphereTable.xsd).
 
-        Returns a string containing the XML representation.
+        returns a string containing the XML representation.
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
@@ -892,27 +967,28 @@ class CalAtmosphereTable(Representable):
         Populate this table from the content of a XML document that is required to
         conform to the XML schema defined for a CalAtmosphere (CalAtmosphereTable.xsd).
         """
+        if not isinstance(xmlstr, str):
+            raise ConversionException("xmlstr must be a string")
+
         xmldom = minidom.parseString(xmlstr)
-        # this should have at least one child node with a name of CalAtmosphereTable.
+        # this should have at least one child node with a name of "CalAtmosphereTable".
         if (
             not xmldom.hasChildNodes()
             or xmldom.firstChild.nodeName != "CalAtmosphereTable"
         ):
             raise ConversionException(
-                "XML is not from a the expected table", "CalAtmosphereTable."
+                "XML is not from the expected table", "CalAtmosphereTable"
             )
 
         # ignore everything but the first child node
         tabdom = xmldom.firstChild
 
-        # get the version from the schemaVersion attribute, which must be there
-        if (not tabdom.hasAttributes()) or (
-            tabdom.attributes.getNamedItem("schemaVersion") is None
+        # get the version from the schemaVersion attribute, which is not always there
+        versionStr = "-1"
+        if tabdom.hasAttributes() and (
+            tabdom.attributes.getNamedItem("schemaVersion") is not None
         ):
-            raise ConversionException(
-                "schemaVersion not found in XML", "CalAtmosphereTable"
-            )
-        versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
+            versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
         # raises a ValueError if not an integer
         try:
             self.setVersion(int(versionStr))
@@ -957,10 +1033,10 @@ class CalAtmosphereTable(Representable):
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
-                    self._checkAndAdd(row)
+                    self.checkAndAdd(row)
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
-                    raise ConversionException(str, "CalAtmosphereTable") from None
+                    raise ConversionException(str(exc), "CalAtmosphereTable") from None
 
         if tabEntity is None:
             raise ConversionException("No Entity seen in XML", "CalAtmosphereTable")
@@ -969,12 +1045,315 @@ class CalAtmosphereTable(Representable):
 
         self.setEntity(tabEntity)
 
+    def MIMEXMLPart(self):
+        print("MIMEXMLPart not implemented for <CalAtmosphereTable")
+        return
+        # the JAVA code looks like this
+        # String UID = this.getEntity().getEntityId().toString();
+        # String withoutUID = UID.substring(6);
+        # String containerUID = this.getContainer().getEntity().getEntityId().toString();
+        #
+        # StringBuffer sb = new StringBuffer()
+        # .append("<?xml version='1.0'  encoding='ISO-8859-1'?>")
+        # .append("\n")
+        # .append("<CalAtmosphereTable xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:clatm=\"http://Alma/XASDM/CalAtmosphereTable\" xsi:schemaLocation=\"http://Alma/XASDM/CalAtmosphereTable http://almaobservatory.org/XML/XASDM/4/CalAtmosphereTable.xsd\" schemaVersion=\"4\" schemaRevision=\"-1\">\n")
+        # .append("<Entity entityId='")
+        # .append(UID)
+        # .append("' entityIdEncrypted='na' entityTypeName='CalAtmosphereTable' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<ContainerEntity entityId='")
+        # .append(containerUID)
+        # .append("' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<BulkStoreRef file_id='")
+        # .append(withoutUID)
+        # .append("' byteOrder='Big_Endian' />\n")
+        # .append("<Attributes>\n")
+
+        # .append("<antennaName/>\n")
+        # .append("<receiverBand/>\n")
+        # .append("<basebandName/>\n")
+        # .append("<calDataId/>\n")
+        # .append("<calReductionId/>\n")
+        # .append("<startValidTime/>\n")
+        # .append("<endValidTime/>\n")
+        # .append("<numFreq/>\n")
+        # .append("<numLoad/>\n")
+        # .append("<numReceptor/>\n")
+        # .append("<forwardEffSpectrum/>\n")
+        # .append("<frequencyRange/>\n")
+        # .append("<groundPressure/>\n")
+        # .append("<groundRelHumidity/>\n")
+        # .append("<frequencySpectrum/>\n")
+        # .append("<groundTemperature/>\n")
+        # .append("<polarizationTypes/>\n")
+        # .append("<powerSkySpectrum/>\n")
+        # .append("<powerLoadSpectrum/>\n")
+        # .append("<syscalType/>\n")
+        # .append("<tAtmSpectrum/>\n")
+        # .append("<tRecSpectrum/>\n")
+        # .append("<tSysSpectrum/>\n")
+        # .append("<tauSpectrum/>\n")
+        # .append("<tAtm/>\n")
+        # .append("<tRec/>\n")
+        # .append("<tSys/>\n")
+        # .append("<tau/>\n")
+        # .append("<water/>\n")
+        # .append("<waterError/>\n")
+
+        # .append("<alphaSpectrum/>\n")
+        # .append("<forwardEfficiency/>\n")
+        # .append("<forwardEfficiencyError/>\n")
+        # .append("<sbGain/>\n")
+        # .append("<sbGainError/>\n")
+        # .append("<sbGainSpectrum/>\n")
+        # .append("</Attributes>\n")
+        # .append("</CalAtmosphereTable>\n");
+        # return sb.toString();
+
+    def toMIME(self):
+        """
+        Serialize this into a stream of bytes and encapsulates that stream into a MIME message.
+        returns a string containing the MIME message.
+        """
+        print("toMIME not yet implemented for CalAtmosphere")
+        return
+        # the Java code looks like this - returns a Byte array
+        # ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        # DataOutputStream dos = new DataOutputStream(bos);
+
+        # String UID = this.getEntity().getEntityId().toString();
+        # String execBlockUID = this.getContainer().getEntity().getEntityId().toString();
+        # try {
+        #     // The XML Header part.
+        #     dos.writeBytes("MIME-Version: 1.0");
+        #     dos.writeBytes("\n");
+        #    dos
+        #     .writeBytes("Content-Type: Multipart/Related; boundary='MIME_boundary'; type='text/xml'; start= '<header.xml>'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Description: Correlator");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("alma-uid:" + UID);
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part header.
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: text/xml; charset='ISO-8859-1'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Transfer-Encoding: 8bit");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <header.xml>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part content.
+        #    dos.writeBytes(MIMEXMLPart());
+        #    // have updated their code to the new XML header.
+        #    //
+        #    //dos.writeBytes(oldMIMEXMLPart());
+        #
+        #    // The MIME binary part header
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: binary/octet-stream");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <content.bin>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The binary part.
+        #    entity.toBin(dos);
+        #    container.getEntity().toBin(dos);
+        #    dos.writeInt(size());
+
+        #    for (CalAtmosphereRow row: privateRows) row.toBin(dos);
+
+        #    // The closing MIME boundary
+        #    dos.writeBytes("\n--MIME_boundary--");
+        #    dos.writeBytes("\n");
+
+        # } catch (IOException e) {
+        #    throw new ConversionException(
+        #            "Error while reading binary data , the message was "
+        #            + e.getMessage(), "CalAtmosphere");
+        # }
+
+        # return bos.toByteArray();
+
+    # Java code looks like this
+    # static private boolean binaryPartFound(DataInputStream dis, String s, int pos) throws IOException {
+    #    int posl = pos;
+    #    int count = 0;
+    #    dis.mark(1000000);
+    #    try {
+    #        while (dis.readByte() != s.charAt(posl)){
+    #            count ++;
+    #        }
+    #    }
+    #    catch (EOFException e) {
+    #        return false;
+    #    }
+    #
+    #    if (posl == (s.length() - 1)) return true;
+    #
+    #    if (pos == 0) {
+    #        posl++;
+    #        return binaryPartFound(dis, s, posl);
+    #    }
+    #    else {
+    #        if (count > 0) { dis.reset();  return binaryPartFound(dis, s, 0) ; }
+    #        else {
+    #            posl++;
+    #            return binaryPartFound(dis, s, posl);
+    #        }
+    #    }
+    # }
+
+    # private String xmlHeaderPart (String s) throws ConversionException {
+    #    String xmlPartMIMEHeader = "Content-ID: <header.xml>\n\n";
+    #    String binPartMIMEHeader = "--MIME_boundary\nContent-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    #
+    #    // Detect the XML header.
+    #    int loc0 = s.indexOf(xmlPartMIMEHeader);
+    #    if (loc0 == -1 ) throw new ConversionException("Failed to detect the beginning of the XML header", "CalAtmosphere");
+    #
+    #    loc0 += xmlPartMIMEHeader.length();
+    #
+    #    // Look for the string announcing the binary part.
+    #    int loc1 = s.indexOf(binPartMIMEHeader, loc0);
+    #    if (loc1 == -1) throw new ConversionException("Failed to detect the beginning of the binary part", "CalAtmosphere");
+    #
+    #    return s.substring(loc0, loc1).trim();
+    # }
+
+    # setFromMIME(byte[]   data) throws ConversionException {
+    # *
+    # Extracts the binary part of a MIME message and deserialize its content
+    # to fill this with the result of the deserialization.
+    # @param data the string containing the MIME message.
+    # @throws ConversionException
+    # /
+    # ByteOrder byteOrder = null;
+    # //
+    # // Look for the part containing the XML header.
+    # // Very empirically we assume that the first MIME part , the one which contains the
+    # // XML header, always fits in the first 1000 bytes of the MIME message !!
+    # //
+    # String header = xmlHeaderPart(new String(data, 0, Math.min(10000, data.length)));
+    # org.jdom.Document document = null;
+    # SAXBuilder sxb = new SAXBuilder();
+    #
+    # // Firstly build a document out of the XML.
+    # try {
+    #    document = sxb.build(new ByteArrayInputStream(header.getBytes()));
+    # }
+    # catch (Exception e) {
+    #     throw new ConversionException(e.getMessage(), "CalAtmosphere");
+    # }
+    #
+    # //
+    # // Let's define a default order for the sequence of attributes.
+    # //
+    # ArrayList<String> attributesSeq = new ArrayList<String> ();
+
+    #     attributesSeq.add("antennaName"); attributesSeq.add("receiverBand"); attributesSeq.add("basebandName"); attributesSeq.add("calDataId"); attributesSeq.add("calReductionId"); attributesSeq.add("startValidTime"); attributesSeq.add("endValidTime"); attributesSeq.add("numFreq"); attributesSeq.add("numLoad"); attributesSeq.add("numReceptor"); attributesSeq.add("forwardEffSpectrum"); attributesSeq.add("frequencyRange"); attributesSeq.add("groundPressure"); attributesSeq.add("groundRelHumidity"); attributesSeq.add("frequencySpectrum"); attributesSeq.add("groundTemperature"); attributesSeq.add("polarizationTypes"); attributesSeq.add("powerSkySpectrum"); attributesSeq.add("powerLoadSpectrum"); attributesSeq.add("syscalType"); attributesSeq.add("tAtmSpectrum"); attributesSeq.add("tRecSpectrum"); attributesSeq.add("tSysSpectrum"); attributesSeq.add("tauSpectrum"); attributesSeq.add("tAtm"); attributesSeq.add("tRec"); attributesSeq.add("tSys"); attributesSeq.add("tau"); attributesSeq.add("water"); attributesSeq.add("waterError");
+    #     attributesSeq.add("alphaSpectrum");  attributesSeq.add("forwardEfficiency");  attributesSeq.add("forwardEfficiencyError");  attributesSeq.add("sbGain");  attributesSeq.add("sbGainError");  attributesSeq.add("sbGainSpectrum");
+
+    # XPath xpath = null;
+    # //
+    # // And then look for the possible XML contents.
+    # try {
+    #     // Is it an "<ASDMBinaryTable ...." document (old) ?
+    #    if (XPath.newInstance("/ASDMBinaryTable")
+    #            .selectSingleNode(document) != null)
+    #        byteOrder = ByteOrder.BIG_ENDIAN;
+    #    else {
+    #        // Then it must be a "<CalAtmosphereTable ...." document
+    #        // With a BulkStoreRef child element....
+    #        XPath xpa = XPath.newInstance("/CalAtmosphereTable/BulkStoreRef/@byteOrder");
+    #        Object node = xpa.selectSingleNode(document.getRootElement());
+    #        if (node == null)
+    #            throw new ConversionException("No element found for the XPath expression '/CalAtmosphereTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalAtmosphere");
+    #
+    #        // Yes ? then it must have a "BulkStoreRef" element with a
+    #        // "byteOrder" attribute.
+    #        String bo = xpa.valueOf(document.getRootElement());
+    #        if (bo.equals("Little_Endian"))
+    #            byteOrder = ByteOrder.LITTLE_ENDIAN;
+    #        else if (bo.equals("Big_Endian"))
+    #            byteOrder = ByteOrder.BIG_ENDIAN;
+    #        else
+    #            throw new ConversionException("No valid value retrieved for the node '/CalAtmosphereTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalAtmosphere");
+    #
+    #        // And also it must have an Attributes element with children.
+    #        xpa = XPath.newInstance("/CalAtmosphereTable/Attributes#");
+    #        List nodes = xpa.selectNodes(document.getRootElement());
+    #        if (nodes==null || nodes.size()==0)
+    #            throw new ConversionException("No element found for the XPath expression '/CalAtmosphereTable/Attributes#'. Invalid XML header '"+header+"'.", "CalAtmosphere");
+    #
+    #        Iterator iter = nodes.iterator();
+    #        attributesSeq.clear();
+    #        int i = 0;
+    #        while (iter.hasNext()){
+    #            attributesSeq.add(((Element) iter.next()).getName());
+    #            i += 1;
+    #        }
+    #    }
+    # } catch (Exception e) {
+    #    throw new ConversionException(e.getMessage(), "CalAtmosphere");
+    # }
+
+    # //
+    # // Now that we know what is the byte order of the binary data
+    # // Let's extract them from the second MIME part and parse them
+    # //
+    # ByteArrayInputStream bis = new ByteArrayInputStream(data);
+    # DataInputStream dis = new DataInputStream(bis);
+    # BODataInputStream bodis = new BODataInputStream(dis, byteOrder);
+    #
+    # String terminator = "Content-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    # entity = null;
+    # try {
+    #    if (binaryPartFound(dis, terminator, 0) == false) {
+    #        throw new ConversionException ("Failed to detect the beginning of the binary part", "CalAtmosphere");
+    #    }
+    #
+    #    entity = Entity.fromBin(bodis);
+    #
+    #    Entity containerEntity = Entity.fromBin(bodis);
+    #
+    #    int numRows = bodis.readInt();
+    #    for (int i = 0; i < numRows; i++) {
+    #    this.checkAndAdd(CalAtmosphereRow.fromBin(bodis, this, attributesSeq.toArray(new String[0])));
+    #    }
+    # } catch (TagFormatException e) {
+    #    throw new ConversionException( "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalAtmosphere");
+    # }catch (IOException e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalAtmosphere");
+    # } catch (DuplicateKey e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalAtmosphere");
+    # }catch (Exception e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalAtmosphere");
+    # }
+    # }
+
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a CalAtmosphereTable as those produced by the toFile method.
+        Reads and parses a file containing a representation of a CalAtmosphereTable as those produced  by the toFile method.
         This table is populated with the result of the parsing.
-        The directory value is the name of the directory containing the file to be read and parsed.
+        param directory The name of the directory containing the file te be read and parsed.
+        raises ConversionException If any error occurs while reading the
+        files in the directory or parsing them.
         """
+        if not isinstance(directory, str):
+            print("directory must be a string")
 
         # directory must exist as a directory
         if not os.path.isdir(directory):
@@ -986,46 +1365,101 @@ class CalAtmosphereTable(Representable):
         if os.path.exists(os.path.join(directory, "CalAtmosphere.xml")):
             self.setFromXMLFile(directory)
         elif os.path.exists(os.path.join(directory, "CalAtmosphere.bin")):
-            setFromMIMEFile(directory)
+            self.setFromMIMEFile(directory)
         else:
             raise ConversionException(
                 "No file found for the CalAtmosphere table", "CalAtmosphereTable"
             )
 
     def setFromMIMEFile(self, directory):
-        print("setFromMIMEFile not implemented yet")
+        """
+        Set this table from a MIME file.
+        Used internally by setFromFile. Not intented for external use.
+        """
+        print("setFromMIME file not yet implemented for CalAtmosphereTable")
+        return
+
+        # java code looks like this
+        # File file = new File(directory+"/CalAtmosphere.bin");
+        #
+        # byte[] bytes = null;
+        #
+        # try {
+        #     InputStream is = new FileInputStream(file);
+        #     long length = file.length();
+        #     if (length > Integer.MAX_VALUE)
+        #         throw new ConversionException ("File " + file.getName() + " is too large", "CalAtmosphere");
+        #
+        #    bytes = new byte[(int)length];
+        #    int offset = 0;
+        #    int numRead = 0;
+        #
+        #   while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+        #       offset += numRead;
+        #   }
+        #
+        #    if (offset < bytes.length) {
+        #        throw new ConversionException("Could not completely read file "+file.getName(), "CalAtmosphere");
+        #    }
+        #    is.close();
+        # }
+        # catch (IOException e) {
+        #    throw new ConversionException("Error while reading "+file.getName()+". The message was " + e.getMessage(),
+        #    "CalAtmosphere");
+        # }
+
+        # setFromMIME(bytes);
+        # // Changed 24 Sep, 2015 - The export policy cannot be changed by what has been observed at import time. M Caillat
+        # // archiveAsBin = true;
+        # // fileAsBin = true;
+
+    # }
 
     def setFromXMLFile(self, directory):
         """
         This is the function used by setFromFile when the file is an XML file
+        Not intended for external use.
         """
 
         # setFromFile has already established that this exists
         # read the entire file into a string
         xmlstr = None
-        with open(os.path.join(directory, "CalAtmosphere.xml")) as f:
-            xmlstr = f.read()
-
-        if xmlstr is None:
-            raise ConversionException(
-                "CalAtmosphere.xml is empty", "CalAtmosphereTable"
-            )
+        try:
+            with open(os.path.join(directory, "CalAtmosphere.xml")) as f:
+                xmlstr = f.read()
+        except Exception as exc:
+            # reraise it as a ConversionException
+            raise ConversionException(str(exc), "CalAtmosphereTable") from None
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
             self.setFromMIMEFile(directory)
         else:
             self.fromXML(xmlstr)
+            # TBD: when fileAsBin is implemented this should be removed
+            # this will at least preserve the case where fileAsBin was changed for
+            # a table such that the archive has it in XML but the current rule is to
+            # write it out as binary
+            if self._fileAsBin:
+                print(
+                    "CalAtmosphere found as XML but it should be written as binary, which is not yet implemetned. Setting to write as XML to preserve this content."
+                )
+                self._fileAsBin = False
 
     def toFile(self, directory):
         """
         Stores a representation (binary or XML) of this table into a file.
 
-        Depending on the boolean value of _fileAsBin, a binary serialization
-        of this (_fileAsBin=True) will be saved in a file 'CalAtmosphere.bin' or an
-        XML representation (_fileAsBin==False) will be saved in a file 'CalAtmosphere.xml'.
+        Depending on the boolean value of its _fileAsBin data member a binary serialization
+        of this (_fileAsBin==True) will be saved in a file "CalAtmosphere.bin" or
+        an XML representation (_fileAsBin==False) will be saved in a file "CalAtmosphere.xml".
         The file is always written in a directory whose name is passed as a parameter.
+        param directory The name of directory where the file containing the table's
+        representation will be saved.
+        raises ConversionException for any errors while writing that file.
         """
+        if not isinstance(directory, str):
+            raise ConversionException("directory must be a string")
 
         if os.path.exists(directory) and not os.path.isdir(directory):
             raise ConversionException(
@@ -1034,21 +1468,86 @@ class CalAtmosphereTable(Representable):
                 "CalAtmosphereTable",
             )
 
-        if not os.path.exists(directory):
-            # assume it can be created there, if not this will raise a FileNotFound exception here
-            os.mkdir(directory)
+        # if not let's create it.
+        try:
+            if not os.path.exists(directory):
+                # if it can't be created a FileNotFound exception is the most likely result
+                os.mkdir(directory)
+        except Exception as exc:
+            # reraise any exception as a ConversionException
+            raise ConversionException(
+                "Could not create directory "
+                + directory
+                + " exception caught "
+                + str(exc),
+                "CalAtmosphereTable",
+            ) from None
 
         if self._fileAsBin:
             print("fileAsBin not yet implemented for CalAtmosphere")
+            # the Java code looks like this
+            #
+            # The table is exported in a binary format.
+            # (actually a short XML file + a possibly long MIME file)
+            #
+            # File xmlFile = new File(directory+"/CalAtmosphere.xml");
+            # if (xmlFile.exists())
+            #    if (!xmlFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+xmlFile.toString()+"'", "CalAtmosphere");
+            #
+            # File binFile = new File(directory+"/CalAtmosphere.bin");
+            # if (binFile.exists())
+            #    if (!binFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+binFile.toString()+"'", "CalAtmosphere");
+            #
+            # try {
+            #    BufferedWriter out = new BufferedWriter(new FileWriter(xmlFile));
+            #    out.write(MIMEXMLPart());
+            #    out.close();
+            #
+
+            #  OutputStream osBin = new FileOutputStream(binFile);
+            #  osBin.write(toMIME());
+            #  osBin.close();
+
+        # }
+        # catch (FileNotFoundException e) {
+        #     throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalAtmosphere");
+        # }
+        # catch (IOException e) {
+        #      throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalAtmosphere");
+        # }
+        # }
         else:
-            # exported as an XML file.
+            # The table is totally exported in a XML file.
             filePath = os.path.join(directory, "CalAtmosphere.xml")
             if os.path.exists(filePath):
-                # try to delete it, this will raise an exception if the user does not have permission to do that
-                os.remove(filePath)
-            with open(filePath, "w") as f:
-                f.write(self.toXML())
-                f.close()
+                try:
+                    # try to delete it, this will raise an exception if the user does not have permission to do that
+                    os.remove(filePath)
+                except Exception as exc:
+                    # reraise it as a ConversionException
+                    raise ConversionException(
+                        "Could not remove existing "
+                        + filePath
+                        + " exception caught "
+                        + str(exc),
+                        "CalAtmosphereTable",
+                    ) from None
+
+            try:
+                with open(filePath, "w") as f:
+                    f.write(self.toXML())
+                    f.close()
+
+                    # Java code uses a BufferedWriter to capture the output of toXML to the file
+            except Exception as exc:
+                # reraise it as a ConversionException
+                raise ConversionException(
+                    "Problem while writing the XML representation, the message was : "
+                    + str(exc),
+                    "CalAtmosphere",
+                ) from None
 
     def getEntity(self):
         """

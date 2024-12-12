@@ -87,24 +87,59 @@ class ScanRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of ScanIntent Enumeration, start off with it being empty
-        self._scanIntent = []
+        # initialize attribute values
 
-        # this is a list of CalDataOrigin Enumeration, start off with it being empty
-        self._calDataType = []
+        # intrinsic attributes
 
-        # this is a list of CalibrationFunction Enumeration, start off with it being empty
-        self._calibrationFunction = []
+        self._scanNumber = 0
 
-        # this is a list of CalibrationSet Enumeration, start off with it being empty
-        self._calibrationSet = []
+        self._startTime = ArrayTime()
 
-        # this is a list of AntennaMotionPattern Enumeration, start off with it being empty
-        self._calPattern = []
+        self._endTime = ArrayTime()
+
+        self._numIntent = 0
+
+        self._numSubscan = 0
+
+        self._scanIntent = []  # this is a list of ScanIntent []
+
+        self._calDataType = []  # this is a list of CalDataOrigin []
+
+        self._calibrationOnLine = []  # this is a list of bool []
+
+        self._calibrationFunctionExists = False
+
+        self._calibrationFunction = []  # this is a list of CalibrationFunction []
+
+        self._calibrationSetExists = False
+
+        self._calibrationSet = []  # this is a list of CalibrationSet []
+
+        self._calPatternExists = False
+
+        self._calPattern = []  # this is a list of AntennaMotionPattern []
+
+        self._numFieldExists = False
+
+        self._numField = 0
+
+        self._fieldNameExists = False
+
+        self._fieldName = []  # this is a list of str []
+
+        self._sourceNameExists = False
+
+        self._sourceName = None
+
+        # extrinsic attributes
+
+        self._execBlockId = Tag()
 
         if row is not None:
             if not isinstance(row, ScanRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._execBlockId = Tag(row._execBlockId)
 
@@ -275,49 +310,52 @@ class ScanRow:
 
         scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
 
-        self._scanNumber = int(scanNumberNode.firstChild.data)
+        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
 
         startTimeNode = rowdom.getElementsByTagName("startTime")[0]
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data)
+        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
 
         endTimeNode = rowdom.getElementsByTagName("endTime")[0]
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data)
+        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
 
         numIntentNode = rowdom.getElementsByTagName("numIntent")[0]
 
-        self._numIntent = int(numIntentNode.firstChild.data)
+        self._numIntent = int(numIntentNode.firstChild.data.strip())
 
         numSubscanNode = rowdom.getElementsByTagName("numSubscan")[0]
 
-        self._numSubscan = int(numSubscanNode.firstChild.data)
+        self._numSubscan = int(numSubscanNode.firstChild.data.strip())
 
         scanIntentNode = rowdom.getElementsByTagName("scanIntent")[0]
 
-        scanIntentStr = scanIntentNode.firstChild.data
-        self._scanIntent = Parser.stringListToLists(scanIntentStr, ScanIntent, "Scan")
+        scanIntentStr = scanIntentNode.firstChild.data.strip()
+        self._scanIntent = Parser.stringListToLists(
+            scanIntentStr, ScanIntent, "Scan", False
+        )
 
         calDataTypeNode = rowdom.getElementsByTagName("calDataType")[0]
 
-        calDataTypeStr = calDataTypeNode.firstChild.data
+        calDataTypeStr = calDataTypeNode.firstChild.data.strip()
         self._calDataType = Parser.stringListToLists(
-            calDataTypeStr, CalDataOrigin, "Scan"
+            calDataTypeStr, CalDataOrigin, "Scan", False
         )
 
         calibrationOnLineNode = rowdom.getElementsByTagName("calibrationOnLine")[0]
 
-        calibrationOnLineStr = calibrationOnLineNode.firstChild.data
+        calibrationOnLineStr = calibrationOnLineNode.firstChild.data.strip()
+
         self._calibrationOnLine = Parser.stringListToLists(
-            calibrationOnLineStr, bool, "Scan"
+            calibrationOnLineStr, bool, "Scan", False
         )
 
         calibrationFunctionNode = rowdom.getElementsByTagName("calibrationFunction")
         if len(calibrationFunctionNode) > 0:
 
-            calibrationFunctionStr = calibrationFunctionNode[0].firstChild.data
+            calibrationFunctionStr = calibrationFunctionNode[0].firstChild.data.strip()
             self._calibrationFunction = Parser.stringListToLists(
-                calibrationFunctionStr, CalibrationFunction, "Scan"
+                calibrationFunctionStr, CalibrationFunction, "Scan", False
             )
 
             self._calibrationFunctionExists = True
@@ -325,9 +363,9 @@ class ScanRow:
         calibrationSetNode = rowdom.getElementsByTagName("calibrationSet")
         if len(calibrationSetNode) > 0:
 
-            calibrationSetStr = calibrationSetNode[0].firstChild.data
+            calibrationSetStr = calibrationSetNode[0].firstChild.data.strip()
             self._calibrationSet = Parser.stringListToLists(
-                calibrationSetStr, CalibrationSet, "Scan"
+                calibrationSetStr, CalibrationSet, "Scan", False
             )
 
             self._calibrationSetExists = True
@@ -335,9 +373,9 @@ class ScanRow:
         calPatternNode = rowdom.getElementsByTagName("calPattern")
         if len(calPatternNode) > 0:
 
-            calPatternStr = calPatternNode[0].firstChild.data
+            calPatternStr = calPatternNode[0].firstChild.data.strip()
             self._calPattern = Parser.stringListToLists(
-                calPatternStr, AntennaMotionPattern, "Scan"
+                calPatternStr, AntennaMotionPattern, "Scan", False
             )
 
             self._calPatternExists = True
@@ -345,22 +383,23 @@ class ScanRow:
         numFieldNode = rowdom.getElementsByTagName("numField")
         if len(numFieldNode) > 0:
 
-            self._numField = int(numFieldNode[0].firstChild.data)
+            self._numField = int(numFieldNode[0].firstChild.data.strip())
 
             self._numFieldExists = True
 
         fieldNameNode = rowdom.getElementsByTagName("fieldName")
         if len(fieldNameNode) > 0:
 
-            fieldNameStr = fieldNameNode[0].firstChild.data
-            self._fieldName = Parser.stringListToLists(fieldNameStr, str, "Scan")
+            fieldNameStr = fieldNameNode[0].firstChild.data.strip()
+
+            self._fieldName = Parser.stringListToLists(fieldNameStr, str, "Scan", False)
 
             self._fieldNameExists = True
 
         sourceNameNode = rowdom.getElementsByTagName("sourceName")
         if len(sourceNameNode) > 0:
 
-            self._sourceName = str(sourceNameNode[0].firstChild.data)
+            self._sourceName = str(sourceNameNode[0].firstChild.data.strip())
 
             self._sourceNameExists = True
 
@@ -368,7 +407,7 @@ class ScanRow:
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data)
+        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

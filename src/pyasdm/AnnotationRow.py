@@ -75,12 +75,73 @@ class AnnotationRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of BasebandName Enumeration, start off with it being empty
-        self._basebandName = []
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._annotationId = Tag()
+
+        self._time = ArrayTime()
+
+        self._issue = None
+
+        self._details = None
+
+        self._numAntennaExists = False
+
+        self._numAntenna = 0
+
+        self._basebandNameExists = False
+
+        self._basebandName = []  # this is a list of BasebandName []
+
+        self._numBasebandExists = False
+
+        self._numBaseband = 0
+
+        self._intervalExists = False
+
+        self._interval = Interval()
+
+        self._dValueExists = False
+
+        self._dValue = None
+
+        self._vdValueExists = False
+
+        self._vdValue = []  # this is a list of float []
+
+        self._vvdValuesExists = False
+
+        self._vvdValues = []  # this is a list of float []  []
+
+        self._llValueExists = False
+
+        self._llValue = 0
+
+        self._vllValueExists = False
+
+        self._vllValue = []  # this is a list of int []
+
+        self._vvllValueExists = False
+
+        self._vvllValue = []  # this is a list of int []  []
+
+        self._sValueExists = False
+
+        self._sValue = None
+
+        # extrinsic attributes
+
+        self._antennaIdExists = False
+
+        self._antennaId = []  # this is a list of Tag []
 
         if row is not None:
             if not isinstance(row, AnnotationRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._annotationId = Tag(row._annotationId)
 
@@ -304,33 +365,33 @@ class AnnotationRow:
 
         annotationIdNode = rowdom.getElementsByTagName("annotationId")[0]
 
-        self._annotationId = Tag(annotationIdNode.firstChild.data)
+        self._annotationId = Tag(annotationIdNode.firstChild.data.strip())
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data)
+        self._time = ArrayTime(timeNode.firstChild.data.strip())
 
         issueNode = rowdom.getElementsByTagName("issue")[0]
 
-        self._issue = str(issueNode.firstChild.data)
+        self._issue = str(issueNode.firstChild.data.strip())
 
         detailsNode = rowdom.getElementsByTagName("details")[0]
 
-        self._details = str(detailsNode.firstChild.data)
+        self._details = str(detailsNode.firstChild.data.strip())
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")
         if len(numAntennaNode) > 0:
 
-            self._numAntenna = int(numAntennaNode[0].firstChild.data)
+            self._numAntenna = int(numAntennaNode[0].firstChild.data.strip())
 
             self._numAntennaExists = True
 
         basebandNameNode = rowdom.getElementsByTagName("basebandName")
         if len(basebandNameNode) > 0:
 
-            basebandNameStr = basebandNameNode[0].firstChild.data
+            basebandNameStr = basebandNameNode[0].firstChild.data.strip()
             self._basebandName = Parser.stringListToLists(
-                basebandNameStr, BasebandName, "Annotation"
+                basebandNameStr, BasebandName, "Annotation", False
             )
 
             self._basebandNameExists = True
@@ -338,38 +399,42 @@ class AnnotationRow:
         numBasebandNode = rowdom.getElementsByTagName("numBaseband")
         if len(numBasebandNode) > 0:
 
-            self._numBaseband = int(numBasebandNode[0].firstChild.data)
+            self._numBaseband = int(numBasebandNode[0].firstChild.data.strip())
 
             self._numBasebandExists = True
 
         intervalNode = rowdom.getElementsByTagName("interval")
         if len(intervalNode) > 0:
 
-            self._interval = Interval(intervalNode[0].firstChild.data)
+            self._interval = Interval(intervalNode[0].firstChild.data.strip())
 
             self._intervalExists = True
 
         dValueNode = rowdom.getElementsByTagName("dValue")
         if len(dValueNode) > 0:
 
-            self._dValue = double(dValueNode[0].firstChild.data)
+            self._dValue = float(dValueNode[0].firstChild.data.strip())
 
             self._dValueExists = True
 
         vdValueNode = rowdom.getElementsByTagName("vdValue")
         if len(vdValueNode) > 0:
 
-            vdValueStr = vdValueNode[0].firstChild.data
-            self._vdValue = Parser.stringListToLists(vdValueStr, double, "Annotation")
+            vdValueStr = vdValueNode[0].firstChild.data.strip()
+
+            self._vdValue = Parser.stringListToLists(
+                vdValueStr, float, "Annotation", False
+            )
 
             self._vdValueExists = True
 
         vvdValuesNode = rowdom.getElementsByTagName("vvdValues")
         if len(vvdValuesNode) > 0:
 
-            vvdValuesStr = vvdValuesNode[0].firstChild.data
+            vvdValuesStr = vvdValuesNode[0].firstChild.data.strip()
+
             self._vvdValues = Parser.stringListToLists(
-                vvdValuesStr, double, "Annotation"
+                vvdValuesStr, float, "Annotation", False
             )
 
             self._vvdValuesExists = True
@@ -377,30 +442,36 @@ class AnnotationRow:
         llValueNode = rowdom.getElementsByTagName("llValue")
         if len(llValueNode) > 0:
 
-            self._llValue = int(llValueNode[0].firstChild.data)
+            self._llValue = int(llValueNode[0].firstChild.data.strip())
 
             self._llValueExists = True
 
         vllValueNode = rowdom.getElementsByTagName("vllValue")
         if len(vllValueNode) > 0:
 
-            vllValueStr = vllValueNode[0].firstChild.data
-            self._vllValue = Parser.stringListToLists(vllValueStr, int, "Annotation")
+            vllValueStr = vllValueNode[0].firstChild.data.strip()
+
+            self._vllValue = Parser.stringListToLists(
+                vllValueStr, int, "Annotation", False
+            )
 
             self._vllValueExists = True
 
         vvllValueNode = rowdom.getElementsByTagName("vvllValue")
         if len(vvllValueNode) > 0:
 
-            vvllValueStr = vvllValueNode[0].firstChild.data
-            self._vvllValue = Parser.stringListToLists(vvllValueStr, int, "Annotation")
+            vvllValueStr = vvllValueNode[0].firstChild.data.strip()
+
+            self._vvllValue = Parser.stringListToLists(
+                vvllValueStr, int, "Annotation", False
+            )
 
             self._vvllValueExists = True
 
         sValueNode = rowdom.getElementsByTagName("sValue")
         if len(sValueNode) > 0:
 
-            self._sValue = str(sValueNode[0].firstChild.data)
+            self._sValue = str(sValueNode[0].firstChild.data.strip())
 
             self._sValueExists = True
 
@@ -409,8 +480,11 @@ class AnnotationRow:
         antennaIdNode = rowdom.getElementsByTagName("antennaId")
         if len(antennaIdNode) > 0:
 
-            antennaIdStr = antennaIdNode[0].firstChild.data
-            self._antennaId = Parser.stringListToLists(antennaIdStr, Tag, "Annotation")
+            antennaIdStr = antennaIdNode[0].firstChild.data.strip()
+
+            self._antennaId = Parser.stringListToLists(
+                antennaIdStr, Tag, "Annotation", True
+            )
 
             self._antennaIdExists = True
 
@@ -733,7 +807,7 @@ class AnnotationRow:
     def getDValue(self):
         """
         Get dValue, which is optional.
-        return dValue as double
+        return dValue as float
         raises ValueError If dValue does not exist.
         """
         if not self._dValueExists:
@@ -747,13 +821,13 @@ class AnnotationRow:
 
     def setDValue(self, dValue):
         """
-        Set dValue with the specified double value.
-        dValue The double value to which dValue is to be set.
+        Set dValue with the specified float value.
+        dValue The float value to which dValue is to be set.
 
 
         """
 
-        self._dValue = double(dValue)
+        self._dValue = float(dValue)
 
         self._dValueExists = True
 
@@ -766,7 +840,7 @@ class AnnotationRow:
     # ===> Attribute vdValue, which is optional
     _vdValueExists = False
 
-    _vdValue = None  # this is a 1D list of double
+    _vdValue = None  # this is a 1D list of float
 
     def isVdValueExists(self):
         """
@@ -778,7 +852,7 @@ class AnnotationRow:
     def getVdValue(self):
         """
         Get vdValue, which is optional.
-        return vdValue as double []
+        return vdValue as float []
         raises ValueError If vdValue does not exist.
         """
         if not self._vdValueExists:
@@ -792,8 +866,8 @@ class AnnotationRow:
 
     def setVdValue(self, vdValue):
         """
-        Set vdValue with the specified double []  value.
-        vdValue The double []  value to which vdValue is to be set.
+        Set vdValue with the specified float []  value.
+        vdValue The float []  value to which vdValue is to be set.
 
 
         """
@@ -810,11 +884,11 @@ class AnnotationRow:
             if not shapeOK:
                 raise ValueError("shape of vdValue is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(vdValue, double):
+            if not Parser.checkListType(vdValue, float):
                 raise ValueError(
-                    "type of the first value in vdValue is not double as expected"
+                    "type of the first value in vdValue is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._vdValue = copy.deepcopy(vdValue)
@@ -832,7 +906,7 @@ class AnnotationRow:
     # ===> Attribute vvdValues, which is optional
     _vvdValuesExists = False
 
-    _vvdValues = None  # this is a 2D list of double
+    _vvdValues = None  # this is a 2D list of float
 
     def isVvdValuesExists(self):
         """
@@ -844,7 +918,7 @@ class AnnotationRow:
     def getVvdValues(self):
         """
         Get vvdValues, which is optional.
-        return vvdValues as double []  []
+        return vvdValues as float []  []
         raises ValueError If vvdValues does not exist.
         """
         if not self._vvdValuesExists:
@@ -858,8 +932,8 @@ class AnnotationRow:
 
     def setVvdValues(self, vvdValues):
         """
-        Set vvdValues with the specified double []  []  value.
-        vvdValues The double []  []  value to which vvdValues is to be set.
+        Set vvdValues with the specified float []  []  value.
+        vvdValues The float []  []  value to which vvdValues is to be set.
 
 
         """
@@ -876,11 +950,11 @@ class AnnotationRow:
             if not shapeOK:
                 raise ValueError("shape of vvdValues is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(vvdValues, double):
+            if not Parser.checkListType(vvdValues, float):
                 raise ValueError(
-                    "type of the first value in vvdValues is not double as expected"
+                    "type of the first value in vvdValues is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._vvdValues = copy.deepcopy(vvdValues)

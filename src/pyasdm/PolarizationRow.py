@@ -78,15 +78,23 @@ class PolarizationRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of StokesParameter Enumeration, start off with it being empty
-        self._corrType = []
+        # initialize attribute values
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._corrProduct = []
+        # intrinsic attributes
+
+        self._polarizationId = Tag()
+
+        self._numCorr = 0
+
+        self._corrType = []  # this is a list of StokesParameter []
+
+        self._corrProduct = []  # this is a list of PolarizationType []  []
 
         if row is not None:
             if not isinstance(row, PolarizationRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._polarizationId = Tag(row._polarizationId)
 
@@ -156,24 +164,24 @@ class PolarizationRow:
 
         polarizationIdNode = rowdom.getElementsByTagName("polarizationId")[0]
 
-        self._polarizationId = Tag(polarizationIdNode.firstChild.data)
+        self._polarizationId = Tag(polarizationIdNode.firstChild.data.strip())
 
         numCorrNode = rowdom.getElementsByTagName("numCorr")[0]
 
-        self._numCorr = int(numCorrNode.firstChild.data)
+        self._numCorr = int(numCorrNode.firstChild.data.strip())
 
         corrTypeNode = rowdom.getElementsByTagName("corrType")[0]
 
-        corrTypeStr = corrTypeNode.firstChild.data
+        corrTypeStr = corrTypeNode.firstChild.data.strip()
         self._corrType = Parser.stringListToLists(
-            corrTypeStr, StokesParameter, "Polarization"
+            corrTypeStr, StokesParameter, "Polarization", False
         )
 
         corrProductNode = rowdom.getElementsByTagName("corrProduct")[0]
 
-        corrProductStr = corrProductNode.firstChild.data
+        corrProductStr = corrProductNode.firstChild.data.strip()
         self._corrProduct = Parser.stringListToLists(
-            corrProductStr, PolarizationType, "Polarization"
+            corrProductStr, PolarizationType, "Polarization", False
         )
 
     def toBin(self):

@@ -72,9 +72,77 @@ class WeatherRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._pressureExists = False
+
+        self._pressure = Pressure()
+
+        self._relHumidityExists = False
+
+        self._relHumidity = Humidity()
+
+        self._temperatureExists = False
+
+        self._temperature = Temperature()
+
+        self._windDirectionExists = False
+
+        self._windDirection = Angle()
+
+        self._windSpeedExists = False
+
+        self._windSpeed = Speed()
+
+        self._windMaxExists = False
+
+        self._windMax = Speed()
+
+        self._dewPointExists = False
+
+        self._dewPoint = Temperature()
+
+        self._numLayerExists = False
+
+        self._numLayer = 0
+
+        self._layerHeightExists = False
+
+        self._layerHeight = []  # this is a list of Length []
+
+        self._temperatureProfileExists = False
+
+        self._temperatureProfile = []  # this is a list of Temperature []
+
+        self._cloudMonitorExists = False
+
+        self._cloudMonitor = Temperature()
+
+        self._numWVRExists = False
+
+        self._numWVR = 0
+
+        self._wvrTempExists = False
+
+        self._wvrTemp = []  # this is a list of Temperature []
+
+        self._waterExists = False
+
+        self._water = None
+
+        # extrinsic attributes
+
+        self._stationId = Tag()
+
         if row is not None:
             if not isinstance(row, WeatherRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._stationId = Tag(row._stationId)
 
@@ -309,70 +377,71 @@ class WeatherRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         pressureNode = rowdom.getElementsByTagName("pressure")
         if len(pressureNode) > 0:
 
-            self._pressure = Pressure(pressureNode[0].firstChild.data)
+            self._pressure = Pressure(pressureNode[0].firstChild.data.strip())
 
             self._pressureExists = True
 
         relHumidityNode = rowdom.getElementsByTagName("relHumidity")
         if len(relHumidityNode) > 0:
 
-            self._relHumidity = Humidity(relHumidityNode[0].firstChild.data)
+            self._relHumidity = Humidity(relHumidityNode[0].firstChild.data.strip())
 
             self._relHumidityExists = True
 
         temperatureNode = rowdom.getElementsByTagName("temperature")
         if len(temperatureNode) > 0:
 
-            self._temperature = Temperature(temperatureNode[0].firstChild.data)
+            self._temperature = Temperature(temperatureNode[0].firstChild.data.strip())
 
             self._temperatureExists = True
 
         windDirectionNode = rowdom.getElementsByTagName("windDirection")
         if len(windDirectionNode) > 0:
 
-            self._windDirection = Angle(windDirectionNode[0].firstChild.data)
+            self._windDirection = Angle(windDirectionNode[0].firstChild.data.strip())
 
             self._windDirectionExists = True
 
         windSpeedNode = rowdom.getElementsByTagName("windSpeed")
         if len(windSpeedNode) > 0:
 
-            self._windSpeed = Speed(windSpeedNode[0].firstChild.data)
+            self._windSpeed = Speed(windSpeedNode[0].firstChild.data.strip())
 
             self._windSpeedExists = True
 
         windMaxNode = rowdom.getElementsByTagName("windMax")
         if len(windMaxNode) > 0:
 
-            self._windMax = Speed(windMaxNode[0].firstChild.data)
+            self._windMax = Speed(windMaxNode[0].firstChild.data.strip())
 
             self._windMaxExists = True
 
         dewPointNode = rowdom.getElementsByTagName("dewPoint")
         if len(dewPointNode) > 0:
 
-            self._dewPoint = Temperature(dewPointNode[0].firstChild.data)
+            self._dewPoint = Temperature(dewPointNode[0].firstChild.data.strip())
 
             self._dewPointExists = True
 
         numLayerNode = rowdom.getElementsByTagName("numLayer")
         if len(numLayerNode) > 0:
 
-            self._numLayer = int(numLayerNode[0].firstChild.data)
+            self._numLayer = int(numLayerNode[0].firstChild.data.strip())
 
             self._numLayerExists = True
 
         layerHeightNode = rowdom.getElementsByTagName("layerHeight")
         if len(layerHeightNode) > 0:
 
-            layerHeightStr = layerHeightNode[0].firstChild.data
+            layerHeightStr = layerHeightNode[0].firstChild.data.strip()
+
             self._layerHeight = Parser.stringListToLists(
-                layerHeightStr, Length, "Weather"
+                layerHeightStr, Length, "Weather", True
             )
 
             self._layerHeightExists = True
@@ -380,9 +449,10 @@ class WeatherRow:
         temperatureProfileNode = rowdom.getElementsByTagName("temperatureProfile")
         if len(temperatureProfileNode) > 0:
 
-            temperatureProfileStr = temperatureProfileNode[0].firstChild.data
+            temperatureProfileStr = temperatureProfileNode[0].firstChild.data.strip()
+
             self._temperatureProfile = Parser.stringListToLists(
-                temperatureProfileStr, Temperature, "Weather"
+                temperatureProfileStr, Temperature, "Weather", True
             )
 
             self._temperatureProfileExists = True
@@ -390,29 +460,34 @@ class WeatherRow:
         cloudMonitorNode = rowdom.getElementsByTagName("cloudMonitor")
         if len(cloudMonitorNode) > 0:
 
-            self._cloudMonitor = Temperature(cloudMonitorNode[0].firstChild.data)
+            self._cloudMonitor = Temperature(
+                cloudMonitorNode[0].firstChild.data.strip()
+            )
 
             self._cloudMonitorExists = True
 
         numWVRNode = rowdom.getElementsByTagName("numWVR")
         if len(numWVRNode) > 0:
 
-            self._numWVR = int(numWVRNode[0].firstChild.data)
+            self._numWVR = int(numWVRNode[0].firstChild.data.strip())
 
             self._numWVRExists = True
 
         wvrTempNode = rowdom.getElementsByTagName("wvrTemp")
         if len(wvrTempNode) > 0:
 
-            wvrTempStr = wvrTempNode[0].firstChild.data
-            self._wvrTemp = Parser.stringListToLists(wvrTempStr, Temperature, "Weather")
+            wvrTempStr = wvrTempNode[0].firstChild.data.strip()
+
+            self._wvrTemp = Parser.stringListToLists(
+                wvrTempStr, Temperature, "Weather", True
+            )
 
             self._wvrTempExists = True
 
         waterNode = rowdom.getElementsByTagName("water")
         if len(waterNode) > 0:
 
-            self._water = double(waterNode[0].firstChild.data)
+            self._water = float(waterNode[0].firstChild.data.strip())
 
             self._waterExists = True
 
@@ -420,7 +495,7 @@ class WeatherRow:
 
         stationIdNode = rowdom.getElementsByTagName("stationId")[0]
 
-        self._stationId = Tag(stationIdNode.firstChild.data)
+        self._stationId = Tag(stationIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -1128,7 +1203,7 @@ class WeatherRow:
     def getWater(self):
         """
         Get water, which is optional.
-        return water as double
+        return water as float
         raises ValueError If water does not exist.
         """
         if not self._waterExists:
@@ -1142,13 +1217,13 @@ class WeatherRow:
 
     def setWater(self, water):
         """
-        Set water with the specified double value.
-        water The double value to which water is to be set.
+        Set water with the specified float value.
+        water The float value to which water is to be set.
 
 
         """
 
-        self._water = double(water)
+        self._water = float(water)
 
         self._waterExists = True
 

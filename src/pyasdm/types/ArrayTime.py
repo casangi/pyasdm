@@ -531,6 +531,26 @@ class ArrayTime(Interval):
         t.sub(interval)
         return t
 
+    @staticmethod
+    def getInstance(stringList):
+        """
+        Retrieve a value from a list of strings and convert that to an ArrayTime.
+
+        This is used when parsing ArrayTime lists from an XML representation to
+        eventually construct a list of ArrayTime instances. The values are expected
+        to be integers representing nanoseconds.
+
+        Returns a tuple of (ArrayTime, stringList) where ArrayTime is the new ArrayTime
+        created by this call and stringList is the remaining, unused, part of
+        stringList after removing the first element.
+        """
+        if not isinstance(stringList, list):
+            raise ValueError("stringList is not a list")
+
+        # this will raise an error if there aren't any elements on stringList
+        intVal = int(stringList[0])
+        return (ArrayTime(intVal), stringList[1:])
+
     # deferred getArrayTime(StringTokenizer t)
     # deferred method to/from streams
     # toBin(self, astream)

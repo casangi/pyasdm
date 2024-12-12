@@ -72,9 +72,27 @@ class DataDescriptionRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._dataDescriptionId = Tag()
+
+        # extrinsic attributes
+
+        self._polOrHoloId = Tag()
+
+        self._pulsarIdExists = False
+
+        self._pulsarId = Tag()
+
+        self._spectralWindowId = Tag()
+
         if row is not None:
             if not isinstance(row, DataDescriptionRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._dataDescriptionId = Tag(row._dataDescriptionId)
 
@@ -156,24 +174,24 @@ class DataDescriptionRow:
 
         dataDescriptionIdNode = rowdom.getElementsByTagName("dataDescriptionId")[0]
 
-        self._dataDescriptionId = Tag(dataDescriptionIdNode.firstChild.data)
+        self._dataDescriptionId = Tag(dataDescriptionIdNode.firstChild.data.strip())
 
         # extrinsic attribute values
 
         polOrHoloIdNode = rowdom.getElementsByTagName("polOrHoloId")[0]
 
-        self._polOrHoloId = Tag(polOrHoloIdNode.firstChild.data)
+        self._polOrHoloId = Tag(polOrHoloIdNode.firstChild.data.strip())
 
         pulsarIdNode = rowdom.getElementsByTagName("pulsarId")
         if len(pulsarIdNode) > 0:
 
-            self._pulsarId = Tag(pulsarIdNode[0].firstChild.data)
+            self._pulsarId = Tag(pulsarIdNode[0].firstChild.data.strip())
 
             self._pulsarIdExists = True
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

@@ -75,12 +75,65 @@ class PointingRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._numSample = 0
+
+        self._encoder = []  # this is a list of Angle []  []
+
+        self._pointingTracking = None
+
+        self._usePolynomials = None
+
+        self._timeOrigin = ArrayTime()
+
+        self._numTerm = 0
+
+        self._pointingDirection = []  # this is a list of Angle []  []
+
+        self._target = []  # this is a list of Angle []  []
+
+        self._offset = []  # this is a list of Angle []  []
+
+        self._overTheTopExists = False
+
+        self._overTheTop = None
+
+        self._sourceOffsetExists = False
+
+        self._sourceOffset = []  # this is a list of Angle []  []
+
+        self._sourceOffsetReferenceCodeExists = False
+
         self._sourceOffsetReferenceCode = DirectionReferenceCode.from_int(0)
+
+        self._sourceOffsetEquinoxExists = False
+
+        self._sourceOffsetEquinox = ArrayTime()
+
+        self._sampledTimeIntervalExists = False
+
+        self._sampledTimeInterval = []  # this is a list of ArrayTimeInterval []
+
+        self._atmosphericCorrectionExists = False
+
+        self._atmosphericCorrection = []  # this is a list of Angle []  []
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._pointingModelId = 0
 
         if row is not None:
             if not isinstance(row, PointingRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -275,63 +328,68 @@ class PointingRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         numSampleNode = rowdom.getElementsByTagName("numSample")[0]
 
-        self._numSample = int(numSampleNode.firstChild.data)
+        self._numSample = int(numSampleNode.firstChild.data.strip())
 
         encoderNode = rowdom.getElementsByTagName("encoder")[0]
 
-        encoderStr = encoderNode.firstChild.data
-        self._encoder = Parser.stringListToLists(encoderStr, Angle, "Pointing")
+        encoderStr = encoderNode.firstChild.data.strip()
+
+        self._encoder = Parser.stringListToLists(encoderStr, Angle, "Pointing", True)
 
         pointingTrackingNode = rowdom.getElementsByTagName("pointingTracking")[0]
 
-        self._pointingTracking = bool(pointingTrackingNode.firstChild.data)
+        self._pointingTracking = bool(pointingTrackingNode.firstChild.data.strip())
 
         usePolynomialsNode = rowdom.getElementsByTagName("usePolynomials")[0]
 
-        self._usePolynomials = bool(usePolynomialsNode.firstChild.data)
+        self._usePolynomials = bool(usePolynomialsNode.firstChild.data.strip())
 
         timeOriginNode = rowdom.getElementsByTagName("timeOrigin")[0]
 
-        self._timeOrigin = ArrayTime(timeOriginNode.firstChild.data)
+        self._timeOrigin = ArrayTime(timeOriginNode.firstChild.data.strip())
 
         numTermNode = rowdom.getElementsByTagName("numTerm")[0]
 
-        self._numTerm = int(numTermNode.firstChild.data)
+        self._numTerm = int(numTermNode.firstChild.data.strip())
 
         pointingDirectionNode = rowdom.getElementsByTagName("pointingDirection")[0]
 
-        pointingDirectionStr = pointingDirectionNode.firstChild.data
+        pointingDirectionStr = pointingDirectionNode.firstChild.data.strip()
+
         self._pointingDirection = Parser.stringListToLists(
-            pointingDirectionStr, Angle, "Pointing"
+            pointingDirectionStr, Angle, "Pointing", True
         )
 
         targetNode = rowdom.getElementsByTagName("target")[0]
 
-        targetStr = targetNode.firstChild.data
-        self._target = Parser.stringListToLists(targetStr, Angle, "Pointing")
+        targetStr = targetNode.firstChild.data.strip()
+
+        self._target = Parser.stringListToLists(targetStr, Angle, "Pointing", True)
 
         offsetNode = rowdom.getElementsByTagName("offset")[0]
 
-        offsetStr = offsetNode.firstChild.data
-        self._offset = Parser.stringListToLists(offsetStr, Angle, "Pointing")
+        offsetStr = offsetNode.firstChild.data.strip()
+
+        self._offset = Parser.stringListToLists(offsetStr, Angle, "Pointing", True)
 
         overTheTopNode = rowdom.getElementsByTagName("overTheTop")
         if len(overTheTopNode) > 0:
 
-            self._overTheTop = bool(overTheTopNode[0].firstChild.data)
+            self._overTheTop = bool(overTheTopNode[0].firstChild.data.strip())
 
             self._overTheTopExists = True
 
         sourceOffsetNode = rowdom.getElementsByTagName("sourceOffset")
         if len(sourceOffsetNode) > 0:
 
-            sourceOffsetStr = sourceOffsetNode[0].firstChild.data
+            sourceOffsetStr = sourceOffsetNode[0].firstChild.data.strip()
+
             self._sourceOffset = Parser.stringListToLists(
-                sourceOffsetStr, Angle, "Pointing"
+                sourceOffsetStr, Angle, "Pointing", True
             )
 
             self._sourceOffsetExists = True
@@ -343,7 +401,7 @@ class PointingRow:
 
             self._sourceOffsetReferenceCode = (
                 DirectionReferenceCode.newDirectionReferenceCode(
-                    sourceOffsetReferenceCodeNode[0].firstChild.data
+                    sourceOffsetReferenceCodeNode[0].firstChild.data.strip()
                 )
             )
 
@@ -353,7 +411,7 @@ class PointingRow:
         if len(sourceOffsetEquinoxNode) > 0:
 
             self._sourceOffsetEquinox = ArrayTime(
-                sourceOffsetEquinoxNode[0].firstChild.data
+                sourceOffsetEquinoxNode[0].firstChild.data.strip()
             )
 
             self._sourceOffsetEquinoxExists = True
@@ -361,9 +419,10 @@ class PointingRow:
         sampledTimeIntervalNode = rowdom.getElementsByTagName("sampledTimeInterval")
         if len(sampledTimeIntervalNode) > 0:
 
-            sampledTimeIntervalStr = sampledTimeIntervalNode[0].firstChild.data
+            sampledTimeIntervalStr = sampledTimeIntervalNode[0].firstChild.data.strip()
+
             self._sampledTimeInterval = Parser.stringListToLists(
-                sampledTimeIntervalStr, ArrayTimeInterval, "Pointing"
+                sampledTimeIntervalStr, ArrayTimeInterval, "Pointing", True
             )
 
             self._sampledTimeIntervalExists = True
@@ -371,9 +430,12 @@ class PointingRow:
         atmosphericCorrectionNode = rowdom.getElementsByTagName("atmosphericCorrection")
         if len(atmosphericCorrectionNode) > 0:
 
-            atmosphericCorrectionStr = atmosphericCorrectionNode[0].firstChild.data
+            atmosphericCorrectionStr = atmosphericCorrectionNode[
+                0
+            ].firstChild.data.strip()
+
             self._atmosphericCorrection = Parser.stringListToLists(
-                atmosphericCorrectionStr, Angle, "Pointing"
+                atmosphericCorrectionStr, Angle, "Pointing", True
             )
 
             self._atmosphericCorrectionExists = True
@@ -382,11 +444,11 @@ class PointingRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         pointingModelIdNode = rowdom.getElementsByTagName("pointingModelId")[0]
 
-        self._pointingModelId = int(pointingModelIdNode.firstChild.data)
+        self._pointingModelId = int(pointingModelIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

@@ -93,30 +93,147 @@ class SourceRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._sourceId = 0
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._code = None
+
+        self._direction = []  # this is a list of Angle []
+
+        self._properMotion = []  # this is a list of AngularRate []
+
+        self._sourceName = None
+
+        self._directionCodeExists = False
+
         self._directionCode = DirectionReferenceCode.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._directionEquinoxExists = False
+
+        self._directionEquinox = ArrayTime()
+
+        self._calibrationGroupExists = False
+
+        self._calibrationGroup = 0
+
+        self._catalogExists = False
+
+        self._catalog = None
+
+        self._deltaVelExists = False
+
+        self._deltaVel = Speed()
+
+        self._positionExists = False
+
+        self._position = []  # this is a list of Length []
+
+        self._numLinesExists = False
+
+        self._numLines = 0
+
+        self._transitionExists = False
+
+        self._transition = []  # this is a list of str []
+
+        self._restFrequencyExists = False
+
+        self._restFrequency = []  # this is a list of Frequency []
+
+        self._sysVelExists = False
+
+        self._sysVel = []  # this is a list of Speed []
+
+        self._rangeVelExists = False
+
+        self._rangeVel = []  # this is a list of Speed []
+
+        self._sourceModelExists = False
+
         self._sourceModel = SourceModel.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._frequencyRefCodeExists = False
+
         self._frequencyRefCode = FrequencyReferenceCode.from_int(0)
 
-        # this is a list of StokesParameter Enumeration, start off with it being empty
-        self._stokesParameter = []
+        self._numFreqExists = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._numFreq = 0
+
+        self._numStokesExists = False
+
+        self._numStokes = 0
+
+        self._frequencyExists = False
+
+        self._frequency = []  # this is a list of Frequency []
+
+        self._frequencyIntervalExists = False
+
+        self._frequencyInterval = []  # this is a list of Frequency []
+
+        self._stokesParameterExists = False
+
+        self._stokesParameter = []  # this is a list of StokesParameter []
+
+        self._fluxExists = False
+
+        self._flux = []  # this is a list of Flux []  []
+
+        self._fluxErrExists = False
+
+        self._fluxErr = []  # this is a list of Flux []  []
+
+        self._positionAngleExists = False
+
+        self._positionAngle = []  # this is a list of Angle []
+
+        self._positionAngleErrExists = False
+
+        self._positionAngleErr = []  # this is a list of Angle []
+
+        self._sizeExists = False
+
+        self._size = []  # this is a list of Angle []  []
+
+        self._sizeErrExists = False
+
+        self._sizeErr = []  # this is a list of Angle []  []
+
+        self._velRefCodeExists = False
+
         self._velRefCode = RadialVelocityReferenceCode.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._dopplerVelocityExists = False
+
+        self._dopplerVelocity = []  # this is a list of Speed []
+
+        self._dopplerReferenceSystemExists = False
+
         self._dopplerReferenceSystem = RadialVelocityReferenceCode.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._dopplerCalcTypeExists = False
+
         self._dopplerCalcType = DopplerReferenceCode.from_int(0)
+
+        self._parallaxExists = False
+
+        self._parallax = []  # this is a list of Angle []
+
+        # extrinsic attributes
+
+        self._spectralWindowId = Tag()
 
         if row is not None:
             if not isinstance(row, SourceRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._sourceId = row._sourceId
 
@@ -609,37 +726,39 @@ class SourceRow:
 
         sourceIdNode = rowdom.getElementsByTagName("sourceId")[0]
 
-        self._sourceId = int(sourceIdNode.firstChild.data)
+        self._sourceId = int(sourceIdNode.firstChild.data.strip())
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         codeNode = rowdom.getElementsByTagName("code")[0]
 
-        self._code = str(codeNode.firstChild.data)
+        self._code = str(codeNode.firstChild.data.strip())
 
         directionNode = rowdom.getElementsByTagName("direction")[0]
 
-        directionStr = directionNode.firstChild.data
-        self._direction = Parser.stringListToLists(directionStr, Angle, "Source")
+        directionStr = directionNode.firstChild.data.strip()
+
+        self._direction = Parser.stringListToLists(directionStr, Angle, "Source", True)
 
         properMotionNode = rowdom.getElementsByTagName("properMotion")[0]
 
-        properMotionStr = properMotionNode.firstChild.data
+        properMotionStr = properMotionNode.firstChild.data.strip()
+
         self._properMotion = Parser.stringListToLists(
-            properMotionStr, AngularRate, "Source"
+            properMotionStr, AngularRate, "Source", True
         )
 
         sourceNameNode = rowdom.getElementsByTagName("sourceName")[0]
 
-        self._sourceName = str(sourceNameNode.firstChild.data)
+        self._sourceName = str(sourceNameNode.firstChild.data.strip())
 
         directionCodeNode = rowdom.getElementsByTagName("directionCode")
         if len(directionCodeNode) > 0:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data
+                directionCodeNode[0].firstChild.data.strip()
             )
 
             self._directionCodeExists = True
@@ -647,60 +766,71 @@ class SourceRow:
         directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
         if len(directionEquinoxNode) > 0:
 
-            self._directionEquinox = ArrayTime(directionEquinoxNode[0].firstChild.data)
+            self._directionEquinox = ArrayTime(
+                directionEquinoxNode[0].firstChild.data.strip()
+            )
 
             self._directionEquinoxExists = True
 
         calibrationGroupNode = rowdom.getElementsByTagName("calibrationGroup")
         if len(calibrationGroupNode) > 0:
 
-            self._calibrationGroup = int(calibrationGroupNode[0].firstChild.data)
+            self._calibrationGroup = int(
+                calibrationGroupNode[0].firstChild.data.strip()
+            )
 
             self._calibrationGroupExists = True
 
         catalogNode = rowdom.getElementsByTagName("catalog")
         if len(catalogNode) > 0:
 
-            self._catalog = str(catalogNode[0].firstChild.data)
+            self._catalog = str(catalogNode[0].firstChild.data.strip())
 
             self._catalogExists = True
 
         deltaVelNode = rowdom.getElementsByTagName("deltaVel")
         if len(deltaVelNode) > 0:
 
-            self._deltaVel = Speed(deltaVelNode[0].firstChild.data)
+            self._deltaVel = Speed(deltaVelNode[0].firstChild.data.strip())
 
             self._deltaVelExists = True
 
         positionNode = rowdom.getElementsByTagName("position")
         if len(positionNode) > 0:
 
-            positionStr = positionNode[0].firstChild.data
-            self._position = Parser.stringListToLists(positionStr, Length, "Source")
+            positionStr = positionNode[0].firstChild.data.strip()
+
+            self._position = Parser.stringListToLists(
+                positionStr, Length, "Source", True
+            )
 
             self._positionExists = True
 
         numLinesNode = rowdom.getElementsByTagName("numLines")
         if len(numLinesNode) > 0:
 
-            self._numLines = int(numLinesNode[0].firstChild.data)
+            self._numLines = int(numLinesNode[0].firstChild.data.strip())
 
             self._numLinesExists = True
 
         transitionNode = rowdom.getElementsByTagName("transition")
         if len(transitionNode) > 0:
 
-            transitionStr = transitionNode[0].firstChild.data
-            self._transition = Parser.stringListToLists(transitionStr, str, "Source")
+            transitionStr = transitionNode[0].firstChild.data.strip()
+
+            self._transition = Parser.stringListToLists(
+                transitionStr, str, "Source", False
+            )
 
             self._transitionExists = True
 
         restFrequencyNode = rowdom.getElementsByTagName("restFrequency")
         if len(restFrequencyNode) > 0:
 
-            restFrequencyStr = restFrequencyNode[0].firstChild.data
+            restFrequencyStr = restFrequencyNode[0].firstChild.data.strip()
+
             self._restFrequency = Parser.stringListToLists(
-                restFrequencyStr, Frequency, "Source"
+                restFrequencyStr, Frequency, "Source", True
             )
 
             self._restFrequencyExists = True
@@ -708,16 +838,20 @@ class SourceRow:
         sysVelNode = rowdom.getElementsByTagName("sysVel")
         if len(sysVelNode) > 0:
 
-            sysVelStr = sysVelNode[0].firstChild.data
-            self._sysVel = Parser.stringListToLists(sysVelStr, Speed, "Source")
+            sysVelStr = sysVelNode[0].firstChild.data.strip()
+
+            self._sysVel = Parser.stringListToLists(sysVelStr, Speed, "Source", True)
 
             self._sysVelExists = True
 
         rangeVelNode = rowdom.getElementsByTagName("rangeVel")
         if len(rangeVelNode) > 0:
 
-            rangeVelStr = rangeVelNode[0].firstChild.data
-            self._rangeVel = Parser.stringListToLists(rangeVelStr, Speed, "Source")
+            rangeVelStr = rangeVelNode[0].firstChild.data.strip()
+
+            self._rangeVel = Parser.stringListToLists(
+                rangeVelStr, Speed, "Source", True
+            )
 
             self._rangeVelExists = True
 
@@ -725,7 +859,7 @@ class SourceRow:
         if len(sourceModelNode) > 0:
 
             self._sourceModel = SourceModel.newSourceModel(
-                sourceModelNode[0].firstChild.data
+                sourceModelNode[0].firstChild.data.strip()
             )
 
             self._sourceModelExists = True
@@ -734,7 +868,7 @@ class SourceRow:
         if len(frequencyRefCodeNode) > 0:
 
             self._frequencyRefCode = FrequencyReferenceCode.newFrequencyReferenceCode(
-                frequencyRefCodeNode[0].firstChild.data
+                frequencyRefCodeNode[0].firstChild.data.strip()
             )
 
             self._frequencyRefCodeExists = True
@@ -742,23 +876,24 @@ class SourceRow:
         numFreqNode = rowdom.getElementsByTagName("numFreq")
         if len(numFreqNode) > 0:
 
-            self._numFreq = int(numFreqNode[0].firstChild.data)
+            self._numFreq = int(numFreqNode[0].firstChild.data.strip())
 
             self._numFreqExists = True
 
         numStokesNode = rowdom.getElementsByTagName("numStokes")
         if len(numStokesNode) > 0:
 
-            self._numStokes = int(numStokesNode[0].firstChild.data)
+            self._numStokes = int(numStokesNode[0].firstChild.data.strip())
 
             self._numStokesExists = True
 
         frequencyNode = rowdom.getElementsByTagName("frequency")
         if len(frequencyNode) > 0:
 
-            frequencyStr = frequencyNode[0].firstChild.data
+            frequencyStr = frequencyNode[0].firstChild.data.strip()
+
             self._frequency = Parser.stringListToLists(
-                frequencyStr, Frequency, "Source"
+                frequencyStr, Frequency, "Source", True
             )
 
             self._frequencyExists = True
@@ -766,9 +901,10 @@ class SourceRow:
         frequencyIntervalNode = rowdom.getElementsByTagName("frequencyInterval")
         if len(frequencyIntervalNode) > 0:
 
-            frequencyIntervalStr = frequencyIntervalNode[0].firstChild.data
+            frequencyIntervalStr = frequencyIntervalNode[0].firstChild.data.strip()
+
             self._frequencyInterval = Parser.stringListToLists(
-                frequencyIntervalStr, Frequency, "Source"
+                frequencyIntervalStr, Frequency, "Source", True
             )
 
             self._frequencyIntervalExists = True
@@ -776,9 +912,9 @@ class SourceRow:
         stokesParameterNode = rowdom.getElementsByTagName("stokesParameter")
         if len(stokesParameterNode) > 0:
 
-            stokesParameterStr = stokesParameterNode[0].firstChild.data
+            stokesParameterStr = stokesParameterNode[0].firstChild.data.strip()
             self._stokesParameter = Parser.stringListToLists(
-                stokesParameterStr, StokesParameter, "Source"
+                stokesParameterStr, StokesParameter, "Source", False
             )
 
             self._stokesParameterExists = True
@@ -786,25 +922,28 @@ class SourceRow:
         fluxNode = rowdom.getElementsByTagName("flux")
         if len(fluxNode) > 0:
 
-            fluxStr = fluxNode[0].firstChild.data
-            self._flux = Parser.stringListToLists(fluxStr, Flux, "Source")
+            fluxStr = fluxNode[0].firstChild.data.strip()
+
+            self._flux = Parser.stringListToLists(fluxStr, Flux, "Source", True)
 
             self._fluxExists = True
 
         fluxErrNode = rowdom.getElementsByTagName("fluxErr")
         if len(fluxErrNode) > 0:
 
-            fluxErrStr = fluxErrNode[0].firstChild.data
-            self._fluxErr = Parser.stringListToLists(fluxErrStr, Flux, "Source")
+            fluxErrStr = fluxErrNode[0].firstChild.data.strip()
+
+            self._fluxErr = Parser.stringListToLists(fluxErrStr, Flux, "Source", True)
 
             self._fluxErrExists = True
 
         positionAngleNode = rowdom.getElementsByTagName("positionAngle")
         if len(positionAngleNode) > 0:
 
-            positionAngleStr = positionAngleNode[0].firstChild.data
+            positionAngleStr = positionAngleNode[0].firstChild.data.strip()
+
             self._positionAngle = Parser.stringListToLists(
-                positionAngleStr, Angle, "Source"
+                positionAngleStr, Angle, "Source", True
             )
 
             self._positionAngleExists = True
@@ -812,9 +951,10 @@ class SourceRow:
         positionAngleErrNode = rowdom.getElementsByTagName("positionAngleErr")
         if len(positionAngleErrNode) > 0:
 
-            positionAngleErrStr = positionAngleErrNode[0].firstChild.data
+            positionAngleErrStr = positionAngleErrNode[0].firstChild.data.strip()
+
             self._positionAngleErr = Parser.stringListToLists(
-                positionAngleErrStr, Angle, "Source"
+                positionAngleErrStr, Angle, "Source", True
             )
 
             self._positionAngleErrExists = True
@@ -822,16 +962,18 @@ class SourceRow:
         sizeNode = rowdom.getElementsByTagName("size")
         if len(sizeNode) > 0:
 
-            sizeStr = sizeNode[0].firstChild.data
-            self._size = Parser.stringListToLists(sizeStr, Angle, "Source")
+            sizeStr = sizeNode[0].firstChild.data.strip()
+
+            self._size = Parser.stringListToLists(sizeStr, Angle, "Source", True)
 
             self._sizeExists = True
 
         sizeErrNode = rowdom.getElementsByTagName("sizeErr")
         if len(sizeErrNode) > 0:
 
-            sizeErrStr = sizeErrNode[0].firstChild.data
-            self._sizeErr = Parser.stringListToLists(sizeErrStr, Angle, "Source")
+            sizeErrStr = sizeErrNode[0].firstChild.data.strip()
+
+            self._sizeErr = Parser.stringListToLists(sizeErrStr, Angle, "Source", True)
 
             self._sizeErrExists = True
 
@@ -840,7 +982,7 @@ class SourceRow:
 
             self._velRefCode = (
                 RadialVelocityReferenceCode.newRadialVelocityReferenceCode(
-                    velRefCodeNode[0].firstChild.data
+                    velRefCodeNode[0].firstChild.data.strip()
                 )
             )
 
@@ -849,9 +991,10 @@ class SourceRow:
         dopplerVelocityNode = rowdom.getElementsByTagName("dopplerVelocity")
         if len(dopplerVelocityNode) > 0:
 
-            dopplerVelocityStr = dopplerVelocityNode[0].firstChild.data
+            dopplerVelocityStr = dopplerVelocityNode[0].firstChild.data.strip()
+
             self._dopplerVelocity = Parser.stringListToLists(
-                dopplerVelocityStr, Speed, "Source"
+                dopplerVelocityStr, Speed, "Source", True
             )
 
             self._dopplerVelocityExists = True
@@ -863,7 +1006,7 @@ class SourceRow:
 
             self._dopplerReferenceSystem = (
                 RadialVelocityReferenceCode.newRadialVelocityReferenceCode(
-                    dopplerReferenceSystemNode[0].firstChild.data
+                    dopplerReferenceSystemNode[0].firstChild.data.strip()
                 )
             )
 
@@ -873,7 +1016,7 @@ class SourceRow:
         if len(dopplerCalcTypeNode) > 0:
 
             self._dopplerCalcType = DopplerReferenceCode.newDopplerReferenceCode(
-                dopplerCalcTypeNode[0].firstChild.data
+                dopplerCalcTypeNode[0].firstChild.data.strip()
             )
 
             self._dopplerCalcTypeExists = True
@@ -881,8 +1024,11 @@ class SourceRow:
         parallaxNode = rowdom.getElementsByTagName("parallax")
         if len(parallaxNode) > 0:
 
-            parallaxStr = parallaxNode[0].firstChild.data
-            self._parallax = Parser.stringListToLists(parallaxStr, Angle, "Source")
+            parallaxStr = parallaxNode[0].firstChild.data.strip()
+
+            self._parallax = Parser.stringListToLists(
+                parallaxStr, Angle, "Source", True
+            )
 
             self._parallaxExists = True
 
@@ -890,7 +1036,7 @@ class SourceRow:
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

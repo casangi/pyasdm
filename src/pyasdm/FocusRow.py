@@ -72,9 +72,37 @@ class FocusRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._focusTracking = None
+
+        self._focusOffset = []  # this is a list of Length []
+
+        self._focusRotationOffset = []  # this is a list of Angle []
+
+        self._measuredFocusPositionExists = False
+
+        self._measuredFocusPosition = []  # this is a list of Length []
+
+        self._measuredFocusRotationExists = False
+
+        self._measuredFocusRotation = []  # this is a list of Angle []
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._focusModelId = 0
+
         if row is not None:
             if not isinstance(row, FocusRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -186,30 +214,37 @@ class FocusRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         focusTrackingNode = rowdom.getElementsByTagName("focusTracking")[0]
 
-        self._focusTracking = bool(focusTrackingNode.firstChild.data)
+        self._focusTracking = bool(focusTrackingNode.firstChild.data.strip())
 
         focusOffsetNode = rowdom.getElementsByTagName("focusOffset")[0]
 
-        focusOffsetStr = focusOffsetNode.firstChild.data
-        self._focusOffset = Parser.stringListToLists(focusOffsetStr, Length, "Focus")
+        focusOffsetStr = focusOffsetNode.firstChild.data.strip()
+
+        self._focusOffset = Parser.stringListToLists(
+            focusOffsetStr, Length, "Focus", True
+        )
 
         focusRotationOffsetNode = rowdom.getElementsByTagName("focusRotationOffset")[0]
 
-        focusRotationOffsetStr = focusRotationOffsetNode.firstChild.data
+        focusRotationOffsetStr = focusRotationOffsetNode.firstChild.data.strip()
+
         self._focusRotationOffset = Parser.stringListToLists(
-            focusRotationOffsetStr, Angle, "Focus"
+            focusRotationOffsetStr, Angle, "Focus", True
         )
 
         measuredFocusPositionNode = rowdom.getElementsByTagName("measuredFocusPosition")
         if len(measuredFocusPositionNode) > 0:
 
-            measuredFocusPositionStr = measuredFocusPositionNode[0].firstChild.data
+            measuredFocusPositionStr = measuredFocusPositionNode[
+                0
+            ].firstChild.data.strip()
+
             self._measuredFocusPosition = Parser.stringListToLists(
-                measuredFocusPositionStr, Length, "Focus"
+                measuredFocusPositionStr, Length, "Focus", True
             )
 
             self._measuredFocusPositionExists = True
@@ -217,9 +252,12 @@ class FocusRow:
         measuredFocusRotationNode = rowdom.getElementsByTagName("measuredFocusRotation")
         if len(measuredFocusRotationNode) > 0:
 
-            measuredFocusRotationStr = measuredFocusRotationNode[0].firstChild.data
+            measuredFocusRotationStr = measuredFocusRotationNode[
+                0
+            ].firstChild.data.strip()
+
             self._measuredFocusRotation = Parser.stringListToLists(
-                measuredFocusRotationStr, Angle, "Focus"
+                measuredFocusRotationStr, Angle, "Focus", True
             )
 
             self._measuredFocusRotationExists = True
@@ -228,11 +266,11 @@ class FocusRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         focusModelIdNode = rowdom.getElementsByTagName("focusModelId")[0]
 
-        self._focusModelId = int(focusModelIdNode.firstChild.data)
+        self._focusModelId = int(focusModelIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")

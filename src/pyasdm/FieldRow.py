@@ -75,12 +75,61 @@ class FieldRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._fieldId = Tag()
+
+        self._fieldName = None
+
+        self._numPoly = 0
+
+        self._delayDir = []  # this is a list of Angle []  []
+
+        self._phaseDir = []  # this is a list of Angle []  []
+
+        self._referenceDir = []  # this is a list of Angle []  []
+
+        self._timeExists = False
+
+        self._time = ArrayTime()
+
+        self._codeExists = False
+
+        self._code = None
+
+        self._directionCodeExists = False
+
         self._directionCode = DirectionReferenceCode.from_int(0)
+
+        self._directionEquinoxExists = False
+
+        self._directionEquinox = ArrayTime()
+
+        self._assocNatureExists = False
+
+        self._assocNature = None
+
+        # extrinsic attributes
+
+        self._assocFieldIdExists = False
+
+        self._assocFieldId = Tag()
+
+        self._ephemerisIdExists = False
+
+        self._ephemerisId = 0
+
+        self._sourceIdExists = False
+
+        self._sourceId = 0
 
         if row is not None:
             if not isinstance(row, FieldRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._fieldId = Tag(row._fieldId)
 
@@ -264,42 +313,47 @@ class FieldRow:
 
         fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
 
-        self._fieldId = Tag(fieldIdNode.firstChild.data)
+        self._fieldId = Tag(fieldIdNode.firstChild.data.strip())
 
         fieldNameNode = rowdom.getElementsByTagName("fieldName")[0]
 
-        self._fieldName = str(fieldNameNode.firstChild.data)
+        self._fieldName = str(fieldNameNode.firstChild.data.strip())
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data)
+        self._numPoly = int(numPolyNode.firstChild.data.strip())
 
         delayDirNode = rowdom.getElementsByTagName("delayDir")[0]
 
-        delayDirStr = delayDirNode.firstChild.data
-        self._delayDir = Parser.stringListToLists(delayDirStr, Angle, "Field")
+        delayDirStr = delayDirNode.firstChild.data.strip()
+
+        self._delayDir = Parser.stringListToLists(delayDirStr, Angle, "Field", True)
 
         phaseDirNode = rowdom.getElementsByTagName("phaseDir")[0]
 
-        phaseDirStr = phaseDirNode.firstChild.data
-        self._phaseDir = Parser.stringListToLists(phaseDirStr, Angle, "Field")
+        phaseDirStr = phaseDirNode.firstChild.data.strip()
+
+        self._phaseDir = Parser.stringListToLists(phaseDirStr, Angle, "Field", True)
 
         referenceDirNode = rowdom.getElementsByTagName("referenceDir")[0]
 
-        referenceDirStr = referenceDirNode.firstChild.data
-        self._referenceDir = Parser.stringListToLists(referenceDirStr, Angle, "Field")
+        referenceDirStr = referenceDirNode.firstChild.data.strip()
+
+        self._referenceDir = Parser.stringListToLists(
+            referenceDirStr, Angle, "Field", True
+        )
 
         timeNode = rowdom.getElementsByTagName("time")
         if len(timeNode) > 0:
 
-            self._time = ArrayTime(timeNode[0].firstChild.data)
+            self._time = ArrayTime(timeNode[0].firstChild.data.strip())
 
             self._timeExists = True
 
         codeNode = rowdom.getElementsByTagName("code")
         if len(codeNode) > 0:
 
-            self._code = str(codeNode[0].firstChild.data)
+            self._code = str(codeNode[0].firstChild.data.strip())
 
             self._codeExists = True
 
@@ -307,7 +361,7 @@ class FieldRow:
         if len(directionCodeNode) > 0:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data
+                directionCodeNode[0].firstChild.data.strip()
             )
 
             self._directionCodeExists = True
@@ -315,14 +369,16 @@ class FieldRow:
         directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
         if len(directionEquinoxNode) > 0:
 
-            self._directionEquinox = ArrayTime(directionEquinoxNode[0].firstChild.data)
+            self._directionEquinox = ArrayTime(
+                directionEquinoxNode[0].firstChild.data.strip()
+            )
 
             self._directionEquinoxExists = True
 
         assocNatureNode = rowdom.getElementsByTagName("assocNature")
         if len(assocNatureNode) > 0:
 
-            self._assocNature = str(assocNatureNode[0].firstChild.data)
+            self._assocNature = str(assocNatureNode[0].firstChild.data.strip())
 
             self._assocNatureExists = True
 
@@ -331,21 +387,21 @@ class FieldRow:
         assocFieldIdNode = rowdom.getElementsByTagName("assocFieldId")
         if len(assocFieldIdNode) > 0:
 
-            self._assocFieldId = Tag(assocFieldIdNode[0].firstChild.data)
+            self._assocFieldId = Tag(assocFieldIdNode[0].firstChild.data.strip())
 
             self._assocFieldIdExists = True
 
         ephemerisIdNode = rowdom.getElementsByTagName("ephemerisId")
         if len(ephemerisIdNode) > 0:
 
-            self._ephemerisId = int(ephemerisIdNode[0].firstChild.data)
+            self._ephemerisId = int(ephemerisIdNode[0].firstChild.data.strip())
 
             self._ephemerisIdExists = True
 
         sourceIdNode = rowdom.getElementsByTagName("sourceId")
         if len(sourceIdNode) > 0:
 
-            self._sourceId = int(sourceIdNode[0].firstChild.data)
+            self._sourceId = int(sourceIdNode[0].firstChild.data.strip())
 
             self._sourceIdExists = True
 

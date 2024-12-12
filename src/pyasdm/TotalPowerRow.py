@@ -72,9 +72,51 @@ class TotalPowerRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._time = ArrayTime()
+
+        self._scanNumber = 0
+
+        self._subscanNumber = 0
+
+        self._integrationNumber = 0
+
+        self._uvw = []  # this is a list of Length []  []
+
+        self._exposure = []  # this is a list of Interval []  []
+
+        self._timeCentroid = []  # this is a list of ArrayTime []  []
+
+        self._floatData = []  # this is a list of float []  []  []
+
+        self._flagAnt = []  # this is a list of int []
+
+        self._flagPol = []  # this is a list of int []  []
+
+        self._interval = Interval()
+
+        self._subintegrationNumberExists = False
+
+        self._subintegrationNumber = 0
+
+        # extrinsic attributes
+
+        self._configDescriptionId = Tag()
+
+        self._execBlockId = Tag()
+
+        self._fieldId = Tag()
+
+        self._stateId = []  # this is a list of Tag []
+
         if row is not None:
             if not isinstance(row, TotalPowerRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._time = ArrayTime(row._time)
 
@@ -216,61 +258,71 @@ class TotalPowerRow:
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data)
+        self._time = ArrayTime(timeNode.firstChild.data.strip())
 
         scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
 
-        self._scanNumber = int(scanNumberNode.firstChild.data)
+        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
 
         subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
 
-        self._subscanNumber = int(subscanNumberNode.firstChild.data)
+        self._subscanNumber = int(subscanNumberNode.firstChild.data.strip())
 
         integrationNumberNode = rowdom.getElementsByTagName("integrationNumber")[0]
 
-        self._integrationNumber = int(integrationNumberNode.firstChild.data)
+        self._integrationNumber = int(integrationNumberNode.firstChild.data.strip())
 
         uvwNode = rowdom.getElementsByTagName("uvw")[0]
 
-        uvwStr = uvwNode.firstChild.data
-        self._uvw = Parser.stringListToLists(uvwStr, Length, "TotalPower")
+        uvwStr = uvwNode.firstChild.data.strip()
+
+        self._uvw = Parser.stringListToLists(uvwStr, Length, "TotalPower", True)
 
         exposureNode = rowdom.getElementsByTagName("exposure")[0]
 
-        exposureStr = exposureNode.firstChild.data
-        self._exposure = Parser.stringListToLists(exposureStr, Interval, "TotalPower")
+        exposureStr = exposureNode.firstChild.data.strip()
+
+        self._exposure = Parser.stringListToLists(
+            exposureStr, Interval, "TotalPower", True
+        )
 
         timeCentroidNode = rowdom.getElementsByTagName("timeCentroid")[0]
 
-        timeCentroidStr = timeCentroidNode.firstChild.data
+        timeCentroidStr = timeCentroidNode.firstChild.data.strip()
+
         self._timeCentroid = Parser.stringListToLists(
-            timeCentroidStr, ArrayTime, "TotalPower"
+            timeCentroidStr, ArrayTime, "TotalPower", True
         )
 
         floatDataNode = rowdom.getElementsByTagName("floatData")[0]
 
-        floatDataStr = floatDataNode.firstChild.data
-        self._floatData = Parser.stringListToLists(floatDataStr, float, "TotalPower")
+        floatDataStr = floatDataNode.firstChild.data.strip()
+
+        self._floatData = Parser.stringListToLists(
+            floatDataStr, float, "TotalPower", False
+        )
 
         flagAntNode = rowdom.getElementsByTagName("flagAnt")[0]
 
-        flagAntStr = flagAntNode.firstChild.data
-        self._flagAnt = Parser.stringListToLists(flagAntStr, int, "TotalPower")
+        flagAntStr = flagAntNode.firstChild.data.strip()
+
+        self._flagAnt = Parser.stringListToLists(flagAntStr, int, "TotalPower", False)
 
         flagPolNode = rowdom.getElementsByTagName("flagPol")[0]
 
-        flagPolStr = flagPolNode.firstChild.data
-        self._flagPol = Parser.stringListToLists(flagPolStr, int, "TotalPower")
+        flagPolStr = flagPolNode.firstChild.data.strip()
+
+        self._flagPol = Parser.stringListToLists(flagPolStr, int, "TotalPower", False)
 
         intervalNode = rowdom.getElementsByTagName("interval")[0]
 
-        self._interval = Interval(intervalNode.firstChild.data)
+        self._interval = Interval(intervalNode.firstChild.data.strip())
 
         subintegrationNumberNode = rowdom.getElementsByTagName("subintegrationNumber")
         if len(subintegrationNumberNode) > 0:
 
             self._subintegrationNumber = int(
-                subintegrationNumberNode[0].firstChild.data
+                subintegrationNumberNode[0].firstChild.data.strip()
             )
 
             self._subintegrationNumberExists = True
@@ -279,20 +331,21 @@ class TotalPowerRow:
 
         configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
 
-        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data)
+        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data.strip())
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data)
+        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
         fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
 
-        self._fieldId = Tag(fieldIdNode.firstChild.data)
+        self._fieldId = Tag(fieldIdNode.firstChild.data.strip())
 
         stateIdNode = rowdom.getElementsByTagName("stateId")[0]
 
-        stateIdStr = stateIdNode.firstChild.data
-        self._stateId = Parser.stringListToLists(stateIdStr, Tag, "TotalPower")
+        stateIdStr = stateIdNode.firstChild.data.strip()
+
+        self._stateId = Parser.stringListToLists(stateIdStr, Tag, "TotalPower", True)
 
     def toBin(self):
         print("not yet implemented")

@@ -75,12 +75,49 @@ class CalDeviceRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # this is a list of CalibrationDevice Enumeration, start off with it being empty
-        self._calLoadNames = []
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._timeInterval = ArrayTimeInterval()
+
+        self._numCalload = 0
+
+        self._calLoadNames = []  # this is a list of CalibrationDevice []
+
+        self._numReceptorExists = False
+
+        self._numReceptor = 0
+
+        self._calEffExists = False
+
+        self._calEff = []  # this is a list of float []  []
+
+        self._noiseCalExists = False
+
+        self._noiseCal = []  # this is a list of float []
+
+        self._coupledNoiseCalExists = False
+
+        self._coupledNoiseCal = []  # this is a list of float []  []
+
+        self._temperatureLoadExists = False
+
+        self._temperatureLoad = []  # this is a list of Temperature []
+
+        # extrinsic attributes
+
+        self._antennaId = Tag()
+
+        self._feedId = 0
+
+        self._spectralWindowId = Tag()
 
         if row is not None:
             if not isinstance(row, CalDeviceRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaId = Tag(row._antennaId)
 
@@ -225,48 +262,55 @@ class CalDeviceRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data)
+        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
 
         numCalloadNode = rowdom.getElementsByTagName("numCalload")[0]
 
-        self._numCalload = int(numCalloadNode.firstChild.data)
+        self._numCalload = int(numCalloadNode.firstChild.data.strip())
 
         calLoadNamesNode = rowdom.getElementsByTagName("calLoadNames")[0]
 
-        calLoadNamesStr = calLoadNamesNode.firstChild.data
+        calLoadNamesStr = calLoadNamesNode.firstChild.data.strip()
         self._calLoadNames = Parser.stringListToLists(
-            calLoadNamesStr, CalibrationDevice, "CalDevice"
+            calLoadNamesStr, CalibrationDevice, "CalDevice", False
         )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")
         if len(numReceptorNode) > 0:
 
-            self._numReceptor = int(numReceptorNode[0].firstChild.data)
+            self._numReceptor = int(numReceptorNode[0].firstChild.data.strip())
 
             self._numReceptorExists = True
 
         calEffNode = rowdom.getElementsByTagName("calEff")
         if len(calEffNode) > 0:
 
-            calEffStr = calEffNode[0].firstChild.data
-            self._calEff = Parser.stringListToLists(calEffStr, float, "CalDevice")
+            calEffStr = calEffNode[0].firstChild.data.strip()
+
+            self._calEff = Parser.stringListToLists(
+                calEffStr, float, "CalDevice", False
+            )
 
             self._calEffExists = True
 
         noiseCalNode = rowdom.getElementsByTagName("noiseCal")
         if len(noiseCalNode) > 0:
 
-            noiseCalStr = noiseCalNode[0].firstChild.data
-            self._noiseCal = Parser.stringListToLists(noiseCalStr, double, "CalDevice")
+            noiseCalStr = noiseCalNode[0].firstChild.data.strip()
+
+            self._noiseCal = Parser.stringListToLists(
+                noiseCalStr, float, "CalDevice", False
+            )
 
             self._noiseCalExists = True
 
         coupledNoiseCalNode = rowdom.getElementsByTagName("coupledNoiseCal")
         if len(coupledNoiseCalNode) > 0:
 
-            coupledNoiseCalStr = coupledNoiseCalNode[0].firstChild.data
+            coupledNoiseCalStr = coupledNoiseCalNode[0].firstChild.data.strip()
+
             self._coupledNoiseCal = Parser.stringListToLists(
-                coupledNoiseCalStr, float, "CalDevice"
+                coupledNoiseCalStr, float, "CalDevice", False
             )
 
             self._coupledNoiseCalExists = True
@@ -274,9 +318,10 @@ class CalDeviceRow:
         temperatureLoadNode = rowdom.getElementsByTagName("temperatureLoad")
         if len(temperatureLoadNode) > 0:
 
-            temperatureLoadStr = temperatureLoadNode[0].firstChild.data
+            temperatureLoadStr = temperatureLoadNode[0].firstChild.data.strip()
+
             self._temperatureLoad = Parser.stringListToLists(
-                temperatureLoadStr, Temperature, "CalDevice"
+                temperatureLoadStr, Temperature, "CalDevice", True
             )
 
             self._temperatureLoadExists = True
@@ -285,15 +330,15 @@ class CalDeviceRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data)
+        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data)
+        self._feedId = int(feedIdNode.firstChild.data.strip())
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data)
+        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -509,7 +554,7 @@ class CalDeviceRow:
     # ===> Attribute noiseCal, which is optional
     _noiseCalExists = False
 
-    _noiseCal = None  # this is a 1D list of double
+    _noiseCal = None  # this is a 1D list of float
 
     def isNoiseCalExists(self):
         """
@@ -521,7 +566,7 @@ class CalDeviceRow:
     def getNoiseCal(self):
         """
         Get noiseCal, which is optional.
-        return noiseCal as double []
+        return noiseCal as float []
         raises ValueError If noiseCal does not exist.
         """
         if not self._noiseCalExists:
@@ -535,8 +580,8 @@ class CalDeviceRow:
 
     def setNoiseCal(self, noiseCal):
         """
-        Set noiseCal with the specified double []  value.
-        noiseCal The double []  value to which noiseCal is to be set.
+        Set noiseCal with the specified float []  value.
+        noiseCal The float []  value to which noiseCal is to be set.
 
 
         """
@@ -553,11 +598,11 @@ class CalDeviceRow:
             if not shapeOK:
                 raise ValueError("shape of noiseCal is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(noiseCal, double):
+            if not Parser.checkListType(noiseCal, float):
                 raise ValueError(
-                    "type of the first value in noiseCal is not double as expected"
+                    "type of the first value in noiseCal is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._noiseCal = copy.deepcopy(noiseCal)

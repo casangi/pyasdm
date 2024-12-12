@@ -90,27 +90,89 @@ class CalBandpassRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
         self._basebandName = BasebandName.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._sideband = NetSideband.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._typeCurve = CalCurveType.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._receiverBand = ReceiverBand.from_int(0)
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._numAntenna = 0
+
+        self._numPoly = 0
+
+        self._numReceptor = 0
+
+        self._antennaNames = []  # this is a list of str []
+
+        self._refAntennaName = None
+
+        self._freqLimits = []  # this is a list of Frequency []
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._curve = []  # this is a list of float []  []  []
+
+        self._reducedChiSquared = []  # this is a list of float []
+
+        self._numBaselineExists = False
+
+        self._numBaseline = 0
+
+        self._numFreqExists = False
+
+        self._numFreq = 0
+
+        self._rmsExists = False
+
+        self._rms = []  # this is a list of float []  []
+
+        self._frequencyRangeExists = False
+
+        self._frequencyRange = []  # this is a list of Frequency []
+
+        self._numSpectralWindowExists = False
+
+        self._numSpectralWindow = 0
+
+        self._chanFreqStartExists = False
+
+        self._chanFreqStart = []  # this is a list of Frequency []
+
+        self._chanFreqStepExists = False
+
+        self._chanFreqStep = []  # this is a list of Frequency []
+
+        self._numSpectralWindowChanExists = False
+
+        self._numSpectralWindowChan = []  # this is a list of int []
+
+        self._spectrumExists = False
+
+        self._spectrum = []  # this is a list of float []  []  []
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalBandpassRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             # We force the attribute of the result to be not None
             if row._basebandName is None:
@@ -390,114 +452,124 @@ class CalBandpassRow:
         basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data
+            basebandNameNode.firstChild.data.strip()
         )
 
         sidebandNode = rowdom.getElementsByTagName("sideband")[0]
 
-        self._sideband = NetSideband.newNetSideband(sidebandNode.firstChild.data)
+        self._sideband = NetSideband.newNetSideband(
+            sidebandNode.firstChild.data.strip()
+        )
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data
+            atmPhaseCorrectionNode.firstChild.data.strip()
         )
 
         typeCurveNode = rowdom.getElementsByTagName("typeCurve")[0]
 
-        self._typeCurve = CalCurveType.newCalCurveType(typeCurveNode.firstChild.data)
+        self._typeCurve = CalCurveType.newCalCurveType(
+            typeCurveNode.firstChild.data.strip()
+        )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data)
+        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data)
+        self._numPoly = int(numPolyNode.firstChild.data.strip())
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         antennaNamesNode = rowdom.getElementsByTagName("antennaNames")[0]
 
-        antennaNamesStr = antennaNamesNode.firstChild.data
+        antennaNamesStr = antennaNamesNode.firstChild.data.strip()
+
         self._antennaNames = Parser.stringListToLists(
-            antennaNamesStr, str, "CalBandpass"
+            antennaNamesStr, str, "CalBandpass", False
         )
 
         refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
 
-        self._refAntennaName = str(refAntennaNameNode.firstChild.data)
+        self._refAntennaName = str(refAntennaNameNode.firstChild.data.strip())
 
         freqLimitsNode = rowdom.getElementsByTagName("freqLimits")[0]
 
-        freqLimitsStr = freqLimitsNode.firstChild.data
+        freqLimitsStr = freqLimitsNode.firstChild.data.strip()
+
         self._freqLimits = Parser.stringListToLists(
-            freqLimitsStr, Frequency, "CalBandpass"
+            freqLimitsStr, Frequency, "CalBandpass", True
         )
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "CalBandpass"
+            polarizationTypesStr, PolarizationType, "CalBandpass", False
         )
 
         curveNode = rowdom.getElementsByTagName("curve")[0]
 
-        curveStr = curveNode.firstChild.data
-        self._curve = Parser.stringListToLists(curveStr, float, "CalBandpass")
+        curveStr = curveNode.firstChild.data.strip()
+
+        self._curve = Parser.stringListToLists(curveStr, float, "CalBandpass", False)
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data
+        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+
         self._reducedChiSquared = Parser.stringListToLists(
-            reducedChiSquaredStr, double, "CalBandpass"
+            reducedChiSquaredStr, float, "CalBandpass", False
         )
 
         numBaselineNode = rowdom.getElementsByTagName("numBaseline")
         if len(numBaselineNode) > 0:
 
-            self._numBaseline = int(numBaselineNode[0].firstChild.data)
+            self._numBaseline = int(numBaselineNode[0].firstChild.data.strip())
 
             self._numBaselineExists = True
 
         numFreqNode = rowdom.getElementsByTagName("numFreq")
         if len(numFreqNode) > 0:
 
-            self._numFreq = int(numFreqNode[0].firstChild.data)
+            self._numFreq = int(numFreqNode[0].firstChild.data.strip())
 
             self._numFreqExists = True
 
         rmsNode = rowdom.getElementsByTagName("rms")
         if len(rmsNode) > 0:
 
-            rmsStr = rmsNode[0].firstChild.data
-            self._rms = Parser.stringListToLists(rmsStr, float, "CalBandpass")
+            rmsStr = rmsNode[0].firstChild.data.strip()
+
+            self._rms = Parser.stringListToLists(rmsStr, float, "CalBandpass", False)
 
             self._rmsExists = True
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")
         if len(frequencyRangeNode) > 0:
 
-            frequencyRangeStr = frequencyRangeNode[0].firstChild.data
+            frequencyRangeStr = frequencyRangeNode[0].firstChild.data.strip()
+
             self._frequencyRange = Parser.stringListToLists(
-                frequencyRangeStr, Frequency, "CalBandpass"
+                frequencyRangeStr, Frequency, "CalBandpass", True
             )
 
             self._frequencyRangeExists = True
@@ -505,16 +577,19 @@ class CalBandpassRow:
         numSpectralWindowNode = rowdom.getElementsByTagName("numSpectralWindow")
         if len(numSpectralWindowNode) > 0:
 
-            self._numSpectralWindow = int(numSpectralWindowNode[0].firstChild.data)
+            self._numSpectralWindow = int(
+                numSpectralWindowNode[0].firstChild.data.strip()
+            )
 
             self._numSpectralWindowExists = True
 
         chanFreqStartNode = rowdom.getElementsByTagName("chanFreqStart")
         if len(chanFreqStartNode) > 0:
 
-            chanFreqStartStr = chanFreqStartNode[0].firstChild.data
+            chanFreqStartStr = chanFreqStartNode[0].firstChild.data.strip()
+
             self._chanFreqStart = Parser.stringListToLists(
-                chanFreqStartStr, Frequency, "CalBandpass"
+                chanFreqStartStr, Frequency, "CalBandpass", True
             )
 
             self._chanFreqStartExists = True
@@ -522,9 +597,10 @@ class CalBandpassRow:
         chanFreqStepNode = rowdom.getElementsByTagName("chanFreqStep")
         if len(chanFreqStepNode) > 0:
 
-            chanFreqStepStr = chanFreqStepNode[0].firstChild.data
+            chanFreqStepStr = chanFreqStepNode[0].firstChild.data.strip()
+
             self._chanFreqStep = Parser.stringListToLists(
-                chanFreqStepStr, Frequency, "CalBandpass"
+                chanFreqStepStr, Frequency, "CalBandpass", True
             )
 
             self._chanFreqStepExists = True
@@ -532,9 +608,12 @@ class CalBandpassRow:
         numSpectralWindowChanNode = rowdom.getElementsByTagName("numSpectralWindowChan")
         if len(numSpectralWindowChanNode) > 0:
 
-            numSpectralWindowChanStr = numSpectralWindowChanNode[0].firstChild.data
+            numSpectralWindowChanStr = numSpectralWindowChanNode[
+                0
+            ].firstChild.data.strip()
+
             self._numSpectralWindowChan = Parser.stringListToLists(
-                numSpectralWindowChanStr, int, "CalBandpass"
+                numSpectralWindowChanStr, int, "CalBandpass", False
             )
 
             self._numSpectralWindowChanExists = True
@@ -542,8 +621,11 @@ class CalBandpassRow:
         spectrumNode = rowdom.getElementsByTagName("spectrum")
         if len(spectrumNode) > 0:
 
-            spectrumStr = spectrumNode[0].firstChild.data
-            self._spectrum = Parser.stringListToLists(spectrumStr, float, "CalBandpass")
+            spectrumStr = spectrumNode[0].firstChild.data.strip()
+
+            self._spectrum = Parser.stringListToLists(
+                spectrumStr, float, "CalBandpass", False
+            )
 
             self._spectrumExists = True
 
@@ -551,11 +633,11 @@ class CalBandpassRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -1015,20 +1097,20 @@ class CalBandpassRow:
 
     # ===> Attribute reducedChiSquared
 
-    _reducedChiSquared = None  # this is a 1D list of double
+    _reducedChiSquared = None  # this is a 1D list of float
 
     def getReducedChiSquared(self):
         """
         Get reducedChiSquared.
-        return reducedChiSquared as double []
+        return reducedChiSquared as float []
         """
 
         return copy.deepcopy(self._reducedChiSquared)
 
     def setReducedChiSquared(self, reducedChiSquared):
         """
-        Set reducedChiSquared with the specified double []  value.
-        reducedChiSquared The double []  value to which reducedChiSquared is to be set.
+        Set reducedChiSquared with the specified float []  value.
+        reducedChiSquared The float []  value to which reducedChiSquared is to be set.
 
 
         """
@@ -1045,11 +1127,11 @@ class CalBandpassRow:
             if not shapeOK:
                 raise ValueError("shape of reducedChiSquared is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, double):
+            if not Parser.checkListType(reducedChiSquared, float):
                 raise ValueError(
-                    "type of the first value in reducedChiSquared is not double as expected"
+                    "type of the first value in reducedChiSquared is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._reducedChiSquared = copy.deepcopy(reducedChiSquared)
@@ -1809,7 +1891,7 @@ class CalBandpassRow:
             return False
         for indx in range(len(reducedChiSquared)):
 
-            # reducedChiSquared is a list of double, compare using == operator.
+            # reducedChiSquared is a list of float, compare using == operator.
             if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
                 return False
 
@@ -1932,7 +2014,7 @@ class CalBandpassRow:
             return False
         for indx in range(len(reducedChiSquared)):
 
-            # reducedChiSquared is a list of double, compare using == operator.
+            # reducedChiSquared is a list of float, compare using == operator.
             if not (self._reducedChiSquared[indx] == reducedChiSquared[indx]):
                 return False
 

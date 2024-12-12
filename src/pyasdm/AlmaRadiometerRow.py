@@ -72,9 +72,27 @@ class AlmaRadiometerRow:
         self._table = table
         self._hasBeenAdded = False
 
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._almaRadiometerId = Tag()
+
+        self._numAntennaExists = False
+
+        self._numAntenna = 0
+
+        # extrinsic attributes
+
+        self._spectralWindowIdExists = False
+
+        self._spectralWindowId = []  # this is a list of Tag []
+
         if row is not None:
             if not isinstance(row, AlmaRadiometerRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._almaRadiometerId = Tag(row._almaRadiometerId)
 
@@ -165,12 +183,12 @@ class AlmaRadiometerRow:
 
         almaRadiometerIdNode = rowdom.getElementsByTagName("almaRadiometerId")[0]
 
-        self._almaRadiometerId = Tag(almaRadiometerIdNode.firstChild.data)
+        self._almaRadiometerId = Tag(almaRadiometerIdNode.firstChild.data.strip())
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")
         if len(numAntennaNode) > 0:
 
-            self._numAntenna = int(numAntennaNode[0].firstChild.data)
+            self._numAntenna = int(numAntennaNode[0].firstChild.data.strip())
 
             self._numAntennaExists = True
 
@@ -179,9 +197,10 @@ class AlmaRadiometerRow:
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")
         if len(spectralWindowIdNode) > 0:
 
-            spectralWindowIdStr = spectralWindowIdNode[0].firstChild.data
+            spectralWindowIdStr = spectralWindowIdNode[0].firstChild.data.strip()
+
             self._spectralWindowId = Parser.stringListToLists(
-                spectralWindowIdStr, Tag, "AlmaRadiometer"
+                spectralWindowIdStr, Tag, "AlmaRadiometer", True
             )
 
             self._spectralWindowIdExists = True

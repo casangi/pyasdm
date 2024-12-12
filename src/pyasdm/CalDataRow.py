@@ -84,21 +84,55 @@ class CalDataRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._startTimeObserved = ArrayTime()
+
+        self._endTimeObserved = ArrayTime()
+
+        self._execBlockUID = EntityRef()
+
         self._calDataType = CalDataOrigin.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
         self._calType = CalType.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._numScan = 0
+
+        self._scanSet = []  # this is a list of int []
+
+        self._assocCalDataIdExists = False
+
+        self._assocCalDataId = Tag()
+
+        self._assocCalNatureExists = False
+
         self._assocCalNature = AssociatedCalNature.from_int(0)
 
-        # this is a list of ScanIntent Enumeration, start off with it being empty
-        self._scanIntent = []
+        self._fieldNameExists = False
+
+        self._fieldName = []  # this is a list of str []
+
+        self._sourceNameExists = False
+
+        self._sourceName = []  # this is a list of str []
+
+        self._sourceCodeExists = False
+
+        self._sourceCode = []  # this is a list of str []
+
+        self._scanIntentExists = False
+
+        self._scanIntent = []  # this is a list of ScanIntent []
 
         if row is not None:
             if not isinstance(row, CalDataRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._calDataId = Tag(row._calDataId)
 
@@ -276,15 +310,17 @@ class CalDataRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         startTimeObservedNode = rowdom.getElementsByTagName("startTimeObserved")[0]
 
-        self._startTimeObserved = ArrayTime(startTimeObservedNode.firstChild.data)
+        self._startTimeObserved = ArrayTime(
+            startTimeObservedNode.firstChild.data.strip()
+        )
 
         endTimeObservedNode = rowdom.getElementsByTagName("endTimeObserved")[0]
 
-        self._endTimeObserved = ArrayTime(endTimeObservedNode.firstChild.data)
+        self._endTimeObserved = ArrayTime(endTimeObservedNode.firstChild.data.strip())
 
         execBlockUIDNode = rowdom.getElementsByTagName("execBlockUID")[0]
 
@@ -293,26 +329,27 @@ class CalDataRow:
         calDataTypeNode = rowdom.getElementsByTagName("calDataType")[0]
 
         self._calDataType = CalDataOrigin.newCalDataOrigin(
-            calDataTypeNode.firstChild.data
+            calDataTypeNode.firstChild.data.strip()
         )
 
         calTypeNode = rowdom.getElementsByTagName("calType")[0]
 
-        self._calType = CalType.newCalType(calTypeNode.firstChild.data)
+        self._calType = CalType.newCalType(calTypeNode.firstChild.data.strip())
 
         numScanNode = rowdom.getElementsByTagName("numScan")[0]
 
-        self._numScan = int(numScanNode.firstChild.data)
+        self._numScan = int(numScanNode.firstChild.data.strip())
 
         scanSetNode = rowdom.getElementsByTagName("scanSet")[0]
 
-        scanSetStr = scanSetNode.firstChild.data
-        self._scanSet = Parser.stringListToLists(scanSetStr, int, "CalData")
+        scanSetStr = scanSetNode.firstChild.data.strip()
+
+        self._scanSet = Parser.stringListToLists(scanSetStr, int, "CalData", False)
 
         assocCalDataIdNode = rowdom.getElementsByTagName("assocCalDataId")
         if len(assocCalDataIdNode) > 0:
 
-            self._assocCalDataId = Tag(assocCalDataIdNode[0].firstChild.data)
+            self._assocCalDataId = Tag(assocCalDataIdNode[0].firstChild.data.strip())
 
             self._assocCalDataIdExists = True
 
@@ -320,7 +357,7 @@ class CalDataRow:
         if len(assocCalNatureNode) > 0:
 
             self._assocCalNature = AssociatedCalNature.newAssociatedCalNature(
-                assocCalNatureNode[0].firstChild.data
+                assocCalNatureNode[0].firstChild.data.strip()
             )
 
             self._assocCalNatureExists = True
@@ -328,33 +365,42 @@ class CalDataRow:
         fieldNameNode = rowdom.getElementsByTagName("fieldName")
         if len(fieldNameNode) > 0:
 
-            fieldNameStr = fieldNameNode[0].firstChild.data
-            self._fieldName = Parser.stringListToLists(fieldNameStr, str, "CalData")
+            fieldNameStr = fieldNameNode[0].firstChild.data.strip()
+
+            self._fieldName = Parser.stringListToLists(
+                fieldNameStr, str, "CalData", False
+            )
 
             self._fieldNameExists = True
 
         sourceNameNode = rowdom.getElementsByTagName("sourceName")
         if len(sourceNameNode) > 0:
 
-            sourceNameStr = sourceNameNode[0].firstChild.data
-            self._sourceName = Parser.stringListToLists(sourceNameStr, str, "CalData")
+            sourceNameStr = sourceNameNode[0].firstChild.data.strip()
+
+            self._sourceName = Parser.stringListToLists(
+                sourceNameStr, str, "CalData", False
+            )
 
             self._sourceNameExists = True
 
         sourceCodeNode = rowdom.getElementsByTagName("sourceCode")
         if len(sourceCodeNode) > 0:
 
-            sourceCodeStr = sourceCodeNode[0].firstChild.data
-            self._sourceCode = Parser.stringListToLists(sourceCodeStr, str, "CalData")
+            sourceCodeStr = sourceCodeNode[0].firstChild.data.strip()
+
+            self._sourceCode = Parser.stringListToLists(
+                sourceCodeStr, str, "CalData", False
+            )
 
             self._sourceCodeExists = True
 
         scanIntentNode = rowdom.getElementsByTagName("scanIntent")
         if len(scanIntentNode) > 0:
 
-            scanIntentStr = scanIntentNode[0].firstChild.data
+            scanIntentStr = scanIntentNode[0].firstChild.data.strip()
             self._scanIntent = Parser.stringListToLists(
-                scanIntentStr, ScanIntent, "CalData"
+                scanIntentStr, ScanIntent, "CalData", False
             )
 
             self._scanIntentExists = True

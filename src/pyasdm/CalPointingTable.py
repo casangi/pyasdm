@@ -32,106 +32,113 @@
 import pyasdm.ASDM
 
 from .CalPointingRow import CalPointingRow
-from .Representable import Representable
 
 # All of the extended types are imported
 from pyasdm.types import *
 
 from .exceptions.ConversionException import ConversionException
 from .exceptions.DuplicateKey import DuplicateKey
+from .exceptions.UniquenessViolationException import UniquenessViolationException
 
-# using minidom instead of Parser
 from xml.dom import minidom
 
 import os
 
 
-class CalPointingTable(Representable):
+class CalPointingTable:
     """
     The CalPointingTable class is an Alma table.
 
-     Role
-     Result of the pointing calibration performed on-line by TelCal.
+    Role
+    Result of the pointing calibration performed on-line by TelCal.
 
-     Generated from model's revision -1, branch
+    Generated from model's revision -1, branch
 
-     Attributes of CalPointing
+    Attributes of CalPointing
 
-                  Key
+                 Key
 
-    antennaName str Antenna Name
 
-    receiverBand ReceiverBand identifies the receiver band.
-
-    calDataId Tag refers to a unique row in CalData Table.
-
-    calReductionId Tag refers to a unique row in CalReduction Table.
+    antennaName str Antenna Name </TD>
 
 
 
-                  Value (Mandatory)
-
-    startValidTime ArrayTime  the start time of result validity period.
-
-    endValidTime ArrayTime  the end time of result validity period.
-
-    ambientTemperature Temperature  the ambient temperature.
-
-    antennaMake AntennaMake  identifies the antenna make.
-
-    atmPhaseCorrection AtmPhaseCorrection  describes how the atmospheric phase correction has been applied.
-
-    direction Angle []   2  the antenna pointing direction.
-
-    frequencyRange Frequency []   2  the frequency range over which the result is valid.
-
-    pointingModelMode PointingModelMode  identifies the pointing model mode.
-
-    pointingMethod PointingMethod  identifies the pointing method.
-
-    numReceptor int  the number of receptors.
-
-    polarizationTypes PolarizationType []   numReceptor  identifies the polarizations types (one value per receptor).
-
-    collOffsetRelative Angle []  []   numReceptor, 2  the collimation offsets (relative) (one pair of angles  per receptor).
-
-    collOffsetAbsolute Angle []  []   numReceptor, 2  the collimation offsets (absolute) (one pair of angles per receptor).
-
-    collError Angle []  []   numReceptor, 2  the uncertainties on collimation (one pair of angles per receptor)
-
-    collOffsetTied bool []  []   numReceptor, 2  indicates if a collimation offset was tied (true) or not tied (false) to another polar (one pair of boolean values per receptor).
-
-    reducedChiSquared double []   numReceptor  a measure of the quality of the least square fit.
+    receiverBand ReceiverBand identifies the receiver band. </TD>
 
 
 
-                  Value (Optional)
+    calDataId Tag refers to a unique row in CalData Table. </TD>
 
-    averagedPolarizations bool  true when the polarizations were averaged together to improve sensitivity.
 
-    beamPA Angle []   numReceptor  the fitted beam position angles (one value per receptor).
 
-    beamPAError Angle []   numReceptor  the uncertaintes on the fitted beam position angles (one value per receptor).
+    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
 
-    beamPAWasFixed bool  indicates if the beam position was fixed (true) or not fixed (false).
 
-    beamWidth Angle []  []   numReceptor, 2  the fitted beam widths (one pair of angles per receptor).
 
-    beamWidthError Angle []  []   numReceptor, 2  the uncertainties on the fitted beam widths (one pair of angles per receptor).
 
-    beamWidthWasFixed bool []   2  indicates if the beam width was fixed (true) or not fixed (true) (one pair of booleans).
+                 Value (Mandatory)
 
-    offIntensity Temperature []   numReceptor  the off intensity levels (one value per receptor).
+    startValidTime  ArrayTime  the start time of result validity period.
 
-    offIntensityError Temperature []   numReceptor  the uncertainties on the off intensity levels (one value per receptor).
+    endValidTime  ArrayTime  the end time of result validity period.
 
-    offIntensityWasFixed bool  indicates if the off intensity level was fixed (true) or not fixed (false).
+    ambientTemperature  Temperature  the ambient temperature.
 
-    peakIntensity Temperature []   numReceptor  the maximum intensities (one value per receptor).
+    antennaMake  AntennaMake  identifies the antenna make.
 
-    peakIntensityError Temperature []   numReceptor  the uncertainties on the maximum intensities (one value per receptor).
+    atmPhaseCorrection  AtmPhaseCorrection  describes how the atmospheric phase correction has been applied.
 
-    peakIntensityWasFixed bool  the maximum intensity was fixed.
+    direction  Angle []   2  the antenna pointing direction.
+
+    frequencyRange  Frequency []   2  the frequency range over which the result is valid.
+
+    pointingModelMode  PointingModelMode  identifies the pointing model mode.
+
+    pointingMethod  PointingMethod  identifies the pointing method.
+
+    numReceptor (numReceptor) int  the number of receptors.
+
+    polarizationTypes  PolarizationType []   numReceptor  identifies the polarizations types (one value per receptor).
+
+    collOffsetRelative  Angle []  []   numReceptor, 2  the collimation offsets (relative) (one pair of angles  per receptor).
+
+    collOffsetAbsolute  Angle []  []   numReceptor, 2  the collimation offsets (absolute) (one pair of angles per receptor).
+
+    collError  Angle []  []   numReceptor, 2  the uncertainties on collimation (one pair of angles per receptor)
+
+    collOffsetTied  bool []  []   numReceptor, 2  indicates if a collimation offset was tied (true) or not tied (false) to another polar (one pair of boolean values per receptor).
+
+    reducedChiSquared  float []   numReceptor  a measure of the quality of the least square fit.
+
+
+
+                 Value (Optional)
+
+    averagedPolarizations  bool  true when the polarizations were averaged together to improve sensitivity.
+
+    beamPA  Angle []   numReceptor  the fitted beam position angles (one value per receptor).
+
+    beamPAError  Angle []   numReceptor  the uncertaintes on the fitted beam position angles (one value per receptor).
+
+    beamPAWasFixed  bool  indicates if the beam position was fixed (true) or not fixed (false).
+
+    beamWidth  Angle []  []   numReceptor, 2  the fitted beam widths (one pair of angles per receptor).
+
+    beamWidthError  Angle []  []   numReceptor, 2  the uncertainties on the fitted beam widths (one pair of angles per receptor).
+
+    beamWidthWasFixed  bool []   2  indicates if the beam width was fixed (true) or not fixed (true) (one pair of booleans).
+
+    offIntensity  Temperature []   numReceptor  the off intensity levels (one value per receptor).
+
+    offIntensityError  Temperature []   numReceptor  the uncertainties on the off intensity levels (one value per receptor).
+
+    offIntensityWasFixed  bool  indicates if the off intensity level was fixed (true) or not fixed (false).
+
+    peakIntensity  Temperature []   numReceptor  the maximum intensities (one value per receptor).
+
+    peakIntensityError  Temperature []   numReceptor  the uncertainties on the maximum intensities (one value per receptor).
+
+    peakIntensityWasFixed  bool  the maximum intensity was fixed.
 
 
     """
@@ -144,21 +151,24 @@ class CalPointingTable(Representable):
     # set to True while the file is loading, just in case
     _loadInProgress = False
 
-    # the name of this table.
+    # The name of this table.
     _tableName = "CalPointing"
 
-    # the list of field names that make up key 'key'.
+    # The list of field names that make up key 'key'.
     _key = ["antennaName", "receiverBand", "calDataId", "calReductionId"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # _archiveAsBin not used by python implementation
-    # _archiveAsBin = True  # if True archive binary else archive XML
-    _fileAsBin = True  # if True file binary else file XML
+    # archive as bin not used by python implementation
+    # _archiveAsBin = True # If True archive binary else archive XML
+    _fileAsBin = True  # If True file binary else file XML
 
-    # A list to store the CalPointingRow instances
+    # A data structure to store the CalPointingRow s.
+    # In all cases we maintain a private list of CalPointingRow s.
     _privateRows = []
+
+    # non-temporal ASDM in Java had a private row element here to also hold  CalPointingRow s. Not needed in python.
 
     # the Entity of this table
     _entity = None
@@ -173,12 +183,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on ambientTemperature
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._ambientTemperatureEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on ambientTemperature
     def getAmbientTemperatureEqTolerance(self):
         """
         A getter for the tolerance on ambientTemperature
+        Returns the tolerance as a  Temperature
         """
         return self._ambientTemperatureEqTolerance
 
@@ -189,12 +202,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on direction
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._directionEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on direction
     def getDirectionEqTolerance(self):
         """
         A getter for the tolerance on direction
+        Returns the tolerance as a  Angle
         """
         return self._directionEqTolerance
 
@@ -205,12 +221,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on frequencyRange
         """
+        if not isinstance(tolerance, Frequency):
+            print("tolerance must be a  Frequency instance")
+
         self._frequencyRangeEqTolerance = Frequency(tolerance)
 
-    # A getter for the tolerance on frequencyRange
     def getFrequencyRangeEqTolerance(self):
         """
         A getter for the tolerance on frequencyRange
+        Returns the tolerance as a  Frequency
         """
         return self._frequencyRangeEqTolerance
 
@@ -221,12 +240,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on collOffsetRelative
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._collOffsetRelativeEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on collOffsetRelative
     def getCollOffsetRelativeEqTolerance(self):
         """
         A getter for the tolerance on collOffsetRelative
+        Returns the tolerance as a  Angle
         """
         return self._collOffsetRelativeEqTolerance
 
@@ -237,12 +259,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on collOffsetAbsolute
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._collOffsetAbsoluteEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on collOffsetAbsolute
     def getCollOffsetAbsoluteEqTolerance(self):
         """
         A getter for the tolerance on collOffsetAbsolute
+        Returns the tolerance as a  Angle
         """
         return self._collOffsetAbsoluteEqTolerance
 
@@ -253,12 +278,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on collError
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._collErrorEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on collError
     def getCollErrorEqTolerance(self):
         """
         A getter for the tolerance on collError
+        Returns the tolerance as a  Angle
         """
         return self._collErrorEqTolerance
 
@@ -269,12 +297,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on beamPA
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._beamPAEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on beamPA
     def getBeamPAEqTolerance(self):
         """
         A getter for the tolerance on beamPA
+        Returns the tolerance as a  Angle
         """
         return self._beamPAEqTolerance
 
@@ -285,12 +316,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on beamPAError
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._beamPAErrorEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on beamPAError
     def getBeamPAErrorEqTolerance(self):
         """
         A getter for the tolerance on beamPAError
+        Returns the tolerance as a  Angle
         """
         return self._beamPAErrorEqTolerance
 
@@ -301,12 +335,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on beamWidth
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._beamWidthEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on beamWidth
     def getBeamWidthEqTolerance(self):
         """
         A getter for the tolerance on beamWidth
+        Returns the tolerance as a  Angle
         """
         return self._beamWidthEqTolerance
 
@@ -317,12 +354,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on beamWidthError
         """
+        if not isinstance(tolerance, Angle):
+            print("tolerance must be a  Angle instance")
+
         self._beamWidthErrorEqTolerance = Angle(tolerance)
 
-    # A getter for the tolerance on beamWidthError
     def getBeamWidthErrorEqTolerance(self):
         """
         A getter for the tolerance on beamWidthError
+        Returns the tolerance as a  Angle
         """
         return self._beamWidthErrorEqTolerance
 
@@ -333,12 +373,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on offIntensity
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._offIntensityEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on offIntensity
     def getOffIntensityEqTolerance(self):
         """
         A getter for the tolerance on offIntensity
+        Returns the tolerance as a  Temperature
         """
         return self._offIntensityEqTolerance
 
@@ -349,12 +392,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on offIntensityError
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._offIntensityErrorEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on offIntensityError
     def getOffIntensityErrorEqTolerance(self):
         """
         A getter for the tolerance on offIntensityError
+        Returns the tolerance as a  Temperature
         """
         return self._offIntensityErrorEqTolerance
 
@@ -365,12 +411,15 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on peakIntensity
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._peakIntensityEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on peakIntensity
     def getPeakIntensityEqTolerance(self):
         """
         A getter for the tolerance on peakIntensity
+        Returns the tolerance as a  Temperature
         """
         return self._peakIntensityEqTolerance
 
@@ -381,27 +430,29 @@ class CalPointingTable(Representable):
         """
         A setter for the tolerance on peakIntensityError
         """
+        if not isinstance(tolerance, Temperature):
+            print("tolerance must be a  Temperature instance")
+
         self._peakIntensityErrorEqTolerance = Temperature(tolerance)
 
-    # A getter for the tolerance on peakIntensityError
     def getPeakIntensityErrorEqTolerance(self):
         """
         A getter for the tolerance on peakIntensityError
+        Returns the tolerance as a  Temperature
         """
         return self._peakIntensityErrorEqTolerance
 
     def getKeyName(self):
         """
-        Return the list of field names that make up "key" as a list of strings
+        Return the list of field names that make up key key
+        as a list of strings.
         """
         return self._key
 
-    @staticmethod
-    def Key(antennaName, receiverBand, calDataId, calReductionId):
+    def Key(self, antennaName, receiverBand, calDataId, calReductionId):
         """
         Returns a string built by concatenating the ascii representation of the
         parameters values suffixed with a "_" character.
-        The parameter values are assumed to be the appropriate type for that parameter.
         """
         result = ""
 
@@ -413,9 +464,12 @@ class CalPointingTable(Representable):
 
     def __init__(self, container):
         """
-        Create a CalPointingTable attached to container, which must be a ASDM instance
-        All tables must know the container to which they belong.
+        Create a CalPointingTable attached to container.
+
+        container must be a ASDM instance
+        All tables must know the container
         """
+
         if not isinstance(container, pyasdm.ASDM):
             raise (ValueError("CalPointingTable constructor must use a ASDM instance"))
 
@@ -432,6 +486,10 @@ class CalPointingTable(Representable):
         self._presentInMemory = True
         self._loadInProgress = False
 
+        self._privateRows = []
+
+        self._version = 0
+
     def setNotPresentInMemory(self):
         """
         Set the state to indicate it is not present in memory and needs to be loaded before being used.
@@ -445,11 +503,12 @@ class CalPointingTable(Representable):
         Check if the table is present in memory. If not, load the table from the file using the
         directory of the container.
         """
-        # NOTE: if setFromFile throws an exception then presentInMemory will remain False
+        # NOTE: if setFromFile raises an exception then presentInMemory will remain False
         # and loadInProgress will remain True, preventing another attempt at loading.
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
+            print("CalPointing is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -458,6 +517,7 @@ class CalPointingTable(Representable):
     def getContainer(self):
         """
         Return the container to which this table belongs.
+        return a ASDM.
         """
         return self._container
 
@@ -491,28 +551,32 @@ class CalPointingTable(Representable):
         thisRow = CalPointingRow(self)
         return thisRow
 
-    def add(self, newrow):
+    def add(self, x):
         """
         Add a row.
-        raises a DuplicateKey if the new row has a key that is already in the table.
-        If newrow is a list then this method is called recursively on each element of that list.
-        In that case None is returned.
-        returns newrow
+        raises a DuplicateKey Thrown if the new row has a key that is already in the table.
+        If x is a list then this method is called recursively on each element of that list.
+        In that case, None is returned.
+        returns the row that was added.
         """
-        if isinstance(newrow, list):
-            for thisrow in newrow:
+
+        if isinstance(x, list):
+            for thisrow in x:
+                # check on correct type of thisrow happens in add
                 self.add(thisrow)
-            # return None for the list case only
+            # return None fo the list case only
             return None
 
         # the single row case
+        if not isinstance(x, CalPointingRow):
+            raise ValueError("x must be a  CalPointingRow instance.")
 
         if (
             self.getRowByKey(
-                newrow.getAntennaName(),
-                newrow.getReceiverBand(),
-                newrow.getCalDataId(),
-                newrow.getCalReductionId(),
+                x.getAntennaName(),
+                x.getReceiverBand(),
+                x.getCalDataId(),
+                x.getCalReductionId(),
             )
             is not None
         ):
@@ -529,10 +593,9 @@ class CalPointingTable(Representable):
                 "CalPointing",
             )
 
-        row.add(newrow)
-        privateRows.add(newrow)
-        newrow.isAdded()
-        return newrow
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     def newRow(
         self,
@@ -558,7 +621,9 @@ class CalPointingTable(Representable):
         reducedChiSquared,
     ):
         """
-        Create a new CalPointingRow. The new row is not added to this table, but it does know about it.
+        Create a new CalPointingRow initialized to the specified values.
+
+        The new row is not added to this table, but it does know about it.
         (the autoincrementable attribute, if any, is not in the parameter list)
         """
 
@@ -623,35 +688,40 @@ class CalPointingTable(Representable):
 
     # ====> Append a row to its table.
 
-    def _checkAndAdd(self, newrow):
+    def checkAndAdd(self, x):
         """
-        A private method to append a row to its table, used by input conversion
-        methods. Not intended for external use.
+        A method to append a row to it's table, used by input conversion methods.
+        Not indended for external use.
 
-        If this table has an autoincrementable attribute then check if newrow verifies the rule of uniqueness and raise an exception if not.
-        Returns newrow.
+        If this table has an autoincrementable attribute then check if
+        x verifies the rule of uniqueness and raise an exception if not.
+
+        Append x to its table.
+        x is the row to be appended.
+        returns x.
         """
 
         if (
             self.getRowByKey(
-                newrow.getAntennaName(),
-                newrow.getReceiverBand(),
-                newrow.getCalDataId(),
-                newrow.getCalReductionId(),
+                x.getAntennaName(),
+                x.getReceiverBand(),
+                x.getCalDataId(),
+                x.getCalReductionId(),
             )
             is not None
         ):
             raise DuplicateKey("Duplicate key exception in ", "CalPointingTable")
 
-        self._privateRows.append(newrow)
-        newrow.isAdded()
-        return newrow
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     # ====> methods returning rows.
 
     def get(self):
         """
-        Get all rows as an array of CalPointingRow
+        Get all rows.
+        return Alls rows as a list of CalPointingRow
         """
         return self._privateRows
 
@@ -661,13 +731,13 @@ class CalPointingTable(Representable):
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
 
-        @param antennaName.
+        param antennaName.
 
-        @param receiverBand.
+        param receiverBand.
 
-        @param calDataId.
+        param calDataId.
 
-        @param calReductionId.
+        param calReductionId.
 
         """
         for row in self._privateRows:
@@ -684,8 +754,8 @@ class CalPointingTable(Representable):
             if not row.getCalReductionId().equals(calReductionId):
                 continue
 
-            # this row matches these parameters
             return row
+
         # no match found
         return None
 
@@ -713,7 +783,7 @@ class CalPointingTable(Representable):
         reducedChiSquared,
     ):
         """
-                Look up the table for a row whose all attributes
+        Look up the table for a row whose all attributes
         are equal to the corresponding parameters of the method.
         return this row if any, None otherwise.
 
@@ -786,6 +856,12 @@ class CalPointingTable(Representable):
 
         return None
 
+    def getRows(self):
+        """
+        get the rows, synonymous with the get method.
+        """
+        return self.get()
+
     # ====> conversion Methods
 
     def toXML(self):
@@ -793,7 +869,7 @@ class CalPointingTable(Representable):
         Translate this table to an XML representation conforming
         to the schema defined for CalPointing (CalPointingTable.xsd).
 
-        Returns a string containing the XML representation.
+        returns a string containing the XML representation.
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
@@ -813,27 +889,28 @@ class CalPointingTable(Representable):
         Populate this table from the content of a XML document that is required to
         conform to the XML schema defined for a CalPointing (CalPointingTable.xsd).
         """
+        if not isinstance(xmlstr, str):
+            raise ConversionException("xmlstr must be a string")
+
         xmldom = minidom.parseString(xmlstr)
-        # this should have at least one child node with a name of CalPointingTable.
+        # this should have at least one child node with a name of "CalPointingTable".
         if (
             not xmldom.hasChildNodes()
             or xmldom.firstChild.nodeName != "CalPointingTable"
         ):
             raise ConversionException(
-                "XML is not from a the expected table", "CalPointingTable."
+                "XML is not from the expected table", "CalPointingTable"
             )
 
         # ignore everything but the first child node
         tabdom = xmldom.firstChild
 
-        # get the version from the schemaVersion attribute, which must be there
-        if (not tabdom.hasAttributes()) or (
-            tabdom.attributes.getNamedItem("schemaVersion") is None
+        # get the version from the schemaVersion attribute, which is not always there
+        versionStr = "-1"
+        if tabdom.hasAttributes() and (
+            tabdom.attributes.getNamedItem("schemaVersion") is not None
         ):
-            raise ConversionException(
-                "schemaVersion not found in XML", "CalPointingTable"
-            )
-        versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
+            versionStr = tabdom.attributes.getNamedItem("schemaVersion").value
         # raises a ValueError if not an integer
         try:
             self.setVersion(int(versionStr))
@@ -877,10 +954,10 @@ class CalPointingTable(Representable):
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
-                    self._checkAndAdd(row)
+                    self.checkAndAdd(row)
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
-                    raise ConversionException(str, "CalPointingTable") from None
+                    raise ConversionException(str(exc), "CalPointingTable") from None
 
         if tabEntity is None:
             raise ConversionException("No Entity seen in XML", "CalPointingTable")
@@ -889,12 +966,312 @@ class CalPointingTable(Representable):
 
         self.setEntity(tabEntity)
 
+    def MIMEXMLPart(self):
+        print("MIMEXMLPart not implemented for <CalPointingTable")
+        return
+        # the JAVA code looks like this
+        # String UID = this.getEntity().getEntityId().toString();
+        # String withoutUID = UID.substring(6);
+        # String containerUID = this.getContainer().getEntity().getEntityId().toString();
+        #
+        # StringBuffer sb = new StringBuffer()
+        # .append("<?xml version='1.0'  encoding='ISO-8859-1'?>")
+        # .append("\n")
+        # .append("<CalPointingTable xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:clpntg=\"http://Alma/XASDM/CalPointingTable\" xsi:schemaLocation=\"http://Alma/XASDM/CalPointingTable http://almaobservatory.org/XML/XASDM/4/CalPointingTable.xsd\" schemaVersion=\"4\" schemaRevision=\"-1\">\n")
+        # .append("<Entity entityId='")
+        # .append(UID)
+        # .append("' entityIdEncrypted='na' entityTypeName='CalPointingTable' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<ContainerEntity entityId='")
+        # .append(containerUID)
+        # .append("' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n")
+        # .append("<BulkStoreRef file_id='")
+        # .append(withoutUID)
+        # .append("' byteOrder='Big_Endian' />\n")
+        # .append("<Attributes>\n")
+
+        # .append("<antennaName/>\n")
+        # .append("<receiverBand/>\n")
+        # .append("<calDataId/>\n")
+        # .append("<calReductionId/>\n")
+        # .append("<startValidTime/>\n")
+        # .append("<endValidTime/>\n")
+        # .append("<ambientTemperature/>\n")
+        # .append("<antennaMake/>\n")
+        # .append("<atmPhaseCorrection/>\n")
+        # .append("<direction/>\n")
+        # .append("<frequencyRange/>\n")
+        # .append("<pointingModelMode/>\n")
+        # .append("<pointingMethod/>\n")
+        # .append("<numReceptor/>\n")
+        # .append("<polarizationTypes/>\n")
+        # .append("<collOffsetRelative/>\n")
+        # .append("<collOffsetAbsolute/>\n")
+        # .append("<collError/>\n")
+        # .append("<collOffsetTied/>\n")
+        # .append("<reducedChiSquared/>\n")
+
+        # .append("<averagedPolarizations/>\n")
+        # .append("<beamPA/>\n")
+        # .append("<beamPAError/>\n")
+        # .append("<beamPAWasFixed/>\n")
+        # .append("<beamWidth/>\n")
+        # .append("<beamWidthError/>\n")
+        # .append("<beamWidthWasFixed/>\n")
+        # .append("<offIntensity/>\n")
+        # .append("<offIntensityError/>\n")
+        # .append("<offIntensityWasFixed/>\n")
+        # .append("<peakIntensity/>\n")
+        # .append("<peakIntensityError/>\n")
+        # .append("<peakIntensityWasFixed/>\n")
+        # .append("</Attributes>\n")
+        # .append("</CalPointingTable>\n");
+        # return sb.toString();
+
+    def toMIME(self):
+        """
+        Serialize this into a stream of bytes and encapsulates that stream into a MIME message.
+        returns a string containing the MIME message.
+        """
+        print("toMIME not yet implemented for CalPointing")
+        return
+        # the Java code looks like this - returns a Byte array
+        # ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        # DataOutputStream dos = new DataOutputStream(bos);
+
+        # String UID = this.getEntity().getEntityId().toString();
+        # String execBlockUID = this.getContainer().getEntity().getEntityId().toString();
+        # try {
+        #     // The XML Header part.
+        #     dos.writeBytes("MIME-Version: 1.0");
+        #     dos.writeBytes("\n");
+        #    dos
+        #     .writeBytes("Content-Type: Multipart/Related; boundary='MIME_boundary'; type='text/xml'; start= '<header.xml>'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Description: Correlator");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("alma-uid:" + UID);
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part header.
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: text/xml; charset='ISO-8859-1'");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Transfer-Encoding: 8bit");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <header.xml>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The MIME XML part content.
+        #    dos.writeBytes(MIMEXMLPart());
+        #    // have updated their code to the new XML header.
+        #    //
+        #    //dos.writeBytes(oldMIMEXMLPart());
+        #
+        #    // The MIME binary part header
+        #    dos.writeBytes("--MIME_boundary");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-Type: binary/octet-stream");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("Content-ID: <content.bin>");
+        #    dos.writeBytes("\n");
+        #    dos.writeBytes("\n");
+        #
+        #    // The binary part.
+        #    entity.toBin(dos);
+        #    container.getEntity().toBin(dos);
+        #    dos.writeInt(size());
+
+        #    for (CalPointingRow row: privateRows) row.toBin(dos);
+
+        #    // The closing MIME boundary
+        #    dos.writeBytes("\n--MIME_boundary--");
+        #    dos.writeBytes("\n");
+
+        # } catch (IOException e) {
+        #    throw new ConversionException(
+        #            "Error while reading binary data , the message was "
+        #            + e.getMessage(), "CalPointing");
+        # }
+
+        # return bos.toByteArray();
+
+    # Java code looks like this
+    # static private boolean binaryPartFound(DataInputStream dis, String s, int pos) throws IOException {
+    #    int posl = pos;
+    #    int count = 0;
+    #    dis.mark(1000000);
+    #    try {
+    #        while (dis.readByte() != s.charAt(posl)){
+    #            count ++;
+    #        }
+    #    }
+    #    catch (EOFException e) {
+    #        return false;
+    #    }
+    #
+    #    if (posl == (s.length() - 1)) return true;
+    #
+    #    if (pos == 0) {
+    #        posl++;
+    #        return binaryPartFound(dis, s, posl);
+    #    }
+    #    else {
+    #        if (count > 0) { dis.reset();  return binaryPartFound(dis, s, 0) ; }
+    #        else {
+    #            posl++;
+    #            return binaryPartFound(dis, s, posl);
+    #        }
+    #    }
+    # }
+
+    # private String xmlHeaderPart (String s) throws ConversionException {
+    #    String xmlPartMIMEHeader = "Content-ID: <header.xml>\n\n";
+    #    String binPartMIMEHeader = "--MIME_boundary\nContent-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    #
+    #    // Detect the XML header.
+    #    int loc0 = s.indexOf(xmlPartMIMEHeader);
+    #    if (loc0 == -1 ) throw new ConversionException("Failed to detect the beginning of the XML header", "CalPointing");
+    #
+    #    loc0 += xmlPartMIMEHeader.length();
+    #
+    #    // Look for the string announcing the binary part.
+    #    int loc1 = s.indexOf(binPartMIMEHeader, loc0);
+    #    if (loc1 == -1) throw new ConversionException("Failed to detect the beginning of the binary part", "CalPointing");
+    #
+    #    return s.substring(loc0, loc1).trim();
+    # }
+
+    # setFromMIME(byte[]   data) throws ConversionException {
+    # *
+    # Extracts the binary part of a MIME message and deserialize its content
+    # to fill this with the result of the deserialization.
+    # @param data the string containing the MIME message.
+    # @throws ConversionException
+    # /
+    # ByteOrder byteOrder = null;
+    # //
+    # // Look for the part containing the XML header.
+    # // Very empirically we assume that the first MIME part , the one which contains the
+    # // XML header, always fits in the first 1000 bytes of the MIME message !!
+    # //
+    # String header = xmlHeaderPart(new String(data, 0, Math.min(10000, data.length)));
+    # org.jdom.Document document = null;
+    # SAXBuilder sxb = new SAXBuilder();
+    #
+    # // Firstly build a document out of the XML.
+    # try {
+    #    document = sxb.build(new ByteArrayInputStream(header.getBytes()));
+    # }
+    # catch (Exception e) {
+    #     throw new ConversionException(e.getMessage(), "CalPointing");
+    # }
+    #
+    # //
+    # // Let's define a default order for the sequence of attributes.
+    # //
+    # ArrayList<String> attributesSeq = new ArrayList<String> ();
+
+    #     attributesSeq.add("antennaName"); attributesSeq.add("receiverBand"); attributesSeq.add("calDataId"); attributesSeq.add("calReductionId"); attributesSeq.add("startValidTime"); attributesSeq.add("endValidTime"); attributesSeq.add("ambientTemperature"); attributesSeq.add("antennaMake"); attributesSeq.add("atmPhaseCorrection"); attributesSeq.add("direction"); attributesSeq.add("frequencyRange"); attributesSeq.add("pointingModelMode"); attributesSeq.add("pointingMethod"); attributesSeq.add("numReceptor"); attributesSeq.add("polarizationTypes"); attributesSeq.add("collOffsetRelative"); attributesSeq.add("collOffsetAbsolute"); attributesSeq.add("collError"); attributesSeq.add("collOffsetTied"); attributesSeq.add("reducedChiSquared");
+    #     attributesSeq.add("averagedPolarizations");  attributesSeq.add("beamPA");  attributesSeq.add("beamPAError");  attributesSeq.add("beamPAWasFixed");  attributesSeq.add("beamWidth");  attributesSeq.add("beamWidthError");  attributesSeq.add("beamWidthWasFixed");  attributesSeq.add("offIntensity");  attributesSeq.add("offIntensityError");  attributesSeq.add("offIntensityWasFixed");  attributesSeq.add("peakIntensity");  attributesSeq.add("peakIntensityError");  attributesSeq.add("peakIntensityWasFixed");
+
+    # XPath xpath = null;
+    # //
+    # // And then look for the possible XML contents.
+    # try {
+    #     // Is it an "<ASDMBinaryTable ...." document (old) ?
+    #    if (XPath.newInstance("/ASDMBinaryTable")
+    #            .selectSingleNode(document) != null)
+    #        byteOrder = ByteOrder.BIG_ENDIAN;
+    #    else {
+    #        // Then it must be a "<CalPointingTable ...." document
+    #        // With a BulkStoreRef child element....
+    #        XPath xpa = XPath.newInstance("/CalPointingTable/BulkStoreRef/@byteOrder");
+    #        Object node = xpa.selectSingleNode(document.getRootElement());
+    #        if (node == null)
+    #            throw new ConversionException("No element found for the XPath expression '/CalPointingTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalPointing");
+    #
+    #        // Yes ? then it must have a "BulkStoreRef" element with a
+    #        // "byteOrder" attribute.
+    #        String bo = xpa.valueOf(document.getRootElement());
+    #        if (bo.equals("Little_Endian"))
+    #            byteOrder = ByteOrder.LITTLE_ENDIAN;
+    #        else if (bo.equals("Big_Endian"))
+    #            byteOrder = ByteOrder.BIG_ENDIAN;
+    #        else
+    #            throw new ConversionException("No valid value retrieved for the node '/CalPointingTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalPointing");
+    #
+    #        // And also it must have an Attributes element with children.
+    #        xpa = XPath.newInstance("/CalPointingTable/Attributes#");
+    #        List nodes = xpa.selectNodes(document.getRootElement());
+    #        if (nodes==null || nodes.size()==0)
+    #            throw new ConversionException("No element found for the XPath expression '/CalPointingTable/Attributes#'. Invalid XML header '"+header+"'.", "CalPointing");
+    #
+    #        Iterator iter = nodes.iterator();
+    #        attributesSeq.clear();
+    #        int i = 0;
+    #        while (iter.hasNext()){
+    #            attributesSeq.add(((Element) iter.next()).getName());
+    #            i += 1;
+    #        }
+    #    }
+    # } catch (Exception e) {
+    #    throw new ConversionException(e.getMessage(), "CalPointing");
+    # }
+
+    # //
+    # // Now that we know what is the byte order of the binary data
+    # // Let's extract them from the second MIME part and parse them
+    # //
+    # ByteArrayInputStream bis = new ByteArrayInputStream(data);
+    # DataInputStream dis = new DataInputStream(bis);
+    # BODataInputStream bodis = new BODataInputStream(dis, byteOrder);
+    #
+    # String terminator = "Content-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
+    # entity = null;
+    # try {
+    #    if (binaryPartFound(dis, terminator, 0) == false) {
+    #        throw new ConversionException ("Failed to detect the beginning of the binary part", "CalPointing");
+    #    }
+    #
+    #    entity = Entity.fromBin(bodis);
+    #
+    #    Entity containerEntity = Entity.fromBin(bodis);
+    #
+    #    int numRows = bodis.readInt();
+    #    for (int i = 0; i < numRows; i++) {
+    #    this.checkAndAdd(CalPointingRow.fromBin(bodis, this, attributesSeq.toArray(new String[0])));
+    #    }
+    # } catch (TagFormatException e) {
+    #    throw new ConversionException( "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalPointing");
+    # }catch (IOException e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalPointing");
+    # } catch (DuplicateKey e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalPointing");
+    # }catch (Exception e) {
+    #    throw new ConversionException(
+    #        "Error while reading binary data , the message was "
+    #        + e.getMessage(), "CalPointing");
+    # }
+    # }
+
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a CalPointingTable as those produced by the toFile method.
+        Reads and parses a file containing a representation of a CalPointingTable as those produced  by the toFile method.
         This table is populated with the result of the parsing.
-        The directory value is the name of the directory containing the file to be read and parsed.
+        param directory The name of the directory containing the file te be read and parsed.
+        raises ConversionException If any error occurs while reading the
+        files in the directory or parsing them.
         """
+        if not isinstance(directory, str):
+            print("directory must be a string")
 
         # directory must exist as a directory
         if not os.path.isdir(directory):
@@ -906,44 +1283,101 @@ class CalPointingTable(Representable):
         if os.path.exists(os.path.join(directory, "CalPointing.xml")):
             self.setFromXMLFile(directory)
         elif os.path.exists(os.path.join(directory, "CalPointing.bin")):
-            setFromMIMEFile(directory)
+            self.setFromMIMEFile(directory)
         else:
             raise ConversionException(
                 "No file found for the CalPointing table", "CalPointingTable"
             )
 
     def setFromMIMEFile(self, directory):
-        print("setFromMIMEFile not implemented yet")
+        """
+        Set this table from a MIME file.
+        Used internally by setFromFile. Not intented for external use.
+        """
+        print("setFromMIME file not yet implemented for CalPointingTable")
+        return
+
+        # java code looks like this
+        # File file = new File(directory+"/CalPointing.bin");
+        #
+        # byte[] bytes = null;
+        #
+        # try {
+        #     InputStream is = new FileInputStream(file);
+        #     long length = file.length();
+        #     if (length > Integer.MAX_VALUE)
+        #         throw new ConversionException ("File " + file.getName() + " is too large", "CalPointing");
+        #
+        #    bytes = new byte[(int)length];
+        #    int offset = 0;
+        #    int numRead = 0;
+        #
+        #   while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+        #       offset += numRead;
+        #   }
+        #
+        #    if (offset < bytes.length) {
+        #        throw new ConversionException("Could not completely read file "+file.getName(), "CalPointing");
+        #    }
+        #    is.close();
+        # }
+        # catch (IOException e) {
+        #    throw new ConversionException("Error while reading "+file.getName()+". The message was " + e.getMessage(),
+        #    "CalPointing");
+        # }
+
+        # setFromMIME(bytes);
+        # // Changed 24 Sep, 2015 - The export policy cannot be changed by what has been observed at import time. M Caillat
+        # // archiveAsBin = true;
+        # // fileAsBin = true;
+
+    # }
 
     def setFromXMLFile(self, directory):
         """
         This is the function used by setFromFile when the file is an XML file
+        Not intended for external use.
         """
 
         # setFromFile has already established that this exists
         # read the entire file into a string
         xmlstr = None
-        with open(os.path.join(directory, "CalPointing.xml")) as f:
-            xmlstr = f.read()
-
-        if xmlstr is None:
-            raise ConversionException("CalPointing.xml is empty", "CalPointingTable")
+        try:
+            with open(os.path.join(directory, "CalPointing.xml")) as f:
+                xmlstr = f.read()
+        except Exception as exc:
+            # reraise it as a ConversionException
+            raise ConversionException(str(exc), "CalPointingTable") from None
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
             self.setFromMIMEFile(directory)
         else:
             self.fromXML(xmlstr)
+            # TBD: when fileAsBin is implemented this should be removed
+            # this will at least preserve the case where fileAsBin was changed for
+            # a table such that the archive has it in XML but the current rule is to
+            # write it out as binary
+            if self._fileAsBin:
+                print(
+                    "CalPointing found as XML but it should be written as binary, which is not yet implemetned. Setting to write as XML to preserve this content."
+                )
+                self._fileAsBin = False
 
     def toFile(self, directory):
         """
         Stores a representation (binary or XML) of this table into a file.
 
-        Depending on the boolean value of _fileAsBin, a binary serialization
-        of this (_fileAsBin=True) will be saved in a file 'CalPointing.bin' or an
-        XML representation (_fileAsBin==False) will be saved in a file 'CalPointing.xml'.
+        Depending on the boolean value of its _fileAsBin data member a binary serialization
+        of this (_fileAsBin==True) will be saved in a file "CalPointing.bin" or
+        an XML representation (_fileAsBin==False) will be saved in a file "CalPointing.xml".
         The file is always written in a directory whose name is passed as a parameter.
+        param directory The name of directory where the file containing the table's
+        representation will be saved.
+        raises ConversionException for any errors while writing that file.
         """
+        if not isinstance(directory, str):
+            raise ConversionException("directory must be a string")
 
         if os.path.exists(directory) and not os.path.isdir(directory):
             raise ConversionException(
@@ -952,21 +1386,86 @@ class CalPointingTable(Representable):
                 "CalPointingTable",
             )
 
-        if not os.path.exists(directory):
-            # assume it can be created there, if not this will raise a FileNotFound exception here
-            os.mkdir(directory)
+        # if not let's create it.
+        try:
+            if not os.path.exists(directory):
+                # if it can't be created a FileNotFound exception is the most likely result
+                os.mkdir(directory)
+        except Exception as exc:
+            # reraise any exception as a ConversionException
+            raise ConversionException(
+                "Could not create directory "
+                + directory
+                + " exception caught "
+                + str(exc),
+                "CalPointingTable",
+            ) from None
 
         if self._fileAsBin:
             print("fileAsBin not yet implemented for CalPointing")
+            # the Java code looks like this
+            #
+            # The table is exported in a binary format.
+            # (actually a short XML file + a possibly long MIME file)
+            #
+            # File xmlFile = new File(directory+"/CalPointing.xml");
+            # if (xmlFile.exists())
+            #    if (!xmlFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+xmlFile.toString()+"'", "CalPointing");
+            #
+            # File binFile = new File(directory+"/CalPointing.bin");
+            # if (binFile.exists())
+            #    if (!binFile.delete())
+            #        throw new ConversionException("Problem while trying to delete a previous version of '"+binFile.toString()+"'", "CalPointing");
+            #
+            # try {
+            #    BufferedWriter out = new BufferedWriter(new FileWriter(xmlFile));
+            #    out.write(MIMEXMLPart());
+            #    out.close();
+            #
+
+            #  OutputStream osBin = new FileOutputStream(binFile);
+            #  osBin.write(toMIME());
+            #  osBin.close();
+
+        # }
+        # catch (FileNotFoundException e) {
+        #     throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalPointing");
+        # }
+        # catch (IOException e) {
+        #      throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalPointing");
+        # }
+        # }
         else:
-            # exported as an XML file.
+            # The table is totally exported in a XML file.
             filePath = os.path.join(directory, "CalPointing.xml")
             if os.path.exists(filePath):
-                # try to delete it, this will raise an exception if the user does not have permission to do that
-                os.remove(filePath)
-            with open(filePath, "w") as f:
-                f.write(self.toXML())
-                f.close()
+                try:
+                    # try to delete it, this will raise an exception if the user does not have permission to do that
+                    os.remove(filePath)
+                except Exception as exc:
+                    # reraise it as a ConversionException
+                    raise ConversionException(
+                        "Could not remove existing "
+                        + filePath
+                        + " exception caught "
+                        + str(exc),
+                        "CalPointingTable",
+                    ) from None
+
+            try:
+                with open(filePath, "w") as f:
+                    f.write(self.toXML())
+                    f.close()
+
+                    # Java code uses a BufferedWriter to capture the output of toXML to the file
+            except Exception as exc:
+                # reraise it as a ConversionException
+                raise ConversionException(
+                    "Problem while writing the XML representation, the message was : "
+                    + str(exc),
+                    "CalPointing",
+                ) from None
 
     def getEntity(self):
         """

@@ -84,21 +84,57 @@ class CalPrimaryBeamRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._antennaName = None
+
         self._receiverBand = ReceiverBand.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
         self._antennaMake = AntennaMake.from_int(0)
 
-        # this is a list of PolarizationType Enumeration, start off with it being empty
-        self._polarizationTypes = []
+        self._numSubband = 0
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._frequencyRange = []  # this is a list of Frequency []  []
+
+        self._numReceptor = 0
+
+        self._polarizationTypes = []  # this is a list of PolarizationType []
+
+        self._mainBeamEfficiency = []  # this is a list of float []
+
+        self._beamDescriptionUID = EntityRef()
+
+        self._relativeAmplitudeRms = None
+
+        self._direction = []  # this is a list of Angle []
+
+        self._minValidDirection = []  # this is a list of Angle []
+
+        self._maxValidDirection = []  # this is a list of Angle []
+
         self._descriptionType = PrimaryBeamDescription.from_int(0)
+
+        self._imageChannelNumber = []  # this is a list of int []
+
+        self._imageNominalFrequency = []  # this is a list of Frequency []
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalPrimaryBeamRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._antennaName = row._antennaName
 
@@ -268,53 +304,57 @@ class CalPrimaryBeamRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data)
+        self._antennaName = str(antennaNameNode.firstChild.data.strip())
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data
+            receiverBandNode.firstChild.data.strip()
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
 
-        self._antennaMake = AntennaMake.newAntennaMake(antennaMakeNode.firstChild.data)
+        self._antennaMake = AntennaMake.newAntennaMake(
+            antennaMakeNode.firstChild.data.strip()
+        )
 
         numSubbandNode = rowdom.getElementsByTagName("numSubband")[0]
 
-        self._numSubband = int(numSubbandNode.firstChild.data)
+        self._numSubband = int(numSubbandNode.firstChild.data.strip())
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data
+        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+
         self._frequencyRange = Parser.stringListToLists(
-            frequencyRangeStr, Frequency, "CalPrimaryBeam"
+            frequencyRangeStr, Frequency, "CalPrimaryBeam", True
         )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data)
+        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data
+        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
         self._polarizationTypes = Parser.stringListToLists(
-            polarizationTypesStr, PolarizationType, "CalPrimaryBeam"
+            polarizationTypesStr, PolarizationType, "CalPrimaryBeam", False
         )
 
         mainBeamEfficiencyNode = rowdom.getElementsByTagName("mainBeamEfficiency")[0]
 
-        mainBeamEfficiencyStr = mainBeamEfficiencyNode.firstChild.data
+        mainBeamEfficiencyStr = mainBeamEfficiencyNode.firstChild.data.strip()
+
         self._mainBeamEfficiency = Parser.stringListToLists(
-            mainBeamEfficiencyStr, double, "CalPrimaryBeam"
+            mainBeamEfficiencyStr, float, "CalPrimaryBeam", False
         )
 
         beamDescriptionUIDNode = rowdom.getElementsByTagName("beamDescriptionUID")[0]
@@ -325,60 +365,67 @@ class CalPrimaryBeamRow:
             0
         ]
 
-        self._relativeAmplitudeRms = float(relativeAmplitudeRmsNode.firstChild.data)
+        self._relativeAmplitudeRms = float(
+            relativeAmplitudeRmsNode.firstChild.data.strip()
+        )
 
         directionNode = rowdom.getElementsByTagName("direction")[0]
 
-        directionStr = directionNode.firstChild.data
+        directionStr = directionNode.firstChild.data.strip()
+
         self._direction = Parser.stringListToLists(
-            directionStr, Angle, "CalPrimaryBeam"
+            directionStr, Angle, "CalPrimaryBeam", True
         )
 
         minValidDirectionNode = rowdom.getElementsByTagName("minValidDirection")[0]
 
-        minValidDirectionStr = minValidDirectionNode.firstChild.data
+        minValidDirectionStr = minValidDirectionNode.firstChild.data.strip()
+
         self._minValidDirection = Parser.stringListToLists(
-            minValidDirectionStr, Angle, "CalPrimaryBeam"
+            minValidDirectionStr, Angle, "CalPrimaryBeam", True
         )
 
         maxValidDirectionNode = rowdom.getElementsByTagName("maxValidDirection")[0]
 
-        maxValidDirectionStr = maxValidDirectionNode.firstChild.data
+        maxValidDirectionStr = maxValidDirectionNode.firstChild.data.strip()
+
         self._maxValidDirection = Parser.stringListToLists(
-            maxValidDirectionStr, Angle, "CalPrimaryBeam"
+            maxValidDirectionStr, Angle, "CalPrimaryBeam", True
         )
 
         descriptionTypeNode = rowdom.getElementsByTagName("descriptionType")[0]
 
         self._descriptionType = PrimaryBeamDescription.newPrimaryBeamDescription(
-            descriptionTypeNode.firstChild.data
+            descriptionTypeNode.firstChild.data.strip()
         )
 
         imageChannelNumberNode = rowdom.getElementsByTagName("imageChannelNumber")[0]
 
-        imageChannelNumberStr = imageChannelNumberNode.firstChild.data
+        imageChannelNumberStr = imageChannelNumberNode.firstChild.data.strip()
+
         self._imageChannelNumber = Parser.stringListToLists(
-            imageChannelNumberStr, int, "CalPrimaryBeam"
+            imageChannelNumberStr, int, "CalPrimaryBeam", False
         )
 
         imageNominalFrequencyNode = rowdom.getElementsByTagName(
             "imageNominalFrequency"
         )[0]
 
-        imageNominalFrequencyStr = imageNominalFrequencyNode.firstChild.data
+        imageNominalFrequencyStr = imageNominalFrequencyNode.firstChild.data.strip()
+
         self._imageNominalFrequency = Parser.stringListToLists(
-            imageNominalFrequencyStr, Frequency, "CalPrimaryBeam"
+            imageNominalFrequencyStr, Frequency, "CalPrimaryBeam", True
         )
 
         # extrinsic attribute values
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -643,20 +690,20 @@ class CalPrimaryBeamRow:
 
     # ===> Attribute mainBeamEfficiency
 
-    _mainBeamEfficiency = None  # this is a 1D list of double
+    _mainBeamEfficiency = None  # this is a 1D list of float
 
     def getMainBeamEfficiency(self):
         """
         Get mainBeamEfficiency.
-        return mainBeamEfficiency as double []
+        return mainBeamEfficiency as float []
         """
 
         return copy.deepcopy(self._mainBeamEfficiency)
 
     def setMainBeamEfficiency(self, mainBeamEfficiency):
         """
-        Set mainBeamEfficiency with the specified double []  value.
-        mainBeamEfficiency The double []  value to which mainBeamEfficiency is to be set.
+        Set mainBeamEfficiency with the specified float []  value.
+        mainBeamEfficiency The float []  value to which mainBeamEfficiency is to be set.
 
 
         """
@@ -673,11 +720,11 @@ class CalPrimaryBeamRow:
             if not shapeOK:
                 raise ValueError("shape of mainBeamEfficiency is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(mainBeamEfficiency, double):
+            if not Parser.checkListType(mainBeamEfficiency, float):
                 raise ValueError(
-                    "type of the first value in mainBeamEfficiency is not double as expected"
+                    "type of the first value in mainBeamEfficiency is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._mainBeamEfficiency = copy.deepcopy(mainBeamEfficiency)
@@ -1156,7 +1203,7 @@ class CalPrimaryBeamRow:
             return False
         for indx in range(len(mainBeamEfficiency)):
 
-            # mainBeamEfficiency is a list of double, compare using == operator.
+            # mainBeamEfficiency is a list of float, compare using == operator.
             if not (self._mainBeamEfficiency[indx] == mainBeamEfficiency[indx]):
                 return False
 
@@ -1340,7 +1387,7 @@ class CalPrimaryBeamRow:
             return False
         for indx in range(len(mainBeamEfficiency)):
 
-            # mainBeamEfficiency is a list of double, compare using == operator.
+            # mainBeamEfficiency is a list of float, compare using == operator.
             if not (self._mainBeamEfficiency[indx] == mainBeamEfficiency[indx]):
                 return False
 

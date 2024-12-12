@@ -84,21 +84,73 @@ class CalFluxRow:
         self._table = table
         self._hasBeenAdded = False
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        # initialize attribute values
+
+        # intrinsic attributes
+
+        self._sourceName = None
+
+        self._startValidTime = ArrayTime()
+
+        self._endValidTime = ArrayTime()
+
+        self._numFrequencyRanges = 0
+
+        self._numStokes = 0
+
+        self._frequencyRanges = []  # this is a list of Frequency []  []
+
         self._fluxMethod = FluxCalibrationMethod.from_int(0)
 
-        # this is a list of StokesParameter Enumeration, start off with it being empty
-        self._stokes = []
+        self._flux = []  # this is a list of float []  []
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._fluxError = []  # this is a list of float []  []
+
+        self._stokes = []  # this is a list of StokesParameter []
+
+        self._directionExists = False
+
+        self._direction = []  # this is a list of Angle []
+
+        self._directionCodeExists = False
+
         self._directionCode = DirectionReferenceCode.from_int(0)
 
-        # initialize all attributes which have an enumerated type with the value of index 0 in the Enumeration they belong to.
+        self._directionEquinoxExists = False
+
+        self._directionEquinox = Angle()
+
+        self._PAExists = False
+
+        self._PA = []  # this is a list of Angle []  []
+
+        self._PAErrorExists = False
+
+        self._PAError = []  # this is a list of Angle []  []
+
+        self._sizeExists = False
+
+        self._size = []  # this is a list of Angle []  []  []
+
+        self._sizeErrorExists = False
+
+        self._sizeError = []  # this is a list of Angle []  []  []
+
+        self._sourceModelExists = False
+
         self._sourceModel = SourceModel.from_int(0)
+
+        # extrinsic attributes
+
+        self._calDataId = Tag()
+
+        self._calReductionId = Tag()
 
         if row is not None:
             if not isinstance(row, CalFluxRow):
                 raise ValueError("row must be a MainRow")
+
+            # copy constructor
 
             self._sourceName = row._sourceName
 
@@ -325,57 +377,67 @@ class CalFluxRow:
 
         sourceNameNode = rowdom.getElementsByTagName("sourceName")[0]
 
-        self._sourceName = str(sourceNameNode.firstChild.data)
+        self._sourceName = str(sourceNameNode.firstChild.data.strip())
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data)
+        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data)
+        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
 
         numFrequencyRangesNode = rowdom.getElementsByTagName("numFrequencyRanges")[0]
 
-        self._numFrequencyRanges = int(numFrequencyRangesNode.firstChild.data)
+        self._numFrequencyRanges = int(numFrequencyRangesNode.firstChild.data.strip())
 
         numStokesNode = rowdom.getElementsByTagName("numStokes")[0]
 
-        self._numStokes = int(numStokesNode.firstChild.data)
+        self._numStokes = int(numStokesNode.firstChild.data.strip())
 
         frequencyRangesNode = rowdom.getElementsByTagName("frequencyRanges")[0]
 
-        frequencyRangesStr = frequencyRangesNode.firstChild.data
+        frequencyRangesStr = frequencyRangesNode.firstChild.data.strip()
+
         self._frequencyRanges = Parser.stringListToLists(
-            frequencyRangesStr, Frequency, "CalFlux"
+            frequencyRangesStr, Frequency, "CalFlux", True
         )
 
         fluxMethodNode = rowdom.getElementsByTagName("fluxMethod")[0]
 
         self._fluxMethod = FluxCalibrationMethod.newFluxCalibrationMethod(
-            fluxMethodNode.firstChild.data
+            fluxMethodNode.firstChild.data.strip()
         )
 
         fluxNode = rowdom.getElementsByTagName("flux")[0]
 
-        fluxStr = fluxNode.firstChild.data
-        self._flux = Parser.stringListToLists(fluxStr, double, "CalFlux")
+        fluxStr = fluxNode.firstChild.data.strip()
+
+        self._flux = Parser.stringListToLists(fluxStr, float, "CalFlux", False)
 
         fluxErrorNode = rowdom.getElementsByTagName("fluxError")[0]
 
-        fluxErrorStr = fluxErrorNode.firstChild.data
-        self._fluxError = Parser.stringListToLists(fluxErrorStr, double, "CalFlux")
+        fluxErrorStr = fluxErrorNode.firstChild.data.strip()
+
+        self._fluxError = Parser.stringListToLists(
+            fluxErrorStr, float, "CalFlux", False
+        )
 
         stokesNode = rowdom.getElementsByTagName("stokes")[0]
 
-        stokesStr = stokesNode.firstChild.data
-        self._stokes = Parser.stringListToLists(stokesStr, StokesParameter, "CalFlux")
+        stokesStr = stokesNode.firstChild.data.strip()
+        self._stokes = Parser.stringListToLists(
+            stokesStr, StokesParameter, "CalFlux", False
+        )
 
         directionNode = rowdom.getElementsByTagName("direction")
         if len(directionNode) > 0:
 
-            directionStr = directionNode[0].firstChild.data
-            self._direction = Parser.stringListToLists(directionStr, Angle, "CalFlux")
+            directionStr = directionNode[0].firstChild.data.strip()
+
+            self._direction = Parser.stringListToLists(
+                directionStr, Angle, "CalFlux", True
+            )
 
             self._directionExists = True
 
@@ -383,7 +445,7 @@ class CalFluxRow:
         if len(directionCodeNode) > 0:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data
+                directionCodeNode[0].firstChild.data.strip()
             )
 
             self._directionCodeExists = True
@@ -391,39 +453,47 @@ class CalFluxRow:
         directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
         if len(directionEquinoxNode) > 0:
 
-            self._directionEquinox = Angle(directionEquinoxNode[0].firstChild.data)
+            self._directionEquinox = Angle(
+                directionEquinoxNode[0].firstChild.data.strip()
+            )
 
             self._directionEquinoxExists = True
 
         PANode = rowdom.getElementsByTagName("PA")
         if len(PANode) > 0:
 
-            PAStr = PANode[0].firstChild.data
-            self._PA = Parser.stringListToLists(PAStr, Angle, "CalFlux")
+            PAStr = PANode[0].firstChild.data.strip()
+
+            self._PA = Parser.stringListToLists(PAStr, Angle, "CalFlux", True)
 
             self._PAExists = True
 
         PAErrorNode = rowdom.getElementsByTagName("PAError")
         if len(PAErrorNode) > 0:
 
-            PAErrorStr = PAErrorNode[0].firstChild.data
-            self._PAError = Parser.stringListToLists(PAErrorStr, Angle, "CalFlux")
+            PAErrorStr = PAErrorNode[0].firstChild.data.strip()
+
+            self._PAError = Parser.stringListToLists(PAErrorStr, Angle, "CalFlux", True)
 
             self._PAErrorExists = True
 
         sizeNode = rowdom.getElementsByTagName("size")
         if len(sizeNode) > 0:
 
-            sizeStr = sizeNode[0].firstChild.data
-            self._size = Parser.stringListToLists(sizeStr, Angle, "CalFlux")
+            sizeStr = sizeNode[0].firstChild.data.strip()
+
+            self._size = Parser.stringListToLists(sizeStr, Angle, "CalFlux", True)
 
             self._sizeExists = True
 
         sizeErrorNode = rowdom.getElementsByTagName("sizeError")
         if len(sizeErrorNode) > 0:
 
-            sizeErrorStr = sizeErrorNode[0].firstChild.data
-            self._sizeError = Parser.stringListToLists(sizeErrorStr, Angle, "CalFlux")
+            sizeErrorStr = sizeErrorNode[0].firstChild.data.strip()
+
+            self._sizeError = Parser.stringListToLists(
+                sizeErrorStr, Angle, "CalFlux", True
+            )
 
             self._sizeErrorExists = True
 
@@ -431,7 +501,7 @@ class CalFluxRow:
         if len(sourceModelNode) > 0:
 
             self._sourceModel = SourceModel.newSourceModel(
-                sourceModelNode[0].firstChild.data
+                sourceModelNode[0].firstChild.data.strip()
             )
 
             self._sourceModelExists = True
@@ -440,11 +510,11 @@ class CalFluxRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data)
+        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data)
+        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
     def toBin(self):
         print("not yet implemented")
@@ -637,20 +707,20 @@ class CalFluxRow:
 
     # ===> Attribute flux
 
-    _flux = None  # this is a 2D list of double
+    _flux = None  # this is a 2D list of float
 
     def getFlux(self):
         """
         Get flux.
-        return flux as double []  []
+        return flux as float []  []
         """
 
         return copy.deepcopy(self._flux)
 
     def setFlux(self, flux):
         """
-        Set flux with the specified double []  []  value.
-        flux The double []  []  value to which flux is to be set.
+        Set flux with the specified float []  []  value.
+        flux The float []  []  value to which flux is to be set.
 
 
         """
@@ -667,11 +737,11 @@ class CalFluxRow:
             if not shapeOK:
                 raise ValueError("shape of flux is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(flux, double):
+            if not Parser.checkListType(flux, float):
                 raise ValueError(
-                    "type of the first value in flux is not double as expected"
+                    "type of the first value in flux is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._flux = copy.deepcopy(flux)
@@ -680,20 +750,20 @@ class CalFluxRow:
 
     # ===> Attribute fluxError
 
-    _fluxError = None  # this is a 2D list of double
+    _fluxError = None  # this is a 2D list of float
 
     def getFluxError(self):
         """
         Get fluxError.
-        return fluxError as double []  []
+        return fluxError as float []  []
         """
 
         return copy.deepcopy(self._fluxError)
 
     def setFluxError(self, fluxError):
         """
-        Set fluxError with the specified double []  []  value.
-        fluxError The double []  []  value to which fluxError is to be set.
+        Set fluxError with the specified float []  []  value.
+        fluxError The float []  []  value to which fluxError is to be set.
 
 
         """
@@ -710,11 +780,11 @@ class CalFluxRow:
             if not shapeOK:
                 raise ValueError("shape of fluxError is not correct")
 
-            # the type of the values in the list must be double
+            # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(fluxError, double):
+            if not Parser.checkListType(fluxError, float):
                 raise ValueError(
-                    "type of the first value in fluxError is not double as expected"
+                    "type of the first value in fluxError is not float as expected"
                 )
             # finally, (reasonably) safe to just do a deepcopy
             self._fluxError = copy.deepcopy(fluxError)
@@ -1407,7 +1477,7 @@ class CalFluxRow:
             for i in range(flux_dims[0]):
                 for j in range(flux_dims[0]):
 
-                    # flux is an array of double, compare using == operator.
+                    # flux is an array of float, compare using == operator.
                     if not (self._flux[i][j] == flux[i][j]):
                         return False
 
@@ -1426,7 +1496,7 @@ class CalFluxRow:
             for i in range(fluxError_dims[0]):
                 for j in range(fluxError_dims[0]):
 
-                    # fluxError is an array of double, compare using == operator.
+                    # fluxError is an array of float, compare using == operator.
                     if not (self._fluxError[i][j] == fluxError[i][j]):
                         return False
 
@@ -1532,7 +1602,7 @@ class CalFluxRow:
             for i in range(flux_dims[0]):
                 for j in range(flux_dims[0]):
 
-                    # flux is an array of double, compare using == operator.
+                    # flux is an array of float, compare using == operator.
                     if not (self._flux[i][j] == flux[i][j]):
                         return False
 
@@ -1551,7 +1621,7 @@ class CalFluxRow:
             for i in range(fluxError_dims[0]):
                 for j in range(fluxError_dims[0]):
 
-                    # fluxError is an array of double, compare using == operator.
+                    # fluxError is an array of float, compare using == operator.
                     if not (self._fluxError[i][j] == fluxError[i][j]):
                         return False
 
