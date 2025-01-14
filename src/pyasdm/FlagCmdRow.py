@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class FlagCmdRow:
         Create a FlagCmdRow.
         When row is None, create an empty row attached to table, which must be a FlagCmdTable.
         When row is given, copy those values in to the new row. The row argument must be a FlagCmdRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.FlagCmdTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a FlagCmdTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -92,7 +97,7 @@ class FlagCmdRow:
 
         if row is not None:
             if not isinstance(row, FlagCmdRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a FlagCmdRow")
 
             # copy constructor
 
@@ -200,10 +205,124 @@ class FlagCmdRow:
 
         self._command = str(commandNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeStr(self._type)
+
+        eos.writeStr(self._reason)
+
+        eos.writeInt(self._level)
+
+        eos.writeInt(self._severity)
+
+        eos.writeBool(self._applied)
+
+        eos.writeStr(self._command)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def typeFromBin(row, eis):
+        """
+        Set the type in row from the EndianInput (eis) instance.
+        """
+
+        row._type = eis.readStr()
+
+    @staticmethod
+    def reasonFromBin(row, eis):
+        """
+        Set the reason in row from the EndianInput (eis) instance.
+        """
+
+        row._reason = eis.readStr()
+
+    @staticmethod
+    def levelFromBin(row, eis):
+        """
+        Set the level in row from the EndianInput (eis) instance.
+        """
+
+        row._level = eis.readInt()
+
+    @staticmethod
+    def severityFromBin(row, eis):
+        """
+        Set the severity in row from the EndianInput (eis) instance.
+        """
+
+        row._severity = eis.readInt()
+
+    @staticmethod
+    def appliedFromBin(row, eis):
+        """
+        Set the applied in row from the EndianInput (eis) instance.
+        """
+
+        row._applied = eis.readBool()
+
+    @staticmethod
+    def commandFromBin(row, eis):
+        """
+        Set the command in row from the EndianInput (eis) instance.
+        """
+
+        row._command = eis.readStr()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["timeInterval"] = FlagCmdRow.timeIntervalFromBin
+        _fromBinMethods["type"] = FlagCmdRow.typeFromBin
+        _fromBinMethods["reason"] = FlagCmdRow.reasonFromBin
+        _fromBinMethods["level"] = FlagCmdRow.levelFromBin
+        _fromBinMethods["severity"] = FlagCmdRow.severityFromBin
+        _fromBinMethods["applied"] = FlagCmdRow.appliedFromBin
+        _fromBinMethods["command"] = FlagCmdRow.commandFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = FlagCmdRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " FlagCmd",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -453,3 +572,7 @@ class FlagCmdRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+FlagCmdRow.initFromBinMethods()

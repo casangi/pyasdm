@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.StokesParameter import StokesParameter
 
@@ -70,10 +74,11 @@ class PolarizationRow:
         Create a PolarizationRow.
         When row is None, create an empty row attached to table, which must be a PolarizationTable.
         When row is given, copy those values in to the new row. The row argument must be a PolarizationRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.PolarizationTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a PolarizationTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -92,7 +97,7 @@ class PolarizationRow:
 
         if row is not None:
             if not isinstance(row, PolarizationRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a PolarizationRow")
 
             # copy constructor
 
@@ -184,10 +189,119 @@ class PolarizationRow:
             corrProductStr, PolarizationType, "Polarization", False
         )
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._polarizationId.toBin(eos)
+
+        eos.writeInt(self._numCorr)
+
+        eos.writeInt(len(self._corrType))
+        for i in range(len(self._corrType)):
+
+            eos.writeString(self._corrType[i].toString())
+
+        # null array case, unsure if this is possible but this should work
+        if self._corrProduct is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            corrProduct_dims = Parser.getListDims(self._corrProduct)
+        # assumes it really is 2D
+        eos.writeInt(corrProduct_dims[0])
+        eos.writeInt(corrProduct_dims[1])
+        for i in range(corrProduct_dims[0]):
+            for j in range(corrProduct_dims[1]):
+                eos.writeString(self._corrProduct[i][j].toString())
+
+    @staticmethod
+    def polarizationIdFromBin(row, eis):
+        """
+        Set the polarizationId in row from the EndianInput (eis) instance.
+        """
+
+        row._polarizationId = Tag.fromBin(eis)
+
+    @staticmethod
+    def numCorrFromBin(row, eis):
+        """
+        Set the numCorr in row from the EndianInput (eis) instance.
+        """
+
+        row._numCorr = eis.readInt()
+
+    @staticmethod
+    def corrTypeFromBin(row, eis):
+        """
+        Set the corrType in row from the EndianInput (eis) instance.
+        """
+
+        corrTypeDim1 = eis.readInt()
+        thisList = []
+        for i in range(corrTypeDim1):
+            thisValue = StokesParameter.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._corrType = thisList
+
+    @staticmethod
+    def corrProductFromBin(row, eis):
+        """
+        Set the corrProduct in row from the EndianInput (eis) instance.
+        """
+
+        corrProductDim1 = eis.readInt()
+        corrProductDim2 = eis.readInt()
+        thisList = []
+        for i in range(corrProductDim1):
+            thisList_j = []
+            for j in range(corrProductDim2):
+                thisValue = PolarizationType.from_int(eis.readInt())
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.corrProduct = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["polarizationId"] = PolarizationRow.polarizationIdFromBin
+        _fromBinMethods["numCorr"] = PolarizationRow.numCorrFromBin
+        _fromBinMethods["corrType"] = PolarizationRow.corrTypeFromBin
+        _fromBinMethods["corrProduct"] = PolarizationRow.corrProductFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = PolarizationRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Polarization",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute polarizationId
 
@@ -353,7 +467,7 @@ class PolarizationRow:
             if not (self._corrType[indx] == corrType[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if corrProduct is not None:
             if self._corrProduct is None:
                 return False
@@ -366,7 +480,7 @@ class PolarizationRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(corrProduct_dims[0]):
-                for j in range(corrProduct_dims[0]):
+                for j in range(corrProduct_dims[1]):
 
                     # corrProduct is an array of PolarizationType, compare using == operator.
                     if not (self._corrProduct[i][j] == corrProduct[i][j]):
@@ -400,7 +514,7 @@ class PolarizationRow:
             if not (self._corrType[indx] == corrType[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if corrProduct is not None:
             if self._corrProduct is None:
                 return False
@@ -413,10 +527,14 @@ class PolarizationRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(corrProduct_dims[0]):
-                for j in range(corrProduct_dims[0]):
+                for j in range(corrProduct_dims[1]):
 
                     # corrProduct is an array of PolarizationType, compare using == operator.
                     if not (self._corrProduct[i][j] == corrProduct[i][j]):
                         return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+PolarizationRow.initFromBinMethods()

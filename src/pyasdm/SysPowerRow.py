@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class SysPowerRow:
         Create a SysPowerRow.
         When row is None, create an empty row attached to table, which must be a SysPowerTable.
         When row is given, copy those values in to the new row. The row argument must be a SysPowerRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.SysPowerTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a SysPowerTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -102,7 +107,7 @@ class SysPowerRow:
 
         if row is not None:
             if not isinstance(row, SysPowerRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a SysPowerRow")
 
             # copy constructor
 
@@ -278,10 +283,177 @@ class SysPowerRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        eos.writeInt(self._feedId)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._numReceptor)
+
+        eos.writeBool(self._switchedPowerDifferenceExists)
+        if self._switchedPowerDifferenceExists:
+
+            eos.writeInt(len(self._switchedPowerDifference))
+            for i in range(len(self._switchedPowerDifference)):
+
+                eos.writeFloat(self._switchedPowerDifference[i])
+
+        eos.writeBool(self._switchedPowerSumExists)
+        if self._switchedPowerSumExists:
+
+            eos.writeInt(len(self._switchedPowerSum))
+            for i in range(len(self._switchedPowerSum)):
+
+                eos.writeFloat(self._switchedPowerSum[i])
+
+        eos.writeBool(self._requantizerGainExists)
+        if self._requantizerGainExists:
+
+            eos.writeInt(len(self._requantizerGain))
+            for i in range(len(self._requantizerGain)):
+
+                eos.writeFloat(self._requantizerGain[i])
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def feedIdFromBin(row, eis):
+        """
+        Set the feedId in row from the EndianInput (eis) instance.
+        """
+
+        row._feedId = eis.readInt()
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def switchedPowerDifferenceFromBin(row, eis):
+        """
+        Set the optional switchedPowerDifference in row from the EndianInput (eis) instance.
+        """
+        row._switchedPowerDifferenceExists = eis.readBool()
+        if row._switchedPowerDifferenceExists:
+
+            switchedPowerDifferenceDim1 = eis.readInt()
+            thisList = []
+            for i in range(switchedPowerDifferenceDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._switchedPowerDifference = thisList
+
+    @staticmethod
+    def switchedPowerSumFromBin(row, eis):
+        """
+        Set the optional switchedPowerSum in row from the EndianInput (eis) instance.
+        """
+        row._switchedPowerSumExists = eis.readBool()
+        if row._switchedPowerSumExists:
+
+            switchedPowerSumDim1 = eis.readInt()
+            thisList = []
+            for i in range(switchedPowerSumDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._switchedPowerSum = thisList
+
+    @staticmethod
+    def requantizerGainFromBin(row, eis):
+        """
+        Set the optional requantizerGain in row from the EndianInput (eis) instance.
+        """
+        row._requantizerGainExists = eis.readBool()
+        if row._requantizerGainExists:
+
+            requantizerGainDim1 = eis.readInt()
+            thisList = []
+            for i in range(requantizerGainDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._requantizerGain = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = SysPowerRow.antennaIdFromBin
+        _fromBinMethods["spectralWindowId"] = SysPowerRow.spectralWindowIdFromBin
+        _fromBinMethods["feedId"] = SysPowerRow.feedIdFromBin
+        _fromBinMethods["timeInterval"] = SysPowerRow.timeIntervalFromBin
+        _fromBinMethods["numReceptor"] = SysPowerRow.numReceptorFromBin
+
+        _fromBinMethods["switchedPowerDifference"] = (
+            SysPowerRow.switchedPowerDifferenceFromBin
+        )
+        _fromBinMethods["switchedPowerSum"] = SysPowerRow.switchedPowerSumFromBin
+        _fromBinMethods["requantizerGain"] = SysPowerRow.requantizerGainFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = SysPowerRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SysPower",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -701,3 +873,7 @@ class SysPowerRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+SysPowerRow.initFromBinMethods()

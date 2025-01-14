@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.TimeSampling import TimeSampling
 
@@ -67,6 +71,7 @@ class MainRow:
         Create a MainRow.
         When row is None, create an empty row attached to table, which must be a MainTable.
         When row is given, copy those values in to the new row. The row argument must be a MainRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.MainTable):
@@ -287,10 +292,190 @@ class MainRow:
 
         self._stateId = Parser.stringListToLists(stateIdStr, Tag, "Main", True)
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._time.toBin(eos)
+
+        self._configDescriptionId.toBin(eos)
+
+        self._fieldId.toBin(eos)
+
+        eos.writeInt(self._numAntenna)
+
+        eos.writeString(self._timeSampling.toString())
+
+        self._interval.toBin(eos)
+
+        eos.writeInt(self._numIntegration)
+
+        eos.writeInt(self._scanNumber)
+
+        eos.writeInt(self._subscanNumber)
+
+        eos.writeInt(self._dataSize)
+
+        self._dataUID.toBin(eos)
+
+        Tag.listToBin(self._stateId, eos)
+
+        self._execBlockId.toBin(eos)
+
+    @staticmethod
+    def timeFromBin(row, eis):
+        """
+        Set the time in row from the EndianInput (eis) instance.
+        """
+
+        row._time = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def configDescriptionIdFromBin(row, eis):
+        """
+        Set the configDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        row._configDescriptionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def fieldIdFromBin(row, eis):
+        """
+        Set the fieldId in row from the EndianInput (eis) instance.
+        """
+
+        row._fieldId = Tag.fromBin(eis)
+
+    @staticmethod
+    def numAntennaFromBin(row, eis):
+        """
+        Set the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        row._numAntenna = eis.readInt()
+
+    @staticmethod
+    def timeSamplingFromBin(row, eis):
+        """
+        Set the timeSampling in row from the EndianInput (eis) instance.
+        """
+
+        row._timeSampling = TimeSampling.from_int(eis.readInt())
+
+    @staticmethod
+    def intervalFromBin(row, eis):
+        """
+        Set the interval in row from the EndianInput (eis) instance.
+        """
+
+        row._interval = Interval.fromBin(eis)
+
+    @staticmethod
+    def numIntegrationFromBin(row, eis):
+        """
+        Set the numIntegration in row from the EndianInput (eis) instance.
+        """
+
+        row._numIntegration = eis.readInt()
+
+    @staticmethod
+    def scanNumberFromBin(row, eis):
+        """
+        Set the scanNumber in row from the EndianInput (eis) instance.
+        """
+
+        row._scanNumber = eis.readInt()
+
+    @staticmethod
+    def subscanNumberFromBin(row, eis):
+        """
+        Set the subscanNumber in row from the EndianInput (eis) instance.
+        """
+
+        row._subscanNumber = eis.readInt()
+
+    @staticmethod
+    def dataSizeFromBin(row, eis):
+        """
+        Set the dataSize in row from the EndianInput (eis) instance.
+        """
+
+        row._dataSize = eis.readInt()
+
+    @staticmethod
+    def dataUIDFromBin(row, eis):
+        """
+        Set the dataUID in row from the EndianInput (eis) instance.
+        """
+
+        row._dataUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def stateIdFromBin(row, eis):
+        """
+        Set the stateId in row from the EndianInput (eis) instance.
+        """
+
+        row._stateId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def execBlockIdFromBin(row, eis):
+        """
+        Set the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockId = Tag.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["time"] = MainRow.timeFromBin
+        _fromBinMethods["configDescriptionId"] = MainRow.configDescriptionIdFromBin
+        _fromBinMethods["fieldId"] = MainRow.fieldIdFromBin
+        _fromBinMethods["numAntenna"] = MainRow.numAntennaFromBin
+        _fromBinMethods["timeSampling"] = MainRow.timeSamplingFromBin
+        _fromBinMethods["interval"] = MainRow.intervalFromBin
+        _fromBinMethods["numIntegration"] = MainRow.numIntegrationFromBin
+        _fromBinMethods["scanNumber"] = MainRow.scanNumberFromBin
+        _fromBinMethods["subscanNumber"] = MainRow.subscanNumberFromBin
+        _fromBinMethods["dataSize"] = MainRow.dataSizeFromBin
+        _fromBinMethods["dataUID"] = MainRow.dataUIDFromBin
+        _fromBinMethods["stateId"] = MainRow.stateIdFromBin
+        _fromBinMethods["execBlockId"] = MainRow.execBlockIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = MainRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Main",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute time
 
@@ -652,10 +837,9 @@ class MainRow:
 
     def setOneStateId(self, index, stateId):
         """
-        Set stateId[i] with the specified Tag value.
+        Set stateId[index] with the specified Tag value.
         index The index in stateId where to set the Tag value.
-        stateId The Tag value to which stateId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        stateId The Tag value to which stateId[index] is to be set.
 
         """
 
@@ -669,8 +853,8 @@ class MainRow:
         id the Tag to be appended to stateId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._stateId.append(Tag(id[i]))
+            for thisValue in id:
+                self._stateId.append(Tag(thisValue))
         else:
             self._stateId.append(Tag(id))
 
@@ -869,3 +1053,7 @@ class MainRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+MainRow.initFromBinMethods()

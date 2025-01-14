@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.DirectionReferenceCode import DirectionReferenceCode
 
@@ -67,10 +71,11 @@ class SwitchCycleRow:
         Create a SwitchCycleRow.
         When row is None, create an empty row attached to table, which must be a SwitchCycleTable.
         When row is given, copy those values in to the new row. The row argument must be a SwitchCycleRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.SwitchCycleTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a SwitchCycleTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -101,7 +106,7 @@ class SwitchCycleRow:
 
         if row is not None:
             if not isinstance(row, SwitchCycleRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a SwitchCycleRow")
 
             # copy constructor
 
@@ -123,11 +128,11 @@ class SwitchCycleRow:
 
             # by default set systematically directionCode's value to something not None
 
-            self.directionCode = DirectionReferenceCode.from_int(0)
+            self._directionCode = DirectionReferenceCode.from_int(0)
 
             if row._directionCodeExists:
 
-                if row._directionCode is None:
+                if row._directionCode is not None:
                     self._directionCode = row._directionCode
 
                 self._directionCodeExists = True
@@ -274,10 +279,154 @@ class SwitchCycleRow:
 
             self._directionEquinoxExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._switchCycleId.toBin(eos)
+
+        eos.writeInt(self._numStep)
+
+        eos.writeInt(len(self._weightArray))
+        for i in range(len(self._weightArray)):
+
+            eos.writeFloat(self._weightArray[i])
+
+        Angle.listToBin(self._dirOffsetArray, eos)
+
+        Frequency.listToBin(self._freqOffsetArray, eos)
+
+        Interval.listToBin(self._stepDurationArray, eos)
+
+        eos.writeBool(self._directionCodeExists)
+        if self._directionCodeExists:
+
+            eos.writeString(self._directionCode.toString())
+
+        eos.writeBool(self._directionEquinoxExists)
+        if self._directionEquinoxExists:
+
+            self._directionEquinox.toBin(eos)
+
+    @staticmethod
+    def switchCycleIdFromBin(row, eis):
+        """
+        Set the switchCycleId in row from the EndianInput (eis) instance.
+        """
+
+        row._switchCycleId = Tag.fromBin(eis)
+
+    @staticmethod
+    def numStepFromBin(row, eis):
+        """
+        Set the numStep in row from the EndianInput (eis) instance.
+        """
+
+        row._numStep = eis.readInt()
+
+    @staticmethod
+    def weightArrayFromBin(row, eis):
+        """
+        Set the weightArray in row from the EndianInput (eis) instance.
+        """
+
+        weightArrayDim1 = eis.readInt()
+        thisList = []
+        for i in range(weightArrayDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._weightArray = thisList
+
+    @staticmethod
+    def dirOffsetArrayFromBin(row, eis):
+        """
+        Set the dirOffsetArray in row from the EndianInput (eis) instance.
+        """
+
+        row._dirOffsetArray = Angle.from2DBin(eis)
+
+    @staticmethod
+    def freqOffsetArrayFromBin(row, eis):
+        """
+        Set the freqOffsetArray in row from the EndianInput (eis) instance.
+        """
+
+        row._freqOffsetArray = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def stepDurationArrayFromBin(row, eis):
+        """
+        Set the stepDurationArray in row from the EndianInput (eis) instance.
+        """
+
+        row._stepDurationArray = Interval.from1DBin(eis)
+
+    @staticmethod
+    def directionCodeFromBin(row, eis):
+        """
+        Set the optional directionCode in row from the EndianInput (eis) instance.
+        """
+        row._directionCodeExists = eis.readBool()
+        if row._directionCodeExists:
+
+            row._directionCode = DirectionReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def directionEquinoxFromBin(row, eis):
+        """
+        Set the optional directionEquinox in row from the EndianInput (eis) instance.
+        """
+        row._directionEquinoxExists = eis.readBool()
+        if row._directionEquinoxExists:
+
+            row._directionEquinox = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["switchCycleId"] = SwitchCycleRow.switchCycleIdFromBin
+        _fromBinMethods["numStep"] = SwitchCycleRow.numStepFromBin
+        _fromBinMethods["weightArray"] = SwitchCycleRow.weightArrayFromBin
+        _fromBinMethods["dirOffsetArray"] = SwitchCycleRow.dirOffsetArrayFromBin
+        _fromBinMethods["freqOffsetArray"] = SwitchCycleRow.freqOffsetArrayFromBin
+        _fromBinMethods["stepDurationArray"] = SwitchCycleRow.stepDurationArrayFromBin
+
+        _fromBinMethods["directionCode"] = SwitchCycleRow.directionCodeFromBin
+        _fromBinMethods["directionEquinox"] = SwitchCycleRow.directionEquinoxFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = SwitchCycleRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SwitchCycle",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute switchCycleId
 
@@ -622,7 +771,7 @@ class SwitchCycleRow:
             if not (self._weightArray[indx] == weightArray[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if dirOffsetArray is not None:
             if self._dirOffsetArray is None:
                 return False
@@ -635,13 +784,13 @@ class SwitchCycleRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(dirOffsetArray_dims[0]):
-                for j in range(dirOffsetArray_dims[0]):
+                for j in range(dirOffsetArray_dims[1]):
 
                     # dirOffsetArray is a Angle, compare using the almostEquals method.
                     if not (
                         self._dirOffsetArray[i][j].almostEquals(
                             dirOffsetArray[i][j],
-                            this.getTable().getDirOffsetArrayEqTolerance(),
+                            self.getTable().getDirOffsetArrayEqTolerance(),
                         )
                     ):
                         return False
@@ -702,7 +851,7 @@ class SwitchCycleRow:
             if not (self._weightArray[indx] == weightArray[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if dirOffsetArray is not None:
             if self._dirOffsetArray is None:
                 return False
@@ -715,13 +864,13 @@ class SwitchCycleRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(dirOffsetArray_dims[0]):
-                for j in range(dirOffsetArray_dims[0]):
+                for j in range(dirOffsetArray_dims[1]):
 
                     # dirOffsetArray is a Angle, compare using the almostEquals method.
                     if not (
                         self._dirOffsetArray[i][j].almostEquals(
                             dirOffsetArray[i][j],
-                            this.getTable().getDirOffsetArrayEqTolerance(),
+                            self.getTable().getDirOffsetArrayEqTolerance(),
                         )
                     ):
                         return False
@@ -749,3 +898,7 @@ class SwitchCycleRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+SwitchCycleRow.initFromBinMethods()

@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
 
@@ -73,10 +77,11 @@ class CalPositionRow:
         Create a CalPositionRow.
         When row is None, create an empty row attached to table, which must be a CalPositionTable.
         When row is given, copy those values in to the new row. The row argument must be a CalPositionRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalPositionTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalPositionTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -135,13 +140,13 @@ class CalPositionRow:
 
         if row is not None:
             if not isinstance(row, CalPositionRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalPositionRow")
 
             # copy constructor
 
             self._antennaName = row._antennaName
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._atmPhaseCorrection is None:
                 self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
             else:
@@ -434,10 +439,297 @@ class CalPositionRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._antennaName)
+
+        eos.writeString(self._atmPhaseCorrection.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        Length.listToBin(self._antennaPosition, eos)
+
+        eos.writeStr(self._stationName)
+
+        Length.listToBin(self._stationPosition, eos)
+
+        eos.writeString(self._positionMethod.toString())
+
+        eos.writeString(self._receiverBand.toString())
+
+        eos.writeInt(self._numAntenna)
+
+        eos.writeInt(len(self._refAntennaNames))
+        for i in range(len(self._refAntennaNames)):
+
+            eos.writeStr(self._refAntennaNames[i])
+
+        self._axesOffset.toBin(eos)
+
+        self._axesOffsetErr.toBin(eos)
+
+        eos.writeBool(self._axesOffsetFixed)
+
+        Length.listToBin(self._positionOffset, eos)
+
+        Length.listToBin(self._positionErr, eos)
+
+        eos.writeFloat(self._reducedChiSquared)
+
+        eos.writeBool(self._delayRmsExists)
+        if self._delayRmsExists:
+
+            eos.writeFloat(self._delayRms)
+
+        eos.writeBool(self._phaseRmsExists)
+        if self._phaseRmsExists:
+
+            self._phaseRms.toBin(eos)
+
+    @staticmethod
+    def antennaNameFromBin(row, eis):
+        """
+        Set the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaName = eis.readStr()
+
+    @staticmethod
+    def atmPhaseCorrectionFromBin(row, eis):
+        """
+        Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def antennaPositionFromBin(row, eis):
+        """
+        Set the antennaPosition in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaPosition = Length.from1DBin(eis)
+
+    @staticmethod
+    def stationNameFromBin(row, eis):
+        """
+        Set the stationName in row from the EndianInput (eis) instance.
+        """
+
+        row._stationName = eis.readStr()
+
+    @staticmethod
+    def stationPositionFromBin(row, eis):
+        """
+        Set the stationPosition in row from the EndianInput (eis) instance.
+        """
+
+        row._stationPosition = Length.from1DBin(eis)
+
+    @staticmethod
+    def positionMethodFromBin(row, eis):
+        """
+        Set the positionMethod in row from the EndianInput (eis) instance.
+        """
+
+        row._positionMethod = PositionMethod.from_int(eis.readInt())
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def numAntennaFromBin(row, eis):
+        """
+        Set the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        row._numAntenna = eis.readInt()
+
+    @staticmethod
+    def refAntennaNamesFromBin(row, eis):
+        """
+        Set the refAntennaNames in row from the EndianInput (eis) instance.
+        """
+
+        refAntennaNamesDim1 = eis.readInt()
+        thisList = []
+        for i in range(refAntennaNamesDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._refAntennaNames = thisList
+
+    @staticmethod
+    def axesOffsetFromBin(row, eis):
+        """
+        Set the axesOffset in row from the EndianInput (eis) instance.
+        """
+
+        row._axesOffset = Length.fromBin(eis)
+
+    @staticmethod
+    def axesOffsetErrFromBin(row, eis):
+        """
+        Set the axesOffsetErr in row from the EndianInput (eis) instance.
+        """
+
+        row._axesOffsetErr = Length.fromBin(eis)
+
+    @staticmethod
+    def axesOffsetFixedFromBin(row, eis):
+        """
+        Set the axesOffsetFixed in row from the EndianInput (eis) instance.
+        """
+
+        row._axesOffsetFixed = eis.readBool()
+
+    @staticmethod
+    def positionOffsetFromBin(row, eis):
+        """
+        Set the positionOffset in row from the EndianInput (eis) instance.
+        """
+
+        row._positionOffset = Length.from1DBin(eis)
+
+    @staticmethod
+    def positionErrFromBin(row, eis):
+        """
+        Set the positionErr in row from the EndianInput (eis) instance.
+        """
+
+        row._positionErr = Length.from1DBin(eis)
+
+    @staticmethod
+    def reducedChiSquaredFromBin(row, eis):
+        """
+        Set the reducedChiSquared in row from the EndianInput (eis) instance.
+        """
+
+        row._reducedChiSquared = eis.readFloat()
+
+    @staticmethod
+    def delayRmsFromBin(row, eis):
+        """
+        Set the optional delayRms in row from the EndianInput (eis) instance.
+        """
+        row._delayRmsExists = eis.readBool()
+        if row._delayRmsExists:
+
+            row._delayRms = eis.readFloat()
+
+    @staticmethod
+    def phaseRmsFromBin(row, eis):
+        """
+        Set the optional phaseRms in row from the EndianInput (eis) instance.
+        """
+        row._phaseRmsExists = eis.readBool()
+        if row._phaseRmsExists:
+
+            row._phaseRms = Angle.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaName"] = CalPositionRow.antennaNameFromBin
+        _fromBinMethods["atmPhaseCorrection"] = CalPositionRow.atmPhaseCorrectionFromBin
+        _fromBinMethods["calDataId"] = CalPositionRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalPositionRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalPositionRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalPositionRow.endValidTimeFromBin
+        _fromBinMethods["antennaPosition"] = CalPositionRow.antennaPositionFromBin
+        _fromBinMethods["stationName"] = CalPositionRow.stationNameFromBin
+        _fromBinMethods["stationPosition"] = CalPositionRow.stationPositionFromBin
+        _fromBinMethods["positionMethod"] = CalPositionRow.positionMethodFromBin
+        _fromBinMethods["receiverBand"] = CalPositionRow.receiverBandFromBin
+        _fromBinMethods["numAntenna"] = CalPositionRow.numAntennaFromBin
+        _fromBinMethods["refAntennaNames"] = CalPositionRow.refAntennaNamesFromBin
+        _fromBinMethods["axesOffset"] = CalPositionRow.axesOffsetFromBin
+        _fromBinMethods["axesOffsetErr"] = CalPositionRow.axesOffsetErrFromBin
+        _fromBinMethods["axesOffsetFixed"] = CalPositionRow.axesOffsetFixedFromBin
+        _fromBinMethods["positionOffset"] = CalPositionRow.positionOffsetFromBin
+        _fromBinMethods["positionErr"] = CalPositionRow.positionErrFromBin
+        _fromBinMethods["reducedChiSquared"] = CalPositionRow.reducedChiSquaredFromBin
+
+        _fromBinMethods["delayRms"] = CalPositionRow.delayRmsFromBin
+        _fromBinMethods["phaseRms"] = CalPositionRow.phaseRmsFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalPositionRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalPosition",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute antennaName
 
@@ -1406,3 +1698,7 @@ class CalPositionRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalPositionRow.initFromBinMethods()

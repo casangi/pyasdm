@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.WVRMethod import WVRMethod
 
@@ -67,10 +71,11 @@ class CalWVRRow:
         Create a CalWVRRow.
         When row is None, create an empty row attached to table, which must be a CalWVRTable.
         When row is given, copy those values in to the new row. The row argument must be a CalWVRRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalWVRTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalWVRTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -123,7 +128,7 @@ class CalWVRRow:
 
         if row is not None:
             if not isinstance(row, CalWVRRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalWVRRow")
 
             # copy constructor
 
@@ -380,10 +385,312 @@ class CalWVRRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._antennaName)
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        eos.writeString(self._wvrMethod.toString())
+
+        eos.writeInt(self._numInputAntennas)
+
+        eos.writeInt(len(self._inputAntennaNames))
+        for i in range(len(self._inputAntennaNames)):
+
+            eos.writeStr(self._inputAntennaNames[i])
+
+        eos.writeInt(self._numChan)
+
+        Frequency.listToBin(self._chanFreq, eos)
+
+        Frequency.listToBin(self._chanWidth, eos)
+
+        Temperature.listToBin(self._refTemp, eos)
+
+        eos.writeInt(self._numPoly)
+
+        # null array case, unsure if this is possible but this should work
+        if self._pathCoeff is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            pathCoeff_dims = Parser.getListDims(self._pathCoeff)
+        # assumes it really is 3D
+        eos.writeInt(pathCoeff_dims[0])
+        eos.writeInt(pathCoeff_dims[1])
+        eos.writeInt(pathCoeff_dims[2])
+        for i in range(pathCoeff_dims[0]):
+            for j in range(pathCoeff_dims[1]):
+                for k in range(pathCoeff_dims[2]):
+                    eos.writeFloat(self._pathCoeff[i][j][k])
+
+        Frequency.listToBin(self._polyFreqLimits, eos)
+
+        eos.writeInt(len(self._wetPath))
+        for i in range(len(self._wetPath)):
+
+            eos.writeFloat(self._wetPath[i])
+
+        eos.writeInt(len(self._dryPath))
+        for i in range(len(self._dryPath)):
+
+            eos.writeFloat(self._dryPath[i])
+
+        self._water.toBin(eos)
+
+        eos.writeBool(self._tauBaselineExists)
+        if self._tauBaselineExists:
+
+            eos.writeFloat(self._tauBaseline)
+
+    @staticmethod
+    def antennaNameFromBin(row, eis):
+        """
+        Set the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaName = eis.readStr()
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def wvrMethodFromBin(row, eis):
+        """
+        Set the wvrMethod in row from the EndianInput (eis) instance.
+        """
+
+        row._wvrMethod = WVRMethod.from_int(eis.readInt())
+
+    @staticmethod
+    def numInputAntennasFromBin(row, eis):
+        """
+        Set the numInputAntennas in row from the EndianInput (eis) instance.
+        """
+
+        row._numInputAntennas = eis.readInt()
+
+    @staticmethod
+    def inputAntennaNamesFromBin(row, eis):
+        """
+        Set the inputAntennaNames in row from the EndianInput (eis) instance.
+        """
+
+        inputAntennaNamesDim1 = eis.readInt()
+        thisList = []
+        for i in range(inputAntennaNamesDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._inputAntennaNames = thisList
+
+    @staticmethod
+    def numChanFromBin(row, eis):
+        """
+        Set the numChan in row from the EndianInput (eis) instance.
+        """
+
+        row._numChan = eis.readInt()
+
+    @staticmethod
+    def chanFreqFromBin(row, eis):
+        """
+        Set the chanFreq in row from the EndianInput (eis) instance.
+        """
+
+        row._chanFreq = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def chanWidthFromBin(row, eis):
+        """
+        Set the chanWidth in row from the EndianInput (eis) instance.
+        """
+
+        row._chanWidth = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def refTempFromBin(row, eis):
+        """
+        Set the refTemp in row from the EndianInput (eis) instance.
+        """
+
+        row._refTemp = Temperature.from2DBin(eis)
+
+    @staticmethod
+    def numPolyFromBin(row, eis):
+        """
+        Set the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        row._numPoly = eis.readInt()
+
+    @staticmethod
+    def pathCoeffFromBin(row, eis):
+        """
+        Set the pathCoeff in row from the EndianInput (eis) instance.
+        """
+
+        pathCoeffDim1 = eis.readInt()
+        pathCoeffDim2 = eis.readInt()
+        pathCoeffDim3 = eis.readInt()
+        thisList = []
+        for i in range(pathCoeffDim1):
+            thisList_j = []
+            for j in range(pathCoeffDim2):
+                thisList_k = []
+                for k in range(pathCoeffDim3):
+                    thisValue = eis.readFloat()
+                    thisList_k.append(thisValue)
+                thisList_j.append(thisList_k)
+            thisList.append(thisList_j)
+        row.pathCoeff = thisList
+
+    @staticmethod
+    def polyFreqLimitsFromBin(row, eis):
+        """
+        Set the polyFreqLimits in row from the EndianInput (eis) instance.
+        """
+
+        row._polyFreqLimits = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def wetPathFromBin(row, eis):
+        """
+        Set the wetPath in row from the EndianInput (eis) instance.
+        """
+
+        wetPathDim1 = eis.readInt()
+        thisList = []
+        for i in range(wetPathDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._wetPath = thisList
+
+    @staticmethod
+    def dryPathFromBin(row, eis):
+        """
+        Set the dryPath in row from the EndianInput (eis) instance.
+        """
+
+        dryPathDim1 = eis.readInt()
+        thisList = []
+        for i in range(dryPathDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._dryPath = thisList
+
+    @staticmethod
+    def waterFromBin(row, eis):
+        """
+        Set the water in row from the EndianInput (eis) instance.
+        """
+
+        row._water = Length.fromBin(eis)
+
+    @staticmethod
+    def tauBaselineFromBin(row, eis):
+        """
+        Set the optional tauBaseline in row from the EndianInput (eis) instance.
+        """
+        row._tauBaselineExists = eis.readBool()
+        if row._tauBaselineExists:
+
+            row._tauBaseline = eis.readFloat()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaName"] = CalWVRRow.antennaNameFromBin
+        _fromBinMethods["calDataId"] = CalWVRRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalWVRRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalWVRRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalWVRRow.endValidTimeFromBin
+        _fromBinMethods["wvrMethod"] = CalWVRRow.wvrMethodFromBin
+        _fromBinMethods["numInputAntennas"] = CalWVRRow.numInputAntennasFromBin
+        _fromBinMethods["inputAntennaNames"] = CalWVRRow.inputAntennaNamesFromBin
+        _fromBinMethods["numChan"] = CalWVRRow.numChanFromBin
+        _fromBinMethods["chanFreq"] = CalWVRRow.chanFreqFromBin
+        _fromBinMethods["chanWidth"] = CalWVRRow.chanWidthFromBin
+        _fromBinMethods["refTemp"] = CalWVRRow.refTempFromBin
+        _fromBinMethods["numPoly"] = CalWVRRow.numPolyFromBin
+        _fromBinMethods["pathCoeff"] = CalWVRRow.pathCoeffFromBin
+        _fromBinMethods["polyFreqLimits"] = CalWVRRow.polyFreqLimitsFromBin
+        _fromBinMethods["wetPath"] = CalWVRRow.wetPathFromBin
+        _fromBinMethods["dryPath"] = CalWVRRow.dryPathFromBin
+        _fromBinMethods["water"] = CalWVRRow.waterFromBin
+
+        _fromBinMethods["tauBaseline"] = CalWVRRow.tauBaselineFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalWVRRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalWVR",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute startValidTime
 
@@ -1138,7 +1445,7 @@ class CalWVRRow:
             ):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if refTemp is not None:
             if self._refTemp is None:
                 return False
@@ -1151,12 +1458,12 @@ class CalWVRRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(refTemp_dims[0]):
-                for j in range(refTemp_dims[0]):
+                for j in range(refTemp_dims[1]):
 
                     # refTemp is a Temperature, compare using the almostEquals method.
                     if not (
                         self._refTemp[i][j].almostEquals(
-                            refTemp[i][j], this.getTable().getRefTempEqTolerance()
+                            refTemp[i][j], self.getTable().getRefTempEqTolerance()
                         )
                     ):
                         return False
@@ -1178,8 +1485,8 @@ class CalWVRRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(pathCoeff_dims[0]):
-                for j in range(pathCoeff_dims[0]):
-                    for k in range(pathCoeff_dims[0]):
+                for j in range(pathCoeff_dims[1]):
+                    for k in range(pathCoeff_dims[2]):
 
                         # pathCoeff is an array of float, compare using == operator.
                         if not (self._pathCoeff[i][j][k] == pathCoeff[i][j][k]):
@@ -1320,7 +1627,7 @@ class CalWVRRow:
             ):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if refTemp is not None:
             if self._refTemp is None:
                 return False
@@ -1333,12 +1640,12 @@ class CalWVRRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(refTemp_dims[0]):
-                for j in range(refTemp_dims[0]):
+                for j in range(refTemp_dims[1]):
 
                     # refTemp is a Temperature, compare using the almostEquals method.
                     if not (
                         self._refTemp[i][j].almostEquals(
-                            refTemp[i][j], this.getTable().getRefTempEqTolerance()
+                            refTemp[i][j], self.getTable().getRefTempEqTolerance()
                         )
                     ):
                         return False
@@ -1360,8 +1667,8 @@ class CalWVRRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(pathCoeff_dims[0]):
-                for j in range(pathCoeff_dims[0]):
-                    for k in range(pathCoeff_dims[0]):
+                for j in range(pathCoeff_dims[1]):
+                    for k in range(pathCoeff_dims[2]):
 
                         # pathCoeff is an array of float, compare using == operator.
                         if not (self._pathCoeff[i][j][k] == pathCoeff[i][j][k]):
@@ -1404,3 +1711,7 @@ class CalWVRRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalWVRRow.initFromBinMethods()

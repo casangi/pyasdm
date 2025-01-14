@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class TotalPowerRow:
         Create a TotalPowerRow.
         When row is None, create an empty row attached to table, which must be a TotalPowerTable.
         When row is given, copy those values in to the new row. The row argument must be a TotalPowerRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.TotalPowerTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a TotalPowerTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -114,7 +119,7 @@ class TotalPowerRow:
 
         if row is not None:
             if not isinstance(row, TotalPowerRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a TotalPowerRow")
 
             # copy constructor
 
@@ -347,10 +352,287 @@ class TotalPowerRow:
 
         self._stateId = Parser.stringListToLists(stateIdStr, Tag, "TotalPower", True)
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._time.toBin(eos)
+
+        self._configDescriptionId.toBin(eos)
+
+        self._fieldId.toBin(eos)
+
+        eos.writeInt(self._scanNumber)
+
+        eos.writeInt(self._subscanNumber)
+
+        eos.writeInt(self._integrationNumber)
+
+        Length.listToBin(self._uvw, eos)
+
+        Interval.listToBin(self._exposure, eos)
+
+        ArrayTime.listToBin(self._timeCentroid, eos)
+
+        # null array case, unsure if this is possible but this should work
+        if self._floatData is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            floatData_dims = Parser.getListDims(self._floatData)
+        # assumes it really is 3D
+        eos.writeInt(floatData_dims[0])
+        eos.writeInt(floatData_dims[1])
+        eos.writeInt(floatData_dims[2])
+        for i in range(floatData_dims[0]):
+            for j in range(floatData_dims[1]):
+                for k in range(floatData_dims[2]):
+                    eos.writeFloat(self._floatData[i][j][k])
+
+        eos.writeInt(len(self._flagAnt))
+        for i in range(len(self._flagAnt)):
+
+            eos.writeInt(self._flagAnt[i])
+
+        # null array case, unsure if this is possible but this should work
+        if self._flagPol is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            flagPol_dims = Parser.getListDims(self._flagPol)
+        # assumes it really is 2D
+        eos.writeInt(flagPol_dims[0])
+        eos.writeInt(flagPol_dims[1])
+        for i in range(flagPol_dims[0]):
+            for j in range(flagPol_dims[1]):
+                eos.writeInt(self._flagPol[i][j])
+
+        self._interval.toBin(eos)
+
+        Tag.listToBin(self._stateId, eos)
+
+        self._execBlockId.toBin(eos)
+
+        eos.writeBool(self._subintegrationNumberExists)
+        if self._subintegrationNumberExists:
+
+            eos.writeInt(self._subintegrationNumber)
+
+    @staticmethod
+    def timeFromBin(row, eis):
+        """
+        Set the time in row from the EndianInput (eis) instance.
+        """
+
+        row._time = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def configDescriptionIdFromBin(row, eis):
+        """
+        Set the configDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        row._configDescriptionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def fieldIdFromBin(row, eis):
+        """
+        Set the fieldId in row from the EndianInput (eis) instance.
+        """
+
+        row._fieldId = Tag.fromBin(eis)
+
+    @staticmethod
+    def scanNumberFromBin(row, eis):
+        """
+        Set the scanNumber in row from the EndianInput (eis) instance.
+        """
+
+        row._scanNumber = eis.readInt()
+
+    @staticmethod
+    def subscanNumberFromBin(row, eis):
+        """
+        Set the subscanNumber in row from the EndianInput (eis) instance.
+        """
+
+        row._subscanNumber = eis.readInt()
+
+    @staticmethod
+    def integrationNumberFromBin(row, eis):
+        """
+        Set the integrationNumber in row from the EndianInput (eis) instance.
+        """
+
+        row._integrationNumber = eis.readInt()
+
+    @staticmethod
+    def uvwFromBin(row, eis):
+        """
+        Set the uvw in row from the EndianInput (eis) instance.
+        """
+
+        row._uvw = Length.from2DBin(eis)
+
+    @staticmethod
+    def exposureFromBin(row, eis):
+        """
+        Set the exposure in row from the EndianInput (eis) instance.
+        """
+
+        row._exposure = Interval.from2DBin(eis)
+
+    @staticmethod
+    def timeCentroidFromBin(row, eis):
+        """
+        Set the timeCentroid in row from the EndianInput (eis) instance.
+        """
+
+        row._timeCentroid = ArrayTime.from2DBin(eis)
+
+    @staticmethod
+    def floatDataFromBin(row, eis):
+        """
+        Set the floatData in row from the EndianInput (eis) instance.
+        """
+
+        floatDataDim1 = eis.readInt()
+        floatDataDim2 = eis.readInt()
+        floatDataDim3 = eis.readInt()
+        thisList = []
+        for i in range(floatDataDim1):
+            thisList_j = []
+            for j in range(floatDataDim2):
+                thisList_k = []
+                for k in range(floatDataDim3):
+                    thisValue = eis.readFloat()
+                    thisList_k.append(thisValue)
+                thisList_j.append(thisList_k)
+            thisList.append(thisList_j)
+        row.floatData = thisList
+
+    @staticmethod
+    def flagAntFromBin(row, eis):
+        """
+        Set the flagAnt in row from the EndianInput (eis) instance.
+        """
+
+        flagAntDim1 = eis.readInt()
+        thisList = []
+        for i in range(flagAntDim1):
+            thisValue = eis.readInt()
+            thisList.append(thisValue)
+        row._flagAnt = thisList
+
+    @staticmethod
+    def flagPolFromBin(row, eis):
+        """
+        Set the flagPol in row from the EndianInput (eis) instance.
+        """
+
+        flagPolDim1 = eis.readInt()
+        flagPolDim2 = eis.readInt()
+        thisList = []
+        for i in range(flagPolDim1):
+            thisList_j = []
+            for j in range(flagPolDim2):
+                thisValue = eis.readInt()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.flagPol = thisList
+
+    @staticmethod
+    def intervalFromBin(row, eis):
+        """
+        Set the interval in row from the EndianInput (eis) instance.
+        """
+
+        row._interval = Interval.fromBin(eis)
+
+    @staticmethod
+    def stateIdFromBin(row, eis):
+        """
+        Set the stateId in row from the EndianInput (eis) instance.
+        """
+
+        row._stateId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def execBlockIdFromBin(row, eis):
+        """
+        Set the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockId = Tag.fromBin(eis)
+
+    @staticmethod
+    def subintegrationNumberFromBin(row, eis):
+        """
+        Set the optional subintegrationNumber in row from the EndianInput (eis) instance.
+        """
+        row._subintegrationNumberExists = eis.readBool()
+        if row._subintegrationNumberExists:
+
+            row._subintegrationNumber = eis.readInt()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["time"] = TotalPowerRow.timeFromBin
+        _fromBinMethods["configDescriptionId"] = (
+            TotalPowerRow.configDescriptionIdFromBin
+        )
+        _fromBinMethods["fieldId"] = TotalPowerRow.fieldIdFromBin
+        _fromBinMethods["scanNumber"] = TotalPowerRow.scanNumberFromBin
+        _fromBinMethods["subscanNumber"] = TotalPowerRow.subscanNumberFromBin
+        _fromBinMethods["integrationNumber"] = TotalPowerRow.integrationNumberFromBin
+        _fromBinMethods["uvw"] = TotalPowerRow.uvwFromBin
+        _fromBinMethods["exposure"] = TotalPowerRow.exposureFromBin
+        _fromBinMethods["timeCentroid"] = TotalPowerRow.timeCentroidFromBin
+        _fromBinMethods["floatData"] = TotalPowerRow.floatDataFromBin
+        _fromBinMethods["flagAnt"] = TotalPowerRow.flagAntFromBin
+        _fromBinMethods["flagPol"] = TotalPowerRow.flagPolFromBin
+        _fromBinMethods["interval"] = TotalPowerRow.intervalFromBin
+        _fromBinMethods["stateId"] = TotalPowerRow.stateIdFromBin
+        _fromBinMethods["execBlockId"] = TotalPowerRow.execBlockIdFromBin
+
+        _fromBinMethods["subintegrationNumber"] = (
+            TotalPowerRow.subintegrationNumberFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = TotalPowerRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " TotalPower",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute time
 
@@ -906,10 +1188,9 @@ class TotalPowerRow:
 
     def setOneStateId(self, index, stateId):
         """
-        Set stateId[i] with the specified Tag value.
+        Set stateId[index] with the specified Tag value.
         index The index in stateId where to set the Tag value.
-        stateId The Tag value to which stateId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        stateId The Tag value to which stateId[index] is to be set.
 
         """
 
@@ -923,8 +1204,8 @@ class TotalPowerRow:
         id the Tag to be appended to stateId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._stateId.append(Tag(id[i]))
+            for thisValue in id:
+                self._stateId.append(Tag(thisValue))
         else:
             self._stateId.append(Tag(id))
 
@@ -1029,7 +1310,7 @@ class TotalPowerRow:
         if not (self._integrationNumber == integrationNumber):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if uvw is not None:
             if self._uvw is None:
                 return False
@@ -1042,17 +1323,17 @@ class TotalPowerRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(uvw_dims[0]):
-                for j in range(uvw_dims[0]):
+                for j in range(uvw_dims[1]):
 
                     # uvw is a Length, compare using the almostEquals method.
                     if not (
                         self._uvw[i][j].almostEquals(
-                            uvw[i][j], this.getTable().getUvwEqTolerance()
+                            uvw[i][j], self.getTable().getUvwEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if exposure is not None:
             if self._exposure is None:
                 return False
@@ -1065,13 +1346,13 @@ class TotalPowerRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(exposure_dims[0]):
-                for j in range(exposure_dims[0]):
+                for j in range(exposure_dims[1]):
 
                     # exposure is an array of Interval, compare using equals method.
                     if not (self._exposure[i][j].equals(exposure[i][j])):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if timeCentroid is not None:
             if self._timeCentroid is None:
                 return False
@@ -1084,7 +1365,7 @@ class TotalPowerRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(timeCentroid_dims[0]):
-                for j in range(timeCentroid_dims[0]):
+                for j in range(timeCentroid_dims[1]):
 
                     # timeCentroid is an array of ArrayTime, compare using equals method.
                     if not (self._timeCentroid[i][j].equals(timeCentroid[i][j])):
@@ -1103,8 +1384,8 @@ class TotalPowerRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(floatData_dims[0]):
-                for j in range(floatData_dims[0]):
-                    for k in range(floatData_dims[0]):
+                for j in range(floatData_dims[1]):
+                    for k in range(floatData_dims[2]):
 
                         # floatData is an array of float, compare using == operator.
                         if not (self._floatData[i][j][k] == floatData[i][j][k]):
@@ -1120,7 +1401,7 @@ class TotalPowerRow:
             if not (self._flagAnt[indx] == flagAnt[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if flagPol is not None:
             if self._flagPol is None:
                 return False
@@ -1133,7 +1414,7 @@ class TotalPowerRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(flagPol_dims[0]):
-                for j in range(flagPol_dims[0]):
+                for j in range(flagPol_dims[1]):
 
                     # flagPol is an array of int, compare using == operator.
                     if not (self._flagPol[i][j] == flagPol[i][j]):
@@ -1208,7 +1489,7 @@ class TotalPowerRow:
         if not (self._integrationNumber == integrationNumber):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if uvw is not None:
             if self._uvw is None:
                 return False
@@ -1221,17 +1502,17 @@ class TotalPowerRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(uvw_dims[0]):
-                for j in range(uvw_dims[0]):
+                for j in range(uvw_dims[1]):
 
                     # uvw is a Length, compare using the almostEquals method.
                     if not (
                         self._uvw[i][j].almostEquals(
-                            uvw[i][j], this.getTable().getUvwEqTolerance()
+                            uvw[i][j], self.getTable().getUvwEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if exposure is not None:
             if self._exposure is None:
                 return False
@@ -1244,13 +1525,13 @@ class TotalPowerRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(exposure_dims[0]):
-                for j in range(exposure_dims[0]):
+                for j in range(exposure_dims[1]):
 
                     # exposure is an array of Interval, compare using equals method.
                     if not (self._exposure[i][j].equals(exposure[i][j])):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if timeCentroid is not None:
             if self._timeCentroid is None:
                 return False
@@ -1263,7 +1544,7 @@ class TotalPowerRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(timeCentroid_dims[0]):
-                for j in range(timeCentroid_dims[0]):
+                for j in range(timeCentroid_dims[1]):
 
                     # timeCentroid is an array of ArrayTime, compare using equals method.
                     if not (self._timeCentroid[i][j].equals(timeCentroid[i][j])):
@@ -1282,8 +1563,8 @@ class TotalPowerRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(floatData_dims[0]):
-                for j in range(floatData_dims[0]):
-                    for k in range(floatData_dims[0]):
+                for j in range(floatData_dims[1]):
+                    for k in range(floatData_dims[2]):
 
                         # floatData is an array of float, compare using == operator.
                         if not (self._floatData[i][j][k] == floatData[i][j][k]):
@@ -1299,7 +1580,7 @@ class TotalPowerRow:
             if not (self._flagAnt[indx] == flagAnt[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if flagPol is not None:
             if self._flagPol is None:
                 return False
@@ -1312,7 +1593,7 @@ class TotalPowerRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(flagPol_dims[0]):
-                for j in range(flagPol_dims[0]):
+                for j in range(flagPol_dims[1]):
 
                     # flagPol is an array of int, compare using == operator.
                     if not (self._flagPol[i][j] == flagPol[i][j]):
@@ -1337,3 +1618,7 @@ class TotalPowerRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+TotalPowerRow.initFromBinMethods()

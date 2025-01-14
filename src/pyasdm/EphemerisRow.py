@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class EphemerisRow:
         Create a EphemerisRow.
         When row is None, create an empty row attached to table, which must be a EphemerisTable.
         When row is given, copy those values in to the new row. The row argument must be a EphemerisRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.EphemerisTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a EphemerisTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -106,7 +111,7 @@ class EphemerisRow:
 
         if row is not None:
             if not isinstance(row, EphemerisRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a EphemerisRow")
 
             # copy constructor
 
@@ -294,10 +299,234 @@ class EphemerisRow:
 
             self._radVelExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._ephemerisId)
+
+        eos.writeInt(len(self._observerLocation))
+        for i in range(len(self._observerLocation)):
+
+            eos.writeFloat(self._observerLocation[i])
+
+        eos.writeFloat(self._equinoxEquator)
+
+        eos.writeInt(self._numPolyDir)
+
+        # null array case, unsure if this is possible but this should work
+        if self._dir is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            dir_dims = Parser.getListDims(self._dir)
+        # assumes it really is 2D
+        eos.writeInt(dir_dims[0])
+        eos.writeInt(dir_dims[1])
+        for i in range(dir_dims[0]):
+            for j in range(dir_dims[1]):
+                eos.writeFloat(self._dir[i][j])
+
+        eos.writeInt(self._numPolyDist)
+
+        eos.writeInt(len(self._distance))
+        for i in range(len(self._distance)):
+
+            eos.writeFloat(self._distance[i])
+
+        self._timeOrigin.toBin(eos)
+
+        eos.writeStr(self._origin)
+
+        eos.writeBool(self._numPolyRadVelExists)
+        if self._numPolyRadVelExists:
+
+            eos.writeInt(self._numPolyRadVel)
+
+        eos.writeBool(self._radVelExists)
+        if self._radVelExists:
+
+            eos.writeInt(len(self._radVel))
+            for i in range(len(self._radVel)):
+
+                eos.writeFloat(self._radVel[i])
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def ephemerisIdFromBin(row, eis):
+        """
+        Set the ephemerisId in row from the EndianInput (eis) instance.
+        """
+
+        row._ephemerisId = eis.readInt()
+
+    @staticmethod
+    def observerLocationFromBin(row, eis):
+        """
+        Set the observerLocation in row from the EndianInput (eis) instance.
+        """
+
+        observerLocationDim1 = eis.readInt()
+        thisList = []
+        for i in range(observerLocationDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._observerLocation = thisList
+
+    @staticmethod
+    def equinoxEquatorFromBin(row, eis):
+        """
+        Set the equinoxEquator in row from the EndianInput (eis) instance.
+        """
+
+        row._equinoxEquator = eis.readFloat()
+
+    @staticmethod
+    def numPolyDirFromBin(row, eis):
+        """
+        Set the numPolyDir in row from the EndianInput (eis) instance.
+        """
+
+        row._numPolyDir = eis.readInt()
+
+    @staticmethod
+    def dirFromBin(row, eis):
+        """
+        Set the dir in row from the EndianInput (eis) instance.
+        """
+
+        dirDim1 = eis.readInt()
+        dirDim2 = eis.readInt()
+        thisList = []
+        for i in range(dirDim1):
+            thisList_j = []
+            for j in range(dirDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.dir = thisList
+
+    @staticmethod
+    def numPolyDistFromBin(row, eis):
+        """
+        Set the numPolyDist in row from the EndianInput (eis) instance.
+        """
+
+        row._numPolyDist = eis.readInt()
+
+    @staticmethod
+    def distanceFromBin(row, eis):
+        """
+        Set the distance in row from the EndianInput (eis) instance.
+        """
+
+        distanceDim1 = eis.readInt()
+        thisList = []
+        for i in range(distanceDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._distance = thisList
+
+    @staticmethod
+    def timeOriginFromBin(row, eis):
+        """
+        Set the timeOrigin in row from the EndianInput (eis) instance.
+        """
+
+        row._timeOrigin = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def originFromBin(row, eis):
+        """
+        Set the origin in row from the EndianInput (eis) instance.
+        """
+
+        row._origin = eis.readStr()
+
+    @staticmethod
+    def numPolyRadVelFromBin(row, eis):
+        """
+        Set the optional numPolyRadVel in row from the EndianInput (eis) instance.
+        """
+        row._numPolyRadVelExists = eis.readBool()
+        if row._numPolyRadVelExists:
+
+            row._numPolyRadVel = eis.readInt()
+
+    @staticmethod
+    def radVelFromBin(row, eis):
+        """
+        Set the optional radVel in row from the EndianInput (eis) instance.
+        """
+        row._radVelExists = eis.readBool()
+        if row._radVelExists:
+
+            radVelDim1 = eis.readInt()
+            thisList = []
+            for i in range(radVelDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._radVel = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["timeInterval"] = EphemerisRow.timeIntervalFromBin
+        _fromBinMethods["ephemerisId"] = EphemerisRow.ephemerisIdFromBin
+        _fromBinMethods["observerLocation"] = EphemerisRow.observerLocationFromBin
+        _fromBinMethods["equinoxEquator"] = EphemerisRow.equinoxEquatorFromBin
+        _fromBinMethods["numPolyDir"] = EphemerisRow.numPolyDirFromBin
+        _fromBinMethods["dir"] = EphemerisRow.dirFromBin
+        _fromBinMethods["numPolyDist"] = EphemerisRow.numPolyDistFromBin
+        _fromBinMethods["distance"] = EphemerisRow.distanceFromBin
+        _fromBinMethods["timeOrigin"] = EphemerisRow.timeOriginFromBin
+        _fromBinMethods["origin"] = EphemerisRow.originFromBin
+
+        _fromBinMethods["numPolyRadVel"] = EphemerisRow.numPolyRadVelFromBin
+        _fromBinMethods["radVel"] = EphemerisRow.radVelFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = EphemerisRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Ephemeris",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -759,7 +988,7 @@ class EphemerisRow:
         if not (self._numPolyDir == numPolyDir):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if dir is not None:
             if self._dir is None:
                 return False
@@ -772,7 +1001,7 @@ class EphemerisRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(dir_dims[0]):
-                for j in range(dir_dims[0]):
+                for j in range(dir_dims[1]):
 
                     # dir is an array of float, compare using == operator.
                     if not (self._dir[i][j] == dir[i][j]):
@@ -849,7 +1078,7 @@ class EphemerisRow:
         if not (self._numPolyDir == numPolyDir):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if dir is not None:
             if self._dir is None:
                 return False
@@ -862,7 +1091,7 @@ class EphemerisRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(dir_dims[0]):
-                for j in range(dir_dims[0]):
+                for j in range(dir_dims[1]):
 
                     # dir is an array of float, compare using == operator.
                     if not (self._dir[i][j] == dir[i][j]):
@@ -891,3 +1120,7 @@ class EphemerisRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+EphemerisRow.initFromBinMethods()

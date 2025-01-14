@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class PulsarRow:
         Create a PulsarRow.
         When row is None, create an empty row attached to table, which must be a PulsarTable.
         When row is given, copy those values in to the new row. The row argument must be a PulsarRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.PulsarTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a PulsarTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -116,7 +121,7 @@ class PulsarRow:
 
         if row is not None:
             if not isinstance(row, PulsarRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a PulsarRow")
 
             # copy constructor
 
@@ -358,10 +363,239 @@ class PulsarRow:
 
             self._refFrequencyExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._pulsarId.toBin(eos)
+
+        self._refTime.toBin(eos)
+
+        self._refPulseFreq.toBin(eos)
+
+        eos.writeFloat(self._refPhase)
+
+        eos.writeInt(self._numBin)
+
+        eos.writeBool(self._numPolyExists)
+        if self._numPolyExists:
+
+            eos.writeInt(self._numPoly)
+
+        eos.writeBool(self._phasePolyExists)
+        if self._phasePolyExists:
+
+            eos.writeInt(len(self._phasePoly))
+            for i in range(len(self._phasePoly)):
+
+                eos.writeFloat(self._phasePoly[i])
+
+        eos.writeBool(self._timeSpanExists)
+        if self._timeSpanExists:
+
+            self._timeSpan.toBin(eos)
+
+        eos.writeBool(self._startPhaseBinExists)
+        if self._startPhaseBinExists:
+
+            eos.writeInt(len(self._startPhaseBin))
+            for i in range(len(self._startPhaseBin)):
+
+                eos.writeFloat(self._startPhaseBin[i])
+
+        eos.writeBool(self._endPhaseBinExists)
+        if self._endPhaseBinExists:
+
+            eos.writeInt(len(self._endPhaseBin))
+            for i in range(len(self._endPhaseBin)):
+
+                eos.writeFloat(self._endPhaseBin[i])
+
+        eos.writeBool(self._dispersionMeasureExists)
+        if self._dispersionMeasureExists:
+
+            eos.writeFloat(self._dispersionMeasure)
+
+        eos.writeBool(self._refFrequencyExists)
+        if self._refFrequencyExists:
+
+            self._refFrequency.toBin(eos)
+
+    @staticmethod
+    def pulsarIdFromBin(row, eis):
+        """
+        Set the pulsarId in row from the EndianInput (eis) instance.
+        """
+
+        row._pulsarId = Tag.fromBin(eis)
+
+    @staticmethod
+    def refTimeFromBin(row, eis):
+        """
+        Set the refTime in row from the EndianInput (eis) instance.
+        """
+
+        row._refTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def refPulseFreqFromBin(row, eis):
+        """
+        Set the refPulseFreq in row from the EndianInput (eis) instance.
+        """
+
+        row._refPulseFreq = Frequency.fromBin(eis)
+
+    @staticmethod
+    def refPhaseFromBin(row, eis):
+        """
+        Set the refPhase in row from the EndianInput (eis) instance.
+        """
+
+        row._refPhase = eis.readFloat()
+
+    @staticmethod
+    def numBinFromBin(row, eis):
+        """
+        Set the numBin in row from the EndianInput (eis) instance.
+        """
+
+        row._numBin = eis.readInt()
+
+    @staticmethod
+    def numPolyFromBin(row, eis):
+        """
+        Set the optional numPoly in row from the EndianInput (eis) instance.
+        """
+        row._numPolyExists = eis.readBool()
+        if row._numPolyExists:
+
+            row._numPoly = eis.readInt()
+
+    @staticmethod
+    def phasePolyFromBin(row, eis):
+        """
+        Set the optional phasePoly in row from the EndianInput (eis) instance.
+        """
+        row._phasePolyExists = eis.readBool()
+        if row._phasePolyExists:
+
+            phasePolyDim1 = eis.readInt()
+            thisList = []
+            for i in range(phasePolyDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._phasePoly = thisList
+
+    @staticmethod
+    def timeSpanFromBin(row, eis):
+        """
+        Set the optional timeSpan in row from the EndianInput (eis) instance.
+        """
+        row._timeSpanExists = eis.readBool()
+        if row._timeSpanExists:
+
+            row._timeSpan = Interval.fromBin(eis)
+
+    @staticmethod
+    def startPhaseBinFromBin(row, eis):
+        """
+        Set the optional startPhaseBin in row from the EndianInput (eis) instance.
+        """
+        row._startPhaseBinExists = eis.readBool()
+        if row._startPhaseBinExists:
+
+            startPhaseBinDim1 = eis.readInt()
+            thisList = []
+            for i in range(startPhaseBinDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._startPhaseBin = thisList
+
+    @staticmethod
+    def endPhaseBinFromBin(row, eis):
+        """
+        Set the optional endPhaseBin in row from the EndianInput (eis) instance.
+        """
+        row._endPhaseBinExists = eis.readBool()
+        if row._endPhaseBinExists:
+
+            endPhaseBinDim1 = eis.readInt()
+            thisList = []
+            for i in range(endPhaseBinDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._endPhaseBin = thisList
+
+    @staticmethod
+    def dispersionMeasureFromBin(row, eis):
+        """
+        Set the optional dispersionMeasure in row from the EndianInput (eis) instance.
+        """
+        row._dispersionMeasureExists = eis.readBool()
+        if row._dispersionMeasureExists:
+
+            row._dispersionMeasure = eis.readFloat()
+
+    @staticmethod
+    def refFrequencyFromBin(row, eis):
+        """
+        Set the optional refFrequency in row from the EndianInput (eis) instance.
+        """
+        row._refFrequencyExists = eis.readBool()
+        if row._refFrequencyExists:
+
+            row._refFrequency = Frequency.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["pulsarId"] = PulsarRow.pulsarIdFromBin
+        _fromBinMethods["refTime"] = PulsarRow.refTimeFromBin
+        _fromBinMethods["refPulseFreq"] = PulsarRow.refPulseFreqFromBin
+        _fromBinMethods["refPhase"] = PulsarRow.refPhaseFromBin
+        _fromBinMethods["numBin"] = PulsarRow.numBinFromBin
+
+        _fromBinMethods["numPoly"] = PulsarRow.numPolyFromBin
+        _fromBinMethods["phasePoly"] = PulsarRow.phasePolyFromBin
+        _fromBinMethods["timeSpan"] = PulsarRow.timeSpanFromBin
+        _fromBinMethods["startPhaseBin"] = PulsarRow.startPhaseBinFromBin
+        _fromBinMethods["endPhaseBin"] = PulsarRow.endPhaseBinFromBin
+        _fromBinMethods["dispersionMeasure"] = PulsarRow.dispersionMeasureFromBin
+        _fromBinMethods["refFrequency"] = PulsarRow.refFrequencyFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = PulsarRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Pulsar",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute pulsarId
 
@@ -929,3 +1163,7 @@ class PulsarRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+PulsarRow.initFromBinMethods()

@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.DetectorBandType import DetectorBandType
 
@@ -67,10 +71,11 @@ class SquareLawDetectorRow:
         Create a SquareLawDetectorRow.
         When row is None, create an empty row attached to table, which must be a SquareLawDetectorTable.
         When row is given, copy those values in to the new row. The row argument must be a SquareLawDetectorRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.SquareLawDetectorTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a SquareLawDetectorTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -87,7 +92,7 @@ class SquareLawDetectorRow:
 
         if row is not None:
             if not isinstance(row, SquareLawDetectorRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a SquareLawDetectorRow")
 
             # copy constructor
 
@@ -173,10 +178,82 @@ class SquareLawDetectorRow:
             bandTypeNode.firstChild.data.strip()
         )
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._squareLawDetectorId.toBin(eos)
+
+        eos.writeInt(self._numBand)
+
+        eos.writeString(self._bandType.toString())
+
+    @staticmethod
+    def squareLawDetectorIdFromBin(row, eis):
+        """
+        Set the squareLawDetectorId in row from the EndianInput (eis) instance.
+        """
+
+        row._squareLawDetectorId = Tag.fromBin(eis)
+
+    @staticmethod
+    def numBandFromBin(row, eis):
+        """
+        Set the numBand in row from the EndianInput (eis) instance.
+        """
+
+        row._numBand = eis.readInt()
+
+    @staticmethod
+    def bandTypeFromBin(row, eis):
+        """
+        Set the bandType in row from the EndianInput (eis) instance.
+        """
+
+        row._bandType = DetectorBandType.from_int(eis.readInt())
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["squareLawDetectorId"] = (
+            SquareLawDetectorRow.squareLawDetectorIdFromBin
+        )
+        _fromBinMethods["numBand"] = SquareLawDetectorRow.numBandFromBin
+        _fromBinMethods["bandType"] = SquareLawDetectorRow.bandTypeFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = SquareLawDetectorRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SquareLawDetector",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute squareLawDetectorId
 
@@ -293,3 +370,7 @@ class SquareLawDetectorRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+SquareLawDetectorRow.initFromBinMethods()

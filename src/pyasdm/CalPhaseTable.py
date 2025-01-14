@@ -36,6 +36,11 @@ from .CalPhaseRow import CalPhaseRow
 # All of the extended types are imported
 from pyasdm.types import *
 
+# for BIN input and output
+from pyasdm.ByteOrder import ByteOrder
+from pyasdm.EndianInput import EndianInput
+from pyasdm.EndianOutput import EndianOutput
+
 from .exceptions.ConversionException import ConversionException
 from .exceptions.DuplicateKey import DuplicateKey
 from .exceptions.UniquenessViolationException import UniquenessViolationException
@@ -43,6 +48,7 @@ from .exceptions.UniquenessViolationException import UniquenessViolationExceptio
 from xml.dom import minidom
 
 import os
+import io
 
 
 class CalPhaseTable:
@@ -763,294 +769,371 @@ class CalPhaseTable:
 
         self.setEntity(tabEntity)
 
-    def MIMEXMLPart(self):
-        print("MIMEXMLPart not implemented for <CalPhaseTable")
-        return
-        # the JAVA code looks like this
-        # String UID = this.getEntity().getEntityId().toString();
-        # String withoutUID = UID.substring(6);
-        # String containerUID = this.getContainer().getEntity().getEntityId().toString();
-        #
-        # StringBuffer sb = new StringBuffer()
-        # .append("<?xml version='1.0'  encoding='ISO-8859-1'?>")
-        # .append("\n")
-        # .append("<CalPhaseTable xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:clphas=\"http://Alma/XASDM/CalPhaseTable\" xsi:schemaLocation=\"http://Alma/XASDM/CalPhaseTable http://almaobservatory.org/XML/XASDM/4/CalPhaseTable.xsd\" schemaVersion=\"4\" schemaRevision=\"-1\">\n")
-        # .append("<Entity entityId='")
-        # .append(UID)
-        # .append("' entityIdEncrypted='na' entityTypeName='CalPhaseTable' schemaVersion='1' documentVersion='1'/>\n")
-        # .append("<ContainerEntity entityId='")
-        # .append(containerUID)
-        # .append("' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n")
-        # .append("<BulkStoreRef file_id='")
-        # .append(withoutUID)
-        # .append("' byteOrder='Big_Endian' />\n")
-        # .append("<Attributes>\n")
-
-        # .append("<basebandName/>\n")
-        # .append("<receiverBand/>\n")
-        # .append("<atmPhaseCorrection/>\n")
-        # .append("<calDataId/>\n")
-        # .append("<calReductionId/>\n")
-        # .append("<startValidTime/>\n")
-        # .append("<endValidTime/>\n")
-        # .append("<numBaseline/>\n")
-        # .append("<numReceptor/>\n")
-        # .append("<ampli/>\n")
-        # .append("<antennaNames/>\n")
-        # .append("<baselineLengths/>\n")
-        # .append("<decorrelationFactor/>\n")
-        # .append("<direction/>\n")
-        # .append("<frequencyRange/>\n")
-        # .append("<integrationTime/>\n")
-        # .append("<phase/>\n")
-        # .append("<polarizationTypes/>\n")
-        # .append("<phaseRMS/>\n")
-        # .append("<statPhaseRMS/>\n")
-
-        # .append("<correctionValidity/>\n")
-        # .append("<numAntenna/>\n")
-        # .append("<singleAntennaName/>\n")
-        # .append("<refAntennaName/>\n")
-        # .append("<phaseAnt/>\n")
-        # .append("<phaseAntRMS/>\n")
-        # .append("</Attributes>\n")
-        # .append("</CalPhaseTable>\n");
-        # return sb.toString();
-
-    def toMIME(self):
+    def MIMEXMLPart(self, byteOrder):
         """
-        Serialize this into a stream of bytes and encapsulates that stream into a MIME message.
-        returns a string containing the MIME message.
+        Used in both the small XML file as well as the bin file when writing out as binary.
+        The byte order is set by byteOrder.
         """
-        print("toMIME not yet implemented for CalPhase")
-        return
-        # the Java code looks like this - returns a Byte array
-        # ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        # DataOutputStream dos = new DataOutputStream(bos);
+        uidStr = self.getEntity().getEntityId().toString()
+        withoutUID = uidStr[6:]
+        containerUID = self.getContainer().getEntity().getEntityId().toString()
 
-        # String UID = this.getEntity().getEntityId().toString();
-        # String execBlockUID = this.getContainer().getEntity().getEntityId().toString();
-        # try {
-        #     // The XML Header part.
-        #     dos.writeBytes("MIME-Version: 1.0");
-        #     dos.writeBytes("\n");
-        #    dos
-        #     .writeBytes("Content-Type: Multipart/Related; boundary='MIME_boundary'; type='text/xml'; start= '<header.xml>'");
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("Content-Description: Correlator");
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("alma-uid:" + UID);
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("\n");
-        #
-        #    // The MIME XML part header.
-        #    dos.writeBytes("--MIME_boundary");
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("Content-Type: text/xml; charset='ISO-8859-1'");
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("Content-Transfer-Encoding: 8bit");
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("Content-ID: <header.xml>");
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("\n");
-        #
-        #    // The MIME XML part content.
-        #    dos.writeBytes(MIMEXMLPart());
-        #    // have updated their code to the new XML header.
-        #    //
-        #    //dos.writeBytes(oldMIMEXMLPart());
-        #
-        #    // The MIME binary part header
-        #    dos.writeBytes("--MIME_boundary");
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("Content-Type: binary/octet-stream");
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("Content-ID: <content.bin>");
-        #    dos.writeBytes("\n");
-        #    dos.writeBytes("\n");
-        #
-        #    // The binary part.
-        #    entity.toBin(dos);
-        #    container.getEntity().toBin(dos);
-        #    dos.writeInt(size());
+        result = ""
+        result += "<?xml version='1.0'  encoding='ISO-8859-1'?>"
+        result += "\n"
+        result += '<CalPhaseTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:clphas="http://Alma/XASDM/CalPhaseTable" xsi:schemaLocation="http://Alma/XASDM/CalPhaseTable http://almaobservatory.org/XML/XASDM/4/CalPhaseTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
+        result += "<Entity entityId='"
+        result += uidStr
+        result += "' entityIdEncrypted='na' entityTypeName='CalPhaseTable' schemaVersion='1' documentVersion='1'/>\n"
+        result += "<ContainerEntity entityId='"
+        result += containerUID
+        result += "' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n"
+        result += "<BulkStoreRef file_id='"
+        result += withoutUID
+        result += "' byteOrder='" + byteOrder.toString() + "' />\n"
+        result += "<Attributes>\n"
 
-        #    for (CalPhaseRow row: privateRows) row.toBin(dos);
+        result += "<basebandName/>\n"
+        result += "<receiverBand/>\n"
+        result += "<atmPhaseCorrection/>\n"
+        result += "<calDataId/>\n"
+        result += "<calReductionId/>\n"
+        result += "<startValidTime/>\n"
+        result += "<endValidTime/>\n"
+        result += "<numBaseline/>\n"
+        result += "<numReceptor/>\n"
+        result += "<ampli/>\n"
+        result += "<antennaNames/>\n"
+        result += "<baselineLengths/>\n"
+        result += "<decorrelationFactor/>\n"
+        result += "<direction/>\n"
+        result += "<frequencyRange/>\n"
+        result += "<integrationTime/>\n"
+        result += "<phase/>\n"
+        result += "<polarizationTypes/>\n"
+        result += "<phaseRMS/>\n"
+        result += "<statPhaseRMS/>\n"
 
-        #    // The closing MIME boundary
-        #    dos.writeBytes("\n--MIME_boundary--");
-        #    dos.writeBytes("\n");
+        result += "<correctionValidity/>\n"
+        result += "<numAntenna/>\n"
+        result += "<singleAntennaName/>\n"
+        result += "<refAntennaName/>\n"
+        result += "<phaseAnt/>\n"
+        result += "<phaseAntRMS/>\n"
+        result += "</Attributes>\n"
+        result += "</CalPhaseTable>\n"
 
-        # } catch (IOException e) {
-        #    throw new ConversionException(
-        #            "Error while reading binary data , the message was "
-        #            + e.getMessage(), "CalPhase");
-        # }
+        return result
 
-        # return bos.toByteArray();
+    def toMIME(self, mimeFilePath, mimeXMLpart, byteOrder):
+        """
+        Write this out to mimeFilePath as a serialized MIME file with
+        a leading XML part and a following binary part.
 
-    # Java code looks like this
-    # static private boolean binaryPartFound(DataInputStream dis, String s, int pos) throws IOException {
-    #    int posl = pos;
-    #    int count = 0;
-    #    dis.mark(1000000);
-    #    try {
-    #        while (dis.readByte() != s.charAt(posl)){
-    #            count ++;
-    #        }
-    #    }
-    #    catch (EOFException e) {
-    #        return false;
-    #    }
-    #
-    #    if (posl == (s.length() - 1)) return true;
-    #
-    #    if (pos == 0) {
-    #        posl++;
-    #        return binaryPartFound(dis, s, posl);
-    #    }
-    #    else {
-    #        if (count > 0) { dis.reset();  return binaryPartFound(dis, s, 0) ; }
-    #        else {
-    #            posl++;
-    #            return binaryPartFound(dis, s, posl);
-    #        }
-    #    }
-    # }
+        The mimeXMLpart is a string that should have already been written
+        to the corresponding small XML file (and is returned by the
+        MIMEXMLPart method here). The byteOrder is a ByteOrder instance
+        that gives the byte order to use when writing the binary data.
+        That instance should have also been used to generate mimeXMLpart.
+        """
 
-    # private String xmlHeaderPart (String s) throws ConversionException {
-    #    String xmlPartMIMEHeader = "Content-ID: <header.xml>\n\n";
-    #    String binPartMIMEHeader = "--MIME_boundary\nContent-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
-    #
-    #    // Detect the XML header.
-    #    int loc0 = s.indexOf(xmlPartMIMEHeader);
-    #    if (loc0 == -1 ) throw new ConversionException("Failed to detect the beginning of the XML header", "CalPhase");
-    #
-    #    loc0 += xmlPartMIMEHeader.length();
-    #
-    #    // Look for the string announcing the binary part.
-    #    int loc1 = s.indexOf(binPartMIMEHeader, loc0);
-    #    if (loc1 == -1) throw new ConversionException("Failed to detect the beginning of the binary part", "CalPhase");
-    #
-    #    return s.substring(loc0, loc1).trim();
-    # }
+        # mimeFilePath should have already been removed if it already existed.
 
-    # setFromMIME(byte[]   data) throws ConversionException {
-    # *
-    # Extracts the binary part of a MIME message and deserialize its content
-    # to fill this with the result of the deserialization.
-    # @param data the string containing the MIME message.
-    # @throws ConversionException
-    # /
-    # ByteOrder byteOrder = null;
-    # //
-    # // Look for the part containing the XML header.
-    # // Very empirically we assume that the first MIME part , the one which contains the
-    # // XML header, always fits in the first 1000 bytes of the MIME message !!
-    # //
-    # String header = xmlHeaderPart(new String(data, 0, Math.min(10000, data.length)));
-    # org.jdom.Document document = null;
-    # SAXBuilder sxb = new SAXBuilder();
-    #
-    # // Firstly build a document out of the XML.
-    # try {
-    #    document = sxb.build(new ByteArrayInputStream(header.getBytes()));
-    # }
-    # catch (Exception e) {
-    #     throw new ConversionException(e.getMessage(), "CalPhase");
-    # }
-    #
-    # //
-    # // Let's define a default order for the sequence of attributes.
-    # //
-    # ArrayList<String> attributesSeq = new ArrayList<String> ();
+        with open(mimeFilePath, "wb") as outBuffer:
 
-    #     attributesSeq.add("basebandName"); attributesSeq.add("receiverBand"); attributesSeq.add("atmPhaseCorrection"); attributesSeq.add("calDataId"); attributesSeq.add("calReductionId"); attributesSeq.add("startValidTime"); attributesSeq.add("endValidTime"); attributesSeq.add("numBaseline"); attributesSeq.add("numReceptor"); attributesSeq.add("ampli"); attributesSeq.add("antennaNames"); attributesSeq.add("baselineLengths"); attributesSeq.add("decorrelationFactor"); attributesSeq.add("direction"); attributesSeq.add("frequencyRange"); attributesSeq.add("integrationTime"); attributesSeq.add("phase"); attributesSeq.add("polarizationTypes"); attributesSeq.add("phaseRMS"); attributesSeq.add("statPhaseRMS");
-    #     attributesSeq.add("correctionValidity");  attributesSeq.add("numAntenna");  attributesSeq.add("singleAntennaName");  attributesSeq.add("refAntennaName");  attributesSeq.add("phaseAnt");  attributesSeq.add("phaseAntRMS");
+            uidStr = self.getEntity().getEntityId().toString()
 
-    # XPath xpath = null;
-    # //
-    # // And then look for the possible XML contents.
-    # try {
-    #     // Is it an "<ASDMBinaryTable ...." document (old) ?
-    #    if (XPath.newInstance("/ASDMBinaryTable")
-    #            .selectSingleNode(document) != null)
-    #        byteOrder = ByteOrder.BIG_ENDIAN;
-    #    else {
-    #        // Then it must be a "<CalPhaseTable ...." document
-    #        // With a BulkStoreRef child element....
-    #        XPath xpa = XPath.newInstance("/CalPhaseTable/BulkStoreRef/@byteOrder");
-    #        Object node = xpa.selectSingleNode(document.getRootElement());
-    #        if (node == null)
-    #            throw new ConversionException("No element found for the XPath expression '/CalPhaseTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalPhase");
-    #
-    #        // Yes ? then it must have a "BulkStoreRef" element with a
-    #        // "byteOrder" attribute.
-    #        String bo = xpa.valueOf(document.getRootElement());
-    #        if (bo.equals("Little_Endian"))
-    #            byteOrder = ByteOrder.LITTLE_ENDIAN;
-    #        else if (bo.equals("Big_Endian"))
-    #            byteOrder = ByteOrder.BIG_ENDIAN;
-    #        else
-    #            throw new ConversionException("No valid value retrieved for the node '/CalPhaseTable/BulkStoreRef/@byteOrder'. Invalid XML header '"+header+"'.", "CalPhase");
-    #
-    #        // And also it must have an Attributes element with children.
-    #        xpa = XPath.newInstance("/CalPhaseTable/Attributes#");
-    #        List nodes = xpa.selectNodes(document.getRootElement());
-    #        if (nodes==null || nodes.size()==0)
-    #            throw new ConversionException("No element found for the XPath expression '/CalPhaseTable/Attributes#'. Invalid XML header '"+header+"'.", "CalPhase");
-    #
-    #        Iterator iter = nodes.iterator();
-    #        attributesSeq.clear();
-    #        int i = 0;
-    #        while (iter.hasNext()){
-    #            attributesSeq.add(((Element) iter.next()).getName());
-    #            i += 1;
-    #        }
-    #    }
-    # } catch (Exception e) {
-    #    throw new ConversionException(e.getMessage(), "CalPhase");
-    # }
+            # The XML Header part.
+            outBuffer.write(bytes("MIME-Version: 1.0", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(
+                bytes(
+                    "Content-Type: Multipart/Related; boundary='MIME_boundary'; type='text/xml'; start= '<header.xml>'",
+                    "utf-8",
+                )
+            )
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(bytes("Content-Description: Correlator", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(bytes("alma-uid:" + uidStr, "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
 
-    # //
-    # // Now that we know what is the byte order of the binary data
-    # // Let's extract them from the second MIME part and parse them
-    # //
-    # ByteArrayInputStream bis = new ByteArrayInputStream(data);
-    # DataInputStream dis = new DataInputStream(bis);
-    # BODataInputStream bodis = new BODataInputStream(dis, byteOrder);
-    #
-    # String terminator = "Content-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n";
-    # entity = null;
-    # try {
-    #    if (binaryPartFound(dis, terminator, 0) == false) {
-    #        throw new ConversionException ("Failed to detect the beginning of the binary part", "CalPhase");
-    #    }
-    #
-    #    entity = Entity.fromBin(bodis);
-    #
-    #    Entity containerEntity = Entity.fromBin(bodis);
-    #
-    #    int numRows = bodis.readInt();
-    #    for (int i = 0; i < numRows; i++) {
-    #    this.checkAndAdd(CalPhaseRow.fromBin(bodis, this, attributesSeq.toArray(new String[0])));
-    #    }
-    # } catch (TagFormatException e) {
-    #    throw new ConversionException( "Error while reading binary data , the message was "
-    #        + e.getMessage(), "CalPhase");
-    # }catch (IOException e) {
-    #    throw new ConversionException(
-    #        "Error while reading binary data , the message was "
-    #        + e.getMessage(), "CalPhase");
-    # } catch (DuplicateKey e) {
-    #    throw new ConversionException(
-    #        "Error while reading binary data , the message was "
-    #        + e.getMessage(), "CalPhase");
-    # }catch (Exception e) {
-    #    throw new ConversionException(
-    #        "Error while reading binary data , the message was "
-    #        + e.getMessage(), "CalPhase");
-    # }
-    # }
+            # The MIME XML part header.
+            outBuffer.write(bytes("--MIME_boundary", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(
+                bytes("Content-Type: text/xml; charset='ISO-8859-1'", "utf-8")
+            )
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(bytes("Content-Transfer-Encoding: 8bit", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(bytes("Content-ID: <header.xml>", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+
+            # The MIME XML part content.
+            outBuffer.write(bytes(mimeXMLpart, "utf-8"))
+
+            # The MIME binary part header
+            outBuffer.write(bytes("--MIME_boundary", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(bytes("Content-Type: binary/octet-stream", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(bytes("Content-ID: <content.bin>", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+
+            # The binary part, needs an EndianOutput instance
+
+            eos = EndianOutput(outBuffer, byteOrder)
+            self.getEntity().toBin(eos)
+            self.getContainer().getEntity().toBin(eos)
+            eos.writeInt(len(self._privateRows))
+
+            # and all of the rows
+            for thisRow in self._privateRows:
+                thisRow.toBin(eos)
+
+            # The closing MIME boundary
+            outBuffer.write(bytes("\n--MIME_boundary--", "utf-8"))
+            outBuffer.write(bytes("\n", "utf-8"))
+
+            # close the eos, also closes outBuffer, no penalty for doing that more than once
+            eos.close()
+
+    def setFromMIME(self, byteStream):
+        """
+        Extracts the binary part of a MIME message and deserialize its content
+        to fill this with the result of the deserialization.
+        param byteStream the previously opened io.BufferedReader instance
+        containing the data to be extracted.
+
+        It is the responsibility of this method to close byteStream.
+        """
+
+        if not (isinstance(byteStream, io.BufferedReader) and byteStream.seekable()):
+            byteStream.close()
+            raise ConversionException(
+                "opened byteStream is not the expected io.BufferedReader or it is not seekable, this should never happen.",
+                "CalPhase",
+            )
+
+        xmlPartMIMEHeader = bytes(str("Content-ID: <header.xml>\n\n").encode())
+        binPartMIMEHeader = bytes(
+            str(
+                "--MIME_boundary\nContent-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n"
+            ).encode()
+        )
+
+        # follow the Java example and grab the first 10000 bytes, which will always contain the header
+        headerBytes = byteStream.read(10000)
+
+        # Detect the XML header.
+        loc0 = headerBytes.find(xmlPartMIMEHeader)
+        # c++ code also looks for a string with an additional CRLF after each newline if the above fails, but Java
+        # doesn't and even c++ doesn't follow that up when failing to find the binPartMIMEHeader, so go with the Java example
+        if loc0 < 0:
+            byteStream.close()
+            raise ConversionException(
+                "Failed to detect the begining of the XML header.", "CalPhase"
+            )
+
+        loc0 += len(xmlPartMIMEHeader)
+
+        # Look for the string announcing the binary part.
+        loc1 = headerBytes.find(binPartMIMEHeader, loc0)
+        if loc1 < 0:
+            byteStream.close()
+            raise ConversionException(
+                "Failed to detect the begining of the binary part.", "CalPhase"
+            )
+
+        # extract the XML header as a string
+        xmlHeader = headerBytes[loc0:loc1].decode()
+
+        xmldom = minidom.parseString(xmlHeader)
+        if not xmldom.hasChildNodes():
+            byteStream.close()
+            raise ConversionException("XML is not properly structured.", "CalPhase")
+
+        attributesSeq = []
+        byteOrderStr = None
+        versionStr = "-1"
+
+        hdrdom = xmldom.firstChild
+        if hdrdom.nodeName == "ASDMBinaryTable":
+            # old style of binary data
+            # assume Big_Endian and the default order of the elements
+            byteOrderStr = "Big_Endian"
+
+            attributesSeq.append("basebandName")
+
+            attributesSeq.append("receiverBand")
+
+            attributesSeq.append("atmPhaseCorrection")
+
+            attributesSeq.append("calDataId")
+
+            attributesSeq.append("calReductionId")
+
+            attributesSeq.append("startValidTime")
+
+            attributesSeq.append("endValidTime")
+
+            attributesSeq.append("numBaseline")
+
+            attributesSeq.append("numReceptor")
+
+            attributesSeq.append("ampli")
+
+            attributesSeq.append("antennaNames")
+
+            attributesSeq.append("baselineLengths")
+
+            attributesSeq.append("decorrelationFactor")
+
+            attributesSeq.append("direction")
+
+            attributesSeq.append("frequencyRange")
+
+            attributesSeq.append("integrationTime")
+
+            attributesSeq.append("phase")
+
+            attributesSeq.append("polarizationTypes")
+
+            attributesSeq.append("phaseRMS")
+
+            attributesSeq.append("statPhaseRMS")
+
+            attributesSeq.append("correctionValidity")
+
+            attributesSeq.append("numAntenna")
+
+            attributesSeq.append("singleAntennaName")
+
+            attributesSeq.append("refAntennaName")
+
+            attributesSeq.append("phaseAnt")
+
+            attributesSeq.append("phaseAntRMS")
+
+            versionStr = "2"
+
+        else:
+            # c++ and Java just assume it then must be a CalPhase table
+            # this is more insistant, just in case
+            if hdrdom.nodeName != "CalPhaseTable":
+                byteStream.close()
+                raise ConversionException(
+                    "XML Header is not from the expected table.", "CalPhase"
+                )
+
+            # schemaVersion becomes versionStr
+            if (
+                hdrdom.hasAttributes()
+                and hdrdom.attributes.getNamedItem("schemaVersion") is not None
+            ):
+                versionStr = hdrdom.attributes.getNamedItem("schemaVersion").value
+
+            if not hdrdom.hasChildNodes():
+                byteStream.close()
+                raise ConversionException(
+                    "THe XML header is missing all of the expected elements.",
+                    "CalPhase",
+                )
+
+            # loop through the child nodes, looking for BulkStoreRef and Attributes
+            for hdrnode in hdrdom.childNodes:
+                if hdrnode.nodeName == "BulkStoreRef":
+                    if byteOrderStr is not None:
+                        byteStream.close()
+                        raise ConversionException(
+                            "More than one BulkStoreRef element seen. Invalid XML header.",
+                            "CalPhase",
+                        )
+                    if not hdrnode.hasAttributes():
+                        byteStream.close()
+                        raise ConversionException(
+                            "BulkStoreRef does not contain any attributes. Invalid XML header.",
+                            "CalPhase",
+                        )
+                    byteOrderAttr = hdrnode.attributes.getNamedItem("byteOrder")
+                    if byteOrderAttr is None:
+                        byteStream.close()
+                        raise ConversionException(
+                            "byteOrder attribute not found in BulkStoreRef element. Invalid XML header.",
+                            "CalPhase",
+                        )
+                    byteOrderStr = byteOrderAttr.value
+                elif hdrnode.nodeName == "Attributes":
+                    if len(attributesSeq) > 0:
+                        byteStream.close()
+                        raise ConversionException(
+                            "More than one Attributes node seen. Invalid XML header.",
+                            "CalPhase",
+                        )
+                    if not hdrnode.hasChildNodes():
+                        byteStream.close()
+                        raise ConversionException(
+                            "Attributes element has no child nodes. Invalid XML header.",
+                            "CalPhase",
+                        )
+                    for attrnode in hdrnode.childNodes:
+                        if attrnode.nodeType == attrnode.ELEMENT_NODE:
+                            attributesSeq.append(str(attrnode.nodeName))
+
+        if byteOrderStr is None:
+            byteStream.close()
+            raise ConversionException(
+                "BulkStoreRef element not seen and this is not an older version 2 XML header. Invalid XML header.",
+                "CalPhase",
+            )
+
+        if len(attributesSeq) == 0:
+            byteStream.close()
+            raise ConversionException(
+                "Attributes element not seen and this is not an older version 2 XML header. Invalid XML header.",
+                "CalPhase",
+            )
+
+        byteOrder = ByteOrder(byteOrderStr)
+
+        # seek to the start of the binary part
+        byteStream.seek(loc1 + len(binPartMIMEHeader))
+
+        # and create the class that manages that stream and returns values as requested
+        eis = EndianInput(byteStream, byteOrder)
+
+        self._entity = Entity.fromBin(eis)
+
+        # containerEntity is not used, but it is next
+        containerEntity = Entity.fromBin(eis)
+
+        # the number of rows
+        numRows = eis.readInt()
+
+        # c++ checks numRows against what is reported in the ASDM for this table, this is what Java does
+        try:
+            for i in range(numRows):
+                self.checkAndAdd(CalPhaseRow.fromBin(eis, self, attributesSeq))
+                print("row %s added, loc = %s" % (i, eis.tell()))
+        except Exception as exc:
+            byteStream.close()
+            eis.close()
+            raise ConversionException(
+                "Error while reading binary data, the exception was " + str(exc),
+                "CalPhase",
+            ) from None
+
+        # there is no harm in closing both
+        print("closing")
+        eis.close()
+        byteStream.close()
+        print("checking")
+        print("eis : %s" % eis.closed())
+        print("byteStream : %s" % byteStream.closed)
 
     def setFromFile(self, directory):
         """
@@ -1082,46 +1165,23 @@ class CalPhaseTable:
     def setFromMIMEFile(self, directory):
         """
         Set this table from a MIME file.
-        Used internally by setFromFile. Not intented for external use.
+        Used internally by setFromFile. Not intended for external use.
         """
-        print("setFromMIME file not yet implemented for CalPhaseTable")
-        return
+        # The java and c++ versions read all of the contents into a byte array.
+        # This uses a buffered byte stream. Created here and then
+        # handed off to the setFromMIME method, which is responsible for closing it.
 
-        # java code looks like this
-        # File file = new File(directory+"/CalPhase.bin");
-        #
-        # byte[] bytes = null;
-        #
-        # try {
-        #     InputStream is = new FileInputStream(file);
-        #     long length = file.length();
-        #     if (length > Integer.MAX_VALUE)
-        #         throw new ConversionException ("File " + file.getName() + " is too large", "CalPhase");
-        #
-        #    bytes = new byte[(int)length];
-        #    int offset = 0;
-        #    int numRead = 0;
-        #
-        #   while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
-        #       offset += numRead;
-        #   }
-        #
-        #    if (offset < bytes.length) {
-        #        throw new ConversionException("Could not completely read file "+file.getName(), "CalPhase");
-        #    }
-        #    is.close();
-        # }
-        # catch (IOException e) {
-        #    throw new ConversionException("Error while reading "+file.getName()+". The message was " + e.getMessage(),
-        #    "CalPhase");
-        # }
+        filename = os.path.join(directory, "CalPhase.bin")
+        byteStream = None
+        try:
+            byteStream = open(filename, "rb")
+        except Exception as exc:
+            raise ConversionException(
+                "Error while opening " + filename + ". The exception was " + str(exc),
+                "CalPhase",
+            )
 
-        # setFromMIME(bytes);
-        # // Changed 24 Sep, 2015 - The export policy cannot be changed by what has been observed at import time. M Caillat
-        # // archiveAsBin = true;
-        # // fileAsBin = true;
-
-    # }
+        self.setFromMIME(byteStream)
 
     def setFromXMLFile(self, directory):
         """
@@ -1144,15 +1204,6 @@ class CalPhaseTable:
             self.setFromMIMEFile(directory)
         else:
             self.fromXML(xmlstr)
-            # TBD: when fileAsBin is implemented this should be removed
-            # this will at least preserve the case where fileAsBin was changed for
-            # a table such that the archive has it in XML but the current rule is to
-            # write it out as binary
-            if self._fileAsBin:
-                print(
-                    "CalPhase found as XML but it should be written as binary, which is not yet implemetned. Setting to write as XML to preserve this content."
-                )
-                self._fileAsBin = False
 
     def toFile(self, directory):
         """
@@ -1192,40 +1243,50 @@ class CalPhaseTable:
             ) from None
 
         if self._fileAsBin:
-            print("fileAsBin not yet implemented for CalPhase")
-            # the Java code looks like this
-            #
             # The table is exported in a binary format.
             # (actually a short XML file + a possibly long MIME file)
-            #
-            # File xmlFile = new File(directory+"/CalPhase.xml");
-            # if (xmlFile.exists())
-            #    if (!xmlFile.delete())
-            #        throw new ConversionException("Problem while trying to delete a previous version of '"+xmlFile.toString()+"'", "CalPhase");
-            #
-            # File binFile = new File(directory+"/CalPhase.bin");
-            # if (binFile.exists())
-            #    if (!binFile.delete())
-            #        throw new ConversionException("Problem while trying to delete a previous version of '"+binFile.toString()+"'", "CalPhase");
-            #
-            # try {
-            #    BufferedWriter out = new BufferedWriter(new FileWriter(xmlFile));
-            #    out.write(MIMEXMLPart());
-            #    out.close();
-            #
 
-            #  OutputStream osBin = new FileOutputStream(binFile);
-            #  osBin.write(toMIME());
-            #  osBin.close();
+            # Java defaults to Big_Endian
+            # c++ defaults to Machine, go with c++
+            byteOrder = ByteOrder()
 
-        # }
-        # catch (FileNotFoundException e) {
-        #     throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalPhase");
-        # }
-        # catch (IOException e) {
-        #      throw new ConversionException("Problem while writing the binary representation, the message was : " + e.getMessage(), "CalPhase");
-        # }
-        # }
+            # first, just the short XML file
+            xmlFilePath = os.path.join(directory, "CalPhase.xml")
+            if os.path.exists(xmlFilePath):
+                try:
+                    os.remove(xmlFilePath)
+                except Exception as exc:
+                    raise ConversionException(
+                        "Could not remove existing "
+                        + xmlFilePath
+                        + ", exception caught "
+                        + str(exc),
+                        "CalPhase",
+                    ) from None
+
+            # used in both files
+            mimeXMLpart = self.MIMEXMLPart(byteOrder)
+
+            # this is all that is written to the XML file
+            with open(xmlFilePath, "w") as xmlfile:
+                xmlfile.write(mimeXMLpart)
+
+            # now open the possibly much longer MIME file
+            mimeFilePath = os.path.join(directory, "CalPhase.bin")
+            if os.path.exists(mimeFilePath):
+                try:
+                    os.remove(mimeFilePath)
+                except Exception as exc:
+                    raise ConversionException(
+                        "Could not remove existing "
+                        + mimeFilePath
+                        + ", exception caught "
+                        + str(exc),
+                        "CalPhase",
+                    ) from None
+
+            # the details are all handled in toMIME
+            self.toMIME(mimeFilePath, mimeXMLpart, byteOrder)
         else:
             # The table is totally exported in a XML file.
             filePath = os.path.join(directory, "CalPhase.xml")

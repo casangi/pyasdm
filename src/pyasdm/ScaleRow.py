@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.TimeScale import TimeScale
 
@@ -76,10 +80,11 @@ class ScaleRow:
         Create a ScaleRow.
         When row is None, create an empty row attached to table, which must be a ScaleTable.
         When row is given, copy those values in to the new row. The row argument must be a ScaleRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.ScaleTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a ScaleTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -100,7 +105,7 @@ class ScaleRow:
 
         if row is not None:
             if not isinstance(row, ScaleRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a ScaleRow")
 
             # copy constructor
 
@@ -218,10 +223,102 @@ class ScaleRow:
             weightTypeNode.firstChild.data.strip()
         )
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._scaleId.toBin(eos)
+
+        eos.writeString(self._timeScale.toString())
+
+        eos.writeString(self._crossDataScale.toString())
+
+        eos.writeString(self._autoDataScale.toString())
+
+        eos.writeString(self._weightType.toString())
+
+    @staticmethod
+    def scaleIdFromBin(row, eis):
+        """
+        Set the scaleId in row from the EndianInput (eis) instance.
+        """
+
+        row._scaleId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeScaleFromBin(row, eis):
+        """
+        Set the timeScale in row from the EndianInput (eis) instance.
+        """
+
+        row._timeScale = TimeScale.from_int(eis.readInt())
+
+    @staticmethod
+    def crossDataScaleFromBin(row, eis):
+        """
+        Set the crossDataScale in row from the EndianInput (eis) instance.
+        """
+
+        row._crossDataScale = DataScale.from_int(eis.readInt())
+
+    @staticmethod
+    def autoDataScaleFromBin(row, eis):
+        """
+        Set the autoDataScale in row from the EndianInput (eis) instance.
+        """
+
+        row._autoDataScale = DataScale.from_int(eis.readInt())
+
+    @staticmethod
+    def weightTypeFromBin(row, eis):
+        """
+        Set the weightType in row from the EndianInput (eis) instance.
+        """
+
+        row._weightType = WeightType.from_int(eis.readInt())
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["scaleId"] = ScaleRow.scaleIdFromBin
+        _fromBinMethods["timeScale"] = ScaleRow.timeScaleFromBin
+        _fromBinMethods["crossDataScale"] = ScaleRow.crossDataScaleFromBin
+        _fromBinMethods["autoDataScale"] = ScaleRow.autoDataScaleFromBin
+        _fromBinMethods["weightType"] = ScaleRow.weightTypeFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = ScaleRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Scale",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute scaleId
 
@@ -405,3 +502,7 @@ class ScaleRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+ScaleRow.initFromBinMethods()

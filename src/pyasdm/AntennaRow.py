@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.AntennaMake import AntennaMake
 
@@ -70,10 +74,11 @@ class AntennaRow:
         Create a AntennaRow.
         When row is None, create an empty row attached to table, which must be a AntennaTable.
         When row is given, copy those values in to the new row. The row argument must be a AntennaRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.AntennaTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a AntennaTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -108,7 +113,7 @@ class AntennaRow:
 
         if row is not None:
             if not isinstance(row, AntennaRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a AntennaRow")
 
             # copy constructor
 
@@ -273,10 +278,163 @@ class AntennaRow:
 
         self._stationId = Tag(stationIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        eos.writeStr(self._name)
+
+        eos.writeString(self._antennaMake.toString())
+
+        eos.writeString(self._antennaType.toString())
+
+        self._dishDiameter.toBin(eos)
+
+        Length.listToBin(self._position, eos)
+
+        Length.listToBin(self._offset, eos)
+
+        self._time.toBin(eos)
+
+        self._stationId.toBin(eos)
+
+        eos.writeBool(self._assocAntennaIdExists)
+        if self._assocAntennaIdExists:
+
+            self._assocAntennaId.toBin(eos)
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def nameFromBin(row, eis):
+        """
+        Set the name in row from the EndianInput (eis) instance.
+        """
+
+        row._name = eis.readStr()
+
+    @staticmethod
+    def antennaMakeFromBin(row, eis):
+        """
+        Set the antennaMake in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaMake = AntennaMake.from_int(eis.readInt())
+
+    @staticmethod
+    def antennaTypeFromBin(row, eis):
+        """
+        Set the antennaType in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaType = AntennaType.from_int(eis.readInt())
+
+    @staticmethod
+    def dishDiameterFromBin(row, eis):
+        """
+        Set the dishDiameter in row from the EndianInput (eis) instance.
+        """
+
+        row._dishDiameter = Length.fromBin(eis)
+
+    @staticmethod
+    def positionFromBin(row, eis):
+        """
+        Set the position in row from the EndianInput (eis) instance.
+        """
+
+        row._position = Length.from1DBin(eis)
+
+    @staticmethod
+    def offsetFromBin(row, eis):
+        """
+        Set the offset in row from the EndianInput (eis) instance.
+        """
+
+        row._offset = Length.from1DBin(eis)
+
+    @staticmethod
+    def timeFromBin(row, eis):
+        """
+        Set the time in row from the EndianInput (eis) instance.
+        """
+
+        row._time = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def stationIdFromBin(row, eis):
+        """
+        Set the stationId in row from the EndianInput (eis) instance.
+        """
+
+        row._stationId = Tag.fromBin(eis)
+
+    @staticmethod
+    def assocAntennaIdFromBin(row, eis):
+        """
+        Set the optional assocAntennaId in row from the EndianInput (eis) instance.
+        """
+        row._assocAntennaIdExists = eis.readBool()
+        if row._assocAntennaIdExists:
+
+            row._assocAntennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = AntennaRow.antennaIdFromBin
+        _fromBinMethods["name"] = AntennaRow.nameFromBin
+        _fromBinMethods["antennaMake"] = AntennaRow.antennaMakeFromBin
+        _fromBinMethods["antennaType"] = AntennaRow.antennaTypeFromBin
+        _fromBinMethods["dishDiameter"] = AntennaRow.dishDiameterFromBin
+        _fromBinMethods["position"] = AntennaRow.positionFromBin
+        _fromBinMethods["offset"] = AntennaRow.offsetFromBin
+        _fromBinMethods["time"] = AntennaRow.timeFromBin
+        _fromBinMethods["stationId"] = AntennaRow.stationIdFromBin
+
+        _fromBinMethods["assocAntennaId"] = AntennaRow.assocAntennaIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = AntennaRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Antenna",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute antennaId
 
@@ -595,7 +753,7 @@ class AntennaRow:
         """
 
         if not self._assocAntennaIdExists:
-            raise NoSuchRow("Antenna", "Antenna", true)
+            raise NoSuchRow("Antenna", "Antenna", True)
 
         return self._table.getContainer().getAntenna().getRowByKey(antennaId)
 
@@ -765,3 +923,7 @@ class AntennaRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+AntennaRow.initFromBinMethods()

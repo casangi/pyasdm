@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.BasebandName import BasebandName
 
@@ -85,10 +89,11 @@ class SpectralWindowRow:
         Create a SpectralWindowRow.
         When row is None, create an empty row attached to table, which must be a SpectralWindowTable.
         When row is given, copy those values in to the new row. The row argument must be a SpectralWindowRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.SpectralWindowTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a SpectralWindowTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -213,7 +218,7 @@ class SpectralWindowRow:
 
         if row is not None:
             if not isinstance(row, SpectralWindowRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a SpectralWindowRow")
 
             # copy constructor
 
@@ -303,11 +308,11 @@ class SpectralWindowRow:
 
             # by default set systematically correlationBit's value to something not None
 
-            self.correlationBit = CorrelationBit.from_int(0)
+            self._correlationBit = CorrelationBit.from_int(0)
 
             if row._correlationBitExists:
 
-                if row._correlationBit is None:
+                if row._correlationBit is not None:
                     self._correlationBit = row._correlationBit
 
                 self._correlationBitExists = True
@@ -356,11 +361,11 @@ class SpectralWindowRow:
 
             # by default set systematically measFreqRef's value to something not None
 
-            self.measFreqRef = FrequencyReferenceCode.from_int(0)
+            self._measFreqRef = FrequencyReferenceCode.from_int(0)
 
             if row._measFreqRefExists:
 
-                if row._measFreqRef is None:
+                if row._measFreqRef is not None:
                     self._measFreqRef = row._measFreqRef
 
                 self._measFreqRefExists = True
@@ -435,7 +440,7 @@ class SpectralWindowRow:
 
             if row._assocSpectralWindowIdExists:
 
-                # assocSpectralWindowId is a list , let's populate self.assocSpectralWindowId element by element.
+                # assocSpectralWindowId is a list, let's populate self._assocSpectralWindowId element by element.
                 if self._assocSpectralWindowId is None:
                     self._assocSpectralWindowId = []
                 for i in range(len(row._assocSpectralWindowId)):
@@ -898,10 +903,542 @@ class SpectralWindowRow:
 
             self._imageSpectralWindowIdExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._spectralWindowId.toBin(eos)
+
+        eos.writeString(self._basebandName.toString())
+
+        eos.writeString(self._netSideband.toString())
+
+        eos.writeInt(self._numChan)
+
+        self._refFreq.toBin(eos)
+
+        eos.writeString(self._sidebandProcessingMode.toString())
+
+        self._totBandwidth.toBin(eos)
+
+        eos.writeString(self._windowFunction.toString())
+
+        eos.writeBool(self._numBinExists)
+        if self._numBinExists:
+
+            eos.writeInt(self._numBin)
+
+        eos.writeBool(self._chanFreqStartExists)
+        if self._chanFreqStartExists:
+
+            self._chanFreqStart.toBin(eos)
+
+        eos.writeBool(self._chanFreqStepExists)
+        if self._chanFreqStepExists:
+
+            self._chanFreqStep.toBin(eos)
+
+        eos.writeBool(self._chanFreqArrayExists)
+        if self._chanFreqArrayExists:
+
+            Frequency.listToBin(self._chanFreqArray, eos)
+
+        eos.writeBool(self._chanWidthExists)
+        if self._chanWidthExists:
+
+            self._chanWidth.toBin(eos)
+
+        eos.writeBool(self._chanWidthArrayExists)
+        if self._chanWidthArrayExists:
+
+            Frequency.listToBin(self._chanWidthArray, eos)
+
+        eos.writeBool(self._correlationBitExists)
+        if self._correlationBitExists:
+
+            eos.writeString(self._correlationBit.toString())
+
+        eos.writeBool(self._effectiveBwExists)
+        if self._effectiveBwExists:
+
+            self._effectiveBw.toBin(eos)
+
+        eos.writeBool(self._effectiveBwArrayExists)
+        if self._effectiveBwArrayExists:
+
+            Frequency.listToBin(self._effectiveBwArray, eos)
+
+        eos.writeBool(self._freqGroupExists)
+        if self._freqGroupExists:
+
+            eos.writeInt(self._freqGroup)
+
+        eos.writeBool(self._freqGroupNameExists)
+        if self._freqGroupNameExists:
+
+            eos.writeStr(self._freqGroupName)
+
+        eos.writeBool(self._lineArrayExists)
+        if self._lineArrayExists:
+
+            eos.writeInt(len(self._lineArray))
+            for i in range(len(self._lineArray)):
+
+                eos.writeBool(self._lineArray[i])
+
+        eos.writeBool(self._measFreqRefExists)
+        if self._measFreqRefExists:
+
+            eos.writeString(self._measFreqRef.toString())
+
+        eos.writeBool(self._nameExists)
+        if self._nameExists:
+
+            eos.writeStr(self._name)
+
+        eos.writeBool(self._oversamplingExists)
+        if self._oversamplingExists:
+
+            eos.writeBool(self._oversampling)
+
+        eos.writeBool(self._quantizationExists)
+        if self._quantizationExists:
+
+            eos.writeBool(self._quantization)
+
+        eos.writeBool(self._refChanExists)
+        if self._refChanExists:
+
+            eos.writeFloat(self._refChan)
+
+        eos.writeBool(self._resolutionExists)
+        if self._resolutionExists:
+
+            self._resolution.toBin(eos)
+
+        eos.writeBool(self._resolutionArrayExists)
+        if self._resolutionArrayExists:
+
+            Frequency.listToBin(self._resolutionArray, eos)
+
+        eos.writeBool(self._numAssocValuesExists)
+        if self._numAssocValuesExists:
+
+            eos.writeInt(self._numAssocValues)
+
+        eos.writeBool(self._assocNatureExists)
+        if self._assocNatureExists:
+
+            eos.writeInt(len(self._assocNature))
+            for i in range(len(self._assocNature)):
+
+                eos.writeString(self._assocNature[i].toString())
+
+        eos.writeBool(self._assocSpectralWindowIdExists)
+        if self._assocSpectralWindowIdExists:
+
+            Tag.listToBin(self._assocSpectralWindowId, eos)
+
+        eos.writeBool(self._imageSpectralWindowIdExists)
+        if self._imageSpectralWindowIdExists:
+
+            self._imageSpectralWindowId.toBin(eos)
+
+        eos.writeBool(self._dopplerIdExists)
+        if self._dopplerIdExists:
+
+            eos.writeInt(self._dopplerId)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def basebandNameFromBin(row, eis):
+        """
+        Set the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        row._basebandName = BasebandName.from_int(eis.readInt())
+
+    @staticmethod
+    def netSidebandFromBin(row, eis):
+        """
+        Set the netSideband in row from the EndianInput (eis) instance.
+        """
+
+        row._netSideband = NetSideband.from_int(eis.readInt())
+
+    @staticmethod
+    def numChanFromBin(row, eis):
+        """
+        Set the numChan in row from the EndianInput (eis) instance.
+        """
+
+        row._numChan = eis.readInt()
+
+    @staticmethod
+    def refFreqFromBin(row, eis):
+        """
+        Set the refFreq in row from the EndianInput (eis) instance.
+        """
+
+        row._refFreq = Frequency.fromBin(eis)
+
+    @staticmethod
+    def sidebandProcessingModeFromBin(row, eis):
+        """
+        Set the sidebandProcessingMode in row from the EndianInput (eis) instance.
+        """
+
+        row._sidebandProcessingMode = SidebandProcessingMode.from_int(eis.readInt())
+
+    @staticmethod
+    def totBandwidthFromBin(row, eis):
+        """
+        Set the totBandwidth in row from the EndianInput (eis) instance.
+        """
+
+        row._totBandwidth = Frequency.fromBin(eis)
+
+    @staticmethod
+    def windowFunctionFromBin(row, eis):
+        """
+        Set the windowFunction in row from the EndianInput (eis) instance.
+        """
+
+        row._windowFunction = WindowFunction.from_int(eis.readInt())
+
+    @staticmethod
+    def numBinFromBin(row, eis):
+        """
+        Set the optional numBin in row from the EndianInput (eis) instance.
+        """
+        row._numBinExists = eis.readBool()
+        if row._numBinExists:
+
+            row._numBin = eis.readInt()
+
+    @staticmethod
+    def chanFreqStartFromBin(row, eis):
+        """
+        Set the optional chanFreqStart in row from the EndianInput (eis) instance.
+        """
+        row._chanFreqStartExists = eis.readBool()
+        if row._chanFreqStartExists:
+
+            row._chanFreqStart = Frequency.fromBin(eis)
+
+    @staticmethod
+    def chanFreqStepFromBin(row, eis):
+        """
+        Set the optional chanFreqStep in row from the EndianInput (eis) instance.
+        """
+        row._chanFreqStepExists = eis.readBool()
+        if row._chanFreqStepExists:
+
+            row._chanFreqStep = Frequency.fromBin(eis)
+
+    @staticmethod
+    def chanFreqArrayFromBin(row, eis):
+        """
+        Set the optional chanFreqArray in row from the EndianInput (eis) instance.
+        """
+        row._chanFreqArrayExists = eis.readBool()
+        if row._chanFreqArrayExists:
+
+            row._chanFreqArray = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def chanWidthFromBin(row, eis):
+        """
+        Set the optional chanWidth in row from the EndianInput (eis) instance.
+        """
+        row._chanWidthExists = eis.readBool()
+        if row._chanWidthExists:
+
+            row._chanWidth = Frequency.fromBin(eis)
+
+    @staticmethod
+    def chanWidthArrayFromBin(row, eis):
+        """
+        Set the optional chanWidthArray in row from the EndianInput (eis) instance.
+        """
+        row._chanWidthArrayExists = eis.readBool()
+        if row._chanWidthArrayExists:
+
+            row._chanWidthArray = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def correlationBitFromBin(row, eis):
+        """
+        Set the optional correlationBit in row from the EndianInput (eis) instance.
+        """
+        row._correlationBitExists = eis.readBool()
+        if row._correlationBitExists:
+
+            row._correlationBit = CorrelationBit.from_int(eis.readInt())
+
+    @staticmethod
+    def effectiveBwFromBin(row, eis):
+        """
+        Set the optional effectiveBw in row from the EndianInput (eis) instance.
+        """
+        row._effectiveBwExists = eis.readBool()
+        if row._effectiveBwExists:
+
+            row._effectiveBw = Frequency.fromBin(eis)
+
+    @staticmethod
+    def effectiveBwArrayFromBin(row, eis):
+        """
+        Set the optional effectiveBwArray in row from the EndianInput (eis) instance.
+        """
+        row._effectiveBwArrayExists = eis.readBool()
+        if row._effectiveBwArrayExists:
+
+            row._effectiveBwArray = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def freqGroupFromBin(row, eis):
+        """
+        Set the optional freqGroup in row from the EndianInput (eis) instance.
+        """
+        row._freqGroupExists = eis.readBool()
+        if row._freqGroupExists:
+
+            row._freqGroup = eis.readInt()
+
+    @staticmethod
+    def freqGroupNameFromBin(row, eis):
+        """
+        Set the optional freqGroupName in row from the EndianInput (eis) instance.
+        """
+        row._freqGroupNameExists = eis.readBool()
+        if row._freqGroupNameExists:
+
+            row._freqGroupName = eis.readStr()
+
+    @staticmethod
+    def lineArrayFromBin(row, eis):
+        """
+        Set the optional lineArray in row from the EndianInput (eis) instance.
+        """
+        row._lineArrayExists = eis.readBool()
+        if row._lineArrayExists:
+
+            lineArrayDim1 = eis.readInt()
+            thisList = []
+            for i in range(lineArrayDim1):
+                thisValue = eis.readBool()
+                thisList.append(thisValue)
+            row._lineArray = thisList
+
+    @staticmethod
+    def measFreqRefFromBin(row, eis):
+        """
+        Set the optional measFreqRef in row from the EndianInput (eis) instance.
+        """
+        row._measFreqRefExists = eis.readBool()
+        if row._measFreqRefExists:
+
+            row._measFreqRef = FrequencyReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def nameFromBin(row, eis):
+        """
+        Set the optional name in row from the EndianInput (eis) instance.
+        """
+        row._nameExists = eis.readBool()
+        if row._nameExists:
+
+            row._name = eis.readStr()
+
+    @staticmethod
+    def oversamplingFromBin(row, eis):
+        """
+        Set the optional oversampling in row from the EndianInput (eis) instance.
+        """
+        row._oversamplingExists = eis.readBool()
+        if row._oversamplingExists:
+
+            row._oversampling = eis.readBool()
+
+    @staticmethod
+    def quantizationFromBin(row, eis):
+        """
+        Set the optional quantization in row from the EndianInput (eis) instance.
+        """
+        row._quantizationExists = eis.readBool()
+        if row._quantizationExists:
+
+            row._quantization = eis.readBool()
+
+    @staticmethod
+    def refChanFromBin(row, eis):
+        """
+        Set the optional refChan in row from the EndianInput (eis) instance.
+        """
+        row._refChanExists = eis.readBool()
+        if row._refChanExists:
+
+            row._refChan = eis.readFloat()
+
+    @staticmethod
+    def resolutionFromBin(row, eis):
+        """
+        Set the optional resolution in row from the EndianInput (eis) instance.
+        """
+        row._resolutionExists = eis.readBool()
+        if row._resolutionExists:
+
+            row._resolution = Frequency.fromBin(eis)
+
+    @staticmethod
+    def resolutionArrayFromBin(row, eis):
+        """
+        Set the optional resolutionArray in row from the EndianInput (eis) instance.
+        """
+        row._resolutionArrayExists = eis.readBool()
+        if row._resolutionArrayExists:
+
+            row._resolutionArray = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def numAssocValuesFromBin(row, eis):
+        """
+        Set the optional numAssocValues in row from the EndianInput (eis) instance.
+        """
+        row._numAssocValuesExists = eis.readBool()
+        if row._numAssocValuesExists:
+
+            row._numAssocValues = eis.readInt()
+
+    @staticmethod
+    def assocNatureFromBin(row, eis):
+        """
+        Set the optional assocNature in row from the EndianInput (eis) instance.
+        """
+        row._assocNatureExists = eis.readBool()
+        if row._assocNatureExists:
+
+            assocNatureDim1 = eis.readInt()
+            thisList = []
+            for i in range(assocNatureDim1):
+                thisValue = SpectralResolutionType.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._assocNature = thisList
+
+    @staticmethod
+    def assocSpectralWindowIdFromBin(row, eis):
+        """
+        Set the optional assocSpectralWindowId in row from the EndianInput (eis) instance.
+        """
+        row._assocSpectralWindowIdExists = eis.readBool()
+        if row._assocSpectralWindowIdExists:
+
+            row._assocSpectralWindowId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def imageSpectralWindowIdFromBin(row, eis):
+        """
+        Set the optional imageSpectralWindowId in row from the EndianInput (eis) instance.
+        """
+        row._imageSpectralWindowIdExists = eis.readBool()
+        if row._imageSpectralWindowIdExists:
+
+            row._imageSpectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def dopplerIdFromBin(row, eis):
+        """
+        Set the optional dopplerId in row from the EndianInput (eis) instance.
+        """
+        row._dopplerIdExists = eis.readBool()
+        if row._dopplerIdExists:
+
+            row._dopplerId = eis.readInt()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["spectralWindowId"] = SpectralWindowRow.spectralWindowIdFromBin
+        _fromBinMethods["basebandName"] = SpectralWindowRow.basebandNameFromBin
+        _fromBinMethods["netSideband"] = SpectralWindowRow.netSidebandFromBin
+        _fromBinMethods["numChan"] = SpectralWindowRow.numChanFromBin
+        _fromBinMethods["refFreq"] = SpectralWindowRow.refFreqFromBin
+        _fromBinMethods["sidebandProcessingMode"] = (
+            SpectralWindowRow.sidebandProcessingModeFromBin
+        )
+        _fromBinMethods["totBandwidth"] = SpectralWindowRow.totBandwidthFromBin
+        _fromBinMethods["windowFunction"] = SpectralWindowRow.windowFunctionFromBin
+
+        _fromBinMethods["numBin"] = SpectralWindowRow.numBinFromBin
+        _fromBinMethods["chanFreqStart"] = SpectralWindowRow.chanFreqStartFromBin
+        _fromBinMethods["chanFreqStep"] = SpectralWindowRow.chanFreqStepFromBin
+        _fromBinMethods["chanFreqArray"] = SpectralWindowRow.chanFreqArrayFromBin
+        _fromBinMethods["chanWidth"] = SpectralWindowRow.chanWidthFromBin
+        _fromBinMethods["chanWidthArray"] = SpectralWindowRow.chanWidthArrayFromBin
+        _fromBinMethods["correlationBit"] = SpectralWindowRow.correlationBitFromBin
+        _fromBinMethods["effectiveBw"] = SpectralWindowRow.effectiveBwFromBin
+        _fromBinMethods["effectiveBwArray"] = SpectralWindowRow.effectiveBwArrayFromBin
+        _fromBinMethods["freqGroup"] = SpectralWindowRow.freqGroupFromBin
+        _fromBinMethods["freqGroupName"] = SpectralWindowRow.freqGroupNameFromBin
+        _fromBinMethods["lineArray"] = SpectralWindowRow.lineArrayFromBin
+        _fromBinMethods["measFreqRef"] = SpectralWindowRow.measFreqRefFromBin
+        _fromBinMethods["name"] = SpectralWindowRow.nameFromBin
+        _fromBinMethods["oversampling"] = SpectralWindowRow.oversamplingFromBin
+        _fromBinMethods["quantization"] = SpectralWindowRow.quantizationFromBin
+        _fromBinMethods["refChan"] = SpectralWindowRow.refChanFromBin
+        _fromBinMethods["resolution"] = SpectralWindowRow.resolutionFromBin
+        _fromBinMethods["resolutionArray"] = SpectralWindowRow.resolutionArrayFromBin
+        _fromBinMethods["numAssocValues"] = SpectralWindowRow.numAssocValuesFromBin
+        _fromBinMethods["assocNature"] = SpectralWindowRow.assocNatureFromBin
+        _fromBinMethods["assocSpectralWindowId"] = (
+            SpectralWindowRow.assocSpectralWindowIdFromBin
+        )
+        _fromBinMethods["imageSpectralWindowId"] = (
+            SpectralWindowRow.imageSpectralWindowIdFromBin
+        )
+        _fromBinMethods["dopplerId"] = SpectralWindowRow.dopplerIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = SpectralWindowRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SpectralWindow",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute spectralWindowId
 
@@ -2328,9 +2865,9 @@ class SpectralWindowRow:
 
     def setOneAssocSpectralWindowId(self, index, assocSpectralWindowId):
         """
-        Set assocSpectralWindowId[i] with the specified Tag value.
+        Set assocSpectralWindowId[index] with the specified Tag value.
         index The index in assocSpectralWindowId where to set the Tag value.
-        assocSpectralWindowId The Tag value to which assocSpectralWindowId[i] is to be set.
+        assocSpectralWindowId The Tag value to which assocSpectralWindowId[index] is to be set.
         Raises an exception if that value does not already exist in this row
         """
         if not self._assocSpectralWindowIdExists():
@@ -2347,8 +2884,8 @@ class SpectralWindowRow:
         id the Tag to be appended to assocSpectralWindowId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._assocSpectralWindowId.append(Tag(id[i]))
+            for thisValue in id:
+                self._assocSpectralWindowId.append(Tag(thisValue))
         else:
             self._assocSpectralWindowId.append(Tag(id))
 
@@ -2389,11 +2926,11 @@ class SpectralWindowRow:
         """
         Returns the row in the SpectralWindow table having SpectralWindow.imageSpectralWindowId == imageSpectralWindowId
 
-        Raise ValueError if the optional imageSpectralWindowId does not exist for this row.
+        Raises ValueError if the optional imageSpectralWindowId does not exist for this row.
 
         """
 
-        if not _imageSpectralWindowIdExists:
+        if not self._imageSpectralWindowIdExists:
             raise ValueError("imageSpectralWindowId does not exist for this row.")
 
         return (
@@ -2408,14 +2945,12 @@ class SpectralWindowRow:
         Get the collection of rows in the Doppler table having dopplerId == this.dopplerId
         """
 
-        if self._dopplerIdExists:
-            return (
-                self._table.getContainer()
-                .getDoppler()
-                .getRowByDopplerId(self._dopplerId)
-            )
-        else:
+        if not self._dopplerIdExists:
             raise InvalidAccessException()
+
+        return (
+            self._table.getContainer().getDoppler().getRowByDopplerId(self._dopplerId)
+        )
 
     # comparison methods
 
@@ -2532,3 +3067,7 @@ class SpectralWindowRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+SpectralWindowRow.initFromBinMethods()

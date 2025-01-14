@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
 
@@ -76,10 +80,11 @@ class CalAntennaSolutionsRow:
         Create a CalAntennaSolutionsRow.
         When row is None, create an empty row attached to table, which must be a CalAntennaSolutionsTable.
         When row is given, copy those values in to the new row. The row argument must be a CalAntennaSolutionsRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalAntennaSolutionsTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalAntennaSolutionsTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -132,25 +137,25 @@ class CalAntennaSolutionsRow:
 
         if row is not None:
             if not isinstance(row, CalAntennaSolutionsRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalAntennaSolutionsRow")
 
             # copy constructor
 
             self._antennaName = row._antennaName
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._atmPhaseCorrection is None:
                 self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
             else:
                 self._atmPhaseCorrection = AtmPhaseCorrection(row._atmPhaseCorrection)
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._receiverBand is None:
                 self._receiverBand = ReceiverBand.from_int(0)
             else:
                 self._receiverBand = ReceiverBand(row._receiverBand)
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._basebandName is None:
                 self._basebandName = BasebandName.from_int(0)
             else:
@@ -411,10 +416,319 @@ class CalAntennaSolutionsRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._antennaName)
+
+        eos.writeString(self._atmPhaseCorrection.toString())
+
+        eos.writeString(self._receiverBand.toString())
+
+        eos.writeString(self._basebandName.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        eos.writeInt(self._numReceptor)
+
+        eos.writeStr(self._refAntennaName)
+
+        Angle.listToBin(self._direction, eos)
+
+        Frequency.listToBin(self._frequencyRange, eos)
+
+        self._integrationTime.toBin(eos)
+
+        eos.writeInt(len(self._polarizationTypes))
+        for i in range(len(self._polarizationTypes)):
+
+            eos.writeString(self._polarizationTypes[i].toString())
+
+        eos.writeBool(self._correctionValidity)
+
+        eos.writeInt(len(self._phaseAnt))
+        for i in range(len(self._phaseAnt)):
+
+            eos.writeFloat(self._phaseAnt[i])
+
+        eos.writeInt(len(self._phaseAntRMS))
+        for i in range(len(self._phaseAntRMS)):
+
+            eos.writeFloat(self._phaseAntRMS[i])
+
+        eos.writeInt(len(self._amplitudeAnt))
+        for i in range(len(self._amplitudeAnt)):
+
+            eos.writeFloat(self._amplitudeAnt[i])
+
+        eos.writeInt(len(self._amplitudeAntRMS))
+        for i in range(len(self._amplitudeAntRMS)):
+
+            eos.writeFloat(self._amplitudeAntRMS[i])
+
+    @staticmethod
+    def antennaNameFromBin(row, eis):
+        """
+        Set the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaName = eis.readStr()
+
+    @staticmethod
+    def atmPhaseCorrectionFromBin(row, eis):
+        """
+        Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def basebandNameFromBin(row, eis):
+        """
+        Set the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        row._basebandName = BasebandName.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def refAntennaNameFromBin(row, eis):
+        """
+        Set the refAntennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._refAntennaName = eis.readStr()
+
+    @staticmethod
+    def directionFromBin(row, eis):
+        """
+        Set the direction in row from the EndianInput (eis) instance.
+        """
+
+        row._direction = Angle.from1DBin(eis)
+
+    @staticmethod
+    def frequencyRangeFromBin(row, eis):
+        """
+        Set the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyRange = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def integrationTimeFromBin(row, eis):
+        """
+        Set the integrationTime in row from the EndianInput (eis) instance.
+        """
+
+        row._integrationTime = Interval.fromBin(eis)
+
+    @staticmethod
+    def polarizationTypesFromBin(row, eis):
+        """
+        Set the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypesDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationTypes = thisList
+
+    @staticmethod
+    def correctionValidityFromBin(row, eis):
+        """
+        Set the correctionValidity in row from the EndianInput (eis) instance.
+        """
+
+        row._correctionValidity = eis.readBool()
+
+    @staticmethod
+    def phaseAntFromBin(row, eis):
+        """
+        Set the phaseAnt in row from the EndianInput (eis) instance.
+        """
+
+        phaseAntDim1 = eis.readInt()
+        thisList = []
+        for i in range(phaseAntDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._phaseAnt = thisList
+
+    @staticmethod
+    def phaseAntRMSFromBin(row, eis):
+        """
+        Set the phaseAntRMS in row from the EndianInput (eis) instance.
+        """
+
+        phaseAntRMSDim1 = eis.readInt()
+        thisList = []
+        for i in range(phaseAntRMSDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._phaseAntRMS = thisList
+
+    @staticmethod
+    def amplitudeAntFromBin(row, eis):
+        """
+        Set the amplitudeAnt in row from the EndianInput (eis) instance.
+        """
+
+        amplitudeAntDim1 = eis.readInt()
+        thisList = []
+        for i in range(amplitudeAntDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._amplitudeAnt = thisList
+
+    @staticmethod
+    def amplitudeAntRMSFromBin(row, eis):
+        """
+        Set the amplitudeAntRMS in row from the EndianInput (eis) instance.
+        """
+
+        amplitudeAntRMSDim1 = eis.readInt()
+        thisList = []
+        for i in range(amplitudeAntRMSDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._amplitudeAntRMS = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaName"] = CalAntennaSolutionsRow.antennaNameFromBin
+        _fromBinMethods["atmPhaseCorrection"] = (
+            CalAntennaSolutionsRow.atmPhaseCorrectionFromBin
+        )
+        _fromBinMethods["receiverBand"] = CalAntennaSolutionsRow.receiverBandFromBin
+        _fromBinMethods["basebandName"] = CalAntennaSolutionsRow.basebandNameFromBin
+        _fromBinMethods["calDataId"] = CalAntennaSolutionsRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalAntennaSolutionsRow.calReductionIdFromBin
+        _fromBinMethods["spectralWindowId"] = (
+            CalAntennaSolutionsRow.spectralWindowIdFromBin
+        )
+        _fromBinMethods["startValidTime"] = CalAntennaSolutionsRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalAntennaSolutionsRow.endValidTimeFromBin
+        _fromBinMethods["numReceptor"] = CalAntennaSolutionsRow.numReceptorFromBin
+        _fromBinMethods["refAntennaName"] = CalAntennaSolutionsRow.refAntennaNameFromBin
+        _fromBinMethods["direction"] = CalAntennaSolutionsRow.directionFromBin
+        _fromBinMethods["frequencyRange"] = CalAntennaSolutionsRow.frequencyRangeFromBin
+        _fromBinMethods["integrationTime"] = (
+            CalAntennaSolutionsRow.integrationTimeFromBin
+        )
+        _fromBinMethods["polarizationTypes"] = (
+            CalAntennaSolutionsRow.polarizationTypesFromBin
+        )
+        _fromBinMethods["correctionValidity"] = (
+            CalAntennaSolutionsRow.correctionValidityFromBin
+        )
+        _fromBinMethods["phaseAnt"] = CalAntennaSolutionsRow.phaseAntFromBin
+        _fromBinMethods["phaseAntRMS"] = CalAntennaSolutionsRow.phaseAntRMSFromBin
+        _fromBinMethods["amplitudeAnt"] = CalAntennaSolutionsRow.amplitudeAntFromBin
+        _fromBinMethods["amplitudeAntRMS"] = (
+            CalAntennaSolutionsRow.amplitudeAntRMSFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalAntennaSolutionsRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalAntennaSolutions",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute antennaName
 
@@ -1390,3 +1704,7 @@ class CalAntennaSolutionsRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalAntennaSolutionsRow.initFromBinMethods()

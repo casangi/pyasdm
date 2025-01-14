@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class ObservationRow:
         Create a ObservationRow.
         When row is None, create an empty row attached to table, which must be a ObservationTable.
         When row is given, copy those values in to the new row. The row argument must be a ObservationRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.ObservationTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a ObservationTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -80,7 +85,7 @@ class ObservationRow:
 
         if row is not None:
             if not isinstance(row, ObservationRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a ObservationRow")
 
             # copy constructor
 
@@ -140,10 +145,58 @@ class ObservationRow:
 
         self._observationId = Tag(observationIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._observationId.toBin(eos)
+
+    @staticmethod
+    def observationIdFromBin(row, eis):
+        """
+        Set the observationId in row from the EndianInput (eis) instance.
+        """
+
+        row._observationId = Tag.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["observationId"] = ObservationRow.observationIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = ObservationRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Observation",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute observationId
 
@@ -194,3 +247,7 @@ class ObservationRow:
     ):
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+ObservationRow.initFromBinMethods()

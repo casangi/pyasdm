@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class SysCalRow:
         Create a SysCalRow.
         When row is None, create an empty row attached to table, which must be a SysCalTable.
         When row is given, copy those values in to the new row. The row argument must be a SysCalRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.SysCalTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a SysCalTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -148,7 +153,7 @@ class SysCalRow:
 
         if row is not None:
             if not isinstance(row, SysCalRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a SysCalRow")
 
             # copy constructor
 
@@ -555,10 +560,398 @@ class SysCalRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._feedId)
+
+        eos.writeInt(self._numReceptor)
+
+        eos.writeInt(self._numChan)
+
+        eos.writeBool(self._tcalFlagExists)
+        if self._tcalFlagExists:
+
+            eos.writeBool(self._tcalFlag)
+
+        eos.writeBool(self._tcalSpectrumExists)
+        if self._tcalSpectrumExists:
+
+            Temperature.listToBin(self._tcalSpectrum, eos)
+
+        eos.writeBool(self._trxFlagExists)
+        if self._trxFlagExists:
+
+            eos.writeBool(self._trxFlag)
+
+        eos.writeBool(self._trxSpectrumExists)
+        if self._trxSpectrumExists:
+
+            Temperature.listToBin(self._trxSpectrum, eos)
+
+        eos.writeBool(self._tskyFlagExists)
+        if self._tskyFlagExists:
+
+            eos.writeBool(self._tskyFlag)
+
+        eos.writeBool(self._tskySpectrumExists)
+        if self._tskySpectrumExists:
+
+            Temperature.listToBin(self._tskySpectrum, eos)
+
+        eos.writeBool(self._tsysFlagExists)
+        if self._tsysFlagExists:
+
+            eos.writeBool(self._tsysFlag)
+
+        eos.writeBool(self._tsysSpectrumExists)
+        if self._tsysSpectrumExists:
+
+            Temperature.listToBin(self._tsysSpectrum, eos)
+
+        eos.writeBool(self._tantFlagExists)
+        if self._tantFlagExists:
+
+            eos.writeBool(self._tantFlag)
+
+        eos.writeBool(self._tantSpectrumExists)
+        if self._tantSpectrumExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._tantSpectrum is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                tantSpectrum_dims = Parser.getListDims(self._tantSpectrum)
+            # assumes it really is 2D
+            eos.writeInt(tantSpectrum_dims[0])
+            eos.writeInt(tantSpectrum_dims[1])
+            for i in range(tantSpectrum_dims[0]):
+                for j in range(tantSpectrum_dims[1]):
+                    eos.writeFloat(self._tantSpectrum[i][j])
+
+        eos.writeBool(self._tantTsysFlagExists)
+        if self._tantTsysFlagExists:
+
+            eos.writeBool(self._tantTsysFlag)
+
+        eos.writeBool(self._tantTsysSpectrumExists)
+        if self._tantTsysSpectrumExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._tantTsysSpectrum is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                tantTsysSpectrum_dims = Parser.getListDims(self._tantTsysSpectrum)
+            # assumes it really is 2D
+            eos.writeInt(tantTsysSpectrum_dims[0])
+            eos.writeInt(tantTsysSpectrum_dims[1])
+            for i in range(tantTsysSpectrum_dims[0]):
+                for j in range(tantTsysSpectrum_dims[1]):
+                    eos.writeFloat(self._tantTsysSpectrum[i][j])
+
+        eos.writeBool(self._phaseDiffFlagExists)
+        if self._phaseDiffFlagExists:
+
+            eos.writeBool(self._phaseDiffFlag)
+
+        eos.writeBool(self._phaseDiffSpectrumExists)
+        if self._phaseDiffSpectrumExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._phaseDiffSpectrum is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                phaseDiffSpectrum_dims = Parser.getListDims(self._phaseDiffSpectrum)
+            # assumes it really is 2D
+            eos.writeInt(phaseDiffSpectrum_dims[0])
+            eos.writeInt(phaseDiffSpectrum_dims[1])
+            for i in range(phaseDiffSpectrum_dims[0]):
+                for j in range(phaseDiffSpectrum_dims[1]):
+                    eos.writeFloat(self._phaseDiffSpectrum[i][j])
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def feedIdFromBin(row, eis):
+        """
+        Set the feedId in row from the EndianInput (eis) instance.
+        """
+
+        row._feedId = eis.readInt()
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def numChanFromBin(row, eis):
+        """
+        Set the numChan in row from the EndianInput (eis) instance.
+        """
+
+        row._numChan = eis.readInt()
+
+    @staticmethod
+    def tcalFlagFromBin(row, eis):
+        """
+        Set the optional tcalFlag in row from the EndianInput (eis) instance.
+        """
+        row._tcalFlagExists = eis.readBool()
+        if row._tcalFlagExists:
+
+            row._tcalFlag = eis.readBool()
+
+    @staticmethod
+    def tcalSpectrumFromBin(row, eis):
+        """
+        Set the optional tcalSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._tcalSpectrumExists = eis.readBool()
+        if row._tcalSpectrumExists:
+
+            row._tcalSpectrum = Temperature.from2DBin(eis)
+
+    @staticmethod
+    def trxFlagFromBin(row, eis):
+        """
+        Set the optional trxFlag in row from the EndianInput (eis) instance.
+        """
+        row._trxFlagExists = eis.readBool()
+        if row._trxFlagExists:
+
+            row._trxFlag = eis.readBool()
+
+    @staticmethod
+    def trxSpectrumFromBin(row, eis):
+        """
+        Set the optional trxSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._trxSpectrumExists = eis.readBool()
+        if row._trxSpectrumExists:
+
+            row._trxSpectrum = Temperature.from2DBin(eis)
+
+    @staticmethod
+    def tskyFlagFromBin(row, eis):
+        """
+        Set the optional tskyFlag in row from the EndianInput (eis) instance.
+        """
+        row._tskyFlagExists = eis.readBool()
+        if row._tskyFlagExists:
+
+            row._tskyFlag = eis.readBool()
+
+    @staticmethod
+    def tskySpectrumFromBin(row, eis):
+        """
+        Set the optional tskySpectrum in row from the EndianInput (eis) instance.
+        """
+        row._tskySpectrumExists = eis.readBool()
+        if row._tskySpectrumExists:
+
+            row._tskySpectrum = Temperature.from2DBin(eis)
+
+    @staticmethod
+    def tsysFlagFromBin(row, eis):
+        """
+        Set the optional tsysFlag in row from the EndianInput (eis) instance.
+        """
+        row._tsysFlagExists = eis.readBool()
+        if row._tsysFlagExists:
+
+            row._tsysFlag = eis.readBool()
+
+    @staticmethod
+    def tsysSpectrumFromBin(row, eis):
+        """
+        Set the optional tsysSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._tsysSpectrumExists = eis.readBool()
+        if row._tsysSpectrumExists:
+
+            row._tsysSpectrum = Temperature.from2DBin(eis)
+
+    @staticmethod
+    def tantFlagFromBin(row, eis):
+        """
+        Set the optional tantFlag in row from the EndianInput (eis) instance.
+        """
+        row._tantFlagExists = eis.readBool()
+        if row._tantFlagExists:
+
+            row._tantFlag = eis.readBool()
+
+    @staticmethod
+    def tantSpectrumFromBin(row, eis):
+        """
+        Set the optional tantSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._tantSpectrumExists = eis.readBool()
+        if row._tantSpectrumExists:
+
+            tantSpectrumDim1 = eis.readInt()
+            tantSpectrumDim2 = eis.readInt()
+            thisList = []
+            for i in range(tantSpectrumDim1):
+                thisList_j = []
+                for j in range(tantSpectrumDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.tantSpectrum = thisList
+
+    @staticmethod
+    def tantTsysFlagFromBin(row, eis):
+        """
+        Set the optional tantTsysFlag in row from the EndianInput (eis) instance.
+        """
+        row._tantTsysFlagExists = eis.readBool()
+        if row._tantTsysFlagExists:
+
+            row._tantTsysFlag = eis.readBool()
+
+    @staticmethod
+    def tantTsysSpectrumFromBin(row, eis):
+        """
+        Set the optional tantTsysSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._tantTsysSpectrumExists = eis.readBool()
+        if row._tantTsysSpectrumExists:
+
+            tantTsysSpectrumDim1 = eis.readInt()
+            tantTsysSpectrumDim2 = eis.readInt()
+            thisList = []
+            for i in range(tantTsysSpectrumDim1):
+                thisList_j = []
+                for j in range(tantTsysSpectrumDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.tantTsysSpectrum = thisList
+
+    @staticmethod
+    def phaseDiffFlagFromBin(row, eis):
+        """
+        Set the optional phaseDiffFlag in row from the EndianInput (eis) instance.
+        """
+        row._phaseDiffFlagExists = eis.readBool()
+        if row._phaseDiffFlagExists:
+
+            row._phaseDiffFlag = eis.readBool()
+
+    @staticmethod
+    def phaseDiffSpectrumFromBin(row, eis):
+        """
+        Set the optional phaseDiffSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._phaseDiffSpectrumExists = eis.readBool()
+        if row._phaseDiffSpectrumExists:
+
+            phaseDiffSpectrumDim1 = eis.readInt()
+            phaseDiffSpectrumDim2 = eis.readInt()
+            thisList = []
+            for i in range(phaseDiffSpectrumDim1):
+                thisList_j = []
+                for j in range(phaseDiffSpectrumDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.phaseDiffSpectrum = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = SysCalRow.antennaIdFromBin
+        _fromBinMethods["spectralWindowId"] = SysCalRow.spectralWindowIdFromBin
+        _fromBinMethods["timeInterval"] = SysCalRow.timeIntervalFromBin
+        _fromBinMethods["feedId"] = SysCalRow.feedIdFromBin
+        _fromBinMethods["numReceptor"] = SysCalRow.numReceptorFromBin
+        _fromBinMethods["numChan"] = SysCalRow.numChanFromBin
+
+        _fromBinMethods["tcalFlag"] = SysCalRow.tcalFlagFromBin
+        _fromBinMethods["tcalSpectrum"] = SysCalRow.tcalSpectrumFromBin
+        _fromBinMethods["trxFlag"] = SysCalRow.trxFlagFromBin
+        _fromBinMethods["trxSpectrum"] = SysCalRow.trxSpectrumFromBin
+        _fromBinMethods["tskyFlag"] = SysCalRow.tskyFlagFromBin
+        _fromBinMethods["tskySpectrum"] = SysCalRow.tskySpectrumFromBin
+        _fromBinMethods["tsysFlag"] = SysCalRow.tsysFlagFromBin
+        _fromBinMethods["tsysSpectrum"] = SysCalRow.tsysSpectrumFromBin
+        _fromBinMethods["tantFlag"] = SysCalRow.tantFlagFromBin
+        _fromBinMethods["tantSpectrum"] = SysCalRow.tantSpectrumFromBin
+        _fromBinMethods["tantTsysFlag"] = SysCalRow.tantTsysFlagFromBin
+        _fromBinMethods["tantTsysSpectrum"] = SysCalRow.tantTsysSpectrumFromBin
+        _fromBinMethods["phaseDiffFlag"] = SysCalRow.phaseDiffFlagFromBin
+        _fromBinMethods["phaseDiffSpectrum"] = SysCalRow.phaseDiffSpectrumFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = SysCalRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SysCal",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1589,3 +1982,7 @@ class SysCalRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+SysCalRow.initFromBinMethods()

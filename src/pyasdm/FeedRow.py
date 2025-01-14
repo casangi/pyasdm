@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.PolarizationType import PolarizationType
 
@@ -67,10 +71,11 @@ class FeedRow:
         Create a FeedRow.
         When row is None, create an empty row attached to table, which must be a FeedTable.
         When row is given, copy those values in to the new row. The row argument must be a FeedRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.FeedTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a FeedTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -129,7 +134,7 @@ class FeedRow:
 
         if row is not None:
             if not isinstance(row, FeedRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a FeedRow")
 
             # copy constructor
 
@@ -434,10 +439,308 @@ class FeedRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._feedId)
+
+        eos.writeInt(self._numReceptor)
+
+        # null array case, unsure if this is possible but this should work
+        if self._beamOffset is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            beamOffset_dims = Parser.getListDims(self._beamOffset)
+        # assumes it really is 2D
+        eos.writeInt(beamOffset_dims[0])
+        eos.writeInt(beamOffset_dims[1])
+        for i in range(beamOffset_dims[0]):
+            for j in range(beamOffset_dims[1]):
+                eos.writeFloat(self._beamOffset[i][j])
+
+        Length.listToBin(self._focusReference, eos)
+
+        eos.writeInt(len(self._polarizationTypes))
+        for i in range(len(self._polarizationTypes)):
+
+            eos.writeString(self._polarizationTypes[i].toString())
+
+        Complex.listToBin(self._polResponse, eos)
+
+        Angle.listToBin(self._receptorAngle, eos)
+
+        eos.writeInt(len(self._receiverId))
+        for i in range(len(self._receiverId)):
+
+            eos.writeInt(int(self._receiverId[i].getValue()))
+
+        eos.writeBool(self._feedNumExists)
+        if self._feedNumExists:
+
+            eos.writeInt(self._feedNum)
+
+        eos.writeBool(self._illumOffsetExists)
+        if self._illumOffsetExists:
+
+            Length.listToBin(self._illumOffset, eos)
+
+        eos.writeBool(self._positionExists)
+        if self._positionExists:
+
+            Length.listToBin(self._position, eos)
+
+        eos.writeBool(self._skyCouplingExists)
+        if self._skyCouplingExists:
+
+            eos.writeFloat(self._skyCoupling)
+
+        eos.writeBool(self._numChanExists)
+        if self._numChanExists:
+
+            eos.writeInt(self._numChan)
+
+        eos.writeBool(self._skyCouplingSpectrumExists)
+        if self._skyCouplingSpectrumExists:
+
+            eos.writeInt(len(self._skyCouplingSpectrum))
+            for i in range(len(self._skyCouplingSpectrum)):
+
+                eos.writeFloat(self._skyCouplingSpectrum[i])
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def feedIdFromBin(row, eis):
+        """
+        Set the feedId in row from the EndianInput (eis) instance.
+        """
+
+        row._feedId = eis.readInt()
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def beamOffsetFromBin(row, eis):
+        """
+        Set the beamOffset in row from the EndianInput (eis) instance.
+        """
+
+        beamOffsetDim1 = eis.readInt()
+        beamOffsetDim2 = eis.readInt()
+        thisList = []
+        for i in range(beamOffsetDim1):
+            thisList_j = []
+            for j in range(beamOffsetDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.beamOffset = thisList
+
+    @staticmethod
+    def focusReferenceFromBin(row, eis):
+        """
+        Set the focusReference in row from the EndianInput (eis) instance.
+        """
+
+        row._focusReference = Length.from2DBin(eis)
+
+    @staticmethod
+    def polarizationTypesFromBin(row, eis):
+        """
+        Set the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypesDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationTypes = thisList
+
+    @staticmethod
+    def polResponseFromBin(row, eis):
+        """
+        Set the polResponse in row from the EndianInput (eis) instance.
+        """
+
+        row._polResponse = Complex.from2DBin(eis)
+
+    @staticmethod
+    def receptorAngleFromBin(row, eis):
+        """
+        Set the receptorAngle in row from the EndianInput (eis) instance.
+        """
+
+        row._receptorAngle = Angle.from1DBin(eis)
+
+    @staticmethod
+    def receiverIdFromBin(row, eis):
+        """
+        Set the receiverId in row from the EndianInput (eis) instance.
+        """
+
+        thisList = []
+        unusedLength = eis.readInt()
+        for i in range(unusedLength):
+            thisList.append(eis.readInt())
+        row._receiverId = thisList
+
+    @staticmethod
+    def feedNumFromBin(row, eis):
+        """
+        Set the optional feedNum in row from the EndianInput (eis) instance.
+        """
+        row._feedNumExists = eis.readBool()
+        if row._feedNumExists:
+
+            row._feedNum = eis.readInt()
+
+    @staticmethod
+    def illumOffsetFromBin(row, eis):
+        """
+        Set the optional illumOffset in row from the EndianInput (eis) instance.
+        """
+        row._illumOffsetExists = eis.readBool()
+        if row._illumOffsetExists:
+
+            row._illumOffset = Length.from1DBin(eis)
+
+    @staticmethod
+    def positionFromBin(row, eis):
+        """
+        Set the optional position in row from the EndianInput (eis) instance.
+        """
+        row._positionExists = eis.readBool()
+        if row._positionExists:
+
+            row._position = Length.from1DBin(eis)
+
+    @staticmethod
+    def skyCouplingFromBin(row, eis):
+        """
+        Set the optional skyCoupling in row from the EndianInput (eis) instance.
+        """
+        row._skyCouplingExists = eis.readBool()
+        if row._skyCouplingExists:
+
+            row._skyCoupling = eis.readFloat()
+
+    @staticmethod
+    def numChanFromBin(row, eis):
+        """
+        Set the optional numChan in row from the EndianInput (eis) instance.
+        """
+        row._numChanExists = eis.readBool()
+        if row._numChanExists:
+
+            row._numChan = eis.readInt()
+
+    @staticmethod
+    def skyCouplingSpectrumFromBin(row, eis):
+        """
+        Set the optional skyCouplingSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._skyCouplingSpectrumExists = eis.readBool()
+        if row._skyCouplingSpectrumExists:
+
+            skyCouplingSpectrumDim1 = eis.readInt()
+            thisList = []
+            for i in range(skyCouplingSpectrumDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._skyCouplingSpectrum = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = FeedRow.antennaIdFromBin
+        _fromBinMethods["spectralWindowId"] = FeedRow.spectralWindowIdFromBin
+        _fromBinMethods["timeInterval"] = FeedRow.timeIntervalFromBin
+        _fromBinMethods["feedId"] = FeedRow.feedIdFromBin
+        _fromBinMethods["numReceptor"] = FeedRow.numReceptorFromBin
+        _fromBinMethods["beamOffset"] = FeedRow.beamOffsetFromBin
+        _fromBinMethods["focusReference"] = FeedRow.focusReferenceFromBin
+        _fromBinMethods["polarizationTypes"] = FeedRow.polarizationTypesFromBin
+        _fromBinMethods["polResponse"] = FeedRow.polResponseFromBin
+        _fromBinMethods["receptorAngle"] = FeedRow.receptorAngleFromBin
+        _fromBinMethods["receiverId"] = FeedRow.receiverIdFromBin
+
+        _fromBinMethods["feedNum"] = FeedRow.feedNumFromBin
+        _fromBinMethods["illumOffset"] = FeedRow.illumOffsetFromBin
+        _fromBinMethods["position"] = FeedRow.positionFromBin
+        _fromBinMethods["skyCoupling"] = FeedRow.skyCouplingFromBin
+        _fromBinMethods["numChan"] = FeedRow.numChanFromBin
+        _fromBinMethods["skyCouplingSpectrum"] = FeedRow.skyCouplingSpectrumFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = FeedRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Feed",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute feedId
 
@@ -1197,10 +1500,9 @@ class FeedRow:
 
     def setOneReceiverId(self, index, receiverId):
         """
-        Set receiverId[i] with the specified int value.
+        Set receiverId[index] with the specified int value.
         index The index in receiverId where to set the int value.
-        receiverId The int value to which receiverId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        receiverId The int value to which receiverId[index] is to be set.
 
         """
 
@@ -1222,7 +1524,6 @@ class FeedRow:
         Using the receiverId at location i in this row, return the corresponding row from ReceiverTable
         """
 
-        # was self._receiverId[i]
         j = self._receiverId[i]
         return self._table.getContainer().getReceiver().getRowByReceiverId(j)
 
@@ -1238,7 +1539,7 @@ class FeedRow:
             # this may return more than one row
             if isinstance(tr, list):
                 for thisRow in tr:
-                    result.append(tr[k])
+                    result.append(thisRow)
             else:
                 result.append(tr)
         return copy.deepcopy(result)
@@ -1279,7 +1580,7 @@ class FeedRow:
         if not (self._numReceptor == numReceptor):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if beamOffset is not None:
             if self._beamOffset is None:
                 return False
@@ -1292,13 +1593,13 @@ class FeedRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(beamOffset_dims[0]):
-                for j in range(beamOffset_dims[0]):
+                for j in range(beamOffset_dims[1]):
 
                     # beamOffset is an array of float, compare using == operator.
                     if not (self._beamOffset[i][j] == beamOffset[i][j]):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if focusReference is not None:
             if self._focusReference is None:
                 return False
@@ -1311,13 +1612,13 @@ class FeedRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(focusReference_dims[0]):
-                for j in range(focusReference_dims[0]):
+                for j in range(focusReference_dims[1]):
 
                     # focusReference is a Length, compare using the almostEquals method.
                     if not (
                         self._focusReference[i][j].almostEquals(
                             focusReference[i][j],
-                            this.getTable().getFocusReferenceEqTolerance(),
+                            self.getTable().getFocusReferenceEqTolerance(),
                         )
                     ):
                         return False
@@ -1332,7 +1633,7 @@ class FeedRow:
             if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if polResponse is not None:
             if self._polResponse is None:
                 return False
@@ -1345,7 +1646,7 @@ class FeedRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(polResponse_dims[0]):
-                for j in range(polResponse_dims[0]):
+                for j in range(polResponse_dims[1]):
 
                     # polResponse is an array of Complex, compare using equals method.
                     if not (self._polResponse[i][j].equals(polResponse[i][j])):
@@ -1370,7 +1671,7 @@ class FeedRow:
 
         # receiverId is a list of int, compare using the != operator.
         for indx in range(len(receiverId)):
-            if self._receiverId[i] != receiverId[i]:
+            if self._receiverId[indx] != receiverId[indx]:
                 return False
 
         return True
@@ -1406,7 +1707,7 @@ class FeedRow:
         if not (self._numReceptor == numReceptor):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if beamOffset is not None:
             if self._beamOffset is None:
                 return False
@@ -1419,13 +1720,13 @@ class FeedRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(beamOffset_dims[0]):
-                for j in range(beamOffset_dims[0]):
+                for j in range(beamOffset_dims[1]):
 
                     # beamOffset is an array of float, compare using == operator.
                     if not (self._beamOffset[i][j] == beamOffset[i][j]):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if focusReference is not None:
             if self._focusReference is None:
                 return False
@@ -1438,13 +1739,13 @@ class FeedRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(focusReference_dims[0]):
-                for j in range(focusReference_dims[0]):
+                for j in range(focusReference_dims[1]):
 
                     # focusReference is a Length, compare using the almostEquals method.
                     if not (
                         self._focusReference[i][j].almostEquals(
                             focusReference[i][j],
-                            this.getTable().getFocusReferenceEqTolerance(),
+                            self.getTable().getFocusReferenceEqTolerance(),
                         )
                     ):
                         return False
@@ -1459,7 +1760,7 @@ class FeedRow:
             if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if polResponse is not None:
             if self._polResponse is None:
                 return False
@@ -1472,7 +1773,7 @@ class FeedRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(polResponse_dims[0]):
-                for j in range(polResponse_dims[0]):
+                for j in range(polResponse_dims[1]):
 
                     # polResponse is an array of Complex, compare using equals method.
                     if not (self._polResponse[i][j].equals(polResponse[i][j])):
@@ -1497,7 +1798,11 @@ class FeedRow:
 
         # receiverId is a list of int, compare using the != operator.
         for indx in range(len(receiverId)):
-            if self._receiverId[i] != receiverId[i]:
+            if self._receiverId[indx] != receiverId[indx]:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+FeedRow.initFromBinMethods()

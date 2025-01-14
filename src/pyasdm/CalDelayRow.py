@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
 
@@ -79,10 +83,11 @@ class CalDelayRow:
         Create a CalDelayRow.
         When row is None, create an empty row attached to table, which must be a CalDelayTable.
         When row is given, copy those values in to the new row. The row argument must be a CalDelayRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalDelayTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalDelayTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -149,25 +154,25 @@ class CalDelayRow:
 
         if row is not None:
             if not isinstance(row, CalDelayRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalDelayRow")
 
             # copy constructor
 
             self._antennaName = row._antennaName
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._atmPhaseCorrection is None:
                 self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
             else:
                 self._atmPhaseCorrection = AtmPhaseCorrection(row._atmPhaseCorrection)
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._basebandName is None:
                 self._basebandName = BasebandName.from_int(0)
             else:
                 self._basebandName = BasebandName(row._basebandName)
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._receiverBand is None:
                 self._receiverBand = ReceiverBand.from_int(0)
             else:
@@ -509,10 +514,359 @@ class CalDelayRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._antennaName)
+
+        eos.writeString(self._atmPhaseCorrection.toString())
+
+        eos.writeString(self._basebandName.toString())
+
+        eos.writeString(self._receiverBand.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        eos.writeStr(self._refAntennaName)
+
+        eos.writeInt(self._numReceptor)
+
+        eos.writeInt(len(self._delayError))
+        for i in range(len(self._delayError)):
+
+            eos.writeFloat(self._delayError[i])
+
+        eos.writeInt(len(self._delayOffset))
+        for i in range(len(self._delayOffset)):
+
+            eos.writeFloat(self._delayOffset[i])
+
+        eos.writeInt(len(self._polarizationTypes))
+        for i in range(len(self._polarizationTypes)):
+
+            eos.writeString(self._polarizationTypes[i].toString())
+
+        eos.writeInt(len(self._reducedChiSquared))
+        for i in range(len(self._reducedChiSquared)):
+
+            eos.writeFloat(self._reducedChiSquared[i])
+
+        eos.writeInt(len(self._appliedDelay))
+        for i in range(len(self._appliedDelay)):
+
+            eos.writeFloat(self._appliedDelay[i])
+
+        eos.writeBool(self._crossDelayOffsetExists)
+        if self._crossDelayOffsetExists:
+
+            eos.writeFloat(self._crossDelayOffset)
+
+        eos.writeBool(self._crossDelayOffsetErrorExists)
+        if self._crossDelayOffsetErrorExists:
+
+            eos.writeFloat(self._crossDelayOffsetError)
+
+        eos.writeBool(self._numSidebandExists)
+        if self._numSidebandExists:
+
+            eos.writeInt(self._numSideband)
+
+        eos.writeBool(self._refFreqExists)
+        if self._refFreqExists:
+
+            Frequency.listToBin(self._refFreq, eos)
+
+        eos.writeBool(self._refFreqPhaseExists)
+        if self._refFreqPhaseExists:
+
+            Angle.listToBin(self._refFreqPhase, eos)
+
+        eos.writeBool(self._sidebandsExists)
+        if self._sidebandsExists:
+
+            eos.writeInt(len(self._sidebands))
+            for i in range(len(self._sidebands)):
+
+                eos.writeString(self._sidebands[i].toString())
+
+    @staticmethod
+    def antennaNameFromBin(row, eis):
+        """
+        Set the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaName = eis.readStr()
+
+    @staticmethod
+    def atmPhaseCorrectionFromBin(row, eis):
+        """
+        Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+
+    @staticmethod
+    def basebandNameFromBin(row, eis):
+        """
+        Set the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        row._basebandName = BasebandName.from_int(eis.readInt())
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def refAntennaNameFromBin(row, eis):
+        """
+        Set the refAntennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._refAntennaName = eis.readStr()
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def delayErrorFromBin(row, eis):
+        """
+        Set the delayError in row from the EndianInput (eis) instance.
+        """
+
+        delayErrorDim1 = eis.readInt()
+        thisList = []
+        for i in range(delayErrorDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._delayError = thisList
+
+    @staticmethod
+    def delayOffsetFromBin(row, eis):
+        """
+        Set the delayOffset in row from the EndianInput (eis) instance.
+        """
+
+        delayOffsetDim1 = eis.readInt()
+        thisList = []
+        for i in range(delayOffsetDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._delayOffset = thisList
+
+    @staticmethod
+    def polarizationTypesFromBin(row, eis):
+        """
+        Set the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypesDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationTypes = thisList
+
+    @staticmethod
+    def reducedChiSquaredFromBin(row, eis):
+        """
+        Set the reducedChiSquared in row from the EndianInput (eis) instance.
+        """
+
+        reducedChiSquaredDim1 = eis.readInt()
+        thisList = []
+        for i in range(reducedChiSquaredDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._reducedChiSquared = thisList
+
+    @staticmethod
+    def appliedDelayFromBin(row, eis):
+        """
+        Set the appliedDelay in row from the EndianInput (eis) instance.
+        """
+
+        appliedDelayDim1 = eis.readInt()
+        thisList = []
+        for i in range(appliedDelayDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._appliedDelay = thisList
+
+    @staticmethod
+    def crossDelayOffsetFromBin(row, eis):
+        """
+        Set the optional crossDelayOffset in row from the EndianInput (eis) instance.
+        """
+        row._crossDelayOffsetExists = eis.readBool()
+        if row._crossDelayOffsetExists:
+
+            row._crossDelayOffset = eis.readFloat()
+
+    @staticmethod
+    def crossDelayOffsetErrorFromBin(row, eis):
+        """
+        Set the optional crossDelayOffsetError in row from the EndianInput (eis) instance.
+        """
+        row._crossDelayOffsetErrorExists = eis.readBool()
+        if row._crossDelayOffsetErrorExists:
+
+            row._crossDelayOffsetError = eis.readFloat()
+
+    @staticmethod
+    def numSidebandFromBin(row, eis):
+        """
+        Set the optional numSideband in row from the EndianInput (eis) instance.
+        """
+        row._numSidebandExists = eis.readBool()
+        if row._numSidebandExists:
+
+            row._numSideband = eis.readInt()
+
+    @staticmethod
+    def refFreqFromBin(row, eis):
+        """
+        Set the optional refFreq in row from the EndianInput (eis) instance.
+        """
+        row._refFreqExists = eis.readBool()
+        if row._refFreqExists:
+
+            row._refFreq = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def refFreqPhaseFromBin(row, eis):
+        """
+        Set the optional refFreqPhase in row from the EndianInput (eis) instance.
+        """
+        row._refFreqPhaseExists = eis.readBool()
+        if row._refFreqPhaseExists:
+
+            row._refFreqPhase = Angle.from1DBin(eis)
+
+    @staticmethod
+    def sidebandsFromBin(row, eis):
+        """
+        Set the optional sidebands in row from the EndianInput (eis) instance.
+        """
+        row._sidebandsExists = eis.readBool()
+        if row._sidebandsExists:
+
+            sidebandsDim1 = eis.readInt()
+            thisList = []
+            for i in range(sidebandsDim1):
+                thisValue = ReceiverSideband.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._sidebands = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaName"] = CalDelayRow.antennaNameFromBin
+        _fromBinMethods["atmPhaseCorrection"] = CalDelayRow.atmPhaseCorrectionFromBin
+        _fromBinMethods["basebandName"] = CalDelayRow.basebandNameFromBin
+        _fromBinMethods["receiverBand"] = CalDelayRow.receiverBandFromBin
+        _fromBinMethods["calDataId"] = CalDelayRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalDelayRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalDelayRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalDelayRow.endValidTimeFromBin
+        _fromBinMethods["refAntennaName"] = CalDelayRow.refAntennaNameFromBin
+        _fromBinMethods["numReceptor"] = CalDelayRow.numReceptorFromBin
+        _fromBinMethods["delayError"] = CalDelayRow.delayErrorFromBin
+        _fromBinMethods["delayOffset"] = CalDelayRow.delayOffsetFromBin
+        _fromBinMethods["polarizationTypes"] = CalDelayRow.polarizationTypesFromBin
+        _fromBinMethods["reducedChiSquared"] = CalDelayRow.reducedChiSquaredFromBin
+        _fromBinMethods["appliedDelay"] = CalDelayRow.appliedDelayFromBin
+
+        _fromBinMethods["crossDelayOffset"] = CalDelayRow.crossDelayOffsetFromBin
+        _fromBinMethods["crossDelayOffsetError"] = (
+            CalDelayRow.crossDelayOffsetErrorFromBin
+        )
+        _fromBinMethods["numSideband"] = CalDelayRow.numSidebandFromBin
+        _fromBinMethods["refFreq"] = CalDelayRow.refFreqFromBin
+        _fromBinMethods["refFreqPhase"] = CalDelayRow.refFreqPhaseFromBin
+        _fromBinMethods["sidebands"] = CalDelayRow.sidebandsFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalDelayRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalDelay",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute antennaName
 
@@ -1567,3 +1921,7 @@ class CalDelayRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalDelayRow.initFromBinMethods()

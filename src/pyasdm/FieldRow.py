@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.DirectionReferenceCode import DirectionReferenceCode
 
@@ -67,10 +71,11 @@ class FieldRow:
         Create a FieldRow.
         When row is None, create an empty row attached to table, which must be a FieldTable.
         When row is given, copy those values in to the new row. The row argument must be a FieldRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.FieldTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a FieldTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -127,7 +132,7 @@ class FieldRow:
 
         if row is not None:
             if not isinstance(row, FieldRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a FieldRow")
 
             # copy constructor
 
@@ -164,11 +169,11 @@ class FieldRow:
 
             # by default set systematically directionCode's value to something not None
 
-            self.directionCode = DirectionReferenceCode.from_int(0)
+            self._directionCode = DirectionReferenceCode.from_int(0)
 
             if row._directionCodeExists:
 
-                if row._directionCode is None:
+                if row._directionCode is not None:
                     self._directionCode = row._directionCode
 
                 self._directionCodeExists = True
@@ -405,10 +410,242 @@ class FieldRow:
 
             self._sourceIdExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._fieldId.toBin(eos)
+
+        eos.writeStr(self._fieldName)
+
+        eos.writeInt(self._numPoly)
+
+        Angle.listToBin(self._delayDir, eos)
+
+        Angle.listToBin(self._phaseDir, eos)
+
+        Angle.listToBin(self._referenceDir, eos)
+
+        eos.writeBool(self._timeExists)
+        if self._timeExists:
+
+            self._time.toBin(eos)
+
+        eos.writeBool(self._codeExists)
+        if self._codeExists:
+
+            eos.writeStr(self._code)
+
+        eos.writeBool(self._directionCodeExists)
+        if self._directionCodeExists:
+
+            eos.writeString(self._directionCode.toString())
+
+        eos.writeBool(self._directionEquinoxExists)
+        if self._directionEquinoxExists:
+
+            self._directionEquinox.toBin(eos)
+
+        eos.writeBool(self._assocNatureExists)
+        if self._assocNatureExists:
+
+            eos.writeStr(self._assocNature)
+
+        eos.writeBool(self._ephemerisIdExists)
+        if self._ephemerisIdExists:
+
+            eos.writeInt(self._ephemerisId)
+
+        eos.writeBool(self._sourceIdExists)
+        if self._sourceIdExists:
+
+            eos.writeInt(self._sourceId)
+
+        eos.writeBool(self._assocFieldIdExists)
+        if self._assocFieldIdExists:
+
+            self._assocFieldId.toBin(eos)
+
+    @staticmethod
+    def fieldIdFromBin(row, eis):
+        """
+        Set the fieldId in row from the EndianInput (eis) instance.
+        """
+
+        row._fieldId = Tag.fromBin(eis)
+
+    @staticmethod
+    def fieldNameFromBin(row, eis):
+        """
+        Set the fieldName in row from the EndianInput (eis) instance.
+        """
+
+        row._fieldName = eis.readStr()
+
+    @staticmethod
+    def numPolyFromBin(row, eis):
+        """
+        Set the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        row._numPoly = eis.readInt()
+
+    @staticmethod
+    def delayDirFromBin(row, eis):
+        """
+        Set the delayDir in row from the EndianInput (eis) instance.
+        """
+
+        row._delayDir = Angle.from2DBin(eis)
+
+    @staticmethod
+    def phaseDirFromBin(row, eis):
+        """
+        Set the phaseDir in row from the EndianInput (eis) instance.
+        """
+
+        row._phaseDir = Angle.from2DBin(eis)
+
+    @staticmethod
+    def referenceDirFromBin(row, eis):
+        """
+        Set the referenceDir in row from the EndianInput (eis) instance.
+        """
+
+        row._referenceDir = Angle.from2DBin(eis)
+
+    @staticmethod
+    def timeFromBin(row, eis):
+        """
+        Set the optional time in row from the EndianInput (eis) instance.
+        """
+        row._timeExists = eis.readBool()
+        if row._timeExists:
+
+            row._time = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def codeFromBin(row, eis):
+        """
+        Set the optional code in row from the EndianInput (eis) instance.
+        """
+        row._codeExists = eis.readBool()
+        if row._codeExists:
+
+            row._code = eis.readStr()
+
+    @staticmethod
+    def directionCodeFromBin(row, eis):
+        """
+        Set the optional directionCode in row from the EndianInput (eis) instance.
+        """
+        row._directionCodeExists = eis.readBool()
+        if row._directionCodeExists:
+
+            row._directionCode = DirectionReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def directionEquinoxFromBin(row, eis):
+        """
+        Set the optional directionEquinox in row from the EndianInput (eis) instance.
+        """
+        row._directionEquinoxExists = eis.readBool()
+        if row._directionEquinoxExists:
+
+            row._directionEquinox = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def assocNatureFromBin(row, eis):
+        """
+        Set the optional assocNature in row from the EndianInput (eis) instance.
+        """
+        row._assocNatureExists = eis.readBool()
+        if row._assocNatureExists:
+
+            row._assocNature = eis.readStr()
+
+    @staticmethod
+    def ephemerisIdFromBin(row, eis):
+        """
+        Set the optional ephemerisId in row from the EndianInput (eis) instance.
+        """
+        row._ephemerisIdExists = eis.readBool()
+        if row._ephemerisIdExists:
+
+            row._ephemerisId = eis.readInt()
+
+    @staticmethod
+    def sourceIdFromBin(row, eis):
+        """
+        Set the optional sourceId in row from the EndianInput (eis) instance.
+        """
+        row._sourceIdExists = eis.readBool()
+        if row._sourceIdExists:
+
+            row._sourceId = eis.readInt()
+
+    @staticmethod
+    def assocFieldIdFromBin(row, eis):
+        """
+        Set the optional assocFieldId in row from the EndianInput (eis) instance.
+        """
+        row._assocFieldIdExists = eis.readBool()
+        if row._assocFieldIdExists:
+
+            row._assocFieldId = Tag.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["fieldId"] = FieldRow.fieldIdFromBin
+        _fromBinMethods["fieldName"] = FieldRow.fieldNameFromBin
+        _fromBinMethods["numPoly"] = FieldRow.numPolyFromBin
+        _fromBinMethods["delayDir"] = FieldRow.delayDirFromBin
+        _fromBinMethods["phaseDir"] = FieldRow.phaseDirFromBin
+        _fromBinMethods["referenceDir"] = FieldRow.referenceDirFromBin
+
+        _fromBinMethods["time"] = FieldRow.timeFromBin
+        _fromBinMethods["code"] = FieldRow.codeFromBin
+        _fromBinMethods["directionCode"] = FieldRow.directionCodeFromBin
+        _fromBinMethods["directionEquinox"] = FieldRow.directionEquinoxFromBin
+        _fromBinMethods["assocNature"] = FieldRow.assocNatureFromBin
+        _fromBinMethods["ephemerisId"] = FieldRow.ephemerisIdFromBin
+        _fromBinMethods["sourceId"] = FieldRow.sourceIdFromBin
+        _fromBinMethods["assocFieldId"] = FieldRow.assocFieldIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = FieldRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Field",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute fieldId
 
@@ -986,22 +1223,20 @@ class FieldRow:
         Get the collection of rows in the Source table having sourceId == this.sourceId
         """
 
-        if self._sourceIdExists:
-            return (
-                self._table.getContainer().getSource().getRowBySourceId(self._sourceId)
-            )
-        else:
+        if not self._sourceIdExists:
             raise InvalidAccessException()
+
+        return self._table.getContainer().getSource().getRowBySourceId(self._sourceId)
 
     def getFieldUsingAssocFieldId(self):
         """
         Returns the row in the Field table having Field.assocFieldId == assocFieldId
 
-        Raise ValueError if the optional assocFieldId does not exist for this row.
+        Raises ValueError if the optional assocFieldId does not exist for this row.
 
         """
 
-        if not _assocFieldIdExists:
+        if not self._assocFieldIdExists:
             raise ValueError("assocFieldId does not exist for this row.")
 
         return self._table.getContainer().getField().getRowByKey(self._assocFieldId)
@@ -1022,7 +1257,7 @@ class FieldRow:
         if not (self._numPoly == numPoly):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if delayDir is not None:
             if self._delayDir is None:
                 return False
@@ -1035,17 +1270,17 @@ class FieldRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(delayDir_dims[0]):
-                for j in range(delayDir_dims[0]):
+                for j in range(delayDir_dims[1]):
 
                     # delayDir is a Angle, compare using the almostEquals method.
                     if not (
                         self._delayDir[i][j].almostEquals(
-                            delayDir[i][j], this.getTable().getDelayDirEqTolerance()
+                            delayDir[i][j], self.getTable().getDelayDirEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if phaseDir is not None:
             if self._phaseDir is None:
                 return False
@@ -1058,17 +1293,17 @@ class FieldRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(phaseDir_dims[0]):
-                for j in range(phaseDir_dims[0]):
+                for j in range(phaseDir_dims[1]):
 
                     # phaseDir is a Angle, compare using the almostEquals method.
                     if not (
                         self._phaseDir[i][j].almostEquals(
-                            phaseDir[i][j], this.getTable().getPhaseDirEqTolerance()
+                            phaseDir[i][j], self.getTable().getPhaseDirEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if referenceDir is not None:
             if self._referenceDir is None:
                 return False
@@ -1081,13 +1316,13 @@ class FieldRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(referenceDir_dims[0]):
-                for j in range(referenceDir_dims[0]):
+                for j in range(referenceDir_dims[1]):
 
                     # referenceDir is a Angle, compare using the almostEquals method.
                     if not (
                         self._referenceDir[i][j].almostEquals(
                             referenceDir[i][j],
-                            this.getTable().getReferenceDirEqTolerance(),
+                            self.getTable().getReferenceDirEqTolerance(),
                         )
                     ):
                         return False
@@ -1120,7 +1355,7 @@ class FieldRow:
         if not (self._numPoly == numPoly):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if delayDir is not None:
             if self._delayDir is None:
                 return False
@@ -1133,17 +1368,17 @@ class FieldRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(delayDir_dims[0]):
-                for j in range(delayDir_dims[0]):
+                for j in range(delayDir_dims[1]):
 
                     # delayDir is a Angle, compare using the almostEquals method.
                     if not (
                         self._delayDir[i][j].almostEquals(
-                            delayDir[i][j], this.getTable().getDelayDirEqTolerance()
+                            delayDir[i][j], self.getTable().getDelayDirEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if phaseDir is not None:
             if self._phaseDir is None:
                 return False
@@ -1156,17 +1391,17 @@ class FieldRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(phaseDir_dims[0]):
-                for j in range(phaseDir_dims[0]):
+                for j in range(phaseDir_dims[1]):
 
                     # phaseDir is a Angle, compare using the almostEquals method.
                     if not (
                         self._phaseDir[i][j].almostEquals(
-                            phaseDir[i][j], this.getTable().getPhaseDirEqTolerance()
+                            phaseDir[i][j], self.getTable().getPhaseDirEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if referenceDir is not None:
             if self._referenceDir is None:
                 return False
@@ -1179,15 +1414,19 @@ class FieldRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(referenceDir_dims[0]):
-                for j in range(referenceDir_dims[0]):
+                for j in range(referenceDir_dims[1]):
 
                     # referenceDir is a Angle, compare using the almostEquals method.
                     if not (
                         self._referenceDir[i][j].almostEquals(
                             referenceDir[i][j],
-                            this.getTable().getReferenceDirEqTolerance(),
+                            self.getTable().getReferenceDirEqTolerance(),
                         )
                     ):
                         return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+FieldRow.initFromBinMethods()

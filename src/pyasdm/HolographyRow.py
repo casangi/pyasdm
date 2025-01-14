@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.HolographyChannelType import HolographyChannelType
 
@@ -67,10 +71,11 @@ class HolographyRow:
         Create a HolographyRow.
         When row is None, create an empty row attached to table, which must be a HolographyTable.
         When row is given, copy those values in to the new row. The row argument must be a HolographyRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.HolographyTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a HolographyTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -91,7 +96,7 @@ class HolographyRow:
 
         if row is not None:
             if not isinstance(row, HolographyRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a HolographyRow")
 
             # copy constructor
 
@@ -187,10 +192,110 @@ class HolographyRow:
             typeStr, HolographyChannelType, "Holography", False
         )
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._holographyId.toBin(eos)
+
+        self._distance.toBin(eos)
+
+        self._focus.toBin(eos)
+
+        eos.writeInt(self._numCorr)
+
+        eos.writeInt(len(self._type))
+        for i in range(len(self._type)):
+
+            eos.writeString(self._type[i].toString())
+
+    @staticmethod
+    def holographyIdFromBin(row, eis):
+        """
+        Set the holographyId in row from the EndianInput (eis) instance.
+        """
+
+        row._holographyId = Tag.fromBin(eis)
+
+    @staticmethod
+    def distanceFromBin(row, eis):
+        """
+        Set the distance in row from the EndianInput (eis) instance.
+        """
+
+        row._distance = Length.fromBin(eis)
+
+    @staticmethod
+    def focusFromBin(row, eis):
+        """
+        Set the focus in row from the EndianInput (eis) instance.
+        """
+
+        row._focus = Length.fromBin(eis)
+
+    @staticmethod
+    def numCorrFromBin(row, eis):
+        """
+        Set the numCorr in row from the EndianInput (eis) instance.
+        """
+
+        row._numCorr = eis.readInt()
+
+    @staticmethod
+    def typeFromBin(row, eis):
+        """
+        Set the type in row from the EndianInput (eis) instance.
+        """
+
+        typeDim1 = eis.readInt()
+        thisList = []
+        for i in range(typeDim1):
+            thisValue = HolographyChannelType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._type = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["holographyId"] = HolographyRow.holographyIdFromBin
+        _fromBinMethods["distance"] = HolographyRow.distanceFromBin
+        _fromBinMethods["focus"] = HolographyRow.focusFromBin
+        _fromBinMethods["numCorr"] = HolographyRow.numCorrFromBin
+        _fromBinMethods["type"] = HolographyRow.typeFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = HolographyRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Holography",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute holographyId
 
@@ -411,3 +516,7 @@ class HolographyRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+HolographyRow.initFromBinMethods()

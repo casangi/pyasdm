@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.WVRMethod import WVRMethod
 
@@ -67,10 +71,11 @@ class WVMCalRow:
         Create a WVMCalRow.
         When row is None, create an empty row attached to table, which must be a WVMCalTable.
         When row is given, copy those values in to the new row. The row argument must be a WVMCalRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.WVMCalTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a WVMCalTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -105,7 +110,7 @@ class WVMCalRow:
 
         if row is not None:
             if not isinstance(row, WVMCalRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a WVMCalRow")
 
             # copy constructor
 
@@ -276,10 +281,194 @@ class WVMCalRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeString(self._wvrMethod.toString())
+
+        Frequency.listToBin(self._polyFreqLimits, eos)
+
+        eos.writeInt(self._numInputAntenna)
+
+        eos.writeInt(self._numChan)
+
+        eos.writeInt(self._numPoly)
+
+        # null array case, unsure if this is possible but this should work
+        if self._pathCoeff is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            pathCoeff_dims = Parser.getListDims(self._pathCoeff)
+        # assumes it really is 3D
+        eos.writeInt(pathCoeff_dims[0])
+        eos.writeInt(pathCoeff_dims[1])
+        eos.writeInt(pathCoeff_dims[2])
+        for i in range(pathCoeff_dims[0]):
+            for j in range(pathCoeff_dims[1]):
+                for k in range(pathCoeff_dims[2]):
+                    eos.writeFloat(self._pathCoeff[i][j][k])
+
+        Temperature.listToBin(self._refTemp, eos)
+
+        Tag.listToBin(self._inputAntennaId, eos)
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def wvrMethodFromBin(row, eis):
+        """
+        Set the wvrMethod in row from the EndianInput (eis) instance.
+        """
+
+        row._wvrMethod = WVRMethod.from_int(eis.readInt())
+
+    @staticmethod
+    def polyFreqLimitsFromBin(row, eis):
+        """
+        Set the polyFreqLimits in row from the EndianInput (eis) instance.
+        """
+
+        row._polyFreqLimits = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def numInputAntennaFromBin(row, eis):
+        """
+        Set the numInputAntenna in row from the EndianInput (eis) instance.
+        """
+
+        row._numInputAntenna = eis.readInt()
+
+    @staticmethod
+    def numChanFromBin(row, eis):
+        """
+        Set the numChan in row from the EndianInput (eis) instance.
+        """
+
+        row._numChan = eis.readInt()
+
+    @staticmethod
+    def numPolyFromBin(row, eis):
+        """
+        Set the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        row._numPoly = eis.readInt()
+
+    @staticmethod
+    def pathCoeffFromBin(row, eis):
+        """
+        Set the pathCoeff in row from the EndianInput (eis) instance.
+        """
+
+        pathCoeffDim1 = eis.readInt()
+        pathCoeffDim2 = eis.readInt()
+        pathCoeffDim3 = eis.readInt()
+        thisList = []
+        for i in range(pathCoeffDim1):
+            thisList_j = []
+            for j in range(pathCoeffDim2):
+                thisList_k = []
+                for k in range(pathCoeffDim3):
+                    thisValue = eis.readFloat()
+                    thisList_k.append(thisValue)
+                thisList_j.append(thisList_k)
+            thisList.append(thisList_j)
+        row.pathCoeff = thisList
+
+    @staticmethod
+    def refTempFromBin(row, eis):
+        """
+        Set the refTemp in row from the EndianInput (eis) instance.
+        """
+
+        row._refTemp = Temperature.from2DBin(eis)
+
+    @staticmethod
+    def inputAntennaIdFromBin(row, eis):
+        """
+        Set the inputAntennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._inputAntennaId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = WVMCalRow.antennaIdFromBin
+        _fromBinMethods["spectralWindowId"] = WVMCalRow.spectralWindowIdFromBin
+        _fromBinMethods["timeInterval"] = WVMCalRow.timeIntervalFromBin
+        _fromBinMethods["wvrMethod"] = WVMCalRow.wvrMethodFromBin
+        _fromBinMethods["polyFreqLimits"] = WVMCalRow.polyFreqLimitsFromBin
+        _fromBinMethods["numInputAntenna"] = WVMCalRow.numInputAntennaFromBin
+        _fromBinMethods["numChan"] = WVMCalRow.numChanFromBin
+        _fromBinMethods["numPoly"] = WVMCalRow.numPolyFromBin
+        _fromBinMethods["pathCoeff"] = WVMCalRow.pathCoeffFromBin
+        _fromBinMethods["refTemp"] = WVMCalRow.refTempFromBin
+        _fromBinMethods["inputAntennaId"] = WVMCalRow.inputAntennaIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = WVMCalRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " WVMCal",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -657,10 +846,9 @@ class WVMCalRow:
 
     def setOneInputAntennaId(self, index, inputAntennaId):
         """
-        Set inputAntennaId[i] with the specified Tag value.
+        Set inputAntennaId[index] with the specified Tag value.
         index The index in inputAntennaId where to set the Tag value.
-        inputAntennaId The Tag value to which inputAntennaId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        inputAntennaId The Tag value to which inputAntennaId[index] is to be set.
 
         """
 
@@ -674,8 +862,8 @@ class WVMCalRow:
         id the Tag to be appended to inputAntennaId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._inputAntennaId.append(Tag(id[i]))
+            for thisValue in id:
+                self._inputAntennaId.append(Tag(thisValue))
         else:
             self._inputAntennaId.append(Tag(id))
 
@@ -779,14 +967,14 @@ class WVMCalRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(pathCoeff_dims[0]):
-                for j in range(pathCoeff_dims[0]):
-                    for k in range(pathCoeff_dims[0]):
+                for j in range(pathCoeff_dims[1]):
+                    for k in range(pathCoeff_dims[2]):
 
                         # pathCoeff is an array of float, compare using == operator.
                         if not (self._pathCoeff[i][j][k] == pathCoeff[i][j][k]):
                             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if refTemp is not None:
             if self._refTemp is None:
                 return False
@@ -799,12 +987,12 @@ class WVMCalRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(refTemp_dims[0]):
-                for j in range(refTemp_dims[0]):
+                for j in range(refTemp_dims[1]):
 
                     # refTemp is a Temperature, compare using the almostEquals method.
                     if not (
                         self._refTemp[i][j].almostEquals(
-                            refTemp[i][j], this.getTable().getRefTempEqTolerance()
+                            refTemp[i][j], self.getTable().getRefTempEqTolerance()
                         )
                     ):
                         return False
@@ -891,14 +1079,14 @@ class WVMCalRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(pathCoeff_dims[0]):
-                for j in range(pathCoeff_dims[0]):
-                    for k in range(pathCoeff_dims[0]):
+                for j in range(pathCoeff_dims[1]):
+                    for k in range(pathCoeff_dims[2]):
 
                         # pathCoeff is an array of float, compare using == operator.
                         if not (self._pathCoeff[i][j][k] == pathCoeff[i][j][k]):
                             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if refTemp is not None:
             if self._refTemp is None:
                 return False
@@ -911,12 +1099,12 @@ class WVMCalRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(refTemp_dims[0]):
-                for j in range(refTemp_dims[0]):
+                for j in range(refTemp_dims[1]):
 
                     # refTemp is a Temperature, compare using the almostEquals method.
                     if not (
                         self._refTemp[i][j].almostEquals(
-                            refTemp[i][j], this.getTable().getRefTempEqTolerance()
+                            refTemp[i][j], self.getTable().getRefTempEqTolerance()
                         )
                     ):
                         return False
@@ -932,3 +1120,7 @@ class WVMCalRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+WVMCalRow.initFromBinMethods()

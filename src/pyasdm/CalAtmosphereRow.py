@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -76,10 +80,11 @@ class CalAtmosphereRow:
         Create a CalAtmosphereRow.
         When row is None, create an empty row attached to table, which must be a CalAtmosphereTable.
         When row is given, copy those values in to the new row. The row argument must be a CalAtmosphereRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalAtmosphereTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalAtmosphereTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -176,19 +181,19 @@ class CalAtmosphereRow:
 
         if row is not None:
             if not isinstance(row, CalAtmosphereRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalAtmosphereRow")
 
             # copy constructor
 
             self._antennaName = row._antennaName
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._receiverBand is None:
                 self._receiverBand = ReceiverBand.from_int(0)
             else:
                 self._receiverBand = ReceiverBand(row._receiverBand)
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._basebandName is None:
                 self._basebandName = BasebandName.from_int(0)
             else:
@@ -733,10 +738,652 @@ class CalAtmosphereRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._antennaName)
+
+        eos.writeString(self._receiverBand.toString())
+
+        eos.writeString(self._basebandName.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        eos.writeInt(self._numFreq)
+
+        eos.writeInt(self._numLoad)
+
+        eos.writeInt(self._numReceptor)
+
+        # null array case, unsure if this is possible but this should work
+        if self._forwardEffSpectrum is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            forwardEffSpectrum_dims = Parser.getListDims(self._forwardEffSpectrum)
+        # assumes it really is 2D
+        eos.writeInt(forwardEffSpectrum_dims[0])
+        eos.writeInt(forwardEffSpectrum_dims[1])
+        for i in range(forwardEffSpectrum_dims[0]):
+            for j in range(forwardEffSpectrum_dims[1]):
+                eos.writeFloat(self._forwardEffSpectrum[i][j])
+
+        Frequency.listToBin(self._frequencyRange, eos)
+
+        self._groundPressure.toBin(eos)
+
+        self._groundRelHumidity.toBin(eos)
+
+        Frequency.listToBin(self._frequencySpectrum, eos)
+
+        self._groundTemperature.toBin(eos)
+
+        eos.writeInt(len(self._polarizationTypes))
+        for i in range(len(self._polarizationTypes)):
+
+            eos.writeString(self._polarizationTypes[i].toString())
+
+        # null array case, unsure if this is possible but this should work
+        if self._powerSkySpectrum is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            powerSkySpectrum_dims = Parser.getListDims(self._powerSkySpectrum)
+        # assumes it really is 2D
+        eos.writeInt(powerSkySpectrum_dims[0])
+        eos.writeInt(powerSkySpectrum_dims[1])
+        for i in range(powerSkySpectrum_dims[0]):
+            for j in range(powerSkySpectrum_dims[1]):
+                eos.writeFloat(self._powerSkySpectrum[i][j])
+
+        # null array case, unsure if this is possible but this should work
+        if self._powerLoadSpectrum is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            powerLoadSpectrum_dims = Parser.getListDims(self._powerLoadSpectrum)
+        # assumes it really is 3D
+        eos.writeInt(powerLoadSpectrum_dims[0])
+        eos.writeInt(powerLoadSpectrum_dims[1])
+        eos.writeInt(powerLoadSpectrum_dims[2])
+        for i in range(powerLoadSpectrum_dims[0]):
+            for j in range(powerLoadSpectrum_dims[1]):
+                for k in range(powerLoadSpectrum_dims[2]):
+                    eos.writeFloat(self._powerLoadSpectrum[i][j][k])
+
+        eos.writeString(self._syscalType.toString())
+
+        Temperature.listToBin(self._tAtmSpectrum, eos)
+
+        Temperature.listToBin(self._tRecSpectrum, eos)
+
+        Temperature.listToBin(self._tSysSpectrum, eos)
+
+        # null array case, unsure if this is possible but this should work
+        if self._tauSpectrum is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            tauSpectrum_dims = Parser.getListDims(self._tauSpectrum)
+        # assumes it really is 2D
+        eos.writeInt(tauSpectrum_dims[0])
+        eos.writeInt(tauSpectrum_dims[1])
+        for i in range(tauSpectrum_dims[0]):
+            for j in range(tauSpectrum_dims[1]):
+                eos.writeFloat(self._tauSpectrum[i][j])
+
+        Temperature.listToBin(self._tAtm, eos)
+
+        Temperature.listToBin(self._tRec, eos)
+
+        Temperature.listToBin(self._tSys, eos)
+
+        eos.writeInt(len(self._tau))
+        for i in range(len(self._tau)):
+
+            eos.writeFloat(self._tau[i])
+
+        Length.listToBin(self._water, eos)
+
+        Length.listToBin(self._waterError, eos)
+
+        eos.writeBool(self._alphaSpectrumExists)
+        if self._alphaSpectrumExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._alphaSpectrum is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                alphaSpectrum_dims = Parser.getListDims(self._alphaSpectrum)
+            # assumes it really is 2D
+            eos.writeInt(alphaSpectrum_dims[0])
+            eos.writeInt(alphaSpectrum_dims[1])
+            for i in range(alphaSpectrum_dims[0]):
+                for j in range(alphaSpectrum_dims[1]):
+                    eos.writeFloat(self._alphaSpectrum[i][j])
+
+        eos.writeBool(self._forwardEfficiencyExists)
+        if self._forwardEfficiencyExists:
+
+            eos.writeInt(len(self._forwardEfficiency))
+            for i in range(len(self._forwardEfficiency)):
+
+                eos.writeFloat(self._forwardEfficiency[i])
+
+        eos.writeBool(self._forwardEfficiencyErrorExists)
+        if self._forwardEfficiencyErrorExists:
+
+            eos.writeInt(len(self._forwardEfficiencyError))
+            for i in range(len(self._forwardEfficiencyError)):
+
+                eos.writeFloat(self._forwardEfficiencyError[i])
+
+        eos.writeBool(self._sbGainExists)
+        if self._sbGainExists:
+
+            eos.writeInt(len(self._sbGain))
+            for i in range(len(self._sbGain)):
+
+                eos.writeFloat(self._sbGain[i])
+
+        eos.writeBool(self._sbGainErrorExists)
+        if self._sbGainErrorExists:
+
+            eos.writeInt(len(self._sbGainError))
+            for i in range(len(self._sbGainError)):
+
+                eos.writeFloat(self._sbGainError[i])
+
+        eos.writeBool(self._sbGainSpectrumExists)
+        if self._sbGainSpectrumExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._sbGainSpectrum is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                sbGainSpectrum_dims = Parser.getListDims(self._sbGainSpectrum)
+            # assumes it really is 2D
+            eos.writeInt(sbGainSpectrum_dims[0])
+            eos.writeInt(sbGainSpectrum_dims[1])
+            for i in range(sbGainSpectrum_dims[0]):
+                for j in range(sbGainSpectrum_dims[1]):
+                    eos.writeFloat(self._sbGainSpectrum[i][j])
+
+    @staticmethod
+    def antennaNameFromBin(row, eis):
+        """
+        Set the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaName = eis.readStr()
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def basebandNameFromBin(row, eis):
+        """
+        Set the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        row._basebandName = BasebandName.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def numFreqFromBin(row, eis):
+        """
+        Set the numFreq in row from the EndianInput (eis) instance.
+        """
+
+        row._numFreq = eis.readInt()
+
+    @staticmethod
+    def numLoadFromBin(row, eis):
+        """
+        Set the numLoad in row from the EndianInput (eis) instance.
+        """
+
+        row._numLoad = eis.readInt()
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def forwardEffSpectrumFromBin(row, eis):
+        """
+        Set the forwardEffSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        forwardEffSpectrumDim1 = eis.readInt()
+        forwardEffSpectrumDim2 = eis.readInt()
+        thisList = []
+        for i in range(forwardEffSpectrumDim1):
+            thisList_j = []
+            for j in range(forwardEffSpectrumDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.forwardEffSpectrum = thisList
+
+    @staticmethod
+    def frequencyRangeFromBin(row, eis):
+        """
+        Set the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyRange = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def groundPressureFromBin(row, eis):
+        """
+        Set the groundPressure in row from the EndianInput (eis) instance.
+        """
+
+        row._groundPressure = Pressure.fromBin(eis)
+
+    @staticmethod
+    def groundRelHumidityFromBin(row, eis):
+        """
+        Set the groundRelHumidity in row from the EndianInput (eis) instance.
+        """
+
+        row._groundRelHumidity = Humidity.fromBin(eis)
+
+    @staticmethod
+    def frequencySpectrumFromBin(row, eis):
+        """
+        Set the frequencySpectrum in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencySpectrum = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def groundTemperatureFromBin(row, eis):
+        """
+        Set the groundTemperature in row from the EndianInput (eis) instance.
+        """
+
+        row._groundTemperature = Temperature.fromBin(eis)
+
+    @staticmethod
+    def polarizationTypesFromBin(row, eis):
+        """
+        Set the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypesDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationTypes = thisList
+
+    @staticmethod
+    def powerSkySpectrumFromBin(row, eis):
+        """
+        Set the powerSkySpectrum in row from the EndianInput (eis) instance.
+        """
+
+        powerSkySpectrumDim1 = eis.readInt()
+        powerSkySpectrumDim2 = eis.readInt()
+        thisList = []
+        for i in range(powerSkySpectrumDim1):
+            thisList_j = []
+            for j in range(powerSkySpectrumDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.powerSkySpectrum = thisList
+
+    @staticmethod
+    def powerLoadSpectrumFromBin(row, eis):
+        """
+        Set the powerLoadSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        powerLoadSpectrumDim1 = eis.readInt()
+        powerLoadSpectrumDim2 = eis.readInt()
+        powerLoadSpectrumDim3 = eis.readInt()
+        thisList = []
+        for i in range(powerLoadSpectrumDim1):
+            thisList_j = []
+            for j in range(powerLoadSpectrumDim2):
+                thisList_k = []
+                for k in range(powerLoadSpectrumDim3):
+                    thisValue = eis.readFloat()
+                    thisList_k.append(thisValue)
+                thisList_j.append(thisList_k)
+            thisList.append(thisList_j)
+        row.powerLoadSpectrum = thisList
+
+    @staticmethod
+    def syscalTypeFromBin(row, eis):
+        """
+        Set the syscalType in row from the EndianInput (eis) instance.
+        """
+
+        row._syscalType = SyscalMethod.from_int(eis.readInt())
+
+    @staticmethod
+    def tAtmSpectrumFromBin(row, eis):
+        """
+        Set the tAtmSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        row._tAtmSpectrum = Temperature.from2DBin(eis)
+
+    @staticmethod
+    def tRecSpectrumFromBin(row, eis):
+        """
+        Set the tRecSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        row._tRecSpectrum = Temperature.from2DBin(eis)
+
+    @staticmethod
+    def tSysSpectrumFromBin(row, eis):
+        """
+        Set the tSysSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        row._tSysSpectrum = Temperature.from2DBin(eis)
+
+    @staticmethod
+    def tauSpectrumFromBin(row, eis):
+        """
+        Set the tauSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        tauSpectrumDim1 = eis.readInt()
+        tauSpectrumDim2 = eis.readInt()
+        thisList = []
+        for i in range(tauSpectrumDim1):
+            thisList_j = []
+            for j in range(tauSpectrumDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.tauSpectrum = thisList
+
+    @staticmethod
+    def tAtmFromBin(row, eis):
+        """
+        Set the tAtm in row from the EndianInput (eis) instance.
+        """
+
+        row._tAtm = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def tRecFromBin(row, eis):
+        """
+        Set the tRec in row from the EndianInput (eis) instance.
+        """
+
+        row._tRec = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def tSysFromBin(row, eis):
+        """
+        Set the tSys in row from the EndianInput (eis) instance.
+        """
+
+        row._tSys = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def tauFromBin(row, eis):
+        """
+        Set the tau in row from the EndianInput (eis) instance.
+        """
+
+        tauDim1 = eis.readInt()
+        thisList = []
+        for i in range(tauDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._tau = thisList
+
+    @staticmethod
+    def waterFromBin(row, eis):
+        """
+        Set the water in row from the EndianInput (eis) instance.
+        """
+
+        row._water = Length.from1DBin(eis)
+
+    @staticmethod
+    def waterErrorFromBin(row, eis):
+        """
+        Set the waterError in row from the EndianInput (eis) instance.
+        """
+
+        row._waterError = Length.from1DBin(eis)
+
+    @staticmethod
+    def alphaSpectrumFromBin(row, eis):
+        """
+        Set the optional alphaSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._alphaSpectrumExists = eis.readBool()
+        if row._alphaSpectrumExists:
+
+            alphaSpectrumDim1 = eis.readInt()
+            alphaSpectrumDim2 = eis.readInt()
+            thisList = []
+            for i in range(alphaSpectrumDim1):
+                thisList_j = []
+                for j in range(alphaSpectrumDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.alphaSpectrum = thisList
+
+    @staticmethod
+    def forwardEfficiencyFromBin(row, eis):
+        """
+        Set the optional forwardEfficiency in row from the EndianInput (eis) instance.
+        """
+        row._forwardEfficiencyExists = eis.readBool()
+        if row._forwardEfficiencyExists:
+
+            forwardEfficiencyDim1 = eis.readInt()
+            thisList = []
+            for i in range(forwardEfficiencyDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._forwardEfficiency = thisList
+
+    @staticmethod
+    def forwardEfficiencyErrorFromBin(row, eis):
+        """
+        Set the optional forwardEfficiencyError in row from the EndianInput (eis) instance.
+        """
+        row._forwardEfficiencyErrorExists = eis.readBool()
+        if row._forwardEfficiencyErrorExists:
+
+            forwardEfficiencyErrorDim1 = eis.readInt()
+            thisList = []
+            for i in range(forwardEfficiencyErrorDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._forwardEfficiencyError = thisList
+
+    @staticmethod
+    def sbGainFromBin(row, eis):
+        """
+        Set the optional sbGain in row from the EndianInput (eis) instance.
+        """
+        row._sbGainExists = eis.readBool()
+        if row._sbGainExists:
+
+            sbGainDim1 = eis.readInt()
+            thisList = []
+            for i in range(sbGainDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._sbGain = thisList
+
+    @staticmethod
+    def sbGainErrorFromBin(row, eis):
+        """
+        Set the optional sbGainError in row from the EndianInput (eis) instance.
+        """
+        row._sbGainErrorExists = eis.readBool()
+        if row._sbGainErrorExists:
+
+            sbGainErrorDim1 = eis.readInt()
+            thisList = []
+            for i in range(sbGainErrorDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._sbGainError = thisList
+
+    @staticmethod
+    def sbGainSpectrumFromBin(row, eis):
+        """
+        Set the optional sbGainSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._sbGainSpectrumExists = eis.readBool()
+        if row._sbGainSpectrumExists:
+
+            sbGainSpectrumDim1 = eis.readInt()
+            sbGainSpectrumDim2 = eis.readInt()
+            thisList = []
+            for i in range(sbGainSpectrumDim1):
+                thisList_j = []
+                for j in range(sbGainSpectrumDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.sbGainSpectrum = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaName"] = CalAtmosphereRow.antennaNameFromBin
+        _fromBinMethods["receiverBand"] = CalAtmosphereRow.receiverBandFromBin
+        _fromBinMethods["basebandName"] = CalAtmosphereRow.basebandNameFromBin
+        _fromBinMethods["calDataId"] = CalAtmosphereRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalAtmosphereRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalAtmosphereRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalAtmosphereRow.endValidTimeFromBin
+        _fromBinMethods["numFreq"] = CalAtmosphereRow.numFreqFromBin
+        _fromBinMethods["numLoad"] = CalAtmosphereRow.numLoadFromBin
+        _fromBinMethods["numReceptor"] = CalAtmosphereRow.numReceptorFromBin
+        _fromBinMethods["forwardEffSpectrum"] = (
+            CalAtmosphereRow.forwardEffSpectrumFromBin
+        )
+        _fromBinMethods["frequencyRange"] = CalAtmosphereRow.frequencyRangeFromBin
+        _fromBinMethods["groundPressure"] = CalAtmosphereRow.groundPressureFromBin
+        _fromBinMethods["groundRelHumidity"] = CalAtmosphereRow.groundRelHumidityFromBin
+        _fromBinMethods["frequencySpectrum"] = CalAtmosphereRow.frequencySpectrumFromBin
+        _fromBinMethods["groundTemperature"] = CalAtmosphereRow.groundTemperatureFromBin
+        _fromBinMethods["polarizationTypes"] = CalAtmosphereRow.polarizationTypesFromBin
+        _fromBinMethods["powerSkySpectrum"] = CalAtmosphereRow.powerSkySpectrumFromBin
+        _fromBinMethods["powerLoadSpectrum"] = CalAtmosphereRow.powerLoadSpectrumFromBin
+        _fromBinMethods["syscalType"] = CalAtmosphereRow.syscalTypeFromBin
+        _fromBinMethods["tAtmSpectrum"] = CalAtmosphereRow.tAtmSpectrumFromBin
+        _fromBinMethods["tRecSpectrum"] = CalAtmosphereRow.tRecSpectrumFromBin
+        _fromBinMethods["tSysSpectrum"] = CalAtmosphereRow.tSysSpectrumFromBin
+        _fromBinMethods["tauSpectrum"] = CalAtmosphereRow.tauSpectrumFromBin
+        _fromBinMethods["tAtm"] = CalAtmosphereRow.tAtmFromBin
+        _fromBinMethods["tRec"] = CalAtmosphereRow.tRecFromBin
+        _fromBinMethods["tSys"] = CalAtmosphereRow.tSysFromBin
+        _fromBinMethods["tau"] = CalAtmosphereRow.tauFromBin
+        _fromBinMethods["water"] = CalAtmosphereRow.waterFromBin
+        _fromBinMethods["waterError"] = CalAtmosphereRow.waterErrorFromBin
+
+        _fromBinMethods["alphaSpectrum"] = CalAtmosphereRow.alphaSpectrumFromBin
+        _fromBinMethods["forwardEfficiency"] = CalAtmosphereRow.forwardEfficiencyFromBin
+        _fromBinMethods["forwardEfficiencyError"] = (
+            CalAtmosphereRow.forwardEfficiencyErrorFromBin
+        )
+        _fromBinMethods["sbGain"] = CalAtmosphereRow.sbGainFromBin
+        _fromBinMethods["sbGainError"] = CalAtmosphereRow.sbGainErrorFromBin
+        _fromBinMethods["sbGainSpectrum"] = CalAtmosphereRow.sbGainSpectrumFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalAtmosphereRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalAtmosphere",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute receiverBand
 
@@ -2276,7 +2923,7 @@ class CalAtmosphereRow:
         if not (self._numReceptor == numReceptor):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if forwardEffSpectrum is not None:
             if self._forwardEffSpectrum is None:
                 return False
@@ -2289,7 +2936,7 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(forwardEffSpectrum_dims[0]):
-                for j in range(forwardEffSpectrum_dims[0]):
+                for j in range(forwardEffSpectrum_dims[1]):
 
                     # forwardEffSpectrum is an array of float, compare using == operator.
                     if not (self._forwardEffSpectrum[i][j] == forwardEffSpectrum[i][j]):
@@ -2348,7 +2995,7 @@ class CalAtmosphereRow:
             if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if powerSkySpectrum is not None:
             if self._powerSkySpectrum is None:
                 return False
@@ -2361,7 +3008,7 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(powerSkySpectrum_dims[0]):
-                for j in range(powerSkySpectrum_dims[0]):
+                for j in range(powerSkySpectrum_dims[1]):
 
                     # powerSkySpectrum is an array of float, compare using == operator.
                     if not (self._powerSkySpectrum[i][j] == powerSkySpectrum[i][j]):
@@ -2380,8 +3027,8 @@ class CalAtmosphereRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(powerLoadSpectrum_dims[0]):
-                for j in range(powerLoadSpectrum_dims[0]):
-                    for k in range(powerLoadSpectrum_dims[0]):
+                for j in range(powerLoadSpectrum_dims[1]):
+                    for k in range(powerLoadSpectrum_dims[2]):
 
                         # powerLoadSpectrum is an array of float, compare using == operator.
                         if not (
@@ -2394,7 +3041,7 @@ class CalAtmosphereRow:
         if not (self._syscalType.getValue() == syscalType.getValue()):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if tAtmSpectrum is not None:
             if self._tAtmSpectrum is None:
                 return False
@@ -2407,18 +3054,18 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(tAtmSpectrum_dims[0]):
-                for j in range(tAtmSpectrum_dims[0]):
+                for j in range(tAtmSpectrum_dims[1]):
 
                     # tAtmSpectrum is a Temperature, compare using the almostEquals method.
                     if not (
                         self._tAtmSpectrum[i][j].almostEquals(
                             tAtmSpectrum[i][j],
-                            this.getTable().getTAtmSpectrumEqTolerance(),
+                            self.getTable().getTAtmSpectrumEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if tRecSpectrum is not None:
             if self._tRecSpectrum is None:
                 return False
@@ -2431,18 +3078,18 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(tRecSpectrum_dims[0]):
-                for j in range(tRecSpectrum_dims[0]):
+                for j in range(tRecSpectrum_dims[1]):
 
                     # tRecSpectrum is a Temperature, compare using the almostEquals method.
                     if not (
                         self._tRecSpectrum[i][j].almostEquals(
                             tRecSpectrum[i][j],
-                            this.getTable().getTRecSpectrumEqTolerance(),
+                            self.getTable().getTRecSpectrumEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if tSysSpectrum is not None:
             if self._tSysSpectrum is None:
                 return False
@@ -2455,18 +3102,18 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(tSysSpectrum_dims[0]):
-                for j in range(tSysSpectrum_dims[0]):
+                for j in range(tSysSpectrum_dims[1]):
 
                     # tSysSpectrum is a Temperature, compare using the almostEquals method.
                     if not (
                         self._tSysSpectrum[i][j].almostEquals(
                             tSysSpectrum[i][j],
-                            this.getTable().getTSysSpectrumEqTolerance(),
+                            self.getTable().getTSysSpectrumEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if tauSpectrum is not None:
             if self._tauSpectrum is None:
                 return False
@@ -2479,7 +3126,7 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(tauSpectrum_dims[0]):
-                for j in range(tauSpectrum_dims[0]):
+                for j in range(tauSpectrum_dims[1]):
 
                     # tauSpectrum is an array of float, compare using == operator.
                     if not (self._tauSpectrum[i][j] == tauSpectrum[i][j]):
@@ -2640,7 +3287,7 @@ class CalAtmosphereRow:
         if not (self._numReceptor == numReceptor):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if forwardEffSpectrum is not None:
             if self._forwardEffSpectrum is None:
                 return False
@@ -2653,7 +3300,7 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(forwardEffSpectrum_dims[0]):
-                for j in range(forwardEffSpectrum_dims[0]):
+                for j in range(forwardEffSpectrum_dims[1]):
 
                     # forwardEffSpectrum is an array of float, compare using == operator.
                     if not (self._forwardEffSpectrum[i][j] == forwardEffSpectrum[i][j]):
@@ -2712,7 +3359,7 @@ class CalAtmosphereRow:
             if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if powerSkySpectrum is not None:
             if self._powerSkySpectrum is None:
                 return False
@@ -2725,7 +3372,7 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(powerSkySpectrum_dims[0]):
-                for j in range(powerSkySpectrum_dims[0]):
+                for j in range(powerSkySpectrum_dims[1]):
 
                     # powerSkySpectrum is an array of float, compare using == operator.
                     if not (self._powerSkySpectrum[i][j] == powerSkySpectrum[i][j]):
@@ -2744,8 +3391,8 @@ class CalAtmosphereRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(powerLoadSpectrum_dims[0]):
-                for j in range(powerLoadSpectrum_dims[0]):
-                    for k in range(powerLoadSpectrum_dims[0]):
+                for j in range(powerLoadSpectrum_dims[1]):
+                    for k in range(powerLoadSpectrum_dims[2]):
 
                         # powerLoadSpectrum is an array of float, compare using == operator.
                         if not (
@@ -2758,7 +3405,7 @@ class CalAtmosphereRow:
         if not (self._syscalType.getValue() == syscalType.getValue()):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if tAtmSpectrum is not None:
             if self._tAtmSpectrum is None:
                 return False
@@ -2771,18 +3418,18 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(tAtmSpectrum_dims[0]):
-                for j in range(tAtmSpectrum_dims[0]):
+                for j in range(tAtmSpectrum_dims[1]):
 
                     # tAtmSpectrum is a Temperature, compare using the almostEquals method.
                     if not (
                         self._tAtmSpectrum[i][j].almostEquals(
                             tAtmSpectrum[i][j],
-                            this.getTable().getTAtmSpectrumEqTolerance(),
+                            self.getTable().getTAtmSpectrumEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if tRecSpectrum is not None:
             if self._tRecSpectrum is None:
                 return False
@@ -2795,18 +3442,18 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(tRecSpectrum_dims[0]):
-                for j in range(tRecSpectrum_dims[0]):
+                for j in range(tRecSpectrum_dims[1]):
 
                     # tRecSpectrum is a Temperature, compare using the almostEquals method.
                     if not (
                         self._tRecSpectrum[i][j].almostEquals(
                             tRecSpectrum[i][j],
-                            this.getTable().getTRecSpectrumEqTolerance(),
+                            self.getTable().getTRecSpectrumEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if tSysSpectrum is not None:
             if self._tSysSpectrum is None:
                 return False
@@ -2819,18 +3466,18 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(tSysSpectrum_dims[0]):
-                for j in range(tSysSpectrum_dims[0]):
+                for j in range(tSysSpectrum_dims[1]):
 
                     # tSysSpectrum is a Temperature, compare using the almostEquals method.
                     if not (
                         self._tSysSpectrum[i][j].almostEquals(
                             tSysSpectrum[i][j],
-                            this.getTable().getTSysSpectrumEqTolerance(),
+                            self.getTable().getTSysSpectrumEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if tauSpectrum is not None:
             if self._tauSpectrum is None:
                 return False
@@ -2843,7 +3490,7 @@ class CalAtmosphereRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(tauSpectrum_dims[0]):
-                for j in range(tauSpectrum_dims[0]):
+                for j in range(tauSpectrum_dims[1]):
 
                     # tauSpectrum is an array of float, compare using == operator.
                     if not (self._tauSpectrum[i][j] == tauSpectrum[i][j]):
@@ -2920,3 +3567,7 @@ class CalAtmosphereRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalAtmosphereRow.initFromBinMethods()

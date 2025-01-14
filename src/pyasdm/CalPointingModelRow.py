@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -76,10 +80,11 @@ class CalPointingModelRow:
         Create a CalPointingModelRow.
         When row is None, create an empty row attached to table, which must be a CalPointingModelTable.
         When row is given, copy those values in to the new row. The row argument must be a CalPointingModelRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalPointingModelTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalPointingModelTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -136,13 +141,13 @@ class CalPointingModelRow:
 
         if row is not None:
             if not isinstance(row, CalPointingModelRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalPointingModelRow")
 
             # copy constructor
 
             self._antennaName = row._antennaName
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._receiverBand is None:
                 self._receiverBand = ReceiverBand.from_int(0)
             else:
@@ -431,10 +436,324 @@ class CalPointingModelRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._antennaName)
+
+        eos.writeString(self._receiverBand.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        eos.writeString(self._antennaMake.toString())
+
+        eos.writeString(self._pointingModelMode.toString())
+
+        eos.writeString(self._polarizationType.toString())
+
+        eos.writeInt(self._numCoeff)
+
+        eos.writeInt(len(self._coeffName))
+        for i in range(len(self._coeffName)):
+
+            eos.writeStr(self._coeffName[i])
+
+        eos.writeInt(len(self._coeffVal))
+        for i in range(len(self._coeffVal)):
+
+            eos.writeFloat(self._coeffVal[i])
+
+        eos.writeInt(len(self._coeffError))
+        for i in range(len(self._coeffError)):
+
+            eos.writeFloat(self._coeffError[i])
+
+        eos.writeInt(len(self._coeffFixed))
+        for i in range(len(self._coeffFixed)):
+
+            eos.writeBool(self._coeffFixed[i])
+
+        self._azimuthRMS.toBin(eos)
+
+        self._elevationRms.toBin(eos)
+
+        self._skyRMS.toBin(eos)
+
+        eos.writeFloat(self._reducedChiSquared)
+
+        eos.writeBool(self._numObsExists)
+        if self._numObsExists:
+
+            eos.writeInt(self._numObs)
+
+        eos.writeBool(self._coeffFormulaExists)
+        if self._coeffFormulaExists:
+
+            eos.writeInt(len(self._coeffFormula))
+            for i in range(len(self._coeffFormula)):
+
+                eos.writeStr(self._coeffFormula[i])
+
+    @staticmethod
+    def antennaNameFromBin(row, eis):
+        """
+        Set the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaName = eis.readStr()
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def antennaMakeFromBin(row, eis):
+        """
+        Set the antennaMake in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaMake = AntennaMake.from_int(eis.readInt())
+
+    @staticmethod
+    def pointingModelModeFromBin(row, eis):
+        """
+        Set the pointingModelMode in row from the EndianInput (eis) instance.
+        """
+
+        row._pointingModelMode = PointingModelMode.from_int(eis.readInt())
+
+    @staticmethod
+    def polarizationTypeFromBin(row, eis):
+        """
+        Set the polarizationType in row from the EndianInput (eis) instance.
+        """
+
+        row._polarizationType = PolarizationType.from_int(eis.readInt())
+
+    @staticmethod
+    def numCoeffFromBin(row, eis):
+        """
+        Set the numCoeff in row from the EndianInput (eis) instance.
+        """
+
+        row._numCoeff = eis.readInt()
+
+    @staticmethod
+    def coeffNameFromBin(row, eis):
+        """
+        Set the coeffName in row from the EndianInput (eis) instance.
+        """
+
+        coeffNameDim1 = eis.readInt()
+        thisList = []
+        for i in range(coeffNameDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._coeffName = thisList
+
+    @staticmethod
+    def coeffValFromBin(row, eis):
+        """
+        Set the coeffVal in row from the EndianInput (eis) instance.
+        """
+
+        coeffValDim1 = eis.readInt()
+        thisList = []
+        for i in range(coeffValDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._coeffVal = thisList
+
+    @staticmethod
+    def coeffErrorFromBin(row, eis):
+        """
+        Set the coeffError in row from the EndianInput (eis) instance.
+        """
+
+        coeffErrorDim1 = eis.readInt()
+        thisList = []
+        for i in range(coeffErrorDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._coeffError = thisList
+
+    @staticmethod
+    def coeffFixedFromBin(row, eis):
+        """
+        Set the coeffFixed in row from the EndianInput (eis) instance.
+        """
+
+        coeffFixedDim1 = eis.readInt()
+        thisList = []
+        for i in range(coeffFixedDim1):
+            thisValue = eis.readBool()
+            thisList.append(thisValue)
+        row._coeffFixed = thisList
+
+    @staticmethod
+    def azimuthRMSFromBin(row, eis):
+        """
+        Set the azimuthRMS in row from the EndianInput (eis) instance.
+        """
+
+        row._azimuthRMS = Angle.fromBin(eis)
+
+    @staticmethod
+    def elevationRmsFromBin(row, eis):
+        """
+        Set the elevationRms in row from the EndianInput (eis) instance.
+        """
+
+        row._elevationRms = Angle.fromBin(eis)
+
+    @staticmethod
+    def skyRMSFromBin(row, eis):
+        """
+        Set the skyRMS in row from the EndianInput (eis) instance.
+        """
+
+        row._skyRMS = Angle.fromBin(eis)
+
+    @staticmethod
+    def reducedChiSquaredFromBin(row, eis):
+        """
+        Set the reducedChiSquared in row from the EndianInput (eis) instance.
+        """
+
+        row._reducedChiSquared = eis.readFloat()
+
+    @staticmethod
+    def numObsFromBin(row, eis):
+        """
+        Set the optional numObs in row from the EndianInput (eis) instance.
+        """
+        row._numObsExists = eis.readBool()
+        if row._numObsExists:
+
+            row._numObs = eis.readInt()
+
+    @staticmethod
+    def coeffFormulaFromBin(row, eis):
+        """
+        Set the optional coeffFormula in row from the EndianInput (eis) instance.
+        """
+        row._coeffFormulaExists = eis.readBool()
+        if row._coeffFormulaExists:
+
+            coeffFormulaDim1 = eis.readInt()
+            thisList = []
+            for i in range(coeffFormulaDim1):
+                thisValue = eis.readStr()
+                thisList.append(thisValue)
+            row._coeffFormula = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaName"] = CalPointingModelRow.antennaNameFromBin
+        _fromBinMethods["receiverBand"] = CalPointingModelRow.receiverBandFromBin
+        _fromBinMethods["calDataId"] = CalPointingModelRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalPointingModelRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalPointingModelRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalPointingModelRow.endValidTimeFromBin
+        _fromBinMethods["antennaMake"] = CalPointingModelRow.antennaMakeFromBin
+        _fromBinMethods["pointingModelMode"] = (
+            CalPointingModelRow.pointingModelModeFromBin
+        )
+        _fromBinMethods["polarizationType"] = (
+            CalPointingModelRow.polarizationTypeFromBin
+        )
+        _fromBinMethods["numCoeff"] = CalPointingModelRow.numCoeffFromBin
+        _fromBinMethods["coeffName"] = CalPointingModelRow.coeffNameFromBin
+        _fromBinMethods["coeffVal"] = CalPointingModelRow.coeffValFromBin
+        _fromBinMethods["coeffError"] = CalPointingModelRow.coeffErrorFromBin
+        _fromBinMethods["coeffFixed"] = CalPointingModelRow.coeffFixedFromBin
+        _fromBinMethods["azimuthRMS"] = CalPointingModelRow.azimuthRMSFromBin
+        _fromBinMethods["elevationRms"] = CalPointingModelRow.elevationRmsFromBin
+        _fromBinMethods["skyRMS"] = CalPointingModelRow.skyRMSFromBin
+        _fromBinMethods["reducedChiSquared"] = (
+            CalPointingModelRow.reducedChiSquaredFromBin
+        )
+
+        _fromBinMethods["numObs"] = CalPointingModelRow.numObsFromBin
+        _fromBinMethods["coeffFormula"] = CalPointingModelRow.coeffFormulaFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalPointingModelRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalPointingModel",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute antennaName
 
@@ -1346,3 +1665,7 @@ class CalPointingModelRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalPointingModelRow.initFromBinMethods()

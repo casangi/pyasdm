@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.AntennaMake import AntennaMake
 
@@ -73,10 +77,11 @@ class CalHolographyRow:
         Create a CalHolographyRow.
         When row is None, create an empty row attached to table, which must be a CalHolographyTable.
         When row is given, copy those values in to the new row. The row argument must be a CalHolographyRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalHolographyTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalHolographyTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -159,7 +164,7 @@ class CalHolographyRow:
 
         if row is not None:
             if not isinstance(row, CalHolographyRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalHolographyRow")
 
             # copy constructor
 
@@ -585,10 +590,403 @@ class CalHolographyRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._antennaName)
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        eos.writeString(self._antennaMake.toString())
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        self._ambientTemperature.toBin(eos)
+
+        Length.listToBin(self._focusPosition, eos)
+
+        Frequency.listToBin(self._frequencyRange, eos)
+
+        eos.writeFloat(self._illuminationTaper)
+
+        eos.writeInt(self._numReceptor)
+
+        eos.writeInt(len(self._polarizationTypes))
+        for i in range(len(self._polarizationTypes)):
+
+            eos.writeString(self._polarizationTypes[i].toString())
+
+        eos.writeInt(self._numPanelModes)
+
+        eos.writeString(self._receiverBand.toString())
+
+        self._beamMapUID.toBin(eos)
+
+        self._rawRMS.toBin(eos)
+
+        self._weightedRMS.toBin(eos)
+
+        self._surfaceMapUID.toBin(eos)
+
+        Angle.listToBin(self._direction, eos)
+
+        eos.writeBool(self._numScrewExists)
+        if self._numScrewExists:
+
+            eos.writeInt(self._numScrew)
+
+        eos.writeBool(self._screwNameExists)
+        if self._screwNameExists:
+
+            eos.writeInt(len(self._screwName))
+            for i in range(len(self._screwName)):
+
+                eos.writeStr(self._screwName[i])
+
+        eos.writeBool(self._screwMotionExists)
+        if self._screwMotionExists:
+
+            Length.listToBin(self._screwMotion, eos)
+
+        eos.writeBool(self._screwMotionErrorExists)
+        if self._screwMotionErrorExists:
+
+            Length.listToBin(self._screwMotionError, eos)
+
+        eos.writeBool(self._gravCorrectionExists)
+        if self._gravCorrectionExists:
+
+            eos.writeBool(self._gravCorrection)
+
+        eos.writeBool(self._gravOptRangeExists)
+        if self._gravOptRangeExists:
+
+            Angle.listToBin(self._gravOptRange, eos)
+
+        eos.writeBool(self._tempCorrectionExists)
+        if self._tempCorrectionExists:
+
+            eos.writeBool(self._tempCorrection)
+
+        eos.writeBool(self._tempOptRangeExists)
+        if self._tempOptRangeExists:
+
+            Temperature.listToBin(self._tempOptRange, eos)
+
+    @staticmethod
+    def antennaNameFromBin(row, eis):
+        """
+        Set the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaName = eis.readStr()
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def antennaMakeFromBin(row, eis):
+        """
+        Set the antennaMake in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaMake = AntennaMake.from_int(eis.readInt())
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def ambientTemperatureFromBin(row, eis):
+        """
+        Set the ambientTemperature in row from the EndianInput (eis) instance.
+        """
+
+        row._ambientTemperature = Temperature.fromBin(eis)
+
+    @staticmethod
+    def focusPositionFromBin(row, eis):
+        """
+        Set the focusPosition in row from the EndianInput (eis) instance.
+        """
+
+        row._focusPosition = Length.from1DBin(eis)
+
+    @staticmethod
+    def frequencyRangeFromBin(row, eis):
+        """
+        Set the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyRange = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def illuminationTaperFromBin(row, eis):
+        """
+        Set the illuminationTaper in row from the EndianInput (eis) instance.
+        """
+
+        row._illuminationTaper = eis.readFloat()
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def polarizationTypesFromBin(row, eis):
+        """
+        Set the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypesDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationTypes = thisList
+
+    @staticmethod
+    def numPanelModesFromBin(row, eis):
+        """
+        Set the numPanelModes in row from the EndianInput (eis) instance.
+        """
+
+        row._numPanelModes = eis.readInt()
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def beamMapUIDFromBin(row, eis):
+        """
+        Set the beamMapUID in row from the EndianInput (eis) instance.
+        """
+
+        row._beamMapUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def rawRMSFromBin(row, eis):
+        """
+        Set the rawRMS in row from the EndianInput (eis) instance.
+        """
+
+        row._rawRMS = Length.fromBin(eis)
+
+    @staticmethod
+    def weightedRMSFromBin(row, eis):
+        """
+        Set the weightedRMS in row from the EndianInput (eis) instance.
+        """
+
+        row._weightedRMS = Length.fromBin(eis)
+
+    @staticmethod
+    def surfaceMapUIDFromBin(row, eis):
+        """
+        Set the surfaceMapUID in row from the EndianInput (eis) instance.
+        """
+
+        row._surfaceMapUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def directionFromBin(row, eis):
+        """
+        Set the direction in row from the EndianInput (eis) instance.
+        """
+
+        row._direction = Angle.from1DBin(eis)
+
+    @staticmethod
+    def numScrewFromBin(row, eis):
+        """
+        Set the optional numScrew in row from the EndianInput (eis) instance.
+        """
+        row._numScrewExists = eis.readBool()
+        if row._numScrewExists:
+
+            row._numScrew = eis.readInt()
+
+    @staticmethod
+    def screwNameFromBin(row, eis):
+        """
+        Set the optional screwName in row from the EndianInput (eis) instance.
+        """
+        row._screwNameExists = eis.readBool()
+        if row._screwNameExists:
+
+            screwNameDim1 = eis.readInt()
+            thisList = []
+            for i in range(screwNameDim1):
+                thisValue = eis.readStr()
+                thisList.append(thisValue)
+            row._screwName = thisList
+
+    @staticmethod
+    def screwMotionFromBin(row, eis):
+        """
+        Set the optional screwMotion in row from the EndianInput (eis) instance.
+        """
+        row._screwMotionExists = eis.readBool()
+        if row._screwMotionExists:
+
+            row._screwMotion = Length.from1DBin(eis)
+
+    @staticmethod
+    def screwMotionErrorFromBin(row, eis):
+        """
+        Set the optional screwMotionError in row from the EndianInput (eis) instance.
+        """
+        row._screwMotionErrorExists = eis.readBool()
+        if row._screwMotionErrorExists:
+
+            row._screwMotionError = Length.from1DBin(eis)
+
+    @staticmethod
+    def gravCorrectionFromBin(row, eis):
+        """
+        Set the optional gravCorrection in row from the EndianInput (eis) instance.
+        """
+        row._gravCorrectionExists = eis.readBool()
+        if row._gravCorrectionExists:
+
+            row._gravCorrection = eis.readBool()
+
+    @staticmethod
+    def gravOptRangeFromBin(row, eis):
+        """
+        Set the optional gravOptRange in row from the EndianInput (eis) instance.
+        """
+        row._gravOptRangeExists = eis.readBool()
+        if row._gravOptRangeExists:
+
+            row._gravOptRange = Angle.from1DBin(eis)
+
+    @staticmethod
+    def tempCorrectionFromBin(row, eis):
+        """
+        Set the optional tempCorrection in row from the EndianInput (eis) instance.
+        """
+        row._tempCorrectionExists = eis.readBool()
+        if row._tempCorrectionExists:
+
+            row._tempCorrection = eis.readBool()
+
+    @staticmethod
+    def tempOptRangeFromBin(row, eis):
+        """
+        Set the optional tempOptRange in row from the EndianInput (eis) instance.
+        """
+        row._tempOptRangeExists = eis.readBool()
+        if row._tempOptRangeExists:
+
+            row._tempOptRange = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaName"] = CalHolographyRow.antennaNameFromBin
+        _fromBinMethods["calDataId"] = CalHolographyRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalHolographyRow.calReductionIdFromBin
+        _fromBinMethods["antennaMake"] = CalHolographyRow.antennaMakeFromBin
+        _fromBinMethods["startValidTime"] = CalHolographyRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalHolographyRow.endValidTimeFromBin
+        _fromBinMethods["ambientTemperature"] = (
+            CalHolographyRow.ambientTemperatureFromBin
+        )
+        _fromBinMethods["focusPosition"] = CalHolographyRow.focusPositionFromBin
+        _fromBinMethods["frequencyRange"] = CalHolographyRow.frequencyRangeFromBin
+        _fromBinMethods["illuminationTaper"] = CalHolographyRow.illuminationTaperFromBin
+        _fromBinMethods["numReceptor"] = CalHolographyRow.numReceptorFromBin
+        _fromBinMethods["polarizationTypes"] = CalHolographyRow.polarizationTypesFromBin
+        _fromBinMethods["numPanelModes"] = CalHolographyRow.numPanelModesFromBin
+        _fromBinMethods["receiverBand"] = CalHolographyRow.receiverBandFromBin
+        _fromBinMethods["beamMapUID"] = CalHolographyRow.beamMapUIDFromBin
+        _fromBinMethods["rawRMS"] = CalHolographyRow.rawRMSFromBin
+        _fromBinMethods["weightedRMS"] = CalHolographyRow.weightedRMSFromBin
+        _fromBinMethods["surfaceMapUID"] = CalHolographyRow.surfaceMapUIDFromBin
+        _fromBinMethods["direction"] = CalHolographyRow.directionFromBin
+
+        _fromBinMethods["numScrew"] = CalHolographyRow.numScrewFromBin
+        _fromBinMethods["screwName"] = CalHolographyRow.screwNameFromBin
+        _fromBinMethods["screwMotion"] = CalHolographyRow.screwMotionFromBin
+        _fromBinMethods["screwMotionError"] = CalHolographyRow.screwMotionErrorFromBin
+        _fromBinMethods["gravCorrection"] = CalHolographyRow.gravCorrectionFromBin
+        _fromBinMethods["gravOptRange"] = CalHolographyRow.gravOptRangeFromBin
+        _fromBinMethods["tempCorrection"] = CalHolographyRow.tempCorrectionFromBin
+        _fromBinMethods["tempOptRange"] = CalHolographyRow.tempOptRangeFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalHolographyRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalHolography",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute antennaName
 
@@ -1900,3 +2298,7 @@ class CalHolographyRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalHolographyRow.initFromBinMethods()

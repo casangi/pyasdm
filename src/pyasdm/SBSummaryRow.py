@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -73,10 +77,11 @@ class SBSummaryRow:
         Create a SBSummaryRow.
         When row is None, create an empty row attached to table, which must be a SBSummaryTable.
         When row is given, copy those values in to the new row. The row argument must be a SBSummaryRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.SBSummaryTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a SBSummaryTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -129,7 +134,7 @@ class SBSummaryRow:
 
         if row is not None:
             if not isinstance(row, SBSummaryRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a SBSummaryRow")
 
             # copy constructor
 
@@ -185,11 +190,11 @@ class SBSummaryRow:
 
             # by default set systematically centerDirectionCode's value to something not None
 
-            self.centerDirectionCode = DirectionReferenceCode.from_int(0)
+            self._centerDirectionCode = DirectionReferenceCode.from_int(0)
 
             if row._centerDirectionCodeExists:
 
-                if row._centerDirectionCode is None:
+                if row._centerDirectionCode is not None:
                     self._centerDirectionCode = row._centerDirectionCode
 
                 self._centerDirectionCodeExists = True
@@ -412,10 +417,289 @@ class SBSummaryRow:
 
             self._centerDirectionEquinoxExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._sBSummaryId.toBin(eos)
+
+        self._sbSummaryUID.toBin(eos)
+
+        self._projectUID.toBin(eos)
+
+        self._obsUnitSetUID.toBin(eos)
+
+        eos.writeFloat(self._frequency)
+
+        eos.writeString(self._frequencyBand.toString())
+
+        eos.writeString(self._sbType.toString())
+
+        self._sbDuration.toBin(eos)
+
+        eos.writeInt(self._numObservingMode)
+
+        eos.writeInt(len(self._observingMode))
+        for i in range(len(self._observingMode)):
+
+            eos.writeStr(self._observingMode[i])
+
+        eos.writeInt(self._numberRepeats)
+
+        eos.writeInt(self._numScienceGoal)
+
+        eos.writeInt(len(self._scienceGoal))
+        for i in range(len(self._scienceGoal)):
+
+            eos.writeStr(self._scienceGoal[i])
+
+        eos.writeInt(self._numWeatherConstraint)
+
+        eos.writeInt(len(self._weatherConstraint))
+        for i in range(len(self._weatherConstraint)):
+
+            eos.writeStr(self._weatherConstraint[i])
+
+        eos.writeBool(self._centerDirectionExists)
+        if self._centerDirectionExists:
+
+            Angle.listToBin(self._centerDirection, eos)
+
+        eos.writeBool(self._centerDirectionCodeExists)
+        if self._centerDirectionCodeExists:
+
+            eos.writeString(self._centerDirectionCode.toString())
+
+        eos.writeBool(self._centerDirectionEquinoxExists)
+        if self._centerDirectionEquinoxExists:
+
+            self._centerDirectionEquinox.toBin(eos)
+
+    @staticmethod
+    def sBSummaryIdFromBin(row, eis):
+        """
+        Set the sBSummaryId in row from the EndianInput (eis) instance.
+        """
+
+        row._sBSummaryId = Tag.fromBin(eis)
+
+    @staticmethod
+    def sbSummaryUIDFromBin(row, eis):
+        """
+        Set the sbSummaryUID in row from the EndianInput (eis) instance.
+        """
+
+        row._sbSummaryUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def projectUIDFromBin(row, eis):
+        """
+        Set the projectUID in row from the EndianInput (eis) instance.
+        """
+
+        row._projectUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def obsUnitSetUIDFromBin(row, eis):
+        """
+        Set the obsUnitSetUID in row from the EndianInput (eis) instance.
+        """
+
+        row._obsUnitSetUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def frequencyFromBin(row, eis):
+        """
+        Set the frequency in row from the EndianInput (eis) instance.
+        """
+
+        row._frequency = eis.readFloat()
+
+    @staticmethod
+    def frequencyBandFromBin(row, eis):
+        """
+        Set the frequencyBand in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def sbTypeFromBin(row, eis):
+        """
+        Set the sbType in row from the EndianInput (eis) instance.
+        """
+
+        row._sbType = SBType.from_int(eis.readInt())
+
+    @staticmethod
+    def sbDurationFromBin(row, eis):
+        """
+        Set the sbDuration in row from the EndianInput (eis) instance.
+        """
+
+        row._sbDuration = Interval.fromBin(eis)
+
+    @staticmethod
+    def numObservingModeFromBin(row, eis):
+        """
+        Set the numObservingMode in row from the EndianInput (eis) instance.
+        """
+
+        row._numObservingMode = eis.readInt()
+
+    @staticmethod
+    def observingModeFromBin(row, eis):
+        """
+        Set the observingMode in row from the EndianInput (eis) instance.
+        """
+
+        observingModeDim1 = eis.readInt()
+        thisList = []
+        for i in range(observingModeDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._observingMode = thisList
+
+    @staticmethod
+    def numberRepeatsFromBin(row, eis):
+        """
+        Set the numberRepeats in row from the EndianInput (eis) instance.
+        """
+
+        row._numberRepeats = eis.readInt()
+
+    @staticmethod
+    def numScienceGoalFromBin(row, eis):
+        """
+        Set the numScienceGoal in row from the EndianInput (eis) instance.
+        """
+
+        row._numScienceGoal = eis.readInt()
+
+    @staticmethod
+    def scienceGoalFromBin(row, eis):
+        """
+        Set the scienceGoal in row from the EndianInput (eis) instance.
+        """
+
+        scienceGoalDim1 = eis.readInt()
+        thisList = []
+        for i in range(scienceGoalDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._scienceGoal = thisList
+
+    @staticmethod
+    def numWeatherConstraintFromBin(row, eis):
+        """
+        Set the numWeatherConstraint in row from the EndianInput (eis) instance.
+        """
+
+        row._numWeatherConstraint = eis.readInt()
+
+    @staticmethod
+    def weatherConstraintFromBin(row, eis):
+        """
+        Set the weatherConstraint in row from the EndianInput (eis) instance.
+        """
+
+        weatherConstraintDim1 = eis.readInt()
+        thisList = []
+        for i in range(weatherConstraintDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._weatherConstraint = thisList
+
+    @staticmethod
+    def centerDirectionFromBin(row, eis):
+        """
+        Set the optional centerDirection in row from the EndianInput (eis) instance.
+        """
+        row._centerDirectionExists = eis.readBool()
+        if row._centerDirectionExists:
+
+            row._centerDirection = Angle.from1DBin(eis)
+
+    @staticmethod
+    def centerDirectionCodeFromBin(row, eis):
+        """
+        Set the optional centerDirectionCode in row from the EndianInput (eis) instance.
+        """
+        row._centerDirectionCodeExists = eis.readBool()
+        if row._centerDirectionCodeExists:
+
+            row._centerDirectionCode = DirectionReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def centerDirectionEquinoxFromBin(row, eis):
+        """
+        Set the optional centerDirectionEquinox in row from the EndianInput (eis) instance.
+        """
+        row._centerDirectionEquinoxExists = eis.readBool()
+        if row._centerDirectionEquinoxExists:
+
+            row._centerDirectionEquinox = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["sBSummaryId"] = SBSummaryRow.sBSummaryIdFromBin
+        _fromBinMethods["sbSummaryUID"] = SBSummaryRow.sbSummaryUIDFromBin
+        _fromBinMethods["projectUID"] = SBSummaryRow.projectUIDFromBin
+        _fromBinMethods["obsUnitSetUID"] = SBSummaryRow.obsUnitSetUIDFromBin
+        _fromBinMethods["frequency"] = SBSummaryRow.frequencyFromBin
+        _fromBinMethods["frequencyBand"] = SBSummaryRow.frequencyBandFromBin
+        _fromBinMethods["sbType"] = SBSummaryRow.sbTypeFromBin
+        _fromBinMethods["sbDuration"] = SBSummaryRow.sbDurationFromBin
+        _fromBinMethods["numObservingMode"] = SBSummaryRow.numObservingModeFromBin
+        _fromBinMethods["observingMode"] = SBSummaryRow.observingModeFromBin
+        _fromBinMethods["numberRepeats"] = SBSummaryRow.numberRepeatsFromBin
+        _fromBinMethods["numScienceGoal"] = SBSummaryRow.numScienceGoalFromBin
+        _fromBinMethods["scienceGoal"] = SBSummaryRow.scienceGoalFromBin
+        _fromBinMethods["numWeatherConstraint"] = (
+            SBSummaryRow.numWeatherConstraintFromBin
+        )
+        _fromBinMethods["weatherConstraint"] = SBSummaryRow.weatherConstraintFromBin
+
+        _fromBinMethods["centerDirection"] = SBSummaryRow.centerDirectionFromBin
+        _fromBinMethods["centerDirectionCode"] = SBSummaryRow.centerDirectionCodeFromBin
+        _fromBinMethods["centerDirectionEquinox"] = (
+            SBSummaryRow.centerDirectionEquinoxFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = SBSummaryRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SBSummary",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute sBSummaryId
 
@@ -1199,3 +1483,7 @@ class SBSummaryRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+SBSummaryRow.initFromBinMethods()

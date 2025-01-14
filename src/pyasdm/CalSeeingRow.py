@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
 
@@ -67,10 +71,11 @@ class CalSeeingRow:
         Create a CalSeeingRow.
         When row is None, create an empty row attached to table, which must be a CalSeeingTable.
         When row is given, copy those values in to the new row. The row argument must be a CalSeeingRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalSeeingTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalSeeingTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -119,11 +124,11 @@ class CalSeeingRow:
 
         if row is not None:
             if not isinstance(row, CalSeeingRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalSeeingRow")
 
             # copy constructor
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._atmPhaseCorrection is None:
                 self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
             else:
@@ -351,10 +356,228 @@ class CalSeeingRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeString(self._atmPhaseCorrection.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        Frequency.listToBin(self._frequencyRange, eos)
+
+        self._integrationTime.toBin(eos)
+
+        eos.writeInt(self._numBaseLengths)
+
+        Length.listToBin(self._baselineLengths, eos)
+
+        Angle.listToBin(self._phaseRMS, eos)
+
+        self._seeing.toBin(eos)
+
+        self._seeingError.toBin(eos)
+
+        eos.writeBool(self._exponentExists)
+        if self._exponentExists:
+
+            eos.writeFloat(self._exponent)
+
+        eos.writeBool(self._outerScaleExists)
+        if self._outerScaleExists:
+
+            self._outerScale.toBin(eos)
+
+        eos.writeBool(self._outerScaleRMSExists)
+        if self._outerScaleRMSExists:
+
+            self._outerScaleRMS.toBin(eos)
+
+    @staticmethod
+    def atmPhaseCorrectionFromBin(row, eis):
+        """
+        Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def frequencyRangeFromBin(row, eis):
+        """
+        Set the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyRange = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def integrationTimeFromBin(row, eis):
+        """
+        Set the integrationTime in row from the EndianInput (eis) instance.
+        """
+
+        row._integrationTime = Interval.fromBin(eis)
+
+    @staticmethod
+    def numBaseLengthsFromBin(row, eis):
+        """
+        Set the numBaseLengths in row from the EndianInput (eis) instance.
+        """
+
+        row._numBaseLengths = eis.readInt()
+
+    @staticmethod
+    def baselineLengthsFromBin(row, eis):
+        """
+        Set the baselineLengths in row from the EndianInput (eis) instance.
+        """
+
+        row._baselineLengths = Length.from1DBin(eis)
+
+    @staticmethod
+    def phaseRMSFromBin(row, eis):
+        """
+        Set the phaseRMS in row from the EndianInput (eis) instance.
+        """
+
+        row._phaseRMS = Angle.from1DBin(eis)
+
+    @staticmethod
+    def seeingFromBin(row, eis):
+        """
+        Set the seeing in row from the EndianInput (eis) instance.
+        """
+
+        row._seeing = Angle.fromBin(eis)
+
+    @staticmethod
+    def seeingErrorFromBin(row, eis):
+        """
+        Set the seeingError in row from the EndianInput (eis) instance.
+        """
+
+        row._seeingError = Angle.fromBin(eis)
+
+    @staticmethod
+    def exponentFromBin(row, eis):
+        """
+        Set the optional exponent in row from the EndianInput (eis) instance.
+        """
+        row._exponentExists = eis.readBool()
+        if row._exponentExists:
+
+            row._exponent = eis.readFloat()
+
+    @staticmethod
+    def outerScaleFromBin(row, eis):
+        """
+        Set the optional outerScale in row from the EndianInput (eis) instance.
+        """
+        row._outerScaleExists = eis.readBool()
+        if row._outerScaleExists:
+
+            row._outerScale = Length.fromBin(eis)
+
+    @staticmethod
+    def outerScaleRMSFromBin(row, eis):
+        """
+        Set the optional outerScaleRMS in row from the EndianInput (eis) instance.
+        """
+        row._outerScaleRMSExists = eis.readBool()
+        if row._outerScaleRMSExists:
+
+            row._outerScaleRMS = Angle.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["atmPhaseCorrection"] = CalSeeingRow.atmPhaseCorrectionFromBin
+        _fromBinMethods["calDataId"] = CalSeeingRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalSeeingRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalSeeingRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalSeeingRow.endValidTimeFromBin
+        _fromBinMethods["frequencyRange"] = CalSeeingRow.frequencyRangeFromBin
+        _fromBinMethods["integrationTime"] = CalSeeingRow.integrationTimeFromBin
+        _fromBinMethods["numBaseLengths"] = CalSeeingRow.numBaseLengthsFromBin
+        _fromBinMethods["baselineLengths"] = CalSeeingRow.baselineLengthsFromBin
+        _fromBinMethods["phaseRMS"] = CalSeeingRow.phaseRMSFromBin
+        _fromBinMethods["seeing"] = CalSeeingRow.seeingFromBin
+        _fromBinMethods["seeingError"] = CalSeeingRow.seeingErrorFromBin
+
+        _fromBinMethods["exponent"] = CalSeeingRow.exponentFromBin
+        _fromBinMethods["outerScale"] = CalSeeingRow.outerScaleFromBin
+        _fromBinMethods["outerScaleRMS"] = CalSeeingRow.outerScaleRMSFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalSeeingRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalSeeing",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute atmPhaseCorrection
 
@@ -1068,3 +1291,7 @@ class CalSeeingRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalSeeingRow.initFromBinMethods()

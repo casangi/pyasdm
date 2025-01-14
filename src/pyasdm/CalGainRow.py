@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class CalGainRow:
         Create a CalGainRow.
         When row is None, create an empty row attached to table, which must be a CalGainTable.
         When row is given, copy those values in to the new row. The row argument must be a CalGainRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalGainTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalGainTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -102,7 +107,7 @@ class CalGainRow:
 
         if row is not None:
             if not isinstance(row, CalGainRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalGainRow")
 
             # copy constructor
 
@@ -246,10 +251,168 @@ class CalGainRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        eos.writeFloat(self._gain)
+
+        eos.writeBool(self._gainValid)
+
+        eos.writeFloat(self._fit)
+
+        eos.writeFloat(self._fitWeight)
+
+        eos.writeBool(self._totalGainValid)
+
+        eos.writeFloat(self._totalFit)
+
+        eos.writeFloat(self._totalFitWeight)
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def gainFromBin(row, eis):
+        """
+        Set the gain in row from the EndianInput (eis) instance.
+        """
+
+        row._gain = eis.readFloat()
+
+    @staticmethod
+    def gainValidFromBin(row, eis):
+        """
+        Set the gainValid in row from the EndianInput (eis) instance.
+        """
+
+        row._gainValid = eis.readBool()
+
+    @staticmethod
+    def fitFromBin(row, eis):
+        """
+        Set the fit in row from the EndianInput (eis) instance.
+        """
+
+        row._fit = eis.readFloat()
+
+    @staticmethod
+    def fitWeightFromBin(row, eis):
+        """
+        Set the fitWeight in row from the EndianInput (eis) instance.
+        """
+
+        row._fitWeight = eis.readFloat()
+
+    @staticmethod
+    def totalGainValidFromBin(row, eis):
+        """
+        Set the totalGainValid in row from the EndianInput (eis) instance.
+        """
+
+        row._totalGainValid = eis.readBool()
+
+    @staticmethod
+    def totalFitFromBin(row, eis):
+        """
+        Set the totalFit in row from the EndianInput (eis) instance.
+        """
+
+        row._totalFit = eis.readFloat()
+
+    @staticmethod
+    def totalFitWeightFromBin(row, eis):
+        """
+        Set the totalFitWeight in row from the EndianInput (eis) instance.
+        """
+
+        row._totalFitWeight = eis.readFloat()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["calDataId"] = CalGainRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalGainRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalGainRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalGainRow.endValidTimeFromBin
+        _fromBinMethods["gain"] = CalGainRow.gainFromBin
+        _fromBinMethods["gainValid"] = CalGainRow.gainValidFromBin
+        _fromBinMethods["fit"] = CalGainRow.fitFromBin
+        _fromBinMethods["fitWeight"] = CalGainRow.fitWeightFromBin
+        _fromBinMethods["totalGainValid"] = CalGainRow.totalGainValidFromBin
+        _fromBinMethods["totalFit"] = CalGainRow.totalFitFromBin
+        _fromBinMethods["totalFitWeight"] = CalGainRow.totalFitWeightFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalGainRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalGain",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute startValidTime
 
@@ -670,3 +833,7 @@ class CalGainRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalGainRow.initFromBinMethods()

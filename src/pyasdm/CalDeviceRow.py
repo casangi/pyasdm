@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.CalibrationDevice import CalibrationDevice
 
@@ -67,10 +71,11 @@ class CalDeviceRow:
         Create a CalDeviceRow.
         When row is None, create an empty row attached to table, which must be a CalDeviceTable.
         When row is given, copy those values in to the new row. The row argument must be a CalDeviceRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalDeviceTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalDeviceTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -115,7 +120,7 @@ class CalDeviceRow:
 
         if row is not None:
             if not isinstance(row, CalDeviceRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalDeviceRow")
 
             # copy constructor
 
@@ -340,10 +345,250 @@ class CalDeviceRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._feedId)
+
+        eos.writeInt(self._numCalload)
+
+        eos.writeInt(len(self._calLoadNames))
+        for i in range(len(self._calLoadNames)):
+
+            eos.writeString(self._calLoadNames[i].toString())
+
+        eos.writeBool(self._numReceptorExists)
+        if self._numReceptorExists:
+
+            eos.writeInt(self._numReceptor)
+
+        eos.writeBool(self._calEffExists)
+        if self._calEffExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._calEff is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                calEff_dims = Parser.getListDims(self._calEff)
+            # assumes it really is 2D
+            eos.writeInt(calEff_dims[0])
+            eos.writeInt(calEff_dims[1])
+            for i in range(calEff_dims[0]):
+                for j in range(calEff_dims[1]):
+                    eos.writeFloat(self._calEff[i][j])
+
+        eos.writeBool(self._noiseCalExists)
+        if self._noiseCalExists:
+
+            eos.writeInt(len(self._noiseCal))
+            for i in range(len(self._noiseCal)):
+
+                eos.writeFloat(self._noiseCal[i])
+
+        eos.writeBool(self._coupledNoiseCalExists)
+        if self._coupledNoiseCalExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._coupledNoiseCal is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                coupledNoiseCal_dims = Parser.getListDims(self._coupledNoiseCal)
+            # assumes it really is 2D
+            eos.writeInt(coupledNoiseCal_dims[0])
+            eos.writeInt(coupledNoiseCal_dims[1])
+            for i in range(coupledNoiseCal_dims[0]):
+                for j in range(coupledNoiseCal_dims[1]):
+                    eos.writeFloat(self._coupledNoiseCal[i][j])
+
+        eos.writeBool(self._temperatureLoadExists)
+        if self._temperatureLoadExists:
+
+            Temperature.listToBin(self._temperatureLoad, eos)
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def feedIdFromBin(row, eis):
+        """
+        Set the feedId in row from the EndianInput (eis) instance.
+        """
+
+        row._feedId = eis.readInt()
+
+    @staticmethod
+    def numCalloadFromBin(row, eis):
+        """
+        Set the numCalload in row from the EndianInput (eis) instance.
+        """
+
+        row._numCalload = eis.readInt()
+
+    @staticmethod
+    def calLoadNamesFromBin(row, eis):
+        """
+        Set the calLoadNames in row from the EndianInput (eis) instance.
+        """
+
+        calLoadNamesDim1 = eis.readInt()
+        thisList = []
+        for i in range(calLoadNamesDim1):
+            thisValue = CalibrationDevice.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._calLoadNames = thisList
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the optional numReceptor in row from the EndianInput (eis) instance.
+        """
+        row._numReceptorExists = eis.readBool()
+        if row._numReceptorExists:
+
+            row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def calEffFromBin(row, eis):
+        """
+        Set the optional calEff in row from the EndianInput (eis) instance.
+        """
+        row._calEffExists = eis.readBool()
+        if row._calEffExists:
+
+            calEffDim1 = eis.readInt()
+            calEffDim2 = eis.readInt()
+            thisList = []
+            for i in range(calEffDim1):
+                thisList_j = []
+                for j in range(calEffDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.calEff = thisList
+
+    @staticmethod
+    def noiseCalFromBin(row, eis):
+        """
+        Set the optional noiseCal in row from the EndianInput (eis) instance.
+        """
+        row._noiseCalExists = eis.readBool()
+        if row._noiseCalExists:
+
+            noiseCalDim1 = eis.readInt()
+            thisList = []
+            for i in range(noiseCalDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._noiseCal = thisList
+
+    @staticmethod
+    def coupledNoiseCalFromBin(row, eis):
+        """
+        Set the optional coupledNoiseCal in row from the EndianInput (eis) instance.
+        """
+        row._coupledNoiseCalExists = eis.readBool()
+        if row._coupledNoiseCalExists:
+
+            coupledNoiseCalDim1 = eis.readInt()
+            coupledNoiseCalDim2 = eis.readInt()
+            thisList = []
+            for i in range(coupledNoiseCalDim1):
+                thisList_j = []
+                for j in range(coupledNoiseCalDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.coupledNoiseCal = thisList
+
+    @staticmethod
+    def temperatureLoadFromBin(row, eis):
+        """
+        Set the optional temperatureLoad in row from the EndianInput (eis) instance.
+        """
+        row._temperatureLoadExists = eis.readBool()
+        if row._temperatureLoadExists:
+
+            row._temperatureLoad = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = CalDeviceRow.antennaIdFromBin
+        _fromBinMethods["spectralWindowId"] = CalDeviceRow.spectralWindowIdFromBin
+        _fromBinMethods["timeInterval"] = CalDeviceRow.timeIntervalFromBin
+        _fromBinMethods["feedId"] = CalDeviceRow.feedIdFromBin
+        _fromBinMethods["numCalload"] = CalDeviceRow.numCalloadFromBin
+        _fromBinMethods["calLoadNames"] = CalDeviceRow.calLoadNamesFromBin
+
+        _fromBinMethods["numReceptor"] = CalDeviceRow.numReceptorFromBin
+        _fromBinMethods["calEff"] = CalDeviceRow.calEffFromBin
+        _fromBinMethods["noiseCal"] = CalDeviceRow.noiseCalFromBin
+        _fromBinMethods["coupledNoiseCal"] = CalDeviceRow.coupledNoiseCalFromBin
+        _fromBinMethods["temperatureLoad"] = CalDeviceRow.temperatureLoadFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalDeviceRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalDevice",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -945,3 +1190,7 @@ class CalDeviceRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalDeviceRow.initFromBinMethods()

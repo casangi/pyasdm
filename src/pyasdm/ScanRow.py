@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.ScanIntent import ScanIntent
 
@@ -79,10 +83,11 @@ class ScanRow:
         Create a ScanRow.
         When row is None, create an empty row attached to table, which must be a ScanTable.
         When row is given, copy those values in to the new row. The row argument must be a ScanRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.ScanTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a ScanTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -137,7 +142,7 @@ class ScanRow:
 
         if row is not None:
             if not isinstance(row, ScanRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a ScanRow")
 
             # copy constructor
 
@@ -409,10 +414,299 @@ class ScanRow:
 
         self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._execBlockId.toBin(eos)
+
+        eos.writeInt(self._scanNumber)
+
+        self._startTime.toBin(eos)
+
+        self._endTime.toBin(eos)
+
+        eos.writeInt(self._numIntent)
+
+        eos.writeInt(self._numSubscan)
+
+        eos.writeInt(len(self._scanIntent))
+        for i in range(len(self._scanIntent)):
+
+            eos.writeString(self._scanIntent[i].toString())
+
+        eos.writeInt(len(self._calDataType))
+        for i in range(len(self._calDataType)):
+
+            eos.writeString(self._calDataType[i].toString())
+
+        eos.writeInt(len(self._calibrationOnLine))
+        for i in range(len(self._calibrationOnLine)):
+
+            eos.writeBool(self._calibrationOnLine[i])
+
+        eos.writeBool(self._calibrationFunctionExists)
+        if self._calibrationFunctionExists:
+
+            eos.writeInt(len(self._calibrationFunction))
+            for i in range(len(self._calibrationFunction)):
+
+                eos.writeString(self._calibrationFunction[i].toString())
+
+        eos.writeBool(self._calibrationSetExists)
+        if self._calibrationSetExists:
+
+            eos.writeInt(len(self._calibrationSet))
+            for i in range(len(self._calibrationSet)):
+
+                eos.writeString(self._calibrationSet[i].toString())
+
+        eos.writeBool(self._calPatternExists)
+        if self._calPatternExists:
+
+            eos.writeInt(len(self._calPattern))
+            for i in range(len(self._calPattern)):
+
+                eos.writeString(self._calPattern[i].toString())
+
+        eos.writeBool(self._numFieldExists)
+        if self._numFieldExists:
+
+            eos.writeInt(self._numField)
+
+        eos.writeBool(self._fieldNameExists)
+        if self._fieldNameExists:
+
+            eos.writeInt(len(self._fieldName))
+            for i in range(len(self._fieldName)):
+
+                eos.writeStr(self._fieldName[i])
+
+        eos.writeBool(self._sourceNameExists)
+        if self._sourceNameExists:
+
+            eos.writeStr(self._sourceName)
+
+    @staticmethod
+    def execBlockIdFromBin(row, eis):
+        """
+        Set the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockId = Tag.fromBin(eis)
+
+    @staticmethod
+    def scanNumberFromBin(row, eis):
+        """
+        Set the scanNumber in row from the EndianInput (eis) instance.
+        """
+
+        row._scanNumber = eis.readInt()
+
+    @staticmethod
+    def startTimeFromBin(row, eis):
+        """
+        Set the startTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endTimeFromBin(row, eis):
+        """
+        Set the endTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def numIntentFromBin(row, eis):
+        """
+        Set the numIntent in row from the EndianInput (eis) instance.
+        """
+
+        row._numIntent = eis.readInt()
+
+    @staticmethod
+    def numSubscanFromBin(row, eis):
+        """
+        Set the numSubscan in row from the EndianInput (eis) instance.
+        """
+
+        row._numSubscan = eis.readInt()
+
+    @staticmethod
+    def scanIntentFromBin(row, eis):
+        """
+        Set the scanIntent in row from the EndianInput (eis) instance.
+        """
+
+        scanIntentDim1 = eis.readInt()
+        thisList = []
+        for i in range(scanIntentDim1):
+            thisValue = ScanIntent.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._scanIntent = thisList
+
+    @staticmethod
+    def calDataTypeFromBin(row, eis):
+        """
+        Set the calDataType in row from the EndianInput (eis) instance.
+        """
+
+        calDataTypeDim1 = eis.readInt()
+        thisList = []
+        for i in range(calDataTypeDim1):
+            thisValue = CalDataOrigin.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._calDataType = thisList
+
+    @staticmethod
+    def calibrationOnLineFromBin(row, eis):
+        """
+        Set the calibrationOnLine in row from the EndianInput (eis) instance.
+        """
+
+        calibrationOnLineDim1 = eis.readInt()
+        thisList = []
+        for i in range(calibrationOnLineDim1):
+            thisValue = eis.readBool()
+            thisList.append(thisValue)
+        row._calibrationOnLine = thisList
+
+    @staticmethod
+    def calibrationFunctionFromBin(row, eis):
+        """
+        Set the optional calibrationFunction in row from the EndianInput (eis) instance.
+        """
+        row._calibrationFunctionExists = eis.readBool()
+        if row._calibrationFunctionExists:
+
+            calibrationFunctionDim1 = eis.readInt()
+            thisList = []
+            for i in range(calibrationFunctionDim1):
+                thisValue = CalibrationFunction.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._calibrationFunction = thisList
+
+    @staticmethod
+    def calibrationSetFromBin(row, eis):
+        """
+        Set the optional calibrationSet in row from the EndianInput (eis) instance.
+        """
+        row._calibrationSetExists = eis.readBool()
+        if row._calibrationSetExists:
+
+            calibrationSetDim1 = eis.readInt()
+            thisList = []
+            for i in range(calibrationSetDim1):
+                thisValue = CalibrationSet.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._calibrationSet = thisList
+
+    @staticmethod
+    def calPatternFromBin(row, eis):
+        """
+        Set the optional calPattern in row from the EndianInput (eis) instance.
+        """
+        row._calPatternExists = eis.readBool()
+        if row._calPatternExists:
+
+            calPatternDim1 = eis.readInt()
+            thisList = []
+            for i in range(calPatternDim1):
+                thisValue = AntennaMotionPattern.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._calPattern = thisList
+
+    @staticmethod
+    def numFieldFromBin(row, eis):
+        """
+        Set the optional numField in row from the EndianInput (eis) instance.
+        """
+        row._numFieldExists = eis.readBool()
+        if row._numFieldExists:
+
+            row._numField = eis.readInt()
+
+    @staticmethod
+    def fieldNameFromBin(row, eis):
+        """
+        Set the optional fieldName in row from the EndianInput (eis) instance.
+        """
+        row._fieldNameExists = eis.readBool()
+        if row._fieldNameExists:
+
+            fieldNameDim1 = eis.readInt()
+            thisList = []
+            for i in range(fieldNameDim1):
+                thisValue = eis.readStr()
+                thisList.append(thisValue)
+            row._fieldName = thisList
+
+    @staticmethod
+    def sourceNameFromBin(row, eis):
+        """
+        Set the optional sourceName in row from the EndianInput (eis) instance.
+        """
+        row._sourceNameExists = eis.readBool()
+        if row._sourceNameExists:
+
+            row._sourceName = eis.readStr()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["execBlockId"] = ScanRow.execBlockIdFromBin
+        _fromBinMethods["scanNumber"] = ScanRow.scanNumberFromBin
+        _fromBinMethods["startTime"] = ScanRow.startTimeFromBin
+        _fromBinMethods["endTime"] = ScanRow.endTimeFromBin
+        _fromBinMethods["numIntent"] = ScanRow.numIntentFromBin
+        _fromBinMethods["numSubscan"] = ScanRow.numSubscanFromBin
+        _fromBinMethods["scanIntent"] = ScanRow.scanIntentFromBin
+        _fromBinMethods["calDataType"] = ScanRow.calDataTypeFromBin
+        _fromBinMethods["calibrationOnLine"] = ScanRow.calibrationOnLineFromBin
+
+        _fromBinMethods["calibrationFunction"] = ScanRow.calibrationFunctionFromBin
+        _fromBinMethods["calibrationSet"] = ScanRow.calibrationSetFromBin
+        _fromBinMethods["calPattern"] = ScanRow.calPatternFromBin
+        _fromBinMethods["numField"] = ScanRow.numFieldFromBin
+        _fromBinMethods["fieldName"] = ScanRow.fieldNameFromBin
+        _fromBinMethods["sourceName"] = ScanRow.sourceNameFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = ScanRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Scan",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute scanNumber
 
@@ -1207,3 +1501,7 @@ class ScanRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+ScanRow.initFromBinMethods()

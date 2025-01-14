@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.BasebandName import BasebandName
 
@@ -79,10 +83,11 @@ class CorrelatorModeRow:
         Create a CorrelatorModeRow.
         When row is None, create an empty row attached to table, which must be a CorrelatorModeTable.
         When row is given, copy those values in to the new row. The row argument must be a CorrelatorModeRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CorrelatorModeTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CorrelatorModeTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -113,7 +118,7 @@ class CorrelatorModeRow:
 
         if row is not None:
             if not isinstance(row, CorrelatorModeRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CorrelatorModeRow")
 
             # copy constructor
 
@@ -276,10 +281,189 @@ class CorrelatorModeRow:
             correlatorNameNode.firstChild.data.strip()
         )
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._correlatorModeId.toBin(eos)
+
+        eos.writeInt(self._numBaseband)
+
+        eos.writeInt(len(self._basebandNames))
+        for i in range(len(self._basebandNames)):
+
+            eos.writeString(self._basebandNames[i].toString())
+
+        eos.writeInt(len(self._basebandConfig))
+        for i in range(len(self._basebandConfig)):
+
+            eos.writeInt(self._basebandConfig[i])
+
+        eos.writeString(self._accumMode.toString())
+
+        eos.writeInt(self._binMode)
+
+        eos.writeInt(self._numAxes)
+
+        eos.writeInt(len(self._axesOrderArray))
+        for i in range(len(self._axesOrderArray)):
+
+            eos.writeString(self._axesOrderArray[i].toString())
+
+        eos.writeInt(len(self._filterMode))
+        for i in range(len(self._filterMode)):
+
+            eos.writeString(self._filterMode[i].toString())
+
+        eos.writeString(self._correlatorName.toString())
+
+    @staticmethod
+    def correlatorModeIdFromBin(row, eis):
+        """
+        Set the correlatorModeId in row from the EndianInput (eis) instance.
+        """
+
+        row._correlatorModeId = Tag.fromBin(eis)
+
+    @staticmethod
+    def numBasebandFromBin(row, eis):
+        """
+        Set the numBaseband in row from the EndianInput (eis) instance.
+        """
+
+        row._numBaseband = eis.readInt()
+
+    @staticmethod
+    def basebandNamesFromBin(row, eis):
+        """
+        Set the basebandNames in row from the EndianInput (eis) instance.
+        """
+
+        basebandNamesDim1 = eis.readInt()
+        thisList = []
+        for i in range(basebandNamesDim1):
+            thisValue = BasebandName.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._basebandNames = thisList
+
+    @staticmethod
+    def basebandConfigFromBin(row, eis):
+        """
+        Set the basebandConfig in row from the EndianInput (eis) instance.
+        """
+
+        basebandConfigDim1 = eis.readInt()
+        thisList = []
+        for i in range(basebandConfigDim1):
+            thisValue = eis.readInt()
+            thisList.append(thisValue)
+        row._basebandConfig = thisList
+
+    @staticmethod
+    def accumModeFromBin(row, eis):
+        """
+        Set the accumMode in row from the EndianInput (eis) instance.
+        """
+
+        row._accumMode = AccumMode.from_int(eis.readInt())
+
+    @staticmethod
+    def binModeFromBin(row, eis):
+        """
+        Set the binMode in row from the EndianInput (eis) instance.
+        """
+
+        row._binMode = eis.readInt()
+
+    @staticmethod
+    def numAxesFromBin(row, eis):
+        """
+        Set the numAxes in row from the EndianInput (eis) instance.
+        """
+
+        row._numAxes = eis.readInt()
+
+    @staticmethod
+    def axesOrderArrayFromBin(row, eis):
+        """
+        Set the axesOrderArray in row from the EndianInput (eis) instance.
+        """
+
+        axesOrderArrayDim1 = eis.readInt()
+        thisList = []
+        for i in range(axesOrderArrayDim1):
+            thisValue = AxisName.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._axesOrderArray = thisList
+
+    @staticmethod
+    def filterModeFromBin(row, eis):
+        """
+        Set the filterMode in row from the EndianInput (eis) instance.
+        """
+
+        filterModeDim1 = eis.readInt()
+        thisList = []
+        for i in range(filterModeDim1):
+            thisValue = FilterMode.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._filterMode = thisList
+
+    @staticmethod
+    def correlatorNameFromBin(row, eis):
+        """
+        Set the correlatorName in row from the EndianInput (eis) instance.
+        """
+
+        row._correlatorName = CorrelatorName.from_int(eis.readInt())
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["correlatorModeId"] = CorrelatorModeRow.correlatorModeIdFromBin
+        _fromBinMethods["numBaseband"] = CorrelatorModeRow.numBasebandFromBin
+        _fromBinMethods["basebandNames"] = CorrelatorModeRow.basebandNamesFromBin
+        _fromBinMethods["basebandConfig"] = CorrelatorModeRow.basebandConfigFromBin
+        _fromBinMethods["accumMode"] = CorrelatorModeRow.accumModeFromBin
+        _fromBinMethods["binMode"] = CorrelatorModeRow.binModeFromBin
+        _fromBinMethods["numAxes"] = CorrelatorModeRow.numAxesFromBin
+        _fromBinMethods["axesOrderArray"] = CorrelatorModeRow.axesOrderArrayFromBin
+        _fromBinMethods["filterMode"] = CorrelatorModeRow.filterModeFromBin
+        _fromBinMethods["correlatorName"] = CorrelatorModeRow.correlatorNameFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CorrelatorModeRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CorrelatorMode",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute correlatorModeId
 
@@ -770,3 +954,7 @@ class CorrelatorModeRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CorrelatorModeRow.initFromBinMethods()

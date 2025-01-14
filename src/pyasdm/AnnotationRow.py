@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.BasebandName import BasebandName
 
@@ -67,10 +71,11 @@ class AnnotationRow:
         Create a AnnotationRow.
         When row is None, create an empty row attached to table, which must be a AnnotationTable.
         When row is given, copy those values in to the new row. The row argument must be a AnnotationRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.AnnotationTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a AnnotationTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -139,7 +144,7 @@ class AnnotationRow:
 
         if row is not None:
             if not isinstance(row, AnnotationRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a AnnotationRow")
 
             # copy constructor
 
@@ -248,7 +253,7 @@ class AnnotationRow:
 
             if row._antennaIdExists:
 
-                # antennaId is a list , let's populate self.antennaId element by element.
+                # antennaId is a list, let's populate self._antennaId element by element.
                 if self._antennaId is None:
                     self._antennaId = []
                 for i in range(len(row._antennaId)):
@@ -488,10 +493,348 @@ class AnnotationRow:
 
             self._antennaIdExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._annotationId.toBin(eos)
+
+        self._time.toBin(eos)
+
+        eos.writeStr(self._issue)
+
+        eos.writeStr(self._details)
+
+        eos.writeBool(self._numAntennaExists)
+        if self._numAntennaExists:
+
+            eos.writeInt(self._numAntenna)
+
+        eos.writeBool(self._basebandNameExists)
+        if self._basebandNameExists:
+
+            eos.writeInt(len(self._basebandName))
+            for i in range(len(self._basebandName)):
+
+                eos.writeString(self._basebandName[i].toString())
+
+        eos.writeBool(self._numBasebandExists)
+        if self._numBasebandExists:
+
+            eos.writeInt(self._numBaseband)
+
+        eos.writeBool(self._intervalExists)
+        if self._intervalExists:
+
+            self._interval.toBin(eos)
+
+        eos.writeBool(self._dValueExists)
+        if self._dValueExists:
+
+            eos.writeFloat(self._dValue)
+
+        eos.writeBool(self._vdValueExists)
+        if self._vdValueExists:
+
+            eos.writeInt(len(self._vdValue))
+            for i in range(len(self._vdValue)):
+
+                eos.writeFloat(self._vdValue[i])
+
+        eos.writeBool(self._vvdValuesExists)
+        if self._vvdValuesExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._vvdValues is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                vvdValues_dims = Parser.getListDims(self._vvdValues)
+            # assumes it really is 2D
+            eos.writeInt(vvdValues_dims[0])
+            eos.writeInt(vvdValues_dims[1])
+            for i in range(vvdValues_dims[0]):
+                for j in range(vvdValues_dims[1]):
+                    eos.writeFloat(self._vvdValues[i][j])
+
+        eos.writeBool(self._llValueExists)
+        if self._llValueExists:
+
+            eos.writeInt(self._llValue)
+
+        eos.writeBool(self._vllValueExists)
+        if self._vllValueExists:
+
+            eos.writeInt(len(self._vllValue))
+            for i in range(len(self._vllValue)):
+
+                eos.writeInt(self._vllValue[i])
+
+        eos.writeBool(self._vvllValueExists)
+        if self._vvllValueExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._vvllValue is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                vvllValue_dims = Parser.getListDims(self._vvllValue)
+            # assumes it really is 2D
+            eos.writeInt(vvllValue_dims[0])
+            eos.writeInt(vvllValue_dims[1])
+            for i in range(vvllValue_dims[0]):
+                for j in range(vvllValue_dims[1]):
+                    eos.writeInt(self._vvllValue[i][j])
+
+        eos.writeBool(self._sValueExists)
+        if self._sValueExists:
+
+            eos.writeStr(self._sValue)
+
+        eos.writeBool(self._antennaIdExists)
+        if self._antennaIdExists:
+
+            Tag.listToBin(self._antennaId, eos)
+
+    @staticmethod
+    def annotationIdFromBin(row, eis):
+        """
+        Set the annotationId in row from the EndianInput (eis) instance.
+        """
+
+        row._annotationId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeFromBin(row, eis):
+        """
+        Set the time in row from the EndianInput (eis) instance.
+        """
+
+        row._time = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def issueFromBin(row, eis):
+        """
+        Set the issue in row from the EndianInput (eis) instance.
+        """
+
+        row._issue = eis.readStr()
+
+    @staticmethod
+    def detailsFromBin(row, eis):
+        """
+        Set the details in row from the EndianInput (eis) instance.
+        """
+
+        row._details = eis.readStr()
+
+    @staticmethod
+    def numAntennaFromBin(row, eis):
+        """
+        Set the optional numAntenna in row from the EndianInput (eis) instance.
+        """
+        row._numAntennaExists = eis.readBool()
+        if row._numAntennaExists:
+
+            row._numAntenna = eis.readInt()
+
+    @staticmethod
+    def basebandNameFromBin(row, eis):
+        """
+        Set the optional basebandName in row from the EndianInput (eis) instance.
+        """
+        row._basebandNameExists = eis.readBool()
+        if row._basebandNameExists:
+
+            basebandNameDim1 = eis.readInt()
+            thisList = []
+            for i in range(basebandNameDim1):
+                thisValue = BasebandName.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._basebandName = thisList
+
+    @staticmethod
+    def numBasebandFromBin(row, eis):
+        """
+        Set the optional numBaseband in row from the EndianInput (eis) instance.
+        """
+        row._numBasebandExists = eis.readBool()
+        if row._numBasebandExists:
+
+            row._numBaseband = eis.readInt()
+
+    @staticmethod
+    def intervalFromBin(row, eis):
+        """
+        Set the optional interval in row from the EndianInput (eis) instance.
+        """
+        row._intervalExists = eis.readBool()
+        if row._intervalExists:
+
+            row._interval = Interval.fromBin(eis)
+
+    @staticmethod
+    def dValueFromBin(row, eis):
+        """
+        Set the optional dValue in row from the EndianInput (eis) instance.
+        """
+        row._dValueExists = eis.readBool()
+        if row._dValueExists:
+
+            row._dValue = eis.readFloat()
+
+    @staticmethod
+    def vdValueFromBin(row, eis):
+        """
+        Set the optional vdValue in row from the EndianInput (eis) instance.
+        """
+        row._vdValueExists = eis.readBool()
+        if row._vdValueExists:
+
+            vdValueDim1 = eis.readInt()
+            thisList = []
+            for i in range(vdValueDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._vdValue = thisList
+
+    @staticmethod
+    def vvdValuesFromBin(row, eis):
+        """
+        Set the optional vvdValues in row from the EndianInput (eis) instance.
+        """
+        row._vvdValuesExists = eis.readBool()
+        if row._vvdValuesExists:
+
+            vvdValuesDim1 = eis.readInt()
+            vvdValuesDim2 = eis.readInt()
+            thisList = []
+            for i in range(vvdValuesDim1):
+                thisList_j = []
+                for j in range(vvdValuesDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.vvdValues = thisList
+
+    @staticmethod
+    def llValueFromBin(row, eis):
+        """
+        Set the optional llValue in row from the EndianInput (eis) instance.
+        """
+        row._llValueExists = eis.readBool()
+        if row._llValueExists:
+
+            row._llValue = eis.readInt()
+
+    @staticmethod
+    def vllValueFromBin(row, eis):
+        """
+        Set the optional vllValue in row from the EndianInput (eis) instance.
+        """
+        row._vllValueExists = eis.readBool()
+        if row._vllValueExists:
+
+            vllValueDim1 = eis.readInt()
+            thisList = []
+            for i in range(vllValueDim1):
+                thisValue = eis.readInt()
+                thisList.append(thisValue)
+            row._vllValue = thisList
+
+    @staticmethod
+    def vvllValueFromBin(row, eis):
+        """
+        Set the optional vvllValue in row from the EndianInput (eis) instance.
+        """
+        row._vvllValueExists = eis.readBool()
+        if row._vvllValueExists:
+
+            vvllValueDim1 = eis.readInt()
+            vvllValueDim2 = eis.readInt()
+            thisList = []
+            for i in range(vvllValueDim1):
+                thisList_j = []
+                for j in range(vvllValueDim2):
+                    thisValue = eis.readInt()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.vvllValue = thisList
+
+    @staticmethod
+    def sValueFromBin(row, eis):
+        """
+        Set the optional sValue in row from the EndianInput (eis) instance.
+        """
+        row._sValueExists = eis.readBool()
+        if row._sValueExists:
+
+            row._sValue = eis.readStr()
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the optional antennaId in row from the EndianInput (eis) instance.
+        """
+        row._antennaIdExists = eis.readBool()
+        if row._antennaIdExists:
+
+            row._antennaId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["annotationId"] = AnnotationRow.annotationIdFromBin
+        _fromBinMethods["time"] = AnnotationRow.timeFromBin
+        _fromBinMethods["issue"] = AnnotationRow.issueFromBin
+        _fromBinMethods["details"] = AnnotationRow.detailsFromBin
+
+        _fromBinMethods["numAntenna"] = AnnotationRow.numAntennaFromBin
+        _fromBinMethods["basebandName"] = AnnotationRow.basebandNameFromBin
+        _fromBinMethods["numBaseband"] = AnnotationRow.numBasebandFromBin
+        _fromBinMethods["interval"] = AnnotationRow.intervalFromBin
+        _fromBinMethods["dValue"] = AnnotationRow.dValueFromBin
+        _fromBinMethods["vdValue"] = AnnotationRow.vdValueFromBin
+        _fromBinMethods["vvdValues"] = AnnotationRow.vvdValuesFromBin
+        _fromBinMethods["llValue"] = AnnotationRow.llValueFromBin
+        _fromBinMethods["vllValue"] = AnnotationRow.vllValueFromBin
+        _fromBinMethods["vvllValue"] = AnnotationRow.vvllValueFromBin
+        _fromBinMethods["sValue"] = AnnotationRow.sValueFromBin
+        _fromBinMethods["antennaId"] = AnnotationRow.antennaIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = AnnotationRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Annotation",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute annotationId
 
@@ -1263,9 +1606,9 @@ class AnnotationRow:
 
     def setOneAntennaId(self, index, antennaId):
         """
-        Set antennaId[i] with the specified Tag value.
+        Set antennaId[index] with the specified Tag value.
         index The index in antennaId where to set the Tag value.
-        antennaId The Tag value to which antennaId[i] is to be set.
+        antennaId The Tag value to which antennaId[index] is to be set.
         Raises an exception if that value does not already exist in this row
         """
         if not self._antennaIdExists():
@@ -1282,8 +1625,8 @@ class AnnotationRow:
         id the Tag to be appended to antennaId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._antennaId.append(Tag(id[i]))
+            for thisValue in id:
+                self._antennaId.append(Tag(thisValue))
         else:
             self._antennaId.append(Tag(id))
 
@@ -1361,3 +1704,7 @@ class AnnotationRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+AnnotationRow.initFromBinMethods()

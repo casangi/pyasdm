@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class SeeingRow:
         Create a SeeingRow.
         When row is None, create an empty row attached to table, which must be a SeeingTable.
         When row is given, copy those values in to the new row. The row argument must be a SeeingRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.SeeingTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a SeeingTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -90,7 +95,7 @@ class SeeingRow:
 
         if row is not None:
             if not isinstance(row, SeeingRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a SeeingRow")
 
             # copy constructor
 
@@ -198,10 +203,113 @@ class SeeingRow:
 
         self._exponent = float(exponentNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._numBaseLength)
+
+        Length.listToBin(self._baseLength, eos)
+
+        Angle.listToBin(self._phaseRms, eos)
+
+        eos.writeFloat(self._seeing)
+
+        eos.writeFloat(self._exponent)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def numBaseLengthFromBin(row, eis):
+        """
+        Set the numBaseLength in row from the EndianInput (eis) instance.
+        """
+
+        row._numBaseLength = eis.readInt()
+
+    @staticmethod
+    def baseLengthFromBin(row, eis):
+        """
+        Set the baseLength in row from the EndianInput (eis) instance.
+        """
+
+        row._baseLength = Length.from1DBin(eis)
+
+    @staticmethod
+    def phaseRmsFromBin(row, eis):
+        """
+        Set the phaseRms in row from the EndianInput (eis) instance.
+        """
+
+        row._phaseRms = Angle.from1DBin(eis)
+
+    @staticmethod
+    def seeingFromBin(row, eis):
+        """
+        Set the seeing in row from the EndianInput (eis) instance.
+        """
+
+        row._seeing = eis.readFloat()
+
+    @staticmethod
+    def exponentFromBin(row, eis):
+        """
+        Set the exponent in row from the EndianInput (eis) instance.
+        """
+
+        row._exponent = eis.readFloat()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["timeInterval"] = SeeingRow.timeIntervalFromBin
+        _fromBinMethods["numBaseLength"] = SeeingRow.numBaseLengthFromBin
+        _fromBinMethods["baseLength"] = SeeingRow.baseLengthFromBin
+        _fromBinMethods["phaseRms"] = SeeingRow.phaseRmsFromBin
+        _fromBinMethods["seeing"] = SeeingRow.seeingFromBin
+        _fromBinMethods["exponent"] = SeeingRow.exponentFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = SeeingRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Seeing",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -496,3 +604,7 @@ class SeeingRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+SeeingRow.initFromBinMethods()

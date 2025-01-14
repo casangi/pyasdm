@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class WeatherRow:
         Create a WeatherRow.
         When row is None, create an empty row attached to table, which must be a WeatherTable.
         When row is given, copy those values in to the new row. The row argument must be a WeatherRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.WeatherTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a WeatherTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -140,7 +145,7 @@ class WeatherRow:
 
         if row is not None:
             if not isinstance(row, WeatherRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a WeatherRow")
 
             # copy constructor
 
@@ -497,10 +502,294 @@ class WeatherRow:
 
         self._stationId = Tag(stationIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._stationId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeBool(self._pressureExists)
+        if self._pressureExists:
+
+            self._pressure.toBin(eos)
+
+        eos.writeBool(self._relHumidityExists)
+        if self._relHumidityExists:
+
+            self._relHumidity.toBin(eos)
+
+        eos.writeBool(self._temperatureExists)
+        if self._temperatureExists:
+
+            self._temperature.toBin(eos)
+
+        eos.writeBool(self._windDirectionExists)
+        if self._windDirectionExists:
+
+            self._windDirection.toBin(eos)
+
+        eos.writeBool(self._windSpeedExists)
+        if self._windSpeedExists:
+
+            self._windSpeed.toBin(eos)
+
+        eos.writeBool(self._windMaxExists)
+        if self._windMaxExists:
+
+            self._windMax.toBin(eos)
+
+        eos.writeBool(self._dewPointExists)
+        if self._dewPointExists:
+
+            self._dewPoint.toBin(eos)
+
+        eos.writeBool(self._numLayerExists)
+        if self._numLayerExists:
+
+            eos.writeInt(self._numLayer)
+
+        eos.writeBool(self._layerHeightExists)
+        if self._layerHeightExists:
+
+            Length.listToBin(self._layerHeight, eos)
+
+        eos.writeBool(self._temperatureProfileExists)
+        if self._temperatureProfileExists:
+
+            Temperature.listToBin(self._temperatureProfile, eos)
+
+        eos.writeBool(self._cloudMonitorExists)
+        if self._cloudMonitorExists:
+
+            self._cloudMonitor.toBin(eos)
+
+        eos.writeBool(self._numWVRExists)
+        if self._numWVRExists:
+
+            eos.writeInt(self._numWVR)
+
+        eos.writeBool(self._wvrTempExists)
+        if self._wvrTempExists:
+
+            Temperature.listToBin(self._wvrTemp, eos)
+
+        eos.writeBool(self._waterExists)
+        if self._waterExists:
+
+            eos.writeFloat(self._water)
+
+    @staticmethod
+    def stationIdFromBin(row, eis):
+        """
+        Set the stationId in row from the EndianInput (eis) instance.
+        """
+
+        row._stationId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def pressureFromBin(row, eis):
+        """
+        Set the optional pressure in row from the EndianInput (eis) instance.
+        """
+        row._pressureExists = eis.readBool()
+        if row._pressureExists:
+
+            row._pressure = Pressure.fromBin(eis)
+
+    @staticmethod
+    def relHumidityFromBin(row, eis):
+        """
+        Set the optional relHumidity in row from the EndianInput (eis) instance.
+        """
+        row._relHumidityExists = eis.readBool()
+        if row._relHumidityExists:
+
+            row._relHumidity = Humidity.fromBin(eis)
+
+    @staticmethod
+    def temperatureFromBin(row, eis):
+        """
+        Set the optional temperature in row from the EndianInput (eis) instance.
+        """
+        row._temperatureExists = eis.readBool()
+        if row._temperatureExists:
+
+            row._temperature = Temperature.fromBin(eis)
+
+    @staticmethod
+    def windDirectionFromBin(row, eis):
+        """
+        Set the optional windDirection in row from the EndianInput (eis) instance.
+        """
+        row._windDirectionExists = eis.readBool()
+        if row._windDirectionExists:
+
+            row._windDirection = Angle.fromBin(eis)
+
+    @staticmethod
+    def windSpeedFromBin(row, eis):
+        """
+        Set the optional windSpeed in row from the EndianInput (eis) instance.
+        """
+        row._windSpeedExists = eis.readBool()
+        if row._windSpeedExists:
+
+            row._windSpeed = Speed.fromBin(eis)
+
+    @staticmethod
+    def windMaxFromBin(row, eis):
+        """
+        Set the optional windMax in row from the EndianInput (eis) instance.
+        """
+        row._windMaxExists = eis.readBool()
+        if row._windMaxExists:
+
+            row._windMax = Speed.fromBin(eis)
+
+    @staticmethod
+    def dewPointFromBin(row, eis):
+        """
+        Set the optional dewPoint in row from the EndianInput (eis) instance.
+        """
+        row._dewPointExists = eis.readBool()
+        if row._dewPointExists:
+
+            row._dewPoint = Temperature.fromBin(eis)
+
+    @staticmethod
+    def numLayerFromBin(row, eis):
+        """
+        Set the optional numLayer in row from the EndianInput (eis) instance.
+        """
+        row._numLayerExists = eis.readBool()
+        if row._numLayerExists:
+
+            row._numLayer = eis.readInt()
+
+    @staticmethod
+    def layerHeightFromBin(row, eis):
+        """
+        Set the optional layerHeight in row from the EndianInput (eis) instance.
+        """
+        row._layerHeightExists = eis.readBool()
+        if row._layerHeightExists:
+
+            row._layerHeight = Length.from1DBin(eis)
+
+    @staticmethod
+    def temperatureProfileFromBin(row, eis):
+        """
+        Set the optional temperatureProfile in row from the EndianInput (eis) instance.
+        """
+        row._temperatureProfileExists = eis.readBool()
+        if row._temperatureProfileExists:
+
+            row._temperatureProfile = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def cloudMonitorFromBin(row, eis):
+        """
+        Set the optional cloudMonitor in row from the EndianInput (eis) instance.
+        """
+        row._cloudMonitorExists = eis.readBool()
+        if row._cloudMonitorExists:
+
+            row._cloudMonitor = Temperature.fromBin(eis)
+
+    @staticmethod
+    def numWVRFromBin(row, eis):
+        """
+        Set the optional numWVR in row from the EndianInput (eis) instance.
+        """
+        row._numWVRExists = eis.readBool()
+        if row._numWVRExists:
+
+            row._numWVR = eis.readInt()
+
+    @staticmethod
+    def wvrTempFromBin(row, eis):
+        """
+        Set the optional wvrTemp in row from the EndianInput (eis) instance.
+        """
+        row._wvrTempExists = eis.readBool()
+        if row._wvrTempExists:
+
+            row._wvrTemp = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def waterFromBin(row, eis):
+        """
+        Set the optional water in row from the EndianInput (eis) instance.
+        """
+        row._waterExists = eis.readBool()
+        if row._waterExists:
+
+            row._water = eis.readFloat()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["stationId"] = WeatherRow.stationIdFromBin
+        _fromBinMethods["timeInterval"] = WeatherRow.timeIntervalFromBin
+
+        _fromBinMethods["pressure"] = WeatherRow.pressureFromBin
+        _fromBinMethods["relHumidity"] = WeatherRow.relHumidityFromBin
+        _fromBinMethods["temperature"] = WeatherRow.temperatureFromBin
+        _fromBinMethods["windDirection"] = WeatherRow.windDirectionFromBin
+        _fromBinMethods["windSpeed"] = WeatherRow.windSpeedFromBin
+        _fromBinMethods["windMax"] = WeatherRow.windMaxFromBin
+        _fromBinMethods["dewPoint"] = WeatherRow.dewPointFromBin
+        _fromBinMethods["numLayer"] = WeatherRow.numLayerFromBin
+        _fromBinMethods["layerHeight"] = WeatherRow.layerHeightFromBin
+        _fromBinMethods["temperatureProfile"] = WeatherRow.temperatureProfileFromBin
+        _fromBinMethods["cloudMonitor"] = WeatherRow.cloudMonitorFromBin
+        _fromBinMethods["numWVR"] = WeatherRow.numWVRFromBin
+        _fromBinMethods["wvrTemp"] = WeatherRow.wvrTempFromBin
+        _fromBinMethods["water"] = WeatherRow.waterFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = WeatherRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Weather",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1306,3 +1595,7 @@ class WeatherRow:
     ):
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+WeatherRow.initFromBinMethods()

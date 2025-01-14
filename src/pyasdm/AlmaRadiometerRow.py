@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class AlmaRadiometerRow:
         Create a AlmaRadiometerRow.
         When row is None, create an empty row attached to table, which must be a AlmaRadiometerTable.
         When row is given, copy those values in to the new row. The row argument must be a AlmaRadiometerRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.AlmaRadiometerTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a AlmaRadiometerTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -90,7 +95,7 @@ class AlmaRadiometerRow:
 
         if row is not None:
             if not isinstance(row, AlmaRadiometerRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a AlmaRadiometerRow")
 
             # copy constructor
 
@@ -108,7 +113,7 @@ class AlmaRadiometerRow:
 
             if row._spectralWindowIdExists:
 
-                # spectralWindowId is a list , let's populate self.spectralWindowId element by element.
+                # spectralWindowId is a list, let's populate self._spectralWindowId element by element.
                 if self._spectralWindowId is None:
                     self._spectralWindowId = []
                 for i in range(len(row._spectralWindowId)):
@@ -205,10 +210,91 @@ class AlmaRadiometerRow:
 
             self._spectralWindowIdExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._almaRadiometerId.toBin(eos)
+
+        eos.writeBool(self._numAntennaExists)
+        if self._numAntennaExists:
+
+            eos.writeInt(self._numAntenna)
+
+        eos.writeBool(self._spectralWindowIdExists)
+        if self._spectralWindowIdExists:
+
+            Tag.listToBin(self._spectralWindowId, eos)
+
+    @staticmethod
+    def almaRadiometerIdFromBin(row, eis):
+        """
+        Set the almaRadiometerId in row from the EndianInput (eis) instance.
+        """
+
+        row._almaRadiometerId = Tag.fromBin(eis)
+
+    @staticmethod
+    def numAntennaFromBin(row, eis):
+        """
+        Set the optional numAntenna in row from the EndianInput (eis) instance.
+        """
+        row._numAntennaExists = eis.readBool()
+        if row._numAntennaExists:
+
+            row._numAntenna = eis.readInt()
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the optional spectralWindowId in row from the EndianInput (eis) instance.
+        """
+        row._spectralWindowIdExists = eis.readBool()
+        if row._spectralWindowIdExists:
+
+            row._spectralWindowId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["almaRadiometerId"] = AlmaRadiometerRow.almaRadiometerIdFromBin
+
+        _fromBinMethods["numAntenna"] = AlmaRadiometerRow.numAntennaFromBin
+        _fromBinMethods["spectralWindowId"] = AlmaRadiometerRow.spectralWindowIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = AlmaRadiometerRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " AlmaRadiometer",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute almaRadiometerId
 
@@ -357,9 +443,9 @@ class AlmaRadiometerRow:
 
     def setOneSpectralWindowId(self, index, spectralWindowId):
         """
-        Set spectralWindowId[i] with the specified Tag value.
+        Set spectralWindowId[index] with the specified Tag value.
         index The index in spectralWindowId where to set the Tag value.
-        spectralWindowId The Tag value to which spectralWindowId[i] is to be set.
+        spectralWindowId The Tag value to which spectralWindowId[index] is to be set.
         Raises an exception if that value does not already exist in this row
         """
         if not self._spectralWindowIdExists():
@@ -376,8 +462,8 @@ class AlmaRadiometerRow:
         id the Tag to be appended to spectralWindowId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._spectralWindowId.append(Tag(id[i]))
+            for thisValue in id:
+                self._spectralWindowId.append(Tag(thisValue))
         else:
             self._spectralWindowId.append(Tag(id))
 
@@ -429,3 +515,7 @@ class AlmaRadiometerRow:
     ):
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+AlmaRadiometerRow.initFromBinMethods()

@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class ExecBlockRow:
         Create a ExecBlockRow.
         When row is None, create an empty row attached to table, which must be a ExecBlockTable.
         When row is given, copy those values in to the new row. The row argument must be a ExecBlockRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.ExecBlockTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a ExecBlockTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -154,7 +159,7 @@ class ExecBlockRow:
 
         if row is not None:
             if not isinstance(row, ExecBlockRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a ExecBlockRow")
 
             # copy constructor
 
@@ -547,10 +552,415 @@ class ExecBlockRow:
 
             self._scaleIdExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._execBlockId.toBin(eos)
+
+        self._startTime.toBin(eos)
+
+        self._endTime.toBin(eos)
+
+        eos.writeInt(self._execBlockNum)
+
+        self._execBlockUID.toBin(eos)
+
+        self._projectUID.toBin(eos)
+
+        eos.writeStr(self._configName)
+
+        eos.writeStr(self._telescopeName)
+
+        eos.writeStr(self._observerName)
+
+        eos.writeInt(self._numObservingLog)
+
+        eos.writeInt(len(self._observingLog))
+        for i in range(len(self._observingLog)):
+
+            eos.writeStr(self._observingLog[i])
+
+        self._sessionReference.toBin(eos)
+
+        self._baseRangeMin.toBin(eos)
+
+        self._baseRangeMax.toBin(eos)
+
+        self._baseRmsMinor.toBin(eos)
+
+        self._baseRmsMajor.toBin(eos)
+
+        self._basePa.toBin(eos)
+
+        eos.writeBool(self._aborted)
+
+        eos.writeInt(self._numAntenna)
+
+        Tag.listToBin(self._antennaId, eos)
+
+        self._sBSummaryId.toBin(eos)
+
+        eos.writeBool(self._releaseDateExists)
+        if self._releaseDateExists:
+
+            self._releaseDate.toBin(eos)
+
+        eos.writeBool(self._schedulerModeExists)
+        if self._schedulerModeExists:
+
+            eos.writeStr(self._schedulerMode)
+
+        eos.writeBool(self._siteAltitudeExists)
+        if self._siteAltitudeExists:
+
+            self._siteAltitude.toBin(eos)
+
+        eos.writeBool(self._siteLongitudeExists)
+        if self._siteLongitudeExists:
+
+            self._siteLongitude.toBin(eos)
+
+        eos.writeBool(self._siteLatitudeExists)
+        if self._siteLatitudeExists:
+
+            self._siteLatitude.toBin(eos)
+
+        eos.writeBool(self._observingScriptExists)
+        if self._observingScriptExists:
+
+            eos.writeStr(self._observingScript)
+
+        eos.writeBool(self._observingScriptUIDExists)
+        if self._observingScriptUIDExists:
+
+            self._observingScriptUID.toBin(eos)
+
+        eos.writeBool(self._scaleIdExists)
+        if self._scaleIdExists:
+
+            self._scaleId.toBin(eos)
+
+    @staticmethod
+    def execBlockIdFromBin(row, eis):
+        """
+        Set the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startTimeFromBin(row, eis):
+        """
+        Set the startTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endTimeFromBin(row, eis):
+        """
+        Set the endTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def execBlockNumFromBin(row, eis):
+        """
+        Set the execBlockNum in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockNum = eis.readInt()
+
+    @staticmethod
+    def execBlockUIDFromBin(row, eis):
+        """
+        Set the execBlockUID in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def projectUIDFromBin(row, eis):
+        """
+        Set the projectUID in row from the EndianInput (eis) instance.
+        """
+
+        row._projectUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def configNameFromBin(row, eis):
+        """
+        Set the configName in row from the EndianInput (eis) instance.
+        """
+
+        row._configName = eis.readStr()
+
+    @staticmethod
+    def telescopeNameFromBin(row, eis):
+        """
+        Set the telescopeName in row from the EndianInput (eis) instance.
+        """
+
+        row._telescopeName = eis.readStr()
+
+    @staticmethod
+    def observerNameFromBin(row, eis):
+        """
+        Set the observerName in row from the EndianInput (eis) instance.
+        """
+
+        row._observerName = eis.readStr()
+
+    @staticmethod
+    def numObservingLogFromBin(row, eis):
+        """
+        Set the numObservingLog in row from the EndianInput (eis) instance.
+        """
+
+        row._numObservingLog = eis.readInt()
+
+    @staticmethod
+    def observingLogFromBin(row, eis):
+        """
+        Set the observingLog in row from the EndianInput (eis) instance.
+        """
+
+        observingLogDim1 = eis.readInt()
+        thisList = []
+        for i in range(observingLogDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._observingLog = thisList
+
+    @staticmethod
+    def sessionReferenceFromBin(row, eis):
+        """
+        Set the sessionReference in row from the EndianInput (eis) instance.
+        """
+
+        row._sessionReference = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def baseRangeMinFromBin(row, eis):
+        """
+        Set the baseRangeMin in row from the EndianInput (eis) instance.
+        """
+
+        row._baseRangeMin = Length.fromBin(eis)
+
+    @staticmethod
+    def baseRangeMaxFromBin(row, eis):
+        """
+        Set the baseRangeMax in row from the EndianInput (eis) instance.
+        """
+
+        row._baseRangeMax = Length.fromBin(eis)
+
+    @staticmethod
+    def baseRmsMinorFromBin(row, eis):
+        """
+        Set the baseRmsMinor in row from the EndianInput (eis) instance.
+        """
+
+        row._baseRmsMinor = Length.fromBin(eis)
+
+    @staticmethod
+    def baseRmsMajorFromBin(row, eis):
+        """
+        Set the baseRmsMajor in row from the EndianInput (eis) instance.
+        """
+
+        row._baseRmsMajor = Length.fromBin(eis)
+
+    @staticmethod
+    def basePaFromBin(row, eis):
+        """
+        Set the basePa in row from the EndianInput (eis) instance.
+        """
+
+        row._basePa = Angle.fromBin(eis)
+
+    @staticmethod
+    def abortedFromBin(row, eis):
+        """
+        Set the aborted in row from the EndianInput (eis) instance.
+        """
+
+        row._aborted = eis.readBool()
+
+    @staticmethod
+    def numAntennaFromBin(row, eis):
+        """
+        Set the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        row._numAntenna = eis.readInt()
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def sBSummaryIdFromBin(row, eis):
+        """
+        Set the sBSummaryId in row from the EndianInput (eis) instance.
+        """
+
+        row._sBSummaryId = Tag.fromBin(eis)
+
+    @staticmethod
+    def releaseDateFromBin(row, eis):
+        """
+        Set the optional releaseDate in row from the EndianInput (eis) instance.
+        """
+        row._releaseDateExists = eis.readBool()
+        if row._releaseDateExists:
+
+            row._releaseDate = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def schedulerModeFromBin(row, eis):
+        """
+        Set the optional schedulerMode in row from the EndianInput (eis) instance.
+        """
+        row._schedulerModeExists = eis.readBool()
+        if row._schedulerModeExists:
+
+            row._schedulerMode = eis.readStr()
+
+    @staticmethod
+    def siteAltitudeFromBin(row, eis):
+        """
+        Set the optional siteAltitude in row from the EndianInput (eis) instance.
+        """
+        row._siteAltitudeExists = eis.readBool()
+        if row._siteAltitudeExists:
+
+            row._siteAltitude = Length.fromBin(eis)
+
+    @staticmethod
+    def siteLongitudeFromBin(row, eis):
+        """
+        Set the optional siteLongitude in row from the EndianInput (eis) instance.
+        """
+        row._siteLongitudeExists = eis.readBool()
+        if row._siteLongitudeExists:
+
+            row._siteLongitude = Angle.fromBin(eis)
+
+    @staticmethod
+    def siteLatitudeFromBin(row, eis):
+        """
+        Set the optional siteLatitude in row from the EndianInput (eis) instance.
+        """
+        row._siteLatitudeExists = eis.readBool()
+        if row._siteLatitudeExists:
+
+            row._siteLatitude = Angle.fromBin(eis)
+
+    @staticmethod
+    def observingScriptFromBin(row, eis):
+        """
+        Set the optional observingScript in row from the EndianInput (eis) instance.
+        """
+        row._observingScriptExists = eis.readBool()
+        if row._observingScriptExists:
+
+            row._observingScript = eis.readStr()
+
+    @staticmethod
+    def observingScriptUIDFromBin(row, eis):
+        """
+        Set the optional observingScriptUID in row from the EndianInput (eis) instance.
+        """
+        row._observingScriptUIDExists = eis.readBool()
+        if row._observingScriptUIDExists:
+
+            row._observingScriptUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def scaleIdFromBin(row, eis):
+        """
+        Set the optional scaleId in row from the EndianInput (eis) instance.
+        """
+        row._scaleIdExists = eis.readBool()
+        if row._scaleIdExists:
+
+            row._scaleId = Tag.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["execBlockId"] = ExecBlockRow.execBlockIdFromBin
+        _fromBinMethods["startTime"] = ExecBlockRow.startTimeFromBin
+        _fromBinMethods["endTime"] = ExecBlockRow.endTimeFromBin
+        _fromBinMethods["execBlockNum"] = ExecBlockRow.execBlockNumFromBin
+        _fromBinMethods["execBlockUID"] = ExecBlockRow.execBlockUIDFromBin
+        _fromBinMethods["projectUID"] = ExecBlockRow.projectUIDFromBin
+        _fromBinMethods["configName"] = ExecBlockRow.configNameFromBin
+        _fromBinMethods["telescopeName"] = ExecBlockRow.telescopeNameFromBin
+        _fromBinMethods["observerName"] = ExecBlockRow.observerNameFromBin
+        _fromBinMethods["numObservingLog"] = ExecBlockRow.numObservingLogFromBin
+        _fromBinMethods["observingLog"] = ExecBlockRow.observingLogFromBin
+        _fromBinMethods["sessionReference"] = ExecBlockRow.sessionReferenceFromBin
+        _fromBinMethods["baseRangeMin"] = ExecBlockRow.baseRangeMinFromBin
+        _fromBinMethods["baseRangeMax"] = ExecBlockRow.baseRangeMaxFromBin
+        _fromBinMethods["baseRmsMinor"] = ExecBlockRow.baseRmsMinorFromBin
+        _fromBinMethods["baseRmsMajor"] = ExecBlockRow.baseRmsMajorFromBin
+        _fromBinMethods["basePa"] = ExecBlockRow.basePaFromBin
+        _fromBinMethods["aborted"] = ExecBlockRow.abortedFromBin
+        _fromBinMethods["numAntenna"] = ExecBlockRow.numAntennaFromBin
+        _fromBinMethods["antennaId"] = ExecBlockRow.antennaIdFromBin
+        _fromBinMethods["sBSummaryId"] = ExecBlockRow.sBSummaryIdFromBin
+
+        _fromBinMethods["releaseDate"] = ExecBlockRow.releaseDateFromBin
+        _fromBinMethods["schedulerMode"] = ExecBlockRow.schedulerModeFromBin
+        _fromBinMethods["siteAltitude"] = ExecBlockRow.siteAltitudeFromBin
+        _fromBinMethods["siteLongitude"] = ExecBlockRow.siteLongitudeFromBin
+        _fromBinMethods["siteLatitude"] = ExecBlockRow.siteLatitudeFromBin
+        _fromBinMethods["observingScript"] = ExecBlockRow.observingScriptFromBin
+        _fromBinMethods["observingScriptUID"] = ExecBlockRow.observingScriptUIDFromBin
+        _fromBinMethods["scaleId"] = ExecBlockRow.scaleIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = ExecBlockRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " ExecBlock",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute execBlockId
 
@@ -1447,10 +1857,9 @@ class ExecBlockRow:
 
     def setOneAntennaId(self, index, antennaId):
         """
-        Set antennaId[i] with the specified Tag value.
+        Set antennaId[index] with the specified Tag value.
         index The index in antennaId where to set the Tag value.
-        antennaId The Tag value to which antennaId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        antennaId The Tag value to which antennaId[index] is to be set.
 
         """
 
@@ -1464,8 +1873,8 @@ class ExecBlockRow:
         id the Tag to be appended to antennaId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._antennaId.append(Tag(id[i]))
+            for thisValue in id:
+                self._antennaId.append(Tag(thisValue))
         else:
             self._antennaId.append(Tag(id))
 
@@ -1505,11 +1914,11 @@ class ExecBlockRow:
         """
         Returns the row in the Scale table having Scale.scaleId == scaleId
 
-        Raise ValueError if the optional scaleId does not exist for this row.
+        Raises ValueError if the optional scaleId does not exist for this row.
 
         """
 
-        if not _scaleIdExists:
+        if not self._scaleIdExists:
             raise ValueError("scaleId does not exist for this row.")
 
         return self._table.getContainer().getScale().getRowByKey(self._scaleId)
@@ -1804,3 +2213,7 @@ class ExecBlockRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+ExecBlockRow.initFromBinMethods()

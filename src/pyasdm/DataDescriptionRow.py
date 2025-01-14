@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class DataDescriptionRow:
         Create a DataDescriptionRow.
         When row is None, create an empty row attached to table, which must be a DataDescriptionTable.
         When row is given, copy those values in to the new row. The row argument must be a DataDescriptionRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.DataDescriptionTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a DataDescriptionTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -90,7 +95,7 @@ class DataDescriptionRow:
 
         if row is not None:
             if not isinstance(row, DataDescriptionRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a DataDescriptionRow")
 
             # copy constructor
 
@@ -193,10 +198,99 @@ class DataDescriptionRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._dataDescriptionId.toBin(eos)
+
+        self._polOrHoloId.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        eos.writeBool(self._pulsarIdExists)
+        if self._pulsarIdExists:
+
+            self._pulsarId.toBin(eos)
+
+    @staticmethod
+    def dataDescriptionIdFromBin(row, eis):
+        """
+        Set the dataDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        row._dataDescriptionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def polOrHoloIdFromBin(row, eis):
+        """
+        Set the polOrHoloId in row from the EndianInput (eis) instance.
+        """
+
+        row._polOrHoloId = Tag.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def pulsarIdFromBin(row, eis):
+        """
+        Set the optional pulsarId in row from the EndianInput (eis) instance.
+        """
+        row._pulsarIdExists = eis.readBool()
+        if row._pulsarIdExists:
+
+            row._pulsarId = Tag.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["dataDescriptionId"] = (
+            DataDescriptionRow.dataDescriptionIdFromBin
+        )
+        _fromBinMethods["polOrHoloId"] = DataDescriptionRow.polOrHoloIdFromBin
+        _fromBinMethods["spectralWindowId"] = DataDescriptionRow.spectralWindowIdFromBin
+
+        _fromBinMethods["pulsarId"] = DataDescriptionRow.pulsarIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = DataDescriptionRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " DataDescription",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute dataDescriptionId
 
@@ -350,11 +444,11 @@ class DataDescriptionRow:
         """
         Returns the row in the Pulsar table having Pulsar.pulsarId == pulsarId
 
-        Raise ValueError if the optional pulsarId does not exist for this row.
+        Raises ValueError if the optional pulsarId does not exist for this row.
 
         """
 
-        if not _pulsarIdExists:
+        if not self._pulsarIdExists:
             raise ValueError("pulsarId does not exist for this row.")
 
         return self._table.getContainer().getPulsar().getRowByKey(self._pulsarId)
@@ -398,3 +492,7 @@ class DataDescriptionRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+DataDescriptionRow.initFromBinMethods()

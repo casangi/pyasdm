@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.BasebandName import BasebandName
 
@@ -67,10 +71,11 @@ class CalAppPhaseRow:
         Create a CalAppPhaseRow.
         When row is None, create an empty row attached to table, which must be a CalAppPhaseTable.
         When row is given, copy those values in to the new row. The row argument must be a CalAppPhaseRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalAppPhaseTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalAppPhaseTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -145,11 +150,11 @@ class CalAppPhaseRow:
 
         if row is not None:
             if not isinstance(row, CalAppPhaseRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalAppPhaseRow")
 
             # copy constructor
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._basebandName is None:
                 self._basebandName = BasebandName.from_int(0)
             else:
@@ -501,10 +506,441 @@ class CalAppPhaseRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeString(self._basebandName.toString())
+
+        eos.writeInt(self._scanNumber)
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        self._adjustTime.toBin(eos)
+
+        eos.writeStr(self._adjustToken)
+
+        eos.writeStr(self._phasingMode)
+
+        eos.writeInt(self._numPhasedAntennas)
+
+        eos.writeInt(len(self._phasedAntennas))
+        for i in range(len(self._phasedAntennas)):
+
+            eos.writeStr(self._phasedAntennas[i])
+
+        eos.writeInt(self._refAntennaIndex)
+
+        eos.writeInt(self._candRefAntennaIndex)
+
+        eos.writeStr(self._phasePacking)
+
+        eos.writeInt(self._numReceptors)
+
+        eos.writeInt(self._numChannels)
+
+        eos.writeInt(self._numPhaseValues)
+
+        eos.writeInt(len(self._phaseValues))
+        for i in range(len(self._phaseValues)):
+
+            eos.writeFloat(self._phaseValues[i])
+
+        eos.writeInt(self._numCompare)
+
+        eos.writeInt(self._numEfficiencies)
+
+        eos.writeInt(len(self._compareArray))
+        for i in range(len(self._compareArray)):
+
+            eos.writeStr(self._compareArray[i])
+
+        eos.writeInt(len(self._efficiencyIndices))
+        for i in range(len(self._efficiencyIndices)):
+
+            eos.writeInt(self._efficiencyIndices[i])
+
+        # null array case, unsure if this is possible but this should work
+        if self._efficiencies is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            efficiencies_dims = Parser.getListDims(self._efficiencies)
+        # assumes it really is 2D
+        eos.writeInt(efficiencies_dims[0])
+        eos.writeInt(efficiencies_dims[1])
+        for i in range(efficiencies_dims[0]):
+            for j in range(efficiencies_dims[1]):
+                eos.writeFloat(self._efficiencies[i][j])
+
+        eos.writeInt(len(self._quality))
+        for i in range(len(self._quality)):
+
+            eos.writeFloat(self._quality[i])
+
+        eos.writeStr(self._phasedSumAntenna)
+
+        eos.writeBool(self._typeSupportsExists)
+        if self._typeSupportsExists:
+
+            eos.writeStr(self._typeSupports)
+
+        eos.writeBool(self._numSupportsExists)
+        if self._numSupportsExists:
+
+            eos.writeInt(self._numSupports)
+
+        eos.writeBool(self._phaseSupportsExists)
+        if self._phaseSupportsExists:
+
+            eos.writeInt(len(self._phaseSupports))
+            for i in range(len(self._phaseSupports)):
+
+                eos.writeFloat(self._phaseSupports[i])
+
+    @staticmethod
+    def basebandNameFromBin(row, eis):
+        """
+        Set the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        row._basebandName = BasebandName.from_int(eis.readInt())
+
+    @staticmethod
+    def scanNumberFromBin(row, eis):
+        """
+        Set the scanNumber in row from the EndianInput (eis) instance.
+        """
+
+        row._scanNumber = eis.readInt()
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def adjustTimeFromBin(row, eis):
+        """
+        Set the adjustTime in row from the EndianInput (eis) instance.
+        """
+
+        row._adjustTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def adjustTokenFromBin(row, eis):
+        """
+        Set the adjustToken in row from the EndianInput (eis) instance.
+        """
+
+        row._adjustToken = eis.readStr()
+
+    @staticmethod
+    def phasingModeFromBin(row, eis):
+        """
+        Set the phasingMode in row from the EndianInput (eis) instance.
+        """
+
+        row._phasingMode = eis.readStr()
+
+    @staticmethod
+    def numPhasedAntennasFromBin(row, eis):
+        """
+        Set the numPhasedAntennas in row from the EndianInput (eis) instance.
+        """
+
+        row._numPhasedAntennas = eis.readInt()
+
+    @staticmethod
+    def phasedAntennasFromBin(row, eis):
+        """
+        Set the phasedAntennas in row from the EndianInput (eis) instance.
+        """
+
+        phasedAntennasDim1 = eis.readInt()
+        thisList = []
+        for i in range(phasedAntennasDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._phasedAntennas = thisList
+
+    @staticmethod
+    def refAntennaIndexFromBin(row, eis):
+        """
+        Set the refAntennaIndex in row from the EndianInput (eis) instance.
+        """
+
+        row._refAntennaIndex = eis.readInt()
+
+    @staticmethod
+    def candRefAntennaIndexFromBin(row, eis):
+        """
+        Set the candRefAntennaIndex in row from the EndianInput (eis) instance.
+        """
+
+        row._candRefAntennaIndex = eis.readInt()
+
+    @staticmethod
+    def phasePackingFromBin(row, eis):
+        """
+        Set the phasePacking in row from the EndianInput (eis) instance.
+        """
+
+        row._phasePacking = eis.readStr()
+
+    @staticmethod
+    def numReceptorsFromBin(row, eis):
+        """
+        Set the numReceptors in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptors = eis.readInt()
+
+    @staticmethod
+    def numChannelsFromBin(row, eis):
+        """
+        Set the numChannels in row from the EndianInput (eis) instance.
+        """
+
+        row._numChannels = eis.readInt()
+
+    @staticmethod
+    def numPhaseValuesFromBin(row, eis):
+        """
+        Set the numPhaseValues in row from the EndianInput (eis) instance.
+        """
+
+        row._numPhaseValues = eis.readInt()
+
+    @staticmethod
+    def phaseValuesFromBin(row, eis):
+        """
+        Set the phaseValues in row from the EndianInput (eis) instance.
+        """
+
+        phaseValuesDim1 = eis.readInt()
+        thisList = []
+        for i in range(phaseValuesDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._phaseValues = thisList
+
+    @staticmethod
+    def numCompareFromBin(row, eis):
+        """
+        Set the numCompare in row from the EndianInput (eis) instance.
+        """
+
+        row._numCompare = eis.readInt()
+
+    @staticmethod
+    def numEfficienciesFromBin(row, eis):
+        """
+        Set the numEfficiencies in row from the EndianInput (eis) instance.
+        """
+
+        row._numEfficiencies = eis.readInt()
+
+    @staticmethod
+    def compareArrayFromBin(row, eis):
+        """
+        Set the compareArray in row from the EndianInput (eis) instance.
+        """
+
+        compareArrayDim1 = eis.readInt()
+        thisList = []
+        for i in range(compareArrayDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._compareArray = thisList
+
+    @staticmethod
+    def efficiencyIndicesFromBin(row, eis):
+        """
+        Set the efficiencyIndices in row from the EndianInput (eis) instance.
+        """
+
+        efficiencyIndicesDim1 = eis.readInt()
+        thisList = []
+        for i in range(efficiencyIndicesDim1):
+            thisValue = eis.readInt()
+            thisList.append(thisValue)
+        row._efficiencyIndices = thisList
+
+    @staticmethod
+    def efficienciesFromBin(row, eis):
+        """
+        Set the efficiencies in row from the EndianInput (eis) instance.
+        """
+
+        efficienciesDim1 = eis.readInt()
+        efficienciesDim2 = eis.readInt()
+        thisList = []
+        for i in range(efficienciesDim1):
+            thisList_j = []
+            for j in range(efficienciesDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.efficiencies = thisList
+
+    @staticmethod
+    def qualityFromBin(row, eis):
+        """
+        Set the quality in row from the EndianInput (eis) instance.
+        """
+
+        qualityDim1 = eis.readInt()
+        thisList = []
+        for i in range(qualityDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._quality = thisList
+
+    @staticmethod
+    def phasedSumAntennaFromBin(row, eis):
+        """
+        Set the phasedSumAntenna in row from the EndianInput (eis) instance.
+        """
+
+        row._phasedSumAntenna = eis.readStr()
+
+    @staticmethod
+    def typeSupportsFromBin(row, eis):
+        """
+        Set the optional typeSupports in row from the EndianInput (eis) instance.
+        """
+        row._typeSupportsExists = eis.readBool()
+        if row._typeSupportsExists:
+
+            row._typeSupports = eis.readStr()
+
+    @staticmethod
+    def numSupportsFromBin(row, eis):
+        """
+        Set the optional numSupports in row from the EndianInput (eis) instance.
+        """
+        row._numSupportsExists = eis.readBool()
+        if row._numSupportsExists:
+
+            row._numSupports = eis.readInt()
+
+    @staticmethod
+    def phaseSupportsFromBin(row, eis):
+        """
+        Set the optional phaseSupports in row from the EndianInput (eis) instance.
+        """
+        row._phaseSupportsExists = eis.readBool()
+        if row._phaseSupportsExists:
+
+            phaseSupportsDim1 = eis.readInt()
+            thisList = []
+            for i in range(phaseSupportsDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._phaseSupports = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["basebandName"] = CalAppPhaseRow.basebandNameFromBin
+        _fromBinMethods["scanNumber"] = CalAppPhaseRow.scanNumberFromBin
+        _fromBinMethods["calDataId"] = CalAppPhaseRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalAppPhaseRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalAppPhaseRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalAppPhaseRow.endValidTimeFromBin
+        _fromBinMethods["adjustTime"] = CalAppPhaseRow.adjustTimeFromBin
+        _fromBinMethods["adjustToken"] = CalAppPhaseRow.adjustTokenFromBin
+        _fromBinMethods["phasingMode"] = CalAppPhaseRow.phasingModeFromBin
+        _fromBinMethods["numPhasedAntennas"] = CalAppPhaseRow.numPhasedAntennasFromBin
+        _fromBinMethods["phasedAntennas"] = CalAppPhaseRow.phasedAntennasFromBin
+        _fromBinMethods["refAntennaIndex"] = CalAppPhaseRow.refAntennaIndexFromBin
+        _fromBinMethods["candRefAntennaIndex"] = (
+            CalAppPhaseRow.candRefAntennaIndexFromBin
+        )
+        _fromBinMethods["phasePacking"] = CalAppPhaseRow.phasePackingFromBin
+        _fromBinMethods["numReceptors"] = CalAppPhaseRow.numReceptorsFromBin
+        _fromBinMethods["numChannels"] = CalAppPhaseRow.numChannelsFromBin
+        _fromBinMethods["numPhaseValues"] = CalAppPhaseRow.numPhaseValuesFromBin
+        _fromBinMethods["phaseValues"] = CalAppPhaseRow.phaseValuesFromBin
+        _fromBinMethods["numCompare"] = CalAppPhaseRow.numCompareFromBin
+        _fromBinMethods["numEfficiencies"] = CalAppPhaseRow.numEfficienciesFromBin
+        _fromBinMethods["compareArray"] = CalAppPhaseRow.compareArrayFromBin
+        _fromBinMethods["efficiencyIndices"] = CalAppPhaseRow.efficiencyIndicesFromBin
+        _fromBinMethods["efficiencies"] = CalAppPhaseRow.efficienciesFromBin
+        _fromBinMethods["quality"] = CalAppPhaseRow.qualityFromBin
+        _fromBinMethods["phasedSumAntenna"] = CalAppPhaseRow.phasedSumAntennaFromBin
+
+        _fromBinMethods["typeSupports"] = CalAppPhaseRow.typeSupportsFromBin
+        _fromBinMethods["numSupports"] = CalAppPhaseRow.numSupportsFromBin
+        _fromBinMethods["phaseSupports"] = CalAppPhaseRow.phaseSupportsFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalAppPhaseRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalAppPhase",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute basebandName
 
@@ -1542,7 +1978,7 @@ class CalAppPhaseRow:
             if not (self._efficiencyIndices[indx] == efficiencyIndices[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if efficiencies is not None:
             if self._efficiencies is None:
                 return False
@@ -1555,7 +1991,7 @@ class CalAppPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(efficiencies_dims[0]):
-                for j in range(efficiencies_dims[0]):
+                for j in range(efficiencies_dims[1]):
 
                     # efficiencies is an array of float, compare using == operator.
                     if not (self._efficiencies[i][j] == efficiencies[i][j]):
@@ -1728,7 +2164,7 @@ class CalAppPhaseRow:
             if not (self._efficiencyIndices[indx] == efficiencyIndices[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if efficiencies is not None:
             if self._efficiencies is None:
                 return False
@@ -1741,7 +2177,7 @@ class CalAppPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(efficiencies_dims[0]):
-                for j in range(efficiencies_dims[0]):
+                for j in range(efficiencies_dims[1]):
 
                     # efficiencies is an array of float, compare using == operator.
                     if not (self._efficiencies[i][j] == efficiencies[i][j]):
@@ -1762,3 +2198,7 @@ class CalAppPhaseRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalAppPhaseRow.initFromBinMethods()

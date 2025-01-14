@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.SubscanIntent import SubscanIntent
 
@@ -73,10 +77,11 @@ class SubscanRow:
         Create a SubscanRow.
         When row is None, create an empty row attached to table, which must be a SubscanTable.
         When row is given, copy those values in to the new row. The row argument must be a SubscanRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.SubscanTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a SubscanTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -115,7 +120,7 @@ class SubscanRow:
 
         if row is not None:
             if not isinstance(row, SubscanRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a SubscanRow")
 
             # copy constructor
 
@@ -144,22 +149,22 @@ class SubscanRow:
 
             # by default set systematically subscanMode's value to something not None
 
-            self.subscanMode = SwitchingMode.from_int(0)
+            self._subscanMode = SwitchingMode.from_int(0)
 
             if row._subscanModeExists:
 
-                if row._subscanMode is None:
+                if row._subscanMode is not None:
                     self._subscanMode = row._subscanMode
 
                 self._subscanModeExists = True
 
             # by default set systematically correlatorCalibration's value to something not None
 
-            self.correlatorCalibration = CorrelatorCalibration.from_int(0)
+            self._correlatorCalibration = CorrelatorCalibration.from_int(0)
 
             if row._correlatorCalibrationExists:
 
-                if row._correlatorCalibration is None:
+                if row._correlatorCalibration is not None:
                     self._correlatorCalibration = row._correlatorCalibration
 
                 self._correlatorCalibrationExists = True
@@ -311,10 +316,189 @@ class SubscanRow:
 
         self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._execBlockId.toBin(eos)
+
+        eos.writeInt(self._scanNumber)
+
+        eos.writeInt(self._subscanNumber)
+
+        self._startTime.toBin(eos)
+
+        self._endTime.toBin(eos)
+
+        eos.writeStr(self._fieldName)
+
+        eos.writeString(self._subscanIntent.toString())
+
+        eos.writeInt(self._numIntegration)
+
+        eos.writeInt(len(self._numSubintegration))
+        for i in range(len(self._numSubintegration)):
+
+            eos.writeInt(self._numSubintegration[i])
+
+        eos.writeBool(self._subscanModeExists)
+        if self._subscanModeExists:
+
+            eos.writeString(self._subscanMode.toString())
+
+        eos.writeBool(self._correlatorCalibrationExists)
+        if self._correlatorCalibrationExists:
+
+            eos.writeString(self._correlatorCalibration.toString())
+
+    @staticmethod
+    def execBlockIdFromBin(row, eis):
+        """
+        Set the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockId = Tag.fromBin(eis)
+
+    @staticmethod
+    def scanNumberFromBin(row, eis):
+        """
+        Set the scanNumber in row from the EndianInput (eis) instance.
+        """
+
+        row._scanNumber = eis.readInt()
+
+    @staticmethod
+    def subscanNumberFromBin(row, eis):
+        """
+        Set the subscanNumber in row from the EndianInput (eis) instance.
+        """
+
+        row._subscanNumber = eis.readInt()
+
+    @staticmethod
+    def startTimeFromBin(row, eis):
+        """
+        Set the startTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endTimeFromBin(row, eis):
+        """
+        Set the endTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def fieldNameFromBin(row, eis):
+        """
+        Set the fieldName in row from the EndianInput (eis) instance.
+        """
+
+        row._fieldName = eis.readStr()
+
+    @staticmethod
+    def subscanIntentFromBin(row, eis):
+        """
+        Set the subscanIntent in row from the EndianInput (eis) instance.
+        """
+
+        row._subscanIntent = SubscanIntent.from_int(eis.readInt())
+
+    @staticmethod
+    def numIntegrationFromBin(row, eis):
+        """
+        Set the numIntegration in row from the EndianInput (eis) instance.
+        """
+
+        row._numIntegration = eis.readInt()
+
+    @staticmethod
+    def numSubintegrationFromBin(row, eis):
+        """
+        Set the numSubintegration in row from the EndianInput (eis) instance.
+        """
+
+        numSubintegrationDim1 = eis.readInt()
+        thisList = []
+        for i in range(numSubintegrationDim1):
+            thisValue = eis.readInt()
+            thisList.append(thisValue)
+        row._numSubintegration = thisList
+
+    @staticmethod
+    def subscanModeFromBin(row, eis):
+        """
+        Set the optional subscanMode in row from the EndianInput (eis) instance.
+        """
+        row._subscanModeExists = eis.readBool()
+        if row._subscanModeExists:
+
+            row._subscanMode = SwitchingMode.from_int(eis.readInt())
+
+    @staticmethod
+    def correlatorCalibrationFromBin(row, eis):
+        """
+        Set the optional correlatorCalibration in row from the EndianInput (eis) instance.
+        """
+        row._correlatorCalibrationExists = eis.readBool()
+        if row._correlatorCalibrationExists:
+
+            row._correlatorCalibration = CorrelatorCalibration.from_int(eis.readInt())
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["execBlockId"] = SubscanRow.execBlockIdFromBin
+        _fromBinMethods["scanNumber"] = SubscanRow.scanNumberFromBin
+        _fromBinMethods["subscanNumber"] = SubscanRow.subscanNumberFromBin
+        _fromBinMethods["startTime"] = SubscanRow.startTimeFromBin
+        _fromBinMethods["endTime"] = SubscanRow.endTimeFromBin
+        _fromBinMethods["fieldName"] = SubscanRow.fieldNameFromBin
+        _fromBinMethods["subscanIntent"] = SubscanRow.subscanIntentFromBin
+        _fromBinMethods["numIntegration"] = SubscanRow.numIntegrationFromBin
+        _fromBinMethods["numSubintegration"] = SubscanRow.numSubintegrationFromBin
+
+        _fromBinMethods["subscanMode"] = SubscanRow.subscanModeFromBin
+        _fromBinMethods["correlatorCalibration"] = (
+            SubscanRow.correlatorCalibrationFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = SubscanRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Subscan",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute scanNumber
 
@@ -780,3 +964,7 @@ class SubscanRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+SubscanRow.initFromBinMethods()

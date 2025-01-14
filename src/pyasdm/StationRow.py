@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.StationType import StationType
 
@@ -67,10 +71,11 @@ class StationRow:
         Create a StationRow.
         When row is None, create an empty row attached to table, which must be a StationTable.
         When row is given, copy those values in to the new row. The row argument must be a StationRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.StationTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a StationTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -93,7 +98,7 @@ class StationRow:
 
         if row is not None:
             if not isinstance(row, StationRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a StationRow")
 
             # copy constructor
 
@@ -203,10 +208,108 @@ class StationRow:
 
             self._timeExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._stationId.toBin(eos)
+
+        eos.writeStr(self._name)
+
+        Length.listToBin(self._position, eos)
+
+        eos.writeString(self._type.toString())
+
+        eos.writeBool(self._timeExists)
+        if self._timeExists:
+
+            self._time.toBin(eos)
+
+    @staticmethod
+    def stationIdFromBin(row, eis):
+        """
+        Set the stationId in row from the EndianInput (eis) instance.
+        """
+
+        row._stationId = Tag.fromBin(eis)
+
+    @staticmethod
+    def nameFromBin(row, eis):
+        """
+        Set the name in row from the EndianInput (eis) instance.
+        """
+
+        row._name = eis.readStr()
+
+    @staticmethod
+    def positionFromBin(row, eis):
+        """
+        Set the position in row from the EndianInput (eis) instance.
+        """
+
+        row._position = Length.from1DBin(eis)
+
+    @staticmethod
+    def typeFromBin(row, eis):
+        """
+        Set the type in row from the EndianInput (eis) instance.
+        """
+
+        row._type = StationType.from_int(eis.readInt())
+
+    @staticmethod
+    def timeFromBin(row, eis):
+        """
+        Set the optional time in row from the EndianInput (eis) instance.
+        """
+        row._timeExists = eis.readBool()
+        if row._timeExists:
+
+            row._time = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["stationId"] = StationRow.stationIdFromBin
+        _fromBinMethods["name"] = StationRow.nameFromBin
+        _fromBinMethods["position"] = StationRow.positionFromBin
+        _fromBinMethods["type"] = StationRow.typeFromBin
+
+        _fromBinMethods["time"] = StationRow.timeFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = StationRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Station",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute stationId
 
@@ -438,3 +541,7 @@ class StationRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+StationRow.initFromBinMethods()

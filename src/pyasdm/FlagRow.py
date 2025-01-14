@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.PolarizationType import PolarizationType
 
@@ -67,10 +71,11 @@ class FlagRow:
         Create a FlagRow.
         When row is None, create an empty row attached to table, which must be a FlagTable.
         When row is given, copy those values in to the new row. The row argument must be a FlagRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.FlagTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a FlagTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -127,7 +132,7 @@ class FlagRow:
 
         if row is not None:
             if not isinstance(row, FlagRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a FlagRow")
 
             # copy constructor
 
@@ -203,7 +208,7 @@ class FlagRow:
 
             if row._pairedAntennaIdExists:
 
-                # pairedAntennaId is a list , let's populate self.pairedAntennaId element by element.
+                # pairedAntennaId is a list, let's populate self._pairedAntennaId element by element.
                 if self._pairedAntennaId is None:
                     self._pairedAntennaId = []
                 for i in range(len(row._pairedAntennaId)):
@@ -216,7 +221,7 @@ class FlagRow:
 
             if row._spectralWindowIdExists:
 
-                # spectralWindowId is a list , let's populate self.spectralWindowId element by element.
+                # spectralWindowId is a list, let's populate self._spectralWindowId element by element.
                 if self._spectralWindowId is None:
                     self._spectralWindowId = []
                 for i in range(len(row._spectralWindowId)):
@@ -430,10 +435,270 @@ class FlagRow:
 
             self._spectralWindowIdExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._flagId.toBin(eos)
+
+        self._startTime.toBin(eos)
+
+        self._endTime.toBin(eos)
+
+        eos.writeStr(self._reason)
+
+        eos.writeInt(self._numAntenna)
+
+        Tag.listToBin(self._antennaId, eos)
+
+        eos.writeBool(self._numPolarizationTypeExists)
+        if self._numPolarizationTypeExists:
+
+            eos.writeInt(self._numPolarizationType)
+
+        eos.writeBool(self._numSpectralWindowExists)
+        if self._numSpectralWindowExists:
+
+            eos.writeInt(self._numSpectralWindow)
+
+        eos.writeBool(self._numPairedAntennaExists)
+        if self._numPairedAntennaExists:
+
+            eos.writeInt(self._numPairedAntenna)
+
+        eos.writeBool(self._numChanExists)
+        if self._numChanExists:
+
+            eos.writeInt(self._numChan)
+
+        eos.writeBool(self._polarizationTypeExists)
+        if self._polarizationTypeExists:
+
+            eos.writeInt(len(self._polarizationType))
+            for i in range(len(self._polarizationType)):
+
+                eos.writeString(self._polarizationType[i].toString())
+
+        eos.writeBool(self._channelExists)
+        if self._channelExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._channel is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                channel_dims = Parser.getListDims(self._channel)
+            # assumes it really is 2D
+            eos.writeInt(channel_dims[0])
+            eos.writeInt(channel_dims[1])
+            for i in range(channel_dims[0]):
+                for j in range(channel_dims[1]):
+                    eos.writeInt(self._channel[i][j])
+
+        eos.writeBool(self._pairedAntennaIdExists)
+        if self._pairedAntennaIdExists:
+
+            Tag.listToBin(self._pairedAntennaId, eos)
+
+        eos.writeBool(self._spectralWindowIdExists)
+        if self._spectralWindowIdExists:
+
+            Tag.listToBin(self._spectralWindowId, eos)
+
+    @staticmethod
+    def flagIdFromBin(row, eis):
+        """
+        Set the flagId in row from the EndianInput (eis) instance.
+        """
+
+        row._flagId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startTimeFromBin(row, eis):
+        """
+        Set the startTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endTimeFromBin(row, eis):
+        """
+        Set the endTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def reasonFromBin(row, eis):
+        """
+        Set the reason in row from the EndianInput (eis) instance.
+        """
+
+        row._reason = eis.readStr()
+
+    @staticmethod
+    def numAntennaFromBin(row, eis):
+        """
+        Set the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        row._numAntenna = eis.readInt()
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def numPolarizationTypeFromBin(row, eis):
+        """
+        Set the optional numPolarizationType in row from the EndianInput (eis) instance.
+        """
+        row._numPolarizationTypeExists = eis.readBool()
+        if row._numPolarizationTypeExists:
+
+            row._numPolarizationType = eis.readInt()
+
+    @staticmethod
+    def numSpectralWindowFromBin(row, eis):
+        """
+        Set the optional numSpectralWindow in row from the EndianInput (eis) instance.
+        """
+        row._numSpectralWindowExists = eis.readBool()
+        if row._numSpectralWindowExists:
+
+            row._numSpectralWindow = eis.readInt()
+
+    @staticmethod
+    def numPairedAntennaFromBin(row, eis):
+        """
+        Set the optional numPairedAntenna in row from the EndianInput (eis) instance.
+        """
+        row._numPairedAntennaExists = eis.readBool()
+        if row._numPairedAntennaExists:
+
+            row._numPairedAntenna = eis.readInt()
+
+    @staticmethod
+    def numChanFromBin(row, eis):
+        """
+        Set the optional numChan in row from the EndianInput (eis) instance.
+        """
+        row._numChanExists = eis.readBool()
+        if row._numChanExists:
+
+            row._numChan = eis.readInt()
+
+    @staticmethod
+    def polarizationTypeFromBin(row, eis):
+        """
+        Set the optional polarizationType in row from the EndianInput (eis) instance.
+        """
+        row._polarizationTypeExists = eis.readBool()
+        if row._polarizationTypeExists:
+
+            polarizationTypeDim1 = eis.readInt()
+            thisList = []
+            for i in range(polarizationTypeDim1):
+                thisValue = PolarizationType.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._polarizationType = thisList
+
+    @staticmethod
+    def channelFromBin(row, eis):
+        """
+        Set the optional channel in row from the EndianInput (eis) instance.
+        """
+        row._channelExists = eis.readBool()
+        if row._channelExists:
+
+            channelDim1 = eis.readInt()
+            channelDim2 = eis.readInt()
+            thisList = []
+            for i in range(channelDim1):
+                thisList_j = []
+                for j in range(channelDim2):
+                    thisValue = eis.readInt()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.channel = thisList
+
+    @staticmethod
+    def pairedAntennaIdFromBin(row, eis):
+        """
+        Set the optional pairedAntennaId in row from the EndianInput (eis) instance.
+        """
+        row._pairedAntennaIdExists = eis.readBool()
+        if row._pairedAntennaIdExists:
+
+            row._pairedAntennaId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the optional spectralWindowId in row from the EndianInput (eis) instance.
+        """
+        row._spectralWindowIdExists = eis.readBool()
+        if row._spectralWindowIdExists:
+
+            row._spectralWindowId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["flagId"] = FlagRow.flagIdFromBin
+        _fromBinMethods["startTime"] = FlagRow.startTimeFromBin
+        _fromBinMethods["endTime"] = FlagRow.endTimeFromBin
+        _fromBinMethods["reason"] = FlagRow.reasonFromBin
+        _fromBinMethods["numAntenna"] = FlagRow.numAntennaFromBin
+        _fromBinMethods["antennaId"] = FlagRow.antennaIdFromBin
+
+        _fromBinMethods["numPolarizationType"] = FlagRow.numPolarizationTypeFromBin
+        _fromBinMethods["numSpectralWindow"] = FlagRow.numSpectralWindowFromBin
+        _fromBinMethods["numPairedAntenna"] = FlagRow.numPairedAntennaFromBin
+        _fromBinMethods["numChan"] = FlagRow.numChanFromBin
+        _fromBinMethods["polarizationType"] = FlagRow.polarizationTypeFromBin
+        _fromBinMethods["channel"] = FlagRow.channelFromBin
+        _fromBinMethods["pairedAntennaId"] = FlagRow.pairedAntennaIdFromBin
+        _fromBinMethods["spectralWindowId"] = FlagRow.spectralWindowIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = FlagRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Flag",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute flagId
 
@@ -1048,10 +1313,9 @@ class FlagRow:
 
     def setOneAntennaId(self, index, antennaId):
         """
-        Set antennaId[i] with the specified Tag value.
+        Set antennaId[index] with the specified Tag value.
         index The index in antennaId where to set the Tag value.
-        antennaId The Tag value to which antennaId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        antennaId The Tag value to which antennaId[index] is to be set.
 
         """
 
@@ -1065,8 +1329,8 @@ class FlagRow:
         id the Tag to be appended to antennaId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._antennaId.append(Tag(id[i]))
+            for thisValue in id:
+                self._antennaId.append(Tag(thisValue))
         else:
             self._antennaId.append(Tag(id))
 
@@ -1096,9 +1360,9 @@ class FlagRow:
 
     def setOnePairedAntennaId(self, index, pairedAntennaId):
         """
-        Set pairedAntennaId[i] with the specified Tag value.
+        Set pairedAntennaId[index] with the specified Tag value.
         index The index in pairedAntennaId where to set the Tag value.
-        pairedAntennaId The Tag value to which pairedAntennaId[i] is to be set.
+        pairedAntennaId The Tag value to which pairedAntennaId[index] is to be set.
         Raises an exception if that value does not already exist in this row
         """
         if not self._pairedAntennaIdExists():
@@ -1115,8 +1379,8 @@ class FlagRow:
         id the Tag to be appended to pairedAntennaId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._pairedAntennaId.append(Tag(id[i]))
+            for thisValue in id:
+                self._pairedAntennaId.append(Tag(thisValue))
         else:
             self._pairedAntennaId.append(Tag(id))
 
@@ -1153,9 +1417,9 @@ class FlagRow:
 
     def setOneSpectralWindowId(self, index, spectralWindowId):
         """
-        Set spectralWindowId[i] with the specified Tag value.
+        Set spectralWindowId[index] with the specified Tag value.
         index The index in spectralWindowId where to set the Tag value.
-        spectralWindowId The Tag value to which spectralWindowId[i] is to be set.
+        spectralWindowId The Tag value to which spectralWindowId[index] is to be set.
         Raises an exception if that value does not already exist in this row
         """
         if not self._spectralWindowIdExists():
@@ -1172,8 +1436,8 @@ class FlagRow:
         id the Tag to be appended to spectralWindowId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._spectralWindowId.append(Tag(id[i]))
+            for thisValue in id:
+                self._spectralWindowId.append(Tag(thisValue))
         else:
             self._spectralWindowId.append(Tag(id))
 
@@ -1289,3 +1553,7 @@ class FlagRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+FlagRow.initFromBinMethods()

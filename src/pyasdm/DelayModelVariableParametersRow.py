@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.DifferenceType import DifferenceType
 
@@ -70,10 +74,11 @@ class DelayModelVariableParametersRow:
         Create a DelayModelVariableParametersRow.
         When row is None, create an empty row attached to table, which must be a DelayModelVariableParametersTable.
         When row is given, copy those values in to the new row. The row argument must be a DelayModelVariableParametersRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.DelayModelVariableParametersTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a DelayModelVariableParametersTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -122,7 +127,7 @@ class DelayModelVariableParametersRow:
 
         if row is not None:
             if not isinstance(row, DelayModelVariableParametersRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a DelayModelVariableParametersRow")
 
             # copy constructor
 
@@ -398,10 +403,248 @@ class DelayModelVariableParametersRow:
             delayModelFixedParametersIdNode.firstChild.data.strip()
         )
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._delayModelVariableParametersId.toBin(eos)
+
+        self._time.toBin(eos)
+
+        eos.writeFloat(self._ut1_utc)
+
+        eos.writeFloat(self._iat_utc)
+
+        eos.writeString(self._timeType.toString())
+
+        self._gstAtUt0.toBin(eos)
+
+        self._earthRotationRate.toBin(eos)
+
+        eos.writeInt(len(self._polarOffsets))
+        for i in range(len(self._polarOffsets)):
+
+            eos.writeFloat(self._polarOffsets[i])
+
+        eos.writeString(self._polarOffsetsType.toString())
+
+        self._delayModelFixedParametersId.toBin(eos)
+
+        eos.writeBool(self._nutationInLongitudeExists)
+        if self._nutationInLongitudeExists:
+
+            self._nutationInLongitude.toBin(eos)
+
+        eos.writeBool(self._nutationInLongitudeRateExists)
+        if self._nutationInLongitudeRateExists:
+
+            self._nutationInLongitudeRate.toBin(eos)
+
+        eos.writeBool(self._nutationInObliquityExists)
+        if self._nutationInObliquityExists:
+
+            self._nutationInObliquity.toBin(eos)
+
+        eos.writeBool(self._nutationInObliquityRateExists)
+        if self._nutationInObliquityRateExists:
+
+            self._nutationInObliquityRate.toBin(eos)
+
+    @staticmethod
+    def delayModelVariableParametersIdFromBin(row, eis):
+        """
+        Set the delayModelVariableParametersId in row from the EndianInput (eis) instance.
+        """
+
+        row._delayModelVariableParametersId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeFromBin(row, eis):
+        """
+        Set the time in row from the EndianInput (eis) instance.
+        """
+
+        row._time = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def ut1_utcFromBin(row, eis):
+        """
+        Set the ut1_utc in row from the EndianInput (eis) instance.
+        """
+
+        row._ut1_utc = eis.readFloat()
+
+    @staticmethod
+    def iat_utcFromBin(row, eis):
+        """
+        Set the iat_utc in row from the EndianInput (eis) instance.
+        """
+
+        row._iat_utc = eis.readFloat()
+
+    @staticmethod
+    def timeTypeFromBin(row, eis):
+        """
+        Set the timeType in row from the EndianInput (eis) instance.
+        """
+
+        row._timeType = DifferenceType.from_int(eis.readInt())
+
+    @staticmethod
+    def gstAtUt0FromBin(row, eis):
+        """
+        Set the gstAtUt0 in row from the EndianInput (eis) instance.
+        """
+
+        row._gstAtUt0 = Angle.fromBin(eis)
+
+    @staticmethod
+    def earthRotationRateFromBin(row, eis):
+        """
+        Set the earthRotationRate in row from the EndianInput (eis) instance.
+        """
+
+        row._earthRotationRate = AngularRate.fromBin(eis)
+
+    @staticmethod
+    def polarOffsetsFromBin(row, eis):
+        """
+        Set the polarOffsets in row from the EndianInput (eis) instance.
+        """
+
+        polarOffsetsDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarOffsetsDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._polarOffsets = thisList
+
+    @staticmethod
+    def polarOffsetsTypeFromBin(row, eis):
+        """
+        Set the polarOffsetsType in row from the EndianInput (eis) instance.
+        """
+
+        row._polarOffsetsType = DifferenceType.from_int(eis.readInt())
+
+    @staticmethod
+    def delayModelFixedParametersIdFromBin(row, eis):
+        """
+        Set the delayModelFixedParametersId in row from the EndianInput (eis) instance.
+        """
+
+        row._delayModelFixedParametersId = Tag.fromBin(eis)
+
+    @staticmethod
+    def nutationInLongitudeFromBin(row, eis):
+        """
+        Set the optional nutationInLongitude in row from the EndianInput (eis) instance.
+        """
+        row._nutationInLongitudeExists = eis.readBool()
+        if row._nutationInLongitudeExists:
+
+            row._nutationInLongitude = Angle.fromBin(eis)
+
+    @staticmethod
+    def nutationInLongitudeRateFromBin(row, eis):
+        """
+        Set the optional nutationInLongitudeRate in row from the EndianInput (eis) instance.
+        """
+        row._nutationInLongitudeRateExists = eis.readBool()
+        if row._nutationInLongitudeRateExists:
+
+            row._nutationInLongitudeRate = AngularRate.fromBin(eis)
+
+    @staticmethod
+    def nutationInObliquityFromBin(row, eis):
+        """
+        Set the optional nutationInObliquity in row from the EndianInput (eis) instance.
+        """
+        row._nutationInObliquityExists = eis.readBool()
+        if row._nutationInObliquityExists:
+
+            row._nutationInObliquity = Angle.fromBin(eis)
+
+    @staticmethod
+    def nutationInObliquityRateFromBin(row, eis):
+        """
+        Set the optional nutationInObliquityRate in row from the EndianInput (eis) instance.
+        """
+        row._nutationInObliquityRateExists = eis.readBool()
+        if row._nutationInObliquityRateExists:
+
+            row._nutationInObliquityRate = AngularRate.fromBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["delayModelVariableParametersId"] = (
+            DelayModelVariableParametersRow.delayModelVariableParametersIdFromBin
+        )
+        _fromBinMethods["time"] = DelayModelVariableParametersRow.timeFromBin
+        _fromBinMethods["ut1_utc"] = DelayModelVariableParametersRow.ut1_utcFromBin
+        _fromBinMethods["iat_utc"] = DelayModelVariableParametersRow.iat_utcFromBin
+        _fromBinMethods["timeType"] = DelayModelVariableParametersRow.timeTypeFromBin
+        _fromBinMethods["gstAtUt0"] = DelayModelVariableParametersRow.gstAtUt0FromBin
+        _fromBinMethods["earthRotationRate"] = (
+            DelayModelVariableParametersRow.earthRotationRateFromBin
+        )
+        _fromBinMethods["polarOffsets"] = (
+            DelayModelVariableParametersRow.polarOffsetsFromBin
+        )
+        _fromBinMethods["polarOffsetsType"] = (
+            DelayModelVariableParametersRow.polarOffsetsTypeFromBin
+        )
+        _fromBinMethods["delayModelFixedParametersId"] = (
+            DelayModelVariableParametersRow.delayModelFixedParametersIdFromBin
+        )
+
+        _fromBinMethods["nutationInLongitude"] = (
+            DelayModelVariableParametersRow.nutationInLongitudeFromBin
+        )
+        _fromBinMethods["nutationInLongitudeRate"] = (
+            DelayModelVariableParametersRow.nutationInLongitudeRateFromBin
+        )
+        _fromBinMethods["nutationInObliquity"] = (
+            DelayModelVariableParametersRow.nutationInObliquityFromBin
+        )
+        _fromBinMethods["nutationInObliquityRate"] = (
+            DelayModelVariableParametersRow.nutationInObliquityRateFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = DelayModelVariableParametersRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " DelayModelVariableParameters",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute delayModelVariableParametersId
 
@@ -1001,3 +1244,7 @@ class DelayModelVariableParametersRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+DelayModelVariableParametersRow.initFromBinMethods()

@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.DirectionReferenceCode import DirectionReferenceCode
 
@@ -85,10 +89,11 @@ class SourceRow:
         Create a SourceRow.
         When row is None, create an empty row attached to table, which must be a SourceTable.
         When row is given, copy those values in to the new row. The row argument must be a SourceRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.SourceTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a SourceTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -231,7 +236,7 @@ class SourceRow:
 
         if row is not None:
             if not isinstance(row, SourceRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a SourceRow")
 
             # copy constructor
 
@@ -253,11 +258,11 @@ class SourceRow:
 
             # by default set systematically directionCode's value to something not None
 
-            self.directionCode = DirectionReferenceCode.from_int(0)
+            self._directionCode = DirectionReferenceCode.from_int(0)
 
             if row._directionCodeExists:
 
-                if row._directionCode is None:
+                if row._directionCode is not None:
                     self._directionCode = row._directionCode
 
                 self._directionCodeExists = True
@@ -349,22 +354,22 @@ class SourceRow:
 
             # by default set systematically sourceModel's value to something not None
 
-            self.sourceModel = SourceModel.from_int(0)
+            self._sourceModel = SourceModel.from_int(0)
 
             if row._sourceModelExists:
 
-                if row._sourceModel is None:
+                if row._sourceModel is not None:
                     self._sourceModel = row._sourceModel
 
                 self._sourceModelExists = True
 
             # by default set systematically frequencyRefCode's value to something not None
 
-            self.frequencyRefCode = FrequencyReferenceCode.from_int(0)
+            self._frequencyRefCode = FrequencyReferenceCode.from_int(0)
 
             if row._frequencyRefCodeExists:
 
-                if row._frequencyRefCode is None:
+                if row._frequencyRefCode is not None:
                     self._frequencyRefCode = row._frequencyRefCode
 
                 self._frequencyRefCodeExists = True
@@ -468,11 +473,11 @@ class SourceRow:
 
             # by default set systematically velRefCode's value to something not None
 
-            self.velRefCode = RadialVelocityReferenceCode.from_int(0)
+            self._velRefCode = RadialVelocityReferenceCode.from_int(0)
 
             if row._velRefCodeExists:
 
-                if row._velRefCode is None:
+                if row._velRefCode is not None:
                     self._velRefCode = row._velRefCode
 
                 self._velRefCodeExists = True
@@ -488,22 +493,22 @@ class SourceRow:
 
             # by default set systematically dopplerReferenceSystem's value to something not None
 
-            self.dopplerReferenceSystem = RadialVelocityReferenceCode.from_int(0)
+            self._dopplerReferenceSystem = RadialVelocityReferenceCode.from_int(0)
 
             if row._dopplerReferenceSystemExists:
 
-                if row._dopplerReferenceSystem is None:
+                if row._dopplerReferenceSystem is not None:
                     self._dopplerReferenceSystem = row._dopplerReferenceSystem
 
                 self._dopplerReferenceSystemExists = True
 
             # by default set systematically dopplerCalcType's value to something not None
 
-            self.dopplerCalcType = DopplerReferenceCode.from_int(0)
+            self._dopplerCalcType = DopplerReferenceCode.from_int(0)
 
             if row._dopplerCalcTypeExists:
 
-                if row._dopplerCalcType is None:
+                if row._dopplerCalcType is not None:
                     self._dopplerCalcType = row._dopplerCalcType
 
                 self._dopplerCalcTypeExists = True
@@ -1038,10 +1043,609 @@ class SourceRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeInt(self._sourceId)
+
+        self._timeInterval.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        eos.writeStr(self._code)
+
+        Angle.listToBin(self._direction, eos)
+
+        AngularRate.listToBin(self._properMotion, eos)
+
+        eos.writeStr(self._sourceName)
+
+        eos.writeBool(self._directionCodeExists)
+        if self._directionCodeExists:
+
+            eos.writeString(self._directionCode.toString())
+
+        eos.writeBool(self._directionEquinoxExists)
+        if self._directionEquinoxExists:
+
+            self._directionEquinox.toBin(eos)
+
+        eos.writeBool(self._calibrationGroupExists)
+        if self._calibrationGroupExists:
+
+            eos.writeInt(self._calibrationGroup)
+
+        eos.writeBool(self._catalogExists)
+        if self._catalogExists:
+
+            eos.writeStr(self._catalog)
+
+        eos.writeBool(self._deltaVelExists)
+        if self._deltaVelExists:
+
+            self._deltaVel.toBin(eos)
+
+        eos.writeBool(self._positionExists)
+        if self._positionExists:
+
+            Length.listToBin(self._position, eos)
+
+        eos.writeBool(self._numLinesExists)
+        if self._numLinesExists:
+
+            eos.writeInt(self._numLines)
+
+        eos.writeBool(self._transitionExists)
+        if self._transitionExists:
+
+            eos.writeInt(len(self._transition))
+            for i in range(len(self._transition)):
+
+                eos.writeStr(self._transition[i])
+
+        eos.writeBool(self._restFrequencyExists)
+        if self._restFrequencyExists:
+
+            Frequency.listToBin(self._restFrequency, eos)
+
+        eos.writeBool(self._sysVelExists)
+        if self._sysVelExists:
+
+            Speed.listToBin(self._sysVel, eos)
+
+        eos.writeBool(self._rangeVelExists)
+        if self._rangeVelExists:
+
+            Speed.listToBin(self._rangeVel, eos)
+
+        eos.writeBool(self._sourceModelExists)
+        if self._sourceModelExists:
+
+            eos.writeString(self._sourceModel.toString())
+
+        eos.writeBool(self._frequencyRefCodeExists)
+        if self._frequencyRefCodeExists:
+
+            eos.writeString(self._frequencyRefCode.toString())
+
+        eos.writeBool(self._numFreqExists)
+        if self._numFreqExists:
+
+            eos.writeInt(self._numFreq)
+
+        eos.writeBool(self._numStokesExists)
+        if self._numStokesExists:
+
+            eos.writeInt(self._numStokes)
+
+        eos.writeBool(self._frequencyExists)
+        if self._frequencyExists:
+
+            Frequency.listToBin(self._frequency, eos)
+
+        eos.writeBool(self._frequencyIntervalExists)
+        if self._frequencyIntervalExists:
+
+            Frequency.listToBin(self._frequencyInterval, eos)
+
+        eos.writeBool(self._stokesParameterExists)
+        if self._stokesParameterExists:
+
+            eos.writeInt(len(self._stokesParameter))
+            for i in range(len(self._stokesParameter)):
+
+                eos.writeString(self._stokesParameter[i].toString())
+
+        eos.writeBool(self._fluxExists)
+        if self._fluxExists:
+
+            Flux.listToBin(self._flux, eos)
+
+        eos.writeBool(self._fluxErrExists)
+        if self._fluxErrExists:
+
+            Flux.listToBin(self._fluxErr, eos)
+
+        eos.writeBool(self._positionAngleExists)
+        if self._positionAngleExists:
+
+            Angle.listToBin(self._positionAngle, eos)
+
+        eos.writeBool(self._positionAngleErrExists)
+        if self._positionAngleErrExists:
+
+            Angle.listToBin(self._positionAngleErr, eos)
+
+        eos.writeBool(self._sizeExists)
+        if self._sizeExists:
+
+            Angle.listToBin(self._size, eos)
+
+        eos.writeBool(self._sizeErrExists)
+        if self._sizeErrExists:
+
+            Angle.listToBin(self._sizeErr, eos)
+
+        eos.writeBool(self._velRefCodeExists)
+        if self._velRefCodeExists:
+
+            eos.writeString(self._velRefCode.toString())
+
+        eos.writeBool(self._dopplerVelocityExists)
+        if self._dopplerVelocityExists:
+
+            Speed.listToBin(self._dopplerVelocity, eos)
+
+        eos.writeBool(self._dopplerReferenceSystemExists)
+        if self._dopplerReferenceSystemExists:
+
+            eos.writeString(self._dopplerReferenceSystem.toString())
+
+        eos.writeBool(self._dopplerCalcTypeExists)
+        if self._dopplerCalcTypeExists:
+
+            eos.writeString(self._dopplerCalcType.toString())
+
+        eos.writeBool(self._parallaxExists)
+        if self._parallaxExists:
+
+            Angle.listToBin(self._parallax, eos)
+
+    @staticmethod
+    def sourceIdFromBin(row, eis):
+        """
+        Set the sourceId in row from the EndianInput (eis) instance.
+        """
+
+        row._sourceId = eis.readInt()
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def codeFromBin(row, eis):
+        """
+        Set the code in row from the EndianInput (eis) instance.
+        """
+
+        row._code = eis.readStr()
+
+    @staticmethod
+    def directionFromBin(row, eis):
+        """
+        Set the direction in row from the EndianInput (eis) instance.
+        """
+
+        row._direction = Angle.from1DBin(eis)
+
+    @staticmethod
+    def properMotionFromBin(row, eis):
+        """
+        Set the properMotion in row from the EndianInput (eis) instance.
+        """
+
+        row._properMotion = AngularRate.from1DBin(eis)
+
+    @staticmethod
+    def sourceNameFromBin(row, eis):
+        """
+        Set the sourceName in row from the EndianInput (eis) instance.
+        """
+
+        row._sourceName = eis.readStr()
+
+    @staticmethod
+    def directionCodeFromBin(row, eis):
+        """
+        Set the optional directionCode in row from the EndianInput (eis) instance.
+        """
+        row._directionCodeExists = eis.readBool()
+        if row._directionCodeExists:
+
+            row._directionCode = DirectionReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def directionEquinoxFromBin(row, eis):
+        """
+        Set the optional directionEquinox in row from the EndianInput (eis) instance.
+        """
+        row._directionEquinoxExists = eis.readBool()
+        if row._directionEquinoxExists:
+
+            row._directionEquinox = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def calibrationGroupFromBin(row, eis):
+        """
+        Set the optional calibrationGroup in row from the EndianInput (eis) instance.
+        """
+        row._calibrationGroupExists = eis.readBool()
+        if row._calibrationGroupExists:
+
+            row._calibrationGroup = eis.readInt()
+
+    @staticmethod
+    def catalogFromBin(row, eis):
+        """
+        Set the optional catalog in row from the EndianInput (eis) instance.
+        """
+        row._catalogExists = eis.readBool()
+        if row._catalogExists:
+
+            row._catalog = eis.readStr()
+
+    @staticmethod
+    def deltaVelFromBin(row, eis):
+        """
+        Set the optional deltaVel in row from the EndianInput (eis) instance.
+        """
+        row._deltaVelExists = eis.readBool()
+        if row._deltaVelExists:
+
+            row._deltaVel = Speed.fromBin(eis)
+
+    @staticmethod
+    def positionFromBin(row, eis):
+        """
+        Set the optional position in row from the EndianInput (eis) instance.
+        """
+        row._positionExists = eis.readBool()
+        if row._positionExists:
+
+            row._position = Length.from1DBin(eis)
+
+    @staticmethod
+    def numLinesFromBin(row, eis):
+        """
+        Set the optional numLines in row from the EndianInput (eis) instance.
+        """
+        row._numLinesExists = eis.readBool()
+        if row._numLinesExists:
+
+            row._numLines = eis.readInt()
+
+    @staticmethod
+    def transitionFromBin(row, eis):
+        """
+        Set the optional transition in row from the EndianInput (eis) instance.
+        """
+        row._transitionExists = eis.readBool()
+        if row._transitionExists:
+
+            transitionDim1 = eis.readInt()
+            thisList = []
+            for i in range(transitionDim1):
+                thisValue = eis.readStr()
+                thisList.append(thisValue)
+            row._transition = thisList
+
+    @staticmethod
+    def restFrequencyFromBin(row, eis):
+        """
+        Set the optional restFrequency in row from the EndianInput (eis) instance.
+        """
+        row._restFrequencyExists = eis.readBool()
+        if row._restFrequencyExists:
+
+            row._restFrequency = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def sysVelFromBin(row, eis):
+        """
+        Set the optional sysVel in row from the EndianInput (eis) instance.
+        """
+        row._sysVelExists = eis.readBool()
+        if row._sysVelExists:
+
+            row._sysVel = Speed.from1DBin(eis)
+
+    @staticmethod
+    def rangeVelFromBin(row, eis):
+        """
+        Set the optional rangeVel in row from the EndianInput (eis) instance.
+        """
+        row._rangeVelExists = eis.readBool()
+        if row._rangeVelExists:
+
+            row._rangeVel = Speed.from1DBin(eis)
+
+    @staticmethod
+    def sourceModelFromBin(row, eis):
+        """
+        Set the optional sourceModel in row from the EndianInput (eis) instance.
+        """
+        row._sourceModelExists = eis.readBool()
+        if row._sourceModelExists:
+
+            row._sourceModel = SourceModel.from_int(eis.readInt())
+
+    @staticmethod
+    def frequencyRefCodeFromBin(row, eis):
+        """
+        Set the optional frequencyRefCode in row from the EndianInput (eis) instance.
+        """
+        row._frequencyRefCodeExists = eis.readBool()
+        if row._frequencyRefCodeExists:
+
+            row._frequencyRefCode = FrequencyReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def numFreqFromBin(row, eis):
+        """
+        Set the optional numFreq in row from the EndianInput (eis) instance.
+        """
+        row._numFreqExists = eis.readBool()
+        if row._numFreqExists:
+
+            row._numFreq = eis.readInt()
+
+    @staticmethod
+    def numStokesFromBin(row, eis):
+        """
+        Set the optional numStokes in row from the EndianInput (eis) instance.
+        """
+        row._numStokesExists = eis.readBool()
+        if row._numStokesExists:
+
+            row._numStokes = eis.readInt()
+
+    @staticmethod
+    def frequencyFromBin(row, eis):
+        """
+        Set the optional frequency in row from the EndianInput (eis) instance.
+        """
+        row._frequencyExists = eis.readBool()
+        if row._frequencyExists:
+
+            row._frequency = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def frequencyIntervalFromBin(row, eis):
+        """
+        Set the optional frequencyInterval in row from the EndianInput (eis) instance.
+        """
+        row._frequencyIntervalExists = eis.readBool()
+        if row._frequencyIntervalExists:
+
+            row._frequencyInterval = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def stokesParameterFromBin(row, eis):
+        """
+        Set the optional stokesParameter in row from the EndianInput (eis) instance.
+        """
+        row._stokesParameterExists = eis.readBool()
+        if row._stokesParameterExists:
+
+            stokesParameterDim1 = eis.readInt()
+            thisList = []
+            for i in range(stokesParameterDim1):
+                thisValue = StokesParameter.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._stokesParameter = thisList
+
+    @staticmethod
+    def fluxFromBin(row, eis):
+        """
+        Set the optional flux in row from the EndianInput (eis) instance.
+        """
+        row._fluxExists = eis.readBool()
+        if row._fluxExists:
+
+            row._flux = Flux.from2DBin(eis)
+
+    @staticmethod
+    def fluxErrFromBin(row, eis):
+        """
+        Set the optional fluxErr in row from the EndianInput (eis) instance.
+        """
+        row._fluxErrExists = eis.readBool()
+        if row._fluxErrExists:
+
+            row._fluxErr = Flux.from2DBin(eis)
+
+    @staticmethod
+    def positionAngleFromBin(row, eis):
+        """
+        Set the optional positionAngle in row from the EndianInput (eis) instance.
+        """
+        row._positionAngleExists = eis.readBool()
+        if row._positionAngleExists:
+
+            row._positionAngle = Angle.from1DBin(eis)
+
+    @staticmethod
+    def positionAngleErrFromBin(row, eis):
+        """
+        Set the optional positionAngleErr in row from the EndianInput (eis) instance.
+        """
+        row._positionAngleErrExists = eis.readBool()
+        if row._positionAngleErrExists:
+
+            row._positionAngleErr = Angle.from1DBin(eis)
+
+    @staticmethod
+    def sizeFromBin(row, eis):
+        """
+        Set the optional size in row from the EndianInput (eis) instance.
+        """
+        row._sizeExists = eis.readBool()
+        if row._sizeExists:
+
+            row._size = Angle.from2DBin(eis)
+
+    @staticmethod
+    def sizeErrFromBin(row, eis):
+        """
+        Set the optional sizeErr in row from the EndianInput (eis) instance.
+        """
+        row._sizeErrExists = eis.readBool()
+        if row._sizeErrExists:
+
+            row._sizeErr = Angle.from2DBin(eis)
+
+    @staticmethod
+    def velRefCodeFromBin(row, eis):
+        """
+        Set the optional velRefCode in row from the EndianInput (eis) instance.
+        """
+        row._velRefCodeExists = eis.readBool()
+        if row._velRefCodeExists:
+
+            row._velRefCode = RadialVelocityReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def dopplerVelocityFromBin(row, eis):
+        """
+        Set the optional dopplerVelocity in row from the EndianInput (eis) instance.
+        """
+        row._dopplerVelocityExists = eis.readBool()
+        if row._dopplerVelocityExists:
+
+            row._dopplerVelocity = Speed.from1DBin(eis)
+
+    @staticmethod
+    def dopplerReferenceSystemFromBin(row, eis):
+        """
+        Set the optional dopplerReferenceSystem in row from the EndianInput (eis) instance.
+        """
+        row._dopplerReferenceSystemExists = eis.readBool()
+        if row._dopplerReferenceSystemExists:
+
+            row._dopplerReferenceSystem = RadialVelocityReferenceCode.from_int(
+                eis.readInt()
+            )
+
+    @staticmethod
+    def dopplerCalcTypeFromBin(row, eis):
+        """
+        Set the optional dopplerCalcType in row from the EndianInput (eis) instance.
+        """
+        row._dopplerCalcTypeExists = eis.readBool()
+        if row._dopplerCalcTypeExists:
+
+            row._dopplerCalcType = DopplerReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def parallaxFromBin(row, eis):
+        """
+        Set the optional parallax in row from the EndianInput (eis) instance.
+        """
+        row._parallaxExists = eis.readBool()
+        if row._parallaxExists:
+
+            row._parallax = Angle.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["sourceId"] = SourceRow.sourceIdFromBin
+        _fromBinMethods["timeInterval"] = SourceRow.timeIntervalFromBin
+        _fromBinMethods["spectralWindowId"] = SourceRow.spectralWindowIdFromBin
+        _fromBinMethods["code"] = SourceRow.codeFromBin
+        _fromBinMethods["direction"] = SourceRow.directionFromBin
+        _fromBinMethods["properMotion"] = SourceRow.properMotionFromBin
+        _fromBinMethods["sourceName"] = SourceRow.sourceNameFromBin
+
+        _fromBinMethods["directionCode"] = SourceRow.directionCodeFromBin
+        _fromBinMethods["directionEquinox"] = SourceRow.directionEquinoxFromBin
+        _fromBinMethods["calibrationGroup"] = SourceRow.calibrationGroupFromBin
+        _fromBinMethods["catalog"] = SourceRow.catalogFromBin
+        _fromBinMethods["deltaVel"] = SourceRow.deltaVelFromBin
+        _fromBinMethods["position"] = SourceRow.positionFromBin
+        _fromBinMethods["numLines"] = SourceRow.numLinesFromBin
+        _fromBinMethods["transition"] = SourceRow.transitionFromBin
+        _fromBinMethods["restFrequency"] = SourceRow.restFrequencyFromBin
+        _fromBinMethods["sysVel"] = SourceRow.sysVelFromBin
+        _fromBinMethods["rangeVel"] = SourceRow.rangeVelFromBin
+        _fromBinMethods["sourceModel"] = SourceRow.sourceModelFromBin
+        _fromBinMethods["frequencyRefCode"] = SourceRow.frequencyRefCodeFromBin
+        _fromBinMethods["numFreq"] = SourceRow.numFreqFromBin
+        _fromBinMethods["numStokes"] = SourceRow.numStokesFromBin
+        _fromBinMethods["frequency"] = SourceRow.frequencyFromBin
+        _fromBinMethods["frequencyInterval"] = SourceRow.frequencyIntervalFromBin
+        _fromBinMethods["stokesParameter"] = SourceRow.stokesParameterFromBin
+        _fromBinMethods["flux"] = SourceRow.fluxFromBin
+        _fromBinMethods["fluxErr"] = SourceRow.fluxErrFromBin
+        _fromBinMethods["positionAngle"] = SourceRow.positionAngleFromBin
+        _fromBinMethods["positionAngleErr"] = SourceRow.positionAngleErrFromBin
+        _fromBinMethods["size"] = SourceRow.sizeFromBin
+        _fromBinMethods["sizeErr"] = SourceRow.sizeErrFromBin
+        _fromBinMethods["velRefCode"] = SourceRow.velRefCodeFromBin
+        _fromBinMethods["dopplerVelocity"] = SourceRow.dopplerVelocityFromBin
+        _fromBinMethods["dopplerReferenceSystem"] = (
+            SourceRow.dopplerReferenceSystemFromBin
+        )
+        _fromBinMethods["dopplerCalcType"] = SourceRow.dopplerCalcTypeFromBin
+        _fromBinMethods["parallax"] = SourceRow.parallaxFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = SourceRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Source",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute sourceId
 
@@ -3023,3 +3627,7 @@ class SourceRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+SourceRow.initFromBinMethods()

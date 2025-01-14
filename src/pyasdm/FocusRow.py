@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class FocusRow:
         Create a FocusRow.
         When row is None, create an empty row attached to table, which must be a FocusTable.
         When row is given, copy those values in to the new row. The row argument must be a FocusRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.FocusTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a FocusTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -100,7 +105,7 @@ class FocusRow:
 
         if row is not None:
             if not isinstance(row, FocusRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a FocusRow")
 
             # copy constructor
 
@@ -272,10 +277,146 @@ class FocusRow:
 
         self._focusModelId = int(focusModelIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeBool(self._focusTracking)
+
+        Length.listToBin(self._focusOffset, eos)
+
+        Angle.listToBin(self._focusRotationOffset, eos)
+
+        eos.writeInt(self._focusModelId)
+
+        eos.writeBool(self._measuredFocusPositionExists)
+        if self._measuredFocusPositionExists:
+
+            Length.listToBin(self._measuredFocusPosition, eos)
+
+        eos.writeBool(self._measuredFocusRotationExists)
+        if self._measuredFocusRotationExists:
+
+            Angle.listToBin(self._measuredFocusRotation, eos)
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def focusTrackingFromBin(row, eis):
+        """
+        Set the focusTracking in row from the EndianInput (eis) instance.
+        """
+
+        row._focusTracking = eis.readBool()
+
+    @staticmethod
+    def focusOffsetFromBin(row, eis):
+        """
+        Set the focusOffset in row from the EndianInput (eis) instance.
+        """
+
+        row._focusOffset = Length.from1DBin(eis)
+
+    @staticmethod
+    def focusRotationOffsetFromBin(row, eis):
+        """
+        Set the focusRotationOffset in row from the EndianInput (eis) instance.
+        """
+
+        row._focusRotationOffset = Angle.from1DBin(eis)
+
+    @staticmethod
+    def focusModelIdFromBin(row, eis):
+        """
+        Set the focusModelId in row from the EndianInput (eis) instance.
+        """
+
+        row._focusModelId = eis.readInt()
+
+    @staticmethod
+    def measuredFocusPositionFromBin(row, eis):
+        """
+        Set the optional measuredFocusPosition in row from the EndianInput (eis) instance.
+        """
+        row._measuredFocusPositionExists = eis.readBool()
+        if row._measuredFocusPositionExists:
+
+            row._measuredFocusPosition = Length.from1DBin(eis)
+
+    @staticmethod
+    def measuredFocusRotationFromBin(row, eis):
+        """
+        Set the optional measuredFocusRotation in row from the EndianInput (eis) instance.
+        """
+        row._measuredFocusRotationExists = eis.readBool()
+        if row._measuredFocusRotationExists:
+
+            row._measuredFocusRotation = Angle.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = FocusRow.antennaIdFromBin
+        _fromBinMethods["timeInterval"] = FocusRow.timeIntervalFromBin
+        _fromBinMethods["focusTracking"] = FocusRow.focusTrackingFromBin
+        _fromBinMethods["focusOffset"] = FocusRow.focusOffsetFromBin
+        _fromBinMethods["focusRotationOffset"] = FocusRow.focusRotationOffsetFromBin
+        _fromBinMethods["focusModelId"] = FocusRow.focusModelIdFromBin
+
+        _fromBinMethods["measuredFocusPosition"] = FocusRow.measuredFocusPositionFromBin
+        _fromBinMethods["measuredFocusRotation"] = FocusRow.measuredFocusRotationFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = FocusRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Focus",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -733,3 +874,7 @@ class FocusRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+FocusRow.initFromBinMethods()

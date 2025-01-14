@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
 
@@ -76,10 +80,11 @@ class CalCurveRow:
         Create a CalCurveRow.
         When row is None, create an empty row attached to table, which must be a CalCurveTable.
         When row is given, copy those values in to the new row. The row argument must be a CalCurveRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalCurveTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalCurveTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -132,23 +137,23 @@ class CalCurveRow:
 
         if row is not None:
             if not isinstance(row, CalCurveRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalCurveRow")
 
             # copy constructor
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._atmPhaseCorrection is None:
                 self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
             else:
                 self._atmPhaseCorrection = AtmPhaseCorrection(row._atmPhaseCorrection)
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._typeCurve is None:
                 self._typeCurve = CalCurveType.from_int(0)
             else:
                 self._typeCurve = CalCurveType(row._typeCurve)
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._receiverBand is None:
                 self._receiverBand = ReceiverBand.from_int(0)
             else:
@@ -403,10 +408,326 @@ class CalCurveRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeString(self._atmPhaseCorrection.toString())
+
+        eos.writeString(self._typeCurve.toString())
+
+        eos.writeString(self._receiverBand.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        Frequency.listToBin(self._frequencyRange, eos)
+
+        eos.writeInt(self._numAntenna)
+
+        eos.writeInt(self._numPoly)
+
+        eos.writeInt(self._numReceptor)
+
+        eos.writeInt(len(self._antennaNames))
+        for i in range(len(self._antennaNames)):
+
+            eos.writeStr(self._antennaNames[i])
+
+        eos.writeStr(self._refAntennaName)
+
+        eos.writeInt(len(self._polarizationTypes))
+        for i in range(len(self._polarizationTypes)):
+
+            eos.writeString(self._polarizationTypes[i].toString())
+
+        # null array case, unsure if this is possible but this should work
+        if self._curve is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            curve_dims = Parser.getListDims(self._curve)
+        # assumes it really is 3D
+        eos.writeInt(curve_dims[0])
+        eos.writeInt(curve_dims[1])
+        eos.writeInt(curve_dims[2])
+        for i in range(curve_dims[0]):
+            for j in range(curve_dims[1]):
+                for k in range(curve_dims[2]):
+                    eos.writeFloat(self._curve[i][j][k])
+
+        eos.writeInt(len(self._reducedChiSquared))
+        for i in range(len(self._reducedChiSquared)):
+
+            eos.writeFloat(self._reducedChiSquared[i])
+
+        eos.writeBool(self._numBaselineExists)
+        if self._numBaselineExists:
+
+            eos.writeInt(self._numBaseline)
+
+        eos.writeBool(self._rmsExists)
+        if self._rmsExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._rms is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                rms_dims = Parser.getListDims(self._rms)
+            # assumes it really is 2D
+            eos.writeInt(rms_dims[0])
+            eos.writeInt(rms_dims[1])
+            for i in range(rms_dims[0]):
+                for j in range(rms_dims[1]):
+                    eos.writeFloat(self._rms[i][j])
+
+    @staticmethod
+    def atmPhaseCorrectionFromBin(row, eis):
+        """
+        Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+
+    @staticmethod
+    def typeCurveFromBin(row, eis):
+        """
+        Set the typeCurve in row from the EndianInput (eis) instance.
+        """
+
+        row._typeCurve = CalCurveType.from_int(eis.readInt())
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def frequencyRangeFromBin(row, eis):
+        """
+        Set the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyRange = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def numAntennaFromBin(row, eis):
+        """
+        Set the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        row._numAntenna = eis.readInt()
+
+    @staticmethod
+    def numPolyFromBin(row, eis):
+        """
+        Set the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        row._numPoly = eis.readInt()
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def antennaNamesFromBin(row, eis):
+        """
+        Set the antennaNames in row from the EndianInput (eis) instance.
+        """
+
+        antennaNamesDim1 = eis.readInt()
+        thisList = []
+        for i in range(antennaNamesDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._antennaNames = thisList
+
+    @staticmethod
+    def refAntennaNameFromBin(row, eis):
+        """
+        Set the refAntennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._refAntennaName = eis.readStr()
+
+    @staticmethod
+    def polarizationTypesFromBin(row, eis):
+        """
+        Set the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypesDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationTypes = thisList
+
+    @staticmethod
+    def curveFromBin(row, eis):
+        """
+        Set the curve in row from the EndianInput (eis) instance.
+        """
+
+        curveDim1 = eis.readInt()
+        curveDim2 = eis.readInt()
+        curveDim3 = eis.readInt()
+        thisList = []
+        for i in range(curveDim1):
+            thisList_j = []
+            for j in range(curveDim2):
+                thisList_k = []
+                for k in range(curveDim3):
+                    thisValue = eis.readFloat()
+                    thisList_k.append(thisValue)
+                thisList_j.append(thisList_k)
+            thisList.append(thisList_j)
+        row.curve = thisList
+
+    @staticmethod
+    def reducedChiSquaredFromBin(row, eis):
+        """
+        Set the reducedChiSquared in row from the EndianInput (eis) instance.
+        """
+
+        reducedChiSquaredDim1 = eis.readInt()
+        thisList = []
+        for i in range(reducedChiSquaredDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._reducedChiSquared = thisList
+
+    @staticmethod
+    def numBaselineFromBin(row, eis):
+        """
+        Set the optional numBaseline in row from the EndianInput (eis) instance.
+        """
+        row._numBaselineExists = eis.readBool()
+        if row._numBaselineExists:
+
+            row._numBaseline = eis.readInt()
+
+    @staticmethod
+    def rmsFromBin(row, eis):
+        """
+        Set the optional rms in row from the EndianInput (eis) instance.
+        """
+        row._rmsExists = eis.readBool()
+        if row._rmsExists:
+
+            rmsDim1 = eis.readInt()
+            rmsDim2 = eis.readInt()
+            thisList = []
+            for i in range(rmsDim1):
+                thisList_j = []
+                for j in range(rmsDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.rms = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["atmPhaseCorrection"] = CalCurveRow.atmPhaseCorrectionFromBin
+        _fromBinMethods["typeCurve"] = CalCurveRow.typeCurveFromBin
+        _fromBinMethods["receiverBand"] = CalCurveRow.receiverBandFromBin
+        _fromBinMethods["calDataId"] = CalCurveRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalCurveRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalCurveRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalCurveRow.endValidTimeFromBin
+        _fromBinMethods["frequencyRange"] = CalCurveRow.frequencyRangeFromBin
+        _fromBinMethods["numAntenna"] = CalCurveRow.numAntennaFromBin
+        _fromBinMethods["numPoly"] = CalCurveRow.numPolyFromBin
+        _fromBinMethods["numReceptor"] = CalCurveRow.numReceptorFromBin
+        _fromBinMethods["antennaNames"] = CalCurveRow.antennaNamesFromBin
+        _fromBinMethods["refAntennaName"] = CalCurveRow.refAntennaNameFromBin
+        _fromBinMethods["polarizationTypes"] = CalCurveRow.polarizationTypesFromBin
+        _fromBinMethods["curve"] = CalCurveRow.curveFromBin
+        _fromBinMethods["reducedChiSquared"] = CalCurveRow.reducedChiSquaredFromBin
+
+        _fromBinMethods["numBaseline"] = CalCurveRow.numBaselineFromBin
+        _fromBinMethods["rms"] = CalCurveRow.rmsFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalCurveRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalCurve",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute atmPhaseCorrection
 
@@ -1154,8 +1475,8 @@ class CalCurveRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(curve_dims[0]):
-                for j in range(curve_dims[0]):
-                    for k in range(curve_dims[0]):
+                for j in range(curve_dims[1]):
+                    for k in range(curve_dims[2]):
 
                         # curve is an array of float, compare using == operator.
                         if not (self._curve[i][j][k] == curve[i][j][k]):
@@ -1277,8 +1598,8 @@ class CalCurveRow:
                 return False
             # assumes they are both 3D arrays, the internal one should be
             for i in range(curve_dims[0]):
-                for j in range(curve_dims[0]):
-                    for k in range(curve_dims[0]):
+                for j in range(curve_dims[1]):
+                    for k in range(curve_dims[2]):
 
                         # curve is an array of float, compare using == operator.
                         if not (self._curve[i][j][k] == curve[i][j][k]):
@@ -1295,3 +1616,7 @@ class CalCurveRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalCurveRow.initFromBinMethods()

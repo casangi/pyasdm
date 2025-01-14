@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class HistoryRow:
         Create a HistoryRow.
         When row is None, create an empty row attached to table, which must be a HistoryTable.
         When row is given, copy those values in to the new row. The row argument must be a HistoryRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.HistoryTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a HistoryTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -98,7 +103,7 @@ class HistoryRow:
 
         if row is not None:
             if not isinstance(row, HistoryRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a HistoryRow")
 
             # copy constructor
 
@@ -226,10 +231,146 @@ class HistoryRow:
 
         self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._execBlockId.toBin(eos)
+
+        self._time.toBin(eos)
+
+        eos.writeStr(self._message)
+
+        eos.writeStr(self._priority)
+
+        eos.writeStr(self._origin)
+
+        eos.writeStr(self._objectId)
+
+        eos.writeStr(self._application)
+
+        eos.writeStr(self._cliCommand)
+
+        eos.writeStr(self._appParms)
+
+    @staticmethod
+    def execBlockIdFromBin(row, eis):
+        """
+        Set the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeFromBin(row, eis):
+        """
+        Set the time in row from the EndianInput (eis) instance.
+        """
+
+        row._time = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def messageFromBin(row, eis):
+        """
+        Set the message in row from the EndianInput (eis) instance.
+        """
+
+        row._message = eis.readStr()
+
+    @staticmethod
+    def priorityFromBin(row, eis):
+        """
+        Set the priority in row from the EndianInput (eis) instance.
+        """
+
+        row._priority = eis.readStr()
+
+    @staticmethod
+    def originFromBin(row, eis):
+        """
+        Set the origin in row from the EndianInput (eis) instance.
+        """
+
+        row._origin = eis.readStr()
+
+    @staticmethod
+    def objectIdFromBin(row, eis):
+        """
+        Set the objectId in row from the EndianInput (eis) instance.
+        """
+
+        row._objectId = eis.readStr()
+
+    @staticmethod
+    def applicationFromBin(row, eis):
+        """
+        Set the application in row from the EndianInput (eis) instance.
+        """
+
+        row._application = eis.readStr()
+
+    @staticmethod
+    def cliCommandFromBin(row, eis):
+        """
+        Set the cliCommand in row from the EndianInput (eis) instance.
+        """
+
+        row._cliCommand = eis.readStr()
+
+    @staticmethod
+    def appParmsFromBin(row, eis):
+        """
+        Set the appParms in row from the EndianInput (eis) instance.
+        """
+
+        row._appParms = eis.readStr()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["execBlockId"] = HistoryRow.execBlockIdFromBin
+        _fromBinMethods["time"] = HistoryRow.timeFromBin
+        _fromBinMethods["message"] = HistoryRow.messageFromBin
+        _fromBinMethods["priority"] = HistoryRow.priorityFromBin
+        _fromBinMethods["origin"] = HistoryRow.originFromBin
+        _fromBinMethods["objectId"] = HistoryRow.objectIdFromBin
+        _fromBinMethods["application"] = HistoryRow.applicationFromBin
+        _fromBinMethods["cliCommand"] = HistoryRow.cliCommandFromBin
+        _fromBinMethods["appParms"] = HistoryRow.appParmsFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = HistoryRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " History",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute time
 
@@ -563,3 +704,7 @@ class HistoryRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+HistoryRow.initFromBinMethods()

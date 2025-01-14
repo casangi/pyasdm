@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.PolarizationType import PolarizationType
 
@@ -67,10 +71,11 @@ class DelayModelRow:
         Create a DelayModelRow.
         When row is None, create an empty row attached to table, which must be a DelayModelTable.
         When row is given, copy those values in to the new row. The row argument must be a DelayModelRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.DelayModelTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a DelayModelTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -189,7 +194,7 @@ class DelayModelRow:
 
         if row is not None:
             if not isinstance(row, DelayModelRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a DelayModelRow")
 
             # copy constructor
 
@@ -830,10 +835,593 @@ class DelayModelRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._numPoly)
+
+        eos.writeInt(len(self._phaseDelay))
+        for i in range(len(self._phaseDelay)):
+
+            eos.writeFloat(self._phaseDelay[i])
+
+        eos.writeInt(len(self._phaseDelayRate))
+        for i in range(len(self._phaseDelayRate)):
+
+            eos.writeFloat(self._phaseDelayRate[i])
+
+        eos.writeInt(len(self._groupDelay))
+        for i in range(len(self._groupDelay)):
+
+            eos.writeFloat(self._groupDelay[i])
+
+        eos.writeInt(len(self._groupDelayRate))
+        for i in range(len(self._groupDelayRate)):
+
+            eos.writeFloat(self._groupDelayRate[i])
+
+        self._fieldId.toBin(eos)
+
+        eos.writeBool(self._timeOriginExists)
+        if self._timeOriginExists:
+
+            self._timeOrigin.toBin(eos)
+
+        eos.writeBool(self._atmosphericGroupDelayExists)
+        if self._atmosphericGroupDelayExists:
+
+            eos.writeFloat(self._atmosphericGroupDelay)
+
+        eos.writeBool(self._atmosphericGroupDelayRateExists)
+        if self._atmosphericGroupDelayRateExists:
+
+            eos.writeFloat(self._atmosphericGroupDelayRate)
+
+        eos.writeBool(self._geometricDelayExists)
+        if self._geometricDelayExists:
+
+            eos.writeFloat(self._geometricDelay)
+
+        eos.writeBool(self._geometricDelayRateExists)
+        if self._geometricDelayRateExists:
+
+            eos.writeFloat(self._geometricDelayRate)
+
+        eos.writeBool(self._numLOExists)
+        if self._numLOExists:
+
+            eos.writeInt(self._numLO)
+
+        eos.writeBool(self._LOOffsetExists)
+        if self._LOOffsetExists:
+
+            Frequency.listToBin(self._LOOffset, eos)
+
+        eos.writeBool(self._LOOffsetRateExists)
+        if self._LOOffsetRateExists:
+
+            Frequency.listToBin(self._LOOffsetRate, eos)
+
+        eos.writeBool(self._dispersiveDelayExists)
+        if self._dispersiveDelayExists:
+
+            eos.writeFloat(self._dispersiveDelay)
+
+        eos.writeBool(self._dispersiveDelayRateExists)
+        if self._dispersiveDelayRateExists:
+
+            eos.writeFloat(self._dispersiveDelayRate)
+
+        eos.writeBool(self._atmosphericDryDelayExists)
+        if self._atmosphericDryDelayExists:
+
+            eos.writeFloat(self._atmosphericDryDelay)
+
+        eos.writeBool(self._atmosphericWetDelayExists)
+        if self._atmosphericWetDelayExists:
+
+            eos.writeFloat(self._atmosphericWetDelay)
+
+        eos.writeBool(self._padDelayExists)
+        if self._padDelayExists:
+
+            eos.writeFloat(self._padDelay)
+
+        eos.writeBool(self._antennaDelayExists)
+        if self._antennaDelayExists:
+
+            eos.writeFloat(self._antennaDelay)
+
+        eos.writeBool(self._numReceptorExists)
+        if self._numReceptorExists:
+
+            eos.writeInt(self._numReceptor)
+
+        eos.writeBool(self._polarizationTypeExists)
+        if self._polarizationTypeExists:
+
+            eos.writeInt(len(self._polarizationType))
+            for i in range(len(self._polarizationType)):
+
+                eos.writeString(self._polarizationType[i].toString())
+
+        eos.writeBool(self._electronicDelayExists)
+        if self._electronicDelayExists:
+
+            eos.writeInt(len(self._electronicDelay))
+            for i in range(len(self._electronicDelay)):
+
+                eos.writeFloat(self._electronicDelay[i])
+
+        eos.writeBool(self._electronicDelayRateExists)
+        if self._electronicDelayRateExists:
+
+            eos.writeInt(len(self._electronicDelayRate))
+            for i in range(len(self._electronicDelayRate)):
+
+                eos.writeFloat(self._electronicDelayRate[i])
+
+        eos.writeBool(self._receiverDelayExists)
+        if self._receiverDelayExists:
+
+            eos.writeInt(len(self._receiverDelay))
+            for i in range(len(self._receiverDelay)):
+
+                eos.writeFloat(self._receiverDelay[i])
+
+        eos.writeBool(self._IFDelayExists)
+        if self._IFDelayExists:
+
+            eos.writeInt(len(self._IFDelay))
+            for i in range(len(self._IFDelay)):
+
+                eos.writeFloat(self._IFDelay[i])
+
+        eos.writeBool(self._LODelayExists)
+        if self._LODelayExists:
+
+            eos.writeInt(len(self._LODelay))
+            for i in range(len(self._LODelay)):
+
+                eos.writeFloat(self._LODelay[i])
+
+        eos.writeBool(self._crossPolarizationDelayExists)
+        if self._crossPolarizationDelayExists:
+
+            eos.writeFloat(self._crossPolarizationDelay)
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def numPolyFromBin(row, eis):
+        """
+        Set the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        row._numPoly = eis.readInt()
+
+    @staticmethod
+    def phaseDelayFromBin(row, eis):
+        """
+        Set the phaseDelay in row from the EndianInput (eis) instance.
+        """
+
+        phaseDelayDim1 = eis.readInt()
+        thisList = []
+        for i in range(phaseDelayDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._phaseDelay = thisList
+
+    @staticmethod
+    def phaseDelayRateFromBin(row, eis):
+        """
+        Set the phaseDelayRate in row from the EndianInput (eis) instance.
+        """
+
+        phaseDelayRateDim1 = eis.readInt()
+        thisList = []
+        for i in range(phaseDelayRateDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._phaseDelayRate = thisList
+
+    @staticmethod
+    def groupDelayFromBin(row, eis):
+        """
+        Set the groupDelay in row from the EndianInput (eis) instance.
+        """
+
+        groupDelayDim1 = eis.readInt()
+        thisList = []
+        for i in range(groupDelayDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._groupDelay = thisList
+
+    @staticmethod
+    def groupDelayRateFromBin(row, eis):
+        """
+        Set the groupDelayRate in row from the EndianInput (eis) instance.
+        """
+
+        groupDelayRateDim1 = eis.readInt()
+        thisList = []
+        for i in range(groupDelayRateDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._groupDelayRate = thisList
+
+    @staticmethod
+    def fieldIdFromBin(row, eis):
+        """
+        Set the fieldId in row from the EndianInput (eis) instance.
+        """
+
+        row._fieldId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeOriginFromBin(row, eis):
+        """
+        Set the optional timeOrigin in row from the EndianInput (eis) instance.
+        """
+        row._timeOriginExists = eis.readBool()
+        if row._timeOriginExists:
+
+            row._timeOrigin = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def atmosphericGroupDelayFromBin(row, eis):
+        """
+        Set the optional atmosphericGroupDelay in row from the EndianInput (eis) instance.
+        """
+        row._atmosphericGroupDelayExists = eis.readBool()
+        if row._atmosphericGroupDelayExists:
+
+            row._atmosphericGroupDelay = eis.readFloat()
+
+    @staticmethod
+    def atmosphericGroupDelayRateFromBin(row, eis):
+        """
+        Set the optional atmosphericGroupDelayRate in row from the EndianInput (eis) instance.
+        """
+        row._atmosphericGroupDelayRateExists = eis.readBool()
+        if row._atmosphericGroupDelayRateExists:
+
+            row._atmosphericGroupDelayRate = eis.readFloat()
+
+    @staticmethod
+    def geometricDelayFromBin(row, eis):
+        """
+        Set the optional geometricDelay in row from the EndianInput (eis) instance.
+        """
+        row._geometricDelayExists = eis.readBool()
+        if row._geometricDelayExists:
+
+            row._geometricDelay = eis.readFloat()
+
+    @staticmethod
+    def geometricDelayRateFromBin(row, eis):
+        """
+        Set the optional geometricDelayRate in row from the EndianInput (eis) instance.
+        """
+        row._geometricDelayRateExists = eis.readBool()
+        if row._geometricDelayRateExists:
+
+            row._geometricDelayRate = eis.readFloat()
+
+    @staticmethod
+    def numLOFromBin(row, eis):
+        """
+        Set the optional numLO in row from the EndianInput (eis) instance.
+        """
+        row._numLOExists = eis.readBool()
+        if row._numLOExists:
+
+            row._numLO = eis.readInt()
+
+    @staticmethod
+    def LOOffsetFromBin(row, eis):
+        """
+        Set the optional LOOffset in row from the EndianInput (eis) instance.
+        """
+        row._LOOffsetExists = eis.readBool()
+        if row._LOOffsetExists:
+
+            row._LOOffset = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def LOOffsetRateFromBin(row, eis):
+        """
+        Set the optional LOOffsetRate in row from the EndianInput (eis) instance.
+        """
+        row._LOOffsetRateExists = eis.readBool()
+        if row._LOOffsetRateExists:
+
+            row._LOOffsetRate = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def dispersiveDelayFromBin(row, eis):
+        """
+        Set the optional dispersiveDelay in row from the EndianInput (eis) instance.
+        """
+        row._dispersiveDelayExists = eis.readBool()
+        if row._dispersiveDelayExists:
+
+            row._dispersiveDelay = eis.readFloat()
+
+    @staticmethod
+    def dispersiveDelayRateFromBin(row, eis):
+        """
+        Set the optional dispersiveDelayRate in row from the EndianInput (eis) instance.
+        """
+        row._dispersiveDelayRateExists = eis.readBool()
+        if row._dispersiveDelayRateExists:
+
+            row._dispersiveDelayRate = eis.readFloat()
+
+    @staticmethod
+    def atmosphericDryDelayFromBin(row, eis):
+        """
+        Set the optional atmosphericDryDelay in row from the EndianInput (eis) instance.
+        """
+        row._atmosphericDryDelayExists = eis.readBool()
+        if row._atmosphericDryDelayExists:
+
+            row._atmosphericDryDelay = eis.readFloat()
+
+    @staticmethod
+    def atmosphericWetDelayFromBin(row, eis):
+        """
+        Set the optional atmosphericWetDelay in row from the EndianInput (eis) instance.
+        """
+        row._atmosphericWetDelayExists = eis.readBool()
+        if row._atmosphericWetDelayExists:
+
+            row._atmosphericWetDelay = eis.readFloat()
+
+    @staticmethod
+    def padDelayFromBin(row, eis):
+        """
+        Set the optional padDelay in row from the EndianInput (eis) instance.
+        """
+        row._padDelayExists = eis.readBool()
+        if row._padDelayExists:
+
+            row._padDelay = eis.readFloat()
+
+    @staticmethod
+    def antennaDelayFromBin(row, eis):
+        """
+        Set the optional antennaDelay in row from the EndianInput (eis) instance.
+        """
+        row._antennaDelayExists = eis.readBool()
+        if row._antennaDelayExists:
+
+            row._antennaDelay = eis.readFloat()
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the optional numReceptor in row from the EndianInput (eis) instance.
+        """
+        row._numReceptorExists = eis.readBool()
+        if row._numReceptorExists:
+
+            row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def polarizationTypeFromBin(row, eis):
+        """
+        Set the optional polarizationType in row from the EndianInput (eis) instance.
+        """
+        row._polarizationTypeExists = eis.readBool()
+        if row._polarizationTypeExists:
+
+            polarizationTypeDim1 = eis.readInt()
+            thisList = []
+            for i in range(polarizationTypeDim1):
+                thisValue = PolarizationType.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._polarizationType = thisList
+
+    @staticmethod
+    def electronicDelayFromBin(row, eis):
+        """
+        Set the optional electronicDelay in row from the EndianInput (eis) instance.
+        """
+        row._electronicDelayExists = eis.readBool()
+        if row._electronicDelayExists:
+
+            electronicDelayDim1 = eis.readInt()
+            thisList = []
+            for i in range(electronicDelayDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._electronicDelay = thisList
+
+    @staticmethod
+    def electronicDelayRateFromBin(row, eis):
+        """
+        Set the optional electronicDelayRate in row from the EndianInput (eis) instance.
+        """
+        row._electronicDelayRateExists = eis.readBool()
+        if row._electronicDelayRateExists:
+
+            electronicDelayRateDim1 = eis.readInt()
+            thisList = []
+            for i in range(electronicDelayRateDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._electronicDelayRate = thisList
+
+    @staticmethod
+    def receiverDelayFromBin(row, eis):
+        """
+        Set the optional receiverDelay in row from the EndianInput (eis) instance.
+        """
+        row._receiverDelayExists = eis.readBool()
+        if row._receiverDelayExists:
+
+            receiverDelayDim1 = eis.readInt()
+            thisList = []
+            for i in range(receiverDelayDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._receiverDelay = thisList
+
+    @staticmethod
+    def IFDelayFromBin(row, eis):
+        """
+        Set the optional IFDelay in row from the EndianInput (eis) instance.
+        """
+        row._IFDelayExists = eis.readBool()
+        if row._IFDelayExists:
+
+            IFDelayDim1 = eis.readInt()
+            thisList = []
+            for i in range(IFDelayDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._IFDelay = thisList
+
+    @staticmethod
+    def LODelayFromBin(row, eis):
+        """
+        Set the optional LODelay in row from the EndianInput (eis) instance.
+        """
+        row._LODelayExists = eis.readBool()
+        if row._LODelayExists:
+
+            LODelayDim1 = eis.readInt()
+            thisList = []
+            for i in range(LODelayDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._LODelay = thisList
+
+    @staticmethod
+    def crossPolarizationDelayFromBin(row, eis):
+        """
+        Set the optional crossPolarizationDelay in row from the EndianInput (eis) instance.
+        """
+        row._crossPolarizationDelayExists = eis.readBool()
+        if row._crossPolarizationDelayExists:
+
+            row._crossPolarizationDelay = eis.readFloat()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = DelayModelRow.antennaIdFromBin
+        _fromBinMethods["spectralWindowId"] = DelayModelRow.spectralWindowIdFromBin
+        _fromBinMethods["timeInterval"] = DelayModelRow.timeIntervalFromBin
+        _fromBinMethods["numPoly"] = DelayModelRow.numPolyFromBin
+        _fromBinMethods["phaseDelay"] = DelayModelRow.phaseDelayFromBin
+        _fromBinMethods["phaseDelayRate"] = DelayModelRow.phaseDelayRateFromBin
+        _fromBinMethods["groupDelay"] = DelayModelRow.groupDelayFromBin
+        _fromBinMethods["groupDelayRate"] = DelayModelRow.groupDelayRateFromBin
+        _fromBinMethods["fieldId"] = DelayModelRow.fieldIdFromBin
+
+        _fromBinMethods["timeOrigin"] = DelayModelRow.timeOriginFromBin
+        _fromBinMethods["atmosphericGroupDelay"] = (
+            DelayModelRow.atmosphericGroupDelayFromBin
+        )
+        _fromBinMethods["atmosphericGroupDelayRate"] = (
+            DelayModelRow.atmosphericGroupDelayRateFromBin
+        )
+        _fromBinMethods["geometricDelay"] = DelayModelRow.geometricDelayFromBin
+        _fromBinMethods["geometricDelayRate"] = DelayModelRow.geometricDelayRateFromBin
+        _fromBinMethods["numLO"] = DelayModelRow.numLOFromBin
+        _fromBinMethods["LOOffset"] = DelayModelRow.LOOffsetFromBin
+        _fromBinMethods["LOOffsetRate"] = DelayModelRow.LOOffsetRateFromBin
+        _fromBinMethods["dispersiveDelay"] = DelayModelRow.dispersiveDelayFromBin
+        _fromBinMethods["dispersiveDelayRate"] = (
+            DelayModelRow.dispersiveDelayRateFromBin
+        )
+        _fromBinMethods["atmosphericDryDelay"] = (
+            DelayModelRow.atmosphericDryDelayFromBin
+        )
+        _fromBinMethods["atmosphericWetDelay"] = (
+            DelayModelRow.atmosphericWetDelayFromBin
+        )
+        _fromBinMethods["padDelay"] = DelayModelRow.padDelayFromBin
+        _fromBinMethods["antennaDelay"] = DelayModelRow.antennaDelayFromBin
+        _fromBinMethods["numReceptor"] = DelayModelRow.numReceptorFromBin
+        _fromBinMethods["polarizationType"] = DelayModelRow.polarizationTypeFromBin
+        _fromBinMethods["electronicDelay"] = DelayModelRow.electronicDelayFromBin
+        _fromBinMethods["electronicDelayRate"] = (
+            DelayModelRow.electronicDelayRateFromBin
+        )
+        _fromBinMethods["receiverDelay"] = DelayModelRow.receiverDelayFromBin
+        _fromBinMethods["IFDelay"] = DelayModelRow.IFDelayFromBin
+        _fromBinMethods["LODelay"] = DelayModelRow.LODelayFromBin
+        _fromBinMethods["crossPolarizationDelay"] = (
+            DelayModelRow.crossPolarizationDelayFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = DelayModelRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " DelayModel",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -2482,3 +3070,7 @@ class DelayModelRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+DelayModelRow.initFromBinMethods()

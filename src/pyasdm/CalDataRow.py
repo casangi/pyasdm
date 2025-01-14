@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.CalDataOrigin import CalDataOrigin
 
@@ -76,10 +80,11 @@ class CalDataRow:
         Create a CalDataRow.
         When row is None, create an empty row attached to table, which must be a CalDataTable.
         When row is given, copy those values in to the new row. The row argument must be a CalDataRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalDataTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalDataTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -130,7 +135,7 @@ class CalDataRow:
 
         if row is not None:
             if not isinstance(row, CalDataRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalDataRow")
 
             # copy constructor
 
@@ -169,11 +174,11 @@ class CalDataRow:
 
             # by default set systematically assocCalNature's value to something not None
 
-            self.assocCalNature = AssociatedCalNature.from_int(0)
+            self._assocCalNature = AssociatedCalNature.from_int(0)
 
             if row._assocCalNatureExists:
 
-                if row._assocCalNature is None:
+                if row._assocCalNature is not None:
                     self._assocCalNature = row._assocCalNature
 
                 self._assocCalNatureExists = True
@@ -405,10 +410,272 @@ class CalDataRow:
 
             self._scanIntentExists = True
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._calDataId.toBin(eos)
+
+        self._startTimeObserved.toBin(eos)
+
+        self._endTimeObserved.toBin(eos)
+
+        self._execBlockUID.toBin(eos)
+
+        eos.writeString(self._calDataType.toString())
+
+        eos.writeString(self._calType.toString())
+
+        eos.writeInt(self._numScan)
+
+        eos.writeInt(len(self._scanSet))
+        for i in range(len(self._scanSet)):
+
+            eos.writeInt(self._scanSet[i])
+
+        eos.writeBool(self._assocCalDataIdExists)
+        if self._assocCalDataIdExists:
+
+            self._assocCalDataId.toBin(eos)
+
+        eos.writeBool(self._assocCalNatureExists)
+        if self._assocCalNatureExists:
+
+            eos.writeString(self._assocCalNature.toString())
+
+        eos.writeBool(self._fieldNameExists)
+        if self._fieldNameExists:
+
+            eos.writeInt(len(self._fieldName))
+            for i in range(len(self._fieldName)):
+
+                eos.writeStr(self._fieldName[i])
+
+        eos.writeBool(self._sourceNameExists)
+        if self._sourceNameExists:
+
+            eos.writeInt(len(self._sourceName))
+            for i in range(len(self._sourceName)):
+
+                eos.writeStr(self._sourceName[i])
+
+        eos.writeBool(self._sourceCodeExists)
+        if self._sourceCodeExists:
+
+            eos.writeInt(len(self._sourceCode))
+            for i in range(len(self._sourceCode)):
+
+                eos.writeStr(self._sourceCode[i])
+
+        eos.writeBool(self._scanIntentExists)
+        if self._scanIntentExists:
+
+            eos.writeInt(len(self._scanIntent))
+            for i in range(len(self._scanIntent)):
+
+                eos.writeString(self._scanIntent[i].toString())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startTimeObservedFromBin(row, eis):
+        """
+        Set the startTimeObserved in row from the EndianInput (eis) instance.
+        """
+
+        row._startTimeObserved = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endTimeObservedFromBin(row, eis):
+        """
+        Set the endTimeObserved in row from the EndianInput (eis) instance.
+        """
+
+        row._endTimeObserved = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def execBlockUIDFromBin(row, eis):
+        """
+        Set the execBlockUID in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def calDataTypeFromBin(row, eis):
+        """
+        Set the calDataType in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataType = CalDataOrigin.from_int(eis.readInt())
+
+    @staticmethod
+    def calTypeFromBin(row, eis):
+        """
+        Set the calType in row from the EndianInput (eis) instance.
+        """
+
+        row._calType = CalType.from_int(eis.readInt())
+
+    @staticmethod
+    def numScanFromBin(row, eis):
+        """
+        Set the numScan in row from the EndianInput (eis) instance.
+        """
+
+        row._numScan = eis.readInt()
+
+    @staticmethod
+    def scanSetFromBin(row, eis):
+        """
+        Set the scanSet in row from the EndianInput (eis) instance.
+        """
+
+        scanSetDim1 = eis.readInt()
+        thisList = []
+        for i in range(scanSetDim1):
+            thisValue = eis.readInt()
+            thisList.append(thisValue)
+        row._scanSet = thisList
+
+    @staticmethod
+    def assocCalDataIdFromBin(row, eis):
+        """
+        Set the optional assocCalDataId in row from the EndianInput (eis) instance.
+        """
+        row._assocCalDataIdExists = eis.readBool()
+        if row._assocCalDataIdExists:
+
+            row._assocCalDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def assocCalNatureFromBin(row, eis):
+        """
+        Set the optional assocCalNature in row from the EndianInput (eis) instance.
+        """
+        row._assocCalNatureExists = eis.readBool()
+        if row._assocCalNatureExists:
+
+            row._assocCalNature = AssociatedCalNature.from_int(eis.readInt())
+
+    @staticmethod
+    def fieldNameFromBin(row, eis):
+        """
+        Set the optional fieldName in row from the EndianInput (eis) instance.
+        """
+        row._fieldNameExists = eis.readBool()
+        if row._fieldNameExists:
+
+            fieldNameDim1 = eis.readInt()
+            thisList = []
+            for i in range(fieldNameDim1):
+                thisValue = eis.readStr()
+                thisList.append(thisValue)
+            row._fieldName = thisList
+
+    @staticmethod
+    def sourceNameFromBin(row, eis):
+        """
+        Set the optional sourceName in row from the EndianInput (eis) instance.
+        """
+        row._sourceNameExists = eis.readBool()
+        if row._sourceNameExists:
+
+            sourceNameDim1 = eis.readInt()
+            thisList = []
+            for i in range(sourceNameDim1):
+                thisValue = eis.readStr()
+                thisList.append(thisValue)
+            row._sourceName = thisList
+
+    @staticmethod
+    def sourceCodeFromBin(row, eis):
+        """
+        Set the optional sourceCode in row from the EndianInput (eis) instance.
+        """
+        row._sourceCodeExists = eis.readBool()
+        if row._sourceCodeExists:
+
+            sourceCodeDim1 = eis.readInt()
+            thisList = []
+            for i in range(sourceCodeDim1):
+                thisValue = eis.readStr()
+                thisList.append(thisValue)
+            row._sourceCode = thisList
+
+    @staticmethod
+    def scanIntentFromBin(row, eis):
+        """
+        Set the optional scanIntent in row from the EndianInput (eis) instance.
+        """
+        row._scanIntentExists = eis.readBool()
+        if row._scanIntentExists:
+
+            scanIntentDim1 = eis.readInt()
+            thisList = []
+            for i in range(scanIntentDim1):
+                thisValue = ScanIntent.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._scanIntent = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["calDataId"] = CalDataRow.calDataIdFromBin
+        _fromBinMethods["startTimeObserved"] = CalDataRow.startTimeObservedFromBin
+        _fromBinMethods["endTimeObserved"] = CalDataRow.endTimeObservedFromBin
+        _fromBinMethods["execBlockUID"] = CalDataRow.execBlockUIDFromBin
+        _fromBinMethods["calDataType"] = CalDataRow.calDataTypeFromBin
+        _fromBinMethods["calType"] = CalDataRow.calTypeFromBin
+        _fromBinMethods["numScan"] = CalDataRow.numScanFromBin
+        _fromBinMethods["scanSet"] = CalDataRow.scanSetFromBin
+
+        _fromBinMethods["assocCalDataId"] = CalDataRow.assocCalDataIdFromBin
+        _fromBinMethods["assocCalNature"] = CalDataRow.assocCalNatureFromBin
+        _fromBinMethods["fieldName"] = CalDataRow.fieldNameFromBin
+        _fromBinMethods["sourceName"] = CalDataRow.sourceNameFromBin
+        _fromBinMethods["sourceCode"] = CalDataRow.sourceCodeFromBin
+        _fromBinMethods["scanIntent"] = CalDataRow.scanIntentFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalDataRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalData",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute calDataId
 
@@ -1092,3 +1359,7 @@ class CalDataRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalDataRow.initFromBinMethods()

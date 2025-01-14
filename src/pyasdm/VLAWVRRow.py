@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class VLAWVRRow:
         Create a VLAWVRRow.
         When row is None, create an empty row attached to table, which must be a VLAWVRTable.
         When row is given, copy those values in to the new row. The row argument must be a VLAWVRRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.VLAWVRTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a VLAWVRTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -102,7 +107,7 @@ class VLAWVRRow:
 
         if row is not None:
             if not isinstance(row, VLAWVRRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a VLAWVRRow")
 
             # copy constructor
 
@@ -273,10 +278,167 @@ class VLAWVRRow:
 
         self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._numChan)
+
+        eos.writeInt(len(self._hiValues))
+        for i in range(len(self._hiValues)):
+
+            eos.writeFloat(self._hiValues[i])
+
+        eos.writeInt(len(self._loValues))
+        for i in range(len(self._loValues)):
+
+            eos.writeFloat(self._loValues[i])
+
+        eos.writeBool(self._chanFreqCenterExists)
+        if self._chanFreqCenterExists:
+
+            Frequency.listToBin(self._chanFreqCenter, eos)
+
+        eos.writeBool(self._chanWidthExists)
+        if self._chanWidthExists:
+
+            Frequency.listToBin(self._chanWidth, eos)
+
+        eos.writeBool(self._wvrIdExists)
+        if self._wvrIdExists:
+
+            eos.writeStr(self._wvrId)
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def numChanFromBin(row, eis):
+        """
+        Set the numChan in row from the EndianInput (eis) instance.
+        """
+
+        row._numChan = eis.readInt()
+
+    @staticmethod
+    def hiValuesFromBin(row, eis):
+        """
+        Set the hiValues in row from the EndianInput (eis) instance.
+        """
+
+        hiValuesDim1 = eis.readInt()
+        thisList = []
+        for i in range(hiValuesDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._hiValues = thisList
+
+    @staticmethod
+    def loValuesFromBin(row, eis):
+        """
+        Set the loValues in row from the EndianInput (eis) instance.
+        """
+
+        loValuesDim1 = eis.readInt()
+        thisList = []
+        for i in range(loValuesDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._loValues = thisList
+
+    @staticmethod
+    def chanFreqCenterFromBin(row, eis):
+        """
+        Set the optional chanFreqCenter in row from the EndianInput (eis) instance.
+        """
+        row._chanFreqCenterExists = eis.readBool()
+        if row._chanFreqCenterExists:
+
+            row._chanFreqCenter = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def chanWidthFromBin(row, eis):
+        """
+        Set the optional chanWidth in row from the EndianInput (eis) instance.
+        """
+        row._chanWidthExists = eis.readBool()
+        if row._chanWidthExists:
+
+            row._chanWidth = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def wvrIdFromBin(row, eis):
+        """
+        Set the optional wvrId in row from the EndianInput (eis) instance.
+        """
+        row._wvrIdExists = eis.readBool()
+        if row._wvrIdExists:
+
+            row._wvrId = eis.readStr()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = VLAWVRRow.antennaIdFromBin
+        _fromBinMethods["timeInterval"] = VLAWVRRow.timeIntervalFromBin
+        _fromBinMethods["numChan"] = VLAWVRRow.numChanFromBin
+        _fromBinMethods["hiValues"] = VLAWVRRow.hiValuesFromBin
+        _fromBinMethods["loValues"] = VLAWVRRow.loValuesFromBin
+
+        _fromBinMethods["chanFreqCenter"] = VLAWVRRow.chanFreqCenterFromBin
+        _fromBinMethods["chanWidth"] = VLAWVRRow.chanWidthFromBin
+        _fromBinMethods["wvrId"] = VLAWVRRow.wvrIdFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = VLAWVRRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " VLAWVR",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -714,3 +876,7 @@ class VLAWVRRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+VLAWVRRow.initFromBinMethods()

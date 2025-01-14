@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -76,10 +80,11 @@ class CalPrimaryBeamRow:
         Create a CalPrimaryBeamRow.
         When row is None, create an empty row attached to table, which must be a CalPrimaryBeamTable.
         When row is given, copy those values in to the new row. The row argument must be a CalPrimaryBeamRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalPrimaryBeamTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalPrimaryBeamTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -132,13 +137,13 @@ class CalPrimaryBeamRow:
 
         if row is not None:
             if not isinstance(row, CalPrimaryBeamRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalPrimaryBeamRow")
 
             # copy constructor
 
             self._antennaName = row._antennaName
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._receiverBand is None:
                 self._receiverBand = ReceiverBand.from_int(0)
             else:
@@ -427,10 +432,307 @@ class CalPrimaryBeamRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._antennaName)
+
+        eos.writeString(self._receiverBand.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        eos.writeString(self._antennaMake.toString())
+
+        eos.writeInt(self._numSubband)
+
+        Frequency.listToBin(self._frequencyRange, eos)
+
+        eos.writeInt(self._numReceptor)
+
+        eos.writeInt(len(self._polarizationTypes))
+        for i in range(len(self._polarizationTypes)):
+
+            eos.writeString(self._polarizationTypes[i].toString())
+
+        eos.writeInt(len(self._mainBeamEfficiency))
+        for i in range(len(self._mainBeamEfficiency)):
+
+            eos.writeFloat(self._mainBeamEfficiency[i])
+
+        self._beamDescriptionUID.toBin(eos)
+
+        eos.writeFloat(self._relativeAmplitudeRms)
+
+        Angle.listToBin(self._direction, eos)
+
+        Angle.listToBin(self._minValidDirection, eos)
+
+        Angle.listToBin(self._maxValidDirection, eos)
+
+        eos.writeString(self._descriptionType.toString())
+
+        eos.writeInt(len(self._imageChannelNumber))
+        for i in range(len(self._imageChannelNumber)):
+
+            eos.writeInt(self._imageChannelNumber[i])
+
+        Frequency.listToBin(self._imageNominalFrequency, eos)
+
+    @staticmethod
+    def antennaNameFromBin(row, eis):
+        """
+        Set the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaName = eis.readStr()
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def antennaMakeFromBin(row, eis):
+        """
+        Set the antennaMake in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaMake = AntennaMake.from_int(eis.readInt())
+
+    @staticmethod
+    def numSubbandFromBin(row, eis):
+        """
+        Set the numSubband in row from the EndianInput (eis) instance.
+        """
+
+        row._numSubband = eis.readInt()
+
+    @staticmethod
+    def frequencyRangeFromBin(row, eis):
+        """
+        Set the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyRange = Frequency.from2DBin(eis)
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def polarizationTypesFromBin(row, eis):
+        """
+        Set the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypesDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationTypes = thisList
+
+    @staticmethod
+    def mainBeamEfficiencyFromBin(row, eis):
+        """
+        Set the mainBeamEfficiency in row from the EndianInput (eis) instance.
+        """
+
+        mainBeamEfficiencyDim1 = eis.readInt()
+        thisList = []
+        for i in range(mainBeamEfficiencyDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._mainBeamEfficiency = thisList
+
+    @staticmethod
+    def beamDescriptionUIDFromBin(row, eis):
+        """
+        Set the beamDescriptionUID in row from the EndianInput (eis) instance.
+        """
+
+        row._beamDescriptionUID = EntityRef.fromBin(eis)
+
+    @staticmethod
+    def relativeAmplitudeRmsFromBin(row, eis):
+        """
+        Set the relativeAmplitudeRms in row from the EndianInput (eis) instance.
+        """
+
+        row._relativeAmplitudeRms = eis.readFloat()
+
+    @staticmethod
+    def directionFromBin(row, eis):
+        """
+        Set the direction in row from the EndianInput (eis) instance.
+        """
+
+        row._direction = Angle.from1DBin(eis)
+
+    @staticmethod
+    def minValidDirectionFromBin(row, eis):
+        """
+        Set the minValidDirection in row from the EndianInput (eis) instance.
+        """
+
+        row._minValidDirection = Angle.from1DBin(eis)
+
+    @staticmethod
+    def maxValidDirectionFromBin(row, eis):
+        """
+        Set the maxValidDirection in row from the EndianInput (eis) instance.
+        """
+
+        row._maxValidDirection = Angle.from1DBin(eis)
+
+    @staticmethod
+    def descriptionTypeFromBin(row, eis):
+        """
+        Set the descriptionType in row from the EndianInput (eis) instance.
+        """
+
+        row._descriptionType = PrimaryBeamDescription.from_int(eis.readInt())
+
+    @staticmethod
+    def imageChannelNumberFromBin(row, eis):
+        """
+        Set the imageChannelNumber in row from the EndianInput (eis) instance.
+        """
+
+        imageChannelNumberDim1 = eis.readInt()
+        thisList = []
+        for i in range(imageChannelNumberDim1):
+            thisValue = eis.readInt()
+            thisList.append(thisValue)
+        row._imageChannelNumber = thisList
+
+    @staticmethod
+    def imageNominalFrequencyFromBin(row, eis):
+        """
+        Set the imageNominalFrequency in row from the EndianInput (eis) instance.
+        """
+
+        row._imageNominalFrequency = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaName"] = CalPrimaryBeamRow.antennaNameFromBin
+        _fromBinMethods["receiverBand"] = CalPrimaryBeamRow.receiverBandFromBin
+        _fromBinMethods["calDataId"] = CalPrimaryBeamRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalPrimaryBeamRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalPrimaryBeamRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalPrimaryBeamRow.endValidTimeFromBin
+        _fromBinMethods["antennaMake"] = CalPrimaryBeamRow.antennaMakeFromBin
+        _fromBinMethods["numSubband"] = CalPrimaryBeamRow.numSubbandFromBin
+        _fromBinMethods["frequencyRange"] = CalPrimaryBeamRow.frequencyRangeFromBin
+        _fromBinMethods["numReceptor"] = CalPrimaryBeamRow.numReceptorFromBin
+        _fromBinMethods["polarizationTypes"] = (
+            CalPrimaryBeamRow.polarizationTypesFromBin
+        )
+        _fromBinMethods["mainBeamEfficiency"] = (
+            CalPrimaryBeamRow.mainBeamEfficiencyFromBin
+        )
+        _fromBinMethods["beamDescriptionUID"] = (
+            CalPrimaryBeamRow.beamDescriptionUIDFromBin
+        )
+        _fromBinMethods["relativeAmplitudeRms"] = (
+            CalPrimaryBeamRow.relativeAmplitudeRmsFromBin
+        )
+        _fromBinMethods["direction"] = CalPrimaryBeamRow.directionFromBin
+        _fromBinMethods["minValidDirection"] = (
+            CalPrimaryBeamRow.minValidDirectionFromBin
+        )
+        _fromBinMethods["maxValidDirection"] = (
+            CalPrimaryBeamRow.maxValidDirectionFromBin
+        )
+        _fromBinMethods["descriptionType"] = CalPrimaryBeamRow.descriptionTypeFromBin
+        _fromBinMethods["imageChannelNumber"] = (
+            CalPrimaryBeamRow.imageChannelNumberFromBin
+        )
+        _fromBinMethods["imageNominalFrequency"] = (
+            CalPrimaryBeamRow.imageNominalFrequencyFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalPrimaryBeamRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalPrimaryBeam",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute antennaName
 
@@ -1159,7 +1461,7 @@ class CalPrimaryBeamRow:
         if not (self._numSubband == numSubband):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if frequencyRange is not None:
             if self._frequencyRange is None:
                 return False
@@ -1172,13 +1474,13 @@ class CalPrimaryBeamRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(frequencyRange_dims[0]):
-                for j in range(frequencyRange_dims[0]):
+                for j in range(frequencyRange_dims[1]):
 
                     # frequencyRange is a Frequency, compare using the almostEquals method.
                     if not (
                         self._frequencyRange[i][j].almostEquals(
                             frequencyRange[i][j],
-                            this.getTable().getFrequencyRangeEqTolerance(),
+                            self.getTable().getFrequencyRangeEqTolerance(),
                         )
                     ):
                         return False
@@ -1343,7 +1645,7 @@ class CalPrimaryBeamRow:
         if not (self._numSubband == numSubband):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if frequencyRange is not None:
             if self._frequencyRange is None:
                 return False
@@ -1356,13 +1658,13 @@ class CalPrimaryBeamRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(frequencyRange_dims[0]):
-                for j in range(frequencyRange_dims[0]):
+                for j in range(frequencyRange_dims[1]):
 
                     # frequencyRange is a Frequency, compare using the almostEquals method.
                     if not (
                         self._frequencyRange[i][j].almostEquals(
                             frequencyRange[i][j],
-                            this.getTable().getFrequencyRangeEqTolerance(),
+                            self.getTable().getFrequencyRangeEqTolerance(),
                         )
                     ):
                         return False
@@ -1465,3 +1767,7 @@ class CalPrimaryBeamRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalPrimaryBeamRow.initFromBinMethods()

@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.InvalidatingCondition import InvalidatingCondition
 
@@ -67,10 +71,11 @@ class CalReductionRow:
         Create a CalReductionRow.
         When row is None, create an empty row attached to table, which must be a CalReductionTable.
         When row is given, copy those values in to the new row. The row argument must be a CalReductionRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalReductionTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalReductionTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -103,7 +108,7 @@ class CalReductionRow:
 
         if row is not None:
             if not isinstance(row, CalReductionRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalReductionRow")
 
             # copy constructor
 
@@ -265,10 +270,196 @@ class CalReductionRow:
 
         self._softwareVersion = str(softwareVersionNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._calReductionId.toBin(eos)
+
+        eos.writeInt(self._numApplied)
+
+        eos.writeInt(len(self._appliedCalibrations))
+        for i in range(len(self._appliedCalibrations)):
+
+            eos.writeStr(self._appliedCalibrations[i])
+
+        eos.writeInt(self._numParam)
+
+        eos.writeInt(len(self._paramSet))
+        for i in range(len(self._paramSet)):
+
+            eos.writeStr(self._paramSet[i])
+
+        eos.writeInt(self._numInvalidConditions)
+
+        eos.writeInt(len(self._invalidConditions))
+        for i in range(len(self._invalidConditions)):
+
+            eos.writeString(self._invalidConditions[i].toString())
+
+        self._timeReduced.toBin(eos)
+
+        eos.writeStr(self._messages)
+
+        eos.writeStr(self._software)
+
+        eos.writeStr(self._softwareVersion)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def numAppliedFromBin(row, eis):
+        """
+        Set the numApplied in row from the EndianInput (eis) instance.
+        """
+
+        row._numApplied = eis.readInt()
+
+    @staticmethod
+    def appliedCalibrationsFromBin(row, eis):
+        """
+        Set the appliedCalibrations in row from the EndianInput (eis) instance.
+        """
+
+        appliedCalibrationsDim1 = eis.readInt()
+        thisList = []
+        for i in range(appliedCalibrationsDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._appliedCalibrations = thisList
+
+    @staticmethod
+    def numParamFromBin(row, eis):
+        """
+        Set the numParam in row from the EndianInput (eis) instance.
+        """
+
+        row._numParam = eis.readInt()
+
+    @staticmethod
+    def paramSetFromBin(row, eis):
+        """
+        Set the paramSet in row from the EndianInput (eis) instance.
+        """
+
+        paramSetDim1 = eis.readInt()
+        thisList = []
+        for i in range(paramSetDim1):
+            thisValue = eis.readStr()
+            thisList.append(thisValue)
+        row._paramSet = thisList
+
+    @staticmethod
+    def numInvalidConditionsFromBin(row, eis):
+        """
+        Set the numInvalidConditions in row from the EndianInput (eis) instance.
+        """
+
+        row._numInvalidConditions = eis.readInt()
+
+    @staticmethod
+    def invalidConditionsFromBin(row, eis):
+        """
+        Set the invalidConditions in row from the EndianInput (eis) instance.
+        """
+
+        invalidConditionsDim1 = eis.readInt()
+        thisList = []
+        for i in range(invalidConditionsDim1):
+            thisValue = InvalidatingCondition.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._invalidConditions = thisList
+
+    @staticmethod
+    def timeReducedFromBin(row, eis):
+        """
+        Set the timeReduced in row from the EndianInput (eis) instance.
+        """
+
+        row._timeReduced = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def messagesFromBin(row, eis):
+        """
+        Set the messages in row from the EndianInput (eis) instance.
+        """
+
+        row._messages = eis.readStr()
+
+    @staticmethod
+    def softwareFromBin(row, eis):
+        """
+        Set the software in row from the EndianInput (eis) instance.
+        """
+
+        row._software = eis.readStr()
+
+    @staticmethod
+    def softwareVersionFromBin(row, eis):
+        """
+        Set the softwareVersion in row from the EndianInput (eis) instance.
+        """
+
+        row._softwareVersion = eis.readStr()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["calReductionId"] = CalReductionRow.calReductionIdFromBin
+        _fromBinMethods["numApplied"] = CalReductionRow.numAppliedFromBin
+        _fromBinMethods["appliedCalibrations"] = (
+            CalReductionRow.appliedCalibrationsFromBin
+        )
+        _fromBinMethods["numParam"] = CalReductionRow.numParamFromBin
+        _fromBinMethods["paramSet"] = CalReductionRow.paramSetFromBin
+        _fromBinMethods["numInvalidConditions"] = (
+            CalReductionRow.numInvalidConditionsFromBin
+        )
+        _fromBinMethods["invalidConditions"] = CalReductionRow.invalidConditionsFromBin
+        _fromBinMethods["timeReduced"] = CalReductionRow.timeReducedFromBin
+        _fromBinMethods["messages"] = CalReductionRow.messagesFromBin
+        _fromBinMethods["software"] = CalReductionRow.softwareFromBin
+        _fromBinMethods["softwareVersion"] = CalReductionRow.softwareVersionFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalReductionRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalReduction",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute calReductionId
 
@@ -760,3 +951,7 @@ class CalReductionRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalReductionRow.initFromBinMethods()

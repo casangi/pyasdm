@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -82,10 +86,11 @@ class CalPointingRow:
         Create a CalPointingRow.
         When row is None, create an empty row attached to table, which must be a CalPointingTable.
         When row is given, copy those values in to the new row. The row argument must be a CalPointingRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalPointingTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalPointingTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -190,13 +195,13 @@ class CalPointingRow:
 
         if row is not None:
             if not isinstance(row, CalPointingRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalPointingRow")
 
             # copy constructor
 
             self._antennaName = row._antennaName
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._receiverBand is None:
                 self._receiverBand = ReceiverBand.from_int(0)
             else:
@@ -807,10 +812,526 @@ class CalPointingRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._antennaName)
+
+        eos.writeString(self._receiverBand.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        self._ambientTemperature.toBin(eos)
+
+        eos.writeString(self._antennaMake.toString())
+
+        eos.writeString(self._atmPhaseCorrection.toString())
+
+        Angle.listToBin(self._direction, eos)
+
+        Frequency.listToBin(self._frequencyRange, eos)
+
+        eos.writeString(self._pointingModelMode.toString())
+
+        eos.writeString(self._pointingMethod.toString())
+
+        eos.writeInt(self._numReceptor)
+
+        eos.writeInt(len(self._polarizationTypes))
+        for i in range(len(self._polarizationTypes)):
+
+            eos.writeString(self._polarizationTypes[i].toString())
+
+        Angle.listToBin(self._collOffsetRelative, eos)
+
+        Angle.listToBin(self._collOffsetAbsolute, eos)
+
+        Angle.listToBin(self._collError, eos)
+
+        # null array case, unsure if this is possible but this should work
+        if self._collOffsetTied is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            collOffsetTied_dims = Parser.getListDims(self._collOffsetTied)
+        # assumes it really is 2D
+        eos.writeInt(collOffsetTied_dims[0])
+        eos.writeInt(collOffsetTied_dims[1])
+        for i in range(collOffsetTied_dims[0]):
+            for j in range(collOffsetTied_dims[1]):
+                eos.writeBool(self._collOffsetTied[i][j])
+
+        eos.writeInt(len(self._reducedChiSquared))
+        for i in range(len(self._reducedChiSquared)):
+
+            eos.writeFloat(self._reducedChiSquared[i])
+
+        eos.writeBool(self._averagedPolarizationsExists)
+        if self._averagedPolarizationsExists:
+
+            eos.writeBool(self._averagedPolarizations)
+
+        eos.writeBool(self._beamPAExists)
+        if self._beamPAExists:
+
+            Angle.listToBin(self._beamPA, eos)
+
+        eos.writeBool(self._beamPAErrorExists)
+        if self._beamPAErrorExists:
+
+            Angle.listToBin(self._beamPAError, eos)
+
+        eos.writeBool(self._beamPAWasFixedExists)
+        if self._beamPAWasFixedExists:
+
+            eos.writeBool(self._beamPAWasFixed)
+
+        eos.writeBool(self._beamWidthExists)
+        if self._beamWidthExists:
+
+            Angle.listToBin(self._beamWidth, eos)
+
+        eos.writeBool(self._beamWidthErrorExists)
+        if self._beamWidthErrorExists:
+
+            Angle.listToBin(self._beamWidthError, eos)
+
+        eos.writeBool(self._beamWidthWasFixedExists)
+        if self._beamWidthWasFixedExists:
+
+            eos.writeInt(len(self._beamWidthWasFixed))
+            for i in range(len(self._beamWidthWasFixed)):
+
+                eos.writeBool(self._beamWidthWasFixed[i])
+
+        eos.writeBool(self._offIntensityExists)
+        if self._offIntensityExists:
+
+            Temperature.listToBin(self._offIntensity, eos)
+
+        eos.writeBool(self._offIntensityErrorExists)
+        if self._offIntensityErrorExists:
+
+            Temperature.listToBin(self._offIntensityError, eos)
+
+        eos.writeBool(self._offIntensityWasFixedExists)
+        if self._offIntensityWasFixedExists:
+
+            eos.writeBool(self._offIntensityWasFixed)
+
+        eos.writeBool(self._peakIntensityExists)
+        if self._peakIntensityExists:
+
+            Temperature.listToBin(self._peakIntensity, eos)
+
+        eos.writeBool(self._peakIntensityErrorExists)
+        if self._peakIntensityErrorExists:
+
+            Temperature.listToBin(self._peakIntensityError, eos)
+
+        eos.writeBool(self._peakIntensityWasFixedExists)
+        if self._peakIntensityWasFixedExists:
+
+            eos.writeBool(self._peakIntensityWasFixed)
+
+    @staticmethod
+    def antennaNameFromBin(row, eis):
+        """
+        Set the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaName = eis.readStr()
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def ambientTemperatureFromBin(row, eis):
+        """
+        Set the ambientTemperature in row from the EndianInput (eis) instance.
+        """
+
+        row._ambientTemperature = Temperature.fromBin(eis)
+
+    @staticmethod
+    def antennaMakeFromBin(row, eis):
+        """
+        Set the antennaMake in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaMake = AntennaMake.from_int(eis.readInt())
+
+    @staticmethod
+    def atmPhaseCorrectionFromBin(row, eis):
+        """
+        Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+
+    @staticmethod
+    def directionFromBin(row, eis):
+        """
+        Set the direction in row from the EndianInput (eis) instance.
+        """
+
+        row._direction = Angle.from1DBin(eis)
+
+    @staticmethod
+    def frequencyRangeFromBin(row, eis):
+        """
+        Set the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyRange = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def pointingModelModeFromBin(row, eis):
+        """
+        Set the pointingModelMode in row from the EndianInput (eis) instance.
+        """
+
+        row._pointingModelMode = PointingModelMode.from_int(eis.readInt())
+
+    @staticmethod
+    def pointingMethodFromBin(row, eis):
+        """
+        Set the pointingMethod in row from the EndianInput (eis) instance.
+        """
+
+        row._pointingMethod = PointingMethod.from_int(eis.readInt())
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def polarizationTypesFromBin(row, eis):
+        """
+        Set the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypesDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationTypes = thisList
+
+    @staticmethod
+    def collOffsetRelativeFromBin(row, eis):
+        """
+        Set the collOffsetRelative in row from the EndianInput (eis) instance.
+        """
+
+        row._collOffsetRelative = Angle.from2DBin(eis)
+
+    @staticmethod
+    def collOffsetAbsoluteFromBin(row, eis):
+        """
+        Set the collOffsetAbsolute in row from the EndianInput (eis) instance.
+        """
+
+        row._collOffsetAbsolute = Angle.from2DBin(eis)
+
+    @staticmethod
+    def collErrorFromBin(row, eis):
+        """
+        Set the collError in row from the EndianInput (eis) instance.
+        """
+
+        row._collError = Angle.from2DBin(eis)
+
+    @staticmethod
+    def collOffsetTiedFromBin(row, eis):
+        """
+        Set the collOffsetTied in row from the EndianInput (eis) instance.
+        """
+
+        collOffsetTiedDim1 = eis.readInt()
+        collOffsetTiedDim2 = eis.readInt()
+        thisList = []
+        for i in range(collOffsetTiedDim1):
+            thisList_j = []
+            for j in range(collOffsetTiedDim2):
+                thisValue = eis.readBool()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.collOffsetTied = thisList
+
+    @staticmethod
+    def reducedChiSquaredFromBin(row, eis):
+        """
+        Set the reducedChiSquared in row from the EndianInput (eis) instance.
+        """
+
+        reducedChiSquaredDim1 = eis.readInt()
+        thisList = []
+        for i in range(reducedChiSquaredDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._reducedChiSquared = thisList
+
+    @staticmethod
+    def averagedPolarizationsFromBin(row, eis):
+        """
+        Set the optional averagedPolarizations in row from the EndianInput (eis) instance.
+        """
+        row._averagedPolarizationsExists = eis.readBool()
+        if row._averagedPolarizationsExists:
+
+            row._averagedPolarizations = eis.readBool()
+
+    @staticmethod
+    def beamPAFromBin(row, eis):
+        """
+        Set the optional beamPA in row from the EndianInput (eis) instance.
+        """
+        row._beamPAExists = eis.readBool()
+        if row._beamPAExists:
+
+            row._beamPA = Angle.from1DBin(eis)
+
+    @staticmethod
+    def beamPAErrorFromBin(row, eis):
+        """
+        Set the optional beamPAError in row from the EndianInput (eis) instance.
+        """
+        row._beamPAErrorExists = eis.readBool()
+        if row._beamPAErrorExists:
+
+            row._beamPAError = Angle.from1DBin(eis)
+
+    @staticmethod
+    def beamPAWasFixedFromBin(row, eis):
+        """
+        Set the optional beamPAWasFixed in row from the EndianInput (eis) instance.
+        """
+        row._beamPAWasFixedExists = eis.readBool()
+        if row._beamPAWasFixedExists:
+
+            row._beamPAWasFixed = eis.readBool()
+
+    @staticmethod
+    def beamWidthFromBin(row, eis):
+        """
+        Set the optional beamWidth in row from the EndianInput (eis) instance.
+        """
+        row._beamWidthExists = eis.readBool()
+        if row._beamWidthExists:
+
+            row._beamWidth = Angle.from2DBin(eis)
+
+    @staticmethod
+    def beamWidthErrorFromBin(row, eis):
+        """
+        Set the optional beamWidthError in row from the EndianInput (eis) instance.
+        """
+        row._beamWidthErrorExists = eis.readBool()
+        if row._beamWidthErrorExists:
+
+            row._beamWidthError = Angle.from2DBin(eis)
+
+    @staticmethod
+    def beamWidthWasFixedFromBin(row, eis):
+        """
+        Set the optional beamWidthWasFixed in row from the EndianInput (eis) instance.
+        """
+        row._beamWidthWasFixedExists = eis.readBool()
+        if row._beamWidthWasFixedExists:
+
+            beamWidthWasFixedDim1 = eis.readInt()
+            thisList = []
+            for i in range(beamWidthWasFixedDim1):
+                thisValue = eis.readBool()
+                thisList.append(thisValue)
+            row._beamWidthWasFixed = thisList
+
+    @staticmethod
+    def offIntensityFromBin(row, eis):
+        """
+        Set the optional offIntensity in row from the EndianInput (eis) instance.
+        """
+        row._offIntensityExists = eis.readBool()
+        if row._offIntensityExists:
+
+            row._offIntensity = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def offIntensityErrorFromBin(row, eis):
+        """
+        Set the optional offIntensityError in row from the EndianInput (eis) instance.
+        """
+        row._offIntensityErrorExists = eis.readBool()
+        if row._offIntensityErrorExists:
+
+            row._offIntensityError = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def offIntensityWasFixedFromBin(row, eis):
+        """
+        Set the optional offIntensityWasFixed in row from the EndianInput (eis) instance.
+        """
+        row._offIntensityWasFixedExists = eis.readBool()
+        if row._offIntensityWasFixedExists:
+
+            row._offIntensityWasFixed = eis.readBool()
+
+    @staticmethod
+    def peakIntensityFromBin(row, eis):
+        """
+        Set the optional peakIntensity in row from the EndianInput (eis) instance.
+        """
+        row._peakIntensityExists = eis.readBool()
+        if row._peakIntensityExists:
+
+            row._peakIntensity = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def peakIntensityErrorFromBin(row, eis):
+        """
+        Set the optional peakIntensityError in row from the EndianInput (eis) instance.
+        """
+        row._peakIntensityErrorExists = eis.readBool()
+        if row._peakIntensityErrorExists:
+
+            row._peakIntensityError = Temperature.from1DBin(eis)
+
+    @staticmethod
+    def peakIntensityWasFixedFromBin(row, eis):
+        """
+        Set the optional peakIntensityWasFixed in row from the EndianInput (eis) instance.
+        """
+        row._peakIntensityWasFixedExists = eis.readBool()
+        if row._peakIntensityWasFixedExists:
+
+            row._peakIntensityWasFixed = eis.readBool()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaName"] = CalPointingRow.antennaNameFromBin
+        _fromBinMethods["receiverBand"] = CalPointingRow.receiverBandFromBin
+        _fromBinMethods["calDataId"] = CalPointingRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalPointingRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalPointingRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalPointingRow.endValidTimeFromBin
+        _fromBinMethods["ambientTemperature"] = CalPointingRow.ambientTemperatureFromBin
+        _fromBinMethods["antennaMake"] = CalPointingRow.antennaMakeFromBin
+        _fromBinMethods["atmPhaseCorrection"] = CalPointingRow.atmPhaseCorrectionFromBin
+        _fromBinMethods["direction"] = CalPointingRow.directionFromBin
+        _fromBinMethods["frequencyRange"] = CalPointingRow.frequencyRangeFromBin
+        _fromBinMethods["pointingModelMode"] = CalPointingRow.pointingModelModeFromBin
+        _fromBinMethods["pointingMethod"] = CalPointingRow.pointingMethodFromBin
+        _fromBinMethods["numReceptor"] = CalPointingRow.numReceptorFromBin
+        _fromBinMethods["polarizationTypes"] = CalPointingRow.polarizationTypesFromBin
+        _fromBinMethods["collOffsetRelative"] = CalPointingRow.collOffsetRelativeFromBin
+        _fromBinMethods["collOffsetAbsolute"] = CalPointingRow.collOffsetAbsoluteFromBin
+        _fromBinMethods["collError"] = CalPointingRow.collErrorFromBin
+        _fromBinMethods["collOffsetTied"] = CalPointingRow.collOffsetTiedFromBin
+        _fromBinMethods["reducedChiSquared"] = CalPointingRow.reducedChiSquaredFromBin
+
+        _fromBinMethods["averagedPolarizations"] = (
+            CalPointingRow.averagedPolarizationsFromBin
+        )
+        _fromBinMethods["beamPA"] = CalPointingRow.beamPAFromBin
+        _fromBinMethods["beamPAError"] = CalPointingRow.beamPAErrorFromBin
+        _fromBinMethods["beamPAWasFixed"] = CalPointingRow.beamPAWasFixedFromBin
+        _fromBinMethods["beamWidth"] = CalPointingRow.beamWidthFromBin
+        _fromBinMethods["beamWidthError"] = CalPointingRow.beamWidthErrorFromBin
+        _fromBinMethods["beamWidthWasFixed"] = CalPointingRow.beamWidthWasFixedFromBin
+        _fromBinMethods["offIntensity"] = CalPointingRow.offIntensityFromBin
+        _fromBinMethods["offIntensityError"] = CalPointingRow.offIntensityErrorFromBin
+        _fromBinMethods["offIntensityWasFixed"] = (
+            CalPointingRow.offIntensityWasFixedFromBin
+        )
+        _fromBinMethods["peakIntensity"] = CalPointingRow.peakIntensityFromBin
+        _fromBinMethods["peakIntensityError"] = CalPointingRow.peakIntensityErrorFromBin
+        _fromBinMethods["peakIntensityWasFixed"] = (
+            CalPointingRow.peakIntensityWasFixedFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalPointingRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalPointing",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute antennaName
 
@@ -2365,7 +2886,7 @@ class CalPointingRow:
             if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if collOffsetRelative is not None:
             if self._collOffsetRelative is None:
                 return False
@@ -2378,18 +2899,18 @@ class CalPointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(collOffsetRelative_dims[0]):
-                for j in range(collOffsetRelative_dims[0]):
+                for j in range(collOffsetRelative_dims[1]):
 
                     # collOffsetRelative is a Angle, compare using the almostEquals method.
                     if not (
                         self._collOffsetRelative[i][j].almostEquals(
                             collOffsetRelative[i][j],
-                            this.getTable().getCollOffsetRelativeEqTolerance(),
+                            self.getTable().getCollOffsetRelativeEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if collOffsetAbsolute is not None:
             if self._collOffsetAbsolute is None:
                 return False
@@ -2402,18 +2923,18 @@ class CalPointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(collOffsetAbsolute_dims[0]):
-                for j in range(collOffsetAbsolute_dims[0]):
+                for j in range(collOffsetAbsolute_dims[1]):
 
                     # collOffsetAbsolute is a Angle, compare using the almostEquals method.
                     if not (
                         self._collOffsetAbsolute[i][j].almostEquals(
                             collOffsetAbsolute[i][j],
-                            this.getTable().getCollOffsetAbsoluteEqTolerance(),
+                            self.getTable().getCollOffsetAbsoluteEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if collError is not None:
             if self._collError is None:
                 return False
@@ -2426,17 +2947,17 @@ class CalPointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(collError_dims[0]):
-                for j in range(collError_dims[0]):
+                for j in range(collError_dims[1]):
 
                     # collError is a Angle, compare using the almostEquals method.
                     if not (
                         self._collError[i][j].almostEquals(
-                            collError[i][j], this.getTable().getCollErrorEqTolerance()
+                            collError[i][j], self.getTable().getCollErrorEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if collOffsetTied is not None:
             if self._collOffsetTied is None:
                 return False
@@ -2449,7 +2970,7 @@ class CalPointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(collOffsetTied_dims[0]):
-                for j in range(collOffsetTied_dims[0]):
+                for j in range(collOffsetTied_dims[1]):
 
                     # collOffsetTied is an array of bool, compare using == operator.
                     if not (self._collOffsetTied[i][j] == collOffsetTied[i][j]):
@@ -2580,7 +3101,7 @@ class CalPointingRow:
             if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if collOffsetRelative is not None:
             if self._collOffsetRelative is None:
                 return False
@@ -2593,18 +3114,18 @@ class CalPointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(collOffsetRelative_dims[0]):
-                for j in range(collOffsetRelative_dims[0]):
+                for j in range(collOffsetRelative_dims[1]):
 
                     # collOffsetRelative is a Angle, compare using the almostEquals method.
                     if not (
                         self._collOffsetRelative[i][j].almostEquals(
                             collOffsetRelative[i][j],
-                            this.getTable().getCollOffsetRelativeEqTolerance(),
+                            self.getTable().getCollOffsetRelativeEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if collOffsetAbsolute is not None:
             if self._collOffsetAbsolute is None:
                 return False
@@ -2617,18 +3138,18 @@ class CalPointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(collOffsetAbsolute_dims[0]):
-                for j in range(collOffsetAbsolute_dims[0]):
+                for j in range(collOffsetAbsolute_dims[1]):
 
                     # collOffsetAbsolute is a Angle, compare using the almostEquals method.
                     if not (
                         self._collOffsetAbsolute[i][j].almostEquals(
                             collOffsetAbsolute[i][j],
-                            this.getTable().getCollOffsetAbsoluteEqTolerance(),
+                            self.getTable().getCollOffsetAbsoluteEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if collError is not None:
             if self._collError is None:
                 return False
@@ -2641,17 +3162,17 @@ class CalPointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(collError_dims[0]):
-                for j in range(collError_dims[0]):
+                for j in range(collError_dims[1]):
 
                     # collError is a Angle, compare using the almostEquals method.
                     if not (
                         self._collError[i][j].almostEquals(
-                            collError[i][j], this.getTable().getCollErrorEqTolerance()
+                            collError[i][j], self.getTable().getCollErrorEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if collOffsetTied is not None:
             if self._collOffsetTied is None:
                 return False
@@ -2664,7 +3185,7 @@ class CalPointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(collOffsetTied_dims[0]):
-                for j in range(collOffsetTied_dims[0]):
+                for j in range(collOffsetTied_dims[1]):
 
                     # collOffsetTied is an array of bool, compare using == operator.
                     if not (self._collOffsetTied[i][j] == collOffsetTied[i][j]):
@@ -2681,3 +3202,7 @@ class CalPointingRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalPointingRow.initFromBinMethods()

@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.FluxCalibrationMethod import FluxCalibrationMethod
 
@@ -76,10 +80,11 @@ class CalFluxRow:
         Create a CalFluxRow.
         When row is None, create an empty row attached to table, which must be a CalFluxTable.
         When row is given, copy those values in to the new row. The row argument must be a CalFluxRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalFluxTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalFluxTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -148,7 +153,7 @@ class CalFluxRow:
 
         if row is not None:
             if not isinstance(row, CalFluxRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalFluxRow")
 
             # copy constructor
 
@@ -195,11 +200,11 @@ class CalFluxRow:
 
             # by default set systematically directionCode's value to something not None
 
-            self.directionCode = DirectionReferenceCode.from_int(0)
+            self._directionCode = DirectionReferenceCode.from_int(0)
 
             if row._directionCodeExists:
 
-                if row._directionCode is None:
+                if row._directionCode is not None:
                     self._directionCode = row._directionCode
 
                 self._directionCodeExists = True
@@ -250,11 +255,11 @@ class CalFluxRow:
 
             # by default set systematically sourceModel's value to something not None
 
-            self.sourceModel = SourceModel.from_int(0)
+            self._sourceModel = SourceModel.from_int(0)
 
             if row._sourceModelExists:
 
-                if row._sourceModel is None:
+                if row._sourceModel is not None:
                     self._sourceModel = row._sourceModel
 
                 self._sourceModelExists = True
@@ -516,10 +521,356 @@ class CalFluxRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeStr(self._sourceName)
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        eos.writeInt(self._numFrequencyRanges)
+
+        eos.writeInt(self._numStokes)
+
+        Frequency.listToBin(self._frequencyRanges, eos)
+
+        eos.writeString(self._fluxMethod.toString())
+
+        # null array case, unsure if this is possible but this should work
+        if self._flux is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            flux_dims = Parser.getListDims(self._flux)
+        # assumes it really is 2D
+        eos.writeInt(flux_dims[0])
+        eos.writeInt(flux_dims[1])
+        for i in range(flux_dims[0]):
+            for j in range(flux_dims[1]):
+                eos.writeFloat(self._flux[i][j])
+
+        # null array case, unsure if this is possible but this should work
+        if self._fluxError is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            fluxError_dims = Parser.getListDims(self._fluxError)
+        # assumes it really is 2D
+        eos.writeInt(fluxError_dims[0])
+        eos.writeInt(fluxError_dims[1])
+        for i in range(fluxError_dims[0]):
+            for j in range(fluxError_dims[1]):
+                eos.writeFloat(self._fluxError[i][j])
+
+        eos.writeInt(len(self._stokes))
+        for i in range(len(self._stokes)):
+
+            eos.writeString(self._stokes[i].toString())
+
+        eos.writeBool(self._directionExists)
+        if self._directionExists:
+
+            Angle.listToBin(self._direction, eos)
+
+        eos.writeBool(self._directionCodeExists)
+        if self._directionCodeExists:
+
+            eos.writeString(self._directionCode.toString())
+
+        eos.writeBool(self._directionEquinoxExists)
+        if self._directionEquinoxExists:
+
+            self._directionEquinox.toBin(eos)
+
+        eos.writeBool(self._PAExists)
+        if self._PAExists:
+
+            Angle.listToBin(self._PA, eos)
+
+        eos.writeBool(self._PAErrorExists)
+        if self._PAErrorExists:
+
+            Angle.listToBin(self._PAError, eos)
+
+        eos.writeBool(self._sizeExists)
+        if self._sizeExists:
+
+            Angle.listToBin(self._size, eos)
+
+        eos.writeBool(self._sizeErrorExists)
+        if self._sizeErrorExists:
+
+            Angle.listToBin(self._sizeError, eos)
+
+        eos.writeBool(self._sourceModelExists)
+        if self._sourceModelExists:
+
+            eos.writeString(self._sourceModel.toString())
+
+    @staticmethod
+    def sourceNameFromBin(row, eis):
+        """
+        Set the sourceName in row from the EndianInput (eis) instance.
+        """
+
+        row._sourceName = eis.readStr()
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def numFrequencyRangesFromBin(row, eis):
+        """
+        Set the numFrequencyRanges in row from the EndianInput (eis) instance.
+        """
+
+        row._numFrequencyRanges = eis.readInt()
+
+    @staticmethod
+    def numStokesFromBin(row, eis):
+        """
+        Set the numStokes in row from the EndianInput (eis) instance.
+        """
+
+        row._numStokes = eis.readInt()
+
+    @staticmethod
+    def frequencyRangesFromBin(row, eis):
+        """
+        Set the frequencyRanges in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyRanges = Frequency.from2DBin(eis)
+
+    @staticmethod
+    def fluxMethodFromBin(row, eis):
+        """
+        Set the fluxMethod in row from the EndianInput (eis) instance.
+        """
+
+        row._fluxMethod = FluxCalibrationMethod.from_int(eis.readInt())
+
+    @staticmethod
+    def fluxFromBin(row, eis):
+        """
+        Set the flux in row from the EndianInput (eis) instance.
+        """
+
+        fluxDim1 = eis.readInt()
+        fluxDim2 = eis.readInt()
+        thisList = []
+        for i in range(fluxDim1):
+            thisList_j = []
+            for j in range(fluxDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.flux = thisList
+
+    @staticmethod
+    def fluxErrorFromBin(row, eis):
+        """
+        Set the fluxError in row from the EndianInput (eis) instance.
+        """
+
+        fluxErrorDim1 = eis.readInt()
+        fluxErrorDim2 = eis.readInt()
+        thisList = []
+        for i in range(fluxErrorDim1):
+            thisList_j = []
+            for j in range(fluxErrorDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.fluxError = thisList
+
+    @staticmethod
+    def stokesFromBin(row, eis):
+        """
+        Set the stokes in row from the EndianInput (eis) instance.
+        """
+
+        stokesDim1 = eis.readInt()
+        thisList = []
+        for i in range(stokesDim1):
+            thisValue = StokesParameter.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._stokes = thisList
+
+    @staticmethod
+    def directionFromBin(row, eis):
+        """
+        Set the optional direction in row from the EndianInput (eis) instance.
+        """
+        row._directionExists = eis.readBool()
+        if row._directionExists:
+
+            row._direction = Angle.from1DBin(eis)
+
+    @staticmethod
+    def directionCodeFromBin(row, eis):
+        """
+        Set the optional directionCode in row from the EndianInput (eis) instance.
+        """
+        row._directionCodeExists = eis.readBool()
+        if row._directionCodeExists:
+
+            row._directionCode = DirectionReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def directionEquinoxFromBin(row, eis):
+        """
+        Set the optional directionEquinox in row from the EndianInput (eis) instance.
+        """
+        row._directionEquinoxExists = eis.readBool()
+        if row._directionEquinoxExists:
+
+            row._directionEquinox = Angle.fromBin(eis)
+
+    @staticmethod
+    def PAFromBin(row, eis):
+        """
+        Set the optional PA in row from the EndianInput (eis) instance.
+        """
+        row._PAExists = eis.readBool()
+        if row._PAExists:
+
+            row._PA = Angle.from2DBin(eis)
+
+    @staticmethod
+    def PAErrorFromBin(row, eis):
+        """
+        Set the optional PAError in row from the EndianInput (eis) instance.
+        """
+        row._PAErrorExists = eis.readBool()
+        if row._PAErrorExists:
+
+            row._PAError = Angle.from2DBin(eis)
+
+    @staticmethod
+    def sizeFromBin(row, eis):
+        """
+        Set the optional size in row from the EndianInput (eis) instance.
+        """
+        row._sizeExists = eis.readBool()
+        if row._sizeExists:
+
+            row._size = Angle.from3DBin(eis)
+
+    @staticmethod
+    def sizeErrorFromBin(row, eis):
+        """
+        Set the optional sizeError in row from the EndianInput (eis) instance.
+        """
+        row._sizeErrorExists = eis.readBool()
+        if row._sizeErrorExists:
+
+            row._sizeError = Angle.from3DBin(eis)
+
+    @staticmethod
+    def sourceModelFromBin(row, eis):
+        """
+        Set the optional sourceModel in row from the EndianInput (eis) instance.
+        """
+        row._sourceModelExists = eis.readBool()
+        if row._sourceModelExists:
+
+            row._sourceModel = SourceModel.from_int(eis.readInt())
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["sourceName"] = CalFluxRow.sourceNameFromBin
+        _fromBinMethods["calDataId"] = CalFluxRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalFluxRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalFluxRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalFluxRow.endValidTimeFromBin
+        _fromBinMethods["numFrequencyRanges"] = CalFluxRow.numFrequencyRangesFromBin
+        _fromBinMethods["numStokes"] = CalFluxRow.numStokesFromBin
+        _fromBinMethods["frequencyRanges"] = CalFluxRow.frequencyRangesFromBin
+        _fromBinMethods["fluxMethod"] = CalFluxRow.fluxMethodFromBin
+        _fromBinMethods["flux"] = CalFluxRow.fluxFromBin
+        _fromBinMethods["fluxError"] = CalFluxRow.fluxErrorFromBin
+        _fromBinMethods["stokes"] = CalFluxRow.stokesFromBin
+
+        _fromBinMethods["direction"] = CalFluxRow.directionFromBin
+        _fromBinMethods["directionCode"] = CalFluxRow.directionCodeFromBin
+        _fromBinMethods["directionEquinox"] = CalFluxRow.directionEquinoxFromBin
+        _fromBinMethods["PA"] = CalFluxRow.PAFromBin
+        _fromBinMethods["PAError"] = CalFluxRow.PAErrorFromBin
+        _fromBinMethods["size"] = CalFluxRow.sizeFromBin
+        _fromBinMethods["sizeError"] = CalFluxRow.sizeErrorFromBin
+        _fromBinMethods["sourceModel"] = CalFluxRow.sourceModelFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalFluxRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalFlux",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute sourceName
 
@@ -1434,7 +1785,7 @@ class CalFluxRow:
         if not (self._numStokes == numStokes):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if frequencyRanges is not None:
             if self._frequencyRanges is None:
                 return False
@@ -1447,13 +1798,13 @@ class CalFluxRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(frequencyRanges_dims[0]):
-                for j in range(frequencyRanges_dims[0]):
+                for j in range(frequencyRanges_dims[1]):
 
                     # frequencyRanges is a Frequency, compare using the almostEquals method.
                     if not (
                         self._frequencyRanges[i][j].almostEquals(
                             frequencyRanges[i][j],
-                            this.getTable().getFrequencyRangesEqTolerance(),
+                            self.getTable().getFrequencyRangesEqTolerance(),
                         )
                     ):
                         return False
@@ -1462,7 +1813,7 @@ class CalFluxRow:
         if not (self._fluxMethod.getValue() == fluxMethod.getValue()):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if flux is not None:
             if self._flux is None:
                 return False
@@ -1475,13 +1826,13 @@ class CalFluxRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(flux_dims[0]):
-                for j in range(flux_dims[0]):
+                for j in range(flux_dims[1]):
 
                     # flux is an array of float, compare using == operator.
                     if not (self._flux[i][j] == flux[i][j]):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if fluxError is not None:
             if self._fluxError is None:
                 return False
@@ -1494,7 +1845,7 @@ class CalFluxRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(fluxError_dims[0]):
-                for j in range(fluxError_dims[0]):
+                for j in range(fluxError_dims[1]):
 
                     # fluxError is an array of float, compare using == operator.
                     if not (self._fluxError[i][j] == fluxError[i][j]):
@@ -1559,7 +1910,7 @@ class CalFluxRow:
         if not (self._numStokes == numStokes):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if frequencyRanges is not None:
             if self._frequencyRanges is None:
                 return False
@@ -1572,13 +1923,13 @@ class CalFluxRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(frequencyRanges_dims[0]):
-                for j in range(frequencyRanges_dims[0]):
+                for j in range(frequencyRanges_dims[1]):
 
                     # frequencyRanges is a Frequency, compare using the almostEquals method.
                     if not (
                         self._frequencyRanges[i][j].almostEquals(
                             frequencyRanges[i][j],
-                            this.getTable().getFrequencyRangesEqTolerance(),
+                            self.getTable().getFrequencyRangesEqTolerance(),
                         )
                     ):
                         return False
@@ -1587,7 +1938,7 @@ class CalFluxRow:
         if not (self._fluxMethod.getValue() == fluxMethod.getValue()):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if flux is not None:
             if self._flux is None:
                 return False
@@ -1600,13 +1951,13 @@ class CalFluxRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(flux_dims[0]):
-                for j in range(flux_dims[0]):
+                for j in range(flux_dims[1]):
 
                     # flux is an array of float, compare using == operator.
                     if not (self._flux[i][j] == flux[i][j]):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if fluxError is not None:
             if self._fluxError is None:
                 return False
@@ -1619,7 +1970,7 @@ class CalFluxRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(fluxError_dims[0]):
-                for j in range(fluxError_dims[0]):
+                for j in range(fluxError_dims[1]):
 
                     # fluxError is an array of float, compare using == operator.
                     if not (self._fluxError[i][j] == fluxError[i][j]):
@@ -1636,3 +1987,7 @@ class CalFluxRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalFluxRow.initFromBinMethods()

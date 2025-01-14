@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.DopplerReferenceCode import DopplerReferenceCode
 
@@ -67,10 +71,11 @@ class DopplerRow:
         Create a DopplerRow.
         When row is None, create an empty row attached to table, which must be a DopplerTable.
         When row is given, copy those values in to the new row. The row argument must be a DopplerRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.DopplerTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a DopplerTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -91,7 +96,7 @@ class DopplerRow:
 
         if row is not None:
             if not isinstance(row, DopplerRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a DopplerRow")
 
             # copy constructor
 
@@ -185,10 +190,91 @@ class DopplerRow:
 
         self._sourceId = int(sourceIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeInt(self._dopplerId)
+
+        eos.writeInt(self._sourceId)
+
+        eos.writeInt(self._transitionIndex)
+
+        eos.writeString(self._velDef.toString())
+
+    @staticmethod
+    def dopplerIdFromBin(row, eis):
+        """
+        Set the dopplerId in row from the EndianInput (eis) instance.
+        """
+
+        row._dopplerId = eis.readInt()
+
+    @staticmethod
+    def sourceIdFromBin(row, eis):
+        """
+        Set the sourceId in row from the EndianInput (eis) instance.
+        """
+
+        row._sourceId = eis.readInt()
+
+    @staticmethod
+    def transitionIndexFromBin(row, eis):
+        """
+        Set the transitionIndex in row from the EndianInput (eis) instance.
+        """
+
+        row._transitionIndex = eis.readInt()
+
+    @staticmethod
+    def velDefFromBin(row, eis):
+        """
+        Set the velDef in row from the EndianInput (eis) instance.
+        """
+
+        row._velDef = DopplerReferenceCode.from_int(eis.readInt())
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["dopplerId"] = DopplerRow.dopplerIdFromBin
+        _fromBinMethods["sourceId"] = DopplerRow.sourceIdFromBin
+        _fromBinMethods["transitionIndex"] = DopplerRow.transitionIndexFromBin
+        _fromBinMethods["velDef"] = DopplerRow.velDefFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = DopplerRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Doppler",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute dopplerId
 
@@ -347,3 +433,7 @@ class DopplerRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+DopplerRow.initFromBinMethods()

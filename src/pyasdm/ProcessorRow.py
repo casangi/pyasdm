@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.ProcessorType import ProcessorType
 
@@ -70,10 +74,11 @@ class ProcessorRow:
         Create a ProcessorRow.
         When row is None, create an empty row attached to table, which must be a ProcessorTable.
         When row is given, copy those values in to the new row. The row argument must be a ProcessorRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.ProcessorTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a ProcessorTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -92,7 +97,7 @@ class ProcessorRow:
 
         if row is not None:
             if not isinstance(row, ProcessorRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a ProcessorRow")
 
             # copy constructor
 
@@ -192,10 +197,91 @@ class ProcessorRow:
             processorSubTypeNode.firstChild.data.strip()
         )
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._processorId.toBin(eos)
+
+        self._modeId.toBin(eos)
+
+        eos.writeString(self._processorType.toString())
+
+        eos.writeString(self._processorSubType.toString())
+
+    @staticmethod
+    def processorIdFromBin(row, eis):
+        """
+        Set the processorId in row from the EndianInput (eis) instance.
+        """
+
+        row._processorId = Tag.fromBin(eis)
+
+    @staticmethod
+    def modeIdFromBin(row, eis):
+        """
+        Set the modeId in row from the EndianInput (eis) instance.
+        """
+
+        row._modeId = Tag.fromBin(eis)
+
+    @staticmethod
+    def processorTypeFromBin(row, eis):
+        """
+        Set the processorType in row from the EndianInput (eis) instance.
+        """
+
+        row._processorType = ProcessorType.from_int(eis.readInt())
+
+    @staticmethod
+    def processorSubTypeFromBin(row, eis):
+        """
+        Set the processorSubType in row from the EndianInput (eis) instance.
+        """
+
+        row._processorSubType = ProcessorSubType.from_int(eis.readInt())
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["processorId"] = ProcessorRow.processorIdFromBin
+        _fromBinMethods["modeId"] = ProcessorRow.modeIdFromBin
+        _fromBinMethods["processorType"] = ProcessorRow.processorTypeFromBin
+        _fromBinMethods["processorSubType"] = ProcessorRow.processorSubTypeFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = ProcessorRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Processor",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute processorId
 
@@ -347,3 +433,7 @@ class ProcessorRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+ProcessorRow.initFromBinMethods()

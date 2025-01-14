@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.PolarizationType import PolarizationType
 
@@ -67,10 +71,11 @@ class GainTrackingRow:
         Create a GainTrackingRow.
         When row is None, create an empty row attached to table, which must be a GainTrackingTable.
         When row is given, copy those values in to the new row. The row argument must be a GainTrackingRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.GainTrackingTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a GainTrackingTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -113,7 +118,7 @@ class GainTrackingRow:
 
         if row is not None:
             if not isinstance(row, GainTrackingRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a GainTrackingRow")
 
             # copy constructor
 
@@ -320,10 +325,213 @@ class GainTrackingRow:
 
         self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._spectralWindowId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._feedId)
+
+        eos.writeInt(self._numReceptor)
+
+        eos.writeInt(len(self._attenuator))
+        for i in range(len(self._attenuator)):
+
+            eos.writeFloat(self._attenuator[i])
+
+        eos.writeInt(len(self._polarizationType))
+        for i in range(len(self._polarizationType)):
+
+            eos.writeString(self._polarizationType[i].toString())
+
+        eos.writeBool(self._samplingLevelExists)
+        if self._samplingLevelExists:
+
+            eos.writeFloat(self._samplingLevel)
+
+        eos.writeBool(self._numAttFreqExists)
+        if self._numAttFreqExists:
+
+            eos.writeInt(self._numAttFreq)
+
+        eos.writeBool(self._attFreqExists)
+        if self._attFreqExists:
+
+            eos.writeInt(len(self._attFreq))
+            for i in range(len(self._attFreq)):
+
+                eos.writeFloat(self._attFreq[i])
+
+        eos.writeBool(self._attSpectrumExists)
+        if self._attSpectrumExists:
+
+            Complex.listToBin(self._attSpectrum, eos)
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def spectralWindowIdFromBin(row, eis):
+        """
+        Set the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralWindowId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def feedIdFromBin(row, eis):
+        """
+        Set the feedId in row from the EndianInput (eis) instance.
+        """
+
+        row._feedId = eis.readInt()
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def attenuatorFromBin(row, eis):
+        """
+        Set the attenuator in row from the EndianInput (eis) instance.
+        """
+
+        attenuatorDim1 = eis.readInt()
+        thisList = []
+        for i in range(attenuatorDim1):
+            thisValue = eis.readFloat()
+            thisList.append(thisValue)
+        row._attenuator = thisList
+
+    @staticmethod
+    def polarizationTypeFromBin(row, eis):
+        """
+        Set the polarizationType in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypeDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypeDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationType = thisList
+
+    @staticmethod
+    def samplingLevelFromBin(row, eis):
+        """
+        Set the optional samplingLevel in row from the EndianInput (eis) instance.
+        """
+        row._samplingLevelExists = eis.readBool()
+        if row._samplingLevelExists:
+
+            row._samplingLevel = eis.readFloat()
+
+    @staticmethod
+    def numAttFreqFromBin(row, eis):
+        """
+        Set the optional numAttFreq in row from the EndianInput (eis) instance.
+        """
+        row._numAttFreqExists = eis.readBool()
+        if row._numAttFreqExists:
+
+            row._numAttFreq = eis.readInt()
+
+    @staticmethod
+    def attFreqFromBin(row, eis):
+        """
+        Set the optional attFreq in row from the EndianInput (eis) instance.
+        """
+        row._attFreqExists = eis.readBool()
+        if row._attFreqExists:
+
+            attFreqDim1 = eis.readInt()
+            thisList = []
+            for i in range(attFreqDim1):
+                thisValue = eis.readFloat()
+                thisList.append(thisValue)
+            row._attFreq = thisList
+
+    @staticmethod
+    def attSpectrumFromBin(row, eis):
+        """
+        Set the optional attSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._attSpectrumExists = eis.readBool()
+        if row._attSpectrumExists:
+
+            row._attSpectrum = Complex.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = GainTrackingRow.antennaIdFromBin
+        _fromBinMethods["spectralWindowId"] = GainTrackingRow.spectralWindowIdFromBin
+        _fromBinMethods["timeInterval"] = GainTrackingRow.timeIntervalFromBin
+        _fromBinMethods["feedId"] = GainTrackingRow.feedIdFromBin
+        _fromBinMethods["numReceptor"] = GainTrackingRow.numReceptorFromBin
+        _fromBinMethods["attenuator"] = GainTrackingRow.attenuatorFromBin
+        _fromBinMethods["polarizationType"] = GainTrackingRow.polarizationTypeFromBin
+
+        _fromBinMethods["samplingLevel"] = GainTrackingRow.samplingLevelFromBin
+        _fromBinMethods["numAttFreq"] = GainTrackingRow.numAttFreqFromBin
+        _fromBinMethods["attFreq"] = GainTrackingRow.attFreqFromBin
+        _fromBinMethods["attSpectrum"] = GainTrackingRow.attSpectrumFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = GainTrackingRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " GainTracking",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -904,3 +1112,7 @@ class GainTrackingRow:
                 return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+GainTrackingRow.initFromBinMethods()

@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.CorrelationMode import CorrelationMode
 
@@ -79,10 +83,11 @@ class ConfigDescriptionRow:
         Create a ConfigDescriptionRow.
         When row is None, create an empty row attached to table, which must be a ConfigDescriptionTable.
         When row is given, copy those values in to the new row. The row argument must be a ConfigDescriptionRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.ConfigDescriptionTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a ConfigDescriptionTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -139,7 +144,7 @@ class ConfigDescriptionRow:
 
         if row is not None:
             if not isinstance(row, ConfigDescriptionRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a ConfigDescriptionRow")
 
             # copy constructor
 
@@ -238,7 +243,7 @@ class ConfigDescriptionRow:
 
             if row._assocConfigDescriptionIdExists:
 
-                # assocConfigDescriptionId is a list , let's populate self.assocConfigDescriptionId element by element.
+                # assocConfigDescriptionId is a list, let's populate self._assocConfigDescriptionId element by element.
                 if self._assocConfigDescriptionId is None:
                     self._assocConfigDescriptionId = []
                 for i in range(len(row._assocConfigDescriptionId)):
@@ -491,10 +496,309 @@ class ConfigDescriptionRow:
             switchCycleIdStr, Tag, "ConfigDescription", True
         )
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._configDescriptionId.toBin(eos)
+
+        eos.writeInt(self._numAntenna)
+
+        eos.writeInt(self._numDataDescription)
+
+        eos.writeInt(self._numFeed)
+
+        eos.writeString(self._correlationMode.toString())
+
+        eos.writeInt(self._numAtmPhaseCorrection)
+
+        eos.writeInt(len(self._atmPhaseCorrection))
+        for i in range(len(self._atmPhaseCorrection)):
+
+            eos.writeString(self._atmPhaseCorrection[i].toString())
+
+        eos.writeString(self._processorType.toString())
+
+        eos.writeString(self._spectralType.toString())
+
+        Tag.listToBin(self._antennaId, eos)
+
+        eos.writeInt(len(self._feedId))
+        for i in range(len(self._feedId)):
+
+            eos.writeInt(int(self._feedId[i].getValue()))
+
+        Tag.listToBin(self._switchCycleId, eos)
+
+        Tag.listToBin(self._dataDescriptionId, eos)
+
+        self._processorId.toBin(eos)
+
+        eos.writeBool(self._phasedArrayListExists)
+        if self._phasedArrayListExists:
+
+            eos.writeInt(len(self._phasedArrayList))
+            for i in range(len(self._phasedArrayList)):
+
+                eos.writeInt(self._phasedArrayList[i])
+
+        eos.writeBool(self._numAssocValuesExists)
+        if self._numAssocValuesExists:
+
+            eos.writeInt(self._numAssocValues)
+
+        eos.writeBool(self._assocNatureExists)
+        if self._assocNatureExists:
+
+            eos.writeInt(len(self._assocNature))
+            for i in range(len(self._assocNature)):
+
+                eos.writeString(self._assocNature[i].toString())
+
+        eos.writeBool(self._assocConfigDescriptionIdExists)
+        if self._assocConfigDescriptionIdExists:
+
+            Tag.listToBin(self._assocConfigDescriptionId, eos)
+
+    @staticmethod
+    def configDescriptionIdFromBin(row, eis):
+        """
+        Set the configDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        row._configDescriptionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def numAntennaFromBin(row, eis):
+        """
+        Set the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        row._numAntenna = eis.readInt()
+
+    @staticmethod
+    def numDataDescriptionFromBin(row, eis):
+        """
+        Set the numDataDescription in row from the EndianInput (eis) instance.
+        """
+
+        row._numDataDescription = eis.readInt()
+
+    @staticmethod
+    def numFeedFromBin(row, eis):
+        """
+        Set the numFeed in row from the EndianInput (eis) instance.
+        """
+
+        row._numFeed = eis.readInt()
+
+    @staticmethod
+    def correlationModeFromBin(row, eis):
+        """
+        Set the correlationMode in row from the EndianInput (eis) instance.
+        """
+
+        row._correlationMode = CorrelationMode.from_int(eis.readInt())
+
+    @staticmethod
+    def numAtmPhaseCorrectionFromBin(row, eis):
+        """
+        Set the numAtmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        row._numAtmPhaseCorrection = eis.readInt()
+
+    @staticmethod
+    def atmPhaseCorrectionFromBin(row, eis):
+        """
+        Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        atmPhaseCorrectionDim1 = eis.readInt()
+        thisList = []
+        for i in range(atmPhaseCorrectionDim1):
+            thisValue = AtmPhaseCorrection.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._atmPhaseCorrection = thisList
+
+    @staticmethod
+    def processorTypeFromBin(row, eis):
+        """
+        Set the processorType in row from the EndianInput (eis) instance.
+        """
+
+        row._processorType = ProcessorType.from_int(eis.readInt())
+
+    @staticmethod
+    def spectralTypeFromBin(row, eis):
+        """
+        Set the spectralType in row from the EndianInput (eis) instance.
+        """
+
+        row._spectralType = SpectralResolutionType.from_int(eis.readInt())
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def feedIdFromBin(row, eis):
+        """
+        Set the feedId in row from the EndianInput (eis) instance.
+        """
+
+        thisList = []
+        unusedLength = eis.readInt()
+        for i in range(unusedLength):
+            thisList.append(eis.readInt())
+        row._feedId = thisList
+
+    @staticmethod
+    def switchCycleIdFromBin(row, eis):
+        """
+        Set the switchCycleId in row from the EndianInput (eis) instance.
+        """
+
+        row._switchCycleId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def dataDescriptionIdFromBin(row, eis):
+        """
+        Set the dataDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        row._dataDescriptionId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def processorIdFromBin(row, eis):
+        """
+        Set the processorId in row from the EndianInput (eis) instance.
+        """
+
+        row._processorId = Tag.fromBin(eis)
+
+    @staticmethod
+    def phasedArrayListFromBin(row, eis):
+        """
+        Set the optional phasedArrayList in row from the EndianInput (eis) instance.
+        """
+        row._phasedArrayListExists = eis.readBool()
+        if row._phasedArrayListExists:
+
+            phasedArrayListDim1 = eis.readInt()
+            thisList = []
+            for i in range(phasedArrayListDim1):
+                thisValue = eis.readInt()
+                thisList.append(thisValue)
+            row._phasedArrayList = thisList
+
+    @staticmethod
+    def numAssocValuesFromBin(row, eis):
+        """
+        Set the optional numAssocValues in row from the EndianInput (eis) instance.
+        """
+        row._numAssocValuesExists = eis.readBool()
+        if row._numAssocValuesExists:
+
+            row._numAssocValues = eis.readInt()
+
+    @staticmethod
+    def assocNatureFromBin(row, eis):
+        """
+        Set the optional assocNature in row from the EndianInput (eis) instance.
+        """
+        row._assocNatureExists = eis.readBool()
+        if row._assocNatureExists:
+
+            assocNatureDim1 = eis.readInt()
+            thisList = []
+            for i in range(assocNatureDim1):
+                thisValue = SpectralResolutionType.from_int(eis.readInt())
+                thisList.append(thisValue)
+            row._assocNature = thisList
+
+    @staticmethod
+    def assocConfigDescriptionIdFromBin(row, eis):
+        """
+        Set the optional assocConfigDescriptionId in row from the EndianInput (eis) instance.
+        """
+        row._assocConfigDescriptionIdExists = eis.readBool()
+        if row._assocConfigDescriptionIdExists:
+
+            row._assocConfigDescriptionId = Tag.from1DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["configDescriptionId"] = (
+            ConfigDescriptionRow.configDescriptionIdFromBin
+        )
+        _fromBinMethods["numAntenna"] = ConfigDescriptionRow.numAntennaFromBin
+        _fromBinMethods["numDataDescription"] = (
+            ConfigDescriptionRow.numDataDescriptionFromBin
+        )
+        _fromBinMethods["numFeed"] = ConfigDescriptionRow.numFeedFromBin
+        _fromBinMethods["correlationMode"] = ConfigDescriptionRow.correlationModeFromBin
+        _fromBinMethods["numAtmPhaseCorrection"] = (
+            ConfigDescriptionRow.numAtmPhaseCorrectionFromBin
+        )
+        _fromBinMethods["atmPhaseCorrection"] = (
+            ConfigDescriptionRow.atmPhaseCorrectionFromBin
+        )
+        _fromBinMethods["processorType"] = ConfigDescriptionRow.processorTypeFromBin
+        _fromBinMethods["spectralType"] = ConfigDescriptionRow.spectralTypeFromBin
+        _fromBinMethods["antennaId"] = ConfigDescriptionRow.antennaIdFromBin
+        _fromBinMethods["feedId"] = ConfigDescriptionRow.feedIdFromBin
+        _fromBinMethods["switchCycleId"] = ConfigDescriptionRow.switchCycleIdFromBin
+        _fromBinMethods["dataDescriptionId"] = (
+            ConfigDescriptionRow.dataDescriptionIdFromBin
+        )
+        _fromBinMethods["processorId"] = ConfigDescriptionRow.processorIdFromBin
+
+        _fromBinMethods["phasedArrayList"] = ConfigDescriptionRow.phasedArrayListFromBin
+        _fromBinMethods["numAssocValues"] = ConfigDescriptionRow.numAssocValuesFromBin
+        _fromBinMethods["assocNature"] = ConfigDescriptionRow.assocNatureFromBin
+        _fromBinMethods["assocConfigDescriptionId"] = (
+            ConfigDescriptionRow.assocConfigDescriptionIdFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = ConfigDescriptionRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " ConfigDescription",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute numAntenna
 
@@ -1167,9 +1471,9 @@ class ConfigDescriptionRow:
 
     def setOneAssocConfigDescriptionId(self, index, assocConfigDescriptionId):
         """
-        Set assocConfigDescriptionId[i] with the specified Tag value.
+        Set assocConfigDescriptionId[index] with the specified Tag value.
         index The index in assocConfigDescriptionId where to set the Tag value.
-        assocConfigDescriptionId The Tag value to which assocConfigDescriptionId[i] is to be set.
+        assocConfigDescriptionId The Tag value to which assocConfigDescriptionId[index] is to be set.
         Raises an exception if that value does not already exist in this row
         """
         if not self._assocConfigDescriptionIdExists():
@@ -1186,8 +1490,8 @@ class ConfigDescriptionRow:
         id the Tag to be appended to assocConfigDescriptionId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._assocConfigDescriptionId.append(Tag(id[i]))
+            for thisValue in id:
+                self._assocConfigDescriptionId.append(Tag(thisValue))
         else:
             self._assocConfigDescriptionId.append(Tag(id))
 
@@ -1226,10 +1530,9 @@ class ConfigDescriptionRow:
 
     def setOneAntennaId(self, index, antennaId):
         """
-        Set antennaId[i] with the specified Tag value.
+        Set antennaId[index] with the specified Tag value.
         index The index in antennaId where to set the Tag value.
-        antennaId The Tag value to which antennaId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        antennaId The Tag value to which antennaId[index] is to be set.
 
         """
 
@@ -1243,8 +1546,8 @@ class ConfigDescriptionRow:
         id the Tag to be appended to antennaId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._antennaId.append(Tag(id[i]))
+            for thisValue in id:
+                self._antennaId.append(Tag(thisValue))
         else:
             self._antennaId.append(Tag(id))
 
@@ -1274,10 +1577,9 @@ class ConfigDescriptionRow:
 
     def setOneFeedId(self, index, feedId):
         """
-        Set feedId[i] with the specified int value.
+        Set feedId[index] with the specified int value.
         index The index in feedId where to set the int value.
-        feedId The int value to which feedId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        feedId The int value to which feedId[index] is to be set.
 
         """
 
@@ -1299,7 +1601,6 @@ class ConfigDescriptionRow:
         Using the feedId at location i in this row, return the corresponding row from FeedTable
         """
 
-        # was self._feedId[i]
         j = self._feedId[i]
         return self._table.getContainer().getFeed().getRowByFeedId(j)
 
@@ -1315,17 +1616,16 @@ class ConfigDescriptionRow:
             # this may return more than one row
             if isinstance(tr, list):
                 for thisRow in tr:
-                    result.append(tr[k])
+                    result.append(thisRow)
             else:
                 result.append(tr)
         return copy.deepcopy(result)
 
     def setOneSwitchCycleId(self, index, switchCycleId):
         """
-        Set switchCycleId[i] with the specified Tag value.
+        Set switchCycleId[index] with the specified Tag value.
         index The index in switchCycleId where to set the Tag value.
-        switchCycleId The Tag value to which switchCycleId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        switchCycleId The Tag value to which switchCycleId[index] is to be set.
 
         """
 
@@ -1339,8 +1639,8 @@ class ConfigDescriptionRow:
         id the Tag to be appended to switchCycleId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._switchCycleId.append(Tag(id[i]))
+            for thisValue in id:
+                self._switchCycleId.append(Tag(thisValue))
         else:
             self._switchCycleId.append(Tag(id))
 
@@ -1376,10 +1676,9 @@ class ConfigDescriptionRow:
 
     def setOneDataDescriptionId(self, index, dataDescriptionId):
         """
-        Set dataDescriptionId[i] with the specified Tag value.
+        Set dataDescriptionId[index] with the specified Tag value.
         index The index in dataDescriptionId where to set the Tag value.
-        dataDescriptionId The Tag value to which dataDescriptionId[i] is to be set.
-        Raises an exception if that value does not already exist in this row.
+        dataDescriptionId The Tag value to which dataDescriptionId[index] is to be set.
 
         """
 
@@ -1393,8 +1692,8 @@ class ConfigDescriptionRow:
         id the Tag to be appended to dataDescriptionId
         """
         if isinstance(id, list):
-            for i in range(len(id)):
-                self._dataDescriptionId.append(Tag(id[i]))
+            for thisValue in id:
+                self._dataDescriptionId.append(Tag(thisValue))
         else:
             self._dataDescriptionId.append(Tag(id))
 
@@ -1514,7 +1813,7 @@ class ConfigDescriptionRow:
 
         # feedId is a list of int, compare using the != operator.
         for indx in range(len(feedId)):
-            if self._feedId[i] != feedId[i]:
+            if self._feedId[indx] != feedId[indx]:
                 return False
 
         # switchCycleId is an extrinsic attribute which is a list of Tag.
@@ -1637,7 +1936,7 @@ class ConfigDescriptionRow:
 
         # feedId is a list of int, compare using the != operator.
         for indx in range(len(feedId)):
-            if self._feedId[i] != feedId[i]:
+            if self._feedId[indx] != feedId[indx]:
                 return False
 
         # switchCycleId is an extrinsic attribute which is a list of Tag.
@@ -1665,3 +1964,7 @@ class ConfigDescriptionRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+ConfigDescriptionRow.initFromBinMethods()

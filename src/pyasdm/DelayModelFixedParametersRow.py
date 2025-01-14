@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -64,10 +68,11 @@ class DelayModelFixedParametersRow:
         Create a DelayModelFixedParametersRow.
         When row is None, create an empty row attached to table, which must be a DelayModelFixedParametersTable.
         When row is given, copy those values in to the new row. The row argument must be a DelayModelFixedParametersRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.DelayModelFixedParametersTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a DelayModelFixedParametersTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -154,7 +159,7 @@ class DelayModelFixedParametersRow:
 
         if row is not None:
             if not isinstance(row, DelayModelFixedParametersRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a DelayModelFixedParametersRow")
 
             # copy constructor
 
@@ -578,10 +583,377 @@ class DelayModelFixedParametersRow:
 
         self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._delayModelFixedParametersId.toBin(eos)
+
+        eos.writeStr(self._delayModelVersion)
+
+        self._execBlockId.toBin(eos)
+
+        eos.writeBool(self._gaussConstantExists)
+        if self._gaussConstantExists:
+
+            self._gaussConstant.toBin(eos)
+
+        eos.writeBool(self._newtonianConstantExists)
+        if self._newtonianConstantExists:
+
+            eos.writeFloat(self._newtonianConstant)
+
+        eos.writeBool(self._gravityExists)
+        if self._gravityExists:
+
+            eos.writeFloat(self._gravity)
+
+        eos.writeBool(self._earthFlatteningExists)
+        if self._earthFlatteningExists:
+
+            eos.writeFloat(self._earthFlattening)
+
+        eos.writeBool(self._earthRadiusExists)
+        if self._earthRadiusExists:
+
+            self._earthRadius.toBin(eos)
+
+        eos.writeBool(self._moonEarthMassRatioExists)
+        if self._moonEarthMassRatioExists:
+
+            eos.writeFloat(self._moonEarthMassRatio)
+
+        eos.writeBool(self._ephemerisEpochExists)
+        if self._ephemerisEpochExists:
+
+            eos.writeStr(self._ephemerisEpoch)
+
+        eos.writeBool(self._earthTideLagExists)
+        if self._earthTideLagExists:
+
+            eos.writeFloat(self._earthTideLag)
+
+        eos.writeBool(self._earthGMExists)
+        if self._earthGMExists:
+
+            eos.writeFloat(self._earthGM)
+
+        eos.writeBool(self._moonGMExists)
+        if self._moonGMExists:
+
+            eos.writeFloat(self._moonGM)
+
+        eos.writeBool(self._sunGMExists)
+        if self._sunGMExists:
+
+            eos.writeFloat(self._sunGM)
+
+        eos.writeBool(self._loveNumberHExists)
+        if self._loveNumberHExists:
+
+            eos.writeFloat(self._loveNumberH)
+
+        eos.writeBool(self._loveNumberLExists)
+        if self._loveNumberLExists:
+
+            eos.writeFloat(self._loveNumberL)
+
+        eos.writeBool(self._precessionConstantExists)
+        if self._precessionConstantExists:
+
+            self._precessionConstant.toBin(eos)
+
+        eos.writeBool(self._lightTime1AUExists)
+        if self._lightTime1AUExists:
+
+            eos.writeFloat(self._lightTime1AU)
+
+        eos.writeBool(self._speedOfLightExists)
+        if self._speedOfLightExists:
+
+            self._speedOfLight.toBin(eos)
+
+        eos.writeBool(self._delayModelFlagsExists)
+        if self._delayModelFlagsExists:
+
+            eos.writeStr(self._delayModelFlags)
+
+    @staticmethod
+    def delayModelFixedParametersIdFromBin(row, eis):
+        """
+        Set the delayModelFixedParametersId in row from the EndianInput (eis) instance.
+        """
+
+        row._delayModelFixedParametersId = Tag.fromBin(eis)
+
+    @staticmethod
+    def delayModelVersionFromBin(row, eis):
+        """
+        Set the delayModelVersion in row from the EndianInput (eis) instance.
+        """
+
+        row._delayModelVersion = eis.readStr()
+
+    @staticmethod
+    def execBlockIdFromBin(row, eis):
+        """
+        Set the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        row._execBlockId = Tag.fromBin(eis)
+
+    @staticmethod
+    def gaussConstantFromBin(row, eis):
+        """
+        Set the optional gaussConstant in row from the EndianInput (eis) instance.
+        """
+        row._gaussConstantExists = eis.readBool()
+        if row._gaussConstantExists:
+
+            row._gaussConstant = AngularRate.fromBin(eis)
+
+    @staticmethod
+    def newtonianConstantFromBin(row, eis):
+        """
+        Set the optional newtonianConstant in row from the EndianInput (eis) instance.
+        """
+        row._newtonianConstantExists = eis.readBool()
+        if row._newtonianConstantExists:
+
+            row._newtonianConstant = eis.readFloat()
+
+    @staticmethod
+    def gravityFromBin(row, eis):
+        """
+        Set the optional gravity in row from the EndianInput (eis) instance.
+        """
+        row._gravityExists = eis.readBool()
+        if row._gravityExists:
+
+            row._gravity = eis.readFloat()
+
+    @staticmethod
+    def earthFlatteningFromBin(row, eis):
+        """
+        Set the optional earthFlattening in row from the EndianInput (eis) instance.
+        """
+        row._earthFlatteningExists = eis.readBool()
+        if row._earthFlatteningExists:
+
+            row._earthFlattening = eis.readFloat()
+
+    @staticmethod
+    def earthRadiusFromBin(row, eis):
+        """
+        Set the optional earthRadius in row from the EndianInput (eis) instance.
+        """
+        row._earthRadiusExists = eis.readBool()
+        if row._earthRadiusExists:
+
+            row._earthRadius = Length.fromBin(eis)
+
+    @staticmethod
+    def moonEarthMassRatioFromBin(row, eis):
+        """
+        Set the optional moonEarthMassRatio in row from the EndianInput (eis) instance.
+        """
+        row._moonEarthMassRatioExists = eis.readBool()
+        if row._moonEarthMassRatioExists:
+
+            row._moonEarthMassRatio = eis.readFloat()
+
+    @staticmethod
+    def ephemerisEpochFromBin(row, eis):
+        """
+        Set the optional ephemerisEpoch in row from the EndianInput (eis) instance.
+        """
+        row._ephemerisEpochExists = eis.readBool()
+        if row._ephemerisEpochExists:
+
+            row._ephemerisEpoch = eis.readStr()
+
+    @staticmethod
+    def earthTideLagFromBin(row, eis):
+        """
+        Set the optional earthTideLag in row from the EndianInput (eis) instance.
+        """
+        row._earthTideLagExists = eis.readBool()
+        if row._earthTideLagExists:
+
+            row._earthTideLag = eis.readFloat()
+
+    @staticmethod
+    def earthGMFromBin(row, eis):
+        """
+        Set the optional earthGM in row from the EndianInput (eis) instance.
+        """
+        row._earthGMExists = eis.readBool()
+        if row._earthGMExists:
+
+            row._earthGM = eis.readFloat()
+
+    @staticmethod
+    def moonGMFromBin(row, eis):
+        """
+        Set the optional moonGM in row from the EndianInput (eis) instance.
+        """
+        row._moonGMExists = eis.readBool()
+        if row._moonGMExists:
+
+            row._moonGM = eis.readFloat()
+
+    @staticmethod
+    def sunGMFromBin(row, eis):
+        """
+        Set the optional sunGM in row from the EndianInput (eis) instance.
+        """
+        row._sunGMExists = eis.readBool()
+        if row._sunGMExists:
+
+            row._sunGM = eis.readFloat()
+
+    @staticmethod
+    def loveNumberHFromBin(row, eis):
+        """
+        Set the optional loveNumberH in row from the EndianInput (eis) instance.
+        """
+        row._loveNumberHExists = eis.readBool()
+        if row._loveNumberHExists:
+
+            row._loveNumberH = eis.readFloat()
+
+    @staticmethod
+    def loveNumberLFromBin(row, eis):
+        """
+        Set the optional loveNumberL in row from the EndianInput (eis) instance.
+        """
+        row._loveNumberLExists = eis.readBool()
+        if row._loveNumberLExists:
+
+            row._loveNumberL = eis.readFloat()
+
+    @staticmethod
+    def precessionConstantFromBin(row, eis):
+        """
+        Set the optional precessionConstant in row from the EndianInput (eis) instance.
+        """
+        row._precessionConstantExists = eis.readBool()
+        if row._precessionConstantExists:
+
+            row._precessionConstant = AngularRate.fromBin(eis)
+
+    @staticmethod
+    def lightTime1AUFromBin(row, eis):
+        """
+        Set the optional lightTime1AU in row from the EndianInput (eis) instance.
+        """
+        row._lightTime1AUExists = eis.readBool()
+        if row._lightTime1AUExists:
+
+            row._lightTime1AU = eis.readFloat()
+
+    @staticmethod
+    def speedOfLightFromBin(row, eis):
+        """
+        Set the optional speedOfLight in row from the EndianInput (eis) instance.
+        """
+        row._speedOfLightExists = eis.readBool()
+        if row._speedOfLightExists:
+
+            row._speedOfLight = Speed.fromBin(eis)
+
+    @staticmethod
+    def delayModelFlagsFromBin(row, eis):
+        """
+        Set the optional delayModelFlags in row from the EndianInput (eis) instance.
+        """
+        row._delayModelFlagsExists = eis.readBool()
+        if row._delayModelFlagsExists:
+
+            row._delayModelFlags = eis.readStr()
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["delayModelFixedParametersId"] = (
+            DelayModelFixedParametersRow.delayModelFixedParametersIdFromBin
+        )
+        _fromBinMethods["delayModelVersion"] = (
+            DelayModelFixedParametersRow.delayModelVersionFromBin
+        )
+        _fromBinMethods["execBlockId"] = DelayModelFixedParametersRow.execBlockIdFromBin
+
+        _fromBinMethods["gaussConstant"] = (
+            DelayModelFixedParametersRow.gaussConstantFromBin
+        )
+        _fromBinMethods["newtonianConstant"] = (
+            DelayModelFixedParametersRow.newtonianConstantFromBin
+        )
+        _fromBinMethods["gravity"] = DelayModelFixedParametersRow.gravityFromBin
+        _fromBinMethods["earthFlattening"] = (
+            DelayModelFixedParametersRow.earthFlatteningFromBin
+        )
+        _fromBinMethods["earthRadius"] = DelayModelFixedParametersRow.earthRadiusFromBin
+        _fromBinMethods["moonEarthMassRatio"] = (
+            DelayModelFixedParametersRow.moonEarthMassRatioFromBin
+        )
+        _fromBinMethods["ephemerisEpoch"] = (
+            DelayModelFixedParametersRow.ephemerisEpochFromBin
+        )
+        _fromBinMethods["earthTideLag"] = (
+            DelayModelFixedParametersRow.earthTideLagFromBin
+        )
+        _fromBinMethods["earthGM"] = DelayModelFixedParametersRow.earthGMFromBin
+        _fromBinMethods["moonGM"] = DelayModelFixedParametersRow.moonGMFromBin
+        _fromBinMethods["sunGM"] = DelayModelFixedParametersRow.sunGMFromBin
+        _fromBinMethods["loveNumberH"] = DelayModelFixedParametersRow.loveNumberHFromBin
+        _fromBinMethods["loveNumberL"] = DelayModelFixedParametersRow.loveNumberLFromBin
+        _fromBinMethods["precessionConstant"] = (
+            DelayModelFixedParametersRow.precessionConstantFromBin
+        )
+        _fromBinMethods["lightTime1AU"] = (
+            DelayModelFixedParametersRow.lightTime1AUFromBin
+        )
+        _fromBinMethods["speedOfLight"] = (
+            DelayModelFixedParametersRow.speedOfLightFromBin
+        )
+        _fromBinMethods["delayModelFlags"] = (
+            DelayModelFixedParametersRow.delayModelFlagsFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = DelayModelFixedParametersRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " DelayModelFixedParameters",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute delayModelFixedParametersId
 
@@ -1478,3 +1850,7 @@ class DelayModelFixedParametersRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+DelayModelFixedParametersRow.initFromBinMethods()

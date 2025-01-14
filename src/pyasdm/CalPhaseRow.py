@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.BasebandName import BasebandName
 
@@ -76,10 +80,11 @@ class CalPhaseRow:
         Create a CalPhaseRow.
         When row is None, create an empty row attached to table, which must be a CalPhaseTable.
         When row is given, copy those values in to the new row. The row argument must be a CalPhaseRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.CalPhaseTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a CalPhaseTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -156,23 +161,23 @@ class CalPhaseRow:
 
         if row is not None:
             if not isinstance(row, CalPhaseRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a CalPhaseRow")
 
             # copy constructor
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._basebandName is None:
                 self._basebandName = BasebandName.from_int(0)
             else:
                 self._basebandName = BasebandName(row._basebandName)
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._receiverBand is None:
                 self._receiverBand = ReceiverBand.from_int(0)
             else:
                 self._receiverBand = ReceiverBand(row._receiverBand)
 
-            # We force the attribute of the result to be not None
+            # We force the attribute of the result to be not None.
             if row._atmPhaseCorrection is None:
                 self._atmPhaseCorrection = AtmPhaseCorrection.from_int(0)
             else:
@@ -583,10 +588,548 @@ class CalPhaseRow:
 
         self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        eos.writeString(self._basebandName.toString())
+
+        eos.writeString(self._receiverBand.toString())
+
+        eos.writeString(self._atmPhaseCorrection.toString())
+
+        self._calDataId.toBin(eos)
+
+        self._calReductionId.toBin(eos)
+
+        self._startValidTime.toBin(eos)
+
+        self._endValidTime.toBin(eos)
+
+        eos.writeInt(self._numBaseline)
+
+        eos.writeInt(self._numReceptor)
+
+        # null array case, unsure if this is possible but this should work
+        if self._ampli is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            ampli_dims = Parser.getListDims(self._ampli)
+        # assumes it really is 2D
+        eos.writeInt(ampli_dims[0])
+        eos.writeInt(ampli_dims[1])
+        for i in range(ampli_dims[0]):
+            for j in range(ampli_dims[1]):
+                eos.writeFloat(self._ampli[i][j])
+
+        # null array case, unsure if this is possible but this should work
+        if self._antennaNames is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            antennaNames_dims = Parser.getListDims(self._antennaNames)
+        # assumes it really is 2D
+        eos.writeInt(antennaNames_dims[0])
+        eos.writeInt(antennaNames_dims[1])
+        for i in range(antennaNames_dims[0]):
+            for j in range(antennaNames_dims[1]):
+                eos.writeStr(self._antennaNames[i][j])
+
+        Length.listToBin(self._baselineLengths, eos)
+
+        # null array case, unsure if this is possible but this should work
+        if self._decorrelationFactor is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            decorrelationFactor_dims = Parser.getListDims(self._decorrelationFactor)
+        # assumes it really is 2D
+        eos.writeInt(decorrelationFactor_dims[0])
+        eos.writeInt(decorrelationFactor_dims[1])
+        for i in range(decorrelationFactor_dims[0]):
+            for j in range(decorrelationFactor_dims[1]):
+                eos.writeFloat(self._decorrelationFactor[i][j])
+
+        Angle.listToBin(self._direction, eos)
+
+        Frequency.listToBin(self._frequencyRange, eos)
+
+        self._integrationTime.toBin(eos)
+
+        # null array case, unsure if this is possible but this should work
+        if self._phase is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            phase_dims = Parser.getListDims(self._phase)
+        # assumes it really is 2D
+        eos.writeInt(phase_dims[0])
+        eos.writeInt(phase_dims[1])
+        for i in range(phase_dims[0]):
+            for j in range(phase_dims[1]):
+                eos.writeFloat(self._phase[i][j])
+
+        eos.writeInt(len(self._polarizationTypes))
+        for i in range(len(self._polarizationTypes)):
+
+            eos.writeString(self._polarizationTypes[i].toString())
+
+        # null array case, unsure if this is possible but this should work
+        if self._phaseRMS is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            phaseRMS_dims = Parser.getListDims(self._phaseRMS)
+        # assumes it really is 2D
+        eos.writeInt(phaseRMS_dims[0])
+        eos.writeInt(phaseRMS_dims[1])
+        for i in range(phaseRMS_dims[0]):
+            for j in range(phaseRMS_dims[1]):
+                eos.writeFloat(self._phaseRMS[i][j])
+
+        # null array case, unsure if this is possible but this should work
+        if self._statPhaseRMS is None:
+            eos.writeInt(0)
+            eos.writeInt(0)
+        else:
+            statPhaseRMS_dims = Parser.getListDims(self._statPhaseRMS)
+        # assumes it really is 2D
+        eos.writeInt(statPhaseRMS_dims[0])
+        eos.writeInt(statPhaseRMS_dims[1])
+        for i in range(statPhaseRMS_dims[0]):
+            for j in range(statPhaseRMS_dims[1]):
+                eos.writeFloat(self._statPhaseRMS[i][j])
+
+        eos.writeBool(self._correctionValidityExists)
+        if self._correctionValidityExists:
+
+            eos.writeInt(len(self._correctionValidity))
+            for i in range(len(self._correctionValidity)):
+
+                eos.writeBool(self._correctionValidity[i])
+
+        eos.writeBool(self._numAntennaExists)
+        if self._numAntennaExists:
+
+            eos.writeInt(self._numAntenna)
+
+        eos.writeBool(self._singleAntennaNameExists)
+        if self._singleAntennaNameExists:
+
+            eos.writeInt(len(self._singleAntennaName))
+            for i in range(len(self._singleAntennaName)):
+
+                eos.writeStr(self._singleAntennaName[i])
+
+        eos.writeBool(self._refAntennaNameExists)
+        if self._refAntennaNameExists:
+
+            eos.writeStr(self._refAntennaName)
+
+        eos.writeBool(self._phaseAntExists)
+        if self._phaseAntExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._phaseAnt is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                phaseAnt_dims = Parser.getListDims(self._phaseAnt)
+            # assumes it really is 2D
+            eos.writeInt(phaseAnt_dims[0])
+            eos.writeInt(phaseAnt_dims[1])
+            for i in range(phaseAnt_dims[0]):
+                for j in range(phaseAnt_dims[1]):
+                    eos.writeFloat(self._phaseAnt[i][j])
+
+        eos.writeBool(self._phaseAntRMSExists)
+        if self._phaseAntRMSExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._phaseAntRMS is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                phaseAntRMS_dims = Parser.getListDims(self._phaseAntRMS)
+            # assumes it really is 2D
+            eos.writeInt(phaseAntRMS_dims[0])
+            eos.writeInt(phaseAntRMS_dims[1])
+            for i in range(phaseAntRMS_dims[0]):
+                for j in range(phaseAntRMS_dims[1]):
+                    eos.writeFloat(self._phaseAntRMS[i][j])
+
+    @staticmethod
+    def basebandNameFromBin(row, eis):
+        """
+        Set the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        row._basebandName = BasebandName.from_int(eis.readInt())
+
+    @staticmethod
+    def receiverBandFromBin(row, eis):
+        """
+        Set the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+
+    @staticmethod
+    def atmPhaseCorrectionFromBin(row, eis):
+        """
+        Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+
+    @staticmethod
+    def calDataIdFromBin(row, eis):
+        """
+        Set the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        row._calDataId = Tag.fromBin(eis)
+
+    @staticmethod
+    def calReductionIdFromBin(row, eis):
+        """
+        Set the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        row._calReductionId = Tag.fromBin(eis)
+
+    @staticmethod
+    def startValidTimeFromBin(row, eis):
+        """
+        Set the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._startValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def endValidTimeFromBin(row, eis):
+        """
+        Set the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        row._endValidTime = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def numBaselineFromBin(row, eis):
+        """
+        Set the numBaseline in row from the EndianInput (eis) instance.
+        """
+
+        row._numBaseline = eis.readInt()
+
+    @staticmethod
+    def numReceptorFromBin(row, eis):
+        """
+        Set the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        row._numReceptor = eis.readInt()
+
+    @staticmethod
+    def ampliFromBin(row, eis):
+        """
+        Set the ampli in row from the EndianInput (eis) instance.
+        """
+
+        ampliDim1 = eis.readInt()
+        ampliDim2 = eis.readInt()
+        thisList = []
+        for i in range(ampliDim1):
+            thisList_j = []
+            for j in range(ampliDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.ampli = thisList
+
+    @staticmethod
+    def antennaNamesFromBin(row, eis):
+        """
+        Set the antennaNames in row from the EndianInput (eis) instance.
+        """
+
+        antennaNamesDim1 = eis.readInt()
+        antennaNamesDim2 = eis.readInt()
+        thisList = []
+        for i in range(antennaNamesDim1):
+            thisList_j = []
+            for j in range(antennaNamesDim2):
+                thisValue = eis.readStr()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.antennaNames = thisList
+
+    @staticmethod
+    def baselineLengthsFromBin(row, eis):
+        """
+        Set the baselineLengths in row from the EndianInput (eis) instance.
+        """
+
+        row._baselineLengths = Length.from1DBin(eis)
+
+    @staticmethod
+    def decorrelationFactorFromBin(row, eis):
+        """
+        Set the decorrelationFactor in row from the EndianInput (eis) instance.
+        """
+
+        decorrelationFactorDim1 = eis.readInt()
+        decorrelationFactorDim2 = eis.readInt()
+        thisList = []
+        for i in range(decorrelationFactorDim1):
+            thisList_j = []
+            for j in range(decorrelationFactorDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.decorrelationFactor = thisList
+
+    @staticmethod
+    def directionFromBin(row, eis):
+        """
+        Set the direction in row from the EndianInput (eis) instance.
+        """
+
+        row._direction = Angle.from1DBin(eis)
+
+    @staticmethod
+    def frequencyRangeFromBin(row, eis):
+        """
+        Set the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        row._frequencyRange = Frequency.from1DBin(eis)
+
+    @staticmethod
+    def integrationTimeFromBin(row, eis):
+        """
+        Set the integrationTime in row from the EndianInput (eis) instance.
+        """
+
+        row._integrationTime = Interval.fromBin(eis)
+
+    @staticmethod
+    def phaseFromBin(row, eis):
+        """
+        Set the phase in row from the EndianInput (eis) instance.
+        """
+
+        phaseDim1 = eis.readInt()
+        phaseDim2 = eis.readInt()
+        thisList = []
+        for i in range(phaseDim1):
+            thisList_j = []
+            for j in range(phaseDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.phase = thisList
+
+    @staticmethod
+    def polarizationTypesFromBin(row, eis):
+        """
+        Set the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        thisList = []
+        for i in range(polarizationTypesDim1):
+            thisValue = PolarizationType.from_int(eis.readInt())
+            thisList.append(thisValue)
+        row._polarizationTypes = thisList
+
+    @staticmethod
+    def phaseRMSFromBin(row, eis):
+        """
+        Set the phaseRMS in row from the EndianInput (eis) instance.
+        """
+
+        phaseRMSDim1 = eis.readInt()
+        phaseRMSDim2 = eis.readInt()
+        thisList = []
+        for i in range(phaseRMSDim1):
+            thisList_j = []
+            for j in range(phaseRMSDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.phaseRMS = thisList
+
+    @staticmethod
+    def statPhaseRMSFromBin(row, eis):
+        """
+        Set the statPhaseRMS in row from the EndianInput (eis) instance.
+        """
+
+        statPhaseRMSDim1 = eis.readInt()
+        statPhaseRMSDim2 = eis.readInt()
+        thisList = []
+        for i in range(statPhaseRMSDim1):
+            thisList_j = []
+            for j in range(statPhaseRMSDim2):
+                thisValue = eis.readFloat()
+                thisList_j.append(thisValue)
+            thisList.append(thisList_j)
+        row.statPhaseRMS = thisList
+
+    @staticmethod
+    def correctionValidityFromBin(row, eis):
+        """
+        Set the optional correctionValidity in row from the EndianInput (eis) instance.
+        """
+        row._correctionValidityExists = eis.readBool()
+        if row._correctionValidityExists:
+
+            correctionValidityDim1 = eis.readInt()
+            thisList = []
+            for i in range(correctionValidityDim1):
+                thisValue = eis.readBool()
+                thisList.append(thisValue)
+            row._correctionValidity = thisList
+
+    @staticmethod
+    def numAntennaFromBin(row, eis):
+        """
+        Set the optional numAntenna in row from the EndianInput (eis) instance.
+        """
+        row._numAntennaExists = eis.readBool()
+        if row._numAntennaExists:
+
+            row._numAntenna = eis.readInt()
+
+    @staticmethod
+    def singleAntennaNameFromBin(row, eis):
+        """
+        Set the optional singleAntennaName in row from the EndianInput (eis) instance.
+        """
+        row._singleAntennaNameExists = eis.readBool()
+        if row._singleAntennaNameExists:
+
+            singleAntennaNameDim1 = eis.readInt()
+            thisList = []
+            for i in range(singleAntennaNameDim1):
+                thisValue = eis.readStr()
+                thisList.append(thisValue)
+            row._singleAntennaName = thisList
+
+    @staticmethod
+    def refAntennaNameFromBin(row, eis):
+        """
+        Set the optional refAntennaName in row from the EndianInput (eis) instance.
+        """
+        row._refAntennaNameExists = eis.readBool()
+        if row._refAntennaNameExists:
+
+            row._refAntennaName = eis.readStr()
+
+    @staticmethod
+    def phaseAntFromBin(row, eis):
+        """
+        Set the optional phaseAnt in row from the EndianInput (eis) instance.
+        """
+        row._phaseAntExists = eis.readBool()
+        if row._phaseAntExists:
+
+            phaseAntDim1 = eis.readInt()
+            phaseAntDim2 = eis.readInt()
+            thisList = []
+            for i in range(phaseAntDim1):
+                thisList_j = []
+                for j in range(phaseAntDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.phaseAnt = thisList
+
+    @staticmethod
+    def phaseAntRMSFromBin(row, eis):
+        """
+        Set the optional phaseAntRMS in row from the EndianInput (eis) instance.
+        """
+        row._phaseAntRMSExists = eis.readBool()
+        if row._phaseAntRMSExists:
+
+            phaseAntRMSDim1 = eis.readInt()
+            phaseAntRMSDim2 = eis.readInt()
+            thisList = []
+            for i in range(phaseAntRMSDim1):
+                thisList_j = []
+                for j in range(phaseAntRMSDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row.phaseAntRMS = thisList
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["basebandName"] = CalPhaseRow.basebandNameFromBin
+        _fromBinMethods["receiverBand"] = CalPhaseRow.receiverBandFromBin
+        _fromBinMethods["atmPhaseCorrection"] = CalPhaseRow.atmPhaseCorrectionFromBin
+        _fromBinMethods["calDataId"] = CalPhaseRow.calDataIdFromBin
+        _fromBinMethods["calReductionId"] = CalPhaseRow.calReductionIdFromBin
+        _fromBinMethods["startValidTime"] = CalPhaseRow.startValidTimeFromBin
+        _fromBinMethods["endValidTime"] = CalPhaseRow.endValidTimeFromBin
+        _fromBinMethods["numBaseline"] = CalPhaseRow.numBaselineFromBin
+        _fromBinMethods["numReceptor"] = CalPhaseRow.numReceptorFromBin
+        _fromBinMethods["ampli"] = CalPhaseRow.ampliFromBin
+        _fromBinMethods["antennaNames"] = CalPhaseRow.antennaNamesFromBin
+        _fromBinMethods["baselineLengths"] = CalPhaseRow.baselineLengthsFromBin
+        _fromBinMethods["decorrelationFactor"] = CalPhaseRow.decorrelationFactorFromBin
+        _fromBinMethods["direction"] = CalPhaseRow.directionFromBin
+        _fromBinMethods["frequencyRange"] = CalPhaseRow.frequencyRangeFromBin
+        _fromBinMethods["integrationTime"] = CalPhaseRow.integrationTimeFromBin
+        _fromBinMethods["phase"] = CalPhaseRow.phaseFromBin
+        _fromBinMethods["polarizationTypes"] = CalPhaseRow.polarizationTypesFromBin
+        _fromBinMethods["phaseRMS"] = CalPhaseRow.phaseRMSFromBin
+        _fromBinMethods["statPhaseRMS"] = CalPhaseRow.statPhaseRMSFromBin
+
+        _fromBinMethods["correctionValidity"] = CalPhaseRow.correctionValidityFromBin
+        _fromBinMethods["numAntenna"] = CalPhaseRow.numAntennaFromBin
+        _fromBinMethods["singleAntennaName"] = CalPhaseRow.singleAntennaNameFromBin
+        _fromBinMethods["refAntennaName"] = CalPhaseRow.refAntennaNameFromBin
+        _fromBinMethods["phaseAnt"] = CalPhaseRow.phaseAntFromBin
+        _fromBinMethods["phaseAntRMS"] = CalPhaseRow.phaseAntRMSFromBin
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = CalPhaseRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalPhase",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute basebandName
 
@@ -1722,7 +2265,7 @@ class CalPhaseRow:
         if not (self._numReceptor == numReceptor):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if ampli is not None:
             if self._ampli is None:
                 return False
@@ -1735,13 +2278,13 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(ampli_dims[0]):
-                for j in range(ampli_dims[0]):
+                for j in range(ampli_dims[1]):
 
                     # ampli is an array of float, compare using == operator.
                     if not (self._ampli[i][j] == ampli[i][j]):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if antennaNames is not None:
             if self._antennaNames is None:
                 return False
@@ -1754,7 +2297,7 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(antennaNames_dims[0]):
-                for j in range(antennaNames_dims[0]):
+                for j in range(antennaNames_dims[1]):
 
                     # antennaNames is an array of str, compare using == operator.
                     if not (self._antennaNames[i][j] == antennaNames[i][j]):
@@ -1772,7 +2315,7 @@ class CalPhaseRow:
             ):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if decorrelationFactor is not None:
             if self._decorrelationFactor is None:
                 return False
@@ -1787,7 +2330,7 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(decorrelationFactor_dims[0]):
-                for j in range(decorrelationFactor_dims[0]):
+                for j in range(decorrelationFactor_dims[1]):
 
                     # decorrelationFactor is an array of float, compare using == operator.
                     if not (
@@ -1823,7 +2366,7 @@ class CalPhaseRow:
         if not self._integrationTime.equals(integrationTime):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if phase is not None:
             if self._phase is None:
                 return False
@@ -1836,7 +2379,7 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(phase_dims[0]):
-                for j in range(phase_dims[0]):
+                for j in range(phase_dims[1]):
 
                     # phase is an array of float, compare using == operator.
                     if not (self._phase[i][j] == phase[i][j]):
@@ -1852,7 +2395,7 @@ class CalPhaseRow:
             if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if phaseRMS is not None:
             if self._phaseRMS is None:
                 return False
@@ -1865,13 +2408,13 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(phaseRMS_dims[0]):
-                for j in range(phaseRMS_dims[0]):
+                for j in range(phaseRMS_dims[1]):
 
                     # phaseRMS is an array of float, compare using == operator.
                     if not (self._phaseRMS[i][j] == phaseRMS[i][j]):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if statPhaseRMS is not None:
             if self._statPhaseRMS is None:
                 return False
@@ -1884,7 +2427,7 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(statPhaseRMS_dims[0]):
-                for j in range(statPhaseRMS_dims[0]):
+                for j in range(statPhaseRMS_dims[1]):
 
                     # statPhaseRMS is an array of float, compare using == operator.
                     if not (self._statPhaseRMS[i][j] == statPhaseRMS[i][j]):
@@ -1951,7 +2494,7 @@ class CalPhaseRow:
         if not (self._numReceptor == numReceptor):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if ampli is not None:
             if self._ampli is None:
                 return False
@@ -1964,13 +2507,13 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(ampli_dims[0]):
-                for j in range(ampli_dims[0]):
+                for j in range(ampli_dims[1]):
 
                     # ampli is an array of float, compare using == operator.
                     if not (self._ampli[i][j] == ampli[i][j]):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if antennaNames is not None:
             if self._antennaNames is None:
                 return False
@@ -1983,7 +2526,7 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(antennaNames_dims[0]):
-                for j in range(antennaNames_dims[0]):
+                for j in range(antennaNames_dims[1]):
 
                     # antennaNames is an array of str, compare using == operator.
                     if not (self._antennaNames[i][j] == antennaNames[i][j]):
@@ -2001,7 +2544,7 @@ class CalPhaseRow:
             ):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if decorrelationFactor is not None:
             if self._decorrelationFactor is None:
                 return False
@@ -2016,7 +2559,7 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(decorrelationFactor_dims[0]):
-                for j in range(decorrelationFactor_dims[0]):
+                for j in range(decorrelationFactor_dims[1]):
 
                     # decorrelationFactor is an array of float, compare using == operator.
                     if not (
@@ -2052,7 +2595,7 @@ class CalPhaseRow:
         if not self._integrationTime.equals(integrationTime):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if phase is not None:
             if self._phase is None:
                 return False
@@ -2065,7 +2608,7 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(phase_dims[0]):
-                for j in range(phase_dims[0]):
+                for j in range(phase_dims[1]):
 
                     # phase is an array of float, compare using == operator.
                     if not (self._phase[i][j] == phase[i][j]):
@@ -2081,7 +2624,7 @@ class CalPhaseRow:
             if not (self._polarizationTypes[indx] == polarizationTypes[indx]):
                 return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if phaseRMS is not None:
             if self._phaseRMS is None:
                 return False
@@ -2094,13 +2637,13 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(phaseRMS_dims[0]):
-                for j in range(phaseRMS_dims[0]):
+                for j in range(phaseRMS_dims[1]):
 
                     # phaseRMS is an array of float, compare using == operator.
                     if not (self._phaseRMS[i][j] == phaseRMS[i][j]):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if statPhaseRMS is not None:
             if self._statPhaseRMS is None:
                 return False
@@ -2113,10 +2656,14 @@ class CalPhaseRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(statPhaseRMS_dims[0]):
-                for j in range(statPhaseRMS_dims[0]):
+                for j in range(statPhaseRMS_dims[1]):
 
                     # statPhaseRMS is an array of float, compare using == operator.
                     if not (self._statPhaseRMS[i][j] == statPhaseRMS[i][j]):
                         return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+CalPhaseRow.initFromBinMethods()

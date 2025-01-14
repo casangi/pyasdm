@@ -38,6 +38,10 @@ from .exceptions.ConversionException import ConversionException
 # All of the extended types are imported
 from pyasdm.types import *
 
+# this will contain all of the static methods used to get each element of the row
+# from an EndianInput instance
+_fromBinMethods = {}
+
 
 from pyasdm.enumerations.DirectionReferenceCode import DirectionReferenceCode
 
@@ -67,10 +71,11 @@ class PointingRow:
         Create a PointingRow.
         When row is None, create an empty row attached to table, which must be a PointingTable.
         When row is given, copy those values in to the new row. The row argument must be a PointingRow.
+
         The returned new row is not yet added to table, but it knows about table.
         """
         if not isinstance(table, pyasdm.PointingTable):
-            raise ValueError("table must be a MainTable")
+            raise ValueError("table must be a PointingTable")
 
         self._table = table
         self._hasBeenAdded = False
@@ -131,7 +136,7 @@ class PointingRow:
 
         if row is not None:
             if not isinstance(row, PointingRow):
-                raise ValueError("row must be a MainRow")
+                raise ValueError("row must be a PointingRow")
 
             # copy constructor
 
@@ -182,11 +187,11 @@ class PointingRow:
 
             # by default set systematically sourceOffsetReferenceCode's value to something not None
 
-            self.sourceOffsetReferenceCode = DirectionReferenceCode.from_int(0)
+            self._sourceOffsetReferenceCode = DirectionReferenceCode.from_int(0)
 
             if row._sourceOffsetReferenceCodeExists:
 
-                if row._sourceOffsetReferenceCode is None:
+                if row._sourceOffsetReferenceCode is not None:
                     self._sourceOffsetReferenceCode = row._sourceOffsetReferenceCode
 
                 self._sourceOffsetReferenceCodeExists = True
@@ -450,10 +455,282 @@ class PointingRow:
 
         self._pointingModelId = int(pointingModelIdNode.firstChild.data.strip())
 
-    def toBin(self):
-        print("not yet implemented")
+        # from link values, if any
 
-    # Intrinsic Table Attributes
+    def toBin(self, eos):
+        """
+        Write this row out to the EndianOutput instance, eos.
+        """
+
+        self._antennaId.toBin(eos)
+
+        self._timeInterval.toBin(eos)
+
+        eos.writeInt(self._numSample)
+
+        Angle.listToBin(self._encoder, eos)
+
+        eos.writeBool(self._pointingTracking)
+
+        eos.writeBool(self._usePolynomials)
+
+        self._timeOrigin.toBin(eos)
+
+        eos.writeInt(self._numTerm)
+
+        Angle.listToBin(self._pointingDirection, eos)
+
+        Angle.listToBin(self._target, eos)
+
+        Angle.listToBin(self._offset, eos)
+
+        eos.writeInt(self._pointingModelId)
+
+        eos.writeBool(self._overTheTopExists)
+        if self._overTheTopExists:
+
+            eos.writeBool(self._overTheTop)
+
+        eos.writeBool(self._sourceOffsetExists)
+        if self._sourceOffsetExists:
+
+            Angle.listToBin(self._sourceOffset, eos)
+
+        eos.writeBool(self._sourceOffsetReferenceCodeExists)
+        if self._sourceOffsetReferenceCodeExists:
+
+            eos.writeString(self._sourceOffsetReferenceCode.toString())
+
+        eos.writeBool(self._sourceOffsetEquinoxExists)
+        if self._sourceOffsetEquinoxExists:
+
+            self._sourceOffsetEquinox.toBin(eos)
+
+        eos.writeBool(self._sampledTimeIntervalExists)
+        if self._sampledTimeIntervalExists:
+
+            ArrayTimeInterval.listToBin(self._sampledTimeInterval, eos)
+
+        eos.writeBool(self._atmosphericCorrectionExists)
+        if self._atmosphericCorrectionExists:
+
+            Angle.listToBin(self._atmosphericCorrection, eos)
+
+    @staticmethod
+    def antennaIdFromBin(row, eis):
+        """
+        Set the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        row._antennaId = Tag.fromBin(eis)
+
+    @staticmethod
+    def timeIntervalFromBin(row, eis):
+        """
+        Set the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        row._timeInterval = ArrayTimeInterval.fromBin(eis)
+
+    @staticmethod
+    def numSampleFromBin(row, eis):
+        """
+        Set the numSample in row from the EndianInput (eis) instance.
+        """
+
+        row._numSample = eis.readInt()
+
+    @staticmethod
+    def encoderFromBin(row, eis):
+        """
+        Set the encoder in row from the EndianInput (eis) instance.
+        """
+
+        row._encoder = Angle.from2DBin(eis)
+
+    @staticmethod
+    def pointingTrackingFromBin(row, eis):
+        """
+        Set the pointingTracking in row from the EndianInput (eis) instance.
+        """
+
+        row._pointingTracking = eis.readBool()
+
+    @staticmethod
+    def usePolynomialsFromBin(row, eis):
+        """
+        Set the usePolynomials in row from the EndianInput (eis) instance.
+        """
+
+        row._usePolynomials = eis.readBool()
+
+    @staticmethod
+    def timeOriginFromBin(row, eis):
+        """
+        Set the timeOrigin in row from the EndianInput (eis) instance.
+        """
+
+        row._timeOrigin = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def numTermFromBin(row, eis):
+        """
+        Set the numTerm in row from the EndianInput (eis) instance.
+        """
+
+        row._numTerm = eis.readInt()
+
+    @staticmethod
+    def pointingDirectionFromBin(row, eis):
+        """
+        Set the pointingDirection in row from the EndianInput (eis) instance.
+        """
+
+        row._pointingDirection = Angle.from2DBin(eis)
+
+    @staticmethod
+    def targetFromBin(row, eis):
+        """
+        Set the target in row from the EndianInput (eis) instance.
+        """
+
+        row._target = Angle.from2DBin(eis)
+
+    @staticmethod
+    def offsetFromBin(row, eis):
+        """
+        Set the offset in row from the EndianInput (eis) instance.
+        """
+
+        row._offset = Angle.from2DBin(eis)
+
+    @staticmethod
+    def pointingModelIdFromBin(row, eis):
+        """
+        Set the pointingModelId in row from the EndianInput (eis) instance.
+        """
+
+        row._pointingModelId = eis.readInt()
+
+    @staticmethod
+    def overTheTopFromBin(row, eis):
+        """
+        Set the optional overTheTop in row from the EndianInput (eis) instance.
+        """
+        row._overTheTopExists = eis.readBool()
+        if row._overTheTopExists:
+
+            row._overTheTop = eis.readBool()
+
+    @staticmethod
+    def sourceOffsetFromBin(row, eis):
+        """
+        Set the optional sourceOffset in row from the EndianInput (eis) instance.
+        """
+        row._sourceOffsetExists = eis.readBool()
+        if row._sourceOffsetExists:
+
+            row._sourceOffset = Angle.from2DBin(eis)
+
+    @staticmethod
+    def sourceOffsetReferenceCodeFromBin(row, eis):
+        """
+        Set the optional sourceOffsetReferenceCode in row from the EndianInput (eis) instance.
+        """
+        row._sourceOffsetReferenceCodeExists = eis.readBool()
+        if row._sourceOffsetReferenceCodeExists:
+
+            row._sourceOffsetReferenceCode = DirectionReferenceCode.from_int(
+                eis.readInt()
+            )
+
+    @staticmethod
+    def sourceOffsetEquinoxFromBin(row, eis):
+        """
+        Set the optional sourceOffsetEquinox in row from the EndianInput (eis) instance.
+        """
+        row._sourceOffsetEquinoxExists = eis.readBool()
+        if row._sourceOffsetEquinoxExists:
+
+            row._sourceOffsetEquinox = ArrayTime.fromBin(eis)
+
+    @staticmethod
+    def sampledTimeIntervalFromBin(row, eis):
+        """
+        Set the optional sampledTimeInterval in row from the EndianInput (eis) instance.
+        """
+        row._sampledTimeIntervalExists = eis.readBool()
+        if row._sampledTimeIntervalExists:
+
+            row._sampledTimeInterval = ArrayTimeInterval.from1DBin(eis)
+
+    @staticmethod
+    def atmosphericCorrectionFromBin(row, eis):
+        """
+        Set the optional atmosphericCorrection in row from the EndianInput (eis) instance.
+        """
+        row._atmosphericCorrectionExists = eis.readBool()
+        if row._atmosphericCorrectionExists:
+
+            row._atmosphericCorrection = Angle.from2DBin(eis)
+
+    @staticmethod
+    def initFromBinMethods():
+        global _fromBinMethods
+        if len(_fromBinMethods) > 0:
+            return
+
+        _fromBinMethods["antennaId"] = PointingRow.antennaIdFromBin
+        _fromBinMethods["timeInterval"] = PointingRow.timeIntervalFromBin
+        _fromBinMethods["numSample"] = PointingRow.numSampleFromBin
+        _fromBinMethods["encoder"] = PointingRow.encoderFromBin
+        _fromBinMethods["pointingTracking"] = PointingRow.pointingTrackingFromBin
+        _fromBinMethods["usePolynomials"] = PointingRow.usePolynomialsFromBin
+        _fromBinMethods["timeOrigin"] = PointingRow.timeOriginFromBin
+        _fromBinMethods["numTerm"] = PointingRow.numTermFromBin
+        _fromBinMethods["pointingDirection"] = PointingRow.pointingDirectionFromBin
+        _fromBinMethods["target"] = PointingRow.targetFromBin
+        _fromBinMethods["offset"] = PointingRow.offsetFromBin
+        _fromBinMethods["pointingModelId"] = PointingRow.pointingModelIdFromBin
+
+        _fromBinMethods["overTheTop"] = PointingRow.overTheTopFromBin
+        _fromBinMethods["sourceOffset"] = PointingRow.sourceOffsetFromBin
+        _fromBinMethods["sourceOffsetReferenceCode"] = (
+            PointingRow.sourceOffsetReferenceCodeFromBin
+        )
+        _fromBinMethods["sourceOffsetEquinox"] = PointingRow.sourceOffsetEquinoxFromBin
+        _fromBinMethods["sampledTimeInterval"] = PointingRow.sampledTimeIntervalFromBin
+        _fromBinMethods["atmosphericCorrection"] = (
+            PointingRow.atmosphericCorrectionFromBin
+        )
+
+    @staticmethod
+    def fromBin(eis, table, attributesSeq):
+        """
+        Given an EndianInput instance by the table (which must be a Pointing instance) and
+        the list of attributes to be found in eis, in order, this constructs a row by
+        pulling off values from that EndianInput in the expected order.
+
+        The new row object is returned.
+        """
+        global _fromBinMethods
+
+        row = PointingRow(table)
+        for attributeName in attributesSeq:
+            if attributeName not in _fromBinMethods:
+                raise ConversionException(
+                    "There is not a method to read an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Pointing",
+                )
+
+            method = _fromBinMethods[attributeName]
+            method(row, eis)
+
+        return row
+
+    # Intrinsice Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1214,7 +1491,7 @@ class PointingRow:
         if not (self._numSample == numSample):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if encoder is not None:
             if self._encoder is None:
                 return False
@@ -1227,12 +1504,12 @@ class PointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(encoder_dims[0]):
-                for j in range(encoder_dims[0]):
+                for j in range(encoder_dims[1]):
 
                     # encoder is a Angle, compare using the almostEquals method.
                     if not (
                         self._encoder[i][j].almostEquals(
-                            encoder[i][j], this.getTable().getEncoderEqTolerance()
+                            encoder[i][j], self.getTable().getEncoderEqTolerance()
                         )
                     ):
                         return False
@@ -1253,7 +1530,7 @@ class PointingRow:
         if not (self._numTerm == numTerm):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if pointingDirection is not None:
             if self._pointingDirection is None:
                 return False
@@ -1266,18 +1543,18 @@ class PointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(pointingDirection_dims[0]):
-                for j in range(pointingDirection_dims[0]):
+                for j in range(pointingDirection_dims[1]):
 
                     # pointingDirection is a Angle, compare using the almostEquals method.
                     if not (
                         self._pointingDirection[i][j].almostEquals(
                             pointingDirection[i][j],
-                            this.getTable().getPointingDirectionEqTolerance(),
+                            self.getTable().getPointingDirectionEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if target is not None:
             if self._target is None:
                 return False
@@ -1290,17 +1567,17 @@ class PointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(target_dims[0]):
-                for j in range(target_dims[0]):
+                for j in range(target_dims[1]):
 
                     # target is a Angle, compare using the almostEquals method.
                     if not (
                         self._target[i][j].almostEquals(
-                            target[i][j], this.getTable().getTargetEqTolerance()
+                            target[i][j], self.getTable().getTargetEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if offset is not None:
             if self._offset is None:
                 return False
@@ -1313,12 +1590,12 @@ class PointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(offset_dims[0]):
-                for j in range(offset_dims[0]):
+                for j in range(offset_dims[1]):
 
                     # offset is a Angle, compare using the almostEquals method.
                     if not (
                         self._offset[i][j].almostEquals(
-                            offset[i][j], this.getTable().getOffsetEqTolerance()
+                            offset[i][j], self.getTable().getOffsetEqTolerance()
                         )
                     ):
                         return False
@@ -1366,7 +1643,7 @@ class PointingRow:
         if not (self._numSample == numSample):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if encoder is not None:
             if self._encoder is None:
                 return False
@@ -1379,12 +1656,12 @@ class PointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(encoder_dims[0]):
-                for j in range(encoder_dims[0]):
+                for j in range(encoder_dims[1]):
 
                     # encoder is a Angle, compare using the almostEquals method.
                     if not (
                         self._encoder[i][j].almostEquals(
-                            encoder[i][j], this.getTable().getEncoderEqTolerance()
+                            encoder[i][j], self.getTable().getEncoderEqTolerance()
                         )
                     ):
                         return False
@@ -1405,7 +1682,7 @@ class PointingRow:
         if not (self._numTerm == numTerm):
             return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if pointingDirection is not None:
             if self._pointingDirection is None:
                 return False
@@ -1418,18 +1695,18 @@ class PointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(pointingDirection_dims[0]):
-                for j in range(pointingDirection_dims[0]):
+                for j in range(pointingDirection_dims[1]):
 
                     # pointingDirection is a Angle, compare using the almostEquals method.
                     if not (
                         self._pointingDirection[i][j].almostEquals(
                             pointingDirection[i][j],
-                            this.getTable().getPointingDirectionEqTolerance(),
+                            self.getTable().getPointingDirectionEqTolerance(),
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if target is not None:
             if self._target is None:
                 return False
@@ -1442,17 +1719,17 @@ class PointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(target_dims[0]):
-                for j in range(target_dims[0]):
+                for j in range(target_dims[1]):
 
                     # target is a Angle, compare using the almostEquals method.
                     if not (
                         self._target[i][j].almostEquals(
-                            target[i][j], this.getTable().getTargetEqTolerance()
+                            target[i][j], self.getTable().getTargetEqTolerance()
                         )
                     ):
                         return False
 
-        # We compare two 2D arrays (lists)
+        # We compare two 2D arrays (lists).
         if offset is not None:
             if self._offset is None:
                 return False
@@ -1465,12 +1742,12 @@ class PointingRow:
             # assumes they are both 2D arrays, the internal one should be
 
             for i in range(offset_dims[0]):
-                for j in range(offset_dims[0]):
+                for j in range(offset_dims[1]):
 
                     # offset is a Angle, compare using the almostEquals method.
                     if not (
                         self._offset[i][j].almostEquals(
-                            offset[i][j], this.getTable().getOffsetEqTolerance()
+                            offset[i][j], self.getTable().getOffsetEqTolerance()
                         )
                     ):
                         return False
@@ -1480,3 +1757,7 @@ class PointingRow:
             return False
 
         return True
+
+
+# initialize the dictionary that maps fields to init methods
+PointingRow.initFromBinMethods()
