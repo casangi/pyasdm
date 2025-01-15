@@ -172,22 +172,178 @@ class Pressure:
                 result.append(item.get())
         return result
 
-    def toBin(self):
-        # it also needs a static method to send a list of pressure items toBin
-        # should also work for 2D, 3D lists
-        raise RuntimeError("Pressure.toBin is not yet implemented")
+    def toBin(self, eos):
+        """
+        Write this Pressure out, in hectopascals, to a EndianOutput.
+        """
+        eos.writeDouble(self.get())
 
-    def fromBin(self):
-        raise RuntimeError("Pressure.fromBin is not yet implemented")
+    @staticmethod
+    def listToBin(pressureList, eos):
+        """
+        Write a list of Pressure to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(pressureList, list):
+            raise ValueError("pressureList is not a list")
 
-    def from1DBin(self):
-        raise RuntimeError("Pressure.from1DBin is not yet implemented")
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(pressureList)
+        ndims = len(listDims)
+        if ndims == 1:
+            Pressure.listTo1DBin(pressureList, eos)
+        elif ndims == 2:
+            Pressure.listTo2DBin(pressureList, eos)
+        elif ndims == 3:
+            Pressure.listTo3DBin(pressureList, eos)
 
-    def from2DBin(self):
-        raise RuntimeError("Pressure.from2DBin is not yet implemented")
+        raise ValueError(
+            "unsupport number of dimensions in pressureList in Pressure.listToBin : "
+            + str(ndims)
+        )
 
-    def from3DBin(self):
-        raise RuntimeError("Pressure.from2DBin is not yet implemented")
+    @staticmethod
+    def listTo1DBin(pressureList, eos):
+        """
+        Write a 1D list of Pressure to the EndianOutput
+        """
+        if not isinstance(pressureList, list):
+            raise ValueError("pressureList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(pressureList))
+
+        # only check the first value
+        if (len(pressureList) > 0) and not isinstance(pressureList[0], Pressure):
+            raise (ValueError("pressureList is not a list of Pressure"))
+
+        for thisPressure in pressureList:
+            thisPressure.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(pressureList, eos):
+        """
+        Write a 2D list of Pressure to the EndianOutput
+        """
+        if not isinstance(pressureList, list):
+            raise ValueError("pressureList is not a list")
+
+        ndim1 = len(pressureList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(pressureList[0], list):
+                raise ValueError("pressureList is not a 2D")
+
+            ndim2 = len(pressureList[0])
+            if ndim2 > 0 and not isinstance(pressureList[0][0], Pressure):
+                raise ValueError("pressureListis a not a 2D list of Pressure")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in pressureList:
+            for thisPressure in thisList:
+                thisPressure.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(pressureList, eos):
+        """
+        Write a 3D list of Pressure to the EndianOutput
+        """
+        if not isinstance(pressureList, list):
+            raise ValueError("pressureList is not a list")
+
+        ndim1 = len(pressureList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(pressureList[0], list):
+                raise ValueError("pressureList is not a 3D list")
+
+            ndim2 = len(pressureList[0])
+            if ndim2 > 0:
+                if not isinstance(pressureList[0][0], list):
+                    raise ValueError("pressureList is a not a 3D list")
+                ndim3 = len(pressureList[0][0])
+                if (ndim3 > 0) and not isinstance(pressureList[0][0][0], Pressure):
+                    raise ValueError("pressureList is not a 3D list of Pressure")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in pressureList:
+            for middleList in thisList:
+                for thisPressure in middleList:
+                    thisPressure.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an Pressure, in hectopascals,
+        from an EndianInput instance and use the read value to set a
+        Pressure.
+
+        return an Pressure
+        """
+        return Pressure(eis.readDouble())
+
+    @staticmethod
+    def from1Dbin(eis):
+        """
+        Read a list of binary Pressure values, in hectopascals, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(Pressure.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary Pressure values, in hectopascals, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(Pressure.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3Dbin(eis):
+        """
+        Read a 3D list of binary Pressure values, in hectopascals, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(Pressure.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     def equals(self, otherPressure):
         """

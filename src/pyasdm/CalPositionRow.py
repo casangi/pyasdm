@@ -33,6 +33,8 @@ import pyasdm.CalPositionTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -860,7 +862,7 @@ class CalPositionRow:
             raise ValueError("The value of antennaPosition must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(antennaPosition)
+            listDims = pyasdm.utils.getListDims(antennaPosition)
 
             shapeOK = len(listDims) == 1
 
@@ -869,7 +871,7 @@ class CalPositionRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(antennaPosition, Length):
+            if not pyasdm.utils.checkListType(antennaPosition, Length):
                 raise ValueError(
                     "type of the first value in antennaPosition is not Length as expected"
                 )
@@ -925,7 +927,7 @@ class CalPositionRow:
             raise ValueError("The value of stationPosition must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(stationPosition)
+            listDims = pyasdm.utils.getListDims(stationPosition)
 
             shapeOK = len(listDims) == 1
 
@@ -934,7 +936,7 @@ class CalPositionRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(stationPosition, Length):
+            if not pyasdm.utils.checkListType(stationPosition, Length):
                 raise ValueError(
                     "type of the first value in stationPosition is not Length as expected"
                 )
@@ -1034,7 +1036,7 @@ class CalPositionRow:
             raise ValueError("The value of refAntennaNames must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(refAntennaNames)
+            listDims = pyasdm.utils.getListDims(refAntennaNames)
 
             shapeOK = len(listDims) == 1
 
@@ -1043,7 +1045,7 @@ class CalPositionRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(refAntennaNames, str):
+            if not pyasdm.utils.checkListType(refAntennaNames, str):
                 raise ValueError(
                     "type of the first value in refAntennaNames is not str as expected"
                 )
@@ -1145,7 +1147,7 @@ class CalPositionRow:
             raise ValueError("The value of positionOffset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(positionOffset)
+            listDims = pyasdm.utils.getListDims(positionOffset)
 
             shapeOK = len(listDims) == 1
 
@@ -1154,7 +1156,7 @@ class CalPositionRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(positionOffset, Length):
+            if not pyasdm.utils.checkListType(positionOffset, Length):
                 raise ValueError(
                     "type of the first value in positionOffset is not Length as expected"
                 )
@@ -1188,7 +1190,7 @@ class CalPositionRow:
             raise ValueError("The value of positionErr must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(positionErr)
+            listDims = pyasdm.utils.getListDims(positionErr)
 
             shapeOK = len(listDims) == 1
 
@@ -1197,7 +1199,7 @@ class CalPositionRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(positionErr, Length):
+            if not pyasdm.utils.checkListType(positionErr, Length):
                 raise ValueError(
                     "type of the first value in positionErr is not Length as expected"
                 )

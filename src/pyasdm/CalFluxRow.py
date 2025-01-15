@@ -33,6 +33,8 @@ import pyasdm.CalFluxTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -551,7 +553,7 @@ class CalFluxRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            flux_dims = Parser.getListDims(self._flux)
+            flux_dims = pyasdm.utils.getListDims(self._flux)
         # assumes it really is 2D
         eos.writeInt(flux_dims[0])
         eos.writeInt(flux_dims[1])
@@ -564,7 +566,7 @@ class CalFluxRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            fluxError_dims = Parser.getListDims(self._fluxError)
+            fluxError_dims = pyasdm.utils.getListDims(self._fluxError)
         # assumes it really is 2D
         eos.writeInt(fluxError_dims[0])
         eos.writeInt(fluxError_dims[1])
@@ -1016,7 +1018,7 @@ class CalFluxRow:
             raise ValueError("The value of frequencyRanges must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRanges)
+            listDims = pyasdm.utils.getListDims(frequencyRanges)
 
             shapeOK = len(listDims) == 2
 
@@ -1025,7 +1027,7 @@ class CalFluxRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRanges, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRanges, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRanges is not Frequency as expected"
                 )
@@ -1081,7 +1083,7 @@ class CalFluxRow:
             raise ValueError("The value of flux must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(flux)
+            listDims = pyasdm.utils.getListDims(flux)
 
             shapeOK = len(listDims) == 2
 
@@ -1090,7 +1092,7 @@ class CalFluxRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(flux, float):
+            if not pyasdm.utils.checkListType(flux, float):
                 raise ValueError(
                     "type of the first value in flux is not float as expected"
                 )
@@ -1124,7 +1126,7 @@ class CalFluxRow:
             raise ValueError("The value of fluxError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(fluxError)
+            listDims = pyasdm.utils.getListDims(fluxError)
 
             shapeOK = len(listDims) == 2
 
@@ -1133,7 +1135,7 @@ class CalFluxRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(fluxError, float):
+            if not pyasdm.utils.checkListType(fluxError, float):
                 raise ValueError(
                     "type of the first value in fluxError is not float as expected"
                 )
@@ -1167,7 +1169,7 @@ class CalFluxRow:
             raise ValueError("The value of stokes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(stokes)
+            listDims = pyasdm.utils.getListDims(stokes)
 
             shapeOK = len(listDims) == 1
 
@@ -1176,7 +1178,7 @@ class CalFluxRow:
 
             # the type of the values in the list must be StokesParameter
             # note : this only checks the first value found
-            if not Parser.checkListType(stokes, StokesParameter):
+            if not pyasdm.utils.checkListType(stokes, StokesParameter):
                 raise ValueError(
                     "type of the first value in stokes is not StokesParameter as expected"
                 )
@@ -1225,7 +1227,7 @@ class CalFluxRow:
             raise ValueError("The value of direction must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(direction)
+            listDims = pyasdm.utils.getListDims(direction)
 
             shapeOK = len(listDims) == 1
 
@@ -1234,7 +1236,7 @@ class CalFluxRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(direction, Angle):
+            if not pyasdm.utils.checkListType(direction, Angle):
                 raise ValueError(
                     "type of the first value in direction is not Angle as expected"
                 )
@@ -1382,7 +1384,7 @@ class CalFluxRow:
             raise ValueError("The value of PA must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(PA)
+            listDims = pyasdm.utils.getListDims(PA)
 
             shapeOK = len(listDims) == 2
 
@@ -1391,7 +1393,7 @@ class CalFluxRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(PA, Angle):
+            if not pyasdm.utils.checkListType(PA, Angle):
                 raise ValueError(
                     "type of the first value in PA is not Angle as expected"
                 )
@@ -1448,7 +1450,7 @@ class CalFluxRow:
             raise ValueError("The value of PAError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(PAError)
+            listDims = pyasdm.utils.getListDims(PAError)
 
             shapeOK = len(listDims) == 2
 
@@ -1457,7 +1459,7 @@ class CalFluxRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(PAError, Angle):
+            if not pyasdm.utils.checkListType(PAError, Angle):
                 raise ValueError(
                     "type of the first value in PAError is not Angle as expected"
                 )
@@ -1514,7 +1516,7 @@ class CalFluxRow:
             raise ValueError("The value of size must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(size)
+            listDims = pyasdm.utils.getListDims(size)
 
             shapeOK = len(listDims) == 3
 
@@ -1523,7 +1525,7 @@ class CalFluxRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(size, Angle):
+            if not pyasdm.utils.checkListType(size, Angle):
                 raise ValueError(
                     "type of the first value in size is not Angle as expected"
                 )
@@ -1580,7 +1582,7 @@ class CalFluxRow:
             raise ValueError("The value of sizeError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sizeError)
+            listDims = pyasdm.utils.getListDims(sizeError)
 
             shapeOK = len(listDims) == 3
 
@@ -1589,7 +1591,7 @@ class CalFluxRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(sizeError, Angle):
+            if not pyasdm.utils.checkListType(sizeError, Angle):
                 raise ValueError(
                     "type of the first value in sizeError is not Angle as expected"
                 )
@@ -1791,8 +1793,8 @@ class CalFluxRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            frequencyRanges_dims = Parser.getListDims(frequencyRanges)
-            this_frequencyRanges_dims = Parser.getListDims(self._frequencyRanges)
+            frequencyRanges_dims = pyasdm.utils.getListDims(frequencyRanges)
+            this_frequencyRanges_dims = pyasdm.utils.getListDims(self._frequencyRanges)
             if frequencyRanges_dims != this_frequencyRanges_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1819,8 +1821,8 @@ class CalFluxRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            flux_dims = Parser.getListDims(flux)
-            this_flux_dims = Parser.getListDims(self._flux)
+            flux_dims = pyasdm.utils.getListDims(flux)
+            this_flux_dims = pyasdm.utils.getListDims(self._flux)
             if flux_dims != this_flux_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1838,8 +1840,8 @@ class CalFluxRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            fluxError_dims = Parser.getListDims(fluxError)
-            this_fluxError_dims = Parser.getListDims(self._fluxError)
+            fluxError_dims = pyasdm.utils.getListDims(fluxError)
+            this_fluxError_dims = pyasdm.utils.getListDims(self._fluxError)
             if fluxError_dims != this_fluxError_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1916,8 +1918,8 @@ class CalFluxRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            frequencyRanges_dims = Parser.getListDims(frequencyRanges)
-            this_frequencyRanges_dims = Parser.getListDims(self._frequencyRanges)
+            frequencyRanges_dims = pyasdm.utils.getListDims(frequencyRanges)
+            this_frequencyRanges_dims = pyasdm.utils.getListDims(self._frequencyRanges)
             if frequencyRanges_dims != this_frequencyRanges_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1944,8 +1946,8 @@ class CalFluxRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            flux_dims = Parser.getListDims(flux)
-            this_flux_dims = Parser.getListDims(self._flux)
+            flux_dims = pyasdm.utils.getListDims(flux)
+            this_flux_dims = pyasdm.utils.getListDims(self._flux)
             if flux_dims != this_flux_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1963,8 +1965,8 @@ class CalFluxRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            fluxError_dims = Parser.getListDims(fluxError)
-            this_fluxError_dims = Parser.getListDims(self._fluxError)
+            fluxError_dims = pyasdm.utils.getListDims(fluxError)
+            this_fluxError_dims = pyasdm.utils.getListDims(self._fluxError)
             if fluxError_dims != this_fluxError_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

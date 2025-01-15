@@ -56,7 +56,7 @@ class EntityRef:
         _partId = None
         _entityTypeName = None
         _instanceVersion = None
-        
+
         if len(args) == 0:
             # default, nothing to do
             pass
@@ -86,17 +86,78 @@ class EntityRef:
         """
         return self.toXML()
 
-    def toBin(self):
-        print("not implemented yet")
+    def toBin(self, eos):
+        """
+        Write the binary representation of this into a DataOutput stream.
+        """
+        self._entityId.toBin(eos)
+        self._partId.toBin(eos)
+        eos.writeString(self._entityTypeName)
+        eos.writeString(self._instanceVersion)
 
-    ## also deferred is the static toBin that takes a list of EntityRef objects
+    @staticmetehod
+    def listToBin(entityRefList, eos):
+        """
+        Write a list of EntityRef to the EndianOutput.
+        Only lists of 1D are supported.
+        """
+        if not isinstance(entityRefList, list):
+            raise ValueError("entityRefList is not a list")
 
-    def fromBin(self):
-        print("not implemented yet")
+        listDims = pyasdm.utils.getListDims(entityRefList)
+        if len(listDims) != 1:
+            raise ValueError("only 1D lists of EntityRef are supported.")
+
+        EntityRef.listTo1DBin(entityRefList, eos)
 
     @staticmethod
-    def from1DBin():
-        print("not implemented yet")
+    def listTo1DBin(entityRefList, eos):
+        """
+        Write a 1D list of EntityRef to the EndianOutput
+        """
+        if not isinstance(entityRefList, list):
+            raise ValueError("entityRefList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(entityRefList))
+
+        # only check the first value
+        if (len(entityRefList) > 0) and not isinstance(entityRefList[0], EntityRef):
+            raise (ValueError("entityRefList is not a list of EntityRef"))
+
+        for thisEntityRef in entityRefList:
+            thisEntityRef.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an EntityRef from an EndianInput
+        instance and use the read values to set an EntityRef.
+
+        return an EntityRef
+        """
+        # I don't trust the order that these might be evaluated if done in
+        # the EntityRef constructor
+        entityId = EntityId.fromBin(eis)
+        partId = PartId.fromBin(eis)
+        typeName = eis.readString()
+        instanceVersion = eis.readString()
+        return EntityRef(
+            entityId.toString(), partId.toString(), typeName, instanceVersion
+        )
+
+    @staticmethod
+    def from1DBin(eis):
+        """
+        Read a list of EntityRef from an EndianInput instance and return
+        the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(EntityRef.fromBin(eis))
+
+        return result
 
     def toXML(self):
         """

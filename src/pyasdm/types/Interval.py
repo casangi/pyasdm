@@ -195,3 +195,176 @@ class Interval:
         tmp = Interval()
         tmp.value = self.value
         return tmp
+
+    def toBin(self, eos):
+        """
+        Write this Interval out, in nanoseconds, to a EndianOutput.
+        """
+        eos.writeLong(self.get())
+
+    @staticmethod
+    def listToBin(intervalList, eos):
+        """
+        Write a list of Interval to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(intervalList, list):
+            raise ValueError("intervalList is not a list")
+
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(intervalList)
+        ndims = len(listDims)
+        if ndims == 1:
+            Interval.listTo1DBin(intervalList, eos)
+        elif ndims == 2:
+            Interval.listTo2DBin(intervalList, eos)
+        elif ndims == 3:
+            Interval.listTo3DBin(intervalList, eos)
+
+        raise ValueError(
+            "unsupport number of dimensions in intervalList in Interval.listToBin : "
+            + str(ndims)
+        )
+
+    @staticmethod
+    def listTo1DBin(intervalList, eos):
+        """
+        Write a 1D list of Interval to the EndianOutput
+        """
+        if not isinstance(intervalList, list):
+            raise ValueError("intervalList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(intervalList))
+
+        # only check the first value
+        if (len(intervalList) > 0) and not isinstance(intervalList[0], Interval):
+            raise (ValueError("intervalList is not a list of Interval"))
+
+        for thisInterval in intervalList:
+            thisInterval.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(intervalList, eos):
+        """
+        Write a 2D list of Interval to the EndianOutput
+        """
+        if not isinstance(intervalList, list):
+            raise ValueError("intervalList is not a list")
+
+        ndim1 = len(intervalList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(intervalList[0], list):
+                raise ValueError("intervalList is not a 2D")
+
+            ndim2 = len(intervalList[0])
+            if ndim2 > 0 and not isinstance(intervalList[0][0], Interval):
+                raise ValueError("intervalListis a not a 2D list of Interval")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in intervalList:
+            for thisInterval in thisList:
+                thisInterval.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(intervalList, eos):
+        """
+        Write a 3D list of Interval to the EndianOutput
+        """
+        if not isinstance(intervalList, list):
+            raise ValueError("intervalList is not a list")
+
+        ndim1 = len(intervalList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(intervalList[0], list):
+                raise ValueError("intervalList is not a 3D list")
+
+            ndim2 = len(intervalList[0])
+            if ndim2 > 0:
+                if not isinstance(intervalList[0][0], list):
+                    raise ValueError("intervalList is a not a 3D list")
+                ndim3 = len(intervalList[0][0])
+                if (ndim3 > 0) and not isinstance(intervalList[0][0][0], Interval):
+                    raise ValueError("intervalList is not a 3D list of Interval")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in intervalList:
+            for middleList in thisList:
+                for thisInterval in middleList:
+                    thisInterval.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an Interval, in nanoseconds,
+        from an EndianInput instance and use the read value to set an
+        Interval.
+
+        return an Interval
+        """
+        return Interval(eis.readLong())
+
+    @staticmethod
+    def from1Dbin(eis):
+        """
+        Read a list of binary Interval values, in nanoseconds, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(Interval.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary Interval values, in nanoseconds, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(Interval.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3Dbin(eis):
+        """
+        Read a 3D list of binary Interval values, in nanoseconds, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(Interval.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result

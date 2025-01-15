@@ -33,6 +33,8 @@ import pyasdm.DelayModelVariableParametersTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -836,7 +838,7 @@ class DelayModelVariableParametersRow:
             raise ValueError("The value of polarOffsets must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarOffsets)
+            listDims = pyasdm.utils.getListDims(polarOffsets)
 
             shapeOK = len(listDims) == 1
 
@@ -845,7 +847,7 @@ class DelayModelVariableParametersRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(polarOffsets, float):
+            if not pyasdm.utils.checkListType(polarOffsets, float):
                 raise ValueError(
                     "type of the first value in polarOffsets is not float as expected"
                 )

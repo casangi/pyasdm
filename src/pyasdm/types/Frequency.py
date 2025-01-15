@@ -234,21 +234,177 @@ class Frequency:
         return result
 
     def toBin(self):
-        # it also needs a static method to send a list of frequency items toBin
-        # should also work for 2D, 3D lists
-        raise RuntimeError("Frequency.toBin is not yet implemented")
+        """
+        Write this Frequency out, in Hertz, to a EndianOutput.
+        """
+        eos.writeDouble(self.get())
 
-    def fromBin(self):
-        raise RuntimeError("Frequency.fromBin is not yet implemented")
+    @staticmethod
+    def listToBin(frequencyList, eos):
+        """
+        Write a list of Frequency to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(frequencyList, list):
+            raise ValueError("frequencyList is not a list")
 
-    def from1DBin(self):
-        raise RuntimeError("Frequency.from1DBin is not yet implemented")
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(frequencyList)
+        ndims = len(listDims)
+        if ndims == 1:
+            Frequency.listTo1DBin(frequencyList, eos)
+        elif ndims == 2:
+            Frequency.listTo2DBin(frequencyList, eos)
+        elif ndims == 3:
+            Frequency.listTo3DBin(frequencyList, eos)
 
-    def from2DBin(self):
-        raise RuntimeError("Frequency.from2DBin is not yet implemented")
+        raise ValueError(
+            "unsupport number of dimensions in frequencyList in Frequency.listToBin : "
+            + str(ndims)
+        )
 
-    def from3DBin(self):
-        raise RuntimeError("Frequency.from2DBin is not yet implemented")
+    @staticmethod
+    def listTo1DBin(frequencyList, eos):
+        """
+        Write a 1D list of Frequency to the EndianOutput
+        """
+        if not isinstance(frequencyList, list):
+            raise ValueError("frequencyList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(frequencyList))
+
+        # only check the first value
+        if (len(frequencyList) > 0) and not isinstance(frequencyList[0], Frequency):
+            raise (ValueError("frequencyList is not a list of Frequency"))
+
+        for thisFrequency in frequencyList:
+            thisFrequency.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(frequencyList, eos):
+        """
+        Write a 2D list of Frequency to the EndianOutput
+        """
+        if not isinstance(frequencyList, list):
+            raise ValueError("frequencyList is not a list")
+
+        ndim1 = len(frequencyList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(frequencyList[0], list):
+                raise ValueError("frequencyList is not a 2D")
+
+            ndim2 = len(frequencyList[0])
+            if ndim2 > 0 and not isinstance(frequencyList[0][0], Frequency):
+                raise ValueError("frequencyListis a not a 2D list of Frequency")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in frequencyList:
+            for thisFrequency in thisList:
+                thisFrequency.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(frequencyList, eos):
+        """
+        Write a 3D list of Frequency to the EndianOutput
+        """
+        if not isinstance(frequencyList, list):
+            raise ValueError("frequencyList is not a list")
+
+        ndim1 = len(frequencyList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(frequencyList[0], list):
+                raise ValueError("frequencyList is not a 3D list")
+
+            ndim2 = len(frequencyList[0])
+            if ndim2 > 0:
+                if not isinstance(frequencyList[0][0], list):
+                    raise ValueError("frequencyList is a not a 3D list")
+                ndim3 = len(frequencyList[0][0])
+                if (ndim3 > 0) and not isinstance(frequencyList[0][0][0], Frequency):
+                    raise ValueError("frequencyList is not a 3D list of Frequency")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in frequencyList:
+            for middleList in thisList:
+                for thisFrequency in middleList:
+                    thisFrequency.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an Frequency, in Hertz,
+        from an EndianInput instance and use the read value to set a
+        Frequency.
+
+        return a Frequency
+        """
+        return Frequency(eis.readDouble())
+
+    @staticmethod
+    def from1DBin(eis):
+        """
+        Read a list of binary Frequency values, in Hertz, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(Frequency.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary Frequency values, in Hertz, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(Frequency.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3DBin(eis):
+        """
+        Read a 3D list of binary Frequency values, in Hertz, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(Frequency.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     def equals(self, otherFrequency):
         """

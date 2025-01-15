@@ -33,6 +33,8 @@ import pyasdm.ConfigDescriptionTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -965,7 +967,7 @@ class ConfigDescriptionRow:
             raise ValueError("The value of atmPhaseCorrection must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(atmPhaseCorrection)
+            listDims = pyasdm.utils.getListDims(atmPhaseCorrection)
 
             shapeOK = len(listDims) == 1
 
@@ -974,7 +976,7 @@ class ConfigDescriptionRow:
 
             # the type of the values in the list must be AtmPhaseCorrection
             # note : this only checks the first value found
-            if not Parser.checkListType(atmPhaseCorrection, AtmPhaseCorrection):
+            if not pyasdm.utils.checkListType(atmPhaseCorrection, AtmPhaseCorrection):
                 raise ValueError(
                     "type of the first value in atmPhaseCorrection is not AtmPhaseCorrection as expected"
                 )
@@ -1045,7 +1047,7 @@ class ConfigDescriptionRow:
             raise ValueError("The value of phasedArrayList must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phasedArrayList)
+            listDims = pyasdm.utils.getListDims(phasedArrayList)
 
             shapeOK = len(listDims) == 1
 
@@ -1054,7 +1056,7 @@ class ConfigDescriptionRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(phasedArrayList, int):
+            if not pyasdm.utils.checkListType(phasedArrayList, int):
                 raise ValueError(
                     "type of the first value in phasedArrayList is not int as expected"
                 )
@@ -1178,7 +1180,7 @@ class ConfigDescriptionRow:
             raise ValueError("The value of assocNature must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(assocNature)
+            listDims = pyasdm.utils.getListDims(assocNature)
 
             shapeOK = len(listDims) == 1
 
@@ -1187,7 +1189,7 @@ class ConfigDescriptionRow:
 
             # the type of the values in the list must be SpectralResolutionType
             # note : this only checks the first value found
-            if not Parser.checkListType(assocNature, SpectralResolutionType):
+            if not pyasdm.utils.checkListType(assocNature, SpectralResolutionType):
                 raise ValueError(
                     "type of the first value in assocNature is not SpectralResolutionType as expected"
                 )
@@ -1231,7 +1233,7 @@ class ConfigDescriptionRow:
             raise ValueError("The value of antennaId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(antennaId)
+            listDims = pyasdm.utils.getListDims(antennaId)
 
             shapeOK = len(listDims) == 1
 
@@ -1240,7 +1242,7 @@ class ConfigDescriptionRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(antennaId, Tag):
+            if not pyasdm.utils.checkListType(antennaId, Tag):
                 raise ValueError(
                     "type of the first value in antennaId is not Tag as expected"
                 )
@@ -1289,7 +1291,7 @@ class ConfigDescriptionRow:
             raise ValueError("The value of assocConfigDescriptionId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(assocConfigDescriptionId)
+            listDims = pyasdm.utils.getListDims(assocConfigDescriptionId)
 
             shapeOK = len(listDims) == 1
 
@@ -1298,7 +1300,7 @@ class ConfigDescriptionRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(assocConfigDescriptionId, Tag):
+            if not pyasdm.utils.checkListType(assocConfigDescriptionId, Tag):
                 raise ValueError(
                     "type of the first value in assocConfigDescriptionId is not Tag as expected"
                 )
@@ -1340,7 +1342,7 @@ class ConfigDescriptionRow:
             raise ValueError("The value of dataDescriptionId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(dataDescriptionId)
+            listDims = pyasdm.utils.getListDims(dataDescriptionId)
 
             shapeOK = len(listDims) == 1
 
@@ -1349,7 +1351,7 @@ class ConfigDescriptionRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(dataDescriptionId, Tag):
+            if not pyasdm.utils.checkListType(dataDescriptionId, Tag):
                 raise ValueError(
                     "type of the first value in dataDescriptionId is not Tag as expected"
                 )
@@ -1383,7 +1385,7 @@ class ConfigDescriptionRow:
             raise ValueError("The value of feedId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(feedId)
+            listDims = pyasdm.utils.getListDims(feedId)
 
             shapeOK = len(listDims) == 1
 
@@ -1392,7 +1394,7 @@ class ConfigDescriptionRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(feedId, int):
+            if not pyasdm.utils.checkListType(feedId, int):
                 raise ValueError(
                     "type of the first value in feedId is not int as expected"
                 )
@@ -1449,7 +1451,7 @@ class ConfigDescriptionRow:
             raise ValueError("The value of switchCycleId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(switchCycleId)
+            listDims = pyasdm.utils.getListDims(switchCycleId)
 
             shapeOK = len(listDims) == 1
 
@@ -1458,7 +1460,7 @@ class ConfigDescriptionRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(switchCycleId, Tag):
+            if not pyasdm.utils.checkListType(switchCycleId, Tag):
                 raise ValueError(
                     "type of the first value in switchCycleId is not Tag as expected"
                 )

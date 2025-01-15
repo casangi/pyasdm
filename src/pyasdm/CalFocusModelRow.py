@@ -33,6 +33,8 @@ import pyasdm.CalFocusModelTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -886,7 +888,7 @@ class CalFocusModelRow:
             raise ValueError("The value of coeffName must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(coeffName)
+            listDims = pyasdm.utils.getListDims(coeffName)
 
             shapeOK = len(listDims) == 1
 
@@ -895,7 +897,7 @@ class CalFocusModelRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(coeffName, str):
+            if not pyasdm.utils.checkListType(coeffName, str):
                 raise ValueError(
                     "type of the first value in coeffName is not str as expected"
                 )
@@ -929,7 +931,7 @@ class CalFocusModelRow:
             raise ValueError("The value of coeffFormula must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(coeffFormula)
+            listDims = pyasdm.utils.getListDims(coeffFormula)
 
             shapeOK = len(listDims) == 1
 
@@ -938,7 +940,7 @@ class CalFocusModelRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(coeffFormula, str):
+            if not pyasdm.utils.checkListType(coeffFormula, str):
                 raise ValueError(
                     "type of the first value in coeffFormula is not str as expected"
                 )
@@ -972,7 +974,7 @@ class CalFocusModelRow:
             raise ValueError("The value of coeffValue must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(coeffValue)
+            listDims = pyasdm.utils.getListDims(coeffValue)
 
             shapeOK = len(listDims) == 1
 
@@ -981,7 +983,7 @@ class CalFocusModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(coeffValue, float):
+            if not pyasdm.utils.checkListType(coeffValue, float):
                 raise ValueError(
                     "type of the first value in coeffValue is not float as expected"
                 )
@@ -1015,7 +1017,7 @@ class CalFocusModelRow:
             raise ValueError("The value of coeffError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(coeffError)
+            listDims = pyasdm.utils.getListDims(coeffError)
 
             shapeOK = len(listDims) == 1
 
@@ -1024,7 +1026,7 @@ class CalFocusModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(coeffError, float):
+            if not pyasdm.utils.checkListType(coeffError, float):
                 raise ValueError(
                     "type of the first value in coeffError is not float as expected"
                 )
@@ -1058,7 +1060,7 @@ class CalFocusModelRow:
             raise ValueError("The value of coeffFixed must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(coeffFixed)
+            listDims = pyasdm.utils.getListDims(coeffFixed)
 
             shapeOK = len(listDims) == 1
 
@@ -1067,7 +1069,7 @@ class CalFocusModelRow:
 
             # the type of the values in the list must be bool
             # note : this only checks the first value found
-            if not Parser.checkListType(coeffFixed, bool):
+            if not pyasdm.utils.checkListType(coeffFixed, bool):
                 raise ValueError(
                     "type of the first value in coeffFixed is not bool as expected"
                 )
@@ -1123,7 +1125,7 @@ class CalFocusModelRow:
             raise ValueError("The value of focusRMS must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(focusRMS)
+            listDims = pyasdm.utils.getListDims(focusRMS)
 
             shapeOK = len(listDims) == 1
 
@@ -1132,7 +1134,7 @@ class CalFocusModelRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(focusRMS, Length):
+            if not pyasdm.utils.checkListType(focusRMS, Length):
                 raise ValueError(
                     "type of the first value in focusRMS is not Length as expected"
                 )

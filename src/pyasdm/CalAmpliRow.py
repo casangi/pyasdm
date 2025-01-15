@@ -33,6 +33,8 @@ import pyasdm.CalAmpliTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -748,7 +750,7 @@ class CalAmpliRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -757,7 +759,7 @@ class CalAmpliRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -837,7 +839,7 @@ class CalAmpliRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -846,7 +848,7 @@ class CalAmpliRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -880,7 +882,7 @@ class CalAmpliRow:
             raise ValueError("The value of apertureEfficiency must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(apertureEfficiency)
+            listDims = pyasdm.utils.getListDims(apertureEfficiency)
 
             shapeOK = len(listDims) == 1
 
@@ -889,7 +891,7 @@ class CalAmpliRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(apertureEfficiency, float):
+            if not pyasdm.utils.checkListType(apertureEfficiency, float):
                 raise ValueError(
                     "type of the first value in apertureEfficiency is not float as expected"
                 )
@@ -923,7 +925,7 @@ class CalAmpliRow:
             raise ValueError("The value of apertureEfficiencyError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(apertureEfficiencyError)
+            listDims = pyasdm.utils.getListDims(apertureEfficiencyError)
 
             shapeOK = len(listDims) == 1
 
@@ -932,7 +934,7 @@ class CalAmpliRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(apertureEfficiencyError, float):
+            if not pyasdm.utils.checkListType(apertureEfficiencyError, float):
                 raise ValueError(
                     "type of the first value in apertureEfficiencyError is not float as expected"
                 )

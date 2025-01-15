@@ -33,6 +33,8 @@ import pyasdm.HolographyTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -420,7 +422,7 @@ class HolographyRow:
             raise ValueError("The value of type must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(type)
+            listDims = pyasdm.utils.getListDims(type)
 
             shapeOK = len(listDims) == 1
 
@@ -429,7 +431,7 @@ class HolographyRow:
 
             # the type of the values in the list must be HolographyChannelType
             # note : this only checks the first value found
-            if not Parser.checkListType(type, HolographyChannelType):
+            if not pyasdm.utils.checkListType(type, HolographyChannelType):
                 raise ValueError(
                     "type of the first value in type is not HolographyChannelType as expected"
                 )

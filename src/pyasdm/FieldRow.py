@@ -33,6 +33,8 @@ import pyasdm.FieldTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -746,7 +748,7 @@ class FieldRow:
             raise ValueError("The value of delayDir must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(delayDir)
+            listDims = pyasdm.utils.getListDims(delayDir)
 
             shapeOK = len(listDims) == 2
 
@@ -755,7 +757,7 @@ class FieldRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(delayDir, Angle):
+            if not pyasdm.utils.checkListType(delayDir, Angle):
                 raise ValueError(
                     "type of the first value in delayDir is not Angle as expected"
                 )
@@ -789,7 +791,7 @@ class FieldRow:
             raise ValueError("The value of phaseDir must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseDir)
+            listDims = pyasdm.utils.getListDims(phaseDir)
 
             shapeOK = len(listDims) == 2
 
@@ -798,7 +800,7 @@ class FieldRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseDir, Angle):
+            if not pyasdm.utils.checkListType(phaseDir, Angle):
                 raise ValueError(
                     "type of the first value in phaseDir is not Angle as expected"
                 )
@@ -832,7 +834,7 @@ class FieldRow:
             raise ValueError("The value of referenceDir must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(referenceDir)
+            listDims = pyasdm.utils.getListDims(referenceDir)
 
             shapeOK = len(listDims) == 2
 
@@ -841,7 +843,7 @@ class FieldRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(referenceDir, Angle):
+            if not pyasdm.utils.checkListType(referenceDir, Angle):
                 raise ValueError(
                     "type of the first value in referenceDir is not Angle as expected"
                 )
@@ -1263,8 +1265,8 @@ class FieldRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            delayDir_dims = Parser.getListDims(delayDir)
-            this_delayDir_dims = Parser.getListDims(self._delayDir)
+            delayDir_dims = pyasdm.utils.getListDims(delayDir)
+            this_delayDir_dims = pyasdm.utils.getListDims(self._delayDir)
             if delayDir_dims != this_delayDir_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1286,8 +1288,8 @@ class FieldRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            phaseDir_dims = Parser.getListDims(phaseDir)
-            this_phaseDir_dims = Parser.getListDims(self._phaseDir)
+            phaseDir_dims = pyasdm.utils.getListDims(phaseDir)
+            this_phaseDir_dims = pyasdm.utils.getListDims(self._phaseDir)
             if phaseDir_dims != this_phaseDir_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1309,8 +1311,8 @@ class FieldRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            referenceDir_dims = Parser.getListDims(referenceDir)
-            this_referenceDir_dims = Parser.getListDims(self._referenceDir)
+            referenceDir_dims = pyasdm.utils.getListDims(referenceDir)
+            this_referenceDir_dims = pyasdm.utils.getListDims(self._referenceDir)
             if referenceDir_dims != this_referenceDir_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1361,8 +1363,8 @@ class FieldRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            delayDir_dims = Parser.getListDims(delayDir)
-            this_delayDir_dims = Parser.getListDims(self._delayDir)
+            delayDir_dims = pyasdm.utils.getListDims(delayDir)
+            this_delayDir_dims = pyasdm.utils.getListDims(self._delayDir)
             if delayDir_dims != this_delayDir_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1384,8 +1386,8 @@ class FieldRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            phaseDir_dims = Parser.getListDims(phaseDir)
-            this_phaseDir_dims = Parser.getListDims(self._phaseDir)
+            phaseDir_dims = pyasdm.utils.getListDims(phaseDir)
+            this_phaseDir_dims = pyasdm.utils.getListDims(self._phaseDir)
             if phaseDir_dims != this_phaseDir_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1407,8 +1409,8 @@ class FieldRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            referenceDir_dims = Parser.getListDims(referenceDir)
-            this_referenceDir_dims = Parser.getListDims(self._referenceDir)
+            referenceDir_dims = pyasdm.utils.getListDims(referenceDir)
+            this_referenceDir_dims = pyasdm.utils.getListDims(self._referenceDir)
             if referenceDir_dims != this_referenceDir_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

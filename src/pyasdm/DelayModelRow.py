@@ -33,6 +33,8 @@ import pyasdm.DelayModelTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -1500,7 +1502,7 @@ class DelayModelRow:
             raise ValueError("The value of phaseDelay must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseDelay)
+            listDims = pyasdm.utils.getListDims(phaseDelay)
 
             shapeOK = len(listDims) == 1
 
@@ -1509,7 +1511,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseDelay, float):
+            if not pyasdm.utils.checkListType(phaseDelay, float):
                 raise ValueError(
                     "type of the first value in phaseDelay is not float as expected"
                 )
@@ -1543,7 +1545,7 @@ class DelayModelRow:
             raise ValueError("The value of phaseDelayRate must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseDelayRate)
+            listDims = pyasdm.utils.getListDims(phaseDelayRate)
 
             shapeOK = len(listDims) == 1
 
@@ -1552,7 +1554,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseDelayRate, float):
+            if not pyasdm.utils.checkListType(phaseDelayRate, float):
                 raise ValueError(
                     "type of the first value in phaseDelayRate is not float as expected"
                 )
@@ -1586,7 +1588,7 @@ class DelayModelRow:
             raise ValueError("The value of groupDelay must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(groupDelay)
+            listDims = pyasdm.utils.getListDims(groupDelay)
 
             shapeOK = len(listDims) == 1
 
@@ -1595,7 +1597,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(groupDelay, float):
+            if not pyasdm.utils.checkListType(groupDelay, float):
                 raise ValueError(
                     "type of the first value in groupDelay is not float as expected"
                 )
@@ -1629,7 +1631,7 @@ class DelayModelRow:
             raise ValueError("The value of groupDelayRate must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(groupDelayRate)
+            listDims = pyasdm.utils.getListDims(groupDelayRate)
 
             shapeOK = len(listDims) == 1
 
@@ -1638,7 +1640,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(groupDelayRate, float):
+            if not pyasdm.utils.checkListType(groupDelayRate, float):
                 raise ValueError(
                     "type of the first value in groupDelayRate is not float as expected"
                 )
@@ -1958,7 +1960,7 @@ class DelayModelRow:
             raise ValueError("The value of LOOffset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(LOOffset)
+            listDims = pyasdm.utils.getListDims(LOOffset)
 
             shapeOK = len(listDims) == 1
 
@@ -1967,7 +1969,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(LOOffset, Frequency):
+            if not pyasdm.utils.checkListType(LOOffset, Frequency):
                 raise ValueError(
                     "type of the first value in LOOffset is not Frequency as expected"
                 )
@@ -2024,7 +2026,7 @@ class DelayModelRow:
             raise ValueError("The value of LOOffsetRate must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(LOOffsetRate)
+            listDims = pyasdm.utils.getListDims(LOOffsetRate)
 
             shapeOK = len(listDims) == 1
 
@@ -2033,7 +2035,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(LOOffsetRate, Frequency):
+            if not pyasdm.utils.checkListType(LOOffsetRate, Frequency):
                 raise ValueError(
                     "type of the first value in LOOffsetRate is not Frequency as expected"
                 )
@@ -2405,7 +2407,7 @@ class DelayModelRow:
             raise ValueError("The value of polarizationType must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationType)
+            listDims = pyasdm.utils.getListDims(polarizationType)
 
             shapeOK = len(listDims) == 1
 
@@ -2414,7 +2416,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationType, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationType, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationType is not PolarizationType as expected"
                 )
@@ -2471,7 +2473,7 @@ class DelayModelRow:
             raise ValueError("The value of electronicDelay must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(electronicDelay)
+            listDims = pyasdm.utils.getListDims(electronicDelay)
 
             shapeOK = len(listDims) == 1
 
@@ -2480,7 +2482,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(electronicDelay, float):
+            if not pyasdm.utils.checkListType(electronicDelay, float):
                 raise ValueError(
                     "type of the first value in electronicDelay is not float as expected"
                 )
@@ -2537,7 +2539,7 @@ class DelayModelRow:
             raise ValueError("The value of electronicDelayRate must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(electronicDelayRate)
+            listDims = pyasdm.utils.getListDims(electronicDelayRate)
 
             shapeOK = len(listDims) == 1
 
@@ -2546,7 +2548,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(electronicDelayRate, float):
+            if not pyasdm.utils.checkListType(electronicDelayRate, float):
                 raise ValueError(
                     "type of the first value in electronicDelayRate is not float as expected"
                 )
@@ -2603,7 +2605,7 @@ class DelayModelRow:
             raise ValueError("The value of receiverDelay must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(receiverDelay)
+            listDims = pyasdm.utils.getListDims(receiverDelay)
 
             shapeOK = len(listDims) == 1
 
@@ -2612,7 +2614,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(receiverDelay, float):
+            if not pyasdm.utils.checkListType(receiverDelay, float):
                 raise ValueError(
                     "type of the first value in receiverDelay is not float as expected"
                 )
@@ -2669,7 +2671,7 @@ class DelayModelRow:
             raise ValueError("The value of IFDelay must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(IFDelay)
+            listDims = pyasdm.utils.getListDims(IFDelay)
 
             shapeOK = len(listDims) == 1
 
@@ -2678,7 +2680,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(IFDelay, float):
+            if not pyasdm.utils.checkListType(IFDelay, float):
                 raise ValueError(
                     "type of the first value in IFDelay is not float as expected"
                 )
@@ -2735,7 +2737,7 @@ class DelayModelRow:
             raise ValueError("The value of LODelay must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(LODelay)
+            listDims = pyasdm.utils.getListDims(LODelay)
 
             shapeOK = len(listDims) == 1
 
@@ -2744,7 +2746,7 @@ class DelayModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(LODelay, float):
+            if not pyasdm.utils.checkListType(LODelay, float):
                 raise ValueError(
                     "type of the first value in LODelay is not float as expected"
                 )

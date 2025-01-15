@@ -33,6 +33,8 @@ import pyasdm.FocusTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -495,7 +497,7 @@ class FocusRow:
             raise ValueError("The value of focusOffset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(focusOffset)
+            listDims = pyasdm.utils.getListDims(focusOffset)
 
             shapeOK = len(listDims) == 1
 
@@ -504,7 +506,7 @@ class FocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(focusOffset, Length):
+            if not pyasdm.utils.checkListType(focusOffset, Length):
                 raise ValueError(
                     "type of the first value in focusOffset is not Length as expected"
                 )
@@ -538,7 +540,7 @@ class FocusRow:
             raise ValueError("The value of focusRotationOffset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(focusRotationOffset)
+            listDims = pyasdm.utils.getListDims(focusRotationOffset)
 
             shapeOK = len(listDims) == 1
 
@@ -547,7 +549,7 @@ class FocusRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(focusRotationOffset, Angle):
+            if not pyasdm.utils.checkListType(focusRotationOffset, Angle):
                 raise ValueError(
                     "type of the first value in focusRotationOffset is not Angle as expected"
                 )
@@ -596,7 +598,7 @@ class FocusRow:
             raise ValueError("The value of measuredFocusPosition must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(measuredFocusPosition)
+            listDims = pyasdm.utils.getListDims(measuredFocusPosition)
 
             shapeOK = len(listDims) == 1
 
@@ -605,7 +607,7 @@ class FocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(measuredFocusPosition, Length):
+            if not pyasdm.utils.checkListType(measuredFocusPosition, Length):
                 raise ValueError(
                     "type of the first value in measuredFocusPosition is not Length as expected"
                 )
@@ -662,7 +664,7 @@ class FocusRow:
             raise ValueError("The value of measuredFocusRotation must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(measuredFocusRotation)
+            listDims = pyasdm.utils.getListDims(measuredFocusRotation)
 
             shapeOK = len(listDims) == 1
 
@@ -671,7 +673,7 @@ class FocusRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(measuredFocusRotation, Angle):
+            if not pyasdm.utils.checkListType(measuredFocusRotation, Angle):
                 raise ValueError(
                     "type of the first value in measuredFocusRotation is not Angle as expected"
                 )

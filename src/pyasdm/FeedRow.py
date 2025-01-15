@@ -33,6 +33,8 @@ import pyasdm.FeedTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -461,7 +463,7 @@ class FeedRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            beamOffset_dims = Parser.getListDims(self._beamOffset)
+            beamOffset_dims = pyasdm.utils.getListDims(self._beamOffset)
         # assumes it really is 2D
         eos.writeInt(beamOffset_dims[0])
         eos.writeInt(beamOffset_dims[1])
@@ -848,7 +850,7 @@ class FeedRow:
             raise ValueError("The value of beamOffset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(beamOffset)
+            listDims = pyasdm.utils.getListDims(beamOffset)
 
             shapeOK = len(listDims) == 2
 
@@ -857,7 +859,7 @@ class FeedRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(beamOffset, float):
+            if not pyasdm.utils.checkListType(beamOffset, float):
                 raise ValueError(
                     "type of the first value in beamOffset is not float as expected"
                 )
@@ -891,7 +893,7 @@ class FeedRow:
             raise ValueError("The value of focusReference must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(focusReference)
+            listDims = pyasdm.utils.getListDims(focusReference)
 
             shapeOK = len(listDims) == 2
 
@@ -900,7 +902,7 @@ class FeedRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(focusReference, Length):
+            if not pyasdm.utils.checkListType(focusReference, Length):
                 raise ValueError(
                     "type of the first value in focusReference is not Length as expected"
                 )
@@ -934,7 +936,7 @@ class FeedRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -943,7 +945,7 @@ class FeedRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -977,7 +979,7 @@ class FeedRow:
             raise ValueError("The value of polResponse must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polResponse)
+            listDims = pyasdm.utils.getListDims(polResponse)
 
             shapeOK = len(listDims) == 2
 
@@ -986,7 +988,7 @@ class FeedRow:
 
             # the type of the values in the list must be Complex
             # note : this only checks the first value found
-            if not Parser.checkListType(polResponse, Complex):
+            if not pyasdm.utils.checkListType(polResponse, Complex):
                 raise ValueError(
                     "type of the first value in polResponse is not Complex as expected"
                 )
@@ -1020,7 +1022,7 @@ class FeedRow:
             raise ValueError("The value of receptorAngle must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(receptorAngle)
+            listDims = pyasdm.utils.getListDims(receptorAngle)
 
             shapeOK = len(listDims) == 1
 
@@ -1029,7 +1031,7 @@ class FeedRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(receptorAngle, Angle):
+            if not pyasdm.utils.checkListType(receptorAngle, Angle):
                 raise ValueError(
                     "type of the first value in receptorAngle is not Angle as expected"
                 )
@@ -1123,7 +1125,7 @@ class FeedRow:
             raise ValueError("The value of illumOffset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(illumOffset)
+            listDims = pyasdm.utils.getListDims(illumOffset)
 
             shapeOK = len(listDims) == 1
 
@@ -1132,7 +1134,7 @@ class FeedRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(illumOffset, Length):
+            if not pyasdm.utils.checkListType(illumOffset, Length):
                 raise ValueError(
                     "type of the first value in illumOffset is not Length as expected"
                 )
@@ -1189,7 +1191,7 @@ class FeedRow:
             raise ValueError("The value of position must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(position)
+            listDims = pyasdm.utils.getListDims(position)
 
             shapeOK = len(listDims) == 1
 
@@ -1198,7 +1200,7 @@ class FeedRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(position, Length):
+            if not pyasdm.utils.checkListType(position, Length):
                 raise ValueError(
                     "type of the first value in position is not Length as expected"
                 )
@@ -1345,7 +1347,7 @@ class FeedRow:
             raise ValueError("The value of skyCouplingSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(skyCouplingSpectrum)
+            listDims = pyasdm.utils.getListDims(skyCouplingSpectrum)
 
             shapeOK = len(listDims) == 1
 
@@ -1354,7 +1356,7 @@ class FeedRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(skyCouplingSpectrum, float):
+            if not pyasdm.utils.checkListType(skyCouplingSpectrum, float):
                 raise ValueError(
                     "type of the first value in skyCouplingSpectrum is not float as expected"
                 )
@@ -1428,7 +1430,7 @@ class FeedRow:
             raise ValueError("The value of receiverId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(receiverId)
+            listDims = pyasdm.utils.getListDims(receiverId)
 
             shapeOK = len(listDims) == 1
 
@@ -1437,7 +1439,7 @@ class FeedRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(receiverId, int):
+            if not pyasdm.utils.checkListType(receiverId, int):
                 raise ValueError(
                     "type of the first value in receiverId is not int as expected"
                 )
@@ -1586,8 +1588,8 @@ class FeedRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            beamOffset_dims = Parser.getListDims(beamOffset)
-            this_beamOffset_dims = Parser.getListDims(self._beamOffset)
+            beamOffset_dims = pyasdm.utils.getListDims(beamOffset)
+            this_beamOffset_dims = pyasdm.utils.getListDims(self._beamOffset)
             if beamOffset_dims != this_beamOffset_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1605,8 +1607,8 @@ class FeedRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            focusReference_dims = Parser.getListDims(focusReference)
-            this_focusReference_dims = Parser.getListDims(self._focusReference)
+            focusReference_dims = pyasdm.utils.getListDims(focusReference)
+            this_focusReference_dims = pyasdm.utils.getListDims(self._focusReference)
             if focusReference_dims != this_focusReference_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1639,8 +1641,8 @@ class FeedRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            polResponse_dims = Parser.getListDims(polResponse)
-            this_polResponse_dims = Parser.getListDims(self._polResponse)
+            polResponse_dims = pyasdm.utils.getListDims(polResponse)
+            this_polResponse_dims = pyasdm.utils.getListDims(self._polResponse)
             if polResponse_dims != this_polResponse_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1713,8 +1715,8 @@ class FeedRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            beamOffset_dims = Parser.getListDims(beamOffset)
-            this_beamOffset_dims = Parser.getListDims(self._beamOffset)
+            beamOffset_dims = pyasdm.utils.getListDims(beamOffset)
+            this_beamOffset_dims = pyasdm.utils.getListDims(self._beamOffset)
             if beamOffset_dims != this_beamOffset_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1732,8 +1734,8 @@ class FeedRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            focusReference_dims = Parser.getListDims(focusReference)
-            this_focusReference_dims = Parser.getListDims(self._focusReference)
+            focusReference_dims = pyasdm.utils.getListDims(focusReference)
+            this_focusReference_dims = pyasdm.utils.getListDims(self._focusReference)
             if focusReference_dims != this_focusReference_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1766,8 +1768,8 @@ class FeedRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            polResponse_dims = Parser.getListDims(polResponse)
-            this_polResponse_dims = Parser.getListDims(self._polResponse)
+            polResponse_dims = pyasdm.utils.getListDims(polResponse)
+            this_polResponse_dims = pyasdm.utils.getListDims(self._polResponse)
             if polResponse_dims != this_polResponse_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

@@ -33,6 +33,8 @@ import pyasdm.SeeingTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -388,7 +390,7 @@ class SeeingRow:
             raise ValueError("The value of baseLength must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(baseLength)
+            listDims = pyasdm.utils.getListDims(baseLength)
 
             shapeOK = len(listDims) == 1
 
@@ -397,7 +399,7 @@ class SeeingRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(baseLength, Length):
+            if not pyasdm.utils.checkListType(baseLength, Length):
                 raise ValueError(
                     "type of the first value in baseLength is not Length as expected"
                 )
@@ -431,7 +433,7 @@ class SeeingRow:
             raise ValueError("The value of phaseRms must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseRms)
+            listDims = pyasdm.utils.getListDims(phaseRms)
 
             shapeOK = len(listDims) == 1
 
@@ -440,7 +442,7 @@ class SeeingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseRms, Angle):
+            if not pyasdm.utils.checkListType(phaseRms, Angle):
                 raise ValueError(
                     "type of the first value in phaseRms is not Angle as expected"
                 )

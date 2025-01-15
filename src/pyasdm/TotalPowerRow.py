@@ -33,6 +33,8 @@ import pyasdm.TotalPowerTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -382,7 +384,7 @@ class TotalPowerRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            floatData_dims = Parser.getListDims(self._floatData)
+            floatData_dims = pyasdm.utils.getListDims(self._floatData)
         # assumes it really is 3D
         eos.writeInt(floatData_dims[0])
         eos.writeInt(floatData_dims[1])
@@ -402,7 +404,7 @@ class TotalPowerRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            flagPol_dims = Parser.getListDims(self._flagPol)
+            flagPol_dims = pyasdm.utils.getListDims(self._flagPol)
         # assumes it really is 2D
         eos.writeInt(flagPol_dims[0])
         eos.writeInt(flagPol_dims[1])
@@ -755,7 +757,7 @@ class TotalPowerRow:
             raise ValueError("The value of uvw must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(uvw)
+            listDims = pyasdm.utils.getListDims(uvw)
 
             shapeOK = len(listDims) == 2
 
@@ -764,7 +766,7 @@ class TotalPowerRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(uvw, Length):
+            if not pyasdm.utils.checkListType(uvw, Length):
                 raise ValueError(
                     "type of the first value in uvw is not Length as expected"
                 )
@@ -798,7 +800,7 @@ class TotalPowerRow:
             raise ValueError("The value of exposure must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(exposure)
+            listDims = pyasdm.utils.getListDims(exposure)
 
             shapeOK = len(listDims) == 2
 
@@ -807,7 +809,7 @@ class TotalPowerRow:
 
             # the type of the values in the list must be Interval
             # note : this only checks the first value found
-            if not Parser.checkListType(exposure, Interval):
+            if not pyasdm.utils.checkListType(exposure, Interval):
                 raise ValueError(
                     "type of the first value in exposure is not Interval as expected"
                 )
@@ -841,7 +843,7 @@ class TotalPowerRow:
             raise ValueError("The value of timeCentroid must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(timeCentroid)
+            listDims = pyasdm.utils.getListDims(timeCentroid)
 
             shapeOK = len(listDims) == 2
 
@@ -850,7 +852,7 @@ class TotalPowerRow:
 
             # the type of the values in the list must be ArrayTime
             # note : this only checks the first value found
-            if not Parser.checkListType(timeCentroid, ArrayTime):
+            if not pyasdm.utils.checkListType(timeCentroid, ArrayTime):
                 raise ValueError(
                     "type of the first value in timeCentroid is not ArrayTime as expected"
                 )
@@ -884,7 +886,7 @@ class TotalPowerRow:
             raise ValueError("The value of floatData must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(floatData)
+            listDims = pyasdm.utils.getListDims(floatData)
 
             shapeOK = len(listDims) == 3
 
@@ -893,7 +895,7 @@ class TotalPowerRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(floatData, float):
+            if not pyasdm.utils.checkListType(floatData, float):
                 raise ValueError(
                     "type of the first value in floatData is not float as expected"
                 )
@@ -927,7 +929,7 @@ class TotalPowerRow:
             raise ValueError("The value of flagAnt must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(flagAnt)
+            listDims = pyasdm.utils.getListDims(flagAnt)
 
             shapeOK = len(listDims) == 1
 
@@ -936,7 +938,7 @@ class TotalPowerRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(flagAnt, int):
+            if not pyasdm.utils.checkListType(flagAnt, int):
                 raise ValueError(
                     "type of the first value in flagAnt is not int as expected"
                 )
@@ -970,7 +972,7 @@ class TotalPowerRow:
             raise ValueError("The value of flagPol must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(flagPol)
+            listDims = pyasdm.utils.getListDims(flagPol)
 
             shapeOK = len(listDims) == 2
 
@@ -979,7 +981,7 @@ class TotalPowerRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(flagPol, int):
+            if not pyasdm.utils.checkListType(flagPol, int):
                 raise ValueError(
                     "type of the first value in flagPol is not int as expected"
                 )
@@ -1166,7 +1168,7 @@ class TotalPowerRow:
             raise ValueError("The value of stateId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(stateId)
+            listDims = pyasdm.utils.getListDims(stateId)
 
             shapeOK = len(listDims) == 1
 
@@ -1175,7 +1177,7 @@ class TotalPowerRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(stateId, Tag):
+            if not pyasdm.utils.checkListType(stateId, Tag):
                 raise ValueError(
                     "type of the first value in stateId is not Tag as expected"
                 )
@@ -1316,8 +1318,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            uvw_dims = Parser.getListDims(uvw)
-            this_uvw_dims = Parser.getListDims(self._uvw)
+            uvw_dims = pyasdm.utils.getListDims(uvw)
+            this_uvw_dims = pyasdm.utils.getListDims(self._uvw)
             if uvw_dims != this_uvw_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1339,8 +1341,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            exposure_dims = Parser.getListDims(exposure)
-            this_exposure_dims = Parser.getListDims(self._exposure)
+            exposure_dims = pyasdm.utils.getListDims(exposure)
+            this_exposure_dims = pyasdm.utils.getListDims(self._exposure)
             if exposure_dims != this_exposure_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1358,8 +1360,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            timeCentroid_dims = Parser.getListDims(timeCentroid)
-            this_timeCentroid_dims = Parser.getListDims(self._timeCentroid)
+            timeCentroid_dims = pyasdm.utils.getListDims(timeCentroid)
+            this_timeCentroid_dims = pyasdm.utils.getListDims(self._timeCentroid)
             if timeCentroid_dims != this_timeCentroid_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1378,8 +1380,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            floatData_dims = Parser.getListDims(floatData)
-            this_floatData_dims = Parser.getListDims(self._floatData)
+            floatData_dims = pyasdm.utils.getListDims(floatData)
+            this_floatData_dims = pyasdm.utils.getListDims(self._floatData)
             if floatData_dims != this_floatData_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be
@@ -1407,8 +1409,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            flagPol_dims = Parser.getListDims(flagPol)
-            this_flagPol_dims = Parser.getListDims(self._flagPol)
+            flagPol_dims = pyasdm.utils.getListDims(flagPol)
+            this_flagPol_dims = pyasdm.utils.getListDims(self._flagPol)
             if flagPol_dims != this_flagPol_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1495,8 +1497,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            uvw_dims = Parser.getListDims(uvw)
-            this_uvw_dims = Parser.getListDims(self._uvw)
+            uvw_dims = pyasdm.utils.getListDims(uvw)
+            this_uvw_dims = pyasdm.utils.getListDims(self._uvw)
             if uvw_dims != this_uvw_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1518,8 +1520,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            exposure_dims = Parser.getListDims(exposure)
-            this_exposure_dims = Parser.getListDims(self._exposure)
+            exposure_dims = pyasdm.utils.getListDims(exposure)
+            this_exposure_dims = pyasdm.utils.getListDims(self._exposure)
             if exposure_dims != this_exposure_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1537,8 +1539,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            timeCentroid_dims = Parser.getListDims(timeCentroid)
-            this_timeCentroid_dims = Parser.getListDims(self._timeCentroid)
+            timeCentroid_dims = pyasdm.utils.getListDims(timeCentroid)
+            this_timeCentroid_dims = pyasdm.utils.getListDims(self._timeCentroid)
             if timeCentroid_dims != this_timeCentroid_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1557,8 +1559,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            floatData_dims = Parser.getListDims(floatData)
-            this_floatData_dims = Parser.getListDims(self._floatData)
+            floatData_dims = pyasdm.utils.getListDims(floatData)
+            this_floatData_dims = pyasdm.utils.getListDims(self._floatData)
             if floatData_dims != this_floatData_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be
@@ -1586,8 +1588,8 @@ class TotalPowerRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            flagPol_dims = Parser.getListDims(flagPol)
-            this_flagPol_dims = Parser.getListDims(self._flagPol)
+            flagPol_dims = pyasdm.utils.getListDims(flagPol)
+            this_flagPol_dims = pyasdm.utils.getListDims(self._flagPol)
             if flagPol_dims != this_flagPol_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

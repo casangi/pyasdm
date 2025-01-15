@@ -98,7 +98,18 @@ class EntityId:
         """
         return self._id
 
-    # TBD : toBin, fromBin
+    @staticmethod
+    def fromBin(ein):
+        """
+        Create and return an EntityId from an EndianInput instance.
+        """
+        return EntityId(ein.readString())
+
+    def toBin(self, eout):
+        """
+        Write this EntityId to an EndianOutput instance.
+        """
+        eout.writeString(self._id)
 
     def equals(self, id):
         """

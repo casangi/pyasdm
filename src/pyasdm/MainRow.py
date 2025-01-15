@@ -33,6 +33,8 @@ import pyasdm.MainTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -795,7 +797,7 @@ class MainRow:
             raise ValueError("The value of stateId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(stateId)
+            listDims = pyasdm.utils.getListDims(stateId)
 
             shapeOK = len(listDims) == 1
 
@@ -804,7 +806,7 @@ class MainRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(stateId, Tag):
+            if not pyasdm.utils.checkListType(stateId, Tag):
                 raise ValueError(
                     "type of the first value in stateId is not Tag as expected"
                 )

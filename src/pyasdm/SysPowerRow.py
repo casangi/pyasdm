@@ -33,6 +33,8 @@ import pyasdm.SysPowerTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -547,7 +549,7 @@ class SysPowerRow:
             raise ValueError("The value of switchedPowerDifference must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(switchedPowerDifference)
+            listDims = pyasdm.utils.getListDims(switchedPowerDifference)
 
             shapeOK = len(listDims) == 1
 
@@ -556,7 +558,7 @@ class SysPowerRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(switchedPowerDifference, float):
+            if not pyasdm.utils.checkListType(switchedPowerDifference, float):
                 raise ValueError(
                     "type of the first value in switchedPowerDifference is not float as expected"
                 )
@@ -613,7 +615,7 @@ class SysPowerRow:
             raise ValueError("The value of switchedPowerSum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(switchedPowerSum)
+            listDims = pyasdm.utils.getListDims(switchedPowerSum)
 
             shapeOK = len(listDims) == 1
 
@@ -622,7 +624,7 @@ class SysPowerRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(switchedPowerSum, float):
+            if not pyasdm.utils.checkListType(switchedPowerSum, float):
                 raise ValueError(
                     "type of the first value in switchedPowerSum is not float as expected"
                 )
@@ -679,7 +681,7 @@ class SysPowerRow:
             raise ValueError("The value of requantizerGain must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(requantizerGain)
+            listDims = pyasdm.utils.getListDims(requantizerGain)
 
             shapeOK = len(listDims) == 1
 
@@ -688,7 +690,7 @@ class SysPowerRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(requantizerGain, float):
+            if not pyasdm.utils.checkListType(requantizerGain, float):
                 raise ValueError(
                     "type of the first value in requantizerGain is not float as expected"
                 )

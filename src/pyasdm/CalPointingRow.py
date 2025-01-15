@@ -33,6 +33,8 @@ import pyasdm.CalPointingTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -863,7 +865,7 @@ class CalPointingRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            collOffsetTied_dims = Parser.getListDims(self._collOffsetTied)
+            collOffsetTied_dims = pyasdm.utils.getListDims(self._collOffsetTied)
         # assumes it really is 2D
         eos.writeInt(collOffsetTied_dims[0])
         eos.writeInt(collOffsetTied_dims[1])
@@ -1529,7 +1531,7 @@ class CalPointingRow:
             raise ValueError("The value of direction must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(direction)
+            listDims = pyasdm.utils.getListDims(direction)
 
             shapeOK = len(listDims) == 1
 
@@ -1538,7 +1540,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(direction, Angle):
+            if not pyasdm.utils.checkListType(direction, Angle):
                 raise ValueError(
                     "type of the first value in direction is not Angle as expected"
                 )
@@ -1572,7 +1574,7 @@ class CalPointingRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -1581,7 +1583,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -1681,7 +1683,7 @@ class CalPointingRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -1690,7 +1692,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1724,7 +1726,7 @@ class CalPointingRow:
             raise ValueError("The value of collOffsetRelative must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(collOffsetRelative)
+            listDims = pyasdm.utils.getListDims(collOffsetRelative)
 
             shapeOK = len(listDims) == 2
 
@@ -1733,7 +1735,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(collOffsetRelative, Angle):
+            if not pyasdm.utils.checkListType(collOffsetRelative, Angle):
                 raise ValueError(
                     "type of the first value in collOffsetRelative is not Angle as expected"
                 )
@@ -1767,7 +1769,7 @@ class CalPointingRow:
             raise ValueError("The value of collOffsetAbsolute must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(collOffsetAbsolute)
+            listDims = pyasdm.utils.getListDims(collOffsetAbsolute)
 
             shapeOK = len(listDims) == 2
 
@@ -1776,7 +1778,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(collOffsetAbsolute, Angle):
+            if not pyasdm.utils.checkListType(collOffsetAbsolute, Angle):
                 raise ValueError(
                     "type of the first value in collOffsetAbsolute is not Angle as expected"
                 )
@@ -1810,7 +1812,7 @@ class CalPointingRow:
             raise ValueError("The value of collError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(collError)
+            listDims = pyasdm.utils.getListDims(collError)
 
             shapeOK = len(listDims) == 2
 
@@ -1819,7 +1821,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(collError, Angle):
+            if not pyasdm.utils.checkListType(collError, Angle):
                 raise ValueError(
                     "type of the first value in collError is not Angle as expected"
                 )
@@ -1853,7 +1855,7 @@ class CalPointingRow:
             raise ValueError("The value of collOffsetTied must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(collOffsetTied)
+            listDims = pyasdm.utils.getListDims(collOffsetTied)
 
             shapeOK = len(listDims) == 2
 
@@ -1862,7 +1864,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be bool
             # note : this only checks the first value found
-            if not Parser.checkListType(collOffsetTied, bool):
+            if not pyasdm.utils.checkListType(collOffsetTied, bool):
                 raise ValueError(
                     "type of the first value in collOffsetTied is not bool as expected"
                 )
@@ -1896,7 +1898,7 @@ class CalPointingRow:
             raise ValueError("The value of reducedChiSquared must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(reducedChiSquared)
+            listDims = pyasdm.utils.getListDims(reducedChiSquared)
 
             shapeOK = len(listDims) == 1
 
@@ -1905,7 +1907,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, float):
+            if not pyasdm.utils.checkListType(reducedChiSquared, float):
                 raise ValueError(
                     "type of the first value in reducedChiSquared is not float as expected"
                 )
@@ -1999,7 +2001,7 @@ class CalPointingRow:
             raise ValueError("The value of beamPA must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(beamPA)
+            listDims = pyasdm.utils.getListDims(beamPA)
 
             shapeOK = len(listDims) == 1
 
@@ -2008,7 +2010,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(beamPA, Angle):
+            if not pyasdm.utils.checkListType(beamPA, Angle):
                 raise ValueError(
                     "type of the first value in beamPA is not Angle as expected"
                 )
@@ -2065,7 +2067,7 @@ class CalPointingRow:
             raise ValueError("The value of beamPAError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(beamPAError)
+            listDims = pyasdm.utils.getListDims(beamPAError)
 
             shapeOK = len(listDims) == 1
 
@@ -2074,7 +2076,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(beamPAError, Angle):
+            if not pyasdm.utils.checkListType(beamPAError, Angle):
                 raise ValueError(
                     "type of the first value in beamPAError is not Angle as expected"
                 )
@@ -2176,7 +2178,7 @@ class CalPointingRow:
             raise ValueError("The value of beamWidth must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(beamWidth)
+            listDims = pyasdm.utils.getListDims(beamWidth)
 
             shapeOK = len(listDims) == 2
 
@@ -2185,7 +2187,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(beamWidth, Angle):
+            if not pyasdm.utils.checkListType(beamWidth, Angle):
                 raise ValueError(
                     "type of the first value in beamWidth is not Angle as expected"
                 )
@@ -2242,7 +2244,7 @@ class CalPointingRow:
             raise ValueError("The value of beamWidthError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(beamWidthError)
+            listDims = pyasdm.utils.getListDims(beamWidthError)
 
             shapeOK = len(listDims) == 2
 
@@ -2251,7 +2253,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(beamWidthError, Angle):
+            if not pyasdm.utils.checkListType(beamWidthError, Angle):
                 raise ValueError(
                     "type of the first value in beamWidthError is not Angle as expected"
                 )
@@ -2308,7 +2310,7 @@ class CalPointingRow:
             raise ValueError("The value of beamWidthWasFixed must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(beamWidthWasFixed)
+            listDims = pyasdm.utils.getListDims(beamWidthWasFixed)
 
             shapeOK = len(listDims) == 1
 
@@ -2317,7 +2319,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be bool
             # note : this only checks the first value found
-            if not Parser.checkListType(beamWidthWasFixed, bool):
+            if not pyasdm.utils.checkListType(beamWidthWasFixed, bool):
                 raise ValueError(
                     "type of the first value in beamWidthWasFixed is not bool as expected"
                 )
@@ -2374,7 +2376,7 @@ class CalPointingRow:
             raise ValueError("The value of offIntensity must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(offIntensity)
+            listDims = pyasdm.utils.getListDims(offIntensity)
 
             shapeOK = len(listDims) == 1
 
@@ -2383,7 +2385,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(offIntensity, Temperature):
+            if not pyasdm.utils.checkListType(offIntensity, Temperature):
                 raise ValueError(
                     "type of the first value in offIntensity is not Temperature as expected"
                 )
@@ -2440,7 +2442,7 @@ class CalPointingRow:
             raise ValueError("The value of offIntensityError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(offIntensityError)
+            listDims = pyasdm.utils.getListDims(offIntensityError)
 
             shapeOK = len(listDims) == 1
 
@@ -2449,7 +2451,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(offIntensityError, Temperature):
+            if not pyasdm.utils.checkListType(offIntensityError, Temperature):
                 raise ValueError(
                     "type of the first value in offIntensityError is not Temperature as expected"
                 )
@@ -2551,7 +2553,7 @@ class CalPointingRow:
             raise ValueError("The value of peakIntensity must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(peakIntensity)
+            listDims = pyasdm.utils.getListDims(peakIntensity)
 
             shapeOK = len(listDims) == 1
 
@@ -2560,7 +2562,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(peakIntensity, Temperature):
+            if not pyasdm.utils.checkListType(peakIntensity, Temperature):
                 raise ValueError(
                     "type of the first value in peakIntensity is not Temperature as expected"
                 )
@@ -2617,7 +2619,7 @@ class CalPointingRow:
             raise ValueError("The value of peakIntensityError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(peakIntensityError)
+            listDims = pyasdm.utils.getListDims(peakIntensityError)
 
             shapeOK = len(listDims) == 1
 
@@ -2626,7 +2628,7 @@ class CalPointingRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(peakIntensityError, Temperature):
+            if not pyasdm.utils.checkListType(peakIntensityError, Temperature):
                 raise ValueError(
                     "type of the first value in peakIntensityError is not Temperature as expected"
                 )
@@ -2892,8 +2894,10 @@ class CalPointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            collOffsetRelative_dims = Parser.getListDims(collOffsetRelative)
-            this_collOffsetRelative_dims = Parser.getListDims(self._collOffsetRelative)
+            collOffsetRelative_dims = pyasdm.utils.getListDims(collOffsetRelative)
+            this_collOffsetRelative_dims = pyasdm.utils.getListDims(
+                self._collOffsetRelative
+            )
             if collOffsetRelative_dims != this_collOffsetRelative_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2916,8 +2920,10 @@ class CalPointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            collOffsetAbsolute_dims = Parser.getListDims(collOffsetAbsolute)
-            this_collOffsetAbsolute_dims = Parser.getListDims(self._collOffsetAbsolute)
+            collOffsetAbsolute_dims = pyasdm.utils.getListDims(collOffsetAbsolute)
+            this_collOffsetAbsolute_dims = pyasdm.utils.getListDims(
+                self._collOffsetAbsolute
+            )
             if collOffsetAbsolute_dims != this_collOffsetAbsolute_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2940,8 +2946,8 @@ class CalPointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            collError_dims = Parser.getListDims(collError)
-            this_collError_dims = Parser.getListDims(self._collError)
+            collError_dims = pyasdm.utils.getListDims(collError)
+            this_collError_dims = pyasdm.utils.getListDims(self._collError)
             if collError_dims != this_collError_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2963,8 +2969,8 @@ class CalPointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            collOffsetTied_dims = Parser.getListDims(collOffsetTied)
-            this_collOffsetTied_dims = Parser.getListDims(self._collOffsetTied)
+            collOffsetTied_dims = pyasdm.utils.getListDims(collOffsetTied)
+            this_collOffsetTied_dims = pyasdm.utils.getListDims(self._collOffsetTied)
             if collOffsetTied_dims != this_collOffsetTied_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3107,8 +3113,10 @@ class CalPointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            collOffsetRelative_dims = Parser.getListDims(collOffsetRelative)
-            this_collOffsetRelative_dims = Parser.getListDims(self._collOffsetRelative)
+            collOffsetRelative_dims = pyasdm.utils.getListDims(collOffsetRelative)
+            this_collOffsetRelative_dims = pyasdm.utils.getListDims(
+                self._collOffsetRelative
+            )
             if collOffsetRelative_dims != this_collOffsetRelative_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3131,8 +3139,10 @@ class CalPointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            collOffsetAbsolute_dims = Parser.getListDims(collOffsetAbsolute)
-            this_collOffsetAbsolute_dims = Parser.getListDims(self._collOffsetAbsolute)
+            collOffsetAbsolute_dims = pyasdm.utils.getListDims(collOffsetAbsolute)
+            this_collOffsetAbsolute_dims = pyasdm.utils.getListDims(
+                self._collOffsetAbsolute
+            )
             if collOffsetAbsolute_dims != this_collOffsetAbsolute_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3155,8 +3165,8 @@ class CalPointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            collError_dims = Parser.getListDims(collError)
-            this_collError_dims = Parser.getListDims(self._collError)
+            collError_dims = pyasdm.utils.getListDims(collError)
+            this_collError_dims = pyasdm.utils.getListDims(self._collError)
             if collError_dims != this_collError_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3178,8 +3188,8 @@ class CalPointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            collOffsetTied_dims = Parser.getListDims(collOffsetTied)
-            this_collOffsetTied_dims = Parser.getListDims(self._collOffsetTied)
+            collOffsetTied_dims = pyasdm.utils.getListDims(collOffsetTied)
+            this_collOffsetTied_dims = pyasdm.utils.getListDims(self._collOffsetTied)
             if collOffsetTied_dims != this_collOffsetTied_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

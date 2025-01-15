@@ -20,20 +20,17 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307  USA
 #
-# File UniquenessViolationException.py
+# File getListDims.py
 
 
-class UniquenessViolationException(Exception):
+def getListDims(thisList):
     """
-    The UniquenessViolationException class represents an exception when
-    one tries to add a row r to a table which already contains a row whose
-    all mandatory and non autoincrementable attributes matches the ones
-    in the row  r.
+    Given a list that may be an ND array of lists where all of the lists
+    at each element for the ndim > 1 case have the same shape, this returns
+    a list of the shape of the list of lists (ND array shape)
     """
-
-    def __init__(self, tableName):
-        """
-        Initialize this exception for the named table.
-        """
-        msg = "Cannot add a row in " + tableName + "."
-        super().__init__(msg)
+    result = [len(thisList)]
+    if len(thisList) > 0 and isinstance(thisList[0], list):
+        subdims = getListDims(thisList[0])
+        result[1:] = subdims
+    return result

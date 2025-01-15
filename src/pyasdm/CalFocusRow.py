@@ -33,6 +33,8 @@ import pyasdm.CalFocusTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -954,7 +956,7 @@ class CalFocusRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            offsetWasTied_dims = Parser.getListDims(self._offsetWasTied)
+            offsetWasTied_dims = pyasdm.utils.getListDims(self._offsetWasTied)
         # assumes it really is 2D
         eos.writeInt(offsetWasTied_dims[0])
         eos.writeInt(offsetWasTied_dims[1])
@@ -967,7 +969,7 @@ class CalFocusRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            reducedChiSquared_dims = Parser.getListDims(self._reducedChiSquared)
+            reducedChiSquared_dims = pyasdm.utils.getListDims(self._reducedChiSquared)
         # assumes it really is 2D
         eos.writeInt(reducedChiSquared_dims[0])
         eos.writeInt(reducedChiSquared_dims[1])
@@ -1696,7 +1698,7 @@ class CalFocusRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -1705,7 +1707,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -1739,7 +1741,7 @@ class CalFocusRow:
             raise ValueError("The value of pointingDirection must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(pointingDirection)
+            listDims = pyasdm.utils.getListDims(pointingDirection)
 
             shapeOK = len(listDims) == 1
 
@@ -1748,7 +1750,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(pointingDirection, Angle):
+            if not pyasdm.utils.checkListType(pointingDirection, Angle):
                 raise ValueError(
                     "type of the first value in pointingDirection is not Angle as expected"
                 )
@@ -1804,7 +1806,7 @@ class CalFocusRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -1813,7 +1815,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1847,7 +1849,7 @@ class CalFocusRow:
             raise ValueError("The value of wereFixed must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(wereFixed)
+            listDims = pyasdm.utils.getListDims(wereFixed)
 
             shapeOK = len(listDims) == 1
 
@@ -1856,7 +1858,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be bool
             # note : this only checks the first value found
-            if not Parser.checkListType(wereFixed, bool):
+            if not pyasdm.utils.checkListType(wereFixed, bool):
                 raise ValueError(
                     "type of the first value in wereFixed is not bool as expected"
                 )
@@ -1890,7 +1892,7 @@ class CalFocusRow:
             raise ValueError("The value of offset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(offset)
+            listDims = pyasdm.utils.getListDims(offset)
 
             shapeOK = len(listDims) == 2
 
@@ -1899,7 +1901,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(offset, Length):
+            if not pyasdm.utils.checkListType(offset, Length):
                 raise ValueError(
                     "type of the first value in offset is not Length as expected"
                 )
@@ -1933,7 +1935,7 @@ class CalFocusRow:
             raise ValueError("The value of offsetError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(offsetError)
+            listDims = pyasdm.utils.getListDims(offsetError)
 
             shapeOK = len(listDims) == 2
 
@@ -1942,7 +1944,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(offsetError, Length):
+            if not pyasdm.utils.checkListType(offsetError, Length):
                 raise ValueError(
                     "type of the first value in offsetError is not Length as expected"
                 )
@@ -1976,7 +1978,7 @@ class CalFocusRow:
             raise ValueError("The value of offsetWasTied must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(offsetWasTied)
+            listDims = pyasdm.utils.getListDims(offsetWasTied)
 
             shapeOK = len(listDims) == 2
 
@@ -1985,7 +1987,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be bool
             # note : this only checks the first value found
-            if not Parser.checkListType(offsetWasTied, bool):
+            if not pyasdm.utils.checkListType(offsetWasTied, bool):
                 raise ValueError(
                     "type of the first value in offsetWasTied is not bool as expected"
                 )
@@ -2019,7 +2021,7 @@ class CalFocusRow:
             raise ValueError("The value of reducedChiSquared must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(reducedChiSquared)
+            listDims = pyasdm.utils.getListDims(reducedChiSquared)
 
             shapeOK = len(listDims) == 2
 
@@ -2028,7 +2030,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, float):
+            if not pyasdm.utils.checkListType(reducedChiSquared, float):
                 raise ValueError(
                     "type of the first value in reducedChiSquared is not float as expected"
                 )
@@ -2062,7 +2064,7 @@ class CalFocusRow:
             raise ValueError("The value of position must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(position)
+            listDims = pyasdm.utils.getListDims(position)
 
             shapeOK = len(listDims) == 2
 
@@ -2071,7 +2073,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(position, Length):
+            if not pyasdm.utils.checkListType(position, Length):
                 raise ValueError(
                     "type of the first value in position is not Length as expected"
                 )
@@ -2165,7 +2167,7 @@ class CalFocusRow:
             raise ValueError("The value of focusCurveWidth must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(focusCurveWidth)
+            listDims = pyasdm.utils.getListDims(focusCurveWidth)
 
             shapeOK = len(listDims) == 2
 
@@ -2174,7 +2176,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(focusCurveWidth, Length):
+            if not pyasdm.utils.checkListType(focusCurveWidth, Length):
                 raise ValueError(
                     "type of the first value in focusCurveWidth is not Length as expected"
                 )
@@ -2231,7 +2233,7 @@ class CalFocusRow:
             raise ValueError("The value of focusCurveWidthError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(focusCurveWidthError)
+            listDims = pyasdm.utils.getListDims(focusCurveWidthError)
 
             shapeOK = len(listDims) == 2
 
@@ -2240,7 +2242,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(focusCurveWidthError, Length):
+            if not pyasdm.utils.checkListType(focusCurveWidthError, Length):
                 raise ValueError(
                     "type of the first value in focusCurveWidthError is not Length as expected"
                 )
@@ -2297,7 +2299,7 @@ class CalFocusRow:
             raise ValueError("The value of focusCurveWasFixed must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(focusCurveWasFixed)
+            listDims = pyasdm.utils.getListDims(focusCurveWasFixed)
 
             shapeOK = len(listDims) == 1
 
@@ -2306,7 +2308,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be bool
             # note : this only checks the first value found
-            if not Parser.checkListType(focusCurveWasFixed, bool):
+            if not pyasdm.utils.checkListType(focusCurveWasFixed, bool):
                 raise ValueError(
                     "type of the first value in focusCurveWasFixed is not bool as expected"
                 )
@@ -2363,7 +2365,7 @@ class CalFocusRow:
             raise ValueError("The value of offIntensity must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(offIntensity)
+            listDims = pyasdm.utils.getListDims(offIntensity)
 
             shapeOK = len(listDims) == 1
 
@@ -2372,7 +2374,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(offIntensity, Temperature):
+            if not pyasdm.utils.checkListType(offIntensity, Temperature):
                 raise ValueError(
                     "type of the first value in offIntensity is not Temperature as expected"
                 )
@@ -2429,7 +2431,7 @@ class CalFocusRow:
             raise ValueError("The value of offIntensityError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(offIntensityError)
+            listDims = pyasdm.utils.getListDims(offIntensityError)
 
             shapeOK = len(listDims) == 1
 
@@ -2438,7 +2440,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(offIntensityError, Temperature):
+            if not pyasdm.utils.checkListType(offIntensityError, Temperature):
                 raise ValueError(
                     "type of the first value in offIntensityError is not Temperature as expected"
                 )
@@ -2540,7 +2542,7 @@ class CalFocusRow:
             raise ValueError("The value of peakIntensity must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(peakIntensity)
+            listDims = pyasdm.utils.getListDims(peakIntensity)
 
             shapeOK = len(listDims) == 1
 
@@ -2549,7 +2551,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(peakIntensity, Temperature):
+            if not pyasdm.utils.checkListType(peakIntensity, Temperature):
                 raise ValueError(
                     "type of the first value in peakIntensity is not Temperature as expected"
                 )
@@ -2606,7 +2608,7 @@ class CalFocusRow:
             raise ValueError("The value of peakIntensityError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(peakIntensityError)
+            listDims = pyasdm.utils.getListDims(peakIntensityError)
 
             shapeOK = len(listDims) == 1
 
@@ -2615,7 +2617,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(peakIntensityError, Temperature):
+            if not pyasdm.utils.checkListType(peakIntensityError, Temperature):
                 raise ValueError(
                     "type of the first value in peakIntensityError is not Temperature as expected"
                 )
@@ -2717,7 +2719,7 @@ class CalFocusRow:
             raise ValueError("The value of astigmPlus must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(astigmPlus)
+            listDims = pyasdm.utils.getListDims(astigmPlus)
 
             shapeOK = len(listDims) == 1
 
@@ -2726,7 +2728,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(astigmPlus, Length):
+            if not pyasdm.utils.checkListType(astigmPlus, Length):
                 raise ValueError(
                     "type of the first value in astigmPlus is not Length as expected"
                 )
@@ -2783,7 +2785,7 @@ class CalFocusRow:
             raise ValueError("The value of astigmPlusError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(astigmPlusError)
+            listDims = pyasdm.utils.getListDims(astigmPlusError)
 
             shapeOK = len(listDims) == 1
 
@@ -2792,7 +2794,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(astigmPlusError, Length):
+            if not pyasdm.utils.checkListType(astigmPlusError, Length):
                 raise ValueError(
                     "type of the first value in astigmPlusError is not Length as expected"
                 )
@@ -2849,7 +2851,7 @@ class CalFocusRow:
             raise ValueError("The value of astigmMult must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(astigmMult)
+            listDims = pyasdm.utils.getListDims(astigmMult)
 
             shapeOK = len(listDims) == 1
 
@@ -2858,7 +2860,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(astigmMult, Length):
+            if not pyasdm.utils.checkListType(astigmMult, Length):
                 raise ValueError(
                     "type of the first value in astigmMult is not Length as expected"
                 )
@@ -2915,7 +2917,7 @@ class CalFocusRow:
             raise ValueError("The value of astigmMultError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(astigmMultError)
+            listDims = pyasdm.utils.getListDims(astigmMultError)
 
             shapeOK = len(listDims) == 1
 
@@ -2924,7 +2926,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(astigmMultError, Length):
+            if not pyasdm.utils.checkListType(astigmMultError, Length):
                 raise ValueError(
                     "type of the first value in astigmMultError is not Length as expected"
                 )
@@ -2981,7 +2983,7 @@ class CalFocusRow:
             raise ValueError("The value of illumOffset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(illumOffset)
+            listDims = pyasdm.utils.getListDims(illumOffset)
 
             shapeOK = len(listDims) == 2
 
@@ -2990,7 +2992,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(illumOffset, Length):
+            if not pyasdm.utils.checkListType(illumOffset, Length):
                 raise ValueError(
                     "type of the first value in illumOffset is not Length as expected"
                 )
@@ -3047,7 +3049,7 @@ class CalFocusRow:
             raise ValueError("The value of illumOffsetError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(illumOffsetError)
+            listDims = pyasdm.utils.getListDims(illumOffsetError)
 
             shapeOK = len(listDims) == 2
 
@@ -3056,7 +3058,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(illumOffsetError, Length):
+            if not pyasdm.utils.checkListType(illumOffsetError, Length):
                 raise ValueError(
                     "type of the first value in illumOffsetError is not Length as expected"
                 )
@@ -3113,7 +3115,7 @@ class CalFocusRow:
             raise ValueError("The value of fitRMS must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(fitRMS)
+            listDims = pyasdm.utils.getListDims(fitRMS)
 
             shapeOK = len(listDims) == 1
 
@@ -3122,7 +3124,7 @@ class CalFocusRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(fitRMS, Length):
+            if not pyasdm.utils.checkListType(fitRMS, Length):
                 raise ValueError(
                     "type of the first value in fitRMS is not Length as expected"
                 )
@@ -3345,8 +3347,8 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            offset_dims = Parser.getListDims(offset)
-            this_offset_dims = Parser.getListDims(self._offset)
+            offset_dims = pyasdm.utils.getListDims(offset)
+            this_offset_dims = pyasdm.utils.getListDims(self._offset)
             if offset_dims != this_offset_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3368,8 +3370,8 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            offsetError_dims = Parser.getListDims(offsetError)
-            this_offsetError_dims = Parser.getListDims(self._offsetError)
+            offsetError_dims = pyasdm.utils.getListDims(offsetError)
+            this_offsetError_dims = pyasdm.utils.getListDims(self._offsetError)
             if offsetError_dims != this_offsetError_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3392,8 +3394,8 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            offsetWasTied_dims = Parser.getListDims(offsetWasTied)
-            this_offsetWasTied_dims = Parser.getListDims(self._offsetWasTied)
+            offsetWasTied_dims = pyasdm.utils.getListDims(offsetWasTied)
+            this_offsetWasTied_dims = pyasdm.utils.getListDims(self._offsetWasTied)
             if offsetWasTied_dims != this_offsetWasTied_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3411,8 +3413,10 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            reducedChiSquared_dims = Parser.getListDims(reducedChiSquared)
-            this_reducedChiSquared_dims = Parser.getListDims(self._reducedChiSquared)
+            reducedChiSquared_dims = pyasdm.utils.getListDims(reducedChiSquared)
+            this_reducedChiSquared_dims = pyasdm.utils.getListDims(
+                self._reducedChiSquared
+            )
             if reducedChiSquared_dims != this_reducedChiSquared_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3430,8 +3434,8 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            position_dims = Parser.getListDims(position)
-            this_position_dims = Parser.getListDims(self._position)
+            position_dims = pyasdm.utils.getListDims(position)
+            this_position_dims = pyasdm.utils.getListDims(self._position)
             if position_dims != this_position_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3569,8 +3573,8 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            offset_dims = Parser.getListDims(offset)
-            this_offset_dims = Parser.getListDims(self._offset)
+            offset_dims = pyasdm.utils.getListDims(offset)
+            this_offset_dims = pyasdm.utils.getListDims(self._offset)
             if offset_dims != this_offset_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3592,8 +3596,8 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            offsetError_dims = Parser.getListDims(offsetError)
-            this_offsetError_dims = Parser.getListDims(self._offsetError)
+            offsetError_dims = pyasdm.utils.getListDims(offsetError)
+            this_offsetError_dims = pyasdm.utils.getListDims(self._offsetError)
             if offsetError_dims != this_offsetError_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3616,8 +3620,8 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            offsetWasTied_dims = Parser.getListDims(offsetWasTied)
-            this_offsetWasTied_dims = Parser.getListDims(self._offsetWasTied)
+            offsetWasTied_dims = pyasdm.utils.getListDims(offsetWasTied)
+            this_offsetWasTied_dims = pyasdm.utils.getListDims(self._offsetWasTied)
             if offsetWasTied_dims != this_offsetWasTied_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3635,8 +3639,10 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            reducedChiSquared_dims = Parser.getListDims(reducedChiSquared)
-            this_reducedChiSquared_dims = Parser.getListDims(self._reducedChiSquared)
+            reducedChiSquared_dims = pyasdm.utils.getListDims(reducedChiSquared)
+            this_reducedChiSquared_dims = pyasdm.utils.getListDims(
+                self._reducedChiSquared
+            )
             if reducedChiSquared_dims != this_reducedChiSquared_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3654,8 +3660,8 @@ class CalFocusRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            position_dims = Parser.getListDims(position)
-            this_position_dims = Parser.getListDims(self._position)
+            position_dims = pyasdm.utils.getListDims(position)
+            this_position_dims = pyasdm.utils.getListDims(self._position)
             if position_dims != this_position_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

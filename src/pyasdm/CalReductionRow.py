@@ -33,6 +33,8 @@ import pyasdm.CalReductionTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -538,7 +540,7 @@ class CalReductionRow:
             raise ValueError("The value of appliedCalibrations must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(appliedCalibrations)
+            listDims = pyasdm.utils.getListDims(appliedCalibrations)
 
             shapeOK = len(listDims) == 1
 
@@ -547,7 +549,7 @@ class CalReductionRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(appliedCalibrations, str):
+            if not pyasdm.utils.checkListType(appliedCalibrations, str):
                 raise ValueError(
                     "type of the first value in appliedCalibrations is not str as expected"
                 )
@@ -603,7 +605,7 @@ class CalReductionRow:
             raise ValueError("The value of paramSet must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(paramSet)
+            listDims = pyasdm.utils.getListDims(paramSet)
 
             shapeOK = len(listDims) == 1
 
@@ -612,7 +614,7 @@ class CalReductionRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(paramSet, str):
+            if not pyasdm.utils.checkListType(paramSet, str):
                 raise ValueError(
                     "type of the first value in paramSet is not str as expected"
                 )
@@ -668,7 +670,7 @@ class CalReductionRow:
             raise ValueError("The value of invalidConditions must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(invalidConditions)
+            listDims = pyasdm.utils.getListDims(invalidConditions)
 
             shapeOK = len(listDims) == 1
 
@@ -677,7 +679,7 @@ class CalReductionRow:
 
             # the type of the values in the list must be InvalidatingCondition
             # note : this only checks the first value found
-            if not Parser.checkListType(invalidConditions, InvalidatingCondition):
+            if not pyasdm.utils.checkListType(invalidConditions, InvalidatingCondition):
                 raise ValueError(
                     "type of the first value in invalidConditions is not InvalidatingCondition as expected"
                 )

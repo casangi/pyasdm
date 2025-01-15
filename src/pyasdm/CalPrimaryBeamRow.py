@@ -33,6 +33,8 @@ import pyasdm.CalPrimaryBeamTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -907,7 +909,7 @@ class CalPrimaryBeamRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 2
 
@@ -916,7 +918,7 @@ class CalPrimaryBeamRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -972,7 +974,7 @@ class CalPrimaryBeamRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -981,7 +983,7 @@ class CalPrimaryBeamRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1015,7 +1017,7 @@ class CalPrimaryBeamRow:
             raise ValueError("The value of mainBeamEfficiency must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(mainBeamEfficiency)
+            listDims = pyasdm.utils.getListDims(mainBeamEfficiency)
 
             shapeOK = len(listDims) == 1
 
@@ -1024,7 +1026,7 @@ class CalPrimaryBeamRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(mainBeamEfficiency, float):
+            if not pyasdm.utils.checkListType(mainBeamEfficiency, float):
                 raise ValueError(
                     "type of the first value in mainBeamEfficiency is not float as expected"
                 )
@@ -1103,7 +1105,7 @@ class CalPrimaryBeamRow:
             raise ValueError("The value of direction must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(direction)
+            listDims = pyasdm.utils.getListDims(direction)
 
             shapeOK = len(listDims) == 1
 
@@ -1112,7 +1114,7 @@ class CalPrimaryBeamRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(direction, Angle):
+            if not pyasdm.utils.checkListType(direction, Angle):
                 raise ValueError(
                     "type of the first value in direction is not Angle as expected"
                 )
@@ -1146,7 +1148,7 @@ class CalPrimaryBeamRow:
             raise ValueError("The value of minValidDirection must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(minValidDirection)
+            listDims = pyasdm.utils.getListDims(minValidDirection)
 
             shapeOK = len(listDims) == 1
 
@@ -1155,7 +1157,7 @@ class CalPrimaryBeamRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(minValidDirection, Angle):
+            if not pyasdm.utils.checkListType(minValidDirection, Angle):
                 raise ValueError(
                     "type of the first value in minValidDirection is not Angle as expected"
                 )
@@ -1189,7 +1191,7 @@ class CalPrimaryBeamRow:
             raise ValueError("The value of maxValidDirection must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(maxValidDirection)
+            listDims = pyasdm.utils.getListDims(maxValidDirection)
 
             shapeOK = len(listDims) == 1
 
@@ -1198,7 +1200,7 @@ class CalPrimaryBeamRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(maxValidDirection, Angle):
+            if not pyasdm.utils.checkListType(maxValidDirection, Angle):
                 raise ValueError(
                     "type of the first value in maxValidDirection is not Angle as expected"
                 )
@@ -1254,7 +1256,7 @@ class CalPrimaryBeamRow:
             raise ValueError("The value of imageChannelNumber must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(imageChannelNumber)
+            listDims = pyasdm.utils.getListDims(imageChannelNumber)
 
             shapeOK = len(listDims) == 1
 
@@ -1263,7 +1265,7 @@ class CalPrimaryBeamRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(imageChannelNumber, int):
+            if not pyasdm.utils.checkListType(imageChannelNumber, int):
                 raise ValueError(
                     "type of the first value in imageChannelNumber is not int as expected"
                 )
@@ -1297,7 +1299,7 @@ class CalPrimaryBeamRow:
             raise ValueError("The value of imageNominalFrequency must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(imageNominalFrequency)
+            listDims = pyasdm.utils.getListDims(imageNominalFrequency)
 
             shapeOK = len(listDims) == 1
 
@@ -1306,7 +1308,7 @@ class CalPrimaryBeamRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(imageNominalFrequency, Frequency):
+            if not pyasdm.utils.checkListType(imageNominalFrequency, Frequency):
                 raise ValueError(
                     "type of the first value in imageNominalFrequency is not Frequency as expected"
                 )
@@ -1467,8 +1469,8 @@ class CalPrimaryBeamRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            frequencyRange_dims = Parser.getListDims(frequencyRange)
-            this_frequencyRange_dims = Parser.getListDims(self._frequencyRange)
+            frequencyRange_dims = pyasdm.utils.getListDims(frequencyRange)
+            this_frequencyRange_dims = pyasdm.utils.getListDims(self._frequencyRange)
             if frequencyRange_dims != this_frequencyRange_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1651,8 +1653,8 @@ class CalPrimaryBeamRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            frequencyRange_dims = Parser.getListDims(frequencyRange)
-            this_frequencyRange_dims = Parser.getListDims(self._frequencyRange)
+            frequencyRange_dims = pyasdm.utils.getListDims(frequencyRange)
+            this_frequencyRange_dims = pyasdm.utils.getListDims(self._frequencyRange)
             if frequencyRange_dims != this_frequencyRange_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

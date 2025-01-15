@@ -33,6 +33,8 @@ import pyasdm.SysCalTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -632,7 +634,7 @@ class SysCalRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                tantSpectrum_dims = Parser.getListDims(self._tantSpectrum)
+                tantSpectrum_dims = pyasdm.utils.getListDims(self._tantSpectrum)
             # assumes it really is 2D
             eos.writeInt(tantSpectrum_dims[0])
             eos.writeInt(tantSpectrum_dims[1])
@@ -653,7 +655,7 @@ class SysCalRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                tantTsysSpectrum_dims = Parser.getListDims(self._tantTsysSpectrum)
+                tantTsysSpectrum_dims = pyasdm.utils.getListDims(self._tantTsysSpectrum)
             # assumes it really is 2D
             eos.writeInt(tantTsysSpectrum_dims[0])
             eos.writeInt(tantTsysSpectrum_dims[1])
@@ -674,7 +676,9 @@ class SysCalRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                phaseDiffSpectrum_dims = Parser.getListDims(self._phaseDiffSpectrum)
+                phaseDiffSpectrum_dims = pyasdm.utils.getListDims(
+                    self._phaseDiffSpectrum
+                )
             # assumes it really is 2D
             eos.writeInt(phaseDiffSpectrum_dims[0])
             eos.writeInt(phaseDiffSpectrum_dims[1])
@@ -1112,7 +1116,7 @@ class SysCalRow:
             raise ValueError("The value of tcalSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tcalSpectrum)
+            listDims = pyasdm.utils.getListDims(tcalSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1121,7 +1125,7 @@ class SysCalRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tcalSpectrum, Temperature):
+            if not pyasdm.utils.checkListType(tcalSpectrum, Temperature):
                 raise ValueError(
                     "type of the first value in tcalSpectrum is not Temperature as expected"
                 )
@@ -1223,7 +1227,7 @@ class SysCalRow:
             raise ValueError("The value of trxSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(trxSpectrum)
+            listDims = pyasdm.utils.getListDims(trxSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1232,7 +1236,7 @@ class SysCalRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(trxSpectrum, Temperature):
+            if not pyasdm.utils.checkListType(trxSpectrum, Temperature):
                 raise ValueError(
                     "type of the first value in trxSpectrum is not Temperature as expected"
                 )
@@ -1334,7 +1338,7 @@ class SysCalRow:
             raise ValueError("The value of tskySpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tskySpectrum)
+            listDims = pyasdm.utils.getListDims(tskySpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1343,7 +1347,7 @@ class SysCalRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tskySpectrum, Temperature):
+            if not pyasdm.utils.checkListType(tskySpectrum, Temperature):
                 raise ValueError(
                     "type of the first value in tskySpectrum is not Temperature as expected"
                 )
@@ -1445,7 +1449,7 @@ class SysCalRow:
             raise ValueError("The value of tsysSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tsysSpectrum)
+            listDims = pyasdm.utils.getListDims(tsysSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1454,7 +1458,7 @@ class SysCalRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tsysSpectrum, Temperature):
+            if not pyasdm.utils.checkListType(tsysSpectrum, Temperature):
                 raise ValueError(
                     "type of the first value in tsysSpectrum is not Temperature as expected"
                 )
@@ -1556,7 +1560,7 @@ class SysCalRow:
             raise ValueError("The value of tantSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tantSpectrum)
+            listDims = pyasdm.utils.getListDims(tantSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1565,7 +1569,7 @@ class SysCalRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(tantSpectrum, float):
+            if not pyasdm.utils.checkListType(tantSpectrum, float):
                 raise ValueError(
                     "type of the first value in tantSpectrum is not float as expected"
                 )
@@ -1667,7 +1671,7 @@ class SysCalRow:
             raise ValueError("The value of tantTsysSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tantTsysSpectrum)
+            listDims = pyasdm.utils.getListDims(tantTsysSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1676,7 +1680,7 @@ class SysCalRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(tantTsysSpectrum, float):
+            if not pyasdm.utils.checkListType(tantTsysSpectrum, float):
                 raise ValueError(
                     "type of the first value in tantTsysSpectrum is not float as expected"
                 )
@@ -1778,7 +1782,7 @@ class SysCalRow:
             raise ValueError("The value of phaseDiffSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseDiffSpectrum)
+            listDims = pyasdm.utils.getListDims(phaseDiffSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1787,7 +1791,7 @@ class SysCalRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseDiffSpectrum, float):
+            if not pyasdm.utils.checkListType(phaseDiffSpectrum, float):
                 raise ValueError(
                     "type of the first value in phaseDiffSpectrum is not float as expected"
                 )

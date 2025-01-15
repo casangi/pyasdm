@@ -33,6 +33,8 @@ import pyasdm.SpectralWindowTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -1803,7 +1805,7 @@ class SpectralWindowRow:
             raise ValueError("The value of chanFreqArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(chanFreqArray)
+            listDims = pyasdm.utils.getListDims(chanFreqArray)
 
             shapeOK = len(listDims) == 1
 
@@ -1812,7 +1814,7 @@ class SpectralWindowRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(chanFreqArray, Frequency):
+            if not pyasdm.utils.checkListType(chanFreqArray, Frequency):
                 raise ValueError(
                     "type of the first value in chanFreqArray is not Frequency as expected"
                 )
@@ -1915,7 +1917,7 @@ class SpectralWindowRow:
             raise ValueError("The value of chanWidthArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(chanWidthArray)
+            listDims = pyasdm.utils.getListDims(chanWidthArray)
 
             shapeOK = len(listDims) == 1
 
@@ -1924,7 +1926,7 @@ class SpectralWindowRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(chanWidthArray, Frequency):
+            if not pyasdm.utils.checkListType(chanWidthArray, Frequency):
                 raise ValueError(
                     "type of the first value in chanWidthArray is not Frequency as expected"
                 )
@@ -2072,7 +2074,7 @@ class SpectralWindowRow:
             raise ValueError("The value of effectiveBwArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(effectiveBwArray)
+            listDims = pyasdm.utils.getListDims(effectiveBwArray)
 
             shapeOK = len(listDims) == 1
 
@@ -2081,7 +2083,7 @@ class SpectralWindowRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(effectiveBwArray, Frequency):
+            if not pyasdm.utils.checkListType(effectiveBwArray, Frequency):
                 raise ValueError(
                     "type of the first value in effectiveBwArray is not Frequency as expected"
                 )
@@ -2228,7 +2230,7 @@ class SpectralWindowRow:
             raise ValueError("The value of lineArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(lineArray)
+            listDims = pyasdm.utils.getListDims(lineArray)
 
             shapeOK = len(listDims) == 1
 
@@ -2237,7 +2239,7 @@ class SpectralWindowRow:
 
             # the type of the values in the list must be bool
             # note : this only checks the first value found
-            if not Parser.checkListType(lineArray, bool):
+            if not pyasdm.utils.checkListType(lineArray, bool):
                 raise ValueError(
                     "type of the first value in lineArray is not bool as expected"
                 )
@@ -2565,7 +2567,7 @@ class SpectralWindowRow:
             raise ValueError("The value of resolutionArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(resolutionArray)
+            listDims = pyasdm.utils.getListDims(resolutionArray)
 
             shapeOK = len(listDims) == 1
 
@@ -2574,7 +2576,7 @@ class SpectralWindowRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(resolutionArray, Frequency):
+            if not pyasdm.utils.checkListType(resolutionArray, Frequency):
                 raise ValueError(
                     "type of the first value in resolutionArray is not Frequency as expected"
                 )
@@ -2676,7 +2678,7 @@ class SpectralWindowRow:
             raise ValueError("The value of assocNature must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(assocNature)
+            listDims = pyasdm.utils.getListDims(assocNature)
 
             shapeOK = len(listDims) == 1
 
@@ -2685,7 +2687,7 @@ class SpectralWindowRow:
 
             # the type of the values in the list must be SpectralResolutionType
             # note : this only checks the first value found
-            if not Parser.checkListType(assocNature, SpectralResolutionType):
+            if not pyasdm.utils.checkListType(assocNature, SpectralResolutionType):
                 raise ValueError(
                     "type of the first value in assocNature is not SpectralResolutionType as expected"
                 )
@@ -2744,7 +2746,7 @@ class SpectralWindowRow:
             raise ValueError("The value of assocSpectralWindowId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(assocSpectralWindowId)
+            listDims = pyasdm.utils.getListDims(assocSpectralWindowId)
 
             shapeOK = len(listDims) == 1
 
@@ -2753,7 +2755,7 @@ class SpectralWindowRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(assocSpectralWindowId, Tag):
+            if not pyasdm.utils.checkListType(assocSpectralWindowId, Tag):
                 raise ValueError(
                     "type of the first value in assocSpectralWindowId is not Tag as expected"
                 )

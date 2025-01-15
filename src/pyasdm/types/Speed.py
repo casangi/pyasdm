@@ -172,22 +172,178 @@ class Speed:
                 result.append(item.get())
         return result
 
-    def toBin(self):
-        # it also needs a static method to send a list of speed items toBin
-        # should also work for 2D, 3D lists
-        raise RuntimeError("Speed.toBin is not yet implemented")
+    def toBin(self, eos):
+        """
+        Write this Speed out, in meters per second, to a EndianOutput.
+        """
+        eos.writeDouble(self.get())
 
-    def fromBin(self):
-        raise RuntimeError("Speed.fromBin is not yet implemented")
+    @staticmethod
+    def listToBin(speedList, eos):
+        """
+        Write a list of Speed to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(speedList, list):
+            raise ValueError("speedList is not a list")
 
-    def from1DBin(self):
-        raise RuntimeError("Speed.from1DBin is not yet implemented")
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(speedList)
+        ndims = len(listDims)
+        if ndims == 1:
+            Speed.listTo1DBin(speedList, eos)
+        elif ndims == 2:
+            Speed.listTo2DBin(speedList, eos)
+        elif ndims == 3:
+            Speed.listTo3DBin(speedList, eos)
 
-    def from2DBin(self):
-        raise RuntimeError("Speed.from2DBin is not yet implemented")
+        raise ValueError(
+            "unsupport number of dimensions in speedList in Speed.listToBin : "
+            + str(ndims)
+        )
 
-    def from3DBin(self):
-        raise RuntimeError("Speed.from2DBin is not yet implemented")
+    @staticmethod
+    def listTo1DBin(speedList, eos):
+        """
+        Write a 1D list of Speed to the EndianOutput
+        """
+        if not isinstance(speedList, list):
+            raise ValueError("speedList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(speedList))
+
+        # only check the first value
+        if (len(speedList) > 0) and not isinstance(speedList[0], Speed):
+            raise (ValueError("speedList is not a list of Speed"))
+
+        for thisSpeed in speedList:
+            thisSpeed.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(speedList, eos):
+        """
+        Write a 2D list of Speed to the EndianOutput
+        """
+        if not isinstance(speedList, list):
+            raise ValueError("speedList is not a list")
+
+        ndim1 = len(speedList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(speedList[0], list):
+                raise ValueError("speedList is not a 2D")
+
+            ndim2 = len(speedList[0])
+            if ndim2 > 0 and not isinstance(speedList[0][0], Speed):
+                raise ValueError("speedListis a not a 2D list of Speed")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in speedList:
+            for thisSpeed in thisList:
+                thisSpeed.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(speedList, eos):
+        """
+        Write a 3D list of Speed to the EndianOutput
+        """
+        if not isinstance(speedList, list):
+            raise ValueError("speedList is not a list")
+
+        ndim1 = len(speedList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(speedList[0], list):
+                raise ValueError("speedList is not a 3D list")
+
+            ndim2 = len(speedList[0])
+            if ndim2 > 0:
+                if not isinstance(speedList[0][0], list):
+                    raise ValueError("speedList is a not a 3D list")
+                ndim3 = len(speedList[0][0])
+                if (ndim3 > 0) and not isinstance(speedList[0][0][0], Speed):
+                    raise ValueError("speedList is not a 3D list of Speed")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in speedList:
+            for middleList in thisList:
+                for thisSpeed in middleList:
+                    thisSpeed.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an Speed, in meters per second,
+        from an EndianInput instance and use the read value to set a
+        Speed.
+
+        return an Speed
+        """
+        return Speed(eis.readDouble())
+
+    @staticmethod
+    def from1Dbin(eis):
+        """
+        Read a list of binary Speed values, in meters per second, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(Speed.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary Speed values, in meters per second, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(Speed.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3Dbin(eis):
+        """
+        Read a 3D list of binary Speed values, in meters per second, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(Speed.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     def equals(self, otherSpeed):
         """

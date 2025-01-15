@@ -33,6 +33,8 @@ import pyasdm.VLAWVRTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -517,7 +519,7 @@ class VLAWVRRow:
             raise ValueError("The value of hiValues must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(hiValues)
+            listDims = pyasdm.utils.getListDims(hiValues)
 
             shapeOK = len(listDims) == 1
 
@@ -526,7 +528,7 @@ class VLAWVRRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(hiValues, float):
+            if not pyasdm.utils.checkListType(hiValues, float):
                 raise ValueError(
                     "type of the first value in hiValues is not float as expected"
                 )
@@ -560,7 +562,7 @@ class VLAWVRRow:
             raise ValueError("The value of loValues must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(loValues)
+            listDims = pyasdm.utils.getListDims(loValues)
 
             shapeOK = len(listDims) == 1
 
@@ -569,7 +571,7 @@ class VLAWVRRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(loValues, float):
+            if not pyasdm.utils.checkListType(loValues, float):
                 raise ValueError(
                     "type of the first value in loValues is not float as expected"
                 )
@@ -618,7 +620,7 @@ class VLAWVRRow:
             raise ValueError("The value of chanFreqCenter must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(chanFreqCenter)
+            listDims = pyasdm.utils.getListDims(chanFreqCenter)
 
             shapeOK = len(listDims) == 1
 
@@ -627,7 +629,7 @@ class VLAWVRRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(chanFreqCenter, Frequency):
+            if not pyasdm.utils.checkListType(chanFreqCenter, Frequency):
                 raise ValueError(
                     "type of the first value in chanFreqCenter is not Frequency as expected"
                 )
@@ -684,7 +686,7 @@ class VLAWVRRow:
             raise ValueError("The value of chanWidth must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(chanWidth)
+            listDims = pyasdm.utils.getListDims(chanWidth)
 
             shapeOK = len(listDims) == 1
 
@@ -693,7 +695,7 @@ class VLAWVRRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(chanWidth, Frequency):
+            if not pyasdm.utils.checkListType(chanWidth, Frequency):
                 raise ValueError(
                     "type of the first value in chanWidth is not Frequency as expected"
                 )

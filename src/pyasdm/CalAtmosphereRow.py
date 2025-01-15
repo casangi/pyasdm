@@ -33,6 +33,8 @@ import pyasdm.CalAtmosphereTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -770,7 +772,7 @@ class CalAtmosphereRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            forwardEffSpectrum_dims = Parser.getListDims(self._forwardEffSpectrum)
+            forwardEffSpectrum_dims = pyasdm.utils.getListDims(self._forwardEffSpectrum)
         # assumes it really is 2D
         eos.writeInt(forwardEffSpectrum_dims[0])
         eos.writeInt(forwardEffSpectrum_dims[1])
@@ -798,7 +800,7 @@ class CalAtmosphereRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            powerSkySpectrum_dims = Parser.getListDims(self._powerSkySpectrum)
+            powerSkySpectrum_dims = pyasdm.utils.getListDims(self._powerSkySpectrum)
         # assumes it really is 2D
         eos.writeInt(powerSkySpectrum_dims[0])
         eos.writeInt(powerSkySpectrum_dims[1])
@@ -811,7 +813,7 @@ class CalAtmosphereRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            powerLoadSpectrum_dims = Parser.getListDims(self._powerLoadSpectrum)
+            powerLoadSpectrum_dims = pyasdm.utils.getListDims(self._powerLoadSpectrum)
         # assumes it really is 3D
         eos.writeInt(powerLoadSpectrum_dims[0])
         eos.writeInt(powerLoadSpectrum_dims[1])
@@ -834,7 +836,7 @@ class CalAtmosphereRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            tauSpectrum_dims = Parser.getListDims(self._tauSpectrum)
+            tauSpectrum_dims = pyasdm.utils.getListDims(self._tauSpectrum)
         # assumes it really is 2D
         eos.writeInt(tauSpectrum_dims[0])
         eos.writeInt(tauSpectrum_dims[1])
@@ -865,7 +867,7 @@ class CalAtmosphereRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                alphaSpectrum_dims = Parser.getListDims(self._alphaSpectrum)
+                alphaSpectrum_dims = pyasdm.utils.getListDims(self._alphaSpectrum)
             # assumes it really is 2D
             eos.writeInt(alphaSpectrum_dims[0])
             eos.writeInt(alphaSpectrum_dims[1])
@@ -913,7 +915,7 @@ class CalAtmosphereRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                sbGainSpectrum_dims = Parser.getListDims(self._sbGainSpectrum)
+                sbGainSpectrum_dims = pyasdm.utils.getListDims(self._sbGainSpectrum)
             # assumes it really is 2D
             eos.writeInt(sbGainSpectrum_dims[0])
             eos.writeInt(sbGainSpectrum_dims[1])
@@ -1609,7 +1611,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of forwardEffSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(forwardEffSpectrum)
+            listDims = pyasdm.utils.getListDims(forwardEffSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1618,7 +1620,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(forwardEffSpectrum, float):
+            if not pyasdm.utils.checkListType(forwardEffSpectrum, float):
                 raise ValueError(
                     "type of the first value in forwardEffSpectrum is not float as expected"
                 )
@@ -1652,7 +1654,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -1661,7 +1663,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -1741,7 +1743,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of frequencySpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencySpectrum)
+            listDims = pyasdm.utils.getListDims(frequencySpectrum)
 
             shapeOK = len(listDims) == 1
 
@@ -1750,7 +1752,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencySpectrum, Frequency):
+            if not pyasdm.utils.checkListType(frequencySpectrum, Frequency):
                 raise ValueError(
                     "type of the first value in frequencySpectrum is not Frequency as expected"
                 )
@@ -1807,7 +1809,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -1816,7 +1818,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1850,7 +1852,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of powerSkySpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(powerSkySpectrum)
+            listDims = pyasdm.utils.getListDims(powerSkySpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1859,7 +1861,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(powerSkySpectrum, float):
+            if not pyasdm.utils.checkListType(powerSkySpectrum, float):
                 raise ValueError(
                     "type of the first value in powerSkySpectrum is not float as expected"
                 )
@@ -1893,7 +1895,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of powerLoadSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(powerLoadSpectrum)
+            listDims = pyasdm.utils.getListDims(powerLoadSpectrum)
 
             shapeOK = len(listDims) == 3
 
@@ -1902,7 +1904,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(powerLoadSpectrum, float):
+            if not pyasdm.utils.checkListType(powerLoadSpectrum, float):
                 raise ValueError(
                     "type of the first value in powerLoadSpectrum is not float as expected"
                 )
@@ -1958,7 +1960,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of tAtmSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tAtmSpectrum)
+            listDims = pyasdm.utils.getListDims(tAtmSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -1967,7 +1969,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tAtmSpectrum, Temperature):
+            if not pyasdm.utils.checkListType(tAtmSpectrum, Temperature):
                 raise ValueError(
                     "type of the first value in tAtmSpectrum is not Temperature as expected"
                 )
@@ -2001,7 +2003,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of tRecSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tRecSpectrum)
+            listDims = pyasdm.utils.getListDims(tRecSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -2010,7 +2012,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tRecSpectrum, Temperature):
+            if not pyasdm.utils.checkListType(tRecSpectrum, Temperature):
                 raise ValueError(
                     "type of the first value in tRecSpectrum is not Temperature as expected"
                 )
@@ -2044,7 +2046,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of tSysSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tSysSpectrum)
+            listDims = pyasdm.utils.getListDims(tSysSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -2053,7 +2055,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tSysSpectrum, Temperature):
+            if not pyasdm.utils.checkListType(tSysSpectrum, Temperature):
                 raise ValueError(
                     "type of the first value in tSysSpectrum is not Temperature as expected"
                 )
@@ -2087,7 +2089,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of tauSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tauSpectrum)
+            listDims = pyasdm.utils.getListDims(tauSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -2096,7 +2098,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(tauSpectrum, float):
+            if not pyasdm.utils.checkListType(tauSpectrum, float):
                 raise ValueError(
                     "type of the first value in tauSpectrum is not float as expected"
                 )
@@ -2130,7 +2132,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of tAtm must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tAtm)
+            listDims = pyasdm.utils.getListDims(tAtm)
 
             shapeOK = len(listDims) == 1
 
@@ -2139,7 +2141,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tAtm, Temperature):
+            if not pyasdm.utils.checkListType(tAtm, Temperature):
                 raise ValueError(
                     "type of the first value in tAtm is not Temperature as expected"
                 )
@@ -2173,7 +2175,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of tRec must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tRec)
+            listDims = pyasdm.utils.getListDims(tRec)
 
             shapeOK = len(listDims) == 1
 
@@ -2182,7 +2184,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tRec, Temperature):
+            if not pyasdm.utils.checkListType(tRec, Temperature):
                 raise ValueError(
                     "type of the first value in tRec is not Temperature as expected"
                 )
@@ -2216,7 +2218,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of tSys must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tSys)
+            listDims = pyasdm.utils.getListDims(tSys)
 
             shapeOK = len(listDims) == 1
 
@@ -2225,7 +2227,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tSys, Temperature):
+            if not pyasdm.utils.checkListType(tSys, Temperature):
                 raise ValueError(
                     "type of the first value in tSys is not Temperature as expected"
                 )
@@ -2259,7 +2261,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of tau must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tau)
+            listDims = pyasdm.utils.getListDims(tau)
 
             shapeOK = len(listDims) == 1
 
@@ -2268,7 +2270,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(tau, float):
+            if not pyasdm.utils.checkListType(tau, float):
                 raise ValueError(
                     "type of the first value in tau is not float as expected"
                 )
@@ -2302,7 +2304,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of water must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(water)
+            listDims = pyasdm.utils.getListDims(water)
 
             shapeOK = len(listDims) == 1
 
@@ -2311,7 +2313,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(water, Length):
+            if not pyasdm.utils.checkListType(water, Length):
                 raise ValueError(
                     "type of the first value in water is not Length as expected"
                 )
@@ -2345,7 +2347,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of waterError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(waterError)
+            listDims = pyasdm.utils.getListDims(waterError)
 
             shapeOK = len(listDims) == 1
 
@@ -2354,7 +2356,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(waterError, Length):
+            if not pyasdm.utils.checkListType(waterError, Length):
                 raise ValueError(
                     "type of the first value in waterError is not Length as expected"
                 )
@@ -2403,7 +2405,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of alphaSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(alphaSpectrum)
+            listDims = pyasdm.utils.getListDims(alphaSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -2412,7 +2414,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(alphaSpectrum, float):
+            if not pyasdm.utils.checkListType(alphaSpectrum, float):
                 raise ValueError(
                     "type of the first value in alphaSpectrum is not float as expected"
                 )
@@ -2469,7 +2471,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of forwardEfficiency must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(forwardEfficiency)
+            listDims = pyasdm.utils.getListDims(forwardEfficiency)
 
             shapeOK = len(listDims) == 1
 
@@ -2478,7 +2480,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(forwardEfficiency, float):
+            if not pyasdm.utils.checkListType(forwardEfficiency, float):
                 raise ValueError(
                     "type of the first value in forwardEfficiency is not float as expected"
                 )
@@ -2535,7 +2537,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of forwardEfficiencyError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(forwardEfficiencyError)
+            listDims = pyasdm.utils.getListDims(forwardEfficiencyError)
 
             shapeOK = len(listDims) == 1
 
@@ -2544,7 +2546,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(forwardEfficiencyError, float):
+            if not pyasdm.utils.checkListType(forwardEfficiencyError, float):
                 raise ValueError(
                     "type of the first value in forwardEfficiencyError is not float as expected"
                 )
@@ -2601,7 +2603,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of sbGain must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sbGain)
+            listDims = pyasdm.utils.getListDims(sbGain)
 
             shapeOK = len(listDims) == 1
 
@@ -2610,7 +2612,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(sbGain, float):
+            if not pyasdm.utils.checkListType(sbGain, float):
                 raise ValueError(
                     "type of the first value in sbGain is not float as expected"
                 )
@@ -2667,7 +2669,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of sbGainError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sbGainError)
+            listDims = pyasdm.utils.getListDims(sbGainError)
 
             shapeOK = len(listDims) == 1
 
@@ -2676,7 +2678,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(sbGainError, float):
+            if not pyasdm.utils.checkListType(sbGainError, float):
                 raise ValueError(
                     "type of the first value in sbGainError is not float as expected"
                 )
@@ -2733,7 +2735,7 @@ class CalAtmosphereRow:
             raise ValueError("The value of sbGainSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sbGainSpectrum)
+            listDims = pyasdm.utils.getListDims(sbGainSpectrum)
 
             shapeOK = len(listDims) == 2
 
@@ -2742,7 +2744,7 @@ class CalAtmosphereRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(sbGainSpectrum, float):
+            if not pyasdm.utils.checkListType(sbGainSpectrum, float):
                 raise ValueError(
                     "type of the first value in sbGainSpectrum is not float as expected"
                 )
@@ -2929,8 +2931,10 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            forwardEffSpectrum_dims = Parser.getListDims(forwardEffSpectrum)
-            this_forwardEffSpectrum_dims = Parser.getListDims(self._forwardEffSpectrum)
+            forwardEffSpectrum_dims = pyasdm.utils.getListDims(forwardEffSpectrum)
+            this_forwardEffSpectrum_dims = pyasdm.utils.getListDims(
+                self._forwardEffSpectrum
+            )
             if forwardEffSpectrum_dims != this_forwardEffSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3001,8 +3005,10 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            powerSkySpectrum_dims = Parser.getListDims(powerSkySpectrum)
-            this_powerSkySpectrum_dims = Parser.getListDims(self._powerSkySpectrum)
+            powerSkySpectrum_dims = pyasdm.utils.getListDims(powerSkySpectrum)
+            this_powerSkySpectrum_dims = pyasdm.utils.getListDims(
+                self._powerSkySpectrum
+            )
             if powerSkySpectrum_dims != this_powerSkySpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3021,8 +3027,10 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            powerLoadSpectrum_dims = Parser.getListDims(powerLoadSpectrum)
-            this_powerLoadSpectrum_dims = Parser.getListDims(self._powerLoadSpectrum)
+            powerLoadSpectrum_dims = pyasdm.utils.getListDims(powerLoadSpectrum)
+            this_powerLoadSpectrum_dims = pyasdm.utils.getListDims(
+                self._powerLoadSpectrum
+            )
             if powerLoadSpectrum_dims != this_powerLoadSpectrum_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be
@@ -3047,8 +3055,8 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            tAtmSpectrum_dims = Parser.getListDims(tAtmSpectrum)
-            this_tAtmSpectrum_dims = Parser.getListDims(self._tAtmSpectrum)
+            tAtmSpectrum_dims = pyasdm.utils.getListDims(tAtmSpectrum)
+            this_tAtmSpectrum_dims = pyasdm.utils.getListDims(self._tAtmSpectrum)
             if tAtmSpectrum_dims != this_tAtmSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3071,8 +3079,8 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            tRecSpectrum_dims = Parser.getListDims(tRecSpectrum)
-            this_tRecSpectrum_dims = Parser.getListDims(self._tRecSpectrum)
+            tRecSpectrum_dims = pyasdm.utils.getListDims(tRecSpectrum)
+            this_tRecSpectrum_dims = pyasdm.utils.getListDims(self._tRecSpectrum)
             if tRecSpectrum_dims != this_tRecSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3095,8 +3103,8 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            tSysSpectrum_dims = Parser.getListDims(tSysSpectrum)
-            this_tSysSpectrum_dims = Parser.getListDims(self._tSysSpectrum)
+            tSysSpectrum_dims = pyasdm.utils.getListDims(tSysSpectrum)
+            this_tSysSpectrum_dims = pyasdm.utils.getListDims(self._tSysSpectrum)
             if tSysSpectrum_dims != this_tSysSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3119,8 +3127,8 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            tauSpectrum_dims = Parser.getListDims(tauSpectrum)
-            this_tauSpectrum_dims = Parser.getListDims(self._tauSpectrum)
+            tauSpectrum_dims = pyasdm.utils.getListDims(tauSpectrum)
+            this_tauSpectrum_dims = pyasdm.utils.getListDims(self._tauSpectrum)
             if tauSpectrum_dims != this_tauSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3293,8 +3301,10 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            forwardEffSpectrum_dims = Parser.getListDims(forwardEffSpectrum)
-            this_forwardEffSpectrum_dims = Parser.getListDims(self._forwardEffSpectrum)
+            forwardEffSpectrum_dims = pyasdm.utils.getListDims(forwardEffSpectrum)
+            this_forwardEffSpectrum_dims = pyasdm.utils.getListDims(
+                self._forwardEffSpectrum
+            )
             if forwardEffSpectrum_dims != this_forwardEffSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3365,8 +3375,10 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            powerSkySpectrum_dims = Parser.getListDims(powerSkySpectrum)
-            this_powerSkySpectrum_dims = Parser.getListDims(self._powerSkySpectrum)
+            powerSkySpectrum_dims = pyasdm.utils.getListDims(powerSkySpectrum)
+            this_powerSkySpectrum_dims = pyasdm.utils.getListDims(
+                self._powerSkySpectrum
+            )
             if powerSkySpectrum_dims != this_powerSkySpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3385,8 +3397,10 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            powerLoadSpectrum_dims = Parser.getListDims(powerLoadSpectrum)
-            this_powerLoadSpectrum_dims = Parser.getListDims(self._powerLoadSpectrum)
+            powerLoadSpectrum_dims = pyasdm.utils.getListDims(powerLoadSpectrum)
+            this_powerLoadSpectrum_dims = pyasdm.utils.getListDims(
+                self._powerLoadSpectrum
+            )
             if powerLoadSpectrum_dims != this_powerLoadSpectrum_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be
@@ -3411,8 +3425,8 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            tAtmSpectrum_dims = Parser.getListDims(tAtmSpectrum)
-            this_tAtmSpectrum_dims = Parser.getListDims(self._tAtmSpectrum)
+            tAtmSpectrum_dims = pyasdm.utils.getListDims(tAtmSpectrum)
+            this_tAtmSpectrum_dims = pyasdm.utils.getListDims(self._tAtmSpectrum)
             if tAtmSpectrum_dims != this_tAtmSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3435,8 +3449,8 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            tRecSpectrum_dims = Parser.getListDims(tRecSpectrum)
-            this_tRecSpectrum_dims = Parser.getListDims(self._tRecSpectrum)
+            tRecSpectrum_dims = pyasdm.utils.getListDims(tRecSpectrum)
+            this_tRecSpectrum_dims = pyasdm.utils.getListDims(self._tRecSpectrum)
             if tRecSpectrum_dims != this_tRecSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3459,8 +3473,8 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            tSysSpectrum_dims = Parser.getListDims(tSysSpectrum)
-            this_tSysSpectrum_dims = Parser.getListDims(self._tSysSpectrum)
+            tSysSpectrum_dims = pyasdm.utils.getListDims(tSysSpectrum)
+            this_tSysSpectrum_dims = pyasdm.utils.getListDims(self._tSysSpectrum)
             if tSysSpectrum_dims != this_tSysSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -3483,8 +3497,8 @@ class CalAtmosphereRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            tauSpectrum_dims = Parser.getListDims(tauSpectrum)
-            this_tauSpectrum_dims = Parser.getListDims(self._tauSpectrum)
+            tauSpectrum_dims = pyasdm.utils.getListDims(tauSpectrum)
+            this_tauSpectrum_dims = pyasdm.utils.getListDims(self._tauSpectrum)
             if tauSpectrum_dims != this_tauSpectrum_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

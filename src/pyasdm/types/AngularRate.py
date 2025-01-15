@@ -23,6 +23,8 @@
 # File AngularRate.py
 #
 
+import pyasdm.utils
+
 
 class AngularRate:
     """
@@ -129,7 +131,7 @@ class AngularRate:
 
     def get(self):
         """
-        Return the value of this rate as a double in hectopascals.
+        Return the value of this rate as a double in radians per second.
         """
         return self._rate
 
@@ -172,22 +174,182 @@ class AngularRate:
                 result.append(item.get())
         return result
 
-    def toBin(self):
-        # it also needs a static method to send a list of rate items toBin
-        # should also work for 2D, 3D lists
-        raise RuntimeError("AngularRate.toBin is not yet implemented")
+    def toBin(self, eos):
+        """
+        Write this AngularRate out, in radians per second, to a EndianOutput.
+        """
+        eos.writeDouble(self.get())
 
-    def fromBin(self):
-        raise RuntimeError("AngularRate.fromBin is not yet implemented")
+    @staticmethod
+    def listToBin(angularRateList, eos):
+        """
+        Write a list of AngularRate to the EndianOutput.
+        The list may have 1, 2, or 3 dimensions.
+        """
+        if not isinstance(angularRateList, list):
+            raise ValueError("angularRateList is not a list")
 
-    def from1DBin(self):
-        raise RuntimeError("AngularRate.from1DBin is not yet implemented")
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(angleList)
+        ndims = len(listDims)
+        if ndims == 1:
+            AngularRate.listTo1DBin(angularRateList, eos)
+        elif ndims == 2:
+            AngularRate.listTo2DBin(angularRateList, eos)
+        elif ndims == 3:
+            AngularRate.listTo3DBin(angularRateList, eos)
 
-    def from2DBin(self):
-        raise RuntimeError("AngularRate.from2DBin is not yet implemented")
+        raise ValueError(
+            "unsupport number of dimensions in angularRateList in AngularRate.listToBin : "
+            + str(ndims)
+        )
 
-    def from3DBin(self):
-        raise RuntimeError("AngularRate.from2DBin is not yet implemented")
+    @staticmethod
+    def listTo1DBin(angularRateList, eos):
+        """
+        Write a 1D list of AngularRate to the EndianOutput
+        """
+        if not isinstance(angularRateList, list):
+            raise ValueError("angularRateList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(angularRateList))
+
+        # only check the first value
+        if (len(angularRateList) > 0) and not isinstance(
+            angularRateList[0], AngularRate
+        ):
+            raise (ValueError("angularRateList is not a list off AngularRate"))
+
+        for thisAngularRate in angularRateList:
+            thisAngularRate.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(angularRateList, eos):
+        """
+        Write a 2D list of AngularRate to the EndianOutput
+        """
+        if not isinstance(angularRateList, list):
+            raise ValueError("angularRateList is not a list")
+
+        ndim1 = len(angularRateList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(angularRateList[0], list):
+                raise ValueError("angularRateList is not a 2D")
+
+            ndim2 = len(angularRateList[0])
+            if ndim2 > 0 and not isinstance(angularRateList[0][0], AngularRate):
+                raise ValueError("angularRateListis a not a 2D list of AngularRate")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in angularRateList:
+            for thisAngularRate in thisList:
+                thisAngularRate.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(angularRateList, eos):
+        """
+        Write a 3D list of AngularRate to the EndianOutput
+        """
+        if not isinstance(angularRateList, list):
+            raise ValueError("angularRateList is not a list")
+
+        ndim1 = len(angularRateList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(angularRateList[0], list):
+                raise ValueError("angularRateList is not a 3D list")
+
+            ndim2 = len(angularRateList[0])
+            if ndim2 > 0:
+                if not isinstance(angularRateList[0][0], list):
+                    raise ValueError("angularRateList is a not a 3D list")
+                ndim3 = len(angularRateList[0][0])
+                if (ndim3 > 0) and not isinstance(
+                    angularRateList[0][0][0], AngularRate
+                ):
+                    raise ValueError("angularRateList is not a 3D list of AngularRate")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in angularRateList:
+            for middleList in thisList:
+                for thisAngularRate in middleList:
+                    thisAngularRate.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an AngularRate, in radians per second,
+        from an EndianInput instance and use the read value to set an
+        AngularRate.
+
+        return an AngularRate
+        """
+        return AngularRate(eis.readDouble())
+
+    @staticmethod
+    def from1DBin(eis):
+        """
+        Read a list of binary AngularRate values, in radians per second, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(AngularRate.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary AngularRate values, in radians per second, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(AngularRate.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3DBin(eis):
+        """
+        Read a 3D list of binary AngularRate values, in radians per second, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(AngularRate.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     def equals(self, otherAngularRate):
         """

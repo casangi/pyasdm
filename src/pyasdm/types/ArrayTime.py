@@ -25,6 +25,7 @@
 
 import math
 from .Interval import Interval
+import pyasdm.utils
 
 
 class ArrayTime(Interval):
@@ -551,13 +552,194 @@ class ArrayTime(Interval):
         intVal = int(stringList[0])
         return (ArrayTime(intVal), stringList[1:])
 
-    # deferred getArrayTime(StringTokenizer t)
-    # deferred method to/from streams
-    # toBin(self, astream)
-    # toBin(vector<ArrayTime>, astream);
-    # toBin(vector<vector<ArrayTime> >, astream)
-    # toBin(vector<vector<vector<ArrayTime> > >, astream) # never implemented in java
-    # and the reciprocals: fromBin, from1DBin, from2DBin, from3DBin
+    def toBin(self, eos):
+        """
+        Write this ArrayTime as a long in nanoseconds to an EndianOutput instance.
+        """
+        eos.writeLong(self.get())
+
+    @staticmethod
+    def listToBin(arrayTimeList, eos):
+        """
+        Write a list of ArrayTime to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(arrayTimeList, list):
+            raise ValueError("arrayTimeList is not a list")
+
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(arrayTimeList)
+        ndims = len(listDims)
+        if ndims == 1:
+            ArrayTime.listTo1DBin(arrayTimeList, eos)
+        elif ndims == 2:
+            ArrayTime.listTo2DBin(arrayTimeList, eos)
+        elif ndims == 3:
+            ArrayTime.listTo3DBin(arrayTimeList, eos)
+
+        raise ValueError(
+            "unsupport number of dimensions in arrayTimeList in ArrayTime.listToBin : "
+            + str(ndims)
+        )
+
+    @staticmethod
+    def listTo1DBin(atList, eos):
+        """
+        Write a 1D list of ArrayTime to the EndianOutput instance.
+        """
+
+        if not isinstance(atList, list):
+            raise ValueError("atList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(atList))
+
+        # only check the first value
+        if (len(atList) > 0) and not isinstance(atList[0], ArrayTime):
+            raise (ValueError("atList is not a list off ArrayTime"))
+
+        for thisAt in atList:
+            thisAt.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(atList, eos):
+        """
+        Write a 2D list of ArrayTime to the EndianOutput instance.
+        """
+
+        if not isinstance(atList, list):
+            raise ValueError("atList is not a list")
+
+        ndim1 = len(atList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(atList[0], list):
+                raise ValueError("atList is not a 2D list")
+
+            ndim2 = len(atList[0])
+            if ndim2 > 0 and not isinstance(atList[0][0], ArrayTime):
+                raise ValueError("atList is not a 2D list of ArrayTime")
+
+        # ndims are always written, even for 0-element lists
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in atList:
+            for thisAt in thisList:
+                thisAt.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(atList, eos):
+        """
+        Write a 3D list of ArrayTime to the EndianOutput instance.
+        """
+
+        if not isinstance(atList, list):
+            raise ValueError("atList is not a list")
+
+        ndim1 = len(atList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(atList[0], list):
+                raise ValueError("atList is not a 3D list")
+
+            ndim2 = len(atList[0])
+            if ndim2 > 0:
+                if not isinstance(atList[0][0], list):
+                    raise ValueError("atList is not a 3D list")
+
+                ndim3 = len(atList[0][0])
+
+                if ndim3 > 0 and not isinstance(atList[0][0][0], ArrayTime):
+                    raise ValueError("atList is not a 3D list of ArrayTime")
+
+        # ndims are always written, even for 0-element lists
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in atList:
+            for thisMidList in thisList:
+                for thisAt in thisMidList:
+                    thisAt.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an ArrayTime
+        from an EndianInput instance and use the read value to set an
+        ArrayTime in nanoseconds.
+
+        return an ArrayTime
+        """
+        return ArrayTime(eis.readLongLong())
+
+    @staticmethod
+    def from1Bin(eis):
+        """
+        Read the binary representation of 1D list of ArrayTime
+        from an EndianInput instance
+
+        return a 1D list of ArrayTime
+        """
+
+        result = []
+        ndim = eis.readInt()
+        for i in range(ndim):
+            result.append(ArrayTime.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2Bin(eis):
+        """
+        Read the binary representation of 2D list of ArrayTime
+        from an EndianInput instance
+
+        return a 2D list of ArrayTime
+        """
+
+        result = []
+        ndim1 = eis.readInt()
+        ndim2 = eis.readInt()
+
+        for i in range(ndim1):
+            innerList = []
+            for j in range(ndim2):
+                innerList.append(ArrayTime.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3Bin(eis):
+        """
+        Read the binary representation of 3D list of ArrayTime
+        from an EndianInput instance
+
+        return a 3D list of ArrayTime
+        """
+
+        result = []
+        ndim1 = eis.readInt()
+        ndim2 = eis.readInt()
+        ndim3 = eis.readInt()
+
+        for i in range(ndim1):
+            middleList = []
+            for j in range(ndim2):
+                innerList = []
+                for k in range(ndim3):
+                    innerList.append(ArrayTime.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     # utcCorrection not implemented here, the table of leap seconds by JD has not
     # been updated in some time and does not appear to be used anywhere

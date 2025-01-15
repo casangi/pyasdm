@@ -33,6 +33,8 @@ import pyasdm.CalAntennaSolutionsTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -961,7 +963,7 @@ class CalAntennaSolutionsRow:
             raise ValueError("The value of direction must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(direction)
+            listDims = pyasdm.utils.getListDims(direction)
 
             shapeOK = len(listDims) == 1
 
@@ -970,7 +972,7 @@ class CalAntennaSolutionsRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(direction, Angle):
+            if not pyasdm.utils.checkListType(direction, Angle):
                 raise ValueError(
                     "type of the first value in direction is not Angle as expected"
                 )
@@ -1004,7 +1006,7 @@ class CalAntennaSolutionsRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -1013,7 +1015,7 @@ class CalAntennaSolutionsRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -1070,7 +1072,7 @@ class CalAntennaSolutionsRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -1079,7 +1081,7 @@ class CalAntennaSolutionsRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1135,7 +1137,7 @@ class CalAntennaSolutionsRow:
             raise ValueError("The value of phaseAnt must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseAnt)
+            listDims = pyasdm.utils.getListDims(phaseAnt)
 
             shapeOK = len(listDims) == 1
 
@@ -1144,7 +1146,7 @@ class CalAntennaSolutionsRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseAnt, float):
+            if not pyasdm.utils.checkListType(phaseAnt, float):
                 raise ValueError(
                     "type of the first value in phaseAnt is not float as expected"
                 )
@@ -1178,7 +1180,7 @@ class CalAntennaSolutionsRow:
             raise ValueError("The value of phaseAntRMS must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseAntRMS)
+            listDims = pyasdm.utils.getListDims(phaseAntRMS)
 
             shapeOK = len(listDims) == 1
 
@@ -1187,7 +1189,7 @@ class CalAntennaSolutionsRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseAntRMS, float):
+            if not pyasdm.utils.checkListType(phaseAntRMS, float):
                 raise ValueError(
                     "type of the first value in phaseAntRMS is not float as expected"
                 )
@@ -1221,7 +1223,7 @@ class CalAntennaSolutionsRow:
             raise ValueError("The value of amplitudeAnt must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(amplitudeAnt)
+            listDims = pyasdm.utils.getListDims(amplitudeAnt)
 
             shapeOK = len(listDims) == 1
 
@@ -1230,7 +1232,7 @@ class CalAntennaSolutionsRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(amplitudeAnt, float):
+            if not pyasdm.utils.checkListType(amplitudeAnt, float):
                 raise ValueError(
                     "type of the first value in amplitudeAnt is not float as expected"
                 )
@@ -1264,7 +1266,7 @@ class CalAntennaSolutionsRow:
             raise ValueError("The value of amplitudeAntRMS must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(amplitudeAntRMS)
+            listDims = pyasdm.utils.getListDims(amplitudeAntRMS)
 
             shapeOK = len(listDims) == 1
 
@@ -1273,7 +1275,7 @@ class CalAntennaSolutionsRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(amplitudeAntRMS, float):
+            if not pyasdm.utils.checkListType(amplitudeAntRMS, float):
                 raise ValueError(
                     "type of the first value in amplitudeAntRMS is not float as expected"
                 )

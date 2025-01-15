@@ -33,6 +33,8 @@ import pyasdm.CalBandpassTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -694,7 +696,7 @@ class CalBandpassRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            curve_dims = Parser.getListDims(self._curve)
+            curve_dims = pyasdm.utils.getListDims(self._curve)
         # assumes it really is 3D
         eos.writeInt(curve_dims[0])
         eos.writeInt(curve_dims[1])
@@ -727,7 +729,7 @@ class CalBandpassRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                rms_dims = Parser.getListDims(self._rms)
+                rms_dims = pyasdm.utils.getListDims(self._rms)
             # assumes it really is 2D
             eos.writeInt(rms_dims[0])
             eos.writeInt(rms_dims[1])
@@ -771,7 +773,7 @@ class CalBandpassRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                spectrum_dims = Parser.getListDims(self._spectrum)
+                spectrum_dims = pyasdm.utils.getListDims(self._spectrum)
             # assumes it really is 3D
             eos.writeInt(spectrum_dims[0])
             eos.writeInt(spectrum_dims[1])
@@ -1417,7 +1419,7 @@ class CalBandpassRow:
             raise ValueError("The value of antennaNames must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(antennaNames)
+            listDims = pyasdm.utils.getListDims(antennaNames)
 
             shapeOK = len(listDims) == 1
 
@@ -1426,7 +1428,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(antennaNames, str):
+            if not pyasdm.utils.checkListType(antennaNames, str):
                 raise ValueError(
                     "type of the first value in antennaNames is not str as expected"
                 )
@@ -1482,7 +1484,7 @@ class CalBandpassRow:
             raise ValueError("The value of freqLimits must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(freqLimits)
+            listDims = pyasdm.utils.getListDims(freqLimits)
 
             shapeOK = len(listDims) == 1
 
@@ -1491,7 +1493,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(freqLimits, Frequency):
+            if not pyasdm.utils.checkListType(freqLimits, Frequency):
                 raise ValueError(
                     "type of the first value in freqLimits is not Frequency as expected"
                 )
@@ -1525,7 +1527,7 @@ class CalBandpassRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -1534,7 +1536,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1568,7 +1570,7 @@ class CalBandpassRow:
             raise ValueError("The value of curve must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(curve)
+            listDims = pyasdm.utils.getListDims(curve)
 
             shapeOK = len(listDims) == 3
 
@@ -1577,7 +1579,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(curve, float):
+            if not pyasdm.utils.checkListType(curve, float):
                 raise ValueError(
                     "type of the first value in curve is not float as expected"
                 )
@@ -1611,7 +1613,7 @@ class CalBandpassRow:
             raise ValueError("The value of reducedChiSquared must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(reducedChiSquared)
+            listDims = pyasdm.utils.getListDims(reducedChiSquared)
 
             shapeOK = len(listDims) == 1
 
@@ -1620,7 +1622,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, float):
+            if not pyasdm.utils.checkListType(reducedChiSquared, float):
                 raise ValueError(
                     "type of the first value in reducedChiSquared is not float as expected"
                 )
@@ -1759,7 +1761,7 @@ class CalBandpassRow:
             raise ValueError("The value of rms must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(rms)
+            listDims = pyasdm.utils.getListDims(rms)
 
             shapeOK = len(listDims) == 2
 
@@ -1768,7 +1770,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(rms, float):
+            if not pyasdm.utils.checkListType(rms, float):
                 raise ValueError(
                     "type of the first value in rms is not float as expected"
                 )
@@ -1825,7 +1827,7 @@ class CalBandpassRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -1834,7 +1836,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -1936,7 +1938,7 @@ class CalBandpassRow:
             raise ValueError("The value of chanFreqStart must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(chanFreqStart)
+            listDims = pyasdm.utils.getListDims(chanFreqStart)
 
             shapeOK = len(listDims) == 1
 
@@ -1945,7 +1947,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(chanFreqStart, Frequency):
+            if not pyasdm.utils.checkListType(chanFreqStart, Frequency):
                 raise ValueError(
                     "type of the first value in chanFreqStart is not Frequency as expected"
                 )
@@ -2002,7 +2004,7 @@ class CalBandpassRow:
             raise ValueError("The value of chanFreqStep must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(chanFreqStep)
+            listDims = pyasdm.utils.getListDims(chanFreqStep)
 
             shapeOK = len(listDims) == 1
 
@@ -2011,7 +2013,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(chanFreqStep, Frequency):
+            if not pyasdm.utils.checkListType(chanFreqStep, Frequency):
                 raise ValueError(
                     "type of the first value in chanFreqStep is not Frequency as expected"
                 )
@@ -2068,7 +2070,7 @@ class CalBandpassRow:
             raise ValueError("The value of numSpectralWindowChan must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(numSpectralWindowChan)
+            listDims = pyasdm.utils.getListDims(numSpectralWindowChan)
 
             shapeOK = len(listDims) == 1
 
@@ -2077,7 +2079,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(numSpectralWindowChan, int):
+            if not pyasdm.utils.checkListType(numSpectralWindowChan, int):
                 raise ValueError(
                     "type of the first value in numSpectralWindowChan is not int as expected"
                 )
@@ -2134,7 +2136,7 @@ class CalBandpassRow:
             raise ValueError("The value of spectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(spectrum)
+            listDims = pyasdm.utils.getListDims(spectrum)
 
             shapeOK = len(listDims) == 3
 
@@ -2143,7 +2145,7 @@ class CalBandpassRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(spectrum, float):
+            if not pyasdm.utils.checkListType(spectrum, float):
                 raise ValueError(
                     "type of the first value in spectrum is not float as expected"
                 )
@@ -2363,8 +2365,8 @@ class CalBandpassRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            curve_dims = Parser.getListDims(curve)
-            this_curve_dims = Parser.getListDims(self._curve)
+            curve_dims = pyasdm.utils.getListDims(curve)
+            this_curve_dims = pyasdm.utils.getListDims(self._curve)
             if curve_dims != this_curve_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be
@@ -2486,8 +2488,8 @@ class CalBandpassRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            curve_dims = Parser.getListDims(curve)
-            this_curve_dims = Parser.getListDims(self._curve)
+            curve_dims = pyasdm.utils.getListDims(curve)
+            this_curve_dims = pyasdm.utils.getListDims(self._curve)
             if curve_dims != this_curve_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be

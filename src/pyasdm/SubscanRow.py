@@ -33,6 +33,8 @@ import pyasdm.SubscanTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -740,7 +742,7 @@ class SubscanRow:
             raise ValueError("The value of numSubintegration must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(numSubintegration)
+            listDims = pyasdm.utils.getListDims(numSubintegration)
 
             shapeOK = len(listDims) == 1
 
@@ -749,7 +751,7 @@ class SubscanRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(numSubintegration, int):
+            if not pyasdm.utils.checkListType(numSubintegration, int):
                 raise ValueError(
                     "type of the first value in numSubintegration is not int as expected"
                 )

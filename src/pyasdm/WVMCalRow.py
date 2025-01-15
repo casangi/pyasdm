@@ -33,6 +33,8 @@ import pyasdm.WVMCalTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -309,7 +311,7 @@ class WVMCalRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            pathCoeff_dims = Parser.getListDims(self._pathCoeff)
+            pathCoeff_dims = pyasdm.utils.getListDims(self._pathCoeff)
         # assumes it really is 3D
         eos.writeInt(pathCoeff_dims[0])
         eos.writeInt(pathCoeff_dims[1])
@@ -547,7 +549,7 @@ class WVMCalRow:
             raise ValueError("The value of polyFreqLimits must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polyFreqLimits)
+            listDims = pyasdm.utils.getListDims(polyFreqLimits)
 
             shapeOK = len(listDims) == 1
 
@@ -556,7 +558,7 @@ class WVMCalRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(polyFreqLimits, Frequency):
+            if not pyasdm.utils.checkListType(polyFreqLimits, Frequency):
                 raise ValueError(
                     "type of the first value in polyFreqLimits is not Frequency as expected"
                 )
@@ -656,7 +658,7 @@ class WVMCalRow:
             raise ValueError("The value of pathCoeff must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(pathCoeff)
+            listDims = pyasdm.utils.getListDims(pathCoeff)
 
             shapeOK = len(listDims) == 3
 
@@ -665,7 +667,7 @@ class WVMCalRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(pathCoeff, float):
+            if not pyasdm.utils.checkListType(pathCoeff, float):
                 raise ValueError(
                     "type of the first value in pathCoeff is not float as expected"
                 )
@@ -699,7 +701,7 @@ class WVMCalRow:
             raise ValueError("The value of refTemp must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(refTemp)
+            listDims = pyasdm.utils.getListDims(refTemp)
 
             shapeOK = len(listDims) == 2
 
@@ -708,7 +710,7 @@ class WVMCalRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(refTemp, Temperature):
+            if not pyasdm.utils.checkListType(refTemp, Temperature):
                 raise ValueError(
                     "type of the first value in refTemp is not Temperature as expected"
                 )
@@ -774,7 +776,7 @@ class WVMCalRow:
             raise ValueError("The value of inputAntennaId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(inputAntennaId)
+            listDims = pyasdm.utils.getListDims(inputAntennaId)
 
             shapeOK = len(listDims) == 1
 
@@ -783,7 +785,7 @@ class WVMCalRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(inputAntennaId, Tag):
+            if not pyasdm.utils.checkListType(inputAntennaId, Tag):
                 raise ValueError(
                     "type of the first value in inputAntennaId is not Tag as expected"
                 )
@@ -961,8 +963,8 @@ class WVMCalRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            pathCoeff_dims = Parser.getListDims(pathCoeff)
-            this_pathCoeff_dims = Parser.getListDims(self._pathCoeff)
+            pathCoeff_dims = pyasdm.utils.getListDims(pathCoeff)
+            this_pathCoeff_dims = pyasdm.utils.getListDims(self._pathCoeff)
             if pathCoeff_dims != this_pathCoeff_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be
@@ -980,8 +982,8 @@ class WVMCalRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            refTemp_dims = Parser.getListDims(refTemp)
-            this_refTemp_dims = Parser.getListDims(self._refTemp)
+            refTemp_dims = pyasdm.utils.getListDims(refTemp)
+            this_refTemp_dims = pyasdm.utils.getListDims(self._refTemp)
             if refTemp_dims != this_refTemp_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1073,8 +1075,8 @@ class WVMCalRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            pathCoeff_dims = Parser.getListDims(pathCoeff)
-            this_pathCoeff_dims = Parser.getListDims(self._pathCoeff)
+            pathCoeff_dims = pyasdm.utils.getListDims(pathCoeff)
+            this_pathCoeff_dims = pyasdm.utils.getListDims(self._pathCoeff)
             if pathCoeff_dims != this_pathCoeff_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be
@@ -1092,8 +1094,8 @@ class WVMCalRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            refTemp_dims = Parser.getListDims(refTemp)
-            this_refTemp_dims = Parser.getListDims(self._refTemp)
+            refTemp_dims = pyasdm.utils.getListDims(refTemp)
+            this_refTemp_dims = pyasdm.utils.getListDims(self._refTemp)
             if refTemp_dims != this_refTemp_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

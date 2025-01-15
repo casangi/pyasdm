@@ -24,6 +24,8 @@
 
 from pyasdm.exceptions.ConversionException import ConversionException
 from pyasdm.types.ArrayTimeInterval import ArrayTimeInterval
+import pyasdm.utils
+
 
 class Parser:
     """
@@ -77,40 +79,6 @@ class Parser:
             valueStr = value.toString()
 
         return Parser.nameStringToXML(name, valueStr)
-
-    @staticmethod
-    def getListDims(thisList):
-        """
-        Given a list that may be an ND array of lists where all of the lists
-        at each element for the ndim > 1 case has the same shape, this returns
-        a list of the shape of the list of lists (and ND array shape)
-        """
-        result = [len(thisList)]
-        if len(thisList) > 0 and isinstance(thisList[0], list):
-            subdims = Parser.getListDims(thisList[0])
-            result[1:] = subdims
-        return result
-
-    @staticmethod
-    def checkListType(thisList, atype):
-        """
-        Returns True if and only if thisList is a list and the type of
-        the first non-list value found in thisList is an instance of atype
-        or the length of that list is 0.
-        """
-        result = False
-        if isinstance(thisList, list):
-            if len(thisList) > 0:
-                if isinstance(thisList[0], atype):
-                    return True
-                if isinstance(thisList[0], list):
-                    return Parser.checkListType(thisList[0], atype)
-            else:
-                # zero length list is True
-                return True
-        # it's not a list, this means it's not the expected type
-        # I think it can't get here recursively, only if called with a non-list argument
-        return False
 
     @staticmethod
     def listXMLPrefix(dims):
@@ -187,7 +155,7 @@ class Parser:
         Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
         and the most rapidly varying dimension among the values is the last dimension.
         """
-        listDims = Parser.getListDims(value)
+        listDims = pyasdm.utils.getListDims(value)
         result = "<%s> " % name
         result += Parser.listXMLPrefix(listDims)
         result += Parser.listValuesAsString(value, listDims)
@@ -205,7 +173,7 @@ class Parser:
         Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
         and the most rapidly varying dimension among the values is the last dimension.
         """
-        listDims = Parser.getListDims(value)
+        listDims = pyasdm.utils.getListDims(value)
         result = "<%s> " % name
         result += Parser.listXMLPrefix(listDims)
         result += Parser.listExtendedValuesAsString(value, listDims)
@@ -223,7 +191,7 @@ class Parser:
         Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
         and the most rapidly varying dimension among the values is the last dimension.
         """
-        listDims = Parser.getListDims(value)
+        listDims = pyasdm.utils.getListDims(value)
         result = "<%s> " % name
         result += Parser.listXMLPrefix(listDims)
         result += Parser.listEnumValuesAsString(value, listDims)

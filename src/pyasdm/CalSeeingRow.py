@@ -33,6 +33,8 @@ import pyasdm.CalSeeingTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -679,7 +681,7 @@ class CalSeeingRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -688,7 +690,7 @@ class CalSeeingRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -767,7 +769,7 @@ class CalSeeingRow:
             raise ValueError("The value of baselineLengths must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(baselineLengths)
+            listDims = pyasdm.utils.getListDims(baselineLengths)
 
             shapeOK = len(listDims) == 1
 
@@ -776,7 +778,7 @@ class CalSeeingRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(baselineLengths, Length):
+            if not pyasdm.utils.checkListType(baselineLengths, Length):
                 raise ValueError(
                     "type of the first value in baselineLengths is not Length as expected"
                 )
@@ -810,7 +812,7 @@ class CalSeeingRow:
             raise ValueError("The value of phaseRMS must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseRMS)
+            listDims = pyasdm.utils.getListDims(phaseRMS)
 
             shapeOK = len(listDims) == 1
 
@@ -819,7 +821,7 @@ class CalSeeingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseRMS, Angle):
+            if not pyasdm.utils.checkListType(phaseRMS, Angle):
                 raise ValueError(
                     "type of the first value in phaseRMS is not Angle as expected"
                 )

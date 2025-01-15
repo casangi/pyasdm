@@ -33,6 +33,8 @@ import pyasdm.PulsarTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -802,7 +804,7 @@ class PulsarRow:
             raise ValueError("The value of phasePoly must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phasePoly)
+            listDims = pyasdm.utils.getListDims(phasePoly)
 
             shapeOK = len(listDims) == 1
 
@@ -811,7 +813,7 @@ class PulsarRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phasePoly, float):
+            if not pyasdm.utils.checkListType(phasePoly, float):
                 raise ValueError(
                     "type of the first value in phasePoly is not float as expected"
                 )
@@ -914,7 +916,7 @@ class PulsarRow:
             raise ValueError("The value of startPhaseBin must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(startPhaseBin)
+            listDims = pyasdm.utils.getListDims(startPhaseBin)
 
             shapeOK = len(listDims) == 1
 
@@ -923,7 +925,7 @@ class PulsarRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(startPhaseBin, float):
+            if not pyasdm.utils.checkListType(startPhaseBin, float):
                 raise ValueError(
                     "type of the first value in startPhaseBin is not float as expected"
                 )
@@ -980,7 +982,7 @@ class PulsarRow:
             raise ValueError("The value of endPhaseBin must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(endPhaseBin)
+            listDims = pyasdm.utils.getListDims(endPhaseBin)
 
             shapeOK = len(listDims) == 1
 
@@ -989,7 +991,7 @@ class PulsarRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(endPhaseBin, float):
+            if not pyasdm.utils.checkListType(endPhaseBin, float):
                 raise ValueError(
                     "type of the first value in endPhaseBin is not float as expected"
                 )

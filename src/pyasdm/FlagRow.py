@@ -33,6 +33,8 @@ import pyasdm.FlagTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -490,7 +492,7 @@ class FlagRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                channel_dims = Parser.getListDims(self._channel)
+                channel_dims = pyasdm.utils.getListDims(self._channel)
             # assumes it really is 2D
             eos.writeInt(channel_dims[0])
             eos.writeInt(channel_dims[1])
@@ -1040,7 +1042,7 @@ class FlagRow:
             raise ValueError("The value of polarizationType must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationType)
+            listDims = pyasdm.utils.getListDims(polarizationType)
 
             shapeOK = len(listDims) == 1
 
@@ -1049,7 +1051,7 @@ class FlagRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationType, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationType, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationType is not PolarizationType as expected"
                 )
@@ -1106,7 +1108,7 @@ class FlagRow:
             raise ValueError("The value of channel must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(channel)
+            listDims = pyasdm.utils.getListDims(channel)
 
             shapeOK = len(listDims) == 2
 
@@ -1115,7 +1117,7 @@ class FlagRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(channel, int):
+            if not pyasdm.utils.checkListType(channel, int):
                 raise ValueError(
                     "type of the first value in channel is not int as expected"
                 )
@@ -1159,7 +1161,7 @@ class FlagRow:
             raise ValueError("The value of antennaId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(antennaId)
+            listDims = pyasdm.utils.getListDims(antennaId)
 
             shapeOK = len(listDims) == 1
 
@@ -1168,7 +1170,7 @@ class FlagRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(antennaId, Tag):
+            if not pyasdm.utils.checkListType(antennaId, Tag):
                 raise ValueError(
                     "type of the first value in antennaId is not Tag as expected"
                 )
@@ -1217,7 +1219,7 @@ class FlagRow:
             raise ValueError("The value of pairedAntennaId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(pairedAntennaId)
+            listDims = pyasdm.utils.getListDims(pairedAntennaId)
 
             shapeOK = len(listDims) == 1
 
@@ -1226,7 +1228,7 @@ class FlagRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(pairedAntennaId, Tag):
+            if not pyasdm.utils.checkListType(pairedAntennaId, Tag):
                 raise ValueError(
                     "type of the first value in pairedAntennaId is not Tag as expected"
                 )
@@ -1283,7 +1285,7 @@ class FlagRow:
             raise ValueError("The value of spectralWindowId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(spectralWindowId)
+            listDims = pyasdm.utils.getListDims(spectralWindowId)
 
             shapeOK = len(listDims) == 1
 
@@ -1292,7 +1294,7 @@ class FlagRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(spectralWindowId, Tag):
+            if not pyasdm.utils.checkListType(spectralWindowId, Tag):
                 raise ValueError(
                     "type of the first value in spectralWindowId is not Tag as expected"
                 )

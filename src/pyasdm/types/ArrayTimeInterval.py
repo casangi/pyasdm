@@ -26,6 +26,8 @@
 from .ArrayTime import ArrayTime
 from .Interval import Interval
 
+import pyasdm.utils
+
 import math
 
 # these needs to be somewhere that it can be set globally when the ASDM is loaded
@@ -338,25 +340,137 @@ class ArrayTimeInterval:
         elif isinstance(atORati, ArrayTimeInterval):
             return self.containsArrayTimeInterval(atORati)
         else:
-            raise ValueError("contains argument must be an ArrayTime or an ArrayTimeInterval.")
+            raise ValueError(
+                "contains argument must be an ArrayTime or an ArrayTimeInterval."
+            )
 
     # Formatter
     def toString(self):
         result = "(start="
-        result += str(self.getStart())
+        result += str(self.getStart().toString())
         result += ",duration="
-        result += str(self.getDuration())
+        result += str(self.getDuration().toString())
         result += ")"
         return result
 
-    def toBin(self):
+    def toBin(self, eout):
         """
-        Write the binary representation
+        Write the binary representation to an EndianOutput instance
         It successively writes midpoint and duration.
-
-        There needs to be a version that writes an list of ArrayTimeInterval out as binary.
         """
-        raise RuntimeError("ArrayTimeInterval.toBin not yet implemented")
+        eout.writeLong(self.getMidPoint().get())
+        eout.writeLong(self.getDuration().get())
+
+    @staticmethod
+    def listToBin(atiList, eos):
+        """
+        Write a list of ArrayTimeInterval to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(atiList, list):
+            raise ValueError("atiList is not a list")
+
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(atiList)
+        ndims = len(listDims)
+        if ndims == 1:
+            ArrayTimeInterval.listTo1DBin(atiList, eos)
+        elif ndims == 2:
+            ArrayTimeInterval.listTo2DBin(atiList, eos)
+        elif ndims == 3:
+            ArrayTimeInterval.listTo3DBin(atiList, eos)
+
+        raise ValueError(
+            "unsupport number of dimensions in atiList in ArrayTimeInterval.listToBin : "
+            + str(ndims)
+        )
+
+    @staticmethod
+    def listTo1DBin(atiList, eout):
+        """
+        Write the binary representation of a 1D list of ArrayTimeInterval instances to
+        an EndianOutput instance.
+        """
+        if not isinstance(atiList, list):
+            raise ValueError("atiList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eout.writeInt(len(atiList))
+
+        # only check the first value
+        if len(atiList) > 0 and not isinstance(atiList[0], ArrayTimeInterval):
+            raise ValueError("atiList is not a list of ArrayTimeInterval")
+
+        for thisAti in atiList:
+            thisAti.toBin(eout)
+
+    @staticmethod
+    def listTo2DBin(atiList, eout):
+        """
+        Write the binary representation of a 2D list of ArrayTimeInterval instances to
+        an EndianOutput instance.
+        """
+        if not isinstance(atiList, list):
+            raise ValueError("atiList is not a list")
+
+        ndim1 = len(atiList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(atiList[0], list):
+                raise ValueError("atiList is not a 2D list")
+
+            ndim2 = len(atiList[0])
+            if ndim2 > 0 and not isinstance(atiList[0][0], ArrayTimeInterval):
+                raise ValueError("atiList is not a 2D list of ArrayTimeInterval")
+
+        # ndims are always written, even for 0-element lists
+        eout.writeInt(ndim1)
+        eout.writeInt(ndim2)
+
+        for thisList in atiList:
+            for thisAti in thisList:
+                thisAti.toBin(eout)
+
+    @staticmethod
+    def listTo3DBin(atiList, eout):
+        """
+        Write the binary representation of a 3D list of ArrayTimeInterval instances to
+        an EndianOutput instance.
+        """
+        if not isinstance(atiList, list):
+            raise ValueError("atiList is not a list")
+
+        ndim1 = len(atiList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(atiList[0], list):
+                raise ValueError("atiList is not a 3D list")
+
+            ndim2 = len(atiList[0])
+
+            if ndim2 > 0:
+                # only check the first value in the middle list
+                if not isinstance(atiList[0][0], list):
+                    raise ValueError("atiList is a 3D list")
+
+                ndim3 = len(atiList[0][0])
+                if ndim3 > 0 and not isinstance(atiList[0][0][0], ArrayTimeInterval):
+                    raise ValueError("atiList is not a 2D list of ArrayTimeInterval")
+
+        # ndims are always written, even for 0-element lists
+        eout.writeInt(ndim1)
+        eout.writeInt(ndim2)
+        eout.writeInt(ndim3)
+
+        for thisList in atiList:
+            for thisMidList in thisList:
+                for thisAti in thisMidList:
+                    thisAti.toBin(eout)
 
     @staticmethod
     def setReadStartTimeDurationInBin(torf):
@@ -416,26 +530,81 @@ class ArrayTimeInterval:
         """
         return _readStartTimeDurationInXML
 
-    def fromBin(self):
+    @staticmethod
+    def fromBin(eis):
         """
         Read the binary representation of an ArrayTimeInterval
-        and use the read value to set an  ArrayTimeInterval.
+        from an EndianInput instance and use the read values to set an
+        ArrayTimeInterval.
 
         return an ArrayTimeInterval
 
         Remember that it reads two long integers (64 bits). The first one is considered as the midpoint of the interval
-        and the second one is the duration.
+        and the second one is the duration. If readStartTimeDurationInBin() is True then the first integer
+        is interpreted as the start time, not the midpoint, of the interval.0
 
         """
-        raise RuntimeError("fromBin is not yet implemented")
+        l1 = eis.readLong()
+        l2 = eis.readLong()
+        if ArrayTimeInterval.readStartTimeDurationInBin():
+            return ArrayTimeInterval(l1, l2)
+        else:
+            # ensure that the division here results in an integer
+            return ArrayTimeInterval(int((l1 - l2) / 2), l2)
 
-    def from1DBin(self):
+    # static method
+    def from1DBin(ein):
         """
-        Read the binary representation of a 1D array of  ArrayTimeInterval
-        and use the read value to set a 1D list of  ArrayTimeInterval.
+        Read the binary representations of a 1D array of ArrayTimeInterval
+        from an EndianInput instance to set a 1D list of  ArrayTimeInterval.
         return a 1D list of ArrayTimeInterval
         """
-        raise RuntimeError("from1DBin is not yet implemented")
+        ndim = ein.readInt()
+        result = []
+        for i in range(ndim):
+            result.append(ArrayTimeInterval.fromBin(ein))
+
+        return result
+
+    # static method
+    def from2DBin(ein):
+        """
+        Read the binary representations of a 2D array of ArrayTimeInterval
+        from an EndianInput instance to set a 2D list of  ArrayTimeInterval.
+        return a 1D list of ArrayTimeInterval
+        """
+        ndim1 = ein.readInt()
+        ndim2 = ein.readInt()
+        result = []
+        for i in range(ndim1):
+            innerList = []
+            for j in range(ndim2):
+                innerList.append(ArrayTimeInterval.fromBin(ein))
+            result.append(innerList)
+
+        return result
+
+    # static method
+    def from3DBin(ein):
+        """
+        Read the binary representations of a 3D array of ArrayTimeInterval
+        from an EndianInput instance to set a 3D list of  ArrayTimeInterval.
+        return a 3D list of ArrayTimeInterval
+        """
+        ndim1 = ein.readInt()
+        ndim2 = ein.readInt()
+        ndim3 = ein.readInt()
+        result = []
+        for i in range(ndim1):
+            middleList = []
+            for j in range(ndim2):
+                innerList = []
+                for k in range(ndim3):
+                    innerList.append(ArrayTimeInterval.fromBin(ein))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     @staticmethod
     def getInstance(stringList):

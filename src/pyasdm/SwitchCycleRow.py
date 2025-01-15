@@ -33,6 +33,8 @@ import pyasdm.SwitchCycleTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -505,7 +507,7 @@ class SwitchCycleRow:
             raise ValueError("The value of weightArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(weightArray)
+            listDims = pyasdm.utils.getListDims(weightArray)
 
             shapeOK = len(listDims) == 1
 
@@ -514,7 +516,7 @@ class SwitchCycleRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(weightArray, float):
+            if not pyasdm.utils.checkListType(weightArray, float):
                 raise ValueError(
                     "type of the first value in weightArray is not float as expected"
                 )
@@ -548,7 +550,7 @@ class SwitchCycleRow:
             raise ValueError("The value of dirOffsetArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(dirOffsetArray)
+            listDims = pyasdm.utils.getListDims(dirOffsetArray)
 
             shapeOK = len(listDims) == 2
 
@@ -557,7 +559,7 @@ class SwitchCycleRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(dirOffsetArray, Angle):
+            if not pyasdm.utils.checkListType(dirOffsetArray, Angle):
                 raise ValueError(
                     "type of the first value in dirOffsetArray is not Angle as expected"
                 )
@@ -591,7 +593,7 @@ class SwitchCycleRow:
             raise ValueError("The value of freqOffsetArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(freqOffsetArray)
+            listDims = pyasdm.utils.getListDims(freqOffsetArray)
 
             shapeOK = len(listDims) == 1
 
@@ -600,7 +602,7 @@ class SwitchCycleRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(freqOffsetArray, Frequency):
+            if not pyasdm.utils.checkListType(freqOffsetArray, Frequency):
                 raise ValueError(
                     "type of the first value in freqOffsetArray is not Frequency as expected"
                 )
@@ -634,7 +636,7 @@ class SwitchCycleRow:
             raise ValueError("The value of stepDurationArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(stepDurationArray)
+            listDims = pyasdm.utils.getListDims(stepDurationArray)
 
             shapeOK = len(listDims) == 1
 
@@ -643,7 +645,7 @@ class SwitchCycleRow:
 
             # the type of the values in the list must be Interval
             # note : this only checks the first value found
-            if not Parser.checkListType(stepDurationArray, Interval):
+            if not pyasdm.utils.checkListType(stepDurationArray, Interval):
                 raise ValueError(
                     "type of the first value in stepDurationArray is not Interval as expected"
                 )
@@ -777,8 +779,8 @@ class SwitchCycleRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            dirOffsetArray_dims = Parser.getListDims(dirOffsetArray)
-            this_dirOffsetArray_dims = Parser.getListDims(self._dirOffsetArray)
+            dirOffsetArray_dims = pyasdm.utils.getListDims(dirOffsetArray)
+            this_dirOffsetArray_dims = pyasdm.utils.getListDims(self._dirOffsetArray)
             if dirOffsetArray_dims != this_dirOffsetArray_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -857,8 +859,8 @@ class SwitchCycleRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            dirOffsetArray_dims = Parser.getListDims(dirOffsetArray)
-            this_dirOffsetArray_dims = Parser.getListDims(self._dirOffsetArray)
+            dirOffsetArray_dims = pyasdm.utils.getListDims(dirOffsetArray)
+            this_dirOffsetArray_dims = pyasdm.utils.getListDims(self._dirOffsetArray)
             if dirOffsetArray_dims != this_dirOffsetArray_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

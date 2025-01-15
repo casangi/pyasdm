@@ -33,6 +33,8 @@ import pyasdm.ReceiverTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -562,7 +564,7 @@ class ReceiverRow:
             raise ValueError("The value of freqLO must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(freqLO)
+            listDims = pyasdm.utils.getListDims(freqLO)
 
             shapeOK = len(listDims) == 1
 
@@ -571,7 +573,7 @@ class ReceiverRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(freqLO, Frequency):
+            if not pyasdm.utils.checkListType(freqLO, Frequency):
                 raise ValueError(
                     "type of the first value in freqLO is not Frequency as expected"
                 )
@@ -627,7 +629,7 @@ class ReceiverRow:
             raise ValueError("The value of sidebandLO must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sidebandLO)
+            listDims = pyasdm.utils.getListDims(sidebandLO)
 
             shapeOK = len(listDims) == 1
 
@@ -636,7 +638,7 @@ class ReceiverRow:
 
             # the type of the values in the list must be NetSideband
             # note : this only checks the first value found
-            if not Parser.checkListType(sidebandLO, NetSideband):
+            if not pyasdm.utils.checkListType(sidebandLO, NetSideband):
                 raise ValueError(
                     "type of the first value in sidebandLO is not NetSideband as expected"
                 )

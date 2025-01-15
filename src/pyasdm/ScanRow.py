@@ -33,6 +33,8 @@ import pyasdm.ScanTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -852,7 +854,7 @@ class ScanRow:
             raise ValueError("The value of scanIntent must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(scanIntent)
+            listDims = pyasdm.utils.getListDims(scanIntent)
 
             shapeOK = len(listDims) == 1
 
@@ -861,7 +863,7 @@ class ScanRow:
 
             # the type of the values in the list must be ScanIntent
             # note : this only checks the first value found
-            if not Parser.checkListType(scanIntent, ScanIntent):
+            if not pyasdm.utils.checkListType(scanIntent, ScanIntent):
                 raise ValueError(
                     "type of the first value in scanIntent is not ScanIntent as expected"
                 )
@@ -895,7 +897,7 @@ class ScanRow:
             raise ValueError("The value of calDataType must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(calDataType)
+            listDims = pyasdm.utils.getListDims(calDataType)
 
             shapeOK = len(listDims) == 1
 
@@ -904,7 +906,7 @@ class ScanRow:
 
             # the type of the values in the list must be CalDataOrigin
             # note : this only checks the first value found
-            if not Parser.checkListType(calDataType, CalDataOrigin):
+            if not pyasdm.utils.checkListType(calDataType, CalDataOrigin):
                 raise ValueError(
                     "type of the first value in calDataType is not CalDataOrigin as expected"
                 )
@@ -938,7 +940,7 @@ class ScanRow:
             raise ValueError("The value of calibrationOnLine must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(calibrationOnLine)
+            listDims = pyasdm.utils.getListDims(calibrationOnLine)
 
             shapeOK = len(listDims) == 1
 
@@ -947,7 +949,7 @@ class ScanRow:
 
             # the type of the values in the list must be bool
             # note : this only checks the first value found
-            if not Parser.checkListType(calibrationOnLine, bool):
+            if not pyasdm.utils.checkListType(calibrationOnLine, bool):
                 raise ValueError(
                     "type of the first value in calibrationOnLine is not bool as expected"
                 )
@@ -996,7 +998,7 @@ class ScanRow:
             raise ValueError("The value of calibrationFunction must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(calibrationFunction)
+            listDims = pyasdm.utils.getListDims(calibrationFunction)
 
             shapeOK = len(listDims) == 1
 
@@ -1005,7 +1007,7 @@ class ScanRow:
 
             # the type of the values in the list must be CalibrationFunction
             # note : this only checks the first value found
-            if not Parser.checkListType(calibrationFunction, CalibrationFunction):
+            if not pyasdm.utils.checkListType(calibrationFunction, CalibrationFunction):
                 raise ValueError(
                     "type of the first value in calibrationFunction is not CalibrationFunction as expected"
                 )
@@ -1062,7 +1064,7 @@ class ScanRow:
             raise ValueError("The value of calibrationSet must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(calibrationSet)
+            listDims = pyasdm.utils.getListDims(calibrationSet)
 
             shapeOK = len(listDims) == 1
 
@@ -1071,7 +1073,7 @@ class ScanRow:
 
             # the type of the values in the list must be CalibrationSet
             # note : this only checks the first value found
-            if not Parser.checkListType(calibrationSet, CalibrationSet):
+            if not pyasdm.utils.checkListType(calibrationSet, CalibrationSet):
                 raise ValueError(
                     "type of the first value in calibrationSet is not CalibrationSet as expected"
                 )
@@ -1128,7 +1130,7 @@ class ScanRow:
             raise ValueError("The value of calPattern must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(calPattern)
+            listDims = pyasdm.utils.getListDims(calPattern)
 
             shapeOK = len(listDims) == 1
 
@@ -1137,7 +1139,7 @@ class ScanRow:
 
             # the type of the values in the list must be AntennaMotionPattern
             # note : this only checks the first value found
-            if not Parser.checkListType(calPattern, AntennaMotionPattern):
+            if not pyasdm.utils.checkListType(calPattern, AntennaMotionPattern):
                 raise ValueError(
                     "type of the first value in calPattern is not AntennaMotionPattern as expected"
                 )
@@ -1239,7 +1241,7 @@ class ScanRow:
             raise ValueError("The value of fieldName must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(fieldName)
+            listDims = pyasdm.utils.getListDims(fieldName)
 
             shapeOK = len(listDims) == 1
 
@@ -1248,7 +1250,7 @@ class ScanRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(fieldName, str):
+            if not pyasdm.utils.checkListType(fieldName, str):
                 raise ValueError(
                     "type of the first value in fieldName is not str as expected"
                 )

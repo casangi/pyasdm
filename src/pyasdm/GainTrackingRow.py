@@ -33,6 +33,8 @@ import pyasdm.GainTrackingTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -610,7 +612,7 @@ class GainTrackingRow:
             raise ValueError("The value of attenuator must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(attenuator)
+            listDims = pyasdm.utils.getListDims(attenuator)
 
             shapeOK = len(listDims) == 1
 
@@ -619,7 +621,7 @@ class GainTrackingRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(attenuator, float):
+            if not pyasdm.utils.checkListType(attenuator, float):
                 raise ValueError(
                     "type of the first value in attenuator is not float as expected"
                 )
@@ -653,7 +655,7 @@ class GainTrackingRow:
             raise ValueError("The value of polarizationType must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationType)
+            listDims = pyasdm.utils.getListDims(polarizationType)
 
             shapeOK = len(listDims) == 1
 
@@ -662,7 +664,7 @@ class GainTrackingRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationType, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationType, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationType is not PolarizationType as expected"
                 )
@@ -801,7 +803,7 @@ class GainTrackingRow:
             raise ValueError("The value of attFreq must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(attFreq)
+            listDims = pyasdm.utils.getListDims(attFreq)
 
             shapeOK = len(listDims) == 1
 
@@ -810,7 +812,7 @@ class GainTrackingRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(attFreq, float):
+            if not pyasdm.utils.checkListType(attFreq, float):
                 raise ValueError(
                     "type of the first value in attFreq is not float as expected"
                 )
@@ -867,7 +869,7 @@ class GainTrackingRow:
             raise ValueError("The value of attSpectrum must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(attSpectrum)
+            listDims = pyasdm.utils.getListDims(attSpectrum)
 
             shapeOK = len(listDims) == 1
 
@@ -876,7 +878,7 @@ class GainTrackingRow:
 
             # the type of the values in the list must be Complex
             # note : this only checks the first value found
-            if not Parser.checkListType(attSpectrum, Complex):
+            if not pyasdm.utils.checkListType(attSpectrum, Complex):
                 raise ValueError(
                     "type of the first value in attSpectrum is not Complex as expected"
                 )

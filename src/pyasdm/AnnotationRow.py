@@ -33,6 +33,8 @@ import pyasdm.AnnotationTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -552,7 +554,7 @@ class AnnotationRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                vvdValues_dims = Parser.getListDims(self._vvdValues)
+                vvdValues_dims = pyasdm.utils.getListDims(self._vvdValues)
             # assumes it really is 2D
             eos.writeInt(vvdValues_dims[0])
             eos.writeInt(vvdValues_dims[1])
@@ -581,7 +583,7 @@ class AnnotationRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                vvllValue_dims = Parser.getListDims(self._vvllValue)
+                vvllValue_dims = pyasdm.utils.getListDims(self._vvllValue)
             # assumes it really is 2D
             eos.writeInt(vvllValue_dims[0])
             eos.writeInt(vvllValue_dims[1])
@@ -1018,7 +1020,7 @@ class AnnotationRow:
             raise ValueError("The value of basebandName must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(basebandName)
+            listDims = pyasdm.utils.getListDims(basebandName)
 
             shapeOK = len(listDims) == 1
 
@@ -1027,7 +1029,7 @@ class AnnotationRow:
 
             # the type of the values in the list must be BasebandName
             # note : this only checks the first value found
-            if not Parser.checkListType(basebandName, BasebandName):
+            if not pyasdm.utils.checkListType(basebandName, BasebandName):
                 raise ValueError(
                     "type of the first value in basebandName is not BasebandName as expected"
                 )
@@ -1220,7 +1222,7 @@ class AnnotationRow:
             raise ValueError("The value of vdValue must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(vdValue)
+            listDims = pyasdm.utils.getListDims(vdValue)
 
             shapeOK = len(listDims) == 1
 
@@ -1229,7 +1231,7 @@ class AnnotationRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(vdValue, float):
+            if not pyasdm.utils.checkListType(vdValue, float):
                 raise ValueError(
                     "type of the first value in vdValue is not float as expected"
                 )
@@ -1286,7 +1288,7 @@ class AnnotationRow:
             raise ValueError("The value of vvdValues must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(vvdValues)
+            listDims = pyasdm.utils.getListDims(vvdValues)
 
             shapeOK = len(listDims) == 2
 
@@ -1295,7 +1297,7 @@ class AnnotationRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(vvdValues, float):
+            if not pyasdm.utils.checkListType(vvdValues, float):
                 raise ValueError(
                     "type of the first value in vvdValues is not float as expected"
                 )
@@ -1397,7 +1399,7 @@ class AnnotationRow:
             raise ValueError("The value of vllValue must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(vllValue)
+            listDims = pyasdm.utils.getListDims(vllValue)
 
             shapeOK = len(listDims) == 1
 
@@ -1406,7 +1408,7 @@ class AnnotationRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(vllValue, int):
+            if not pyasdm.utils.checkListType(vllValue, int):
                 raise ValueError(
                     "type of the first value in vllValue is not int as expected"
                 )
@@ -1463,7 +1465,7 @@ class AnnotationRow:
             raise ValueError("The value of vvllValue must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(vvllValue)
+            listDims = pyasdm.utils.getListDims(vvllValue)
 
             shapeOK = len(listDims) == 2
 
@@ -1472,7 +1474,7 @@ class AnnotationRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(vvllValue, int):
+            if not pyasdm.utils.checkListType(vvllValue, int):
                 raise ValueError(
                     "type of the first value in vvllValue is not int as expected"
                 )
@@ -1576,7 +1578,7 @@ class AnnotationRow:
             raise ValueError("The value of antennaId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(antennaId)
+            listDims = pyasdm.utils.getListDims(antennaId)
 
             shapeOK = len(listDims) == 1
 
@@ -1585,7 +1587,7 @@ class AnnotationRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(antennaId, Tag):
+            if not pyasdm.utils.checkListType(antennaId, Tag):
                 raise ValueError(
                     "type of the first value in antennaId is not Tag as expected"
                 )

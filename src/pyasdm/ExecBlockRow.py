@@ -33,6 +33,8 @@ import pyasdm.ExecBlockTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -1219,7 +1221,7 @@ class ExecBlockRow:
             raise ValueError("The value of observingLog must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(observingLog)
+            listDims = pyasdm.utils.getListDims(observingLog)
 
             shapeOK = len(listDims) == 1
 
@@ -1228,7 +1230,7 @@ class ExecBlockRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(observingLog, str):
+            if not pyasdm.utils.checkListType(observingLog, str):
                 raise ValueError(
                     "type of the first value in observingLog is not str as expected"
                 )
@@ -1766,7 +1768,7 @@ class ExecBlockRow:
             raise ValueError("The value of antennaId must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(antennaId)
+            listDims = pyasdm.utils.getListDims(antennaId)
 
             shapeOK = len(listDims) == 1
 
@@ -1775,7 +1777,7 @@ class ExecBlockRow:
 
             # the type of the values in the list must be Tag
             # note : this only checks the first value found
-            if not Parser.checkListType(antennaId, Tag):
+            if not pyasdm.utils.checkListType(antennaId, Tag):
                 raise ValueError(
                     "type of the first value in antennaId is not Tag as expected"
                 )

@@ -33,6 +33,8 @@ import pyasdm.CalPhaseTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -618,7 +620,7 @@ class CalPhaseRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            ampli_dims = Parser.getListDims(self._ampli)
+            ampli_dims = pyasdm.utils.getListDims(self._ampli)
         # assumes it really is 2D
         eos.writeInt(ampli_dims[0])
         eos.writeInt(ampli_dims[1])
@@ -631,7 +633,7 @@ class CalPhaseRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            antennaNames_dims = Parser.getListDims(self._antennaNames)
+            antennaNames_dims = pyasdm.utils.getListDims(self._antennaNames)
         # assumes it really is 2D
         eos.writeInt(antennaNames_dims[0])
         eos.writeInt(antennaNames_dims[1])
@@ -646,7 +648,9 @@ class CalPhaseRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            decorrelationFactor_dims = Parser.getListDims(self._decorrelationFactor)
+            decorrelationFactor_dims = pyasdm.utils.getListDims(
+                self._decorrelationFactor
+            )
         # assumes it really is 2D
         eos.writeInt(decorrelationFactor_dims[0])
         eos.writeInt(decorrelationFactor_dims[1])
@@ -665,7 +669,7 @@ class CalPhaseRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            phase_dims = Parser.getListDims(self._phase)
+            phase_dims = pyasdm.utils.getListDims(self._phase)
         # assumes it really is 2D
         eos.writeInt(phase_dims[0])
         eos.writeInt(phase_dims[1])
@@ -683,7 +687,7 @@ class CalPhaseRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            phaseRMS_dims = Parser.getListDims(self._phaseRMS)
+            phaseRMS_dims = pyasdm.utils.getListDims(self._phaseRMS)
         # assumes it really is 2D
         eos.writeInt(phaseRMS_dims[0])
         eos.writeInt(phaseRMS_dims[1])
@@ -696,7 +700,7 @@ class CalPhaseRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            statPhaseRMS_dims = Parser.getListDims(self._statPhaseRMS)
+            statPhaseRMS_dims = pyasdm.utils.getListDims(self._statPhaseRMS)
         # assumes it really is 2D
         eos.writeInt(statPhaseRMS_dims[0])
         eos.writeInt(statPhaseRMS_dims[1])
@@ -738,7 +742,7 @@ class CalPhaseRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                phaseAnt_dims = Parser.getListDims(self._phaseAnt)
+                phaseAnt_dims = pyasdm.utils.getListDims(self._phaseAnt)
             # assumes it really is 2D
             eos.writeInt(phaseAnt_dims[0])
             eos.writeInt(phaseAnt_dims[1])
@@ -754,7 +758,7 @@ class CalPhaseRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                phaseAntRMS_dims = Parser.getListDims(self._phaseAntRMS)
+                phaseAntRMS_dims = pyasdm.utils.getListDims(self._phaseAntRMS)
             # assumes it really is 2D
             eos.writeInt(phaseAntRMS_dims[0])
             eos.writeInt(phaseAntRMS_dims[1])
@@ -1333,7 +1337,7 @@ class CalPhaseRow:
             raise ValueError("The value of ampli must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(ampli)
+            listDims = pyasdm.utils.getListDims(ampli)
 
             shapeOK = len(listDims) == 2
 
@@ -1342,7 +1346,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(ampli, float):
+            if not pyasdm.utils.checkListType(ampli, float):
                 raise ValueError(
                     "type of the first value in ampli is not float as expected"
                 )
@@ -1376,7 +1380,7 @@ class CalPhaseRow:
             raise ValueError("The value of antennaNames must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(antennaNames)
+            listDims = pyasdm.utils.getListDims(antennaNames)
 
             shapeOK = len(listDims) == 2
 
@@ -1385,7 +1389,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(antennaNames, str):
+            if not pyasdm.utils.checkListType(antennaNames, str):
                 raise ValueError(
                     "type of the first value in antennaNames is not str as expected"
                 )
@@ -1419,7 +1423,7 @@ class CalPhaseRow:
             raise ValueError("The value of baselineLengths must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(baselineLengths)
+            listDims = pyasdm.utils.getListDims(baselineLengths)
 
             shapeOK = len(listDims) == 1
 
@@ -1428,7 +1432,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(baselineLengths, Length):
+            if not pyasdm.utils.checkListType(baselineLengths, Length):
                 raise ValueError(
                     "type of the first value in baselineLengths is not Length as expected"
                 )
@@ -1462,7 +1466,7 @@ class CalPhaseRow:
             raise ValueError("The value of decorrelationFactor must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(decorrelationFactor)
+            listDims = pyasdm.utils.getListDims(decorrelationFactor)
 
             shapeOK = len(listDims) == 2
 
@@ -1471,7 +1475,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(decorrelationFactor, float):
+            if not pyasdm.utils.checkListType(decorrelationFactor, float):
                 raise ValueError(
                     "type of the first value in decorrelationFactor is not float as expected"
                 )
@@ -1505,7 +1509,7 @@ class CalPhaseRow:
             raise ValueError("The value of direction must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(direction)
+            listDims = pyasdm.utils.getListDims(direction)
 
             shapeOK = len(listDims) == 1
 
@@ -1514,7 +1518,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(direction, Angle):
+            if not pyasdm.utils.checkListType(direction, Angle):
                 raise ValueError(
                     "type of the first value in direction is not Angle as expected"
                 )
@@ -1548,7 +1552,7 @@ class CalPhaseRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -1557,7 +1561,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -1614,7 +1618,7 @@ class CalPhaseRow:
             raise ValueError("The value of phase must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phase)
+            listDims = pyasdm.utils.getListDims(phase)
 
             shapeOK = len(listDims) == 2
 
@@ -1623,7 +1627,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phase, float):
+            if not pyasdm.utils.checkListType(phase, float):
                 raise ValueError(
                     "type of the first value in phase is not float as expected"
                 )
@@ -1657,7 +1661,7 @@ class CalPhaseRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -1666,7 +1670,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1700,7 +1704,7 @@ class CalPhaseRow:
             raise ValueError("The value of phaseRMS must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseRMS)
+            listDims = pyasdm.utils.getListDims(phaseRMS)
 
             shapeOK = len(listDims) == 2
 
@@ -1709,7 +1713,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseRMS, float):
+            if not pyasdm.utils.checkListType(phaseRMS, float):
                 raise ValueError(
                     "type of the first value in phaseRMS is not float as expected"
                 )
@@ -1743,7 +1747,7 @@ class CalPhaseRow:
             raise ValueError("The value of statPhaseRMS must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(statPhaseRMS)
+            listDims = pyasdm.utils.getListDims(statPhaseRMS)
 
             shapeOK = len(listDims) == 2
 
@@ -1752,7 +1756,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(statPhaseRMS, float):
+            if not pyasdm.utils.checkListType(statPhaseRMS, float):
                 raise ValueError(
                     "type of the first value in statPhaseRMS is not float as expected"
                 )
@@ -1801,7 +1805,7 @@ class CalPhaseRow:
             raise ValueError("The value of correctionValidity must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(correctionValidity)
+            listDims = pyasdm.utils.getListDims(correctionValidity)
 
             shapeOK = len(listDims) == 1
 
@@ -1810,7 +1814,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be bool
             # note : this only checks the first value found
-            if not Parser.checkListType(correctionValidity, bool):
+            if not pyasdm.utils.checkListType(correctionValidity, bool):
                 raise ValueError(
                     "type of the first value in correctionValidity is not bool as expected"
                 )
@@ -1912,7 +1916,7 @@ class CalPhaseRow:
             raise ValueError("The value of singleAntennaName must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(singleAntennaName)
+            listDims = pyasdm.utils.getListDims(singleAntennaName)
 
             shapeOK = len(listDims) == 1
 
@@ -1921,7 +1925,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(singleAntennaName, str):
+            if not pyasdm.utils.checkListType(singleAntennaName, str):
                 raise ValueError(
                     "type of the first value in singleAntennaName is not str as expected"
                 )
@@ -2023,7 +2027,7 @@ class CalPhaseRow:
             raise ValueError("The value of phaseAnt must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseAnt)
+            listDims = pyasdm.utils.getListDims(phaseAnt)
 
             shapeOK = len(listDims) == 2
 
@@ -2032,7 +2036,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseAnt, float):
+            if not pyasdm.utils.checkListType(phaseAnt, float):
                 raise ValueError(
                     "type of the first value in phaseAnt is not float as expected"
                 )
@@ -2089,7 +2093,7 @@ class CalPhaseRow:
             raise ValueError("The value of phaseAntRMS must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseAntRMS)
+            listDims = pyasdm.utils.getListDims(phaseAntRMS)
 
             shapeOK = len(listDims) == 2
 
@@ -2098,7 +2102,7 @@ class CalPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseAntRMS, float):
+            if not pyasdm.utils.checkListType(phaseAntRMS, float):
                 raise ValueError(
                     "type of the first value in phaseAntRMS is not float as expected"
                 )
@@ -2271,8 +2275,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            ampli_dims = Parser.getListDims(ampli)
-            this_ampli_dims = Parser.getListDims(self._ampli)
+            ampli_dims = pyasdm.utils.getListDims(ampli)
+            this_ampli_dims = pyasdm.utils.getListDims(self._ampli)
             if ampli_dims != this_ampli_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2290,8 +2294,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            antennaNames_dims = Parser.getListDims(antennaNames)
-            this_antennaNames_dims = Parser.getListDims(self._antennaNames)
+            antennaNames_dims = pyasdm.utils.getListDims(antennaNames)
+            this_antennaNames_dims = pyasdm.utils.getListDims(self._antennaNames)
             if antennaNames_dims != this_antennaNames_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2321,8 +2325,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            decorrelationFactor_dims = Parser.getListDims(decorrelationFactor)
-            this_decorrelationFactor_dims = Parser.getListDims(
+            decorrelationFactor_dims = pyasdm.utils.getListDims(decorrelationFactor)
+            this_decorrelationFactor_dims = pyasdm.utils.getListDims(
                 self._decorrelationFactor
             )
             if decorrelationFactor_dims != this_decorrelationFactor_dims:
@@ -2372,8 +2376,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            phase_dims = Parser.getListDims(phase)
-            this_phase_dims = Parser.getListDims(self._phase)
+            phase_dims = pyasdm.utils.getListDims(phase)
+            this_phase_dims = pyasdm.utils.getListDims(self._phase)
             if phase_dims != this_phase_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2401,8 +2405,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            phaseRMS_dims = Parser.getListDims(phaseRMS)
-            this_phaseRMS_dims = Parser.getListDims(self._phaseRMS)
+            phaseRMS_dims = pyasdm.utils.getListDims(phaseRMS)
+            this_phaseRMS_dims = pyasdm.utils.getListDims(self._phaseRMS)
             if phaseRMS_dims != this_phaseRMS_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2420,8 +2424,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            statPhaseRMS_dims = Parser.getListDims(statPhaseRMS)
-            this_statPhaseRMS_dims = Parser.getListDims(self._statPhaseRMS)
+            statPhaseRMS_dims = pyasdm.utils.getListDims(statPhaseRMS)
+            this_statPhaseRMS_dims = pyasdm.utils.getListDims(self._statPhaseRMS)
             if statPhaseRMS_dims != this_statPhaseRMS_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2500,8 +2504,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            ampli_dims = Parser.getListDims(ampli)
-            this_ampli_dims = Parser.getListDims(self._ampli)
+            ampli_dims = pyasdm.utils.getListDims(ampli)
+            this_ampli_dims = pyasdm.utils.getListDims(self._ampli)
             if ampli_dims != this_ampli_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2519,8 +2523,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            antennaNames_dims = Parser.getListDims(antennaNames)
-            this_antennaNames_dims = Parser.getListDims(self._antennaNames)
+            antennaNames_dims = pyasdm.utils.getListDims(antennaNames)
+            this_antennaNames_dims = pyasdm.utils.getListDims(self._antennaNames)
             if antennaNames_dims != this_antennaNames_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2550,8 +2554,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            decorrelationFactor_dims = Parser.getListDims(decorrelationFactor)
-            this_decorrelationFactor_dims = Parser.getListDims(
+            decorrelationFactor_dims = pyasdm.utils.getListDims(decorrelationFactor)
+            this_decorrelationFactor_dims = pyasdm.utils.getListDims(
                 self._decorrelationFactor
             )
             if decorrelationFactor_dims != this_decorrelationFactor_dims:
@@ -2601,8 +2605,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            phase_dims = Parser.getListDims(phase)
-            this_phase_dims = Parser.getListDims(self._phase)
+            phase_dims = pyasdm.utils.getListDims(phase)
+            this_phase_dims = pyasdm.utils.getListDims(self._phase)
             if phase_dims != this_phase_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2630,8 +2634,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            phaseRMS_dims = Parser.getListDims(phaseRMS)
-            this_phaseRMS_dims = Parser.getListDims(self._phaseRMS)
+            phaseRMS_dims = pyasdm.utils.getListDims(phaseRMS)
+            this_phaseRMS_dims = pyasdm.utils.getListDims(self._phaseRMS)
             if phaseRMS_dims != this_phaseRMS_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2649,8 +2653,8 @@ class CalPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            statPhaseRMS_dims = Parser.getListDims(statPhaseRMS)
-            this_statPhaseRMS_dims = Parser.getListDims(self._statPhaseRMS)
+            statPhaseRMS_dims = pyasdm.utils.getListDims(statPhaseRMS)
+            this_statPhaseRMS_dims = pyasdm.utils.getListDims(self._statPhaseRMS)
             if statPhaseRMS_dims != this_statPhaseRMS_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

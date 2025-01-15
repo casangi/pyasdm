@@ -33,6 +33,8 @@ import pyasdm.CalAppPhaseTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -574,7 +576,7 @@ class CalAppPhaseRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            efficiencies_dims = Parser.getListDims(self._efficiencies)
+            efficiencies_dims = pyasdm.utils.getListDims(self._efficiencies)
         # assumes it really is 2D
         eos.writeInt(efficiencies_dims[0])
         eos.writeInt(efficiencies_dims[1])
@@ -1160,7 +1162,7 @@ class CalAppPhaseRow:
             raise ValueError("The value of phasedAntennas must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phasedAntennas)
+            listDims = pyasdm.utils.getListDims(phasedAntennas)
 
             shapeOK = len(listDims) == 1
 
@@ -1169,7 +1171,7 @@ class CalAppPhaseRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(phasedAntennas, str):
+            if not pyasdm.utils.checkListType(phasedAntennas, str):
                 raise ValueError(
                     "type of the first value in phasedAntennas is not str as expected"
                 )
@@ -1335,7 +1337,7 @@ class CalAppPhaseRow:
             raise ValueError("The value of phaseValues must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseValues)
+            listDims = pyasdm.utils.getListDims(phaseValues)
 
             shapeOK = len(listDims) == 1
 
@@ -1344,7 +1346,7 @@ class CalAppPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseValues, float):
+            if not pyasdm.utils.checkListType(phaseValues, float):
                 raise ValueError(
                     "type of the first value in phaseValues is not float as expected"
                 )
@@ -1422,7 +1424,7 @@ class CalAppPhaseRow:
             raise ValueError("The value of compareArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(compareArray)
+            listDims = pyasdm.utils.getListDims(compareArray)
 
             shapeOK = len(listDims) == 1
 
@@ -1431,7 +1433,7 @@ class CalAppPhaseRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(compareArray, str):
+            if not pyasdm.utils.checkListType(compareArray, str):
                 raise ValueError(
                     "type of the first value in compareArray is not str as expected"
                 )
@@ -1465,7 +1467,7 @@ class CalAppPhaseRow:
             raise ValueError("The value of efficiencyIndices must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(efficiencyIndices)
+            listDims = pyasdm.utils.getListDims(efficiencyIndices)
 
             shapeOK = len(listDims) == 1
 
@@ -1474,7 +1476,7 @@ class CalAppPhaseRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(efficiencyIndices, int):
+            if not pyasdm.utils.checkListType(efficiencyIndices, int):
                 raise ValueError(
                     "type of the first value in efficiencyIndices is not int as expected"
                 )
@@ -1508,7 +1510,7 @@ class CalAppPhaseRow:
             raise ValueError("The value of efficiencies must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(efficiencies)
+            listDims = pyasdm.utils.getListDims(efficiencies)
 
             shapeOK = len(listDims) == 2
 
@@ -1517,7 +1519,7 @@ class CalAppPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(efficiencies, float):
+            if not pyasdm.utils.checkListType(efficiencies, float):
                 raise ValueError(
                     "type of the first value in efficiencies is not float as expected"
                 )
@@ -1551,7 +1553,7 @@ class CalAppPhaseRow:
             raise ValueError("The value of quality must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(quality)
+            listDims = pyasdm.utils.getListDims(quality)
 
             shapeOK = len(listDims) == 1
 
@@ -1560,7 +1562,7 @@ class CalAppPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(quality, float):
+            if not pyasdm.utils.checkListType(quality, float):
                 raise ValueError(
                     "type of the first value in quality is not float as expected"
                 )
@@ -1721,7 +1723,7 @@ class CalAppPhaseRow:
             raise ValueError("The value of phaseSupports must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(phaseSupports)
+            listDims = pyasdm.utils.getListDims(phaseSupports)
 
             shapeOK = len(listDims) == 1
 
@@ -1730,7 +1732,7 @@ class CalAppPhaseRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(phaseSupports, float):
+            if not pyasdm.utils.checkListType(phaseSupports, float):
                 raise ValueError(
                     "type of the first value in phaseSupports is not float as expected"
                 )
@@ -1984,8 +1986,8 @@ class CalAppPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            efficiencies_dims = Parser.getListDims(efficiencies)
-            this_efficiencies_dims = Parser.getListDims(self._efficiencies)
+            efficiencies_dims = pyasdm.utils.getListDims(efficiencies)
+            this_efficiencies_dims = pyasdm.utils.getListDims(self._efficiencies)
             if efficiencies_dims != this_efficiencies_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -2170,8 +2172,8 @@ class CalAppPhaseRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            efficiencies_dims = Parser.getListDims(efficiencies)
-            this_efficiencies_dims = Parser.getListDims(self._efficiencies)
+            efficiencies_dims = pyasdm.utils.getListDims(efficiencies)
+            this_efficiencies_dims = pyasdm.utils.getListDims(self._efficiencies)
             if efficiencies_dims != this_efficiencies_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

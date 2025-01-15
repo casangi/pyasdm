@@ -172,22 +172,178 @@ class Flux:
                 result.append(item.get())
         return result
 
-    def toBin(self):
-        # it also needs a static method to send a list of flux items toBin
-        # should also work for 2D, 3D lists
-        raise RuntimeError("Flux.toBin is not yet implemented")
+    def toBin(self, eos):
+        """
+        Write this Flux out, in Janskys, to a EndianOutput.
+        """
+        eos.writeDouble(self.get())
 
-    def fromBin(self):
-        raise RuntimeError("Flux.fromBin is not yet implemented")
+    @staticmethod
+    def listToBin(fluxList, eos):
+        """
+        Write a list of Flux to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(fluxList, list):
+            raise ValueError("fluxList is not a list")
 
-    def from1DBin(self):
-        raise RuntimeError("Flux.from1DBin is not yet implemented")
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(fluxList)
+        ndims = len(listDims)
+        if ndims == 1:
+            Flux.listTo1DBin(fluxList, eos)
+        elif ndims == 2:
+            Flux.listTo2DBin(fluxList, eos)
+        elif ndims == 3:
+            Flux.listTo3DBin(fluxList, eos)
 
-    def from2DBin(self):
-        raise RuntimeError("Flux.from2DBin is not yet implemented")
+        raise ValueError(
+            "unsupport number of dimensions in fluxList in Flux.listToBin : "
+            + str(ndims)
+        )
 
-    def from3DBin(self):
-        raise RuntimeError("Flux.from2DBin is not yet implemented")
+    @staticmethod
+    def listTo1DBin(fluxList, eos):
+        """
+        Write a 1D list of Flux to the EndianOutput
+        """
+        if not isinstance(fluxList, list):
+            raise ValueError("fluxList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(fluxList))
+
+        # only check the first value
+        if (len(fluxList) > 0) and not isinstance(fluxList[0], Flux):
+            raise (ValueError("fluxList is not a list of Flux"))
+
+        for thisFlux in fluxList:
+            thisFlux.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(fluxList, eos):
+        """
+        Write a 2D list of Flux to the EndianOutput
+        """
+        if not isinstance(fluxList, list):
+            raise ValueError("fluxList is not a list")
+
+        ndim1 = len(fluxList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(fluxList[0], list):
+                raise ValueError("fluxList is not a 2D")
+
+            ndim2 = len(fluxList[0])
+            if ndim2 > 0 and not isinstance(fluxList[0][0], Flux):
+                raise ValueError("fluxListis a not a 2D list of Flux")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in fluxList:
+            for thisFlux in thisList:
+                thisFlux.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(fluxList, eos):
+        """
+        Write a 3D list of Flux to the EndianOutput
+        """
+        if not isinstance(fluxList, list):
+            raise ValueError("fluxList is not a list")
+
+        ndim1 = len(fluxList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(fluxList[0], list):
+                raise ValueError("fluxList is not a 3D list")
+
+            ndim2 = len(fluxList[0])
+            if ndim2 > 0:
+                if not isinstance(fluxList[0][0], list):
+                    raise ValueError("fluxList is a not a 3D list")
+                ndim3 = len(fluxList[0][0])
+                if (ndim3 > 0) and not isinstance(fluxList[0][0][0], Flux):
+                    raise ValueError("fluxList is not a 3D list of Flux")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in fluxList:
+            for middleList in thisList:
+                for thisFlux in middleList:
+                    thisFlux.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an Flux, in Janskys,
+        from an EndianInput instance and use the read value to set a
+        Flux.
+
+        return a Flux
+        """
+        return Flux(eis.readDouble())
+
+    @staticmethod
+    def from1Dbin(eis):
+        """
+        Read a list of binary Flux values, in Janskys, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(Flux.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary Flux values, in Janskys, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(Flux.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3DBin(eis):
+        """
+        Read a 3D list of binary Flux values, in Janskys, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(Flux.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     def equals(self, otherFlux):
         """

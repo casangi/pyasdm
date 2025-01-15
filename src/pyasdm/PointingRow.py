@@ -33,6 +33,8 @@ import pyasdm.PointingTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -809,7 +811,7 @@ class PointingRow:
             raise ValueError("The value of encoder must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(encoder)
+            listDims = pyasdm.utils.getListDims(encoder)
 
             shapeOK = len(listDims) == 2
 
@@ -818,7 +820,7 @@ class PointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(encoder, Angle):
+            if not pyasdm.utils.checkListType(encoder, Angle):
                 raise ValueError(
                     "type of the first value in encoder is not Angle as expected"
                 )
@@ -941,7 +943,7 @@ class PointingRow:
             raise ValueError("The value of pointingDirection must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(pointingDirection)
+            listDims = pyasdm.utils.getListDims(pointingDirection)
 
             shapeOK = len(listDims) == 2
 
@@ -950,7 +952,7 @@ class PointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(pointingDirection, Angle):
+            if not pyasdm.utils.checkListType(pointingDirection, Angle):
                 raise ValueError(
                     "type of the first value in pointingDirection is not Angle as expected"
                 )
@@ -984,7 +986,7 @@ class PointingRow:
             raise ValueError("The value of target must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(target)
+            listDims = pyasdm.utils.getListDims(target)
 
             shapeOK = len(listDims) == 2
 
@@ -993,7 +995,7 @@ class PointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(target, Angle):
+            if not pyasdm.utils.checkListType(target, Angle):
                 raise ValueError(
                     "type of the first value in target is not Angle as expected"
                 )
@@ -1027,7 +1029,7 @@ class PointingRow:
             raise ValueError("The value of offset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(offset)
+            listDims = pyasdm.utils.getListDims(offset)
 
             shapeOK = len(listDims) == 2
 
@@ -1036,7 +1038,7 @@ class PointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(offset, Angle):
+            if not pyasdm.utils.checkListType(offset, Angle):
                 raise ValueError(
                     "type of the first value in offset is not Angle as expected"
                 )
@@ -1130,7 +1132,7 @@ class PointingRow:
             raise ValueError("The value of sourceOffset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sourceOffset)
+            listDims = pyasdm.utils.getListDims(sourceOffset)
 
             shapeOK = len(listDims) == 2
 
@@ -1139,7 +1141,7 @@ class PointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(sourceOffset, Angle):
+            if not pyasdm.utils.checkListType(sourceOffset, Angle):
                 raise ValueError(
                     "type of the first value in sourceOffset is not Angle as expected"
                 )
@@ -1289,7 +1291,7 @@ class PointingRow:
             raise ValueError("The value of sampledTimeInterval must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sampledTimeInterval)
+            listDims = pyasdm.utils.getListDims(sampledTimeInterval)
 
             shapeOK = len(listDims) == 1
 
@@ -1298,7 +1300,7 @@ class PointingRow:
 
             # the type of the values in the list must be ArrayTimeInterval
             # note : this only checks the first value found
-            if not Parser.checkListType(sampledTimeInterval, ArrayTimeInterval):
+            if not pyasdm.utils.checkListType(sampledTimeInterval, ArrayTimeInterval):
                 raise ValueError(
                     "type of the first value in sampledTimeInterval is not ArrayTimeInterval as expected"
                 )
@@ -1355,7 +1357,7 @@ class PointingRow:
             raise ValueError("The value of atmosphericCorrection must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(atmosphericCorrection)
+            listDims = pyasdm.utils.getListDims(atmosphericCorrection)
 
             shapeOK = len(listDims) == 2
 
@@ -1364,7 +1366,7 @@ class PointingRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(atmosphericCorrection, Angle):
+            if not pyasdm.utils.checkListType(atmosphericCorrection, Angle):
                 raise ValueError(
                     "type of the first value in atmosphericCorrection is not Angle as expected"
                 )
@@ -1497,8 +1499,8 @@ class PointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            encoder_dims = Parser.getListDims(encoder)
-            this_encoder_dims = Parser.getListDims(self._encoder)
+            encoder_dims = pyasdm.utils.getListDims(encoder)
+            this_encoder_dims = pyasdm.utils.getListDims(self._encoder)
             if encoder_dims != this_encoder_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1536,8 +1538,10 @@ class PointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            pointingDirection_dims = Parser.getListDims(pointingDirection)
-            this_pointingDirection_dims = Parser.getListDims(self._pointingDirection)
+            pointingDirection_dims = pyasdm.utils.getListDims(pointingDirection)
+            this_pointingDirection_dims = pyasdm.utils.getListDims(
+                self._pointingDirection
+            )
             if pointingDirection_dims != this_pointingDirection_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1560,8 +1564,8 @@ class PointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            target_dims = Parser.getListDims(target)
-            this_target_dims = Parser.getListDims(self._target)
+            target_dims = pyasdm.utils.getListDims(target)
+            this_target_dims = pyasdm.utils.getListDims(self._target)
             if target_dims != this_target_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1583,8 +1587,8 @@ class PointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            offset_dims = Parser.getListDims(offset)
-            this_offset_dims = Parser.getListDims(self._offset)
+            offset_dims = pyasdm.utils.getListDims(offset)
+            this_offset_dims = pyasdm.utils.getListDims(self._offset)
             if offset_dims != this_offset_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1649,8 +1653,8 @@ class PointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            encoder_dims = Parser.getListDims(encoder)
-            this_encoder_dims = Parser.getListDims(self._encoder)
+            encoder_dims = pyasdm.utils.getListDims(encoder)
+            this_encoder_dims = pyasdm.utils.getListDims(self._encoder)
             if encoder_dims != this_encoder_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1688,8 +1692,10 @@ class PointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            pointingDirection_dims = Parser.getListDims(pointingDirection)
-            this_pointingDirection_dims = Parser.getListDims(self._pointingDirection)
+            pointingDirection_dims = pyasdm.utils.getListDims(pointingDirection)
+            this_pointingDirection_dims = pyasdm.utils.getListDims(
+                self._pointingDirection
+            )
             if pointingDirection_dims != this_pointingDirection_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1712,8 +1718,8 @@ class PointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            target_dims = Parser.getListDims(target)
-            this_target_dims = Parser.getListDims(self._target)
+            target_dims = pyasdm.utils.getListDims(target)
+            this_target_dims = pyasdm.utils.getListDims(self._target)
             if target_dims != this_target_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1735,8 +1741,8 @@ class PointingRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            offset_dims = Parser.getListDims(offset)
-            this_offset_dims = Parser.getListDims(self._offset)
+            offset_dims = pyasdm.utils.getListDims(offset)
+            this_offset_dims = pyasdm.utils.getListDims(self._offset)
             if offset_dims != this_offset_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

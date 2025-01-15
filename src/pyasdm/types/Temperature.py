@@ -172,22 +172,182 @@ class Temperature:
                 result.append(item.get())
         return result
 
-    def toBin(self):
-        # it also needs a static method to send a list of temperature items toBin
-        # should also work for 2D, 3D lists
-        raise RuntimeError("Temperature.toBin is not yet implemented")
+    def toBin(self, eos):
+        """
+        Write this Temperature out, in degrees Centigrade, to a EndianOutput.
+        """
+        eos.writeDouble(self.get())
 
-    def fromBin(self):
-        raise RuntimeError("Temperature.fromBin is not yet implemented")
+    @staticmethod
+    def listToBin(temperatureList, eos):
+        """
+        Write a list of Temperature to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(temperatureList, list):
+            raise ValueError("temperatureList is not a list")
 
-    def from1DBin(self):
-        raise RuntimeError("Temperature.from1DBin is not yet implemented")
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(temperatureList)
+        ndims = len(listDims)
+        if ndims == 1:
+            Temperature.listTo1DBin(temperatureList, eos)
+        elif ndims == 2:
+            Temperature.listTo2DBin(temperatureList, eos)
+        elif ndims == 3:
+            Temperature.listTo3DBin(temperatureList, eos)
 
-    def from2DBin(self):
-        raise RuntimeError("Temperature.from2DBin is not yet implemented")
+        raise ValueError(
+            "unsupport number of dimensions in temperatureList in Temperature.listToBin : "
+            + str(ndims)
+        )
 
-    def from3DBin(self):
-        raise RuntimeError("Temperature.from2DBin is not yet implemented")
+    @staticmethod
+    def listTo1DBin(temperatureList, eos):
+        """
+        Write a 1D list of Temperature to the EndianOutput
+        """
+        if not isinstance(temperatureList, list):
+            raise ValueError("temperatureList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(temperatureList))
+
+        # only check the first value
+        if (len(temperatureList) > 0) and not isinstance(
+            temperatureList[0], Temperature
+        ):
+            raise (ValueError("temperatureList is not a list of Temperature"))
+
+        for thisTemperature in temperatureList:
+            thisTemperature.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(temperatureList, eos):
+        """
+        Write a 2D list of Temperature to the EndianOutput
+        """
+        if not isinstance(temperatureList, list):
+            raise ValueError("temperatureList is not a list")
+
+        ndim1 = len(temperatureList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(temperatureList[0], list):
+                raise ValueError("temperatureList is not a 2D")
+
+            ndim2 = len(temperatureList[0])
+            if ndim2 > 0 and not isinstance(temperatureList[0][0], Temperature):
+                raise ValueError("temperatureListis a not a 2D list of Temperature")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in temperatureList:
+            for thisTemperature in thisList:
+                thisTemperature.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(temperatureList, eos):
+        """
+        Write a 3D list of Temperature to the EndianOutput
+        """
+        if not isinstance(temperatureList, list):
+            raise ValueError("temperatureList is not a list")
+
+        ndim1 = len(temperatureList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(temperatureList[0], list):
+                raise ValueError("temperatureList is not a 3D list")
+
+            ndim2 = len(temperatureList[0])
+            if ndim2 > 0:
+                if not isinstance(temperatureList[0][0], list):
+                    raise ValueError("temperatureList is a not a 3D list")
+                ndim3 = len(temperatureList[0][0])
+                if (ndim3 > 0) and not isinstance(
+                    temperatureList[0][0][0], Temperature
+                ):
+                    raise ValueError("temperatureList is not a 3D list of Temperature")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in temperatureList:
+            for middleList in thisList:
+                for thisTemperature in middleList:
+                    thisTemperature.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an Temperature, in degrees Centigrade,
+        from an EndianInput instance and use the read value to set a
+        Temperature.
+
+        return an Temperature
+        """
+        return Temperature(eis.readDouble())
+
+    @staticmethod
+    def from1Dbin(eis):
+        """
+        Read a list of binary Temperature values, in degrees Centigrade, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(Temperature.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary Temperature values, in degrees Centigrade, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(Temperature.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3Dbin(eis):
+        """
+        Read a 3D list of binary Temperature values, in degrees Centigrade, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(Temperature.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     def equals(self, otherTemperature):
         """

@@ -33,6 +33,8 @@ import pyasdm.CalHolographyTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -1133,7 +1135,7 @@ class CalHolographyRow:
             raise ValueError("The value of focusPosition must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(focusPosition)
+            listDims = pyasdm.utils.getListDims(focusPosition)
 
             shapeOK = len(listDims) == 1
 
@@ -1142,7 +1144,7 @@ class CalHolographyRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(focusPosition, Length):
+            if not pyasdm.utils.checkListType(focusPosition, Length):
                 raise ValueError(
                     "type of the first value in focusPosition is not Length as expected"
                 )
@@ -1176,7 +1178,7 @@ class CalHolographyRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -1185,7 +1187,7 @@ class CalHolographyRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -1263,7 +1265,7 @@ class CalHolographyRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -1272,7 +1274,7 @@ class CalHolographyRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1442,7 +1444,7 @@ class CalHolographyRow:
             raise ValueError("The value of direction must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(direction)
+            listDims = pyasdm.utils.getListDims(direction)
 
             shapeOK = len(listDims) == 1
 
@@ -1451,7 +1453,7 @@ class CalHolographyRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(direction, Angle):
+            if not pyasdm.utils.checkListType(direction, Angle):
                 raise ValueError(
                     "type of the first value in direction is not Angle as expected"
                 )
@@ -1545,7 +1547,7 @@ class CalHolographyRow:
             raise ValueError("The value of screwName must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(screwName)
+            listDims = pyasdm.utils.getListDims(screwName)
 
             shapeOK = len(listDims) == 1
 
@@ -1554,7 +1556,7 @@ class CalHolographyRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(screwName, str):
+            if not pyasdm.utils.checkListType(screwName, str):
                 raise ValueError(
                     "type of the first value in screwName is not str as expected"
                 )
@@ -1611,7 +1613,7 @@ class CalHolographyRow:
             raise ValueError("The value of screwMotion must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(screwMotion)
+            listDims = pyasdm.utils.getListDims(screwMotion)
 
             shapeOK = len(listDims) == 1
 
@@ -1620,7 +1622,7 @@ class CalHolographyRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(screwMotion, Length):
+            if not pyasdm.utils.checkListType(screwMotion, Length):
                 raise ValueError(
                     "type of the first value in screwMotion is not Length as expected"
                 )
@@ -1677,7 +1679,7 @@ class CalHolographyRow:
             raise ValueError("The value of screwMotionError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(screwMotionError)
+            listDims = pyasdm.utils.getListDims(screwMotionError)
 
             shapeOK = len(listDims) == 1
 
@@ -1686,7 +1688,7 @@ class CalHolographyRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(screwMotionError, Length):
+            if not pyasdm.utils.checkListType(screwMotionError, Length):
                 raise ValueError(
                     "type of the first value in screwMotionError is not Length as expected"
                 )
@@ -1788,7 +1790,7 @@ class CalHolographyRow:
             raise ValueError("The value of gravOptRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(gravOptRange)
+            listDims = pyasdm.utils.getListDims(gravOptRange)
 
             shapeOK = len(listDims) == 1
 
@@ -1797,7 +1799,7 @@ class CalHolographyRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(gravOptRange, Angle):
+            if not pyasdm.utils.checkListType(gravOptRange, Angle):
                 raise ValueError(
                     "type of the first value in gravOptRange is not Angle as expected"
                 )
@@ -1899,7 +1901,7 @@ class CalHolographyRow:
             raise ValueError("The value of tempOptRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(tempOptRange)
+            listDims = pyasdm.utils.getListDims(tempOptRange)
 
             shapeOK = len(listDims) == 1
 
@@ -1908,7 +1910,7 @@ class CalHolographyRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(tempOptRange, Temperature):
+            if not pyasdm.utils.checkListType(tempOptRange, Temperature):
                 raise ValueError(
                     "type of the first value in tempOptRange is not Temperature as expected"
                 )

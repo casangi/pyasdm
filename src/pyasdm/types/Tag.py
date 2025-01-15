@@ -220,7 +220,7 @@ class Tag:
         """
         Retrieve value from a list of strings and convert that to a Tag.
 
-        This is used when parsing Tag lists from an XML representation to 
+        This is used when parsing Tag lists from an XML representation to
         eventually construct a list of Tag instances. The string value is
         used as is with Tag.parseTag to make a Tag instance.
 
@@ -233,3 +233,46 @@ class Tag:
 
         # this will raise an error if there aren't any elements on stringList
         return (Tag.parseTag(stringList[0]), stringList[1:])
+
+    @staticmethod
+    def fromBin(ein):
+        """
+        Create and return a Tag from an EndianInput instance.
+        """
+        return Tag(ein.readString())
+
+    @staticmethod
+    def from1DBin(ein):
+        """
+        Create and return a list of Tag values from an EndianInput instance.
+        """
+        result = []
+        ndim = ein.readInt()
+        for i in range(ndim):
+            result.append(Tag.fromBin(ein))
+
+        return result
+
+    def toBin(self, eout):
+        """
+        Write this Tag to an EndianOutput instance.
+        """
+        eout.writeString(self.toString())
+
+    def listToBin(tagList, eout):
+        """
+        Write a 1D list of Tag instances to an EndianOutput instance.
+        """
+        if tagList is not None and (not isinstance(tagList, list)):
+            raise ValueError("tagList must be a list")
+
+        # None type is treated like a 0-element list
+        ntags = 0
+        if tagList is not None:
+            ntags = len(tagList)
+
+        # ntags is always written, even for zero-element lists
+        eout.writeInt(ntags)
+
+        for thisTag in tagList:
+            thisTag.toBin(eout)

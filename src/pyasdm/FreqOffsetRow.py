@@ -33,6 +33,8 @@ import pyasdm.FreqOffsetTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported

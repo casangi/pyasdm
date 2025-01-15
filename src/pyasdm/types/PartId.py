@@ -80,7 +80,19 @@ class PartId:
     def toString(self):
         return self._id
 
-    # defer toBin and fromBin
+    def toBin(self, eos):
+        """
+        Write the binary representation of this into an EndianOutput stream
+        """
+        eos.writeString(self.toString())
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of a PartId from an EndianInput stream
+        and return the PartId
+        """
+        return PartId(eis.readString())
 
     def equals(self, other):
         return isinstance(other, PartId) and (other.toString() == self._id)

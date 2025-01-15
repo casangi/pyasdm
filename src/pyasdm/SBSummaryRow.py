@@ -33,6 +33,8 @@ import pyasdm.SBSummaryTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -936,7 +938,7 @@ class SBSummaryRow:
             raise ValueError("The value of observingMode must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(observingMode)
+            listDims = pyasdm.utils.getListDims(observingMode)
 
             shapeOK = len(listDims) == 1
 
@@ -945,7 +947,7 @@ class SBSummaryRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(observingMode, str):
+            if not pyasdm.utils.checkListType(observingMode, str):
                 raise ValueError(
                     "type of the first value in observingMode is not str as expected"
                 )
@@ -1023,7 +1025,7 @@ class SBSummaryRow:
             raise ValueError("The value of scienceGoal must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(scienceGoal)
+            listDims = pyasdm.utils.getListDims(scienceGoal)
 
             shapeOK = len(listDims) == 1
 
@@ -1032,7 +1034,7 @@ class SBSummaryRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(scienceGoal, str):
+            if not pyasdm.utils.checkListType(scienceGoal, str):
                 raise ValueError(
                     "type of the first value in scienceGoal is not str as expected"
                 )
@@ -1088,7 +1090,7 @@ class SBSummaryRow:
             raise ValueError("The value of weatherConstraint must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(weatherConstraint)
+            listDims = pyasdm.utils.getListDims(weatherConstraint)
 
             shapeOK = len(listDims) == 1
 
@@ -1097,7 +1099,7 @@ class SBSummaryRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(weatherConstraint, str):
+            if not pyasdm.utils.checkListType(weatherConstraint, str):
                 raise ValueError(
                     "type of the first value in weatherConstraint is not str as expected"
                 )
@@ -1146,7 +1148,7 @@ class SBSummaryRow:
             raise ValueError("The value of centerDirection must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(centerDirection)
+            listDims = pyasdm.utils.getListDims(centerDirection)
 
             shapeOK = len(listDims) == 1
 
@@ -1155,7 +1157,7 @@ class SBSummaryRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(centerDirection, Angle):
+            if not pyasdm.utils.checkListType(centerDirection, Angle):
                 raise ValueError(
                     "type of the first value in centerDirection is not Angle as expected"
                 )

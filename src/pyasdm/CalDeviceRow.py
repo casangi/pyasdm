@@ -33,6 +33,8 @@ import pyasdm.CalDeviceTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -380,7 +382,7 @@ class CalDeviceRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                calEff_dims = Parser.getListDims(self._calEff)
+                calEff_dims = pyasdm.utils.getListDims(self._calEff)
             # assumes it really is 2D
             eos.writeInt(calEff_dims[0])
             eos.writeInt(calEff_dims[1])
@@ -404,7 +406,7 @@ class CalDeviceRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                coupledNoiseCal_dims = Parser.getListDims(self._coupledNoiseCal)
+                coupledNoiseCal_dims = pyasdm.utils.getListDims(self._coupledNoiseCal)
             # assumes it really is 2D
             eos.writeInt(coupledNoiseCal_dims[0])
             eos.writeInt(coupledNoiseCal_dims[1])
@@ -667,7 +669,7 @@ class CalDeviceRow:
             raise ValueError("The value of calLoadNames must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(calLoadNames)
+            listDims = pyasdm.utils.getListDims(calLoadNames)
 
             shapeOK = len(listDims) == 1
 
@@ -676,7 +678,7 @@ class CalDeviceRow:
 
             # the type of the values in the list must be CalibrationDevice
             # note : this only checks the first value found
-            if not Parser.checkListType(calLoadNames, CalibrationDevice):
+            if not pyasdm.utils.checkListType(calLoadNames, CalibrationDevice):
                 raise ValueError(
                     "type of the first value in calLoadNames is not CalibrationDevice as expected"
                 )
@@ -770,7 +772,7 @@ class CalDeviceRow:
             raise ValueError("The value of calEff must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(calEff)
+            listDims = pyasdm.utils.getListDims(calEff)
 
             shapeOK = len(listDims) == 2
 
@@ -779,7 +781,7 @@ class CalDeviceRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(calEff, float):
+            if not pyasdm.utils.checkListType(calEff, float):
                 raise ValueError(
                     "type of the first value in calEff is not float as expected"
                 )
@@ -836,7 +838,7 @@ class CalDeviceRow:
             raise ValueError("The value of noiseCal must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(noiseCal)
+            listDims = pyasdm.utils.getListDims(noiseCal)
 
             shapeOK = len(listDims) == 1
 
@@ -845,7 +847,7 @@ class CalDeviceRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(noiseCal, float):
+            if not pyasdm.utils.checkListType(noiseCal, float):
                 raise ValueError(
                     "type of the first value in noiseCal is not float as expected"
                 )
@@ -902,7 +904,7 @@ class CalDeviceRow:
             raise ValueError("The value of coupledNoiseCal must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(coupledNoiseCal)
+            listDims = pyasdm.utils.getListDims(coupledNoiseCal)
 
             shapeOK = len(listDims) == 2
 
@@ -911,7 +913,7 @@ class CalDeviceRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(coupledNoiseCal, float):
+            if not pyasdm.utils.checkListType(coupledNoiseCal, float):
                 raise ValueError(
                     "type of the first value in coupledNoiseCal is not float as expected"
                 )
@@ -968,7 +970,7 @@ class CalDeviceRow:
             raise ValueError("The value of temperatureLoad must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(temperatureLoad)
+            listDims = pyasdm.utils.getListDims(temperatureLoad)
 
             shapeOK = len(listDims) == 1
 
@@ -977,7 +979,7 @@ class CalDeviceRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(temperatureLoad, Temperature):
+            if not pyasdm.utils.checkListType(temperatureLoad, Temperature):
                 raise ValueError(
                     "type of the first value in temperatureLoad is not Temperature as expected"
                 )

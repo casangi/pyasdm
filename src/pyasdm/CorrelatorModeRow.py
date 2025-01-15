@@ -33,6 +33,8 @@ import pyasdm.CorrelatorModeTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -542,7 +544,7 @@ class CorrelatorModeRow:
             raise ValueError("The value of basebandNames must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(basebandNames)
+            listDims = pyasdm.utils.getListDims(basebandNames)
 
             shapeOK = len(listDims) == 1
 
@@ -551,7 +553,7 @@ class CorrelatorModeRow:
 
             # the type of the values in the list must be BasebandName
             # note : this only checks the first value found
-            if not Parser.checkListType(basebandNames, BasebandName):
+            if not pyasdm.utils.checkListType(basebandNames, BasebandName):
                 raise ValueError(
                     "type of the first value in basebandNames is not BasebandName as expected"
                 )
@@ -585,7 +587,7 @@ class CorrelatorModeRow:
             raise ValueError("The value of basebandConfig must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(basebandConfig)
+            listDims = pyasdm.utils.getListDims(basebandConfig)
 
             shapeOK = len(listDims) == 1
 
@@ -594,7 +596,7 @@ class CorrelatorModeRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(basebandConfig, int):
+            if not pyasdm.utils.checkListType(basebandConfig, int):
                 raise ValueError(
                     "type of the first value in basebandConfig is not int as expected"
                 )
@@ -694,7 +696,7 @@ class CorrelatorModeRow:
             raise ValueError("The value of axesOrderArray must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(axesOrderArray)
+            listDims = pyasdm.utils.getListDims(axesOrderArray)
 
             shapeOK = len(listDims) == 1
 
@@ -703,7 +705,7 @@ class CorrelatorModeRow:
 
             # the type of the values in the list must be AxisName
             # note : this only checks the first value found
-            if not Parser.checkListType(axesOrderArray, AxisName):
+            if not pyasdm.utils.checkListType(axesOrderArray, AxisName):
                 raise ValueError(
                     "type of the first value in axesOrderArray is not AxisName as expected"
                 )
@@ -737,7 +739,7 @@ class CorrelatorModeRow:
             raise ValueError("The value of filterMode must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(filterMode)
+            listDims = pyasdm.utils.getListDims(filterMode)
 
             shapeOK = len(listDims) == 1
 
@@ -746,7 +748,7 @@ class CorrelatorModeRow:
 
             # the type of the values in the list must be FilterMode
             # note : this only checks the first value found
-            if not Parser.checkListType(filterMode, FilterMode):
+            if not pyasdm.utils.checkListType(filterMode, FilterMode):
                 raise ValueError(
                     "type of the first value in filterMode is not FilterMode as expected"
                 )

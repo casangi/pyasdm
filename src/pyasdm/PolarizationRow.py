@@ -33,6 +33,8 @@ import pyasdm.PolarizationTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -210,7 +212,7 @@ class PolarizationRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            corrProduct_dims = Parser.getListDims(self._corrProduct)
+            corrProduct_dims = pyasdm.utils.getListDims(self._corrProduct)
         # assumes it really is 2D
         eos.writeInt(corrProduct_dims[0])
         eos.writeInt(corrProduct_dims[1])
@@ -380,7 +382,7 @@ class PolarizationRow:
             raise ValueError("The value of corrType must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(corrType)
+            listDims = pyasdm.utils.getListDims(corrType)
 
             shapeOK = len(listDims) == 1
 
@@ -389,7 +391,7 @@ class PolarizationRow:
 
             # the type of the values in the list must be StokesParameter
             # note : this only checks the first value found
-            if not Parser.checkListType(corrType, StokesParameter):
+            if not pyasdm.utils.checkListType(corrType, StokesParameter):
                 raise ValueError(
                     "type of the first value in corrType is not StokesParameter as expected"
                 )
@@ -423,7 +425,7 @@ class PolarizationRow:
             raise ValueError("The value of corrProduct must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(corrProduct)
+            listDims = pyasdm.utils.getListDims(corrProduct)
 
             shapeOK = len(listDims) == 2
 
@@ -432,7 +434,7 @@ class PolarizationRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(corrProduct, PolarizationType):
+            if not pyasdm.utils.checkListType(corrProduct, PolarizationType):
                 raise ValueError(
                     "type of the first value in corrProduct is not PolarizationType as expected"
                 )
@@ -473,8 +475,8 @@ class PolarizationRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            corrProduct_dims = Parser.getListDims(corrProduct)
-            this_corrProduct_dims = Parser.getListDims(self._corrProduct)
+            corrProduct_dims = pyasdm.utils.getListDims(corrProduct)
+            this_corrProduct_dims = pyasdm.utils.getListDims(self._corrProduct)
             if corrProduct_dims != this_corrProduct_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -520,8 +522,8 @@ class PolarizationRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            corrProduct_dims = Parser.getListDims(corrProduct)
-            this_corrProduct_dims = Parser.getListDims(self._corrProduct)
+            corrProduct_dims = pyasdm.utils.getListDims(corrProduct)
+            this_corrProduct_dims = pyasdm.utils.getListDims(self._corrProduct)
             if corrProduct_dims != this_corrProduct_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be

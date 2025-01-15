@@ -33,6 +33,8 @@ import pyasdm.CalWVRTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -426,7 +428,7 @@ class CalWVRRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            pathCoeff_dims = Parser.getListDims(self._pathCoeff)
+            pathCoeff_dims = pyasdm.utils.getListDims(self._pathCoeff)
         # assumes it really is 3D
         eos.writeInt(pathCoeff_dims[0])
         eos.writeInt(pathCoeff_dims[1])
@@ -836,7 +838,7 @@ class CalWVRRow:
             raise ValueError("The value of inputAntennaNames must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(inputAntennaNames)
+            listDims = pyasdm.utils.getListDims(inputAntennaNames)
 
             shapeOK = len(listDims) == 1
 
@@ -845,7 +847,7 @@ class CalWVRRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(inputAntennaNames, str):
+            if not pyasdm.utils.checkListType(inputAntennaNames, str):
                 raise ValueError(
                     "type of the first value in inputAntennaNames is not str as expected"
                 )
@@ -901,7 +903,7 @@ class CalWVRRow:
             raise ValueError("The value of chanFreq must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(chanFreq)
+            listDims = pyasdm.utils.getListDims(chanFreq)
 
             shapeOK = len(listDims) == 1
 
@@ -910,7 +912,7 @@ class CalWVRRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(chanFreq, Frequency):
+            if not pyasdm.utils.checkListType(chanFreq, Frequency):
                 raise ValueError(
                     "type of the first value in chanFreq is not Frequency as expected"
                 )
@@ -944,7 +946,7 @@ class CalWVRRow:
             raise ValueError("The value of chanWidth must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(chanWidth)
+            listDims = pyasdm.utils.getListDims(chanWidth)
 
             shapeOK = len(listDims) == 1
 
@@ -953,7 +955,7 @@ class CalWVRRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(chanWidth, Frequency):
+            if not pyasdm.utils.checkListType(chanWidth, Frequency):
                 raise ValueError(
                     "type of the first value in chanWidth is not Frequency as expected"
                 )
@@ -987,7 +989,7 @@ class CalWVRRow:
             raise ValueError("The value of refTemp must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(refTemp)
+            listDims = pyasdm.utils.getListDims(refTemp)
 
             shapeOK = len(listDims) == 2
 
@@ -996,7 +998,7 @@ class CalWVRRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(refTemp, Temperature):
+            if not pyasdm.utils.checkListType(refTemp, Temperature):
                 raise ValueError(
                     "type of the first value in refTemp is not Temperature as expected"
                 )
@@ -1052,7 +1054,7 @@ class CalWVRRow:
             raise ValueError("The value of pathCoeff must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(pathCoeff)
+            listDims = pyasdm.utils.getListDims(pathCoeff)
 
             shapeOK = len(listDims) == 3
 
@@ -1061,7 +1063,7 @@ class CalWVRRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(pathCoeff, float):
+            if not pyasdm.utils.checkListType(pathCoeff, float):
                 raise ValueError(
                     "type of the first value in pathCoeff is not float as expected"
                 )
@@ -1095,7 +1097,7 @@ class CalWVRRow:
             raise ValueError("The value of polyFreqLimits must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polyFreqLimits)
+            listDims = pyasdm.utils.getListDims(polyFreqLimits)
 
             shapeOK = len(listDims) == 1
 
@@ -1104,7 +1106,7 @@ class CalWVRRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(polyFreqLimits, Frequency):
+            if not pyasdm.utils.checkListType(polyFreqLimits, Frequency):
                 raise ValueError(
                     "type of the first value in polyFreqLimits is not Frequency as expected"
                 )
@@ -1138,7 +1140,7 @@ class CalWVRRow:
             raise ValueError("The value of wetPath must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(wetPath)
+            listDims = pyasdm.utils.getListDims(wetPath)
 
             shapeOK = len(listDims) == 1
 
@@ -1147,7 +1149,7 @@ class CalWVRRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(wetPath, float):
+            if not pyasdm.utils.checkListType(wetPath, float):
                 raise ValueError(
                     "type of the first value in wetPath is not float as expected"
                 )
@@ -1181,7 +1183,7 @@ class CalWVRRow:
             raise ValueError("The value of dryPath must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(dryPath)
+            listDims = pyasdm.utils.getListDims(dryPath)
 
             shapeOK = len(listDims) == 1
 
@@ -1190,7 +1192,7 @@ class CalWVRRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(dryPath, float):
+            if not pyasdm.utils.checkListType(dryPath, float):
                 raise ValueError(
                     "type of the first value in dryPath is not float as expected"
                 )
@@ -1451,8 +1453,8 @@ class CalWVRRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            refTemp_dims = Parser.getListDims(refTemp)
-            this_refTemp_dims = Parser.getListDims(self._refTemp)
+            refTemp_dims = pyasdm.utils.getListDims(refTemp)
+            this_refTemp_dims = pyasdm.utils.getListDims(self._refTemp)
             if refTemp_dims != this_refTemp_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1479,8 +1481,8 @@ class CalWVRRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            pathCoeff_dims = Parser.getListDims(pathCoeff)
-            this_pathCoeff_dims = Parser.getListDims(self._pathCoeff)
+            pathCoeff_dims = pyasdm.utils.getListDims(pathCoeff)
+            this_pathCoeff_dims = pyasdm.utils.getListDims(self._pathCoeff)
             if pathCoeff_dims != this_pathCoeff_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be
@@ -1633,8 +1635,8 @@ class CalWVRRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            refTemp_dims = Parser.getListDims(refTemp)
-            this_refTemp_dims = Parser.getListDims(self._refTemp)
+            refTemp_dims = pyasdm.utils.getListDims(refTemp)
+            this_refTemp_dims = pyasdm.utils.getListDims(self._refTemp)
             if refTemp_dims != this_refTemp_dims:
                 return False
             # assumes they are both 2D arrays, the internal one should be
@@ -1661,8 +1663,8 @@ class CalWVRRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            pathCoeff_dims = Parser.getListDims(pathCoeff)
-            this_pathCoeff_dims = Parser.getListDims(self._pathCoeff)
+            pathCoeff_dims = pyasdm.utils.getListDims(pathCoeff)
+            this_pathCoeff_dims = pyasdm.utils.getListDims(self._pathCoeff)
             if pathCoeff_dims != this_pathCoeff_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be

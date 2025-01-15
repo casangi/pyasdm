@@ -24,6 +24,7 @@
 #
 
 import math
+import pyasdm.utils
 
 
 class Angle:
@@ -248,20 +249,178 @@ class Angle:
                 result.append(item.get())
         return result
 
-    def toBin(self):
-        raise RuntimeError("Angle.toBin is not yet implemented")
+    def toBin(self, eos):
+        """
+        Write this Angle out, in radians, to a EndianOutput.
+        """
+        eos.writeDouble(self.get())
 
-    def fromBin(self):
-        raise RuntimeError("Angle.fromBin is not yet implemented")
+    @staticmethod
+    def listToBin(angleList, eos):
+        """
+        Write a list of Angle to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(angleList, list):
+            raise ValueError("angleList is not a list")
 
-    def from1DBin(self):
-        raise RuntimeError("Angle.from1DBin is not yet implemented")
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(angleList)
+        ndims = len(listDims)
+        if ndims == 1:
+            Angle.listTo1DBin(angleList, eos)
+        elif ndims == 2:
+            Angle.listTo2DBin(angleList, eos)
+        elif ndims == 3:
+            Angle.listTo3DBin(angleList, eos)
 
-    def from2DBin(self):
-        raise RuntimeError("Angle.from2DBin is not yet implemented")
+        raise ValueError(
+            "unsupport number of dimensions in angleList in Angle.listToBin : "
+            + str(ndims)
+        )
 
-    def from3DBin(self):
-        raise RuntimeError("Angle.from3DBin is not yet implemented")
+    @staticmethod
+    def listTo1DBin(angleList, eos):
+        """
+        Write a 1D list of Angle to the EndianOutput
+        """
+        if not isinstance(angleList, list):
+            raise ValueError("angleList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(angleList))
+
+        # only check the first value
+        if (len(angleList) > 0) and not isinstance(angleList[0], Angle):
+            raise (ValueError("angleList is not a list of Angle"))
+
+        for thisAngle in angleList:
+            thisAngle.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(angleList, eos):
+        """
+        Write a 2D list of Angle to the EndianOutput
+        """
+        if not isinstance(angleList, list):
+            raise ValueError("angleList is not a list")
+
+        ndim1 = len(angleList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(angleList[0], list):
+                raise ValueError("angleList is not a 2D")
+
+            ndim2 = len(angleList[0])
+            if ndim2 > 0 and not isinstance(angleList[0][0], Angle):
+                raise ValueError("angleListis a not a 2D list of Angle")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in angleList:
+            for thisAngle in thisList:
+                thisAngle.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(angleList, eos):
+        """
+        Write a 3D list of Angle to the EndianOutput
+        """
+        if not isinstance(angleList, list):
+            raise ValueError("angleList is not a list")
+
+        ndim1 = len(angleList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(angleList[0], list):
+                raise ValueError("angleList is not a 3D list")
+
+            ndim2 = len(angleList[0])
+            if ndim2 > 0:
+                if not isinstance(angleList[0][0], list):
+                    raise ValueError("angleList is a not a 3D list")
+                ndim3 = len(angleList[0][0])
+                if (ndim3 > 0) and not isinstance(angleList[0][0][0], Angle):
+                    raise ValueError("angleList is not a 3D list of Angle")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in angleList:
+            for middleList in thisList:
+                for thisAngle in middleList:
+                    thisAngle.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an Angle, in radians,
+        from an EndianInput instance and use the read value to set an
+        Angle.
+
+        return an Angle
+        """
+        return Angle(eis.readDouble())
+
+    @staticmethod
+    def from1Dbin(eis):
+        """
+        Read a list of binary Angle values, in radians, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(Angle.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary Angle values, in radians, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(Angle.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3Dbin(eis):
+        """
+        Read a 3D list of binary Angle values, in radians, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(Angle.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     def equals(self, otherAngle):
         """

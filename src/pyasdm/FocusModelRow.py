@@ -33,6 +33,8 @@ import pyasdm.FocusModelTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -574,7 +576,7 @@ class FocusModelRow:
             raise ValueError("The value of coeffName must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(coeffName)
+            listDims = pyasdm.utils.getListDims(coeffName)
 
             shapeOK = len(listDims) == 1
 
@@ -583,7 +585,7 @@ class FocusModelRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(coeffName, str):
+            if not pyasdm.utils.checkListType(coeffName, str):
                 raise ValueError(
                     "type of the first value in coeffName is not str as expected"
                 )
@@ -617,7 +619,7 @@ class FocusModelRow:
             raise ValueError("The value of coeffFormula must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(coeffFormula)
+            listDims = pyasdm.utils.getListDims(coeffFormula)
 
             shapeOK = len(listDims) == 1
 
@@ -626,7 +628,7 @@ class FocusModelRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(coeffFormula, str):
+            if not pyasdm.utils.checkListType(coeffFormula, str):
                 raise ValueError(
                     "type of the first value in coeffFormula is not str as expected"
                 )
@@ -660,7 +662,7 @@ class FocusModelRow:
             raise ValueError("The value of coeffVal must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(coeffVal)
+            listDims = pyasdm.utils.getListDims(coeffVal)
 
             shapeOK = len(listDims) == 1
 
@@ -669,7 +671,7 @@ class FocusModelRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(coeffVal, float):
+            if not pyasdm.utils.checkListType(coeffVal, float):
                 raise ValueError(
                     "type of the first value in coeffVal is not float as expected"
                 )

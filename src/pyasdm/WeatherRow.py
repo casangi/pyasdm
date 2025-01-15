@@ -33,6 +33,8 @@ import pyasdm.WeatherTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -1228,7 +1230,7 @@ class WeatherRow:
             raise ValueError("The value of layerHeight must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(layerHeight)
+            listDims = pyasdm.utils.getListDims(layerHeight)
 
             shapeOK = len(listDims) == 1
 
@@ -1237,7 +1239,7 @@ class WeatherRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(layerHeight, Length):
+            if not pyasdm.utils.checkListType(layerHeight, Length):
                 raise ValueError(
                     "type of the first value in layerHeight is not Length as expected"
                 )
@@ -1294,7 +1296,7 @@ class WeatherRow:
             raise ValueError("The value of temperatureProfile must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(temperatureProfile)
+            listDims = pyasdm.utils.getListDims(temperatureProfile)
 
             shapeOK = len(listDims) == 1
 
@@ -1303,7 +1305,7 @@ class WeatherRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(temperatureProfile, Temperature):
+            if not pyasdm.utils.checkListType(temperatureProfile, Temperature):
                 raise ValueError(
                     "type of the first value in temperatureProfile is not Temperature as expected"
                 )
@@ -1451,7 +1453,7 @@ class WeatherRow:
             raise ValueError("The value of wvrTemp must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(wvrTemp)
+            listDims = pyasdm.utils.getListDims(wvrTemp)
 
             shapeOK = len(listDims) == 1
 
@@ -1460,7 +1462,7 @@ class WeatherRow:
 
             # the type of the values in the list must be Temperature
             # note : this only checks the first value found
-            if not Parser.checkListType(wvrTemp, Temperature):
+            if not pyasdm.utils.checkListType(wvrTemp, Temperature):
                 raise ValueError(
                     "type of the first value in wvrTemp is not Temperature as expected"
                 )

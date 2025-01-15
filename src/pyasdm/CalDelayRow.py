@@ -33,6 +33,8 @@ import pyasdm.CalDelayTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -1099,7 +1101,7 @@ class CalDelayRow:
             raise ValueError("The value of delayError must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(delayError)
+            listDims = pyasdm.utils.getListDims(delayError)
 
             shapeOK = len(listDims) == 1
 
@@ -1108,7 +1110,7 @@ class CalDelayRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(delayError, float):
+            if not pyasdm.utils.checkListType(delayError, float):
                 raise ValueError(
                     "type of the first value in delayError is not float as expected"
                 )
@@ -1142,7 +1144,7 @@ class CalDelayRow:
             raise ValueError("The value of delayOffset must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(delayOffset)
+            listDims = pyasdm.utils.getListDims(delayOffset)
 
             shapeOK = len(listDims) == 1
 
@@ -1151,7 +1153,7 @@ class CalDelayRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(delayOffset, float):
+            if not pyasdm.utils.checkListType(delayOffset, float):
                 raise ValueError(
                     "type of the first value in delayOffset is not float as expected"
                 )
@@ -1185,7 +1187,7 @@ class CalDelayRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -1194,7 +1196,7 @@ class CalDelayRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1228,7 +1230,7 @@ class CalDelayRow:
             raise ValueError("The value of reducedChiSquared must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(reducedChiSquared)
+            listDims = pyasdm.utils.getListDims(reducedChiSquared)
 
             shapeOK = len(listDims) == 1
 
@@ -1237,7 +1239,7 @@ class CalDelayRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, float):
+            if not pyasdm.utils.checkListType(reducedChiSquared, float):
                 raise ValueError(
                     "type of the first value in reducedChiSquared is not float as expected"
                 )
@@ -1271,7 +1273,7 @@ class CalDelayRow:
             raise ValueError("The value of appliedDelay must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(appliedDelay)
+            listDims = pyasdm.utils.getListDims(appliedDelay)
 
             shapeOK = len(listDims) == 1
 
@@ -1280,7 +1282,7 @@ class CalDelayRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(appliedDelay, float):
+            if not pyasdm.utils.checkListType(appliedDelay, float):
                 raise ValueError(
                     "type of the first value in appliedDelay is not float as expected"
                 )
@@ -1464,7 +1466,7 @@ class CalDelayRow:
             raise ValueError("The value of refFreq must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(refFreq)
+            listDims = pyasdm.utils.getListDims(refFreq)
 
             shapeOK = len(listDims) == 1
 
@@ -1473,7 +1475,7 @@ class CalDelayRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(refFreq, Frequency):
+            if not pyasdm.utils.checkListType(refFreq, Frequency):
                 raise ValueError(
                     "type of the first value in refFreq is not Frequency as expected"
                 )
@@ -1530,7 +1532,7 @@ class CalDelayRow:
             raise ValueError("The value of refFreqPhase must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(refFreqPhase)
+            listDims = pyasdm.utils.getListDims(refFreqPhase)
 
             shapeOK = len(listDims) == 1
 
@@ -1539,7 +1541,7 @@ class CalDelayRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(refFreqPhase, Angle):
+            if not pyasdm.utils.checkListType(refFreqPhase, Angle):
                 raise ValueError(
                     "type of the first value in refFreqPhase is not Angle as expected"
                 )
@@ -1596,7 +1598,7 @@ class CalDelayRow:
             raise ValueError("The value of sidebands must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sidebands)
+            listDims = pyasdm.utils.getListDims(sidebands)
 
             shapeOK = len(listDims) == 1
 
@@ -1605,7 +1607,7 @@ class CalDelayRow:
 
             # the type of the values in the list must be ReceiverSideband
             # note : this only checks the first value found
-            if not Parser.checkListType(sidebands, ReceiverSideband):
+            if not pyasdm.utils.checkListType(sidebands, ReceiverSideband):
                 raise ValueError(
                     "type of the first value in sidebands is not ReceiverSideband as expected"
                 )

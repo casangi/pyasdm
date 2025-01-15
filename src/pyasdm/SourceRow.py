@@ -33,6 +33,8 @@ import pyasdm.SourceTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -1753,7 +1755,7 @@ class SourceRow:
             raise ValueError("The value of direction must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(direction)
+            listDims = pyasdm.utils.getListDims(direction)
 
             shapeOK = len(listDims) == 1
 
@@ -1762,7 +1764,7 @@ class SourceRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(direction, Angle):
+            if not pyasdm.utils.checkListType(direction, Angle):
                 raise ValueError(
                     "type of the first value in direction is not Angle as expected"
                 )
@@ -1796,7 +1798,7 @@ class SourceRow:
             raise ValueError("The value of properMotion must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(properMotion)
+            listDims = pyasdm.utils.getListDims(properMotion)
 
             shapeOK = len(listDims) == 1
 
@@ -1805,7 +1807,7 @@ class SourceRow:
 
             # the type of the values in the list must be AngularRate
             # note : this only checks the first value found
-            if not Parser.checkListType(properMotion, AngularRate):
+            if not pyasdm.utils.checkListType(properMotion, AngularRate):
                 raise ValueError(
                     "type of the first value in properMotion is not AngularRate as expected"
                 )
@@ -2103,7 +2105,7 @@ class SourceRow:
             raise ValueError("The value of position must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(position)
+            listDims = pyasdm.utils.getListDims(position)
 
             shapeOK = len(listDims) == 1
 
@@ -2112,7 +2114,7 @@ class SourceRow:
 
             # the type of the values in the list must be Length
             # note : this only checks the first value found
-            if not Parser.checkListType(position, Length):
+            if not pyasdm.utils.checkListType(position, Length):
                 raise ValueError(
                     "type of the first value in position is not Length as expected"
                 )
@@ -2214,7 +2216,7 @@ class SourceRow:
             raise ValueError("The value of transition must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(transition)
+            listDims = pyasdm.utils.getListDims(transition)
 
             shapeOK = len(listDims) == 1
 
@@ -2223,7 +2225,7 @@ class SourceRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(transition, str):
+            if not pyasdm.utils.checkListType(transition, str):
                 raise ValueError(
                     "type of the first value in transition is not str as expected"
                 )
@@ -2280,7 +2282,7 @@ class SourceRow:
             raise ValueError("The value of restFrequency must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(restFrequency)
+            listDims = pyasdm.utils.getListDims(restFrequency)
 
             shapeOK = len(listDims) == 1
 
@@ -2289,7 +2291,7 @@ class SourceRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(restFrequency, Frequency):
+            if not pyasdm.utils.checkListType(restFrequency, Frequency):
                 raise ValueError(
                     "type of the first value in restFrequency is not Frequency as expected"
                 )
@@ -2346,7 +2348,7 @@ class SourceRow:
             raise ValueError("The value of sysVel must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sysVel)
+            listDims = pyasdm.utils.getListDims(sysVel)
 
             shapeOK = len(listDims) == 1
 
@@ -2355,7 +2357,7 @@ class SourceRow:
 
             # the type of the values in the list must be Speed
             # note : this only checks the first value found
-            if not Parser.checkListType(sysVel, Speed):
+            if not pyasdm.utils.checkListType(sysVel, Speed):
                 raise ValueError(
                     "type of the first value in sysVel is not Speed as expected"
                 )
@@ -2412,7 +2414,7 @@ class SourceRow:
             raise ValueError("The value of rangeVel must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(rangeVel)
+            listDims = pyasdm.utils.getListDims(rangeVel)
 
             shapeOK = len(listDims) == 1
 
@@ -2421,7 +2423,7 @@ class SourceRow:
 
             # the type of the values in the list must be Speed
             # note : this only checks the first value found
-            if not Parser.checkListType(rangeVel, Speed):
+            if not pyasdm.utils.checkListType(rangeVel, Speed):
                 raise ValueError(
                     "type of the first value in rangeVel is not Speed as expected"
                 )
@@ -2658,7 +2660,7 @@ class SourceRow:
             raise ValueError("The value of frequency must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequency)
+            listDims = pyasdm.utils.getListDims(frequency)
 
             shapeOK = len(listDims) == 1
 
@@ -2667,7 +2669,7 @@ class SourceRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequency, Frequency):
+            if not pyasdm.utils.checkListType(frequency, Frequency):
                 raise ValueError(
                     "type of the first value in frequency is not Frequency as expected"
                 )
@@ -2724,7 +2726,7 @@ class SourceRow:
             raise ValueError("The value of frequencyInterval must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyInterval)
+            listDims = pyasdm.utils.getListDims(frequencyInterval)
 
             shapeOK = len(listDims) == 1
 
@@ -2733,7 +2735,7 @@ class SourceRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyInterval, Frequency):
+            if not pyasdm.utils.checkListType(frequencyInterval, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyInterval is not Frequency as expected"
                 )
@@ -2790,7 +2792,7 @@ class SourceRow:
             raise ValueError("The value of stokesParameter must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(stokesParameter)
+            listDims = pyasdm.utils.getListDims(stokesParameter)
 
             shapeOK = len(listDims) == 1
 
@@ -2799,7 +2801,7 @@ class SourceRow:
 
             # the type of the values in the list must be StokesParameter
             # note : this only checks the first value found
-            if not Parser.checkListType(stokesParameter, StokesParameter):
+            if not pyasdm.utils.checkListType(stokesParameter, StokesParameter):
                 raise ValueError(
                     "type of the first value in stokesParameter is not StokesParameter as expected"
                 )
@@ -2856,7 +2858,7 @@ class SourceRow:
             raise ValueError("The value of flux must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(flux)
+            listDims = pyasdm.utils.getListDims(flux)
 
             shapeOK = len(listDims) == 2
 
@@ -2865,7 +2867,7 @@ class SourceRow:
 
             # the type of the values in the list must be Flux
             # note : this only checks the first value found
-            if not Parser.checkListType(flux, Flux):
+            if not pyasdm.utils.checkListType(flux, Flux):
                 raise ValueError(
                     "type of the first value in flux is not Flux as expected"
                 )
@@ -2922,7 +2924,7 @@ class SourceRow:
             raise ValueError("The value of fluxErr must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(fluxErr)
+            listDims = pyasdm.utils.getListDims(fluxErr)
 
             shapeOK = len(listDims) == 2
 
@@ -2931,7 +2933,7 @@ class SourceRow:
 
             # the type of the values in the list must be Flux
             # note : this only checks the first value found
-            if not Parser.checkListType(fluxErr, Flux):
+            if not pyasdm.utils.checkListType(fluxErr, Flux):
                 raise ValueError(
                     "type of the first value in fluxErr is not Flux as expected"
                 )
@@ -2988,7 +2990,7 @@ class SourceRow:
             raise ValueError("The value of positionAngle must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(positionAngle)
+            listDims = pyasdm.utils.getListDims(positionAngle)
 
             shapeOK = len(listDims) == 1
 
@@ -2997,7 +2999,7 @@ class SourceRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(positionAngle, Angle):
+            if not pyasdm.utils.checkListType(positionAngle, Angle):
                 raise ValueError(
                     "type of the first value in positionAngle is not Angle as expected"
                 )
@@ -3054,7 +3056,7 @@ class SourceRow:
             raise ValueError("The value of positionAngleErr must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(positionAngleErr)
+            listDims = pyasdm.utils.getListDims(positionAngleErr)
 
             shapeOK = len(listDims) == 1
 
@@ -3063,7 +3065,7 @@ class SourceRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(positionAngleErr, Angle):
+            if not pyasdm.utils.checkListType(positionAngleErr, Angle):
                 raise ValueError(
                     "type of the first value in positionAngleErr is not Angle as expected"
                 )
@@ -3120,7 +3122,7 @@ class SourceRow:
             raise ValueError("The value of size must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(size)
+            listDims = pyasdm.utils.getListDims(size)
 
             shapeOK = len(listDims) == 2
 
@@ -3129,7 +3131,7 @@ class SourceRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(size, Angle):
+            if not pyasdm.utils.checkListType(size, Angle):
                 raise ValueError(
                     "type of the first value in size is not Angle as expected"
                 )
@@ -3186,7 +3188,7 @@ class SourceRow:
             raise ValueError("The value of sizeErr must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sizeErr)
+            listDims = pyasdm.utils.getListDims(sizeErr)
 
             shapeOK = len(listDims) == 2
 
@@ -3195,7 +3197,7 @@ class SourceRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(sizeErr, Angle):
+            if not pyasdm.utils.checkListType(sizeErr, Angle):
                 raise ValueError(
                     "type of the first value in sizeErr is not Angle as expected"
                 )
@@ -3297,7 +3299,7 @@ class SourceRow:
             raise ValueError("The value of dopplerVelocity must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(dopplerVelocity)
+            listDims = pyasdm.utils.getListDims(dopplerVelocity)
 
             shapeOK = len(listDims) == 1
 
@@ -3306,7 +3308,7 @@ class SourceRow:
 
             # the type of the values in the list must be Speed
             # note : this only checks the first value found
-            if not Parser.checkListType(dopplerVelocity, Speed):
+            if not pyasdm.utils.checkListType(dopplerVelocity, Speed):
                 raise ValueError(
                     "type of the first value in dopplerVelocity is not Speed as expected"
                 )
@@ -3455,7 +3457,7 @@ class SourceRow:
             raise ValueError("The value of parallax must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(parallax)
+            listDims = pyasdm.utils.getListDims(parallax)
 
             shapeOK = len(listDims) == 1
 
@@ -3464,7 +3466,7 @@ class SourceRow:
 
             # the type of the values in the list must be Angle
             # note : this only checks the first value found
-            if not Parser.checkListType(parallax, Angle):
+            if not pyasdm.utils.checkListType(parallax, Angle):
                 raise ValueError(
                     "type of the first value in parallax is not Angle as expected"
                 )

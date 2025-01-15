@@ -33,6 +33,8 @@ import pyasdm.CalDataTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -867,7 +869,7 @@ class CalDataRow:
             raise ValueError("The value of scanSet must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(scanSet)
+            listDims = pyasdm.utils.getListDims(scanSet)
 
             shapeOK = len(listDims) == 1
 
@@ -876,7 +878,7 @@ class CalDataRow:
 
             # the type of the values in the list must be int
             # note : this only checks the first value found
-            if not Parser.checkListType(scanSet, int):
+            if not pyasdm.utils.checkListType(scanSet, int):
                 raise ValueError(
                     "type of the first value in scanSet is not int as expected"
                 )
@@ -1016,7 +1018,7 @@ class CalDataRow:
             raise ValueError("The value of fieldName must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(fieldName)
+            listDims = pyasdm.utils.getListDims(fieldName)
 
             shapeOK = len(listDims) == 1
 
@@ -1025,7 +1027,7 @@ class CalDataRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(fieldName, str):
+            if not pyasdm.utils.checkListType(fieldName, str):
                 raise ValueError(
                     "type of the first value in fieldName is not str as expected"
                 )
@@ -1082,7 +1084,7 @@ class CalDataRow:
             raise ValueError("The value of sourceName must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sourceName)
+            listDims = pyasdm.utils.getListDims(sourceName)
 
             shapeOK = len(listDims) == 1
 
@@ -1091,7 +1093,7 @@ class CalDataRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(sourceName, str):
+            if not pyasdm.utils.checkListType(sourceName, str):
                 raise ValueError(
                     "type of the first value in sourceName is not str as expected"
                 )
@@ -1148,7 +1150,7 @@ class CalDataRow:
             raise ValueError("The value of sourceCode must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(sourceCode)
+            listDims = pyasdm.utils.getListDims(sourceCode)
 
             shapeOK = len(listDims) == 1
 
@@ -1157,7 +1159,7 @@ class CalDataRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(sourceCode, str):
+            if not pyasdm.utils.checkListType(sourceCode, str):
                 raise ValueError(
                     "type of the first value in sourceCode is not str as expected"
                 )
@@ -1214,7 +1216,7 @@ class CalDataRow:
             raise ValueError("The value of scanIntent must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(scanIntent)
+            listDims = pyasdm.utils.getListDims(scanIntent)
 
             shapeOK = len(listDims) == 1
 
@@ -1223,7 +1225,7 @@ class CalDataRow:
 
             # the type of the values in the list must be ScanIntent
             # note : this only checks the first value found
-            if not Parser.checkListType(scanIntent, ScanIntent):
+            if not pyasdm.utils.checkListType(scanIntent, ScanIntent):
                 raise ValueError(
                     "type of the first value in scanIntent is not ScanIntent as expected"
                 )

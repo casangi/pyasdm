@@ -33,6 +33,8 @@ import pyasdm.CalCurveTable
 
 from .Parser import Parser
 
+import pyasdm.utils
+
 from .exceptions.ConversionException import ConversionException
 
 # All of the extended types are imported
@@ -454,7 +456,7 @@ class CalCurveRow:
             eos.writeInt(0)
             eos.writeInt(0)
         else:
-            curve_dims = Parser.getListDims(self._curve)
+            curve_dims = pyasdm.utils.getListDims(self._curve)
         # assumes it really is 3D
         eos.writeInt(curve_dims[0])
         eos.writeInt(curve_dims[1])
@@ -482,7 +484,7 @@ class CalCurveRow:
                 eos.writeInt(0)
                 eos.writeInt(0)
             else:
-                rms_dims = Parser.getListDims(self._rms)
+                rms_dims = pyasdm.utils.getListDims(self._rms)
             # assumes it really is 2D
             eos.writeInt(rms_dims[0])
             eos.writeInt(rms_dims[1])
@@ -887,7 +889,7 @@ class CalCurveRow:
             raise ValueError("The value of frequencyRange must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(frequencyRange)
+            listDims = pyasdm.utils.getListDims(frequencyRange)
 
             shapeOK = len(listDims) == 1
 
@@ -896,7 +898,7 @@ class CalCurveRow:
 
             # the type of the values in the list must be Frequency
             # note : this only checks the first value found
-            if not Parser.checkListType(frequencyRange, Frequency):
+            if not pyasdm.utils.checkListType(frequencyRange, Frequency):
                 raise ValueError(
                     "type of the first value in frequencyRange is not Frequency as expected"
                 )
@@ -996,7 +998,7 @@ class CalCurveRow:
             raise ValueError("The value of antennaNames must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(antennaNames)
+            listDims = pyasdm.utils.getListDims(antennaNames)
 
             shapeOK = len(listDims) == 1
 
@@ -1005,7 +1007,7 @@ class CalCurveRow:
 
             # the type of the values in the list must be str
             # note : this only checks the first value found
-            if not Parser.checkListType(antennaNames, str):
+            if not pyasdm.utils.checkListType(antennaNames, str):
                 raise ValueError(
                     "type of the first value in antennaNames is not str as expected"
                 )
@@ -1061,7 +1063,7 @@ class CalCurveRow:
             raise ValueError("The value of polarizationTypes must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(polarizationTypes)
+            listDims = pyasdm.utils.getListDims(polarizationTypes)
 
             shapeOK = len(listDims) == 1
 
@@ -1070,7 +1072,7 @@ class CalCurveRow:
 
             # the type of the values in the list must be PolarizationType
             # note : this only checks the first value found
-            if not Parser.checkListType(polarizationTypes, PolarizationType):
+            if not pyasdm.utils.checkListType(polarizationTypes, PolarizationType):
                 raise ValueError(
                     "type of the first value in polarizationTypes is not PolarizationType as expected"
                 )
@@ -1104,7 +1106,7 @@ class CalCurveRow:
             raise ValueError("The value of curve must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(curve)
+            listDims = pyasdm.utils.getListDims(curve)
 
             shapeOK = len(listDims) == 3
 
@@ -1113,7 +1115,7 @@ class CalCurveRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(curve, float):
+            if not pyasdm.utils.checkListType(curve, float):
                 raise ValueError(
                     "type of the first value in curve is not float as expected"
                 )
@@ -1147,7 +1149,7 @@ class CalCurveRow:
             raise ValueError("The value of reducedChiSquared must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(reducedChiSquared)
+            listDims = pyasdm.utils.getListDims(reducedChiSquared)
 
             shapeOK = len(listDims) == 1
 
@@ -1156,7 +1158,7 @@ class CalCurveRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(reducedChiSquared, float):
+            if not pyasdm.utils.checkListType(reducedChiSquared, float):
                 raise ValueError(
                     "type of the first value in reducedChiSquared is not float as expected"
                 )
@@ -1250,7 +1252,7 @@ class CalCurveRow:
             raise ValueError("The value of rms must be a list")
         # check the shape
         try:
-            listDims = Parser.getListDims(rms)
+            listDims = pyasdm.utils.getListDims(rms)
 
             shapeOK = len(listDims) == 2
 
@@ -1259,7 +1261,7 @@ class CalCurveRow:
 
             # the type of the values in the list must be float
             # note : this only checks the first value found
-            if not Parser.checkListType(rms, float):
+            if not pyasdm.utils.checkListType(rms, float):
                 raise ValueError(
                     "type of the first value in rms is not float as expected"
                 )
@@ -1469,8 +1471,8 @@ class CalCurveRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            curve_dims = Parser.getListDims(curve)
-            this_curve_dims = Parser.getListDims(self._curve)
+            curve_dims = pyasdm.utils.getListDims(curve)
+            this_curve_dims = pyasdm.utils.getListDims(self._curve)
             if curve_dims != this_curve_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be
@@ -1592,8 +1594,8 @@ class CalCurveRow:
                 return False
             # both lists are not None, assume they are at least lists at this point
             # Compare first their dimensions and then their values.
-            curve_dims = Parser.getListDims(curve)
-            this_curve_dims = Parser.getListDims(self._curve)
+            curve_dims = pyasdm.utils.getListDims(curve)
+            this_curve_dims = pyasdm.utils.getListDims(self._curve)
             if curve_dims != this_curve_dims:
                 return False
             # assumes they are both 3D arrays, the internal one should be

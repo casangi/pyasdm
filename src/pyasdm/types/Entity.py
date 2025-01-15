@@ -87,8 +87,6 @@ class Entity:
         """
         return self.toXML()
 
-    # TBD: toBin and fromBin
-
     def toXML(self):
         """
         Return the values of this Entity as an XML-formatted string.
@@ -141,6 +139,32 @@ class Entity:
 
         # this check for a valid entityId and returns it
         return self._entityId.validate(self._entityId.toString())
+
+    @staticmethod
+    def fromBin(ein):
+        """
+        Create and return an Entity from an EndianInput instance.
+        """
+        # I don't trust the order that these might be evaluated if done in
+        # the entity constructor
+
+        idString = ein.readString()
+        idEncrypted = ein.readString()
+        idTypeName = ein.readString()
+        version = ein.readString()
+        instanceVers = ein.readString()
+        entity = Entity(idString, idEncrypted, idTypeName, version, instanceVers)
+        return entity
+
+    def toBin(self, eout):
+        """
+        Write this Entity out to an EndianOutput instance.
+        """
+        self._entityId.toBin(eout)
+        eout.writeString(self._entityIdEncrypted)
+        eout.writeString(self._entityTypeName)
+        eout.writeString(self._entityVersion)
+        eout.writeString(self._instanceVersion)
 
     def equals(self, entity):
         """

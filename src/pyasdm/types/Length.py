@@ -229,20 +229,178 @@ class Length:
                 result.append(item.get())
         return result
 
-    def toBin(self):
-        raise RuntimeError("Length.toBin is not yet implemented")
+    def toBin(self, eos):
+        """
+        Write this Length out, in meters, to a EndianOutput.
+        """
+        eos.writeDouble(self.get())
 
-    def fromBin(self):
-        raise RuntimeError("Length.fromBin is not yet implemented")
+    @staticmethod
+    def listToBin(lengthList, eos):
+        """
+        Write a list of Length to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(lengthList, list):
+            raise ValueError("lengthList is not a list")
 
-    def from1DBin(self):
-        raise RuntimeError("Length.from1Bin is not yet implemented")
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(lengthList)
+        ndims = len(listDims)
+        if ndims == 1:
+            Length.listTo1DBin(lengthList, eos)
+        elif ndims == 2:
+            Length.listTo2DBin(lengthList, eos)
+        elif ndims == 3:
+            Length.listTo3DBin(lengthList, eos)
 
-    def from2DBin(self):
-        raise RuntimeError("Length.from2Bin is not yet implemented")
+        raise ValueError(
+            "unsupport number of dimensions in lengthList in Length.listToBin : "
+            + str(ndims)
+        )
 
-    def from3DBin(self):
-        raise RuntimeError("Length.from3Bin is not yet implemented")
+    @staticmethod
+    def listTo1DBin(lengthList, eos):
+        """
+        Write a 1D list of Length to the EndianOutput
+        """
+        if not isinstance(lengthList, list):
+            raise ValueError("lengthList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(lengthList))
+
+        # only check the first value
+        if (len(lengthList) > 0) and not isinstance(lengthList[0], Length):
+            raise (ValueError("lengthList is not a list of Length"))
+
+        for thisLength in lengthList:
+            thisLength.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(lengthList, eos):
+        """
+        Write a 2D list of Length to the EndianOutput
+        """
+        if not isinstance(lengthList, list):
+            raise ValueError("lengthList is not a list")
+
+        ndim1 = len(lengthList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(lengthList[0], list):
+                raise ValueError("lengthList is not a 2D")
+
+            ndim2 = len(lengthList[0])
+            if ndim2 > 0 and not isinstance(lengthList[0][0], Length):
+                raise ValueError("lengthListis a not a 2D list of Length")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in lengthList:
+            for thisLength in thisList:
+                thisLength.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(lengthList, eos):
+        """
+        Write a 3D list of Length to the EndianOutput
+        """
+        if not isinstance(lengthList, list):
+            raise ValueError("lengthList is not a list")
+
+        ndim1 = len(lengthList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(lengthList[0], list):
+                raise ValueError("lengthList is not a 3D list")
+
+            ndim2 = len(lengthList[0])
+            if ndim2 > 0:
+                if not isinstance(lengthList[0][0], list):
+                    raise ValueError("lengthList is a not a 3D list")
+                ndim3 = len(lengthList[0][0])
+                if (ndim3 > 0) and not isinstance(lengthList[0][0][0], Length):
+                    raise ValueError("lengthList is not a 3D list of Length")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in lengthList:
+            for middleList in thisList:
+                for thisLength in middleList:
+                    thisLength.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an Length, in meters,
+        from an EndianInput instance and use the read value to set a
+        Length.
+
+        return a Length
+        """
+        return Length(eis.readDouble())
+
+    @staticmethod
+    def from1Dbin(eis):
+        """
+        Read a list of binary Length values, in meters, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(Length.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary Length values, in meters, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(Length.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3Dbin(eis):
+        """
+        Read a 3D list of binary Length values, in meters, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(Length.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     def equals(self, otherLength):
         """

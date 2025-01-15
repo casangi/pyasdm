@@ -172,22 +172,178 @@ class Humidity:
                 result.append(item.get())
         return result
 
-    def toBin(self):
-        # it also needs a static method to send a list of humidity items toBin
-        # should also work for 2D, 3D lists
-        raise RuntimeError("Humidity.toBin is not yet implemented")
+    def toBin(self, eos):
+        """
+        Write this Humidity out, in percent, to a EndianOutput.
+        """
+        eos.writeDouble(self.get())
 
-    def fromBin(self):
-        raise RuntimeError("Humidity.fromBin is not yet implemented")
+    @staticmethod
+    def listToBin(humidityList, eos):
+        """
+        Write a list of Humidity to the EndianOutput.
+        The list may have 1, 2 or 3 dimensions.
+        """
+        if not isinstance(humidityList, list):
+            raise ValueError("humidityList is not a list")
 
-    def from1DBin(self):
-        raise RuntimeError("Humidity.from1DBin is not yet implemented")
+        # this is used to determine the number of dimensions
+        listDims = pyasdm.utils.getListDims(humidityList)
+        ndims = len(listDims)
+        if ndims == 1:
+            Humidity.listTo1DBin(humidityList, eos)
+        elif ndims == 2:
+            Humidity.listTo2DBin(humidityList, eos)
+        elif ndims == 3:
+            Humidity.listTo3DBin(humidityList, eos)
 
-    def from2DBin(self):
-        raise RuntimeError("Humidity.from2DBin is not yet implemented")
+        raise ValueError(
+            "unsupport number of dimensions in humidityList in Humidity.listToBin : "
+            + str(ndims)
+        )
 
-    def from3DBin(self):
-        raise RuntimeError("Humidity.from2DBin is not yet implemented")
+    @staticmethod
+    def listTo1DBin(humidityList, eos):
+        """
+        Write a 1D list of Humidity to the EndianOutput
+        """
+        if not isinstance(humidityList, list):
+            raise ValueError("humidityList is not a list")
+
+        # ndim is always written, even for 0-element lists
+        eos.writeInt(len(humidityList))
+
+        # only check the first value
+        if (len(humidityList) > 0) and not isinstance(humidityList[0], Humidity):
+            raise (ValueError("humidityList is not a list of Humidity"))
+
+        for thisHumidity in humidityList:
+            thisHumidity.toBin(eos)
+
+    @staticmethod
+    def listTo2DBin(humidityList, eos):
+        """
+        Write a 2D list of Humidity to the EndianOutput
+        """
+        if not isinstance(humidityList, list):
+            raise ValueError("humidityList is not a list")
+
+        ndim1 = len(humidityList)
+        ndim2 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(humidityList[0], list):
+                raise ValueError("humidityList is not a 2D")
+
+            ndim2 = len(humidityList[0])
+            if ndim2 > 0 and not isinstance(humidityList[0][0], Humidity):
+                raise ValueError("humidityListis a not a 2D list of Humidity")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+
+        for thisList in humidityList:
+            for thisHumidity in thisList:
+                thisHumidity.toBin(eos)
+
+    @staticmethod
+    def listTo3DBin(humidityList, eos):
+        """
+        Write a 3D list of Humidity to the EndianOutput
+        """
+        if not isinstance(humidityList, list):
+            raise ValueError("humidityList is not a list")
+
+        ndim1 = len(humidityList)
+        ndim2 = 0
+        ndim3 = 0
+
+        if ndim1 > 0:
+            # only check the first value in the outer list
+            if not isinstance(humidityList[0], list):
+                raise ValueError("humidityList is not a 3D list")
+
+            ndim2 = len(humidityList[0])
+            if ndim2 > 0:
+                if not isinstance(humidityList[0][0], list):
+                    raise ValueError("humidityList is a not a 3D list")
+                ndim3 = len(humidityList[0][0])
+                if (ndim3 > 0) and not isinstance(humidityList[0][0][0], Humidity):
+                    raise ValueError("humidityList is not a 3D list of Humidity")
+
+        # ndims are always written
+        eos.writeInt(ndim1)
+        eos.writeInt(ndim2)
+        eos.writeInt(ndim3)
+
+        for thisList in humidityList:
+            for middleList in thisList:
+                for thisHumidity in middleList:
+                    thisHumidityy.toBin(eos)
+
+    @staticmethod
+    def fromBin(eis):
+        """
+        Read the binary representation of an Humidity, in percent,
+        from an EndianInput instance and use the read value to set a
+        Humidity.
+
+        return an Humidity
+        """
+        return Humidity(eis.readDouble())
+
+    @staticmethod
+    def from1DBin(eis):
+        """
+        Read a list of binary Humidity values, in percent, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            result.append(Humidity.fromBin(eis))
+
+        return result
+
+    @staticmethod
+    def from2DBin(eis):
+        """
+        Read a 2D list of binary Humidity values, in percent, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            innerList = []
+            for j in range(dim2):
+                innerList.append(Humidity.fromBin(eis))
+            result.append(innerList)
+
+        return result
+
+    @staticmethod
+    def from3DBin(eis):
+        """
+        Read a 3D list of binary Humidity values, in percent, from an
+        EndianInput instance and return the resulting list.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        result = []
+        for i in range(dim1):
+            middleList = []
+            for j in range(dim2):
+                innerList = []
+                for k in range(dim3):
+                    innerList.append(Humidity.fromBin(eis))
+                middleList.append(innerList)
+            result.append(middleList)
+
+        return result
 
     def equals(self, otherHumidity):
         """
