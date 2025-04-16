@@ -95,7 +95,7 @@ class EntityRef:
         eos.writeString(self._entityTypeName)
         eos.writeString(self._instanceVersion)
 
-    @staticmetehod
+    @staticmethod
     def listToBin(entityRefList, eos):
         """
         Write a list of EntityRef to the EndianOutput.
