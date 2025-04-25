@@ -108,12 +108,38 @@ class CalibrationSet:
                 _calibrationSetDict[self._name] = getattr(CalibrationSet, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a CalibrationSet and its value is the same as this one.
+        """
+        return isinstance(other, CalibrationSet) and (
+            other.getValue() == self.getValue()
+        )
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -138,16 +164,9 @@ class CalibrationSet:
     @staticmethod
     def name(calibrationSet):
         """
-        Returns the string form of the CalibrationSet
+        Returns the string form of calibrationSet
         """
-        return calibrationSet.getName()
-
-    @staticmethod
-    def toString(calibrationSet):
-        """
-        Equivalent to the name method
-        """
-        return CalibrationSet.name(calibrationSet)
+        return str(calibrationSet)
 
     @staticmethod
     def names():

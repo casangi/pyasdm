@@ -84,12 +84,36 @@ class TimeScale:
                 _timeScaleDict[self._name] = getattr(TimeScale, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a TimeScale and its value is the same as this one.
+        """
+        return isinstance(other, TimeScale) and (other.getValue() == self.getValue())
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -114,16 +138,9 @@ class TimeScale:
     @staticmethod
     def name(timeScale):
         """
-        Returns the string form of the TimeScale
+        Returns the string form of timeScale
         """
-        return timeScale.getName()
-
-    @staticmethod
-    def toString(timeScale):
-        """
-        Equivalent to the name method
-        """
-        return TimeScale.name(timeScale)
+        return str(timeScale)
 
     @staticmethod
     def names():

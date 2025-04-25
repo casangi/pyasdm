@@ -120,12 +120,38 @@ class CorrelatorName:
                 _correlatorNameDict[self._name] = getattr(CorrelatorName, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a CorrelatorName and its value is the same as this one.
+        """
+        return isinstance(other, CorrelatorName) and (
+            other.getValue() == self.getValue()
+        )
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -150,16 +176,9 @@ class CorrelatorName:
     @staticmethod
     def name(correlatorName):
         """
-        Returns the string form of the CorrelatorName
+        Returns the string form of correlatorName
         """
-        return correlatorName.getName()
-
-    @staticmethod
-    def toString(correlatorName):
-        """
-        Equivalent to the name method
-        """
-        return CorrelatorName.name(correlatorName)
+        return str(correlatorName)
 
     @staticmethod
     def names():

@@ -100,12 +100,38 @@ class PointingMethod:
                 _pointingMethodDict[self._name] = getattr(PointingMethod, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a PointingMethod and its value is the same as this one.
+        """
+        return isinstance(other, PointingMethod) and (
+            other.getValue() == self.getValue()
+        )
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -130,16 +156,9 @@ class PointingMethod:
     @staticmethod
     def name(pointingMethod):
         """
-        Returns the string form of the PointingMethod
+        Returns the string form of pointingMethod
         """
-        return pointingMethod.getName()
-
-    @staticmethod
-    def toString(pointingMethod):
-        """
-        Equivalent to the name method
-        """
-        return PointingMethod.name(pointingMethod)
+        return str(pointingMethod)
 
     @staticmethod
     def names():

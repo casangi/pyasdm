@@ -106,12 +106,38 @@ class SwitchingMode:
                 _switchingModeDict[self._name] = getattr(SwitchingMode, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a SwitchingMode and its value is the same as this one.
+        """
+        return isinstance(other, SwitchingMode) and (
+            other.getValue() == self.getValue()
+        )
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -136,16 +162,9 @@ class SwitchingMode:
     @staticmethod
     def name(switchingMode):
         """
-        Returns the string form of the SwitchingMode
+        Returns the string form of switchingMode
         """
-        return switchingMode.getName()
-
-    @staticmethod
-    def toString(switchingMode):
-        """
-        Equivalent to the name method
-        """
-        return SwitchingMode.name(switchingMode)
+        return str(switchingMode)
 
     @staticmethod
     def names():

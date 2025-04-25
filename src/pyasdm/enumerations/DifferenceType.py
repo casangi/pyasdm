@@ -92,12 +92,38 @@ class DifferenceType:
                 _differenceTypeDict[self._name] = getattr(DifferenceType, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a DifferenceType and its value is the same as this one.
+        """
+        return isinstance(other, DifferenceType) and (
+            other.getValue() == self.getValue()
+        )
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -122,16 +148,9 @@ class DifferenceType:
     @staticmethod
     def name(differenceType):
         """
-        Returns the string form of the DifferenceType
+        Returns the string form of differenceType
         """
-        return differenceType.getName()
-
-    @staticmethod
-    def toString(differenceType):
-        """
-        Equivalent to the name method
-        """
-        return DifferenceType.name(differenceType)
+        return str(differenceType)
 
     @staticmethod
     def names():

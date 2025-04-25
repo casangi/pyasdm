@@ -112,12 +112,38 @@ class CalDataOrigin:
                 _calDataOriginDict[self._name] = getattr(CalDataOrigin, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a CalDataOrigin and its value is the same as this one.
+        """
+        return isinstance(other, CalDataOrigin) and (
+            other.getValue() == self.getValue()
+        )
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -142,16 +168,9 @@ class CalDataOrigin:
     @staticmethod
     def name(calDataOrigin):
         """
-        Returns the string form of the CalDataOrigin
+        Returns the string form of calDataOrigin
         """
-        return calDataOrigin.getName()
-
-    @staticmethod
-    def toString(calDataOrigin):
-        """
-        Equivalent to the name method
-        """
-        return CalDataOrigin.name(calDataOrigin)
+        return str(calDataOrigin)
 
     @staticmethod
     def names():

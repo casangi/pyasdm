@@ -128,12 +128,36 @@ class AxisName:
                 _axisNameDict[self._name] = getattr(AxisName, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a AxisName and its value is the same as this one.
+        """
+        return isinstance(other, AxisName) and (other.getValue() == self.getValue())
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -158,16 +182,9 @@ class AxisName:
     @staticmethod
     def name(axisName):
         """
-        Returns the string form of the AxisName
+        Returns the string form of axisName
         """
-        return axisName.getName()
-
-    @staticmethod
-    def toString(axisName):
-        """
-        Equivalent to the name method
-        """
-        return AxisName.name(axisName)
+        return str(axisName)
 
     @staticmethod
     def names():

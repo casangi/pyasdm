@@ -88,12 +88,38 @@ class ProcessorType:
                 _processorTypeDict[self._name] = getattr(ProcessorType, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a ProcessorType and its value is the same as this one.
+        """
+        return isinstance(other, ProcessorType) and (
+            other.getValue() == self.getValue()
+        )
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -118,16 +144,9 @@ class ProcessorType:
     @staticmethod
     def name(processorType):
         """
-        Returns the string form of the ProcessorType
+        Returns the string form of processorType
         """
-        return processorType.getName()
-
-    @staticmethod
-    def toString(processorType):
-        """
-        Equivalent to the name method
-        """
-        return ProcessorType.name(processorType)
+        return str(processorType)
 
     @staticmethod
     def names():

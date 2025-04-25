@@ -88,12 +88,36 @@ class CalCurveType:
                 _calCurveTypeDict[self._name] = getattr(CalCurveType, self._name)
 
     def getValue(self):
+        """
+        Return the integer value of this enumeration.
+        """
         return self._value
 
     def getName(self):
+        """
+        Return the name of this enumeration.
+        """
         return self._name
 
-    # by convention with the other languages, these are all static methods
+    def __str__(self):
+        """
+        Equivalent to getName()
+        """
+        return self.getName()
+
+    def __eq__(self, other):
+        """
+        Returns True if other is a CalCurveType and its value is the same as this one.
+        """
+        return isinstance(other, CalCurveType) and (other.getValue() == self.getValue())
+
+    def __ne__(self, other):
+        """
+        Returns True if other is not equal to self
+        """
+        return not (self == other)
+
+    # by convention with the code in java and c++, these are all static methods
     @staticmethod
     def revision():
         """
@@ -118,16 +142,9 @@ class CalCurveType:
     @staticmethod
     def name(calCurveType):
         """
-        Returns the string form of the CalCurveType
+        Returns the string form of calCurveType
         """
-        return calCurveType.getName()
-
-    @staticmethod
-    def toString(calCurveType):
-        """
-        Equivalent to the name method
-        """
-        return CalCurveType.name(calCurveType)
+        return str(calCurveType)
 
     @staticmethod
     def names():
