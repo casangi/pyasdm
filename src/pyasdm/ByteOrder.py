@@ -53,7 +53,7 @@ class ByteOrder:
 
         self.fromString(byteOrderStr)
 
-    def toString(self):
+    def __str__(self):
         """
         return the name as used by ASDM tables.
         returns either "Little_Endian" or "Big_Endian"
@@ -100,3 +100,7 @@ class ByteOrder:
         Returns true if this ByteOrder is equvialent to the native byteorder as found in sys.byteorder.
         """
         return self._is_native
+
+NATIVE = ByteOrder("Native")
+LITTLE = ByteOrder("Little_Endian")
+BIG = ByteOrder("Big_Endian")
