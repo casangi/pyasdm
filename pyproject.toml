@@ -12,10 +12,10 @@ requires-python = ">= 3.9, < 3.13"
 dependencies = [
     'pytest',
     'pytest-cov',
-    'pytest-html'
+    'pytest-html',
+    'numpy'
 
 ]
-
 
 [project.optional-dependencies]
 docs = [
