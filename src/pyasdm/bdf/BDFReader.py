@@ -599,7 +599,7 @@ class BDFReader:
 
     def printBDFHeader(self):
         print("XML Schema version = %s" % self._bdfHeaderData.getSchemaVersion())
-        print("Byte order = %s" % self._bdfHeaderData.getByteOrder().toString())
+        print("Byte order = %s" % self._bdfHeaderData.getByteOrder())
         print("startTime = %s" % self._bdfHeaderData.getStartTime())
         print("projectPath = %s" % self._bdfHeaderData.projectPath())
         print("dataOID = %s" % self._bdfHeaderData.getDataOID())
@@ -613,20 +613,20 @@ class BDFReader:
         print("scanNum = %s" % self._bdfHeaderData.getScanNum())
         print("subscanNum = %s" % self._bdfHeaderData.getSubscanNum())
         print("numAntenna = %s" % self._bdfHeaderData.getNumAntenna())
-        print("correlationMode = %s" % self._bdfHeaderData.getCorrelationMode().getName())
+        print("correlationMode = %s" % self._bdfHeaderData.getCorrelationMode())
         spectralResolutionType = self._bdfHeaderData.getSpectralResolutionType()
         if spectralResolutionType is not None:
-            print("spectralResolutionType = %s" % spectralResolutionType.getName())
+            print("spectralResolutionType = %s" % spectralResolutionType)
         else:
             print("spectralResolutionType not found in sdmDataHeader")
-        print("processorType = %s" % self._bdfHeaderData.getProcessorType().getName())
+        print("processorType = %s" % self._bdfHeaderData.getProcessorType())
         apcList = self._bdfHeaderData.getAPClist()
         if len(apcList) > 0:
             apcString = ""
             for apc in apcList:
                 if len(apcString) > 0:
                     apcString += " "
-                apcString += apc.getName()
+                apcString += str(apc)
             print("atmospheric phase correction = %s" % apcString)
         basebandsList = self._bdfHeaderData.getBasebandsList()
         if len(basebandsList) > 0:
@@ -642,14 +642,14 @@ class BDFReader:
                     for crossPolProduct in spectralWindow["crossPolProducts"]:
                         if len(crossPolStr) > 0:
                             crossPolStr += " "
-                        crossPolStr += crossPolProduct.getName()
+                        crossPolStr += str(crossPolProduct)
                     if len(crossPolStr) > 0:
                         print("\t\tcrossPolProducts = %s" % crossPolStr)
                     sdPolStr = ""
                     for sdPolProduct in spectralWindow["sdPolProducts"]:
                         if len(sdPolStr) > 0:
                             sdPolStr += " "
-                        sdPolStr += sdPolProduct.getName()
+                        sdPolStr += str(sdPolProduct)
                     if len(sdPolStr) > 0:
                         print("\t\tsdPolProducts = %s" % sdPolStr)
                     if spectralWindow['scaleFactor'] is not None:
@@ -664,7 +664,7 @@ class BDFReader:
 
     def printSubset(self, subset):
         # not for release
-        # prins a subset, prining up to the first 10 elements of each type
+        # prints a subset, prining up to the first 10 elements of each type
         # does not use self
         print("Midpoint : %s" % subset['midpointInNanoSeconds'])
         print("Interval : %s" % subset['intervalInNanoSeconds'])
