@@ -143,9 +143,9 @@ class AngularRate:
         """
         self._rate = float(rate)
 
-    def toString(self):
+    def __str__(self):
         """
-        Return the value of this angular rate as a String in units of radians per second.
+        Return the value of this angular rate as a string in units of radians per second.
         """
         return str(self.get())
 
@@ -198,11 +198,11 @@ class AngularRate:
             AngularRate.listTo2DBin(angularRateList, eos)
         elif ndims == 3:
             AngularRate.listTo3DBin(angularRateList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in angularRateList in AngularRate.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in angularRateList in AngularRate.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(angularRateList, eos):
@@ -403,7 +403,7 @@ class AngularRate:
 
         return result
 
-    def eq(self, otherAngularRate):
+    def __eq__(self, otherAngularRate):
         """
         Return True if and only if this AngularRate is equal to the specified
         other AngularRate.
@@ -411,7 +411,7 @@ class AngularRate:
         """
         return self.equals(otherAngularRate)
 
-    def ne(self, otherAngularRate):
+    def __ne__(self, otherAngularRate):
         """
         Return True if and only if this AngularRate is not equal to the specified
         other AngularRate.
@@ -420,7 +420,7 @@ class AngularRate:
             self._rate != otherAngularRate._rate
         )
 
-    def lt(self, otherAngularRate):
+    def __lt__(self, otherAngularRate):
         """
         Return True if and only if this AngularRate is less than the specified
         other AngularRate.
@@ -429,7 +429,7 @@ class AngularRate:
             self._rate < otherAngularRate._rate
         )
 
-    def le(self, otherAngularRate):
+    def __le__(self, otherAngularRate):
         """
         Return True if and only if this AngularRate is less than or equal to
         the specified other AngularRate.
@@ -438,7 +438,7 @@ class AngularRate:
             self._rate <= otherAngularRate._rate
         )
 
-    def gt(self, otherAngularRate):
+    def __gt__(self, otherAngularRate):
         """
         Return True if and only if this AngularRate is greater than the specified
         other AngularRate.
@@ -447,7 +447,7 @@ class AngularRate:
             self._rate > otherAngularRate._rate
         )
 
-    def ge(self, otherAngularRate):
+    def __ge__(self, otherAngularRate):
         """
         Return True if and only if this AngularRate is greater than or equal to
         the specified other AngularRate.
@@ -456,7 +456,7 @@ class AngularRate:
             self._rate >= otherAngularRate._rate
         )
 
-    def add(self, otherAngularRate):
+    def __add__(self, otherAngularRate):
         """
         Add otherAngularRate, which must be a AngularRate, to this angular rate, (this + x).
         param otherAngularRate The AngularRate to be added to this rate.
@@ -468,7 +468,7 @@ class AngularRate:
         self._rate += otherAngularRate._rate
         return self
 
-    def sub(self, otherAngularRate):
+    def __sub__(self, otherAngularRate):
         """
         Subtract otherAngularRate which must be a AngularRate, from this angular rate, (this - x).
         param otherAngularRate The AngularRate to be subtracted from this angular rate.
@@ -480,7 +480,7 @@ class AngularRate:
         self._rate -= otherAngularRate._rate
         return self
 
-    def mult(self, factor):
+    def __mul__(self, factor):
         """
         Multiply this angular rate by some factor, (this * factor).
         param factor The factor by which this angular rate is to be multiplied.
@@ -489,7 +489,7 @@ class AngularRate:
         self._rate *= factor
         return self
 
-    def div(self, factor):
+    def __truediv__(self, factor):
         """
         Divide this angular rate by some factor, (this / factor).
         param factor The factor by which this angular rate is to be divided.

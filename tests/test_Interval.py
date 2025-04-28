@@ -32,7 +32,7 @@ class interval_test(unittest.TestCase):
         # from a string
         intstr = Interval("12345")
         self.assertEqual(intstr.get(),12345)
-        intstrcopy10 = Interval(int10.string())
+        intstrcopy10 = Interval(str(int10))
         self.assertEqual(intstrcopy10.get(),int10.get())
 
         # invalid constructor values - should throw exceptions

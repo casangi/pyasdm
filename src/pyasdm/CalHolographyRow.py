@@ -233,7 +233,7 @@ class CalHolographyRow:
             if row._screwNameExists:
 
                 # screwName is a list, make a deep copy
-                self.screwName = copy.deepcopy(row.screwName)
+                self._screwName = copy.deepcopy(row._screwName)
 
                 self._screwNameExists = True
 
@@ -242,7 +242,7 @@ class CalHolographyRow:
             if row._screwMotionExists:
 
                 # screwMotion is a list, make a deep copy
-                self.screwMotion = copy.deepcopy(row.screwMotion)
+                self._screwMotion = copy.deepcopy(row._screwMotion)
 
                 self._screwMotionExists = True
 
@@ -251,7 +251,7 @@ class CalHolographyRow:
             if row._screwMotionErrorExists:
 
                 # screwMotionError is a list, make a deep copy
-                self.screwMotionError = copy.deepcopy(row.screwMotionError)
+                self._screwMotionError = copy.deepcopy(row._screwMotionError)
 
                 self._screwMotionErrorExists = True
 
@@ -268,7 +268,7 @@ class CalHolographyRow:
             if row._gravOptRangeExists:
 
                 # gravOptRange is a list, make a deep copy
-                self.gravOptRange = copy.deepcopy(row.gravOptRange)
+                self._gravOptRange = copy.deepcopy(row._gravOptRange)
 
                 self._gravOptRangeExists = True
 
@@ -285,7 +285,7 @@ class CalHolographyRow:
             if row._tempOptRangeExists:
 
                 # tempOptRange is a list, make a deep copy
-                self.tempOptRange = copy.deepcopy(row.tempOptRange)
+                self._tempOptRange = copy.deepcopy(row._tempOptRange)
 
                 self._tempOptRangeExists = True
 
@@ -605,7 +605,7 @@ class CalHolographyRow:
 
         self._calReductionId.toBin(eos)
 
-        eos.writeString(self._antennaMake.toString())
+        eos.writeString(str(self._antennaMake))
 
         self._startValidTime.toBin(eos)
 
@@ -624,11 +624,11 @@ class CalHolographyRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(self._polarizationTypes[i].toString())
+            eos.writeString(str(self._polarizationTypes[i]))
 
         eos.writeInt(self._numPanelModes)
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
         self._beamMapUID.toBin(eos)
 
@@ -713,7 +713,7 @@ class CalHolographyRow:
         Set the antennaMake in row from the EndianInput (eis) instance.
         """
 
-        row._antennaMake = AntennaMake.from_int(eis.readInt())
+        row._antennaMake = AntennaMake.literal(eis.readString())
 
     @staticmethod
     def startValidTimeFromBin(row, eis):
@@ -780,7 +780,7 @@ class CalHolographyRow:
         polarizationTypesDim1 = eis.readInt()
         thisList = []
         for i in range(polarizationTypesDim1):
-            thisValue = PolarizationType.from_int(eis.readInt())
+            thisValue = PolarizationType.literal(eis.readString())
             thisList.append(thisValue)
         row._polarizationTypes = thisList
 
@@ -798,7 +798,7 @@ class CalHolographyRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def beamMapUIDFromBin(row, eis):

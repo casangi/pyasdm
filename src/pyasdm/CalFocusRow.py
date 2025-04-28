@@ -281,7 +281,7 @@ class CalFocusRow:
             if row._focusCurveWidthExists:
 
                 # focusCurveWidth is a list, make a deep copy
-                self.focusCurveWidth = copy.deepcopy(row.focusCurveWidth)
+                self._focusCurveWidth = copy.deepcopy(row._focusCurveWidth)
 
                 self._focusCurveWidthExists = True
 
@@ -290,7 +290,7 @@ class CalFocusRow:
             if row._focusCurveWidthErrorExists:
 
                 # focusCurveWidthError is a list, make a deep copy
-                self.focusCurveWidthError = copy.deepcopy(row.focusCurveWidthError)
+                self._focusCurveWidthError = copy.deepcopy(row._focusCurveWidthError)
 
                 self._focusCurveWidthErrorExists = True
 
@@ -299,7 +299,7 @@ class CalFocusRow:
             if row._focusCurveWasFixedExists:
 
                 # focusCurveWasFixed is a list, make a deep copy
-                self.focusCurveWasFixed = copy.deepcopy(row.focusCurveWasFixed)
+                self._focusCurveWasFixed = copy.deepcopy(row._focusCurveWasFixed)
 
                 self._focusCurveWasFixedExists = True
 
@@ -308,7 +308,7 @@ class CalFocusRow:
             if row._offIntensityExists:
 
                 # offIntensity is a list, make a deep copy
-                self.offIntensity = copy.deepcopy(row.offIntensity)
+                self._offIntensity = copy.deepcopy(row._offIntensity)
 
                 self._offIntensityExists = True
 
@@ -317,7 +317,7 @@ class CalFocusRow:
             if row._offIntensityErrorExists:
 
                 # offIntensityError is a list, make a deep copy
-                self.offIntensityError = copy.deepcopy(row.offIntensityError)
+                self._offIntensityError = copy.deepcopy(row._offIntensityError)
 
                 self._offIntensityErrorExists = True
 
@@ -334,7 +334,7 @@ class CalFocusRow:
             if row._peakIntensityExists:
 
                 # peakIntensity is a list, make a deep copy
-                self.peakIntensity = copy.deepcopy(row.peakIntensity)
+                self._peakIntensity = copy.deepcopy(row._peakIntensity)
 
                 self._peakIntensityExists = True
 
@@ -343,7 +343,7 @@ class CalFocusRow:
             if row._peakIntensityErrorExists:
 
                 # peakIntensityError is a list, make a deep copy
-                self.peakIntensityError = copy.deepcopy(row.peakIntensityError)
+                self._peakIntensityError = copy.deepcopy(row._peakIntensityError)
 
                 self._peakIntensityErrorExists = True
 
@@ -360,7 +360,7 @@ class CalFocusRow:
             if row._astigmPlusExists:
 
                 # astigmPlus is a list, make a deep copy
-                self.astigmPlus = copy.deepcopy(row.astigmPlus)
+                self._astigmPlus = copy.deepcopy(row._astigmPlus)
 
                 self._astigmPlusExists = True
 
@@ -369,7 +369,7 @@ class CalFocusRow:
             if row._astigmPlusErrorExists:
 
                 # astigmPlusError is a list, make a deep copy
-                self.astigmPlusError = copy.deepcopy(row.astigmPlusError)
+                self._astigmPlusError = copy.deepcopy(row._astigmPlusError)
 
                 self._astigmPlusErrorExists = True
 
@@ -378,7 +378,7 @@ class CalFocusRow:
             if row._astigmMultExists:
 
                 # astigmMult is a list, make a deep copy
-                self.astigmMult = copy.deepcopy(row.astigmMult)
+                self._astigmMult = copy.deepcopy(row._astigmMult)
 
                 self._astigmMultExists = True
 
@@ -387,7 +387,7 @@ class CalFocusRow:
             if row._astigmMultErrorExists:
 
                 # astigmMultError is a list, make a deep copy
-                self.astigmMultError = copy.deepcopy(row.astigmMultError)
+                self._astigmMultError = copy.deepcopy(row._astigmMultError)
 
                 self._astigmMultErrorExists = True
 
@@ -396,7 +396,7 @@ class CalFocusRow:
             if row._illumOffsetExists:
 
                 # illumOffset is a list, make a deep copy
-                self.illumOffset = copy.deepcopy(row.illumOffset)
+                self._illumOffset = copy.deepcopy(row._illumOffset)
 
                 self._illumOffsetExists = True
 
@@ -405,7 +405,7 @@ class CalFocusRow:
             if row._illumOffsetErrorExists:
 
                 # illumOffsetError is a list, make a deep copy
-                self.illumOffsetError = copy.deepcopy(row.illumOffsetError)
+                self._illumOffsetError = copy.deepcopy(row._illumOffsetError)
 
                 self._illumOffsetErrorExists = True
 
@@ -414,7 +414,7 @@ class CalFocusRow:
             if row._fitRMSExists:
 
                 # fitRMS is a list, make a deep copy
-                self.fitRMS = copy.deepcopy(row.fitRMS)
+                self._fitRMS = copy.deepcopy(row._fitRMS)
 
                 self._fitRMSExists = True
 
@@ -915,7 +915,7 @@ class CalFocusRow:
 
         eos.writeStr(self._antennaName)
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
         self._calDataId.toBin(eos)
 
@@ -927,9 +927,9 @@ class CalFocusRow:
 
         self._ambientTemperature.toBin(eos)
 
-        eos.writeString(self._atmPhaseCorrection.toString())
+        eos.writeString(str(self._atmPhaseCorrection))
 
-        eos.writeString(self._focusMethod.toString())
+        eos.writeString(str(self._focusMethod))
 
         Frequency.listToBin(self._frequencyRange, eos)
 
@@ -940,7 +940,7 @@ class CalFocusRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(self._polarizationTypes[i].toString())
+            eos.writeString(str(self._polarizationTypes[i]))
 
         eos.writeInt(len(self._wereFixed))
         for i in range(len(self._wereFixed)):
@@ -1081,7 +1081,7 @@ class CalFocusRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def calDataIdFromBin(row, eis):
@@ -1129,7 +1129,7 @@ class CalFocusRow:
         Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
         """
 
-        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+        row._atmPhaseCorrection = AtmPhaseCorrection.literal(eis.readString())
 
     @staticmethod
     def focusMethodFromBin(row, eis):
@@ -1137,7 +1137,7 @@ class CalFocusRow:
         Set the focusMethod in row from the EndianInput (eis) instance.
         """
 
-        row._focusMethod = FocusMethod.from_int(eis.readInt())
+        row._focusMethod = FocusMethod.literal(eis.readString())
 
     @staticmethod
     def frequencyRangeFromBin(row, eis):
@@ -1172,7 +1172,7 @@ class CalFocusRow:
         polarizationTypesDim1 = eis.readInt()
         thisList = []
         for i in range(polarizationTypesDim1):
-            thisValue = PolarizationType.from_int(eis.readInt())
+            thisValue = PolarizationType.literal(eis.readString())
             thisList.append(thisValue)
         row._polarizationTypes = thisList
 
@@ -1220,7 +1220,7 @@ class CalFocusRow:
                 thisValue = eis.readBool()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.offsetWasTied = thisList
+        row._offsetWasTied = thisList
 
     @staticmethod
     def reducedChiSquaredFromBin(row, eis):
@@ -1237,7 +1237,7 @@ class CalFocusRow:
                 thisValue = eis.readFloat()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.reducedChiSquared = thisList
+        row._reducedChiSquared = thisList
 
     @staticmethod
     def positionFromBin(row, eis):

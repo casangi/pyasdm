@@ -450,7 +450,7 @@ class CalPositionRow:
 
         eos.writeStr(self._antennaName)
 
-        eos.writeString(self._atmPhaseCorrection.toString())
+        eos.writeString(str(self._atmPhaseCorrection))
 
         self._calDataId.toBin(eos)
 
@@ -466,9 +466,9 @@ class CalPositionRow:
 
         Length.listToBin(self._stationPosition, eos)
 
-        eos.writeString(self._positionMethod.toString())
+        eos.writeString(str(self._positionMethod))
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
         eos.writeInt(self._numAntenna)
 
@@ -513,7 +513,7 @@ class CalPositionRow:
         Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
         """
 
-        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+        row._atmPhaseCorrection = AtmPhaseCorrection.literal(eis.readString())
 
     @staticmethod
     def calDataIdFromBin(row, eis):
@@ -577,7 +577,7 @@ class CalPositionRow:
         Set the positionMethod in row from the EndianInput (eis) instance.
         """
 
-        row._positionMethod = PositionMethod.from_int(eis.readInt())
+        row._positionMethod = PositionMethod.literal(eis.readString())
 
     @staticmethod
     def receiverBandFromBin(row, eis):
@@ -585,7 +585,7 @@ class CalPositionRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def numAntennaFromBin(row, eis):

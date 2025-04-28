@@ -190,7 +190,7 @@ class CalDataRow:
             if row._fieldNameExists:
 
                 # fieldName is a list, make a deep copy
-                self.fieldName = copy.deepcopy(row.fieldName)
+                self._fieldName = copy.deepcopy(row._fieldName)
 
                 self._fieldNameExists = True
 
@@ -199,7 +199,7 @@ class CalDataRow:
             if row._sourceNameExists:
 
                 # sourceName is a list, make a deep copy
-                self.sourceName = copy.deepcopy(row.sourceName)
+                self._sourceName = copy.deepcopy(row._sourceName)
 
                 self._sourceNameExists = True
 
@@ -208,7 +208,7 @@ class CalDataRow:
             if row._sourceCodeExists:
 
                 # sourceCode is a list, make a deep copy
-                self.sourceCode = copy.deepcopy(row.sourceCode)
+                self._sourceCode = copy.deepcopy(row._sourceCode)
 
                 self._sourceCodeExists = True
 
@@ -217,7 +217,7 @@ class CalDataRow:
             if row._scanIntentExists:
 
                 # scanIntent is a list, make a deep copy
-                self.scanIntent = copy.deepcopy(row.scanIntent)
+                self._scanIntent = copy.deepcopy(row._scanIntent)
 
                 self._scanIntentExists = True
 
@@ -427,9 +427,9 @@ class CalDataRow:
 
         self._execBlockUID.toBin(eos)
 
-        eos.writeString(self._calDataType.toString())
+        eos.writeString(str(self._calDataType))
 
-        eos.writeString(self._calType.toString())
+        eos.writeString(str(self._calType))
 
         eos.writeInt(self._numScan)
 
@@ -446,7 +446,7 @@ class CalDataRow:
         eos.writeBool(self._assocCalNatureExists)
         if self._assocCalNatureExists:
 
-            eos.writeString(self._assocCalNature.toString())
+            eos.writeString(str(self._assocCalNature))
 
         eos.writeBool(self._fieldNameExists)
         if self._fieldNameExists:
@@ -478,7 +478,7 @@ class CalDataRow:
             eos.writeInt(len(self._scanIntent))
             for i in range(len(self._scanIntent)):
 
-                eos.writeString(self._scanIntent[i].toString())
+                eos.writeString(str(self._scanIntent[i]))
 
     @staticmethod
     def calDataIdFromBin(row, eis):
@@ -518,7 +518,7 @@ class CalDataRow:
         Set the calDataType in row from the EndianInput (eis) instance.
         """
 
-        row._calDataType = CalDataOrigin.from_int(eis.readInt())
+        row._calDataType = CalDataOrigin.literal(eis.readString())
 
     @staticmethod
     def calTypeFromBin(row, eis):
@@ -526,7 +526,7 @@ class CalDataRow:
         Set the calType in row from the EndianInput (eis) instance.
         """
 
-        row._calType = CalType.from_int(eis.readInt())
+        row._calType = CalType.literal(eis.readString())
 
     @staticmethod
     def numScanFromBin(row, eis):
@@ -567,7 +567,7 @@ class CalDataRow:
         row._assocCalNatureExists = eis.readBool()
         if row._assocCalNatureExists:
 
-            row._assocCalNature = AssociatedCalNature.from_int(eis.readInt())
+            row._assocCalNature = AssociatedCalNature.literal(eis.readString())
 
     @staticmethod
     def fieldNameFromBin(row, eis):
@@ -625,7 +625,7 @@ class CalDataRow:
             scanIntentDim1 = eis.readInt()
             thisList = []
             for i in range(scanIntentDim1):
-                thisValue = ScanIntent.from_int(eis.readInt())
+                thisValue = ScanIntent.literal(eis.readString())
                 thisList.append(thisValue)
             row._scanIntent = thisList
 

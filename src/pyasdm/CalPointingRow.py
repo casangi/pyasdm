@@ -282,7 +282,7 @@ class CalPointingRow:
             if row._beamPAExists:
 
                 # beamPA is a list, make a deep copy
-                self.beamPA = copy.deepcopy(row.beamPA)
+                self._beamPA = copy.deepcopy(row._beamPA)
 
                 self._beamPAExists = True
 
@@ -291,7 +291,7 @@ class CalPointingRow:
             if row._beamPAErrorExists:
 
                 # beamPAError is a list, make a deep copy
-                self.beamPAError = copy.deepcopy(row.beamPAError)
+                self._beamPAError = copy.deepcopy(row._beamPAError)
 
                 self._beamPAErrorExists = True
 
@@ -308,7 +308,7 @@ class CalPointingRow:
             if row._beamWidthExists:
 
                 # beamWidth is a list, make a deep copy
-                self.beamWidth = copy.deepcopy(row.beamWidth)
+                self._beamWidth = copy.deepcopy(row._beamWidth)
 
                 self._beamWidthExists = True
 
@@ -317,7 +317,7 @@ class CalPointingRow:
             if row._beamWidthErrorExists:
 
                 # beamWidthError is a list, make a deep copy
-                self.beamWidthError = copy.deepcopy(row.beamWidthError)
+                self._beamWidthError = copy.deepcopy(row._beamWidthError)
 
                 self._beamWidthErrorExists = True
 
@@ -326,7 +326,7 @@ class CalPointingRow:
             if row._beamWidthWasFixedExists:
 
                 # beamWidthWasFixed is a list, make a deep copy
-                self.beamWidthWasFixed = copy.deepcopy(row.beamWidthWasFixed)
+                self._beamWidthWasFixed = copy.deepcopy(row._beamWidthWasFixed)
 
                 self._beamWidthWasFixedExists = True
 
@@ -335,7 +335,7 @@ class CalPointingRow:
             if row._offIntensityExists:
 
                 # offIntensity is a list, make a deep copy
-                self.offIntensity = copy.deepcopy(row.offIntensity)
+                self._offIntensity = copy.deepcopy(row._offIntensity)
 
                 self._offIntensityExists = True
 
@@ -344,7 +344,7 @@ class CalPointingRow:
             if row._offIntensityErrorExists:
 
                 # offIntensityError is a list, make a deep copy
-                self.offIntensityError = copy.deepcopy(row.offIntensityError)
+                self._offIntensityError = copy.deepcopy(row._offIntensityError)
 
                 self._offIntensityErrorExists = True
 
@@ -361,7 +361,7 @@ class CalPointingRow:
             if row._peakIntensityExists:
 
                 # peakIntensity is a list, make a deep copy
-                self.peakIntensity = copy.deepcopy(row.peakIntensity)
+                self._peakIntensity = copy.deepcopy(row._peakIntensity)
 
                 self._peakIntensityExists = True
 
@@ -370,7 +370,7 @@ class CalPointingRow:
             if row._peakIntensityErrorExists:
 
                 # peakIntensityError is a list, make a deep copy
-                self.peakIntensityError = copy.deepcopy(row.peakIntensityError)
+                self._peakIntensityError = copy.deepcopy(row._peakIntensityError)
 
                 self._peakIntensityErrorExists = True
 
@@ -823,7 +823,7 @@ class CalPointingRow:
 
         eos.writeStr(self._antennaName)
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
         self._calDataId.toBin(eos)
 
@@ -835,24 +835,24 @@ class CalPointingRow:
 
         self._ambientTemperature.toBin(eos)
 
-        eos.writeString(self._antennaMake.toString())
+        eos.writeString(str(self._antennaMake))
 
-        eos.writeString(self._atmPhaseCorrection.toString())
+        eos.writeString(str(self._atmPhaseCorrection))
 
         Angle.listToBin(self._direction, eos)
 
         Frequency.listToBin(self._frequencyRange, eos)
 
-        eos.writeString(self._pointingModelMode.toString())
+        eos.writeString(str(self._pointingModelMode))
 
-        eos.writeString(self._pointingMethod.toString())
+        eos.writeString(str(self._pointingMethod))
 
         eos.writeInt(self._numReceptor)
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(self._polarizationTypes[i].toString())
+            eos.writeString(str(self._polarizationTypes[i]))
 
         Angle.listToBin(self._collOffsetRelative, eos)
 
@@ -960,7 +960,7 @@ class CalPointingRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def calDataIdFromBin(row, eis):
@@ -1008,7 +1008,7 @@ class CalPointingRow:
         Set the antennaMake in row from the EndianInput (eis) instance.
         """
 
-        row._antennaMake = AntennaMake.from_int(eis.readInt())
+        row._antennaMake = AntennaMake.literal(eis.readString())
 
     @staticmethod
     def atmPhaseCorrectionFromBin(row, eis):
@@ -1016,7 +1016,7 @@ class CalPointingRow:
         Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
         """
 
-        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+        row._atmPhaseCorrection = AtmPhaseCorrection.literal(eis.readString())
 
     @staticmethod
     def directionFromBin(row, eis):
@@ -1040,7 +1040,7 @@ class CalPointingRow:
         Set the pointingModelMode in row from the EndianInput (eis) instance.
         """
 
-        row._pointingModelMode = PointingModelMode.from_int(eis.readInt())
+        row._pointingModelMode = PointingModelMode.literal(eis.readString())
 
     @staticmethod
     def pointingMethodFromBin(row, eis):
@@ -1048,7 +1048,7 @@ class CalPointingRow:
         Set the pointingMethod in row from the EndianInput (eis) instance.
         """
 
-        row._pointingMethod = PointingMethod.from_int(eis.readInt())
+        row._pointingMethod = PointingMethod.literal(eis.readString())
 
     @staticmethod
     def numReceptorFromBin(row, eis):
@@ -1067,7 +1067,7 @@ class CalPointingRow:
         polarizationTypesDim1 = eis.readInt()
         thisList = []
         for i in range(polarizationTypesDim1):
-            thisValue = PolarizationType.from_int(eis.readInt())
+            thisValue = PolarizationType.literal(eis.readString())
             thisList.append(thisValue)
         row._polarizationTypes = thisList
 
@@ -1110,7 +1110,7 @@ class CalPointingRow:
                 thisValue = eis.readBool()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.collOffsetTied = thisList
+        row._collOffsetTied = thisList
 
     @staticmethod
     def reducedChiSquaredFromBin(row, eis):

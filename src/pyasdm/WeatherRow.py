@@ -224,7 +224,7 @@ class WeatherRow:
             if row._layerHeightExists:
 
                 # layerHeight is a list, make a deep copy
-                self.layerHeight = copy.deepcopy(row.layerHeight)
+                self._layerHeight = copy.deepcopy(row._layerHeight)
 
                 self._layerHeightExists = True
 
@@ -233,7 +233,7 @@ class WeatherRow:
             if row._temperatureProfileExists:
 
                 # temperatureProfile is a list, make a deep copy
-                self.temperatureProfile = copy.deepcopy(row.temperatureProfile)
+                self._temperatureProfile = copy.deepcopy(row._temperatureProfile)
 
                 self._temperatureProfileExists = True
 
@@ -258,7 +258,7 @@ class WeatherRow:
             if row._wvrTempExists:
 
                 # wvrTemp is a list, make a deep copy
-                self.wvrTemp = copy.deepcopy(row.wvrTemp)
+                self._wvrTemp = copy.deepcopy(row._wvrTemp)
 
                 self._wvrTempExists = True
 

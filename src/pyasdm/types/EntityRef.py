@@ -29,6 +29,7 @@ from .EntityId import EntityId
 
 from xml.dom import minidom
 
+import pyasdm.utils
 
 class EntityRef:
     """
@@ -46,7 +47,7 @@ class EntityRef:
         """
         Construct an EntityRef.
         If args is empty, the default EntityRef whose internal parameters are null.
-        If args is 1 it may be either a string (XML as produced by toString) or
+        If args is 1 it may be either a string (XML as produced by toXML) or
         another EntityRef (copy constructor).
         If there are 4 args they are, in order, entityId, partId,
         entityTypeName, and instanceVersion. All strings that express the
@@ -80,7 +81,7 @@ class EntityRef:
         else:
             raise ValueError("unrecognized arguments to EntityRef constructor")
 
-    def toString(self):
+    def __str__(self):
         """
         Return the entityId as a string. Equivalent to toXML.
         """
@@ -142,9 +143,7 @@ class EntityRef:
         partId = PartId.fromBin(eis)
         typeName = eis.readString()
         instanceVersion = eis.readString()
-        return EntityRef(
-            entityId.toString(), partId.toString(), typeName, instanceVersion
-        )
+        return EntityRef(str(entityId), str(partId), typeName, instanceVersion)
 
     @staticmethod
     def from1DBin(eis):
@@ -169,9 +168,9 @@ class EntityRef:
             raise RuntimeError(msg)
 
         result = ""
-        result = '<EntityRef entityId="' + self._entityId.toString()
+        result = '<EntityRef entityId="' + str(self._entityId)
         if self._partId is not None:
-            result += '" partId="' + self._partId.toString()
+            result += '" partId="' + str(self._partId)
         result += '" entityTypeName="' + self._entityTypeName
         result += '" documentVersion="' + self._instanceVersion + '"/>'
         return result
@@ -220,16 +219,16 @@ class EntityRef:
             or len(self._entityTypeName) == 0
             or len(self._instanceVersion) == 0
         ):
-            return "Null values detected in EntityRef " + self._entityId.toString()
+            return "Null values detected in EntityRef " + str(self._entityId)
 
         # I think this isn't necessary the way these python classes work - caught elsewhere
-        msg = EntityId.validate(self._entityId.toString())
+        msg = EntityId.validate(str(self._entityId))
         if msg is not None:
             return msg
 
         # if partId is set, it must have the correct format
         if self._partId is not None:
-            return PartId.validate(self._partId.toString())
+            return PartId.validate(str(self._partId))
 
         return None
 
@@ -281,7 +280,7 @@ class EntityRef:
         if self.isNull():
             return ""
 
-        return self._entityId.toString()
+        return str(self._entityId)
 
     def setEntityId(self, entityId):
         """
@@ -295,7 +294,7 @@ class EntityRef:
         """
         if self._partId is None:
             return None
-        return self._partId.toString()
+        return str(self._partId)
 
     def setPartId(self, partId):
         """

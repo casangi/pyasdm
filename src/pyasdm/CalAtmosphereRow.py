@@ -280,7 +280,7 @@ class CalAtmosphereRow:
             if row._alphaSpectrumExists:
 
                 # alphaSpectrum is a list, make a deep copy
-                self.alphaSpectrum = copy.deepcopy(row.alphaSpectrum)
+                self._alphaSpectrum = copy.deepcopy(row._alphaSpectrum)
 
                 self._alphaSpectrumExists = True
 
@@ -289,7 +289,7 @@ class CalAtmosphereRow:
             if row._forwardEfficiencyExists:
 
                 # forwardEfficiency is a list, make a deep copy
-                self.forwardEfficiency = copy.deepcopy(row.forwardEfficiency)
+                self._forwardEfficiency = copy.deepcopy(row._forwardEfficiency)
 
                 self._forwardEfficiencyExists = True
 
@@ -298,7 +298,9 @@ class CalAtmosphereRow:
             if row._forwardEfficiencyErrorExists:
 
                 # forwardEfficiencyError is a list, make a deep copy
-                self.forwardEfficiencyError = copy.deepcopy(row.forwardEfficiencyError)
+                self._forwardEfficiencyError = copy.deepcopy(
+                    row._forwardEfficiencyError
+                )
 
                 self._forwardEfficiencyErrorExists = True
 
@@ -307,7 +309,7 @@ class CalAtmosphereRow:
             if row._sbGainExists:
 
                 # sbGain is a list, make a deep copy
-                self.sbGain = copy.deepcopy(row.sbGain)
+                self._sbGain = copy.deepcopy(row._sbGain)
 
                 self._sbGainExists = True
 
@@ -316,7 +318,7 @@ class CalAtmosphereRow:
             if row._sbGainErrorExists:
 
                 # sbGainError is a list, make a deep copy
-                self.sbGainError = copy.deepcopy(row.sbGainError)
+                self._sbGainError = copy.deepcopy(row._sbGainError)
 
                 self._sbGainErrorExists = True
 
@@ -325,7 +327,7 @@ class CalAtmosphereRow:
             if row._sbGainSpectrumExists:
 
                 # sbGainSpectrum is a list, make a deep copy
-                self.sbGainSpectrum = copy.deepcopy(row.sbGainSpectrum)
+                self._sbGainSpectrum = copy.deepcopy(row._sbGainSpectrum)
 
                 self._sbGainSpectrumExists = True
 
@@ -749,9 +751,9 @@ class CalAtmosphereRow:
 
         eos.writeStr(self._antennaName)
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
-        eos.writeString(self._basebandName.toString())
+        eos.writeString(str(self._basebandName))
 
         self._calDataId.toBin(eos)
 
@@ -793,7 +795,7 @@ class CalAtmosphereRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(self._polarizationTypes[i].toString())
+            eos.writeString(str(self._polarizationTypes[i]))
 
         # null array case, unsure if this is possible but this should work
         if self._powerSkySpectrum is None:
@@ -823,7 +825,7 @@ class CalAtmosphereRow:
                 for k in range(powerLoadSpectrum_dims[2]):
                     eos.writeFloat(self._powerLoadSpectrum[i][j][k])
 
-        eos.writeString(self._syscalType.toString())
+        eos.writeString(str(self._syscalType))
 
         Temperature.listToBin(self._tAtmSpectrum, eos)
 
@@ -937,7 +939,7 @@ class CalAtmosphereRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def basebandNameFromBin(row, eis):
@@ -945,7 +947,7 @@ class CalAtmosphereRow:
         Set the basebandName in row from the EndianInput (eis) instance.
         """
 
-        row._basebandName = BasebandName.from_int(eis.readInt())
+        row._basebandName = BasebandName.literal(eis.readString())
 
     @staticmethod
     def calDataIdFromBin(row, eis):
@@ -1018,7 +1020,7 @@ class CalAtmosphereRow:
                 thisValue = eis.readFloat()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.forwardEffSpectrum = thisList
+        row._forwardEffSpectrum = thisList
 
     @staticmethod
     def frequencyRangeFromBin(row, eis):
@@ -1069,7 +1071,7 @@ class CalAtmosphereRow:
         polarizationTypesDim1 = eis.readInt()
         thisList = []
         for i in range(polarizationTypesDim1):
-            thisValue = PolarizationType.from_int(eis.readInt())
+            thisValue = PolarizationType.literal(eis.readString())
             thisList.append(thisValue)
         row._polarizationTypes = thisList
 
@@ -1088,7 +1090,7 @@ class CalAtmosphereRow:
                 thisValue = eis.readFloat()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.powerSkySpectrum = thisList
+        row._powerSkySpectrum = thisList
 
     @staticmethod
     def powerLoadSpectrumFromBin(row, eis):
@@ -1109,7 +1111,7 @@ class CalAtmosphereRow:
                     thisList_k.append(thisValue)
                 thisList_j.append(thisList_k)
             thisList.append(thisList_j)
-        row.powerLoadSpectrum = thisList
+        row._powerLoadSpectrum = thisList
 
     @staticmethod
     def syscalTypeFromBin(row, eis):
@@ -1117,7 +1119,7 @@ class CalAtmosphereRow:
         Set the syscalType in row from the EndianInput (eis) instance.
         """
 
-        row._syscalType = SyscalMethod.from_int(eis.readInt())
+        row._syscalType = SyscalMethod.literal(eis.readString())
 
     @staticmethod
     def tAtmSpectrumFromBin(row, eis):
@@ -1158,7 +1160,7 @@ class CalAtmosphereRow:
                 thisValue = eis.readFloat()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.tauSpectrum = thisList
+        row._tauSpectrum = thisList
 
     @staticmethod
     def tAtmFromBin(row, eis):
@@ -1230,7 +1232,7 @@ class CalAtmosphereRow:
                     thisValue = eis.readFloat()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.alphaSpectrum = thisList
+            row._alphaSpectrum = thisList
 
     @staticmethod
     def forwardEfficiencyFromBin(row, eis):
@@ -1309,7 +1311,7 @@ class CalAtmosphereRow:
                     thisValue = eis.readFloat()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.sbGainSpectrum = thisList
+            row._sbGainSpectrum = thisList
 
     @staticmethod
     def initFromBinMethods():

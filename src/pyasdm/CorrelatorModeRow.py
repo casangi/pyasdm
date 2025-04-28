@@ -297,14 +297,14 @@ class CorrelatorModeRow:
         eos.writeInt(len(self._basebandNames))
         for i in range(len(self._basebandNames)):
 
-            eos.writeString(self._basebandNames[i].toString())
+            eos.writeString(str(self._basebandNames[i]))
 
         eos.writeInt(len(self._basebandConfig))
         for i in range(len(self._basebandConfig)):
 
             eos.writeInt(self._basebandConfig[i])
 
-        eos.writeString(self._accumMode.toString())
+        eos.writeString(str(self._accumMode))
 
         eos.writeInt(self._binMode)
 
@@ -313,14 +313,14 @@ class CorrelatorModeRow:
         eos.writeInt(len(self._axesOrderArray))
         for i in range(len(self._axesOrderArray)):
 
-            eos.writeString(self._axesOrderArray[i].toString())
+            eos.writeString(str(self._axesOrderArray[i]))
 
         eos.writeInt(len(self._filterMode))
         for i in range(len(self._filterMode)):
 
-            eos.writeString(self._filterMode[i].toString())
+            eos.writeString(str(self._filterMode[i]))
 
-        eos.writeString(self._correlatorName.toString())
+        eos.writeString(str(self._correlatorName))
 
     @staticmethod
     def correlatorModeIdFromBin(row, eis):
@@ -347,7 +347,7 @@ class CorrelatorModeRow:
         basebandNamesDim1 = eis.readInt()
         thisList = []
         for i in range(basebandNamesDim1):
-            thisValue = BasebandName.from_int(eis.readInt())
+            thisValue = BasebandName.literal(eis.readString())
             thisList.append(thisValue)
         row._basebandNames = thisList
 
@@ -370,7 +370,7 @@ class CorrelatorModeRow:
         Set the accumMode in row from the EndianInput (eis) instance.
         """
 
-        row._accumMode = AccumMode.from_int(eis.readInt())
+        row._accumMode = AccumMode.literal(eis.readString())
 
     @staticmethod
     def binModeFromBin(row, eis):
@@ -397,7 +397,7 @@ class CorrelatorModeRow:
         axesOrderArrayDim1 = eis.readInt()
         thisList = []
         for i in range(axesOrderArrayDim1):
-            thisValue = AxisName.from_int(eis.readInt())
+            thisValue = AxisName.literal(eis.readString())
             thisList.append(thisValue)
         row._axesOrderArray = thisList
 
@@ -410,7 +410,7 @@ class CorrelatorModeRow:
         filterModeDim1 = eis.readInt()
         thisList = []
         for i in range(filterModeDim1):
-            thisValue = FilterMode.from_int(eis.readInt())
+            thisValue = FilterMode.literal(eis.readString())
             thisList.append(thisValue)
         row._filterMode = thisList
 
@@ -420,7 +420,7 @@ class CorrelatorModeRow:
         Set the correlatorName in row from the EndianInput (eis) instance.
         """
 
-        row._correlatorName = CorrelatorName.from_int(eis.readInt())
+        row._correlatorName = CorrelatorName.literal(eis.readString())
 
     @staticmethod
     def initFromBinMethods():

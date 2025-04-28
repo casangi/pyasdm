@@ -287,7 +287,7 @@ class SpectralWindowRow:
             if row._chanFreqArrayExists:
 
                 # chanFreqArray is a list, make a deep copy
-                self.chanFreqArray = copy.deepcopy(row.chanFreqArray)
+                self._chanFreqArray = copy.deepcopy(row._chanFreqArray)
 
                 self._chanFreqArrayExists = True
 
@@ -304,7 +304,7 @@ class SpectralWindowRow:
             if row._chanWidthArrayExists:
 
                 # chanWidthArray is a list, make a deep copy
-                self.chanWidthArray = copy.deepcopy(row.chanWidthArray)
+                self._chanWidthArray = copy.deepcopy(row._chanWidthArray)
 
                 self._chanWidthArrayExists = True
 
@@ -332,7 +332,7 @@ class SpectralWindowRow:
             if row._effectiveBwArrayExists:
 
                 # effectiveBwArray is a list, make a deep copy
-                self.effectiveBwArray = copy.deepcopy(row.effectiveBwArray)
+                self._effectiveBwArray = copy.deepcopy(row._effectiveBwArray)
 
                 self._effectiveBwArrayExists = True
 
@@ -357,7 +357,7 @@ class SpectralWindowRow:
             if row._lineArrayExists:
 
                 # lineArray is a list, make a deep copy
-                self.lineArray = copy.deepcopy(row.lineArray)
+                self._lineArray = copy.deepcopy(row._lineArray)
 
                 self._lineArrayExists = True
 
@@ -417,7 +417,7 @@ class SpectralWindowRow:
             if row._resolutionArrayExists:
 
                 # resolutionArray is a list, make a deep copy
-                self.resolutionArray = copy.deepcopy(row.resolutionArray)
+                self._resolutionArray = copy.deepcopy(row._resolutionArray)
 
                 self._resolutionArrayExists = True
 
@@ -434,7 +434,7 @@ class SpectralWindowRow:
             if row._assocNatureExists:
 
                 # assocNature is a list, make a deep copy
-                self.assocNature = copy.deepcopy(row.assocNature)
+                self._assocNature = copy.deepcopy(row._assocNature)
 
                 self._assocNatureExists = True
 
@@ -914,19 +914,19 @@ class SpectralWindowRow:
 
         self._spectralWindowId.toBin(eos)
 
-        eos.writeString(self._basebandName.toString())
+        eos.writeString(str(self._basebandName))
 
-        eos.writeString(self._netSideband.toString())
+        eos.writeString(str(self._netSideband))
 
         eos.writeInt(self._numChan)
 
         self._refFreq.toBin(eos)
 
-        eos.writeString(self._sidebandProcessingMode.toString())
+        eos.writeString(str(self._sidebandProcessingMode))
 
         self._totBandwidth.toBin(eos)
 
-        eos.writeString(self._windowFunction.toString())
+        eos.writeString(str(self._windowFunction))
 
         eos.writeBool(self._numBinExists)
         if self._numBinExists:
@@ -961,7 +961,7 @@ class SpectralWindowRow:
         eos.writeBool(self._correlationBitExists)
         if self._correlationBitExists:
 
-            eos.writeString(self._correlationBit.toString())
+            eos.writeString(str(self._correlationBit))
 
         eos.writeBool(self._effectiveBwExists)
         if self._effectiveBwExists:
@@ -994,7 +994,7 @@ class SpectralWindowRow:
         eos.writeBool(self._measFreqRefExists)
         if self._measFreqRefExists:
 
-            eos.writeString(self._measFreqRef.toString())
+            eos.writeString(str(self._measFreqRef))
 
         eos.writeBool(self._nameExists)
         if self._nameExists:
@@ -1037,7 +1037,7 @@ class SpectralWindowRow:
             eos.writeInt(len(self._assocNature))
             for i in range(len(self._assocNature)):
 
-                eos.writeString(self._assocNature[i].toString())
+                eos.writeString(str(self._assocNature[i]))
 
         eos.writeBool(self._assocSpectralWindowIdExists)
         if self._assocSpectralWindowIdExists:
@@ -1068,7 +1068,7 @@ class SpectralWindowRow:
         Set the basebandName in row from the EndianInput (eis) instance.
         """
 
-        row._basebandName = BasebandName.from_int(eis.readInt())
+        row._basebandName = BasebandName.literal(eis.readString())
 
     @staticmethod
     def netSidebandFromBin(row, eis):
@@ -1076,7 +1076,7 @@ class SpectralWindowRow:
         Set the netSideband in row from the EndianInput (eis) instance.
         """
 
-        row._netSideband = NetSideband.from_int(eis.readInt())
+        row._netSideband = NetSideband.literal(eis.readString())
 
     @staticmethod
     def numChanFromBin(row, eis):
@@ -1100,7 +1100,7 @@ class SpectralWindowRow:
         Set the sidebandProcessingMode in row from the EndianInput (eis) instance.
         """
 
-        row._sidebandProcessingMode = SidebandProcessingMode.from_int(eis.readInt())
+        row._sidebandProcessingMode = SidebandProcessingMode.literal(eis.readString())
 
     @staticmethod
     def totBandwidthFromBin(row, eis):
@@ -1116,7 +1116,7 @@ class SpectralWindowRow:
         Set the windowFunction in row from the EndianInput (eis) instance.
         """
 
-        row._windowFunction = WindowFunction.from_int(eis.readInt())
+        row._windowFunction = WindowFunction.literal(eis.readString())
 
     @staticmethod
     def numBinFromBin(row, eis):
@@ -1186,7 +1186,7 @@ class SpectralWindowRow:
         row._correlationBitExists = eis.readBool()
         if row._correlationBitExists:
 
-            row._correlationBit = CorrelationBit.from_int(eis.readInt())
+            row._correlationBit = CorrelationBit.literal(eis.readString())
 
     @staticmethod
     def effectiveBwFromBin(row, eis):
@@ -1251,7 +1251,7 @@ class SpectralWindowRow:
         row._measFreqRefExists = eis.readBool()
         if row._measFreqRefExists:
 
-            row._measFreqRef = FrequencyReferenceCode.from_int(eis.readInt())
+            row._measFreqRef = FrequencyReferenceCode.literal(eis.readString())
 
     @staticmethod
     def nameFromBin(row, eis):
@@ -1334,7 +1334,7 @@ class SpectralWindowRow:
             assocNatureDim1 = eis.readInt()
             thisList = []
             for i in range(assocNatureDim1):
-                thisValue = SpectralResolutionType.from_int(eis.readInt())
+                thisValue = SpectralResolutionType.literal(eis.readString())
                 thisList.append(thisValue)
             row._assocNature = thisList
 

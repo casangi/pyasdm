@@ -23,6 +23,7 @@
 # File Frequency.py
 #
 
+import pyasdm.utils
 
 class Frequency:
     """
@@ -198,15 +199,11 @@ class Frequency:
         else:
             raise ValueError(str(units) + " is not an alllowable unit.")
 
-    def toString(self, units=None):
+    def __str__(self):
         """
-        Return the value of this frequency as a String in the specified units.
-        param units The units in which the value of this frequency is to be displayed.
-        The units default to HERTZ if not specified. The units must be one of the
-        recognized units of HERTZ, KILOHERTZ, MEGAHERTS, and GIGAHERTS.
-        return The value of this frequency as a String in the specified units.
+        Return the value of this frequency as a string in the default units of Hertz.
         """
-        return str(self.get(units))
+        return str(self.get())
 
     @staticmethod
     def values(items):
@@ -233,7 +230,7 @@ class Frequency:
                 result.append(item.get())
         return result
 
-    def toBin(self):
+    def toBin(self, eos):
         """
         Write this Frequency out, in Hertz, to a EndianOutput.
         """
@@ -257,11 +254,11 @@ class Frequency:
             Frequency.listTo2DBin(frequencyList, eos)
         elif ndims == 3:
             Frequency.listTo3DBin(frequencyList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in frequencyList in Frequency.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in frequencyList in Frequency.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(frequencyList, eos):
@@ -458,7 +455,7 @@ class Frequency:
 
         return result
 
-    def eq(self, otherFrequency):
+    def __eq__(self, otherFrequency):
         """
         Return True if and only if this Frequency is equal to the specified
         other Frequency.
@@ -466,7 +463,7 @@ class Frequency:
         """
         return self.equals(otherFrequency)
 
-    def ne(self, otherFrequency):
+    def __ne__(self, otherFrequency):
         """
         Return True if and only if this Frequency is not equal to the specified
         other Frequency.
@@ -475,7 +472,7 @@ class Frequency:
             self._frequency != otherFrequency._frequency
         )
 
-    def lt(self, otherFrequency):
+    def __lt__(self, otherFrequency):
         """
         Return True if and only if this Frequency is less than the specified
         other Frequency.
@@ -484,7 +481,7 @@ class Frequency:
             self._frequency < otherFrequency._frequency
         )
 
-    def le(self, otherFrequency):
+    def __le__(self, otherFrequency):
         """
         Return True if and only if this Frequency is less than or equal to
         the specified other Frequency.
@@ -493,7 +490,7 @@ class Frequency:
             self._frequency <= otherFrequency._frequency
         )
 
-    def gt(self, otherFrequency):
+    def __gt__(self, otherFrequency):
         """
         Return True if and only if this Frequency is greater than the specified
         other Frequency.
@@ -502,7 +499,7 @@ class Frequency:
             self._frequency > otherFrequency._frequency
         )
 
-    def ge(self, otherFrequency):
+    def __ge__(self, otherFrequency):
         """
         Return True if and only if this Frequency is greater than or equal to
         the specified other Frequency.
@@ -511,7 +508,7 @@ class Frequency:
             self._frequency >= otherFrequency._frequency
         )
 
-    def add(self, otherFrequency):
+    def __add__(self, otherFrequency):
         """
         Add otherFrequency, which must be a Frequency, to this frequency, (this + x).
         param otherFreqency The Frequency to be added to this frequency.
@@ -523,7 +520,7 @@ class Frequency:
         self._frequency += otherFrequency._frequency
         return self
 
-    def sub(self, otherFrequency):
+    def __sub__(self, otherFrequency):
         """
         Subtract otherFrequency which must be a Frequency, from this frequency, (this - x).
         param otherFrequency The Frequency to be subtracted from this frequency.
@@ -535,7 +532,7 @@ class Frequency:
         self._frequency -= otherFrequency._frequency
         return self
 
-    def mult(self, factor):
+    def __mul__(self, factor):
         """
         Multiply this frequency by some factor, (this * factor).
         param factor The factor by which this frequency is to be multiplied.
@@ -544,7 +541,7 @@ class Frequency:
         self._frequency *= factor
         return self
 
-    def div(self, factor):
+    def __truediv__(self, factor):
         """
         Divide this frequency by some factor, (this / factor).
         param factor The factor by which this frequency is to be divided.

@@ -130,7 +130,7 @@ class FocusRow:
             if row._measuredFocusPositionExists:
 
                 # measuredFocusPosition is a list, make a deep copy
-                self.measuredFocusPosition = copy.deepcopy(row.measuredFocusPosition)
+                self._measuredFocusPosition = copy.deepcopy(row._measuredFocusPosition)
 
                 self._measuredFocusPositionExists = True
 
@@ -139,7 +139,7 @@ class FocusRow:
             if row._measuredFocusRotationExists:
 
                 # measuredFocusRotation is a list, make a deep copy
-                self.measuredFocusRotation = copy.deepcopy(row.measuredFocusRotation)
+                self._measuredFocusRotation = copy.deepcopy(row._measuredFocusRotation)
 
                 self._measuredFocusRotationExists = True
 

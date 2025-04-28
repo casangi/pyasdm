@@ -152,7 +152,7 @@ class PointingModelRow:
             if row._coeffFormulaExists:
 
                 # coeffFormula is a list, make a deep copy
-                self.coeffFormula = copy.deepcopy(row.coeffFormula)
+                self._coeffFormula = copy.deepcopy(row._coeffFormula)
 
                 self._coeffFormulaExists = True
 
@@ -320,9 +320,9 @@ class PointingModelRow:
 
             eos.writeFloat(self._coeffVal[i])
 
-        eos.writeString(self._polarizationType.toString())
+        eos.writeString(str(self._polarizationType))
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
         eos.writeStr(self._assocNature)
 
@@ -392,7 +392,7 @@ class PointingModelRow:
         Set the polarizationType in row from the EndianInput (eis) instance.
         """
 
-        row._polarizationType = PolarizationType.from_int(eis.readInt())
+        row._polarizationType = PolarizationType.literal(eis.readString())
 
     @staticmethod
     def receiverBandFromBin(row, eis):
@@ -400,7 +400,7 @@ class PointingModelRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def assocNatureFromBin(row, eis):

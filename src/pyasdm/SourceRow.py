@@ -306,7 +306,7 @@ class SourceRow:
             if row._positionExists:
 
                 # position is a list, make a deep copy
-                self.position = copy.deepcopy(row.position)
+                self._position = copy.deepcopy(row._position)
 
                 self._positionExists = True
 
@@ -323,7 +323,7 @@ class SourceRow:
             if row._transitionExists:
 
                 # transition is a list, make a deep copy
-                self.transition = copy.deepcopy(row.transition)
+                self._transition = copy.deepcopy(row._transition)
 
                 self._transitionExists = True
 
@@ -332,7 +332,7 @@ class SourceRow:
             if row._restFrequencyExists:
 
                 # restFrequency is a list, make a deep copy
-                self.restFrequency = copy.deepcopy(row.restFrequency)
+                self._restFrequency = copy.deepcopy(row._restFrequency)
 
                 self._restFrequencyExists = True
 
@@ -341,7 +341,7 @@ class SourceRow:
             if row._sysVelExists:
 
                 # sysVel is a list, make a deep copy
-                self.sysVel = copy.deepcopy(row.sysVel)
+                self._sysVel = copy.deepcopy(row._sysVel)
 
                 self._sysVelExists = True
 
@@ -350,7 +350,7 @@ class SourceRow:
             if row._rangeVelExists:
 
                 # rangeVel is a list, make a deep copy
-                self.rangeVel = copy.deepcopy(row.rangeVel)
+                self._rangeVel = copy.deepcopy(row._rangeVel)
 
                 self._rangeVelExists = True
 
@@ -397,7 +397,7 @@ class SourceRow:
             if row._frequencyExists:
 
                 # frequency is a list, make a deep copy
-                self.frequency = copy.deepcopy(row.frequency)
+                self._frequency = copy.deepcopy(row._frequency)
 
                 self._frequencyExists = True
 
@@ -406,7 +406,7 @@ class SourceRow:
             if row._frequencyIntervalExists:
 
                 # frequencyInterval is a list, make a deep copy
-                self.frequencyInterval = copy.deepcopy(row.frequencyInterval)
+                self._frequencyInterval = copy.deepcopy(row._frequencyInterval)
 
                 self._frequencyIntervalExists = True
 
@@ -415,7 +415,7 @@ class SourceRow:
             if row._stokesParameterExists:
 
                 # stokesParameter is a list, make a deep copy
-                self.stokesParameter = copy.deepcopy(row.stokesParameter)
+                self._stokesParameter = copy.deepcopy(row._stokesParameter)
 
                 self._stokesParameterExists = True
 
@@ -424,7 +424,7 @@ class SourceRow:
             if row._fluxExists:
 
                 # flux is a list, make a deep copy
-                self.flux = copy.deepcopy(row.flux)
+                self._flux = copy.deepcopy(row._flux)
 
                 self._fluxExists = True
 
@@ -433,7 +433,7 @@ class SourceRow:
             if row._fluxErrExists:
 
                 # fluxErr is a list, make a deep copy
-                self.fluxErr = copy.deepcopy(row.fluxErr)
+                self._fluxErr = copy.deepcopy(row._fluxErr)
 
                 self._fluxErrExists = True
 
@@ -442,7 +442,7 @@ class SourceRow:
             if row._positionAngleExists:
 
                 # positionAngle is a list, make a deep copy
-                self.positionAngle = copy.deepcopy(row.positionAngle)
+                self._positionAngle = copy.deepcopy(row._positionAngle)
 
                 self._positionAngleExists = True
 
@@ -451,7 +451,7 @@ class SourceRow:
             if row._positionAngleErrExists:
 
                 # positionAngleErr is a list, make a deep copy
-                self.positionAngleErr = copy.deepcopy(row.positionAngleErr)
+                self._positionAngleErr = copy.deepcopy(row._positionAngleErr)
 
                 self._positionAngleErrExists = True
 
@@ -460,7 +460,7 @@ class SourceRow:
             if row._sizeExists:
 
                 # size is a list, make a deep copy
-                self.size = copy.deepcopy(row.size)
+                self._size = copy.deepcopy(row._size)
 
                 self._sizeExists = True
 
@@ -469,7 +469,7 @@ class SourceRow:
             if row._sizeErrExists:
 
                 # sizeErr is a list, make a deep copy
-                self.sizeErr = copy.deepcopy(row.sizeErr)
+                self._sizeErr = copy.deepcopy(row._sizeErr)
 
                 self._sizeErrExists = True
 
@@ -489,7 +489,7 @@ class SourceRow:
             if row._dopplerVelocityExists:
 
                 # dopplerVelocity is a list, make a deep copy
-                self.dopplerVelocity = copy.deepcopy(row.dopplerVelocity)
+                self._dopplerVelocity = copy.deepcopy(row._dopplerVelocity)
 
                 self._dopplerVelocityExists = True
 
@@ -520,7 +520,7 @@ class SourceRow:
             if row._parallaxExists:
 
                 # parallax is a list, make a deep copy
-                self.parallax = copy.deepcopy(row.parallax)
+                self._parallax = copy.deepcopy(row._parallax)
 
                 self._parallaxExists = True
 
@@ -1069,7 +1069,7 @@ class SourceRow:
         eos.writeBool(self._directionCodeExists)
         if self._directionCodeExists:
 
-            eos.writeString(self._directionCode.toString())
+            eos.writeString(str(self._directionCode))
 
         eos.writeBool(self._directionEquinoxExists)
         if self._directionEquinoxExists:
@@ -1127,12 +1127,12 @@ class SourceRow:
         eos.writeBool(self._sourceModelExists)
         if self._sourceModelExists:
 
-            eos.writeString(self._sourceModel.toString())
+            eos.writeString(str(self._sourceModel))
 
         eos.writeBool(self._frequencyRefCodeExists)
         if self._frequencyRefCodeExists:
 
-            eos.writeString(self._frequencyRefCode.toString())
+            eos.writeString(str(self._frequencyRefCode))
 
         eos.writeBool(self._numFreqExists)
         if self._numFreqExists:
@@ -1160,7 +1160,7 @@ class SourceRow:
             eos.writeInt(len(self._stokesParameter))
             for i in range(len(self._stokesParameter)):
 
-                eos.writeString(self._stokesParameter[i].toString())
+                eos.writeString(str(self._stokesParameter[i]))
 
         eos.writeBool(self._fluxExists)
         if self._fluxExists:
@@ -1195,7 +1195,7 @@ class SourceRow:
         eos.writeBool(self._velRefCodeExists)
         if self._velRefCodeExists:
 
-            eos.writeString(self._velRefCode.toString())
+            eos.writeString(str(self._velRefCode))
 
         eos.writeBool(self._dopplerVelocityExists)
         if self._dopplerVelocityExists:
@@ -1205,12 +1205,12 @@ class SourceRow:
         eos.writeBool(self._dopplerReferenceSystemExists)
         if self._dopplerReferenceSystemExists:
 
-            eos.writeString(self._dopplerReferenceSystem.toString())
+            eos.writeString(str(self._dopplerReferenceSystem))
 
         eos.writeBool(self._dopplerCalcTypeExists)
         if self._dopplerCalcTypeExists:
 
-            eos.writeString(self._dopplerCalcType.toString())
+            eos.writeString(str(self._dopplerCalcType))
 
         eos.writeBool(self._parallaxExists)
         if self._parallaxExists:
@@ -1281,7 +1281,7 @@ class SourceRow:
         row._directionCodeExists = eis.readBool()
         if row._directionCodeExists:
 
-            row._directionCode = DirectionReferenceCode.from_int(eis.readInt())
+            row._directionCode = DirectionReferenceCode.literal(eis.readString())
 
     @staticmethod
     def directionEquinoxFromBin(row, eis):
@@ -1396,7 +1396,7 @@ class SourceRow:
         row._sourceModelExists = eis.readBool()
         if row._sourceModelExists:
 
-            row._sourceModel = SourceModel.from_int(eis.readInt())
+            row._sourceModel = SourceModel.literal(eis.readString())
 
     @staticmethod
     def frequencyRefCodeFromBin(row, eis):
@@ -1406,7 +1406,7 @@ class SourceRow:
         row._frequencyRefCodeExists = eis.readBool()
         if row._frequencyRefCodeExists:
 
-            row._frequencyRefCode = FrequencyReferenceCode.from_int(eis.readInt())
+            row._frequencyRefCode = FrequencyReferenceCode.literal(eis.readString())
 
     @staticmethod
     def numFreqFromBin(row, eis):
@@ -1459,7 +1459,7 @@ class SourceRow:
             stokesParameterDim1 = eis.readInt()
             thisList = []
             for i in range(stokesParameterDim1):
-                thisValue = StokesParameter.from_int(eis.readInt())
+                thisValue = StokesParameter.literal(eis.readString())
                 thisList.append(thisValue)
             row._stokesParameter = thisList
 
@@ -1531,7 +1531,7 @@ class SourceRow:
         row._velRefCodeExists = eis.readBool()
         if row._velRefCodeExists:
 
-            row._velRefCode = RadialVelocityReferenceCode.from_int(eis.readInt())
+            row._velRefCode = RadialVelocityReferenceCode.literal(eis.readString())
 
     @staticmethod
     def dopplerVelocityFromBin(row, eis):
@@ -1551,8 +1551,8 @@ class SourceRow:
         row._dopplerReferenceSystemExists = eis.readBool()
         if row._dopplerReferenceSystemExists:
 
-            row._dopplerReferenceSystem = RadialVelocityReferenceCode.from_int(
-                eis.readInt()
+            row._dopplerReferenceSystem = RadialVelocityReferenceCode.literal(
+                eis.readString()
             )
 
     @staticmethod
@@ -1563,7 +1563,7 @@ class SourceRow:
         row._dopplerCalcTypeExists = eis.readBool()
         if row._dopplerCalcTypeExists:
 
-            row._dopplerCalcType = DopplerReferenceCode.from_int(eis.readInt())
+            row._dopplerCalcType = DopplerReferenceCode.literal(eis.readString())
 
     @staticmethod
     def parallaxFromBin(row, eis):

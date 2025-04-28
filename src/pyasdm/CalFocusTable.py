@@ -563,9 +563,9 @@ class CalFocusTable:
         """
         result = ""
 
-        result += calDataId.toString() + "_"
+        result += str(calDataId) + "_"
 
-        result += calReductionId.toString() + "_"
+        result += str(calReductionId) + "_"
 
         return result
 
@@ -615,7 +615,7 @@ class CalFocusTable:
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
-            print("CalFocus is not present in memory, setting from file")
+            # print("CalFocus is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -640,7 +640,7 @@ class CalFocusTable:
         """
         return self._tableName
 
-    def toString(self):
+    def __str__(self):
         """
         Returns "CalFocusTable" followed by the current size of the table
         between parenthesis.
@@ -1068,9 +1068,9 @@ class CalFocusTable:
         Used in both the small XML file as well as the bin file when writing out as binary.
         The byte order is set by byteOrder.
         """
-        uidStr = self.getEntity().getEntityId().toString()
+        uidStr = str(self.getEntity().getEntityId())
         withoutUID = uidStr[6:]
-        containerUID = self.getContainer().getEntity().getEntityId().toString()
+        containerUID = str(self.getContainer().getEntity().getEntityId())
 
         result = ""
         result += "<?xml version='1.0'  encoding='ISO-8859-1'?>"
@@ -1084,7 +1084,7 @@ class CalFocusTable:
         result += "' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n"
         result += "<BulkStoreRef file_id='"
         result += withoutUID
-        result += "' byteOrder='" + byteOrder.toString() + "' />\n"
+        result += "' byteOrder='" + str(byteOrder) + "' />\n"
         result += "<Attributes>\n"
 
         result += "<antennaName/>\n"
@@ -1145,7 +1145,7 @@ class CalFocusTable:
 
         with open(mimeFilePath, "wb") as outBuffer:
 
-            uidStr = self.getEntity().getEntityId().toString()
+            uidStr = str(self.getEntity().getEntityId())
 
             # The XML Header part.
             outBuffer.write(bytes("MIME-Version: 1.0", "utf-8"))
@@ -1442,7 +1442,7 @@ class CalFocusTable:
         try:
             for i in range(numRows):
                 self.checkAndAdd(CalFocusRow.fromBin(eis, self, attributesSeq))
-                print("row %s added, loc = %s" % (i, eis.tell()))
+                # print("row %s added, loc = %s" % (i, eis.tell()))
         except Exception as exc:
             byteStream.close()
             eis.close()
@@ -1452,12 +1452,12 @@ class CalFocusTable:
             ) from None
 
         # there is no harm in closing both
-        print("closing")
+        # print("closing")
         eis.close()
         byteStream.close()
-        print("checking")
-        print("eis : %s" % eis.closed())
-        print("byteStream : %s" % byteStream.closed)
+        # print("checking")
+        # print("eis : %s" % eis.closed())
+        # print("byteStream : %s" % byteStream.closed)
 
     def setFromFile(self, directory):
         """

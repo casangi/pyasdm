@@ -23,6 +23,7 @@
 # File Temperature.py
 #
 
+import pyasdm.utils
 
 class Temperature:
     """
@@ -141,7 +142,7 @@ class Temperature:
         """
         self._temperature = float(temperature)
 
-    def toString(self):
+    def __str__(self):
         """
         Return the value of this temperature as a String in units of degrees Centigrade.
         """
@@ -196,11 +197,11 @@ class Temperature:
             Temperature.listTo2DBin(temperatureList, eos)
         elif ndims == 3:
             Temperature.listTo3DBin(temperatureList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in temperatureList in Temperature.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in temperatureList in Temperature.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(temperatureList, eos):
@@ -299,7 +300,7 @@ class Temperature:
         return Temperature(eis.readDouble())
 
     @staticmethod
-    def from1Dbin(eis):
+    def from1DBin(eis):
         """
         Read a list of binary Temperature values, in degrees Centigrade, from an
         EndianInput instance and return the resulting list.
@@ -401,7 +402,7 @@ class Temperature:
 
         return result
 
-    def eq(self, otherTemperature):
+    def __eq__(self, otherTemperature):
         """
         Return True if and only if this Temperature is equal to the specified
         other Temperature.
@@ -409,7 +410,7 @@ class Temperature:
         """
         return self.equals(otherTemperature)
 
-    def ne(self, otherTemperature):
+    def __ne__(self, otherTemperature):
         """
         Return True if and only if this Temperature is not equal to the specified
         other Temperature.
@@ -418,7 +419,7 @@ class Temperature:
             self._temperature != otherTemperature._temperature
         )
 
-    def lt(self, otherTemperature):
+    def __lt__(self, otherTemperature):
         """
         Return True if and only if this Temperature is less than the specified
         other Temperature.
@@ -427,7 +428,7 @@ class Temperature:
             self._temperature < otherTemperature._temperature
         )
 
-    def le(self, otherTemperature):
+    def __le__(self, otherTemperature):
         """
         Return True if and only if this Temperature is less than or equal to
         the specified other Temperature.
@@ -436,7 +437,7 @@ class Temperature:
             self._temperature <= otherTemperature._temperature
         )
 
-    def gt(self, otherTemperature):
+    def __gt__(self, otherTemperature):
         """
         Return True if and only if this Temperature is greater than the specified
         other Temperature.
@@ -445,7 +446,7 @@ class Temperature:
             self._temperature > otherTemperature._temperature
         )
 
-    def ge(self, otherTemperature):
+    def __ge__(self, otherTemperature):
         """
         Return True if and only if this Temperature is greater than or equal to
         the specified other Temperature.
@@ -454,7 +455,7 @@ class Temperature:
             self._temperature >= otherTemperature._temperature
         )
 
-    def add(self, otherTemperature):
+    def __add__(self, otherTemperature):
         """
         Add otherTemperature, which must be a Temperature, to this temperature, (this + x).
         param otherTemperature The Temperature to be added to this temperature.
@@ -466,7 +467,7 @@ class Temperature:
         self._temperature += otherTemperature._temperature
         return self
 
-    def sub(self, otherTemperature):
+    def __sub__(self, otherTemperature):
         """
         Subtract otherTemperature which must be a Temperature, from this temperature, (this - x).
         param otherTemperature The Temperature to be subtracted from this temperature.
@@ -478,7 +479,7 @@ class Temperature:
         self._temperature -= otherTemperature._temperature
         return self
 
-    def mult(self, factor):
+    def __mul__(self, factor):
         """
         Multiply this temperature by some factor, (this * factor).
         param factor The factor by which this temperature is to be multiplied.
@@ -487,7 +488,7 @@ class Temperature:
         self._temperature *= factor
         return self
 
-    def div(self, factor):
+    def __truediv__(self, factor):
         """
         Divide this temperature by some factor, (this / factor).
         param factor The factor by which this temperature is to be divided.

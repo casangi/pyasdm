@@ -23,6 +23,7 @@
 # File Complex.py
 #
 
+import pyasdm.utils
 
 class Complex:
     """
@@ -208,7 +209,7 @@ class Complex:
         """
         self._im = float(im)
 
-    def toString(self):
+    def __str__(self):
         """
         Return the value of this complex number as a string of the form "x y",
         where x and y are strings representing the numbers.
@@ -290,11 +291,11 @@ class Complex:
             Complex.listTo2DBin(complexList, eos)
         elif ndims == 3:
             Complex.listTo3DBin(complexList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in complexList in Complex.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in complexList in Complex.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(complexList, eos):
@@ -477,7 +478,7 @@ class Complex:
 
         return result
 
-    def eq(self, other):
+    def __eq__(self, other):
         """
         Return True if and only if this Complex is equal to the specified
         other Complex.
@@ -485,7 +486,7 @@ class Complex:
         """
         return self.equals(other)
 
-    def ne(self, other):
+    def __ne__(self, other):
         """
         Return True if and only if this Complex is not equal to the specified
         other Complex.
@@ -496,7 +497,7 @@ class Complex:
 
         return result
 
-    def lt(self, other):
+    def __lt__(self, other):
         """
         Return True if and only if the magnitude of this Complex is less than that of
         the specified other Complex.
@@ -506,7 +507,7 @@ class Complex:
             result = self.compareTo(other) == -1
         return result
 
-    def le(self, other):
+    def __le__(self, other):
         """
         Return True if and only if the magnitude of this Complex is less than or equal to
         that of the specified other Complex.
@@ -517,7 +518,7 @@ class Complex:
             result = (n == -1) or (n == 0)
         return result
 
-    def gt(self, other):
+    def __gt__(self, other):
         """
         Return True if and only if the magnitude of this Complex is greater than that of
         the specified other Complex.
@@ -527,7 +528,7 @@ class Complex:
             result = self.compareTo(other) == 1
         return result
 
-    def ge(self, other):
+    def __ge__(self, other):
         """
         Return True if and only if the magnitude of this Complex is greater than or equal to
         that of the specified other Complex.
@@ -538,7 +539,7 @@ class Complex:
             result = (n == 1) or (n == 0)
         return result
 
-    def add(self, other):
+    def __add__(self, other):
         """
         Add other, which must be a Complex, to this complex number, (this + x).
         param other The Complex to be added to this complex number.
@@ -551,7 +552,7 @@ class Complex:
         self._im += other._im
         return self
 
-    def sub(self, other):
+    def __sub__(self, other):
         """
         Subtract other which must be a Complex, from this complex number, (this - x).
         param other The Complex to be subtracted from this complex number.
@@ -564,7 +565,7 @@ class Complex:
         self._im -= other._im
         return self
 
-    def mult(self, other):
+    def __mul__(self, other):
         """
         Multiply this complex number by a specified other complex number, (this * other).
         param factor The complex number to be multiplied.
@@ -574,7 +575,7 @@ class Complex:
         self._im = self._re * other._im + self._im * other._re
         return self
 
-    def div(self, other):
+    def __truediv__(self, other):
         """
         Divide this complex number by a specified complex number (this / x).
         param The complex number by which this number is divided.

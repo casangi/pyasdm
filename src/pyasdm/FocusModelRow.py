@@ -291,9 +291,9 @@ class FocusModelRow:
 
         eos.writeInt(self._focusModelId)
 
-        eos.writeString(self._polarizationType.toString())
+        eos.writeString(str(self._polarizationType))
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
         eos.writeInt(self._numCoeff)
 
@@ -338,7 +338,7 @@ class FocusModelRow:
         Set the polarizationType in row from the EndianInput (eis) instance.
         """
 
-        row._polarizationType = PolarizationType.from_int(eis.readInt())
+        row._polarizationType = PolarizationType.literal(eis.readString())
 
     @staticmethod
     def receiverBandFromBin(row, eis):
@@ -346,7 +346,7 @@ class FocusModelRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def numCoeffFromBin(row, eis):

@@ -393,9 +393,9 @@ class CalFocusModelRow:
 
         eos.writeStr(self._antennaName)
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
-        eos.writeString(self._polarizationType.toString())
+        eos.writeString(str(self._polarizationType))
 
         self._calDataId.toBin(eos)
 
@@ -405,7 +405,7 @@ class CalFocusModelRow:
 
         self._endValidTime.toBin(eos)
 
-        eos.writeString(self._antennaMake.toString())
+        eos.writeString(str(self._antennaMake))
 
         eos.writeInt(self._numCoeff)
 
@@ -456,7 +456,7 @@ class CalFocusModelRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def polarizationTypeFromBin(row, eis):
@@ -464,7 +464,7 @@ class CalFocusModelRow:
         Set the polarizationType in row from the EndianInput (eis) instance.
         """
 
-        row._polarizationType = PolarizationType.from_int(eis.readInt())
+        row._polarizationType = PolarizationType.literal(eis.readString())
 
     @staticmethod
     def calDataIdFromBin(row, eis):
@@ -504,7 +504,7 @@ class CalFocusModelRow:
         Set the antennaMake in row from the EndianInput (eis) instance.
         """
 
-        row._antennaMake = AntennaMake.from_int(eis.readInt())
+        row._antennaMake = AntennaMake.literal(eis.readString())
 
     @staticmethod
     def numCoeffFromBin(row, eis):

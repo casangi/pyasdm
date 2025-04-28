@@ -212,7 +212,7 @@ class HolographyRow:
         eos.writeInt(len(self._type))
         for i in range(len(self._type)):
 
-            eos.writeString(self._type[i].toString())
+            eos.writeString(str(self._type[i]))
 
     @staticmethod
     def holographyIdFromBin(row, eis):
@@ -255,7 +255,7 @@ class HolographyRow:
         typeDim1 = eis.readInt()
         thisList = []
         for i in range(typeDim1):
-            thisValue = HolographyChannelType.from_int(eis.readInt())
+            thisValue = HolographyChannelType.literal(eis.readString())
             thisList.append(thisValue)
         row._type = thisList
 

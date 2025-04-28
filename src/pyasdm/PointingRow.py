@@ -183,7 +183,7 @@ class PointingRow:
             if row._sourceOffsetExists:
 
                 # sourceOffset is a list, make a deep copy
-                self.sourceOffset = copy.deepcopy(row.sourceOffset)
+                self._sourceOffset = copy.deepcopy(row._sourceOffset)
 
                 self._sourceOffsetExists = True
 
@@ -211,7 +211,7 @@ class PointingRow:
             if row._sampledTimeIntervalExists:
 
                 # sampledTimeInterval is a list, make a deep copy
-                self.sampledTimeInterval = copy.deepcopy(row.sampledTimeInterval)
+                self._sampledTimeInterval = copy.deepcopy(row._sampledTimeInterval)
 
                 self._sampledTimeIntervalExists = True
 
@@ -220,7 +220,7 @@ class PointingRow:
             if row._atmosphericCorrectionExists:
 
                 # atmosphericCorrection is a list, make a deep copy
-                self.atmosphericCorrection = copy.deepcopy(row.atmosphericCorrection)
+                self._atmosphericCorrection = copy.deepcopy(row._atmosphericCorrection)
 
                 self._atmosphericCorrectionExists = True
 
@@ -501,7 +501,7 @@ class PointingRow:
         eos.writeBool(self._sourceOffsetReferenceCodeExists)
         if self._sourceOffsetReferenceCodeExists:
 
-            eos.writeString(self._sourceOffsetReferenceCode.toString())
+            eos.writeString(str(self._sourceOffsetReferenceCode))
 
         eos.writeBool(self._sourceOffsetEquinoxExists)
         if self._sourceOffsetEquinoxExists:
@@ -642,8 +642,8 @@ class PointingRow:
         row._sourceOffsetReferenceCodeExists = eis.readBool()
         if row._sourceOffsetReferenceCodeExists:
 
-            row._sourceOffsetReferenceCode = DirectionReferenceCode.from_int(
-                eis.readInt()
+            row._sourceOffsetReferenceCode = DirectionReferenceCode.literal(
+                eis.readString()
             )
 
     @staticmethod

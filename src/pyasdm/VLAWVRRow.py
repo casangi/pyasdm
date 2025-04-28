@@ -130,7 +130,7 @@ class VLAWVRRow:
             if row._chanFreqCenterExists:
 
                 # chanFreqCenter is a list, make a deep copy
-                self.chanFreqCenter = copy.deepcopy(row.chanFreqCenter)
+                self._chanFreqCenter = copy.deepcopy(row._chanFreqCenter)
 
                 self._chanFreqCenterExists = True
 
@@ -139,7 +139,7 @@ class VLAWVRRow:
             if row._chanWidthExists:
 
                 # chanWidth is a list, make a deep copy
-                self.chanWidth = copy.deepcopy(row.chanWidth)
+                self._chanWidth = copy.deepcopy(row._chanWidth)
 
                 self._chanWidthExists = True
 

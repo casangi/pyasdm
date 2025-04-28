@@ -38,6 +38,7 @@ import pyasdm.exceptions.BDFReaderException
 
 import numpy as np
 
+
 class BDFHeader:
     """
     A class to hold the values from the primary header of a BDF.
@@ -55,13 +56,13 @@ class BDFHeader:
         """
         Initialize the class attributes to their defaults.
         """
-        self._schemaVersion = 0   # int in c++
-        self._byteOrder = pyasdm.ByteOrder.ByteOrder() # native byte order
+        self._schemaVersion = 0  # int in c++
+        self._byteOrder = pyasdm.ByteOrder.ByteOrder()  # native byte order
         # projectPath is kept in its parts : execBlockNum, scanNum, subscanNum
         self._execBlockNum = 0  # an unsigned integer in c++
-        self._scanNum = 0 # an unsigned integer in c++
-        self._subscanNum = 0 # an unsigned integer in c++
-        self._startTime = 0 # an unsigned long long in c++
+        self._scanNum = 0  # an unsigned integer in c++
+        self._subscanNum = 0  # an unsigned integer in c++
+        self._startTime = 0  # an unsigned long long in c++
 
         # dimensionality and numTime are set when preent, only 1 of them should be non-zero
         self._dimensionality = 0
@@ -70,24 +71,40 @@ class BDFHeader:
         self._dataOID = None
         self._execBlockUID = None
         self._title = None
-        self._numAntenna = 0 # an unsigned integer in c++
-        self._correlationMode = None # a CorrelationMode enumeration when set
-        self._spectralResolutionType = None # a SpectralResolutionType enumeration when set
-        self._processorType = None # a ProcessorType enumeration when set
+        self._numAntenna = 0  # an unsigned integer in c++
+        self._correlationMode = None  # a CorrelationMode enumeration when set
+        self._spectralResolutionType = (
+            None  # a SpectralResolutionType enumeration when set
+        )
+        self._processorType = None  # a ProcessorType enumeration when set
 
         self._dataStruct = {
-            'apc':[],         # list of AtmPhaseCorrection instances
-            'basebands':[],   # list of basebands instances, name and a spectral window struct
-            'flags':{'size':0,'axes':[]},  # unsigned int, list AxisName enumerations
-            'actualTimes':{'size':0,'axes':[]},
-            'actualDurations':{'size':0,'axes':[]},
-            'zeroLags':{'size':0,'axes':[],'correlatorType':None}, # CorrelatorType enumeration
-            'crossData':{'size':0,'axes':[]},
-            'autoData':{'size':0,'axes':[],'normalized':False}
-            }
+            "apc": [],  # list of AtmPhaseCorrection instances
+            "basebands": [],  # list of basebands instances, name and a spectral window struct
+            "flags": {
+                "size": 0,
+                "axes": [],
+            },  # unsigned int, list AxisName enumerations
+            "actualTimes": {"size": 0, "axes": []},
+            "actualDurations": {"size": 0, "axes": []},
+            "zeroLags": {
+                "size": 0,
+                "axes": [],
+                "correlatorType": None,
+            },  # CorrelatorType enumeration
+            "crossData": {"size": 0, "axes": []},
+            "autoData": {"size": 0, "axes": [], "normalized": False},
+        }
 
         # the binary type names in _dataStruct, each of these is a structure with a "size" and "axes" value
-        self._binTypes = ['flags','actualTimes','actualDurations','zeroLags','crossData','autoData']
+        self._binTypes = [
+            "flags",
+            "actualTimes",
+            "actualDurations",
+            "zeroLags",
+            "crossData",
+            "autoData",
+        ]
 
     def getBinaryTypes(self):
         """
@@ -99,7 +116,7 @@ class BDFHeader:
         """
         Return the project path using execBlockNum, scanNum, and subscanNum.
         """
-        return ("%s/%s/%s/" % (self._execBlockNum, self._scanNum, self._subscanNum))
+        return "%s/%s/%s/" % (self._execBlockNum, self._scanNum, self._subscanNum)
 
     def getSize(self, binaryType):
         """
@@ -107,7 +124,7 @@ class BDFHeader:
         """
         if binaryType not in self._binTypes:
             raise ValueError("unrecognized binaryType value")
-        return self._dataStruct[binaryType]['size']
+        return self._dataStruct[binaryType]["size"]
 
     def getAxes(self, binaryType):
         """
@@ -115,7 +132,7 @@ class BDFHeader:
         """
         if binaryType not in self._binTypes:
             raise ValueError("unrecognized binaryType value")
-        return self._dataStruct[binaryType]['axes']
+        return self._dataStruct[binaryType]["axes"]
 
     def getAxesNames(self, binaryType):
         """
@@ -131,7 +148,7 @@ class BDFHeader:
         """
         Does the given binaryType have a size > 0?
         """
-        return (self.getSize(binaryType) > 0)
+        return self.getSize(binaryType) > 0
 
     def isAutoDataNormalized(self):
         """
@@ -170,7 +187,7 @@ class BDFHeader:
         ByteOrder class recognizes
         """
         self._byteOrder.fromString(byteOrder)
-        
+
     def getByteOrder(self):
         """
         gets byteOrder, a ByteOrder instance
@@ -184,7 +201,7 @@ class BDFHeader:
         newExecBlockNum = int(execBlockNum)
         if newExecBlockNum < 0:
             raise ValueError("execBlockNum can not be negative")
-        
+
         self._execBlockNum = newExecBlockNum
 
     def getExecBlockNum(self):
@@ -200,7 +217,7 @@ class BDFHeader:
         newScanNum = int(scanNum)
         if newScanNum < 0:
             raise ValueError("scanNum can not be negative")
-        
+
         self._scanNum = newScanNum
 
     def getScanNum(self):
@@ -216,7 +233,7 @@ class BDFHeader:
         newSubscanNum = int(subscanNum)
         if newSubscanNum < 0:
             raise ValueError("subscanNum can not be negative")
-        
+
         self._subscanNum = newSubscanNum
 
     def getSubscanNum(self):
@@ -234,8 +251,10 @@ class BDFHeader:
         if newDimensionality < 0:
             raise ValueError("dimensionality must be >= 0")
         if newDimensionality > 0 and self._numTime > 0:
-            raise ValueError("dimensionality can not be set to a non-zero value when numTime is positive")
-        
+            raise ValueError(
+                "dimensionality can not be set to a non-zero value when numTime is positive"
+            )
+
         self._dimensionality = newDimensionality
 
     def getDimensionality(self):
@@ -253,8 +272,10 @@ class BDFHeader:
         if newNumTime < 0:
             raise ValueError("numTime must be >= 0")
         if newNumTime > 0 and self._dimensionality > 0:
-            raise ValueError("numTime can not be set to a non-zero value when dimensionality is positive")
-        
+            raise ValueError(
+                "numTime can not be set to a non-zero value when dimensionality is positive"
+            )
+
         self._numTime = newNumTime
 
     def getNumTime(self):
@@ -270,7 +291,7 @@ class BDFHeader:
         newStartTime = int(startTime)
         if newStartTime < 0:
             raise ValueError("startTime can not be negative")
-        
+
         self._startTime = newStartTime
 
     def getStartTime(self):
@@ -325,7 +346,7 @@ class BDFHeader:
         numAntenna = int(numAntenna)
         if numAntenna < 0:
             raise ValueError("numAntenna can not be negative")
-        
+
         self._numAntenna = numAntenna
 
     def getNumAntenna(self):
@@ -338,7 +359,9 @@ class BDFHeader:
         """
         sets the correlationMode, correlationMode is any value that can be used for the CorrelationMode enumeration
         """
-        self._correlationMode = pyasdm.enumerations.CorrelationMode.CorrelationMode.literal(correlationMode)
+        self._correlationMode = (
+            pyasdm.enumerations.CorrelationMode.CorrelationMode.literal(correlationMode)
+        )
 
     def getCorrelationMode(self):
         """
@@ -350,7 +373,11 @@ class BDFHeader:
         """
         sets the spectralResolutionType, spectralResolutionType is any value that can be used for the SpectralResolutionType enumeration
         """
-        self._spectralResolutionType = pyasdm.enumerations.SpectralResolutionType.SpectralResolutionType.literal(spectralResolutionType)
+        self._spectralResolutionType = (
+            pyasdm.enumerations.SpectralResolutionType.SpectralResolutionType.literal(
+                spectralResolutionType
+            )
+        )
 
     def getSpectralResolutionType(self):
         """
@@ -362,7 +389,9 @@ class BDFHeader:
         """
         sets the processorType, processorType is any value that can be used for the ProcessorType enumeration
         """
-        self._processorType = pyasdm.enumerations.ProcessorType.ProcessorType.literal(processorType)
+        self._processorType = pyasdm.enumerations.ProcessorType.ProcessorType.literal(
+            processorType
+        )
 
     def getProcessorType(self):
         """
@@ -379,22 +408,26 @@ class BDFHeader:
             raise ValueError("apcList must be a list")
 
         for item in apcList:
-            if not isinstance(item, pyasdm.enumerations.AtmPhaseCorrection.AtmPhaseCorrection):
-                raise ValueError("apcList must be a list of AtmPhaseCorrection instances")
+            if not isinstance(
+                item, pyasdm.enumerations.AtmPhaseCorrection.AtmPhaseCorrection
+            ):
+                raise ValueError(
+                    "apcList must be a list of AtmPhaseCorrection instances"
+                )
 
-        self._dataStruct['apc'] = apcList
+        self._dataStruct["apc"] = apcList
 
     def getAPClist(self):
         """
         Returns the apc list from the data struct.
         """
-        return self._dataStruct['apc']
+        return self._dataStruct["apc"]
 
     def getBasebandsList(self):
         """
         Returns the basebands list, a list of structs, from the data struct
         """
-        return self._dataStruct['basebands']
+        return self._dataStruct["basebands"]
 
     def _setBinaryStruct(self, binaryNode):
         """
@@ -402,18 +435,28 @@ class BDFHeader:
         of binary, which must be one of flags, actualTimes, actualDurations, crossData,
         autoData, or zeroLags.
         """
-        self._dataStruct[binaryNode.nodeName]['size'] = int(binaryNode.attributes.getNamedItem("size").value)
+        self._dataStruct[binaryNode.nodeName]["size"] = int(
+            binaryNode.attributes.getNamedItem("size").value
+        )
         axesStrList = binaryNode.attributes.getNamedItem("axes").value.split()
         axesList = []
         for axisStr in axesStrList:
             axesList.append(pyasdm.enumerations.AxisName.AxisName.literal(axisStr))
-        self._dataStruct[binaryNode.nodeName]['axes'] = axesList
+        self._dataStruct[binaryNode.nodeName]["axes"] = axesList
         if binaryNode.nodeName == "autoData":
-            self._dataStruct[binaryNode.nodeName]['normalized'] = bool(binaryNode.attributes.getNamedItem("normalized").value)
+            self._dataStruct[binaryNode.nodeName]["normalized"] = bool(
+                binaryNode.attributes.getNamedItem("normalized").value
+            )
         elif binaryNode.nodeName == "zeroLags":
-            correlatorTypeValue = binaryNode.attributes.getNamedItem("correlatorType").value
-            self._dataStruct[binaryNode.nodeName]['correlatorType'] = pyasdm.enumerations.CorrelatorType.CorrelatorType.literal(correlatorTypeValue)
-    
+            correlatorTypeValue = binaryNode.attributes.getNamedItem(
+                "correlatorType"
+            ).value
+            self._dataStruct[binaryNode.nodeName]["correlatorType"] = (
+                pyasdm.enumerations.CorrelatorType.CorrelatorType.literal(
+                    correlatorTypeValue
+                )
+            )
+
     def fromDOM(self, dataHeaderElem):
         """
         set this from a minidom that is an sdmDataHeader element
@@ -424,27 +467,33 @@ class BDFHeader:
         # so look for that first
         schemaVersionAttr = dataHeaderElem.attributes.getNamedItem("schemaVersion")
         if schemaVersionAttr is None:
-            schemaVersionAttr = dataHeaderElem.attributes.getNamedItem("xvers:schemaVersion")
+            schemaVersionAttr = dataHeaderElem.attributes.getNamedItem(
+                "xvers:schemaVersion"
+            )
         self.setSchemaVersion(schemaVersionAttr.value)
-        
+
         self.setByteOrder(dataHeaderElem.attributes.getNamedItem("byteOrder").value)
-        
+
         projectPath = dataHeaderElem.attributes.getNamedItem("projectPath").value
         projectPathParts = projectPath.split("/")
         # in general a projectPath can have 3 to 5 parts : execBlock / scanNum / subscanNum / integrationNum / subintegrationNum
         # here, it should only have the first 3 parts, there is a trailing / so 4 parts with an empty 4th part is OK
-        if len(projectPathParts) > 4 or (len(projectPathParts) == 4 and len(projectPathParts[3]) != 0):
-            raise pyasdm.exceptions.BDFReaderException.BDFReaderException("Invalid string for projectPath '" + projectPath + "'")
-        
+        if len(projectPathParts) > 4 or (
+            len(projectPathParts) == 4 and len(projectPathParts[3]) != 0
+        ):
+            raise pyasdm.exceptions.BDFReaderException.BDFReaderException(
+                "Invalid string for projectPath '" + projectPath + "'"
+            )
+
         self.setExecBlockNum(projectPathParts[0])
         self.setScanNum(projectPathParts[1])
         self.setSubscanNum(projectPathParts[2])
 
         childNode = dataHeaderElem.firstChild
-        
+
         self.setDimensionality(0)
         self.setNumTime(0)
-        
+
         while childNode is not None:
             if childNode.nodeName == "startTime":
                 self.setStartTime(childNode.firstChild.data)
@@ -458,7 +507,7 @@ class BDFHeader:
             if childNode.nodeName == "numTime":
                 self.setNumTime(childNode.firstChild.data)
             if childNode.nodeName == "execBlock":
-                    # get the href value, xlink namespace, namespace may be missing, prefer non-namespace version
+                # get the href value, xlink namespace, namespace may be missing, prefer non-namespace version
                 execBlockAttr = childNode.attributes.getNamedItem("href")
                 if execBlockAttr is None:
                     execBlockAttr = childNode.attributes.getNamedItem("xlink:href")
@@ -474,15 +523,21 @@ class BDFHeader:
             if childNode.nodeName == "dataStruct":
                 # this node is used to fill out the elements of the dataStruct
                 # AtmPhaseCorrection list is empty unless this data includes CROSS data
-                apcEnumList = [] 
-                if (self.getCorrelationMode().getName() == "CROSS_ONLY") or (self.getCorrelationMode().getName() == "CROSS_AND_AUTO"):
+                apcEnumList = []
+                if (self.getCorrelationMode().getName() == "CROSS_ONLY") or (
+                    self.getCorrelationMode().getName() == "CROSS_AND_AUTO"
+                ):
                     # apc is an atttribute that is expected here
                     # it is a space-separated list of AtmPhaseCorrection enumeration names
                     apcList = childNode.attributes.getNamedItem("apc").value.split()
                     for apcName in apcList:
-                        apcEnumList.append(pyasdm.enumerations.AtmPhaseCorrection.AtmPhaseCorrection.literal(apcName))
+                        apcEnumList.append(
+                            pyasdm.enumerations.AtmPhaseCorrection.AtmPhaseCorrection.literal(
+                                apcName
+                            )
+                        )
                 self.setAPClist(apcEnumList)
-                        
+
                 # the child nodes
                 # list of baseband structs to be assembled here
                 basebands = []
@@ -490,44 +545,88 @@ class BDFHeader:
                 while dsChildNode is not None:
                     if dsChildNode.nodeName == "baseband":
                         thisBaseband = {}
-                        thisBaseband["name"] = dsChildNode.attributes.getNamedItem('name').value
+                        thisBaseband["name"] = dsChildNode.attributes.getNamedItem(
+                            "name"
+                        ).value
                         # ths children describe the associated spectral windows
                         bbChildNode = dsChildNode.firstChild
                         spectralWindows = []
                         while bbChildNode is not None:
-                            if bbChildNode.nodeName == 'spectralWindow':
-                                thisSpectralWindow = {'crossPolProducts':[],
-                                                      'sdPolProducts':[],
-                                                      'scaleFactor':None,
-                                                      'numSpectralPoint':None,
-                                                      'numBin':None,
-                                                      'sideband':None,
-                                                      'sw':None}
+                            if bbChildNode.nodeName == "spectralWindow":
+                                thisSpectralWindow = {
+                                    "crossPolProducts": [],
+                                    "sdPolProducts": [],
+                                    "scaleFactor": None,
+                                    "numSpectralPoint": None,
+                                    "numBin": None,
+                                    "sideband": None,
+                                    "sw": None,
+                                }
                                 # the "swbb" attribute is ignored, it could be used as a name
                                 corrModeName = self.getCorrelationMode().getName()
-                                thisSpectralWindow['sw'] = bbChildNode.attributes.getNamedItem('sw').value
-                                if corrModeName == "CROSS_ONLY" or corrModeName == "CROSS_AND_AUTO":
+                                thisSpectralWindow["sw"] = (
+                                    bbChildNode.attributes.getNamedItem("sw").value
+                                )
+                                if (
+                                    corrModeName == "CROSS_ONLY"
+                                    or corrModeName == "CROSS_AND_AUTO"
+                                ):
                                     # cross data values
-                                    crossPolStrList = bbChildNode.attributes.getNamedItem('crossPolProducts').value.split()
+                                    crossPolStrList = (
+                                        bbChildNode.attributes.getNamedItem(
+                                            "crossPolProducts"
+                                        ).value.split()
+                                    )
                                     crossPolList = []
                                     for crossPolStr in crossPolStrList:
-                                        crossPolList.append(pyasdm.enumerations.StokesParameter.StokesParameter.literal(crossPolStr))
-                                        thisSpectralWindow['crossPolProducts'] = crossPolList
+                                        crossPolList.append(
+                                            pyasdm.enumerations.StokesParameter.StokesParameter.literal(
+                                                crossPolStr
+                                            )
+                                        )
+                                        thisSpectralWindow["crossPolProducts"] = (
+                                            crossPolList
+                                        )
                                         # scale factor is a 32-bit float, keep that precision
-                                        thisSpectralWindow['scaleFactor'] = np.float32(bbChildNode.attributes.getNamedItem('scaleFactor').value)
-                                if corrModeName == "AUTO_ONLY" or corrModeName == "CROSS_AND_AUTO":
+                                        thisSpectralWindow["scaleFactor"] = np.float32(
+                                            bbChildNode.attributes.getNamedItem(
+                                                "scaleFactor"
+                                            ).value
+                                        )
+                                if (
+                                    corrModeName == "AUTO_ONLY"
+                                    or corrModeName == "CROSS_AND_AUTO"
+                                ):
                                     # auto data values
-                                    sdPolStrList = bbChildNode.attributes.getNamedItem('sdPolProducts').value.split()
+                                    sdPolStrList = bbChildNode.attributes.getNamedItem(
+                                        "sdPolProducts"
+                                    ).value.split()
                                     sdPolList = []
                                     for sdPolStr in sdPolStrList:
-                                        sdPolList.append(pyasdm.enumerations.StokesParameter.StokesParameter.literal(sdPolStr))
-                                    thisSpectralWindow['sdPolProducts'] = sdPolList
+                                        sdPolList.append(
+                                            pyasdm.enumerations.StokesParameter.StokesParameter.literal(
+                                                sdPolStr
+                                            )
+                                        )
+                                    thisSpectralWindow["sdPolProducts"] = sdPolList
                                 # all types
-                                thisSpectralWindow['numSpectralPoint'] = int(bbChildNode.attributes.getNamedItem('numSpectralPoint').value)
-                                thisSpectralWindow['numBin'] = int(bbChildNode.attributes.getNamedItem('numBin').value)
-                                sidebandStr = bbChildNode.attributes.getNamedItem('sideband').value
-                                thisSpectralWindow['sideband'] = pyasdm.enumerations.NetSideband.NetSideband.literal(sidebandStr)
-                                
+                                thisSpectralWindow["numSpectralPoint"] = int(
+                                    bbChildNode.attributes.getNamedItem(
+                                        "numSpectralPoint"
+                                    ).value
+                                )
+                                thisSpectralWindow["numBin"] = int(
+                                    bbChildNode.attributes.getNamedItem("numBin").value
+                                )
+                                sidebandStr = bbChildNode.attributes.getNamedItem(
+                                    "sideband"
+                                ).value
+                                thisSpectralWindow["sideband"] = (
+                                    pyasdm.enumerations.NetSideband.NetSideband.literal(
+                                        sidebandStr
+                                    )
+                                )
+
                                 spectralWindows.append(thisSpectralWindow)
                             bbChildNode = bbChildNode.nextSibling
                         thisBaseband["spectralWindows"] = spectralWindows
@@ -535,15 +634,14 @@ class BDFHeader:
 
                     if dsChildNode.nodeName in self._binTypes:
                         self._setBinaryStruct(dsChildNode)
-                        
+
                     dsChildNode = dsChildNode.nextSibling
-                                    
+
                 # need to add the basebands assembed here
-                self._dataStruct['basebands'] = basebands
+                self._dataStruct["basebands"] = basebands
 
                 # the c++ code spends several lines to associate spectral window IDs but that code seems
                 # to never be used as there's nothing that actually sets the relevant field in the SpectralWindow
                 # class necessary to use that code. So, ignore that here
 
-            childNode= childNode.nextSibling
-
+            childNode = childNode.nextSibling

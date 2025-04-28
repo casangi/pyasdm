@@ -152,7 +152,7 @@ class CalDeviceRow:
             if row._calEffExists:
 
                 # calEff is a list, make a deep copy
-                self.calEff = copy.deepcopy(row.calEff)
+                self._calEff = copy.deepcopy(row._calEff)
 
                 self._calEffExists = True
 
@@ -161,7 +161,7 @@ class CalDeviceRow:
             if row._noiseCalExists:
 
                 # noiseCal is a list, make a deep copy
-                self.noiseCal = copy.deepcopy(row.noiseCal)
+                self._noiseCal = copy.deepcopy(row._noiseCal)
 
                 self._noiseCalExists = True
 
@@ -170,7 +170,7 @@ class CalDeviceRow:
             if row._coupledNoiseCalExists:
 
                 # coupledNoiseCal is a list, make a deep copy
-                self.coupledNoiseCal = copy.deepcopy(row.coupledNoiseCal)
+                self._coupledNoiseCal = copy.deepcopy(row._coupledNoiseCal)
 
                 self._coupledNoiseCalExists = True
 
@@ -179,7 +179,7 @@ class CalDeviceRow:
             if row._temperatureLoadExists:
 
                 # temperatureLoad is a list, make a deep copy
-                self.temperatureLoad = copy.deepcopy(row.temperatureLoad)
+                self._temperatureLoad = copy.deepcopy(row._temperatureLoad)
 
                 self._temperatureLoadExists = True
 
@@ -367,7 +367,7 @@ class CalDeviceRow:
         eos.writeInt(len(self._calLoadNames))
         for i in range(len(self._calLoadNames)):
 
-            eos.writeString(self._calLoadNames[i].toString())
+            eos.writeString(str(self._calLoadNames[i]))
 
         eos.writeBool(self._numReceptorExists)
         if self._numReceptorExists:
@@ -468,7 +468,7 @@ class CalDeviceRow:
         calLoadNamesDim1 = eis.readInt()
         thisList = []
         for i in range(calLoadNamesDim1):
-            thisValue = CalibrationDevice.from_int(eis.readInt())
+            thisValue = CalibrationDevice.literal(eis.readString())
             thisList.append(thisValue)
         row._calLoadNames = thisList
 
@@ -499,7 +499,7 @@ class CalDeviceRow:
                     thisValue = eis.readFloat()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.calEff = thisList
+            row._calEff = thisList
 
     @staticmethod
     def noiseCalFromBin(row, eis):
@@ -533,7 +533,7 @@ class CalDeviceRow:
                     thisValue = eis.readFloat()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.coupledNoiseCal = thisList
+            row._coupledNoiseCal = thisList
 
     @staticmethod
     def temperatureLoadFromBin(row, eis):

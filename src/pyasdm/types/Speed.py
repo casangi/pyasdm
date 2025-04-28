@@ -23,6 +23,7 @@
 # File Speed.py
 #
 
+import pyasdm.utils
 
 class Speed:
     """
@@ -141,7 +142,7 @@ class Speed:
         """
         self._speed = float(speed)
 
-    def toString(self):
+    def __str__(self):
         """
         Return the value of this speed as a String in units of meters per second.
         """
@@ -196,11 +197,11 @@ class Speed:
             Speed.listTo2DBin(speedList, eos)
         elif ndims == 3:
             Speed.listTo3DBin(speedList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in speedList in Speed.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in speedList in Speed.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(speedList, eos):
@@ -295,7 +296,7 @@ class Speed:
         return Speed(eis.readDouble())
 
     @staticmethod
-    def from1Dbin(eis):
+    def from1DBin(eis):
         """
         Read a list of binary Speed values, in meters per second, from an
         EndianInput instance and return the resulting list.
@@ -391,7 +392,7 @@ class Speed:
 
         return result
 
-    def eq(self, otherSpeed):
+    def __eq__(self, otherSpeed):
         """
         Return True if and only if this Speed is equal to the specified
         other Speed.
@@ -399,42 +400,42 @@ class Speed:
         """
         return self.equals(otherSpeed)
 
-    def ne(self, otherSpeed):
+    def __ne__(self, otherSpeed):
         """
         Return True if and only if this Speed is not equal to the specified
         other Speed.
         """
         return isinstance(otherSpeed, Speed) and (self._speed != otherSpeed._speed)
 
-    def lt(self, otherSpeed):
+    def __lt__(self, otherSpeed):
         """
         Return True if and only if this Speed is less than the specified
         other Speed.
         """
         return isinstance(otherSpeed, Speed) and (self._speed < otherSpeed._speed)
 
-    def le(self, otherSpeed):
+    def __le__(self, otherSpeed):
         """
         Return True if and only if this Speed is less than or equal to
         the specified other Speed.
         """
         return isinstance(otherSpeed, Speed) and (self._speed <= otherSpeed._speed)
 
-    def gt(self, otherSpeed):
+    def __gt__(self, otherSpeed):
         """
         Return True if and only if this Speed is greater than the specified
         other Speed.
         """
         return isinstance(otherSpeed, Speed) and (self._speed > otherSpeed._speed)
 
-    def ge(self, otherSpeed):
+    def __ge__(self, otherSpeed):
         """
         Return True if and only if this Speed is greater than or equal to
         the specified other Speed.
         """
         return isinstance(otherSpeed, Speed) and (self._speed >= otherSpeed._speed)
 
-    def add(self, otherSpeed):
+    def __add__(self, otherSpeed):
         """
         Add otherSpeed, which must be a Speed, to this speed, (this + x).
         param otherSpeed The Speed to be added to this speed.
@@ -446,7 +447,7 @@ class Speed:
         self._speed += otherSpeed._speed
         return self
 
-    def sub(self, otherSpeed):
+    def __sub__(self, otherSpeed):
         """
         Subtract otherSpeed which must be a Speed, from this speed, (this - x).
         param otherSpeed The Speed to be subtracted from this speed.
@@ -458,7 +459,7 @@ class Speed:
         self._speed -= otherSpeed._speed
         return self
 
-    def mult(self, factor):
+    def __mul__(self, factor):
         """
         Multiply this speed by some factor, (this * factor).
         param factor The factor by which this speed is to be multiplied.
@@ -467,7 +468,7 @@ class Speed:
         self._speed *= factor
         return self
 
-    def div(self, factor):
+    def __truediv__(self, factor):
         """
         Divide this speed by some factor, (this / factor).
         param factor The factor by which this speed is to be divided.

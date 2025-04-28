@@ -223,7 +223,7 @@ class StationRow:
 
         Length.listToBin(self._position, eos)
 
-        eos.writeString(self._type.toString())
+        eos.writeString(str(self._type))
 
         eos.writeBool(self._timeExists)
         if self._timeExists:
@@ -260,7 +260,7 @@ class StationRow:
         Set the type in row from the EndianInput (eis) instance.
         """
 
-        row._type = StationType.from_int(eis.readInt())
+        row._type = StationType.literal(eis.readString())
 
     @staticmethod
     def timeFromBin(row, eis):

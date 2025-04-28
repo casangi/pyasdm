@@ -205,7 +205,7 @@ class CalCurveRow:
             if row._rmsExists:
 
                 # rms is a list, make a deep copy
-                self.rms = copy.deepcopy(row.rms)
+                self._rms = copy.deepcopy(row._rms)
 
                 self._rmsExists = True
 
@@ -417,11 +417,11 @@ class CalCurveRow:
         Write this row out to the EndianOutput instance, eos.
         """
 
-        eos.writeString(self._atmPhaseCorrection.toString())
+        eos.writeString(str(self._atmPhaseCorrection))
 
-        eos.writeString(self._typeCurve.toString())
+        eos.writeString(str(self._typeCurve))
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
         self._calDataId.toBin(eos)
 
@@ -449,7 +449,7 @@ class CalCurveRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(self._polarizationTypes[i].toString())
+            eos.writeString(str(self._polarizationTypes[i]))
 
         # null array case, unsure if this is possible but this should work
         if self._curve is None:
@@ -498,7 +498,7 @@ class CalCurveRow:
         Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
         """
 
-        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+        row._atmPhaseCorrection = AtmPhaseCorrection.literal(eis.readString())
 
     @staticmethod
     def typeCurveFromBin(row, eis):
@@ -506,7 +506,7 @@ class CalCurveRow:
         Set the typeCurve in row from the EndianInput (eis) instance.
         """
 
-        row._typeCurve = CalCurveType.from_int(eis.readInt())
+        row._typeCurve = CalCurveType.literal(eis.readString())
 
     @staticmethod
     def receiverBandFromBin(row, eis):
@@ -514,7 +514,7 @@ class CalCurveRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def calDataIdFromBin(row, eis):
@@ -610,7 +610,7 @@ class CalCurveRow:
         polarizationTypesDim1 = eis.readInt()
         thisList = []
         for i in range(polarizationTypesDim1):
-            thisValue = PolarizationType.from_int(eis.readInt())
+            thisValue = PolarizationType.literal(eis.readString())
             thisList.append(thisValue)
         row._polarizationTypes = thisList
 
@@ -633,7 +633,7 @@ class CalCurveRow:
                     thisList_k.append(thisValue)
                 thisList_j.append(thisList_k)
             thisList.append(thisList_j)
-        row.curve = thisList
+        row._curve = thisList
 
     @staticmethod
     def reducedChiSquaredFromBin(row, eis):
@@ -675,7 +675,7 @@ class CalCurveRow:
                     thisValue = eis.readFloat()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.rms = thisList
+            row._rms = thisList
 
     @staticmethod
     def initFromBinMethods():

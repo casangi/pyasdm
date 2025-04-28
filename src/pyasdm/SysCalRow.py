@@ -184,7 +184,7 @@ class SysCalRow:
             if row._tcalSpectrumExists:
 
                 # tcalSpectrum is a list, make a deep copy
-                self.tcalSpectrum = copy.deepcopy(row.tcalSpectrum)
+                self._tcalSpectrum = copy.deepcopy(row._tcalSpectrum)
 
                 self._tcalSpectrumExists = True
 
@@ -201,7 +201,7 @@ class SysCalRow:
             if row._trxSpectrumExists:
 
                 # trxSpectrum is a list, make a deep copy
-                self.trxSpectrum = copy.deepcopy(row.trxSpectrum)
+                self._trxSpectrum = copy.deepcopy(row._trxSpectrum)
 
                 self._trxSpectrumExists = True
 
@@ -218,7 +218,7 @@ class SysCalRow:
             if row._tskySpectrumExists:
 
                 # tskySpectrum is a list, make a deep copy
-                self.tskySpectrum = copy.deepcopy(row.tskySpectrum)
+                self._tskySpectrum = copy.deepcopy(row._tskySpectrum)
 
                 self._tskySpectrumExists = True
 
@@ -235,7 +235,7 @@ class SysCalRow:
             if row._tsysSpectrumExists:
 
                 # tsysSpectrum is a list, make a deep copy
-                self.tsysSpectrum = copy.deepcopy(row.tsysSpectrum)
+                self._tsysSpectrum = copy.deepcopy(row._tsysSpectrum)
 
                 self._tsysSpectrumExists = True
 
@@ -252,7 +252,7 @@ class SysCalRow:
             if row._tantSpectrumExists:
 
                 # tantSpectrum is a list, make a deep copy
-                self.tantSpectrum = copy.deepcopy(row.tantSpectrum)
+                self._tantSpectrum = copy.deepcopy(row._tantSpectrum)
 
                 self._tantSpectrumExists = True
 
@@ -269,7 +269,7 @@ class SysCalRow:
             if row._tantTsysSpectrumExists:
 
                 # tantTsysSpectrum is a list, make a deep copy
-                self.tantTsysSpectrum = copy.deepcopy(row.tantTsysSpectrum)
+                self._tantTsysSpectrum = copy.deepcopy(row._tantTsysSpectrum)
 
                 self._tantTsysSpectrumExists = True
 
@@ -286,7 +286,7 @@ class SysCalRow:
             if row._phaseDiffSpectrumExists:
 
                 # phaseDiffSpectrum is a list, make a deep copy
-                self.phaseDiffSpectrum = copy.deepcopy(row.phaseDiffSpectrum)
+                self._phaseDiffSpectrum = copy.deepcopy(row._phaseDiffSpectrum)
 
                 self._phaseDiffSpectrumExists = True
 
@@ -841,7 +841,7 @@ class SysCalRow:
                     thisValue = eis.readFloat()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.tantSpectrum = thisList
+            row._tantSpectrum = thisList
 
     @staticmethod
     def tantTsysFlagFromBin(row, eis):
@@ -870,7 +870,7 @@ class SysCalRow:
                     thisValue = eis.readFloat()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.tantTsysSpectrum = thisList
+            row._tantTsysSpectrum = thisList
 
     @staticmethod
     def phaseDiffFlagFromBin(row, eis):
@@ -899,7 +899,7 @@ class SysCalRow:
                     thisValue = eis.readFloat()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.phaseDiffSpectrum = thisList
+            row._phaseDiffSpectrum = thisList
 
     @staticmethod
     def initFromBinMethods():

@@ -20,17 +20,17 @@ class entityid_test(unittest.TestCase):
         # valid ALMA UID
         almaId = EntityId("uid://A002/X2a5c2f/X66")
         self.assertTrue(not almaId.isNull())
-        self.assertEqual(almaId.toString(),"uid://A002/X2a5c2f/X66")
+        self.assertEqual(str(almaId),"uid://A002/X2a5c2f/X66")
 
         # valid EVLA UID example 1
         evlaId1 = EntityId("uid:///evla/bdf/1329949996080")
         self.assertTrue(not evlaId1.isNull())
-        self.assertEqual(evlaId1.toString(),"uid:///evla/bdf/1329949996080")
+        self.assertEqual(str(evlaId1),"uid:///evla/bdf/1329949996080")
 
         # valid EVLA UID example 2
         evlaId2 = EntityId("uid://evla/sdm/X1329949850138")
         self.assertTrue(not evlaId2.isNull())
-        self.assertEqual(evlaId2.toString(),"uid://evla/sdm/X1329949850138")
+        self.assertEqual(str(evlaId2),"uid://evla/sdm/X1329949850138")
 
         # copy constructor
         almaIdCopy = EntityId(almaId)

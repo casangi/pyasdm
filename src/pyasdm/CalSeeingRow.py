@@ -365,7 +365,7 @@ class CalSeeingRow:
         Write this row out to the EndianOutput instance, eos.
         """
 
-        eos.writeString(self._atmPhaseCorrection.toString())
+        eos.writeString(str(self._atmPhaseCorrection))
 
         self._calDataId.toBin(eos)
 
@@ -410,7 +410,7 @@ class CalSeeingRow:
         Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
         """
 
-        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+        row._atmPhaseCorrection = AtmPhaseCorrection.literal(eis.readString())
 
     @staticmethod
     def calDataIdFromBin(row, eis):

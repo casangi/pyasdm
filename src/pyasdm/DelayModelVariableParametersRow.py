@@ -420,7 +420,7 @@ class DelayModelVariableParametersRow:
 
         eos.writeFloat(self._iat_utc)
 
-        eos.writeString(self._timeType.toString())
+        eos.writeString(str(self._timeType))
 
         self._gstAtUt0.toBin(eos)
 
@@ -431,7 +431,7 @@ class DelayModelVariableParametersRow:
 
             eos.writeFloat(self._polarOffsets[i])
 
-        eos.writeString(self._polarOffsetsType.toString())
+        eos.writeString(str(self._polarOffsetsType))
 
         self._delayModelFixedParametersId.toBin(eos)
 
@@ -493,7 +493,7 @@ class DelayModelVariableParametersRow:
         Set the timeType in row from the EndianInput (eis) instance.
         """
 
-        row._timeType = DifferenceType.from_int(eis.readInt())
+        row._timeType = DifferenceType.literal(eis.readString())
 
     @staticmethod
     def gstAtUt0FromBin(row, eis):
@@ -530,7 +530,7 @@ class DelayModelVariableParametersRow:
         Set the polarOffsetsType in row from the EndianInput (eis) instance.
         """
 
-        row._polarOffsetsType = DifferenceType.from_int(eis.readInt())
+        row._polarOffsetsType = DifferenceType.literal(eis.readString())
 
     @staticmethod
     def delayModelFixedParametersIdFromBin(row, eis):

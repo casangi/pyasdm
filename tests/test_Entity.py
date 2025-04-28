@@ -19,7 +19,7 @@ class entity_test(unittest.TestCase):
         # this should produce an exception
         ok = False
         try:
-            s = eNull.toString()
+            s = src(eNull)
         except Exception as exp:
             ok = True
         self.assertTrue(ok)
@@ -39,11 +39,11 @@ class entity_test(unittest.TestCase):
         self.assertTrue(eALMA2.equals(eALMA))
         self.assertTrue(eALMA3.equals(eALMA))
 
-        eVLA2 = Entity(eVLA.toString())
+        eVLA2 = Entity(str(eVLA))
         self.assertTrue(eVLA2.equals(eVLA))
 
         # getters and setters
-        self.assertEqual(eALMA.getEntityId().toString(),"uid://A002/X72c1bd/X1")
+        self.assertEqual(str(eALMA.getEntityId()),"uid://A002/X72c1bd/X1")
         self.assertEqual(eALMA.getEntityIdEncrypted(),"na")
         self.assertEqual(eALMA.getEntityTypeName(),"AntennaTable")
         self.assertEqual(eALMA.getEntityVersion(),"1")

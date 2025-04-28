@@ -275,7 +275,7 @@ class DelayModelRow:
             if row._LOOffsetExists:
 
                 # LOOffset is a list, make a deep copy
-                self.LOOffset = copy.deepcopy(row.LOOffset)
+                self._LOOffset = copy.deepcopy(row._LOOffset)
 
                 self._LOOffsetExists = True
 
@@ -284,7 +284,7 @@ class DelayModelRow:
             if row._LOOffsetRateExists:
 
                 # LOOffsetRate is a list, make a deep copy
-                self.LOOffsetRate = copy.deepcopy(row.LOOffsetRate)
+                self._LOOffsetRate = copy.deepcopy(row._LOOffsetRate)
 
                 self._LOOffsetRateExists = True
 
@@ -349,7 +349,7 @@ class DelayModelRow:
             if row._polarizationTypeExists:
 
                 # polarizationType is a list, make a deep copy
-                self.polarizationType = copy.deepcopy(row.polarizationType)
+                self._polarizationType = copy.deepcopy(row._polarizationType)
 
                 self._polarizationTypeExists = True
 
@@ -358,7 +358,7 @@ class DelayModelRow:
             if row._electronicDelayExists:
 
                 # electronicDelay is a list, make a deep copy
-                self.electronicDelay = copy.deepcopy(row.electronicDelay)
+                self._electronicDelay = copy.deepcopy(row._electronicDelay)
 
                 self._electronicDelayExists = True
 
@@ -367,7 +367,7 @@ class DelayModelRow:
             if row._electronicDelayRateExists:
 
                 # electronicDelayRate is a list, make a deep copy
-                self.electronicDelayRate = copy.deepcopy(row.electronicDelayRate)
+                self._electronicDelayRate = copy.deepcopy(row._electronicDelayRate)
 
                 self._electronicDelayRateExists = True
 
@@ -376,7 +376,7 @@ class DelayModelRow:
             if row._receiverDelayExists:
 
                 # receiverDelay is a list, make a deep copy
-                self.receiverDelay = copy.deepcopy(row.receiverDelay)
+                self._receiverDelay = copy.deepcopy(row._receiverDelay)
 
                 self._receiverDelayExists = True
 
@@ -385,7 +385,7 @@ class DelayModelRow:
             if row._IFDelayExists:
 
                 # IFDelay is a list, make a deep copy
-                self.IFDelay = copy.deepcopy(row.IFDelay)
+                self._IFDelay = copy.deepcopy(row._IFDelay)
 
                 self._IFDelayExists = True
 
@@ -394,7 +394,7 @@ class DelayModelRow:
             if row._LODelayExists:
 
                 # LODelay is a list, make a deep copy
-                self.LODelay = copy.deepcopy(row.LODelay)
+                self._LODelay = copy.deepcopy(row._LODelay)
 
                 self._LODelayExists = True
 
@@ -955,7 +955,7 @@ class DelayModelRow:
             eos.writeInt(len(self._polarizationType))
             for i in range(len(self._polarizationType)):
 
-                eos.writeString(self._polarizationType[i].toString())
+                eos.writeString(str(self._polarizationType[i]))
 
         eos.writeBool(self._electronicDelayExists)
         if self._electronicDelayExists:
@@ -1255,7 +1255,7 @@ class DelayModelRow:
             polarizationTypeDim1 = eis.readInt()
             thisList = []
             for i in range(polarizationTypeDim1):
-                thisValue = PolarizationType.from_int(eis.readInt())
+                thisValue = PolarizationType.literal(eis.readString())
                 thisList.append(thisValue)
             row._polarizationType = thisList
 

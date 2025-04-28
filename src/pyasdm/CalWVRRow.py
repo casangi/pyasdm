@@ -404,7 +404,7 @@ class CalWVRRow:
 
         self._endValidTime.toBin(eos)
 
-        eos.writeString(self._wvrMethod.toString())
+        eos.writeString(str(self._wvrMethod))
 
         eos.writeInt(self._numInputAntennas)
 
@@ -503,7 +503,7 @@ class CalWVRRow:
         Set the wvrMethod in row from the EndianInput (eis) instance.
         """
 
-        row._wvrMethod = WVRMethod.from_int(eis.readInt())
+        row._wvrMethod = WVRMethod.literal(eis.readString())
 
     @staticmethod
     def numInputAntennasFromBin(row, eis):
@@ -585,7 +585,7 @@ class CalWVRRow:
                     thisList_k.append(thisValue)
                 thisList_j.append(thisList_k)
             thisList.append(thisList_j)
-        row.pathCoeff = thisList
+        row._pathCoeff = thisList
 
     @staticmethod
     def polyFreqLimitsFromBin(row, eis):

@@ -427,11 +427,11 @@ class CalAntennaSolutionsRow:
 
         eos.writeStr(self._antennaName)
 
-        eos.writeString(self._atmPhaseCorrection.toString())
+        eos.writeString(str(self._atmPhaseCorrection))
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
-        eos.writeString(self._basebandName.toString())
+        eos.writeString(str(self._basebandName))
 
         self._calDataId.toBin(eos)
 
@@ -456,7 +456,7 @@ class CalAntennaSolutionsRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(self._polarizationTypes[i].toString())
+            eos.writeString(str(self._polarizationTypes[i]))
 
         eos.writeBool(self._correctionValidity)
 
@@ -494,7 +494,7 @@ class CalAntennaSolutionsRow:
         Set the atmPhaseCorrection in row from the EndianInput (eis) instance.
         """
 
-        row._atmPhaseCorrection = AtmPhaseCorrection.from_int(eis.readInt())
+        row._atmPhaseCorrection = AtmPhaseCorrection.literal(eis.readString())
 
     @staticmethod
     def receiverBandFromBin(row, eis):
@@ -502,7 +502,7 @@ class CalAntennaSolutionsRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def basebandNameFromBin(row, eis):
@@ -510,7 +510,7 @@ class CalAntennaSolutionsRow:
         Set the basebandName in row from the EndianInput (eis) instance.
         """
 
-        row._basebandName = BasebandName.from_int(eis.readInt())
+        row._basebandName = BasebandName.literal(eis.readString())
 
     @staticmethod
     def calDataIdFromBin(row, eis):
@@ -601,7 +601,7 @@ class CalAntennaSolutionsRow:
         polarizationTypesDim1 = eis.readInt()
         thisList = []
         for i in range(polarizationTypesDim1):
-            thisValue = PolarizationType.from_int(eis.readInt())
+            thisValue = PolarizationType.literal(eis.readString())
             thisList.append(thisValue)
         row._polarizationTypes = thisList
 

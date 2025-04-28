@@ -191,7 +191,7 @@ class SquareLawDetectorRow:
 
         eos.writeInt(self._numBand)
 
-        eos.writeString(self._bandType.toString())
+        eos.writeString(str(self._bandType))
 
     @staticmethod
     def squareLawDetectorIdFromBin(row, eis):
@@ -215,7 +215,7 @@ class SquareLawDetectorRow:
         Set the bandType in row from the EndianInput (eis) instance.
         """
 
-        row._bandType = DetectorBandType.from_int(eis.readInt())
+        row._bandType = DetectorBandType.literal(eis.readString())
 
     @staticmethod
     def initFromBinMethods():

@@ -205,7 +205,7 @@ class DopplerRow:
 
         eos.writeInt(self._transitionIndex)
 
-        eos.writeString(self._velDef.toString())
+        eos.writeString(str(self._velDef))
 
     @staticmethod
     def dopplerIdFromBin(row, eis):
@@ -237,7 +237,7 @@ class DopplerRow:
         Set the velDef in row from the EndianInput (eis) instance.
         """
 
-        row._velDef = DopplerReferenceCode.from_int(eis.readInt())
+        row._velDef = DopplerReferenceCode.literal(eis.readString())
 
     @staticmethod
     def initFromBinMethods():

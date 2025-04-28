@@ -300,7 +300,7 @@ class CalReductionRow:
         eos.writeInt(len(self._invalidConditions))
         for i in range(len(self._invalidConditions)):
 
-            eos.writeString(self._invalidConditions[i].toString())
+            eos.writeString(str(self._invalidConditions[i]))
 
         self._timeReduced.toBin(eos)
 
@@ -377,7 +377,7 @@ class CalReductionRow:
         invalidConditionsDim1 = eis.readInt()
         thisList = []
         for i in range(invalidConditionsDim1):
-            thisValue = InvalidatingCondition.from_int(eis.readInt())
+            thisValue = InvalidatingCondition.literal(eis.readString())
             thisList.append(thisValue)
         row._invalidConditions = thisList
 

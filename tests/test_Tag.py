@@ -15,8 +15,8 @@ class tag_test(unittest.TestCase):
     def test_all(self):
         nullTag = Tag()
         self.assertTrue(nullTag.isNull())
-        self.assertTrue(nullTag.toString() == "null_0")
-        nullTagToo = Tag.parseTag(nullTag.toString())
+        self.assertTrue(str(nullTag) == "null_0")
+        nullTagToo = Tag.parseTag(str(nullTag))
         self.assertTrue(nullTagToo.isNull())
         self.assertTrue(nullTagToo == nullTag)
         self.assertTrue(nullTag.getTagType() is None)
@@ -26,26 +26,26 @@ class tag_test(unittest.TestCase):
 
         noTypeTag1 = Tag(1)
         self.assertFalse(noTypeTag1.isNull())
-        self.assertTrue(noTypeTag1.toString() == "NoType_1")
+        self.assertTrue(str(noTypeTag1) == "NoType_1")
         noTypeTag2 = Tag(2)
         self.assertTrue(noTypeTag2 > noTypeTag1)
         # and because types are ignored by < and >
         self.assertTrue(nullTag < noTypeTag1)
-        noTypeAlso1 = Tag.parseTag(noTypeTag1.toString())
+        noTypeAlso1 = Tag.parseTag(str(noTypeTag1))
         self.assertTrue(noTypeAlso1 == noTypeTag1)
         self.assertTrue(noTypeTag2.getTagValue() == 2)
 
         sw4Tag = Tag(24, TagType.SpectralWindow)
-        self.assertTrue(sw4Tag.getTagType().toString() == "SpectralWindow")
+        self.assertTrue(str(sw4Tag.getTagType()) == "SpectralWindow")
         ant10Tag = Tag(10, TagType.Antenna)
-        self.assertTrue(ant10Tag.getTagType().toString() == "Antenna")
+        self.assertTrue(str(ant10Tag.getTagType()) == "Antenna")
         sw4CopyTag = Tag(sw4Tag)
         self.assertFalse(ant10Tag == sw4Tag)
         self.assertTrue(sw4Tag.equals(sw4CopyTag))
         self.assertTrue(ant10Tag.getTag() == "10")
         self.assertTrue(sw4Tag != ant10Tag)
         dd10Tag = Tag.parseTag("DataDescription_10")
-        self.assertTrue(dd10Tag.getTagType().toString() == TagType.DataDescription.toString())
+        self.assertTrue(str(dd10Tag.getTagType()) == str(TagType.DataDescription))
         self.assertTrue(dd10Tag.getTagValue() == 10)
 
         # throw some exceptions with bad constructors

@@ -55,7 +55,7 @@ class TagType:
             setattr(TagType, name, self)
             _tagTypeDict[name] = getattr(TagType, name)
 
-    def toString(self):
+    def __str__(self):
         """
         Returns the string representation of this TagType.
         """

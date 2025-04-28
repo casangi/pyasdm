@@ -282,16 +282,16 @@ class ReceiverRow:
 
         eos.writeInt(self._numLO)
 
-        eos.writeString(self._frequencyBand.toString())
+        eos.writeString(str(self._frequencyBand))
 
         Frequency.listToBin(self._freqLO, eos)
 
-        eos.writeString(self._receiverSideband.toString())
+        eos.writeString(str(self._receiverSideband))
 
         eos.writeInt(len(self._sidebandLO))
         for i in range(len(self._sidebandLO)):
 
-            eos.writeString(self._sidebandLO[i].toString())
+            eos.writeString(str(self._sidebandLO[i]))
 
     @staticmethod
     def receiverIdFromBin(row, eis):
@@ -339,7 +339,7 @@ class ReceiverRow:
         Set the frequencyBand in row from the EndianInput (eis) instance.
         """
 
-        row._frequencyBand = ReceiverBand.from_int(eis.readInt())
+        row._frequencyBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def freqLOFromBin(row, eis):
@@ -355,7 +355,7 @@ class ReceiverRow:
         Set the receiverSideband in row from the EndianInput (eis) instance.
         """
 
-        row._receiverSideband = ReceiverSideband.from_int(eis.readInt())
+        row._receiverSideband = ReceiverSideband.literal(eis.readString())
 
     @staticmethod
     def sidebandLOFromBin(row, eis):
@@ -366,7 +366,7 @@ class ReceiverRow:
         sidebandLODim1 = eis.readInt()
         thisList = []
         for i in range(sidebandLODim1):
-            thisValue = NetSideband.from_int(eis.readInt())
+            thisValue = NetSideband.literal(eis.readString())
             thisList.append(thisValue)
         row._sidebandLO = thisList
 

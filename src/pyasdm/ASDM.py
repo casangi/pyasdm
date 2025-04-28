@@ -1417,418 +1417,211 @@ class ASDM:
         # do each table via the getters, which populates each as necessary
 
         result = self.addTableRowToXML(result, self.getMain())
-        print(
-            "ASDM result row for table added as necessary for Main, size = "
-            + str(self.getMain().size())
-        )
+        # print("ASDM result row for table added as necessary for Main, size = " + str(self.getMain().size()))
 
         result = self.addTableRowToXML(result, self.getAlmaRadiometer())
-        print(
-            "ASDM result row for table added as necessary for AlmaRadiometer, size = "
-            + str(self.getAlmaRadiometer().size())
-        )
+        # print("ASDM result row for table added as necessary for AlmaRadiometer, size = " + str(self.getAlmaRadiometer().size()))
 
         result = self.addTableRowToXML(result, self.getAnnotation())
-        print(
-            "ASDM result row for table added as necessary for Annotation, size = "
-            + str(self.getAnnotation().size())
-        )
+        # print("ASDM result row for table added as necessary for Annotation, size = " + str(self.getAnnotation().size()))
 
         result = self.addTableRowToXML(result, self.getAntenna())
-        print(
-            "ASDM result row for table added as necessary for Antenna, size = "
-            + str(self.getAntenna().size())
-        )
+        # print("ASDM result row for table added as necessary for Antenna, size = " + str(self.getAntenna().size()))
 
         result = self.addTableRowToXML(result, self.getCalAmpli())
-        print(
-            "ASDM result row for table added as necessary for CalAmpli, size = "
-            + str(self.getCalAmpli().size())
-        )
+        # print("ASDM result row for table added as necessary for CalAmpli, size = " + str(self.getCalAmpli().size()))
 
         result = self.addTableRowToXML(result, self.getCalAntennaSolutions())
-        print(
-            "ASDM result row for table added as necessary for CalAntennaSolutions, size = "
-            + str(self.getCalAntennaSolutions().size())
-        )
+        # print("ASDM result row for table added as necessary for CalAntennaSolutions, size = " + str(self.getCalAntennaSolutions().size()))
 
         result = self.addTableRowToXML(result, self.getCalAppPhase())
-        print(
-            "ASDM result row for table added as necessary for CalAppPhase, size = "
-            + str(self.getCalAppPhase().size())
-        )
+        # print("ASDM result row for table added as necessary for CalAppPhase, size = " + str(self.getCalAppPhase().size()))
 
         result = self.addTableRowToXML(result, self.getCalAtmosphere())
-        print(
-            "ASDM result row for table added as necessary for CalAtmosphere, size = "
-            + str(self.getCalAtmosphere().size())
-        )
+        # print("ASDM result row for table added as necessary for CalAtmosphere, size = " + str(self.getCalAtmosphere().size()))
 
         result = self.addTableRowToXML(result, self.getCalBandpass())
-        print(
-            "ASDM result row for table added as necessary for CalBandpass, size = "
-            + str(self.getCalBandpass().size())
-        )
+        # print("ASDM result row for table added as necessary for CalBandpass, size = " + str(self.getCalBandpass().size()))
 
         result = self.addTableRowToXML(result, self.getCalCurve())
-        print(
-            "ASDM result row for table added as necessary for CalCurve, size = "
-            + str(self.getCalCurve().size())
-        )
+        # print("ASDM result row for table added as necessary for CalCurve, size = " + str(self.getCalCurve().size()))
 
         result = self.addTableRowToXML(result, self.getCalData())
-        print(
-            "ASDM result row for table added as necessary for CalData, size = "
-            + str(self.getCalData().size())
-        )
+        # print("ASDM result row for table added as necessary for CalData, size = " + str(self.getCalData().size()))
 
         result = self.addTableRowToXML(result, self.getCalDelay())
-        print(
-            "ASDM result row for table added as necessary for CalDelay, size = "
-            + str(self.getCalDelay().size())
-        )
+        # print("ASDM result row for table added as necessary for CalDelay, size = " + str(self.getCalDelay().size()))
 
         result = self.addTableRowToXML(result, self.getCalDevice())
-        print(
-            "ASDM result row for table added as necessary for CalDevice, size = "
-            + str(self.getCalDevice().size())
-        )
+        # print("ASDM result row for table added as necessary for CalDevice, size = " + str(self.getCalDevice().size()))
 
         result = self.addTableRowToXML(result, self.getCalFlux())
-        print(
-            "ASDM result row for table added as necessary for CalFlux, size = "
-            + str(self.getCalFlux().size())
-        )
+        # print("ASDM result row for table added as necessary for CalFlux, size = " + str(self.getCalFlux().size()))
 
         result = self.addTableRowToXML(result, self.getCalFocus())
-        print(
-            "ASDM result row for table added as necessary for CalFocus, size = "
-            + str(self.getCalFocus().size())
-        )
+        # print("ASDM result row for table added as necessary for CalFocus, size = " + str(self.getCalFocus().size()))
 
         result = self.addTableRowToXML(result, self.getCalFocusModel())
-        print(
-            "ASDM result row for table added as necessary for CalFocusModel, size = "
-            + str(self.getCalFocusModel().size())
-        )
+        # print("ASDM result row for table added as necessary for CalFocusModel, size = " + str(self.getCalFocusModel().size()))
 
         result = self.addTableRowToXML(result, self.getCalGain())
-        print(
-            "ASDM result row for table added as necessary for CalGain, size = "
-            + str(self.getCalGain().size())
-        )
+        # print("ASDM result row for table added as necessary for CalGain, size = " + str(self.getCalGain().size()))
 
         result = self.addTableRowToXML(result, self.getCalHolography())
-        print(
-            "ASDM result row for table added as necessary for CalHolography, size = "
-            + str(self.getCalHolography().size())
-        )
+        # print("ASDM result row for table added as necessary for CalHolography, size = " + str(self.getCalHolography().size()))
 
         result = self.addTableRowToXML(result, self.getCalPhase())
-        print(
-            "ASDM result row for table added as necessary for CalPhase, size = "
-            + str(self.getCalPhase().size())
-        )
+        # print("ASDM result row for table added as necessary for CalPhase, size = " + str(self.getCalPhase().size()))
 
         result = self.addTableRowToXML(result, self.getCalPointing())
-        print(
-            "ASDM result row for table added as necessary for CalPointing, size = "
-            + str(self.getCalPointing().size())
-        )
+        # print("ASDM result row for table added as necessary for CalPointing, size = " + str(self.getCalPointing().size()))
 
         result = self.addTableRowToXML(result, self.getCalPointingModel())
-        print(
-            "ASDM result row for table added as necessary for CalPointingModel, size = "
-            + str(self.getCalPointingModel().size())
-        )
+        # print("ASDM result row for table added as necessary for CalPointingModel, size = " + str(self.getCalPointingModel().size()))
 
         result = self.addTableRowToXML(result, self.getCalPosition())
-        print(
-            "ASDM result row for table added as necessary for CalPosition, size = "
-            + str(self.getCalPosition().size())
-        )
+        # print("ASDM result row for table added as necessary for CalPosition, size = " + str(self.getCalPosition().size()))
 
         result = self.addTableRowToXML(result, self.getCalPrimaryBeam())
-        print(
-            "ASDM result row for table added as necessary for CalPrimaryBeam, size = "
-            + str(self.getCalPrimaryBeam().size())
-        )
+        # print("ASDM result row for table added as necessary for CalPrimaryBeam, size = " + str(self.getCalPrimaryBeam().size()))
 
         result = self.addTableRowToXML(result, self.getCalReduction())
-        print(
-            "ASDM result row for table added as necessary for CalReduction, size = "
-            + str(self.getCalReduction().size())
-        )
+        # print("ASDM result row for table added as necessary for CalReduction, size = " + str(self.getCalReduction().size()))
 
         result = self.addTableRowToXML(result, self.getCalSeeing())
-        print(
-            "ASDM result row for table added as necessary for CalSeeing, size = "
-            + str(self.getCalSeeing().size())
-        )
+        # print("ASDM result row for table added as necessary for CalSeeing, size = " + str(self.getCalSeeing().size()))
 
         result = self.addTableRowToXML(result, self.getCalWVR())
-        print(
-            "ASDM result row for table added as necessary for CalWVR, size = "
-            + str(self.getCalWVR().size())
-        )
+        # print("ASDM result row for table added as necessary for CalWVR, size = " + str(self.getCalWVR().size()))
 
         result = self.addTableRowToXML(result, self.getConfigDescription())
-        print(
-            "ASDM result row for table added as necessary for ConfigDescription, size = "
-            + str(self.getConfigDescription().size())
-        )
+        # print("ASDM result row for table added as necessary for ConfigDescription, size = " + str(self.getConfigDescription().size()))
 
         result = self.addTableRowToXML(result, self.getCorrelatorMode())
-        print(
-            "ASDM result row for table added as necessary for CorrelatorMode, size = "
-            + str(self.getCorrelatorMode().size())
-        )
+        # print("ASDM result row for table added as necessary for CorrelatorMode, size = " + str(self.getCorrelatorMode().size()))
 
         result = self.addTableRowToXML(result, self.getDataDescription())
-        print(
-            "ASDM result row for table added as necessary for DataDescription, size = "
-            + str(self.getDataDescription().size())
-        )
+        # print("ASDM result row for table added as necessary for DataDescription, size = " + str(self.getDataDescription().size()))
 
         result = self.addTableRowToXML(result, self.getDelayModel())
-        print(
-            "ASDM result row for table added as necessary for DelayModel, size = "
-            + str(self.getDelayModel().size())
-        )
+        # print("ASDM result row for table added as necessary for DelayModel, size = " + str(self.getDelayModel().size()))
 
         result = self.addTableRowToXML(result, self.getDelayModelFixedParameters())
-        print(
-            "ASDM result row for table added as necessary for DelayModelFixedParameters, size = "
-            + str(self.getDelayModelFixedParameters().size())
-        )
+        # print("ASDM result row for table added as necessary for DelayModelFixedParameters, size = " + str(self.getDelayModelFixedParameters().size()))
 
         result = self.addTableRowToXML(result, self.getDelayModelVariableParameters())
-        print(
-            "ASDM result row for table added as necessary for DelayModelVariableParameters, size = "
-            + str(self.getDelayModelVariableParameters().size())
-        )
+        # print("ASDM result row for table added as necessary for DelayModelVariableParameters, size = " + str(self.getDelayModelVariableParameters().size()))
 
         result = self.addTableRowToXML(result, self.getDoppler())
-        print(
-            "ASDM result row for table added as necessary for Doppler, size = "
-            + str(self.getDoppler().size())
-        )
+        # print("ASDM result row for table added as necessary for Doppler, size = " + str(self.getDoppler().size()))
 
         result = self.addTableRowToXML(result, self.getEphemeris())
-        print(
-            "ASDM result row for table added as necessary for Ephemeris, size = "
-            + str(self.getEphemeris().size())
-        )
+        # print("ASDM result row for table added as necessary for Ephemeris, size = " + str(self.getEphemeris().size()))
 
         result = self.addTableRowToXML(result, self.getExecBlock())
-        print(
-            "ASDM result row for table added as necessary for ExecBlock, size = "
-            + str(self.getExecBlock().size())
-        )
+        # print("ASDM result row for table added as necessary for ExecBlock, size = " + str(self.getExecBlock().size()))
 
         result = self.addTableRowToXML(result, self.getFeed())
-        print(
-            "ASDM result row for table added as necessary for Feed, size = "
-            + str(self.getFeed().size())
-        )
+        # print("ASDM result row for table added as necessary for Feed, size = " + str(self.getFeed().size()))
 
         result = self.addTableRowToXML(result, self.getField())
-        print(
-            "ASDM result row for table added as necessary for Field, size = "
-            + str(self.getField().size())
-        )
+        # print("ASDM result row for table added as necessary for Field, size = " + str(self.getField().size()))
 
         result = self.addTableRowToXML(result, self.getFlag())
-        print(
-            "ASDM result row for table added as necessary for Flag, size = "
-            + str(self.getFlag().size())
-        )
+        # print("ASDM result row for table added as necessary for Flag, size = " + str(self.getFlag().size()))
 
         result = self.addTableRowToXML(result, self.getFlagCmd())
-        print(
-            "ASDM result row for table added as necessary for FlagCmd, size = "
-            + str(self.getFlagCmd().size())
-        )
+        # print("ASDM result row for table added as necessary for FlagCmd, size = " + str(self.getFlagCmd().size()))
 
         result = self.addTableRowToXML(result, self.getFocus())
-        print(
-            "ASDM result row for table added as necessary for Focus, size = "
-            + str(self.getFocus().size())
-        )
+        # print("ASDM result row for table added as necessary for Focus, size = " + str(self.getFocus().size()))
 
         result = self.addTableRowToXML(result, self.getFocusModel())
-        print(
-            "ASDM result row for table added as necessary for FocusModel, size = "
-            + str(self.getFocusModel().size())
-        )
+        # print("ASDM result row for table added as necessary for FocusModel, size = " + str(self.getFocusModel().size()))
 
         result = self.addTableRowToXML(result, self.getFreqOffset())
-        print(
-            "ASDM result row for table added as necessary for FreqOffset, size = "
-            + str(self.getFreqOffset().size())
-        )
+        # print("ASDM result row for table added as necessary for FreqOffset, size = " + str(self.getFreqOffset().size()))
 
         result = self.addTableRowToXML(result, self.getGainTracking())
-        print(
-            "ASDM result row for table added as necessary for GainTracking, size = "
-            + str(self.getGainTracking().size())
-        )
+        # print("ASDM result row for table added as necessary for GainTracking, size = " + str(self.getGainTracking().size()))
 
         result = self.addTableRowToXML(result, self.getHistory())
-        print(
-            "ASDM result row for table added as necessary for History, size = "
-            + str(self.getHistory().size())
-        )
+        # print("ASDM result row for table added as necessary for History, size = " + str(self.getHistory().size()))
 
         result = self.addTableRowToXML(result, self.getHolography())
-        print(
-            "ASDM result row for table added as necessary for Holography, size = "
-            + str(self.getHolography().size())
-        )
+        # print("ASDM result row for table added as necessary for Holography, size = " + str(self.getHolography().size()))
 
         result = self.addTableRowToXML(result, self.getObservation())
-        print(
-            "ASDM result row for table added as necessary for Observation, size = "
-            + str(self.getObservation().size())
-        )
+        # print("ASDM result row for table added as necessary for Observation, size = " + str(self.getObservation().size()))
 
         result = self.addTableRowToXML(result, self.getPointing())
-        print(
-            "ASDM result row for table added as necessary for Pointing, size = "
-            + str(self.getPointing().size())
-        )
+        # print("ASDM result row for table added as necessary for Pointing, size = " + str(self.getPointing().size()))
 
         result = self.addTableRowToXML(result, self.getPointingModel())
-        print(
-            "ASDM result row for table added as necessary for PointingModel, size = "
-            + str(self.getPointingModel().size())
-        )
+        # print("ASDM result row for table added as necessary for PointingModel, size = " + str(self.getPointingModel().size()))
 
         result = self.addTableRowToXML(result, self.getPolarization())
-        print(
-            "ASDM result row for table added as necessary for Polarization, size = "
-            + str(self.getPolarization().size())
-        )
+        # print("ASDM result row for table added as necessary for Polarization, size = " + str(self.getPolarization().size()))
 
         result = self.addTableRowToXML(result, self.getProcessor())
-        print(
-            "ASDM result row for table added as necessary for Processor, size = "
-            + str(self.getProcessor().size())
-        )
+        # print("ASDM result row for table added as necessary for Processor, size = " + str(self.getProcessor().size()))
 
         result = self.addTableRowToXML(result, self.getPulsar())
-        print(
-            "ASDM result row for table added as necessary for Pulsar, size = "
-            + str(self.getPulsar().size())
-        )
+        # print("ASDM result row for table added as necessary for Pulsar, size = " + str(self.getPulsar().size()))
 
         result = self.addTableRowToXML(result, self.getReceiver())
-        print(
-            "ASDM result row for table added as necessary for Receiver, size = "
-            + str(self.getReceiver().size())
-        )
+        # print("ASDM result row for table added as necessary for Receiver, size = " + str(self.getReceiver().size()))
 
         result = self.addTableRowToXML(result, self.getSBSummary())
-        print(
-            "ASDM result row for table added as necessary for SBSummary, size = "
-            + str(self.getSBSummary().size())
-        )
+        # print("ASDM result row for table added as necessary for SBSummary, size = " + str(self.getSBSummary().size()))
 
         result = self.addTableRowToXML(result, self.getScale())
-        print(
-            "ASDM result row for table added as necessary for Scale, size = "
-            + str(self.getScale().size())
-        )
+        # print("ASDM result row for table added as necessary for Scale, size = " + str(self.getScale().size()))
 
         result = self.addTableRowToXML(result, self.getScan())
-        print(
-            "ASDM result row for table added as necessary for Scan, size = "
-            + str(self.getScan().size())
-        )
+        # print("ASDM result row for table added as necessary for Scan, size = " + str(self.getScan().size()))
 
         result = self.addTableRowToXML(result, self.getSeeing())
-        print(
-            "ASDM result row for table added as necessary for Seeing, size = "
-            + str(self.getSeeing().size())
-        )
+        # print("ASDM result row for table added as necessary for Seeing, size = " + str(self.getSeeing().size()))
 
         result = self.addTableRowToXML(result, self.getSource())
-        print(
-            "ASDM result row for table added as necessary for Source, size = "
-            + str(self.getSource().size())
-        )
+        # print("ASDM result row for table added as necessary for Source, size = " + str(self.getSource().size()))
 
         result = self.addTableRowToXML(result, self.getSpectralWindow())
-        print(
-            "ASDM result row for table added as necessary for SpectralWindow, size = "
-            + str(self.getSpectralWindow().size())
-        )
+        # print("ASDM result row for table added as necessary for SpectralWindow, size = " + str(self.getSpectralWindow().size()))
 
         result = self.addTableRowToXML(result, self.getSquareLawDetector())
-        print(
-            "ASDM result row for table added as necessary for SquareLawDetector, size = "
-            + str(self.getSquareLawDetector().size())
-        )
+        # print("ASDM result row for table added as necessary for SquareLawDetector, size = " + str(self.getSquareLawDetector().size()))
 
         result = self.addTableRowToXML(result, self.getState())
-        print(
-            "ASDM result row for table added as necessary for State, size = "
-            + str(self.getState().size())
-        )
+        # print("ASDM result row for table added as necessary for State, size = " + str(self.getState().size()))
 
         result = self.addTableRowToXML(result, self.getStation())
-        print(
-            "ASDM result row for table added as necessary for Station, size = "
-            + str(self.getStation().size())
-        )
+        # print("ASDM result row for table added as necessary for Station, size = " + str(self.getStation().size()))
 
         result = self.addTableRowToXML(result, self.getSubscan())
-        print(
-            "ASDM result row for table added as necessary for Subscan, size = "
-            + str(self.getSubscan().size())
-        )
+        # print("ASDM result row for table added as necessary for Subscan, size = " + str(self.getSubscan().size()))
 
         result = self.addTableRowToXML(result, self.getSwitchCycle())
-        print(
-            "ASDM result row for table added as necessary for SwitchCycle, size = "
-            + str(self.getSwitchCycle().size())
-        )
+        # print("ASDM result row for table added as necessary for SwitchCycle, size = " + str(self.getSwitchCycle().size()))
 
         result = self.addTableRowToXML(result, self.getSysCal())
-        print(
-            "ASDM result row for table added as necessary for SysCal, size = "
-            + str(self.getSysCal().size())
-        )
+        # print("ASDM result row for table added as necessary for SysCal, size = " + str(self.getSysCal().size()))
 
         result = self.addTableRowToXML(result, self.getSysPower())
-        print(
-            "ASDM result row for table added as necessary for SysPower, size = "
-            + str(self.getSysPower().size())
-        )
+        # print("ASDM result row for table added as necessary for SysPower, size = " + str(self.getSysPower().size()))
 
         result = self.addTableRowToXML(result, self.getTotalPower())
-        print(
-            "ASDM result row for table added as necessary for TotalPower, size = "
-            + str(self.getTotalPower().size())
-        )
+        # print("ASDM result row for table added as necessary for TotalPower, size = " + str(self.getTotalPower().size()))
 
         result = self.addTableRowToXML(result, self.getVLAWVR())
-        print(
-            "ASDM result row for table added as necessary for VLAWVR, size = "
-            + str(self.getVLAWVR().size())
-        )
+        # print("ASDM result row for table added as necessary for VLAWVR, size = " + str(self.getVLAWVR().size()))
 
         result = self.addTableRowToXML(result, self.getWVMCal())
-        print(
-            "ASDM result row for table added as necessary for WVMCal, size = "
-            + str(self.getWVMCal().size())
-        )
+        # print("ASDM result row for table added as necessary for WVMCal, size = " + str(self.getWVMCal().size()))
 
         result = self.addTableRowToXML(result, self.getWeather())
-        print(
-            "ASDM result row for table added as necessary for Weather, size = "
-            + str(self.getWeather().size())
-        )
+        # print("ASDM result row for table added as necessary for Weather, size = " + str(self.getWeather().size()))
 
         result += "</ASDM>"
         return result

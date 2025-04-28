@@ -23,6 +23,7 @@
 # File Humidity.py
 #
 
+import pyasdm.utils
 
 class Humidity:
     """
@@ -141,7 +142,7 @@ class Humidity:
         """
         self._percent = float(percent)
 
-    def toString(self):
+    def __str__(self):
         """
         Return the value of this humidity as a String in units of percents.
         """
@@ -196,11 +197,11 @@ class Humidity:
             Humidity.listTo2DBin(humidityList, eos)
         elif ndims == 3:
             Humidity.listTo3DBin(humidityList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in humidityList in Humidity.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in humidityList in Humidity.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(humidityList, eos):
@@ -397,7 +398,7 @@ class Humidity:
 
         return result
 
-    def eq(self, otherHumidity):
+    def __eq__(self, otherHumidity):
         """
         Return True if and only if this Humidity is equal to the specified
         other Humidity.
@@ -405,7 +406,7 @@ class Humidity:
         """
         return self.equals(otherHumidity)
 
-    def ne(self, otherHumidity):
+    def __ne__(self, otherHumidity):
         """
         Return True if and only if this Humidity is not equal to the specified
         other Humidity.
@@ -414,7 +415,7 @@ class Humidity:
             self._percent != otherHumidity._percent
         )
 
-    def lt(self, otherHumidity):
+    def __lt__(self, otherHumidity):
         """
         Return True if and only if this Humidity is less than the specified
         other Humidity.
@@ -423,7 +424,7 @@ class Humidity:
             self._percent < otherHumidity._percent
         )
 
-    def le(self, otherHumidity):
+    def __le__(self, otherHumidity):
         """
         Return True if and only if this Humidity is less than or equal to
         the specified other Humidity.
@@ -432,7 +433,7 @@ class Humidity:
             self._percent <= otherHumidity._percent
         )
 
-    def gt(self, otherHumidity):
+    def __gt__(self, otherHumidity):
         """
         Return True if and only if this Humidity is greater than the specified
         other Humidity.
@@ -441,7 +442,7 @@ class Humidity:
             self._percent > otherHumidity._percent
         )
 
-    def ge(self, otherHumidity):
+    def __ge__(self, otherHumidity):
         """
         Return True if and only if this Humidity is greater than or equal to
         the specified other Humidity.
@@ -450,7 +451,7 @@ class Humidity:
             self._percent >= otherHumidity._percent
         )
 
-    def add(self, otherHumidity):
+    def __add__(self, otherHumidity):
         """
         Add otherHumidity, which must be a Humidity, to this percent, (this + x).
         param otherHumidity The Humidity to be added to this percent.
@@ -462,7 +463,7 @@ class Humidity:
         self._percent += otherHumidity._percent
         return self
 
-    def sub(self, otherHumidity):
+    def __sub__(self, otherHumidity):
         """
         Subtract otherHumidity which must be a Humidity, from this percent, (this - x).
         param otherHumidity The Humidity to be subtracted from this percent.
@@ -474,7 +475,7 @@ class Humidity:
         self._percent -= otherHumidity._percent
         return self
 
-    def mult(self, factor):
+    def __mul__(self, factor):
         """
         Multiply this percent by some factor, (this * factor).
         param factor The factor by which this percent is to be multiplied.
@@ -483,7 +484,7 @@ class Humidity:
         self._percent *= factor
         return self
 
-    def div(self, factor):
+    def __truediv__(self, factor):
         """
         Divide this percent by some factor, (this / factor).
         param factor The factor by which this percent is to be divided.

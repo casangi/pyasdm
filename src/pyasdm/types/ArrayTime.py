@@ -576,11 +576,11 @@ class ArrayTime(Interval):
             ArrayTime.listTo2DBin(arrayTimeList, eos)
         elif ndims == 3:
             ArrayTime.listTo3DBin(arrayTimeList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in arrayTimeList in ArrayTime.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in arrayTimeList in ArrayTime.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(atList, eos):

@@ -153,7 +153,7 @@ class EphemerisRow:
             if row._radVelExists:
 
                 # radVel is a list, make a deep copy
-                self.radVel = copy.deepcopy(row.radVel)
+                self._radVel = copy.deepcopy(row._radVel)
 
                 self._radVelExists = True
 
@@ -418,7 +418,7 @@ class EphemerisRow:
                 thisValue = eis.readFloat()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.dir = thisList
+        row._dir = thisList
 
     @staticmethod
     def numPolyDistFromBin(row, eis):

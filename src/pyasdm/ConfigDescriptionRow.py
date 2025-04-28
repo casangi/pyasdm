@@ -220,7 +220,7 @@ class ConfigDescriptionRow:
             if row._phasedArrayListExists:
 
                 # phasedArrayList is a list, make a deep copy
-                self.phasedArrayList = copy.deepcopy(row.phasedArrayList)
+                self._phasedArrayList = copy.deepcopy(row._phasedArrayList)
 
                 self._phasedArrayListExists = True
 
@@ -237,7 +237,7 @@ class ConfigDescriptionRow:
             if row._assocNatureExists:
 
                 # assocNature is a list, make a deep copy
-                self.assocNature = copy.deepcopy(row.assocNature)
+                self._assocNature = copy.deepcopy(row._assocNature)
 
                 self._assocNatureExists = True
 
@@ -513,18 +513,18 @@ class ConfigDescriptionRow:
 
         eos.writeInt(self._numFeed)
 
-        eos.writeString(self._correlationMode.toString())
+        eos.writeString(str(self._correlationMode))
 
         eos.writeInt(self._numAtmPhaseCorrection)
 
         eos.writeInt(len(self._atmPhaseCorrection))
         for i in range(len(self._atmPhaseCorrection)):
 
-            eos.writeString(self._atmPhaseCorrection[i].toString())
+            eos.writeString(str(self._atmPhaseCorrection[i]))
 
-        eos.writeString(self._processorType.toString())
+        eos.writeString(str(self._processorType))
 
-        eos.writeString(self._spectralType.toString())
+        eos.writeString(str(self._spectralType))
 
         Tag.listToBin(self._antennaId, eos)
 
@@ -558,7 +558,7 @@ class ConfigDescriptionRow:
             eos.writeInt(len(self._assocNature))
             for i in range(len(self._assocNature)):
 
-                eos.writeString(self._assocNature[i].toString())
+                eos.writeString(str(self._assocNature[i]))
 
         eos.writeBool(self._assocConfigDescriptionIdExists)
         if self._assocConfigDescriptionIdExists:
@@ -603,7 +603,7 @@ class ConfigDescriptionRow:
         Set the correlationMode in row from the EndianInput (eis) instance.
         """
 
-        row._correlationMode = CorrelationMode.from_int(eis.readInt())
+        row._correlationMode = CorrelationMode.literal(eis.readString())
 
     @staticmethod
     def numAtmPhaseCorrectionFromBin(row, eis):
@@ -622,7 +622,7 @@ class ConfigDescriptionRow:
         atmPhaseCorrectionDim1 = eis.readInt()
         thisList = []
         for i in range(atmPhaseCorrectionDim1):
-            thisValue = AtmPhaseCorrection.from_int(eis.readInt())
+            thisValue = AtmPhaseCorrection.literal(eis.readString())
             thisList.append(thisValue)
         row._atmPhaseCorrection = thisList
 
@@ -632,7 +632,7 @@ class ConfigDescriptionRow:
         Set the processorType in row from the EndianInput (eis) instance.
         """
 
-        row._processorType = ProcessorType.from_int(eis.readInt())
+        row._processorType = ProcessorType.literal(eis.readString())
 
     @staticmethod
     def spectralTypeFromBin(row, eis):
@@ -640,7 +640,7 @@ class ConfigDescriptionRow:
         Set the spectralType in row from the EndianInput (eis) instance.
         """
 
-        row._spectralType = SpectralResolutionType.from_int(eis.readInt())
+        row._spectralType = SpectralResolutionType.literal(eis.readString())
 
     @staticmethod
     def antennaIdFromBin(row, eis):
@@ -722,7 +722,7 @@ class ConfigDescriptionRow:
             assocNatureDim1 = eis.readInt()
             thisList = []
             for i in range(assocNatureDim1):
-                thisValue = SpectralResolutionType.from_int(eis.readInt())
+                thisValue = SpectralResolutionType.literal(eis.readString())
                 thisList.append(thisValue)
             row._assocNature = thisList
 

@@ -257,3 +257,9 @@ class EndianOutput:
 
         self.writeInt(len(strVal))
         self._outStream.write(bytes(strVal, "utf=8"))
+
+    def writeStr(self, strVal):
+        """
+        Identical to writeString, used by the template generator for reasons.
+        """
+        self.writeString(strVal)

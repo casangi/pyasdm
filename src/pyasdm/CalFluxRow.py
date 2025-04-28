@@ -196,7 +196,7 @@ class CalFluxRow:
             if row._directionExists:
 
                 # direction is a list, make a deep copy
-                self.direction = copy.deepcopy(row.direction)
+                self._direction = copy.deepcopy(row._direction)
 
                 self._directionExists = True
 
@@ -224,7 +224,7 @@ class CalFluxRow:
             if row._PAExists:
 
                 # PA is a list, make a deep copy
-                self.PA = copy.deepcopy(row.PA)
+                self._PA = copy.deepcopy(row._PA)
 
                 self._PAExists = True
 
@@ -233,7 +233,7 @@ class CalFluxRow:
             if row._PAErrorExists:
 
                 # PAError is a list, make a deep copy
-                self.PAError = copy.deepcopy(row.PAError)
+                self._PAError = copy.deepcopy(row._PAError)
 
                 self._PAErrorExists = True
 
@@ -242,7 +242,7 @@ class CalFluxRow:
             if row._sizeExists:
 
                 # size is a list, make a deep copy
-                self.size = copy.deepcopy(row.size)
+                self._size = copy.deepcopy(row._size)
 
                 self._sizeExists = True
 
@@ -251,7 +251,7 @@ class CalFluxRow:
             if row._sizeErrorExists:
 
                 # sizeError is a list, make a deep copy
-                self.sizeError = copy.deepcopy(row.sizeError)
+                self._sizeError = copy.deepcopy(row._sizeError)
 
                 self._sizeErrorExists = True
 
@@ -546,7 +546,7 @@ class CalFluxRow:
 
         Frequency.listToBin(self._frequencyRanges, eos)
 
-        eos.writeString(self._fluxMethod.toString())
+        eos.writeString(str(self._fluxMethod))
 
         # null array case, unsure if this is possible but this should work
         if self._flux is None:
@@ -577,7 +577,7 @@ class CalFluxRow:
         eos.writeInt(len(self._stokes))
         for i in range(len(self._stokes)):
 
-            eos.writeString(self._stokes[i].toString())
+            eos.writeString(str(self._stokes[i]))
 
         eos.writeBool(self._directionExists)
         if self._directionExists:
@@ -587,7 +587,7 @@ class CalFluxRow:
         eos.writeBool(self._directionCodeExists)
         if self._directionCodeExists:
 
-            eos.writeString(self._directionCode.toString())
+            eos.writeString(str(self._directionCode))
 
         eos.writeBool(self._directionEquinoxExists)
         if self._directionEquinoxExists:
@@ -617,7 +617,7 @@ class CalFluxRow:
         eos.writeBool(self._sourceModelExists)
         if self._sourceModelExists:
 
-            eos.writeString(self._sourceModel.toString())
+            eos.writeString(str(self._sourceModel))
 
     @staticmethod
     def sourceNameFromBin(row, eis):
@@ -689,7 +689,7 @@ class CalFluxRow:
         Set the fluxMethod in row from the EndianInput (eis) instance.
         """
 
-        row._fluxMethod = FluxCalibrationMethod.from_int(eis.readInt())
+        row._fluxMethod = FluxCalibrationMethod.literal(eis.readString())
 
     @staticmethod
     def fluxFromBin(row, eis):
@@ -706,7 +706,7 @@ class CalFluxRow:
                 thisValue = eis.readFloat()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.flux = thisList
+        row._flux = thisList
 
     @staticmethod
     def fluxErrorFromBin(row, eis):
@@ -723,7 +723,7 @@ class CalFluxRow:
                 thisValue = eis.readFloat()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.fluxError = thisList
+        row._fluxError = thisList
 
     @staticmethod
     def stokesFromBin(row, eis):
@@ -734,7 +734,7 @@ class CalFluxRow:
         stokesDim1 = eis.readInt()
         thisList = []
         for i in range(stokesDim1):
-            thisValue = StokesParameter.from_int(eis.readInt())
+            thisValue = StokesParameter.literal(eis.readString())
             thisList.append(thisValue)
         row._stokes = thisList
 
@@ -756,7 +756,7 @@ class CalFluxRow:
         row._directionCodeExists = eis.readBool()
         if row._directionCodeExists:
 
-            row._directionCode = DirectionReferenceCode.from_int(eis.readInt())
+            row._directionCode = DirectionReferenceCode.literal(eis.readString())
 
     @staticmethod
     def directionEquinoxFromBin(row, eis):
@@ -816,7 +816,7 @@ class CalFluxRow:
         row._sourceModelExists = eis.readBool()
         if row._sourceModelExists:
 
-            row._sourceModel = SourceModel.from_int(eis.readInt())
+            row._sourceModel = SourceModel.literal(eis.readString())
 
     @staticmethod
     def initFromBinMethods():

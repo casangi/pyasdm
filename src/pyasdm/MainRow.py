@@ -309,7 +309,7 @@ class MainRow:
 
         eos.writeInt(self._numAntenna)
 
-        eos.writeString(self._timeSampling.toString())
+        eos.writeString(str(self._timeSampling))
 
         self._interval.toBin(eos)
 
@@ -365,7 +365,7 @@ class MainRow:
         Set the timeSampling in row from the EndianInput (eis) instance.
         """
 
-        row._timeSampling = TimeSampling.from_int(eis.readInt())
+        row._timeSampling = TimeSampling.literal(eis.readString())
 
     @staticmethod
     def intervalFromBin(row, eis):

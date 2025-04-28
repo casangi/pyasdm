@@ -193,7 +193,7 @@ class FlagRow:
             if row._polarizationTypeExists:
 
                 # polarizationType is a list, make a deep copy
-                self.polarizationType = copy.deepcopy(row.polarizationType)
+                self._polarizationType = copy.deepcopy(row._polarizationType)
 
                 self._polarizationTypeExists = True
 
@@ -202,7 +202,7 @@ class FlagRow:
             if row._channelExists:
 
                 # channel is a list, make a deep copy
-                self.channel = copy.deepcopy(row.channel)
+                self._channel = copy.deepcopy(row._channel)
 
                 self._channelExists = True
 
@@ -482,7 +482,7 @@ class FlagRow:
             eos.writeInt(len(self._polarizationType))
             for i in range(len(self._polarizationType)):
 
-                eos.writeString(self._polarizationType[i].toString())
+                eos.writeString(str(self._polarizationType[i]))
 
         eos.writeBool(self._channelExists)
         if self._channelExists:
@@ -609,7 +609,7 @@ class FlagRow:
             polarizationTypeDim1 = eis.readInt()
             thisList = []
             for i in range(polarizationTypeDim1):
-                thisValue = PolarizationType.from_int(eis.readInt())
+                thisValue = PolarizationType.literal(eis.readString())
                 thisList.append(thisValue)
             row._polarizationType = thisList
 
@@ -630,7 +630,7 @@ class FlagRow:
                     thisValue = eis.readInt()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.channel = thisList
+            row._channel = thisList
 
     @staticmethod
     def pairedAntennaIdFromBin(row, eis):

@@ -306,7 +306,7 @@ class SwitchCycleRow:
         eos.writeBool(self._directionCodeExists)
         if self._directionCodeExists:
 
-            eos.writeString(self._directionCode.toString())
+            eos.writeString(str(self._directionCode))
 
         eos.writeBool(self._directionEquinoxExists)
         if self._directionEquinoxExists:
@@ -374,7 +374,7 @@ class SwitchCycleRow:
         row._directionCodeExists = eis.readBool()
         if row._directionCodeExists:
 
-            row._directionCode = DirectionReferenceCode.from_int(eis.readInt())
+            row._directionCode = DirectionReferenceCode.literal(eis.readString())
 
     @staticmethod
     def directionEquinoxFromBin(row, eis):

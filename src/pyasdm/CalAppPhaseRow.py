@@ -237,7 +237,7 @@ class CalAppPhaseRow:
             if row._phaseSupportsExists:
 
                 # phaseSupports is a list, make a deep copy
-                self.phaseSupports = copy.deepcopy(row.phaseSupports)
+                self._phaseSupports = copy.deepcopy(row._phaseSupports)
 
                 self._phaseSupportsExists = True
 
@@ -515,7 +515,7 @@ class CalAppPhaseRow:
         Write this row out to the EndianOutput instance, eos.
         """
 
-        eos.writeString(self._basebandName.toString())
+        eos.writeString(str(self._basebandName))
 
         eos.writeInt(self._scanNumber)
 
@@ -615,7 +615,7 @@ class CalAppPhaseRow:
         Set the basebandName in row from the EndianInput (eis) instance.
         """
 
-        row._basebandName = BasebandName.from_int(eis.readInt())
+        row._basebandName = BasebandName.literal(eis.readString())
 
     @staticmethod
     def scanNumberFromBin(row, eis):
@@ -820,7 +820,7 @@ class CalAppPhaseRow:
                 thisValue = eis.readFloat()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.efficiencies = thisList
+        row._efficiencies = thisList
 
     @staticmethod
     def qualityFromBin(row, eis):

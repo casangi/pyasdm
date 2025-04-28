@@ -174,7 +174,7 @@ class ScanRow:
             if row._calibrationFunctionExists:
 
                 # calibrationFunction is a list, make a deep copy
-                self.calibrationFunction = copy.deepcopy(row.calibrationFunction)
+                self._calibrationFunction = copy.deepcopy(row._calibrationFunction)
 
                 self._calibrationFunctionExists = True
 
@@ -183,7 +183,7 @@ class ScanRow:
             if row._calibrationSetExists:
 
                 # calibrationSet is a list, make a deep copy
-                self.calibrationSet = copy.deepcopy(row.calibrationSet)
+                self._calibrationSet = copy.deepcopy(row._calibrationSet)
 
                 self._calibrationSetExists = True
 
@@ -192,7 +192,7 @@ class ScanRow:
             if row._calPatternExists:
 
                 # calPattern is a list, make a deep copy
-                self.calPattern = copy.deepcopy(row.calPattern)
+                self._calPattern = copy.deepcopy(row._calPattern)
 
                 self._calPatternExists = True
 
@@ -209,7 +209,7 @@ class ScanRow:
             if row._fieldNameExists:
 
                 # fieldName is a list, make a deep copy
-                self.fieldName = copy.deepcopy(row.fieldName)
+                self._fieldName = copy.deepcopy(row._fieldName)
 
                 self._fieldNameExists = True
 
@@ -438,12 +438,12 @@ class ScanRow:
         eos.writeInt(len(self._scanIntent))
         for i in range(len(self._scanIntent)):
 
-            eos.writeString(self._scanIntent[i].toString())
+            eos.writeString(str(self._scanIntent[i]))
 
         eos.writeInt(len(self._calDataType))
         for i in range(len(self._calDataType)):
 
-            eos.writeString(self._calDataType[i].toString())
+            eos.writeString(str(self._calDataType[i]))
 
         eos.writeInt(len(self._calibrationOnLine))
         for i in range(len(self._calibrationOnLine)):
@@ -456,7 +456,7 @@ class ScanRow:
             eos.writeInt(len(self._calibrationFunction))
             for i in range(len(self._calibrationFunction)):
 
-                eos.writeString(self._calibrationFunction[i].toString())
+                eos.writeString(str(self._calibrationFunction[i]))
 
         eos.writeBool(self._calibrationSetExists)
         if self._calibrationSetExists:
@@ -464,7 +464,7 @@ class ScanRow:
             eos.writeInt(len(self._calibrationSet))
             for i in range(len(self._calibrationSet)):
 
-                eos.writeString(self._calibrationSet[i].toString())
+                eos.writeString(str(self._calibrationSet[i]))
 
         eos.writeBool(self._calPatternExists)
         if self._calPatternExists:
@@ -472,7 +472,7 @@ class ScanRow:
             eos.writeInt(len(self._calPattern))
             for i in range(len(self._calPattern)):
 
-                eos.writeString(self._calPattern[i].toString())
+                eos.writeString(str(self._calPattern[i]))
 
         eos.writeBool(self._numFieldExists)
         if self._numFieldExists:
@@ -549,7 +549,7 @@ class ScanRow:
         scanIntentDim1 = eis.readInt()
         thisList = []
         for i in range(scanIntentDim1):
-            thisValue = ScanIntent.from_int(eis.readInt())
+            thisValue = ScanIntent.literal(eis.readString())
             thisList.append(thisValue)
         row._scanIntent = thisList
 
@@ -562,7 +562,7 @@ class ScanRow:
         calDataTypeDim1 = eis.readInt()
         thisList = []
         for i in range(calDataTypeDim1):
-            thisValue = CalDataOrigin.from_int(eis.readInt())
+            thisValue = CalDataOrigin.literal(eis.readString())
             thisList.append(thisValue)
         row._calDataType = thisList
 
@@ -590,7 +590,7 @@ class ScanRow:
             calibrationFunctionDim1 = eis.readInt()
             thisList = []
             for i in range(calibrationFunctionDim1):
-                thisValue = CalibrationFunction.from_int(eis.readInt())
+                thisValue = CalibrationFunction.literal(eis.readString())
                 thisList.append(thisValue)
             row._calibrationFunction = thisList
 
@@ -605,7 +605,7 @@ class ScanRow:
             calibrationSetDim1 = eis.readInt()
             thisList = []
             for i in range(calibrationSetDim1):
-                thisValue = CalibrationSet.from_int(eis.readInt())
+                thisValue = CalibrationSet.literal(eis.readString())
                 thisList.append(thisValue)
             row._calibrationSet = thisList
 
@@ -620,7 +620,7 @@ class ScanRow:
             calPatternDim1 = eis.readInt()
             thisList = []
             for i in range(calPatternDim1):
-                thisValue = AntennaMotionPattern.from_int(eis.readInt())
+                thisValue = AntennaMotionPattern.literal(eis.readString())
                 thisList.append(thisValue)
             row._calPattern = thisList
 

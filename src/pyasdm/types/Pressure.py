@@ -23,6 +23,7 @@
 # File Pressure.py
 #
 
+import pyasdm.utils
 
 class Pressure:
     """
@@ -141,7 +142,7 @@ class Pressure:
         """
         self._pressure = float(value)
 
-    def toString(self):
+    def __str__(self):
         """
         Return the value of this pressure as a String in units of hectopascals.
         """
@@ -196,11 +197,11 @@ class Pressure:
             Pressure.listTo2DBin(pressureList, eos)
         elif ndims == 3:
             Pressure.listTo3DBin(pressureList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in pressureList in Pressure.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in pressureList in Pressure.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(pressureList, eos):
@@ -295,7 +296,7 @@ class Pressure:
         return Pressure(eis.readDouble())
 
     @staticmethod
-    def from1Dbin(eis):
+    def from1DBin(eis):
         """
         Read a list of binary Pressure values, in hectopascals, from an
         EndianInput instance and return the resulting list.
@@ -397,7 +398,7 @@ class Pressure:
 
         return result
 
-    def eq(self, otherPressure):
+    def __eq__(self, otherPressure):
         """
         Return True if and only if this Pressure is equal to the specified
         other Pressure.
@@ -405,7 +406,7 @@ class Pressure:
         """
         return self.equals(otherPressure)
 
-    def ne(self, otherPressure):
+    def __ne__(self, otherPressure):
         """
         Return True if and only if this Pressure is not equal to the specified
         other Pressure.
@@ -414,7 +415,7 @@ class Pressure:
             self._pressure != otherPressure._pressure
         )
 
-    def lt(self, otherPressure):
+    def __lt__(self, otherPressure):
         """
         Return True if and only if this Pressure is less than the specified
         other Pressure.
@@ -423,7 +424,7 @@ class Pressure:
             self._pressure < otherPressure._pressure
         )
 
-    def le(self, otherPressure):
+    def __le__(self, otherPressure):
         """
         Return True if and only if this Pressure is less than or equal to
         the specified other Pressure.
@@ -432,7 +433,7 @@ class Pressure:
             self._pressure <= otherPressure._pressure
         )
 
-    def gt(self, otherPressure):
+    def __gt__(self, otherPressure):
         """
         Return True if and only if this Pressure is greater than the specified
         other Pressure.
@@ -441,7 +442,7 @@ class Pressure:
             self._pressure > otherPressure._pressure
         )
 
-    def ge(self, otherPressure):
+    def __ge__(self, otherPressure):
         """
         Return True if and only if this Pressure is greater than or equal to
         the specified other Pressure.
@@ -450,7 +451,7 @@ class Pressure:
             self._pressure >= otherPressure._pressure
         )
 
-    def add(self, otherPressure):
+    def __add__(self, otherPressure):
         """
         Add otherPressure, which must be a Pressure, to this pressure, (this + x).
         param otherPressure The Pressure to be added to this pressure.
@@ -462,7 +463,7 @@ class Pressure:
         self._pressure += otherPressure._pressure
         return self
 
-    def sub(self, otherPressure):
+    def __sub__(self, otherPressure):
         """
         Subtract otherPressure which must be a Pressure, from this pressure, (this - x).
         param otherPressure The Pressure to be subtracted from this pressure.
@@ -474,7 +475,7 @@ class Pressure:
         self._pressure -= otherPressure._pressure
         return self
 
-    def mult(self, factor):
+    def __mul__(self, factor):
         """
         Multiply this pressure by some factor, (this * factor).
         param factor The factor by which this pressure is to be multiplied.
@@ -483,7 +484,7 @@ class Pressure:
         self._pressure *= factor
         return self
 
-    def div(self, factor):
+    def __truediv__(self, factor):
         """
         Divide this pressure by some factor, (this / factor).
         param factor The factor by which this pressure is to be divided.

@@ -54,7 +54,7 @@ class Parser:
         """
         Return a string of the form '<name> value </name>' to be used in the XML output.
         The value must be convertable to a string using the simple str(value) method.
-        A value that is an instance of a class with a toString method should use
+        A value that is an instance of a class with a __str__ method should use
         the extendedValuetoXML method.
         """
         return Parser.nameStringToXML(name, str(value))
@@ -63,10 +63,10 @@ class Parser:
     def extendedValueToXML(name, value):
         """
         Return a string of the form '<name> value </name>' to be used in the XML output.
-        The value must have a toString member used to convert that value to a string
+        The value must have a __str__ member used to convert that value to a string
         representation. Extended type values all have that function.
 
-        ArrayTimeInterval is the exception. The toString method there is not
+        ArrayTimeInterval is the exception. The __str__ method there is not
         used here following the similar case Java.
         """
         valueStr = None
@@ -76,7 +76,7 @@ class Parser:
                 str(value.getMidPoint().get()) + " " + str(value.getDuration().get())
             )
         else:
-            valueStr = value.toString()
+            valueStr = str(value)
 
         return Parser.nameStringToXML(name, valueStr)
 
@@ -112,7 +112,7 @@ class Parser:
         """
         Turns a list (including a list of lists as used here) into a string for use in an XML output.
         Values in the list are extended type values and are turned into a string by use of
-        the toString method that is part of extended types.
+        the __str__ method that is part of extended types.
         """
         result = ""
         if len(dims) > 1:
@@ -122,7 +122,7 @@ class Parser:
             # these are actual values
             try:
                 for jj in range(dims[0]):
-                    result += theList[jj].toString() + " "
+                    result += str(theList[jj]) + " "
             except:
                 print("exception seen for type " + str(type(theList[jj])))
                 raise
@@ -169,7 +169,7 @@ class Parser:
         output. The list values are encoded such that they can be read and the list
         (which may be a list of lists, i.e. an ND array of values) be fully reconstructed
         from that XML.
-        For use with extended types which can be expressed as a string using their toString() member function.
+        For use with extended types which can be expressed as a string using their __str__ member function.
         Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
         and the most rapidly varying dimension among the values is the last dimension.
         """

@@ -28,10 +28,11 @@
 
 
 """
-   The Interval class implements a concept of an interval
-   of time in units of nanoseconds.
+The Interval class implements a concept of an interval
+of time in units of nanoseconds.
 """
 
+import pyasdm.utils
 
 class Interval:
 
@@ -168,12 +169,8 @@ class Interval:
     def isZero(self):
         return self.value == 0
 
-    def toString(self):
+    def __str__(self):
         return str(self.value)
-
-    # equivalent to toString
-    def string(self):
-        return self.toString()
 
     # get the value, always nanoseconds
     def get(self):
@@ -220,11 +217,11 @@ class Interval:
             Interval.listTo2DBin(intervalList, eos)
         elif ndims == 3:
             Interval.listTo3DBin(intervalList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in intervalList in Interval.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in intervalList in Interval.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(intervalList, eos):
@@ -319,7 +316,7 @@ class Interval:
         return Interval(eis.readLong())
 
     @staticmethod
-    def from1Dbin(eis):
+    def from1DBin(eis):
         """
         Read a list of binary Interval values, in nanoseconds, from an
         EndianInput instance and return the resulting list.

@@ -230,7 +230,7 @@ class StateRow:
 
         self._stateId.toBin(eos)
 
-        eos.writeString(self._calDeviceName.toString())
+        eos.writeString(str(self._calDeviceName))
 
         eos.writeBool(self._sig)
 
@@ -257,7 +257,7 @@ class StateRow:
         Set the calDeviceName in row from the EndianInput (eis) instance.
         """
 
-        row._calDeviceName = CalibrationDevice.from_int(eis.readInt())
+        row._calDeviceName = CalibrationDevice.literal(eis.readString())
 
     @staticmethod
     def sigFromBin(row, eis):

@@ -345,11 +345,11 @@ class ArrayTimeInterval:
             )
 
     # Formatter
-    def toString(self):
+    def __str__(self):
         result = "(start="
-        result += str(self.getStart().toString())
+        result += str(self.getStart())
         result += ",duration="
-        result += str(self.getDuration().toString())
+        result += str(self.getDuration())
         result += ")"
         return result
 
@@ -379,11 +379,11 @@ class ArrayTimeInterval:
             ArrayTimeInterval.listTo2DBin(atiList, eos)
         elif ndims == 3:
             ArrayTimeInterval.listTo3DBin(atiList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in atiList in ArrayTimeInterval.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in atiList in ArrayTimeInterval.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(atiList, eout):

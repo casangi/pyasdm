@@ -161,7 +161,7 @@ class GainTrackingRow:
             if row._attFreqExists:
 
                 # attFreq is a list, make a deep copy
-                self.attFreq = copy.deepcopy(row.attFreq)
+                self._attFreq = copy.deepcopy(row._attFreq)
 
                 self._attFreqExists = True
 
@@ -170,7 +170,7 @@ class GainTrackingRow:
             if row._attSpectrumExists:
 
                 # attSpectrum is a list, make a deep copy
-                self.attSpectrum = copy.deepcopy(row.attSpectrum)
+                self._attSpectrum = copy.deepcopy(row._attSpectrum)
 
                 self._attSpectrumExists = True
 
@@ -352,7 +352,7 @@ class GainTrackingRow:
         eos.writeInt(len(self._polarizationType))
         for i in range(len(self._polarizationType)):
 
-            eos.writeString(self._polarizationType[i].toString())
+            eos.writeString(str(self._polarizationType[i]))
 
         eos.writeBool(self._samplingLevelExists)
         if self._samplingLevelExists:
@@ -439,7 +439,7 @@ class GainTrackingRow:
         polarizationTypeDim1 = eis.readInt()
         thisList = []
         for i in range(polarizationTypeDim1):
-            thisValue = PolarizationType.from_int(eis.readInt())
+            thisValue = PolarizationType.literal(eis.readString())
             thisList.append(thisValue)
         row._polarizationType = thisList
 

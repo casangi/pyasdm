@@ -101,6 +101,7 @@ class ByteOrder:
         """
         return self._is_native
 
+
 NATIVE = ByteOrder("Native")
 LITTLE = ByteOrder("Little_Endian")
 BIG = ByteOrder("Big_Endian")

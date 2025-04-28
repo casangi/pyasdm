@@ -291,9 +291,9 @@ class AntennaRow:
 
         eos.writeStr(self._name)
 
-        eos.writeString(self._antennaMake.toString())
+        eos.writeString(str(self._antennaMake))
 
-        eos.writeString(self._antennaType.toString())
+        eos.writeString(str(self._antennaType))
 
         self._dishDiameter.toBin(eos)
 
@@ -332,7 +332,7 @@ class AntennaRow:
         Set the antennaMake in row from the EndianInput (eis) instance.
         """
 
-        row._antennaMake = AntennaMake.from_int(eis.readInt())
+        row._antennaMake = AntennaMake.literal(eis.readString())
 
     @staticmethod
     def antennaTypeFromBin(row, eis):
@@ -340,7 +340,7 @@ class AntennaRow:
         Set the antennaType in row from the EndianInput (eis) instance.
         """
 
-        row._antennaType = AntennaType.from_int(eis.readInt())
+        row._antennaType = AntennaType.literal(eis.readString())
 
     @staticmethod
     def dishDiameterFromBin(row, eis):

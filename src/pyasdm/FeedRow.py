@@ -186,7 +186,7 @@ class FeedRow:
             if row._illumOffsetExists:
 
                 # illumOffset is a list, make a deep copy
-                self.illumOffset = copy.deepcopy(row.illumOffset)
+                self._illumOffset = copy.deepcopy(row._illumOffset)
 
                 self._illumOffsetExists = True
 
@@ -195,7 +195,7 @@ class FeedRow:
             if row._positionExists:
 
                 # position is a list, make a deep copy
-                self.position = copy.deepcopy(row.position)
+                self._position = copy.deepcopy(row._position)
 
                 self._positionExists = True
 
@@ -220,7 +220,7 @@ class FeedRow:
             if row._skyCouplingSpectrumExists:
 
                 # skyCouplingSpectrum is a list, make a deep copy
-                self.skyCouplingSpectrum = copy.deepcopy(row.skyCouplingSpectrum)
+                self._skyCouplingSpectrum = copy.deepcopy(row._skyCouplingSpectrum)
 
                 self._skyCouplingSpectrumExists = True
 
@@ -476,7 +476,7 @@ class FeedRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(self._polarizationTypes[i].toString())
+            eos.writeString(str(self._polarizationTypes[i]))
 
         Complex.listToBin(self._polResponse, eos)
 
@@ -575,7 +575,7 @@ class FeedRow:
                 thisValue = eis.readFloat()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.beamOffset = thisList
+        row._beamOffset = thisList
 
     @staticmethod
     def focusReferenceFromBin(row, eis):
@@ -594,7 +594,7 @@ class FeedRow:
         polarizationTypesDim1 = eis.readInt()
         thisList = []
         for i in range(polarizationTypesDim1):
-            thisValue = PolarizationType.from_int(eis.readInt())
+            thisValue = PolarizationType.literal(eis.readString())
             thisList.append(thisValue)
         row._polarizationTypes = thisList
 

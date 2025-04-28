@@ -337,7 +337,7 @@ class SubscanRow:
 
         eos.writeStr(self._fieldName)
 
-        eos.writeString(self._subscanIntent.toString())
+        eos.writeString(str(self._subscanIntent))
 
         eos.writeInt(self._numIntegration)
 
@@ -349,12 +349,12 @@ class SubscanRow:
         eos.writeBool(self._subscanModeExists)
         if self._subscanModeExists:
 
-            eos.writeString(self._subscanMode.toString())
+            eos.writeString(str(self._subscanMode))
 
         eos.writeBool(self._correlatorCalibrationExists)
         if self._correlatorCalibrationExists:
 
-            eos.writeString(self._correlatorCalibration.toString())
+            eos.writeString(str(self._correlatorCalibration))
 
     @staticmethod
     def execBlockIdFromBin(row, eis):
@@ -410,7 +410,7 @@ class SubscanRow:
         Set the subscanIntent in row from the EndianInput (eis) instance.
         """
 
-        row._subscanIntent = SubscanIntent.from_int(eis.readInt())
+        row._subscanIntent = SubscanIntent.literal(eis.readString())
 
     @staticmethod
     def numIntegrationFromBin(row, eis):
@@ -441,7 +441,7 @@ class SubscanRow:
         row._subscanModeExists = eis.readBool()
         if row._subscanModeExists:
 
-            row._subscanMode = SwitchingMode.from_int(eis.readInt())
+            row._subscanMode = SwitchingMode.literal(eis.readString())
 
     @staticmethod
     def correlatorCalibrationFromBin(row, eis):
@@ -451,7 +451,7 @@ class SubscanRow:
         row._correlatorCalibrationExists = eis.readBool()
         if row._correlatorCalibrationExists:
 
-            row._correlatorCalibration = CorrelatorCalibration.from_int(eis.readInt())
+            row._correlatorCalibration = CorrelatorCalibration.literal(eis.readString())
 
     @staticmethod
     def initFromBinMethods():

@@ -23,6 +23,7 @@
 # File Flux.py
 #
 
+import pyasdm.utils
 
 class Flux:
     """
@@ -141,7 +142,7 @@ class Flux:
         """
         self._flux = float(flux)
 
-    def toString(self):
+    def __str__(self):
         """
         Return the value of this flux as a String in units of Janskys.
         """
@@ -196,11 +197,11 @@ class Flux:
             Flux.listTo2DBin(fluxList, eos)
         elif ndims == 3:
             Flux.listTo3DBin(fluxList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in fluxList in Flux.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in fluxList in Flux.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(fluxList, eos):
@@ -295,7 +296,7 @@ class Flux:
         return Flux(eis.readDouble())
 
     @staticmethod
-    def from1Dbin(eis):
+    def from1DBin(eis):
         """
         Read a list of binary Flux values, in Janskys, from an
         EndianInput instance and return the resulting list.
@@ -391,7 +392,7 @@ class Flux:
 
         return result
 
-    def eq(self, otherFlux):
+    def __eq__(self, otherFlux):
         """
         Return True if and only if this Flux is equal to the specified
         other Flux.
@@ -399,42 +400,42 @@ class Flux:
         """
         return self.equals(otherFlux)
 
-    def ne(self, otherFlux):
+    def __ne__(self, otherFlux):
         """
         Return True if and only if this Flux is not equal to the specified
         other Flux.
         """
         return isinstance(otherFlux, Flux) and (self._flux != otherFlux._flux)
 
-    def lt(self, otherFlux):
+    def __lt__(self, otherFlux):
         """
         Return True if and only if this Flux is less than the specified
         other Flux.
         """
         return isinstance(otherFlux, Flux) and (self._flux < otherFlux._flux)
 
-    def le(self, otherFlux):
+    def __le__(self, otherFlux):
         """
         Return True if and only if this Flux is less than or equal to
         the specified other Flux.
         """
         return isinstance(otherFlux, Flux) and (self._flux <= otherFlux._flux)
 
-    def gt(self, otherFlux):
+    def __gt__(self, otherFlux):
         """
         Return True if and only if this Flux is greater than the specified
         other Flux.
         """
         return isinstance(otherFlux, Flux) and (self._flux > otherFlux._flux)
 
-    def ge(self, otherFlux):
+    def __ge__(self, otherFlux):
         """
         Return True if and only if this Flux is greater than or equal to
         the specified other Flux.
         """
         return isinstance(otherFlux, Flux) and (self._flux >= otherFlux._flux)
 
-    def add(self, otherFlux):
+    def __add__(self, otherFlux):
         """
         Add otherFlux, which must be a Flux, to this flux, (this + x).
         param otherFlux The Flux to be added to this flux.
@@ -446,7 +447,7 @@ class Flux:
         self._flux += otherFlux._flux
         return self
 
-    def sub(self, otherFlux):
+    def __sub__(self, otherFlux):
         """
         Subtract otherFlux which must be a Flux, from this flux, (this - x).
         param otherFlux The Flux to be subtracted from this flux.
@@ -458,7 +459,7 @@ class Flux:
         self._flux -= otherFlux._flux
         return self
 
-    def mult(self, factor):
+    def __mul__(self, factor):
         """
         Multiply this flux by some factor, (this * factor).
         param factor The factor by which this flux is to be multiplied.
@@ -467,7 +468,7 @@ class Flux:
         self._flux *= factor
         return self
 
-    def div(self, factor):
+    def __truediv__(self, factor):
         """
         Divide this flux by some factor, (this / factor).
         param factor The factor by which this flux is to be divided.

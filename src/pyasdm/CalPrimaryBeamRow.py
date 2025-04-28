@@ -443,7 +443,7 @@ class CalPrimaryBeamRow:
 
         eos.writeStr(self._antennaName)
 
-        eos.writeString(self._receiverBand.toString())
+        eos.writeString(str(self._receiverBand))
 
         self._calDataId.toBin(eos)
 
@@ -453,7 +453,7 @@ class CalPrimaryBeamRow:
 
         self._endValidTime.toBin(eos)
 
-        eos.writeString(self._antennaMake.toString())
+        eos.writeString(str(self._antennaMake))
 
         eos.writeInt(self._numSubband)
 
@@ -464,7 +464,7 @@ class CalPrimaryBeamRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(self._polarizationTypes[i].toString())
+            eos.writeString(str(self._polarizationTypes[i]))
 
         eos.writeInt(len(self._mainBeamEfficiency))
         for i in range(len(self._mainBeamEfficiency)):
@@ -481,7 +481,7 @@ class CalPrimaryBeamRow:
 
         Angle.listToBin(self._maxValidDirection, eos)
 
-        eos.writeString(self._descriptionType.toString())
+        eos.writeString(str(self._descriptionType))
 
         eos.writeInt(len(self._imageChannelNumber))
         for i in range(len(self._imageChannelNumber)):
@@ -504,7 +504,7 @@ class CalPrimaryBeamRow:
         Set the receiverBand in row from the EndianInput (eis) instance.
         """
 
-        row._receiverBand = ReceiverBand.from_int(eis.readInt())
+        row._receiverBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def calDataIdFromBin(row, eis):
@@ -544,7 +544,7 @@ class CalPrimaryBeamRow:
         Set the antennaMake in row from the EndianInput (eis) instance.
         """
 
-        row._antennaMake = AntennaMake.from_int(eis.readInt())
+        row._antennaMake = AntennaMake.literal(eis.readString())
 
     @staticmethod
     def numSubbandFromBin(row, eis):
@@ -579,7 +579,7 @@ class CalPrimaryBeamRow:
         polarizationTypesDim1 = eis.readInt()
         thisList = []
         for i in range(polarizationTypesDim1):
-            thisValue = PolarizationType.from_int(eis.readInt())
+            thisValue = PolarizationType.literal(eis.readString())
             thisList.append(thisValue)
         row._polarizationTypes = thisList
 
@@ -642,7 +642,7 @@ class CalPrimaryBeamRow:
         Set the descriptionType in row from the EndianInput (eis) instance.
         """
 
-        row._descriptionType = PrimaryBeamDescription.from_int(eis.readInt())
+        row._descriptionType = PrimaryBeamDescription.literal(eis.readString())
 
     @staticmethod
     def imageChannelNumberFromBin(row, eis):

@@ -150,7 +150,7 @@ class PulsarRow:
             if row._phasePolyExists:
 
                 # phasePoly is a list, make a deep copy
-                self.phasePoly = copy.deepcopy(row.phasePoly)
+                self._phasePoly = copy.deepcopy(row._phasePoly)
 
                 self._phasePolyExists = True
 
@@ -167,7 +167,7 @@ class PulsarRow:
             if row._startPhaseBinExists:
 
                 # startPhaseBin is a list, make a deep copy
-                self.startPhaseBin = copy.deepcopy(row.startPhaseBin)
+                self._startPhaseBin = copy.deepcopy(row._startPhaseBin)
 
                 self._startPhaseBinExists = True
 
@@ -176,7 +176,7 @@ class PulsarRow:
             if row._endPhaseBinExists:
 
                 # endPhaseBin is a list, make a deep copy
-                self.endPhaseBin = copy.deepcopy(row.endPhaseBin)
+                self._endPhaseBin = copy.deepcopy(row._endPhaseBin)
 
                 self._endPhaseBinExists = True
 

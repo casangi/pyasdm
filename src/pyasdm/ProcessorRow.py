@@ -210,9 +210,9 @@ class ProcessorRow:
 
         self._modeId.toBin(eos)
 
-        eos.writeString(self._processorType.toString())
+        eos.writeString(str(self._processorType))
 
-        eos.writeString(self._processorSubType.toString())
+        eos.writeString(str(self._processorSubType))
 
     @staticmethod
     def processorIdFromBin(row, eis):
@@ -236,7 +236,7 @@ class ProcessorRow:
         Set the processorType in row from the EndianInput (eis) instance.
         """
 
-        row._processorType = ProcessorType.from_int(eis.readInt())
+        row._processorType = ProcessorType.literal(eis.readString())
 
     @staticmethod
     def processorSubTypeFromBin(row, eis):
@@ -244,7 +244,7 @@ class ProcessorRow:
         Set the processorSubType in row from the EndianInput (eis) instance.
         """
 
-        row._processorSubType = ProcessorSubType.from_int(eis.readInt())
+        row._processorSubType = ProcessorSubType.literal(eis.readString())
 
     @staticmethod
     def initFromBinMethods():

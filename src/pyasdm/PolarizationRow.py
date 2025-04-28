@@ -205,7 +205,7 @@ class PolarizationRow:
         eos.writeInt(len(self._corrType))
         for i in range(len(self._corrType)):
 
-            eos.writeString(self._corrType[i].toString())
+            eos.writeString(str(self._corrType[i]))
 
         # null array case, unsure if this is possible but this should work
         if self._corrProduct is None:
@@ -218,7 +218,7 @@ class PolarizationRow:
         eos.writeInt(corrProduct_dims[1])
         for i in range(corrProduct_dims[0]):
             for j in range(corrProduct_dims[1]):
-                eos.writeString(self._corrProduct[i][j].toString())
+                eos.writeString(str(self._corrProduct[i][j]))
 
     @staticmethod
     def polarizationIdFromBin(row, eis):
@@ -245,7 +245,7 @@ class PolarizationRow:
         corrTypeDim1 = eis.readInt()
         thisList = []
         for i in range(corrTypeDim1):
-            thisValue = StokesParameter.from_int(eis.readInt())
+            thisValue = StokesParameter.literal(eis.readString())
             thisList.append(thisValue)
         row._corrType = thisList
 
@@ -261,10 +261,10 @@ class PolarizationRow:
         for i in range(corrProductDim1):
             thisList_j = []
             for j in range(corrProductDim2):
-                thisValue = PolarizationType.from_int(eis.readInt())
+                thisValue = PolarizationType.literal(eis.readString())
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.corrProduct = thisList
+        row._corrProduct = thisList
 
     @staticmethod
     def initFromBinMethods():

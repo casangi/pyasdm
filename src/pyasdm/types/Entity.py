@@ -48,7 +48,7 @@ class Entity:
         """
         Initialize an EntityId.
         No arguments: a Null EntityID and empty strings
-        A string: interpret this as XML previously from a toString method
+        A string: interpret this as XML previously from a toXML_ method
         EntityId, string, string, string, string : entityId, entityIdEncrypted, entityTypeName, entityVersion, instanceVersin
         Anything else raises a ValueError
         """
@@ -81,7 +81,7 @@ class Entity:
         else:
             raise ValueError("Entity : invalid number of arguments, 0, 1 or 5 expected")
 
-    def toString(self):
+    def __str__(self):
         """
         Synonymous with toXML
         """
@@ -94,7 +94,7 @@ class Entity:
         msg = self._validXML()
         if msg is not None:
             raise RuntimeError("Entity.toXML : " + msg)
-        s = '<Entity entityId="' + self._entityId.toString()
+        s = '<Entity entityId="' + str(self._entityId)
         s += '" entityIdEncrypted="' + self._entityIdEncrypted
         s += '" entityTypeName="' + self._entityTypeName
         s += '" schemaVersion="' + self._entityVersion
@@ -135,10 +135,10 @@ class Entity:
             or (len(self._entityVersion) == 0)
             or (len(self._instanceVersion) == 0)
         ):
-            return "Null values detectect in Entity " + self._entityId.toString()
+            return "Null values detectect in Entity " + str(self._entityId)
 
         # this check for a valid entityId and returns it
-        return self._entityId.validate(self._entityId.toString())
+        return self._entityId.validate(str(self._entityId))
 
     @staticmethod
     def fromBin(ein):

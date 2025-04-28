@@ -92,7 +92,7 @@ class EntityId:
                 # invalid type
                 raise ValueError("EntityId : argument must be an EntityId or str")
 
-    def toString(self):
+    def __str__(self):
         """
         returns the value
         """

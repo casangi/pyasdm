@@ -234,13 +234,13 @@ class ScaleRow:
 
         self._scaleId.toBin(eos)
 
-        eos.writeString(self._timeScale.toString())
+        eos.writeString(str(self._timeScale))
 
-        eos.writeString(self._crossDataScale.toString())
+        eos.writeString(str(self._crossDataScale))
 
-        eos.writeString(self._autoDataScale.toString())
+        eos.writeString(str(self._autoDataScale))
 
-        eos.writeString(self._weightType.toString())
+        eos.writeString(str(self._weightType))
 
     @staticmethod
     def scaleIdFromBin(row, eis):
@@ -256,7 +256,7 @@ class ScaleRow:
         Set the timeScale in row from the EndianInput (eis) instance.
         """
 
-        row._timeScale = TimeScale.from_int(eis.readInt())
+        row._timeScale = TimeScale.literal(eis.readString())
 
     @staticmethod
     def crossDataScaleFromBin(row, eis):
@@ -264,7 +264,7 @@ class ScaleRow:
         Set the crossDataScale in row from the EndianInput (eis) instance.
         """
 
-        row._crossDataScale = DataScale.from_int(eis.readInt())
+        row._crossDataScale = DataScale.literal(eis.readString())
 
     @staticmethod
     def autoDataScaleFromBin(row, eis):
@@ -272,7 +272,7 @@ class ScaleRow:
         Set the autoDataScale in row from the EndianInput (eis) instance.
         """
 
-        row._autoDataScale = DataScale.from_int(eis.readInt())
+        row._autoDataScale = DataScale.literal(eis.readString())
 
     @staticmethod
     def weightTypeFromBin(row, eis):
@@ -280,7 +280,7 @@ class ScaleRow:
         Set the weightType in row from the EndianInput (eis) instance.
         """
 
-        row._weightType = WeightType.from_int(eis.readInt())
+        row._weightType = WeightType.literal(eis.readString())
 
     @staticmethod
     def initFromBinMethods():

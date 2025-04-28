@@ -514,7 +514,7 @@ class TotalPowerRow:
                     thisList_k.append(thisValue)
                 thisList_j.append(thisList_k)
             thisList.append(thisList_j)
-        row.floatData = thisList
+        row._floatData = thisList
 
     @staticmethod
     def flagAntFromBin(row, eis):
@@ -544,7 +544,7 @@ class TotalPowerRow:
                 thisValue = eis.readInt()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
-        row.flagPol = thisList
+        row._flagPol = thisList
 
     @staticmethod
     def intervalFromBin(row, eis):

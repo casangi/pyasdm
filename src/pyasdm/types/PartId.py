@@ -73,18 +73,18 @@ class PartId:
             # nothing more to do
             pass
         elif isinstance(id, PartId):
-            self._id = id.toString()
+            self._id = id._id
         else:
             self.setId(id)
 
-    def toString(self):
+    def __str__(self):
         return self._id
 
     def toBin(self, eos):
         """
         Write the binary representation of this into an EndianOutput stream
         """
-        eos.writeString(self.toString())
+        eos.writeString(self._id)
 
     @staticmethod
     def fromBin(eis):
@@ -95,7 +95,7 @@ class PartId:
         return PartId(eis.readString())
 
     def equals(self, other):
-        return isinstance(other, PartId) and (other.toString() == self._id)
+        return isinstance(other, PartId) and (other._id == self._id)
 
     def setId(self, idStr):
         """

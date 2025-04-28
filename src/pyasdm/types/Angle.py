@@ -217,14 +217,11 @@ class Angle:
         else:
             raise ValueError(str(units) + " is not an allowable unit.")
 
-    def toString(self, units=None):
+    def __str__(self):
         """
-        Return the value of this Angle as a string in the given units.
-        The units default to RADIAN if not specified.
-        The units must be one of the recognized units of RADIAN, DEGREE,
-        HOUR, and ARCSECOND.
+        Print the value of this angle in the units of RADIAN.
         """
-        return str(self.get(units))
+        return str(self.get())
 
     @staticmethod
     def values(items):
@@ -273,11 +270,11 @@ class Angle:
             Angle.listTo2DBin(angleList, eos)
         elif ndims == 3:
             Angle.listTo3DBin(angleList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in angleList in Angle.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in angleList in Angle.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(angleList, eos):
@@ -372,7 +369,7 @@ class Angle:
         return Angle(eis.readDouble())
 
     @staticmethod
-    def from1Dbin(eis):
+    def from1DBin(eis):
         """
         Read a list of binary Angle values, in radians, from an
         EndianInput instance and return the resulting list.
@@ -464,44 +461,44 @@ class Angle:
 
         return result
 
-    def eq(self, otherAngle):
+    def __eq__(self, otherAngle):
         """
         Returns True if and only if this Angle is equal to the otherAngle.
         This is equivalent to the equals method.
         """
         return self.equals(otherAngle)
 
-    def ne(self, otherAngle):
+    def __ne__(self, otherAngle):
         """
         Returns True if and only if this Angle is not equal to otherAngle
         """
         return isinstance(otherAngle, Angle) and (self._angle != otherAngle._angle)
 
-    def lt(self, otherAngle):
+    def __lt__(self, otherAngle):
         """
         Returns True if and only if this Angle is less than otherAngle
         """
         return isinstance(otherAngle, Angle) and (self._angle < otherAngle._angle)
 
-    def le(self, otherAngle):
+    def __le__(self, otherAngle):
         """
         Returns True if and only if this Angle is less than or equal to otherAngle
         """
         return isinstance(otherAngle, Angle) and (self._angle <= otherAngle._angle)
 
-    def gt(self, otherAngle):
+    def __gt__(self, otherAngle):
         """
         Returns True if and only if this angle is greater than otherAngle
         """
         return isinstance(otherAngle, Angle) and (self._angle > otherAngle._angle)
 
-    def ge(self, otherAngle):
+    def __ge__(self, otherAngle):
         """
         Returns True if and only if this angle is greater than or equal to otherAngle
         """
         return isinstance(otherAngle, Angle) and (self._angle >= otherAngle._angle)
 
-    def mult(self, factor):
+    def __mul__(self, factor):
         """
         Multiply this angle by some factor, (this * factor).
         Return this angle after multiplication.
@@ -509,7 +506,7 @@ class Angle:
         self._angle *= factor
         return self
 
-    def div(self, factor):
+    def __truediv__(self, factor):
         """
         Divide this angle by some factor, (this / factor)
         Return this angle after division.

@@ -128,8 +128,8 @@ class SysPowerRow:
             if row._switchedPowerDifferenceExists:
 
                 # switchedPowerDifference is a list, make a deep copy
-                self.switchedPowerDifference = copy.deepcopy(
-                    row.switchedPowerDifference
+                self._switchedPowerDifference = copy.deepcopy(
+                    row._switchedPowerDifference
                 )
 
                 self._switchedPowerDifferenceExists = True
@@ -139,7 +139,7 @@ class SysPowerRow:
             if row._switchedPowerSumExists:
 
                 # switchedPowerSum is a list, make a deep copy
-                self.switchedPowerSum = copy.deepcopy(row.switchedPowerSum)
+                self._switchedPowerSum = copy.deepcopy(row._switchedPowerSum)
 
                 self._switchedPowerSumExists = True
 
@@ -148,7 +148,7 @@ class SysPowerRow:
             if row._requantizerGainExists:
 
                 # requantizerGain is a list, make a deep copy
-                self.requantizerGain = copy.deepcopy(row.requantizerGain)
+                self._requantizerGain = copy.deepcopy(row._requantizerGain)
 
                 self._requantizerGainExists = True
 

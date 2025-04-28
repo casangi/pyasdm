@@ -23,6 +23,7 @@
 # File Length.py
 #
 
+import pyasdm.utils
 
 class Length:
     """
@@ -195,14 +196,11 @@ class Length:
         else:
             raise ValueError(str(units) + " is not an alllowable unit.")
 
-    def toString(self, units=None):
+    def __str__(self):
         """
-        Return the value of this length as a string in the specified units.
-        The units default to METER if not specified
-        The units must be one of the recognized units of METER, KILOMETER,
-        CENTIMETER, and MILLIMETER.
+        Return the value of this length as a string in the default units of METER.
         """
-        return str(self.get(units))
+        return str(self.get())
 
     @staticmethod
     def values(items):
@@ -253,11 +251,11 @@ class Length:
             Length.listTo2DBin(lengthList, eos)
         elif ndims == 3:
             Length.listTo3DBin(lengthList, eos)
-
-        raise ValueError(
-            "unsupport number of dimensions in lengthList in Length.listToBin : "
-            + str(ndims)
-        )
+        else:
+            raise ValueError(
+                "unsupport number of dimensions in lengthList in Length.listToBin : "
+                + str(ndims)
+            )
 
     @staticmethod
     def listTo1DBin(lengthList, eos):
@@ -352,7 +350,7 @@ class Length:
         return Length(eis.readDouble())
 
     @staticmethod
-    def from1Dbin(eis):
+    def from1DBin(eis):
         """
         Read a list of binary Length values, in meters, from an
         EndianInput instance and return the resulting list.
@@ -446,44 +444,44 @@ class Length:
 
         return result
 
-    def eq(self, otherLength):
+    def __eq__(self, otherLength):
         """
         Returns True if and only if this Length is equal to the otherLength.
         this is equivalent to the equals method.
         """
         return self.equals(otherLength)
 
-    def ne(self, otherLength):
+    def __ne__(self, otherLength):
         """
         Returns True if and only if this Length is not equal to otherLength
         """
         return isinstance(otherLength, Length) and (self._length != otherLength._length)
 
-    def lt(self, otherLength):
+    def __lt__(self, otherLength):
         """
         Returns True if and only if this Length is less than to otherLength
         """
         return isinstance(otherLength, Length) and (self._length < otherLength._length)
 
-    def le(self, otherLength):
+    def __le__(self, otherLength):
         """
         Returns True if and only if this Length is less than or equal to otherLength
         """
         return isinstance(otherLength, Length) and (self._length <= otherLength._length)
 
-    def gt(self, otherLength):
+    def __gt__(self, otherLength):
         """
         Returns True if and only if this Length is greater than otherLength
         """
         return isinstance(otherLength, Length) and (self._length > otherLength._length)
 
-    def ge(self, otherLength):
+    def __ge__(self, otherLength):
         """
         Returns True if and only if this Length is greater than or equal to otherLength
         """
         return isinstance(otherLength, Length) and (self._length >= otherLength._length)
 
-    def add(self, otherLength):
+    def __add__(self, otherLength):
         """
         Add otherLength, which must be a Length, to this Length, returning this Length
         """
@@ -493,7 +491,7 @@ class Length:
         self._length += otherLength._length
         return self
 
-    def sub(self, otherLength):
+    def __sub__(self, otherLength):
         """
         Subtract a specified Length from this length, (this - x).
         """
@@ -503,7 +501,7 @@ class Length:
         self._length -= otherLengthx._length
         return self
 
-    def mult(self, factor):
+    def __mul__(self, factor):
         """
         Multiply this length by some factor, (this * factor).
         Return this length after multiplication.
@@ -511,7 +509,7 @@ class Length:
         self._length *= factor
         return self
 
-    def div(factor):
+    def __truediv__(factor):
         """
         Divide this length by some factor, (this / factor).
         Return this length after division.

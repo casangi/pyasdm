@@ -126,7 +126,7 @@ class Tag:
 
         return Tag(value, type)
 
-    def toString(self):
+    def __str__(self):
         """
         Return the Tag as a string.
         The resulting string consists of the string representation of the type followed by an underscore
@@ -135,7 +135,7 @@ class Tag:
         """
         if self.isNull():
             return "null_0"
-        return self._type.toString() + "_" + self._tag
+        return str(self._type) + "_" + self._tag
 
     def getTagType(self):
         """
@@ -185,7 +185,7 @@ class Tag:
                 # neither can be null
                 if (not self.isNull()) and (not other.isNull()):
                     result = (self._tag == other._tag) and (
-                        self._type.toString() == other._type.toString()
+                        (str(self._type) == str(other._type))
                     )
         return result
 
@@ -257,7 +257,7 @@ class Tag:
         """
         Write this Tag to an EndianOutput instance.
         """
-        eout.writeString(self.toString())
+        eout.writeString(str(self))
 
     def listToBin(tagList, eout):
         """

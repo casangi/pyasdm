@@ -186,7 +186,7 @@ class SBSummaryRow:
             if row._centerDirectionExists:
 
                 # centerDirection is a list, make a deep copy
-                self.centerDirection = copy.deepcopy(row.centerDirection)
+                self._centerDirection = copy.deepcopy(row._centerDirection)
 
                 self._centerDirectionExists = True
 
@@ -436,9 +436,9 @@ class SBSummaryRow:
 
         eos.writeFloat(self._frequency)
 
-        eos.writeString(self._frequencyBand.toString())
+        eos.writeString(str(self._frequencyBand))
 
-        eos.writeString(self._sbType.toString())
+        eos.writeString(str(self._sbType))
 
         self._sbDuration.toBin(eos)
 
@@ -473,7 +473,7 @@ class SBSummaryRow:
         eos.writeBool(self._centerDirectionCodeExists)
         if self._centerDirectionCodeExists:
 
-            eos.writeString(self._centerDirectionCode.toString())
+            eos.writeString(str(self._centerDirectionCode))
 
         eos.writeBool(self._centerDirectionEquinoxExists)
         if self._centerDirectionEquinoxExists:
@@ -526,7 +526,7 @@ class SBSummaryRow:
         Set the frequencyBand in row from the EndianInput (eis) instance.
         """
 
-        row._frequencyBand = ReceiverBand.from_int(eis.readInt())
+        row._frequencyBand = ReceiverBand.literal(eis.readString())
 
     @staticmethod
     def sbTypeFromBin(row, eis):
@@ -534,7 +534,7 @@ class SBSummaryRow:
         Set the sbType in row from the EndianInput (eis) instance.
         """
 
-        row._sbType = SBType.from_int(eis.readInt())
+        row._sbType = SBType.literal(eis.readString())
 
     @staticmethod
     def sbDurationFromBin(row, eis):
@@ -633,7 +633,7 @@ class SBSummaryRow:
         row._centerDirectionCodeExists = eis.readBool()
         if row._centerDirectionCodeExists:
 
-            row._centerDirectionCode = DirectionReferenceCode.from_int(eis.readInt())
+            row._centerDirectionCode = DirectionReferenceCode.literal(eis.readString())
 
     @staticmethod
     def centerDirectionEquinoxFromBin(row, eis):

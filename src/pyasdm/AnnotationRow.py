@@ -171,7 +171,7 @@ class AnnotationRow:
             if row._basebandNameExists:
 
                 # basebandName is a list, make a deep copy
-                self.basebandName = copy.deepcopy(row.basebandName)
+                self._basebandName = copy.deepcopy(row._basebandName)
 
                 self._basebandNameExists = True
 
@@ -204,7 +204,7 @@ class AnnotationRow:
             if row._vdValueExists:
 
                 # vdValue is a list, make a deep copy
-                self.vdValue = copy.deepcopy(row.vdValue)
+                self._vdValue = copy.deepcopy(row._vdValue)
 
                 self._vdValueExists = True
 
@@ -213,7 +213,7 @@ class AnnotationRow:
             if row._vvdValuesExists:
 
                 # vvdValues is a list, make a deep copy
-                self.vvdValues = copy.deepcopy(row.vvdValues)
+                self._vvdValues = copy.deepcopy(row._vvdValues)
 
                 self._vvdValuesExists = True
 
@@ -230,7 +230,7 @@ class AnnotationRow:
             if row._vllValueExists:
 
                 # vllValue is a list, make a deep copy
-                self.vllValue = copy.deepcopy(row.vllValue)
+                self._vllValue = copy.deepcopy(row._vllValue)
 
                 self._vllValueExists = True
 
@@ -239,7 +239,7 @@ class AnnotationRow:
             if row._vvllValueExists:
 
                 # vvllValue is a list, make a deep copy
-                self.vvllValue = copy.deepcopy(row.vvllValue)
+                self._vvllValue = copy.deepcopy(row._vvllValue)
 
                 self._vvllValueExists = True
 
@@ -521,7 +521,7 @@ class AnnotationRow:
             eos.writeInt(len(self._basebandName))
             for i in range(len(self._basebandName)):
 
-                eos.writeString(self._basebandName[i].toString())
+                eos.writeString(str(self._basebandName[i]))
 
         eos.writeBool(self._numBasebandExists)
         if self._numBasebandExists:
@@ -654,7 +654,7 @@ class AnnotationRow:
             basebandNameDim1 = eis.readInt()
             thisList = []
             for i in range(basebandNameDim1):
-                thisValue = BasebandName.from_int(eis.readInt())
+                thisValue = BasebandName.literal(eis.readString())
                 thisList.append(thisValue)
             row._basebandName = thisList
 
@@ -720,7 +720,7 @@ class AnnotationRow:
                     thisValue = eis.readFloat()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.vvdValues = thisList
+            row._vvdValues = thisList
 
     @staticmethod
     def llValueFromBin(row, eis):
@@ -764,7 +764,7 @@ class AnnotationRow:
                     thisValue = eis.readInt()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
-            row.vvllValue = thisList
+            row._vvllValue = thisList
 
     @staticmethod
     def sValueFromBin(row, eis):
