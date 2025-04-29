@@ -408,6 +408,31 @@ class BDFReader:
         # read the SDM Data Subset header, assume it can't be more than 100 lines
         sdmDataSubsetHeader = self._accumulateUntilBoundary(self._boundary_2, 100)
         sdmDataSubsetHeaderDOM = minidom.parseString(sdmDataSubsetHeader)
+        # it's all in the firstChild node
+        sdmDataSubsetHeaderDOM = sdmDataSubsetHeaderDOM.firstChild
+        if (sdmDataSubsetHeaderDOM.nodeName != "sdmDataSubsetHeader"):
+            raise BDFReaderException("Unexpected XML node found where sdmDataSubsetHeader is expected.: %s" % sdmDataSubsetHeaderDOM.nodeName)
+        projectPath = sdmDataSubsetHeaderDOM.attributes.getNamedItem("projectPath").value
+        projectPathParts = projectPath.split("/")
+        # should have 4 of 5 parts here, it's OK if there's a 6th one that's empty
+        numPathParts = len(projectPathParts)
+        if (numPathParts < 4) or (numPathParts > 6) or (numPathParts == 6 and (len(projectPathParts[5]) != 0)):
+            raise BDFReaderException("Invalid string for projectPath, expectes 4 or 5 parts '" + projectPath + "'")
+        execBlockNum = int(projectPathParts[0])
+        scanNum = int(projectPathParts[1])
+        subscanNum = int(projectPathParts[2])
+        intNum = int(projectPathParts[3])
+        if numPathParts > 5:
+            subIntNum = int(projectPathParts[4])
+        else:
+            subIntNum = 0
+
+        # the first 3 values should match those for this BDF
+        if (execBlockNum != self._bdfHeaderData.getExecBlockNum()) or (scanNum != self._bdfHeaderData.getScanNum()) or (subscanNum != self._bdfHeaderData.getSubscanNum()):
+            raise BDFReaderException("The project path of this data subset '"
+				     +projectPath
+				     +"' is not compatible with the project path announced in the global header"
+				     +" '"+self._bdfHeaderData.projectPath()+"'")
 
         # TBD : SDMDataSubset should be a class, reset it here
 
@@ -669,6 +694,9 @@ class BDFReader:
         # TBD - this struct could be assembed earlier and used more efficiently in the middle
         # TBD - pyBDFExplorer returns sdmDataSubsetHeaderDOM here, is that useful?
         return {
+            "projectPath": projectPath,
+            "integrationNumber": intNum,
+            "subIntegrationNumber": subIntNum,
             "midpointInNanoSeconds": integrationMidpoint,
             "intervalInNanoSeconds": integrationInterval,
             "actualTimes": actualTimesDesc,
@@ -745,7 +773,7 @@ class BDFReader:
         if self._bdfHeaderData.getDimensionality() > 0:
             print("dimensionality = %s" % self._bdfHeaderData.getDimensionality())
         else:
-            print("numTime = %s" % self._bdfHeaderData, getNumTime())
+            print("numTime = %s" % self._bdfHeaderData.getNumTime())
         print("execBlockUID = %s" % self._bdfHeaderData.getExecBlockUID())
         print("execBlockNum = %s" % self._bdfHeaderData.getExecBlockNum())
         print("scanNum = %s" % self._bdfHeaderData.getScanNum())
@@ -806,14 +834,26 @@ class BDFReader:
         # not for release
         # prints a subset, prining up to the first 10 elements of each type
         # does not use self
-        print("Midpoint : %s" % subset["midpointInNanoSeconds"])
-        print("Interval : %s" % subset["intervalInNanoSeconds"])
-        for item in subset:
-            if isinstance(subset[item], dict):
-                if subset[item]["present"]:
-                    nOut = min(10, subset[item]["arr"].size)
-                    outStr = "%s : %s" % (item, subset[item]["arr"][0:nOut])
-                    if nOut == 10:
-                        outStr = outStr + " ... "
-                    outStr = outStr + " size = " + str(subset[item]["arr"].size)
-                    print(item + " : " + outStr)
+        print("projectPath = " + subset["projectPath"])
+        print("time = %s" % subset["midpointInNanoSeconds"])
+        print("interval = %s" % subset["intervalInNanoSeconds"])
+        floatItems = ["autoData","zeroLags"]
+        if "crossData" in subset and subset["crossData"]["present"]:
+            print("crossDataType = " + subset["crossData"]["type"])
+            if subset["crossData"]["type"] == "FLOAT32_TYPE":
+                floatItems.append("crossData")
+        print("Binary attachments :")
+        for item in ["actualTimes","actualDurations","flags","crossData","autoData","zeroLags"]:
+            if (item in subset) and subset[item]["present"]:
+                nOut = min(10, subset[item]["arr"].size)
+                outStr = "%s (%s values ) = " % ((item[0].upper()+item[1:]), subset[item]["arr"].size)
+                nOut = min(10, subset[item]["arr"].size)
+                floatFormat = item in floatItems
+                for itemVal in subset[item]["arr"][0:nOut]:
+                    if floatFormat:
+                        outStr = outStr + " " + f'{itemVal:.6f}'
+                    else:
+                        outStr = outStr + " " + str(itemVal)
+                if nOut < subset[item]["arr"].size:
+                    outStr = outStr + "..."
+                print(outStr)
