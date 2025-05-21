@@ -57,7 +57,7 @@ class BDFHeader:
         Initialize the class attributes to their defaults.
         """
         self._schemaVersion = 0  # int in c++
-        self._byteOrder = pyasdm.ByteOrder.ByteOrder()  # native byte order
+        self._byteOrder = pyasdm.ByteOrder()  # native byte order
         # projectPath is kept in its parts : execBlockNum, scanNum, subscanNum
         self._execBlockNum = 0  # an unsigned integer in c++
         self._scanNum = 0  # an unsigned integer in c++
@@ -360,7 +360,7 @@ class BDFHeader:
         sets the correlationMode, correlationMode is any value that can be used for the CorrelationMode enumeration
         """
         self._correlationMode = (
-            pyasdm.enumerations.CorrelationMode.CorrelationMode.literal(correlationMode)
+            pyasdm.enumerations.CorrelationMode.literal(correlationMode)
         )
 
     def getCorrelationMode(self):
@@ -374,7 +374,7 @@ class BDFHeader:
         sets the spectralResolutionType, spectralResolutionType is any value that can be used for the SpectralResolutionType enumeration
         """
         self._spectralResolutionType = (
-            pyasdm.enumerations.SpectralResolutionType.SpectralResolutionType.literal(
+            pyasdm.enumerations.SpectralResolutionType.literal(
                 spectralResolutionType
             )
         )
@@ -389,7 +389,7 @@ class BDFHeader:
         """
         sets the processorType, processorType is any value that can be used for the ProcessorType enumeration
         """
-        self._processorType = pyasdm.enumerations.ProcessorType.ProcessorType.literal(
+        self._processorType = pyasdm.enumerations.ProcessorType.literal(
             processorType
         )
 
@@ -409,7 +409,7 @@ class BDFHeader:
 
         for item in apcList:
             if not isinstance(
-                item, pyasdm.enumerations.AtmPhaseCorrection.AtmPhaseCorrection
+                item, pyasdm.enumerations.AtmPhaseCorrection
             ):
                 raise ValueError(
                     "apcList must be a list of AtmPhaseCorrection instances"
@@ -441,7 +441,7 @@ class BDFHeader:
         axesStrList = binaryNode.attributes.getNamedItem("axes").value.split()
         axesList = []
         for axisStr in axesStrList:
-            axesList.append(pyasdm.enumerations.AxisName.AxisName.literal(axisStr))
+            axesList.append(pyasdm.enumerations.AxisName.literal(axisStr))
         self._dataStruct[binaryNode.nodeName]["axes"] = axesList
         if binaryNode.nodeName == "autoData":
             self._dataStruct[binaryNode.nodeName]["normalized"] = bool(
@@ -452,7 +452,7 @@ class BDFHeader:
                 "correlatorType"
             ).value
             self._dataStruct[binaryNode.nodeName]["correlatorType"] = (
-                pyasdm.enumerations.CorrelatorType.CorrelatorType.literal(
+                pyasdm.enumerations.CorrelatorType.literal(
                     correlatorTypeValue
                 )
             )
@@ -481,7 +481,7 @@ class BDFHeader:
         if len(projectPathParts) > 4 or (
             len(projectPathParts) == 4 and len(projectPathParts[3]) != 0
         ):
-            raise pyasdm.exceptions.BDFReaderException.BDFReaderException(
+            raise pyasdm.exceptions.BDFReaderException(
                 "Invalid string for projectPath '" + projectPath + "'"
             )
 
@@ -532,7 +532,7 @@ class BDFHeader:
                     apcList = childNode.attributes.getNamedItem("apc").value.split()
                     for apcName in apcList:
                         apcEnumList.append(
-                            pyasdm.enumerations.AtmPhaseCorrection.AtmPhaseCorrection.literal(
+                            pyasdm.enumerations.AtmPhaseCorrection.literal(
                                 apcName
                             )
                         )
@@ -580,7 +580,7 @@ class BDFHeader:
                                     crossPolList = []
                                     for crossPolStr in crossPolStrList:
                                         crossPolList.append(
-                                            pyasdm.enumerations.StokesParameter.StokesParameter.literal(
+                                            pyasdm.enumerations.StokesParameter.literal(
                                                 crossPolStr
                                             )
                                         )
@@ -604,7 +604,7 @@ class BDFHeader:
                                     sdPolList = []
                                     for sdPolStr in sdPolStrList:
                                         sdPolList.append(
-                                            pyasdm.enumerations.StokesParameter.StokesParameter.literal(
+                                            pyasdm.enumerations.StokesParameter.literal(
                                                 sdPolStr
                                             )
                                         )
@@ -622,7 +622,7 @@ class BDFHeader:
                                     "sideband"
                                 ).value
                                 thisSpectralWindow["sideband"] = (
-                                    pyasdm.enumerations.NetSideband.NetSideband.literal(
+                                    pyasdm.enumerations.NetSideband.literal(
                                         sidebandStr
                                     )
                                 )

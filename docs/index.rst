@@ -1,11 +1,9 @@
 ASDM backend for VIPER Framework
-=======================================================
+====================================
 
-
-`GitHub repository link <https://github.com/casangi/pyasdm>`_
+pyasdm is still under active development
 
 .. toctree::
-   :hidden:
-   :maxdepth: 5
+   :maxdepth: 2
 
    api

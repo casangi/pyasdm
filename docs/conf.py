@@ -15,13 +15,12 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(".."))
-
+sys.path.insert(0, os.path.abspath("../src"))
 
 # -- Project information -----------------------------------------------------
 
 project = "pyasdm"
-copyright = "2024, National Radio Astronomy Observatory"
+copyright = "2025, National Radio Astronomy Observatory"
 author = "National Radio Astronomy Observatory"
 
 # The short X.Y version
@@ -41,51 +40,26 @@ release = "0.1b"
 # ones.
 extensions = [
     "nbsphinx",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
     "sphinx.ext.coverage",
     "sphinx.ext.githubpages",
-    "sphinx.ext.napoleon",
-    "autoapi.extension",
+    "sphinx_automodapi.automodapi",
     "recommonmark",
 ]
-
+nbsphinx_allow_errors = True
+nbsphinx_execute = 'never'
 todo_include_todos = True
 add_module_names = False
 numpy_show_class_members = False
+autosummary_generate = True
 nbsphinx_codecell_lexer = "python3"
-nbsphinx_execute = "never"
-
-# This should be uncommented after/if jupyter notebooks are added to colab
-#nbsphinx_prolog = """
-#Open in Colab: https://colab.research.google.com/github/casangi/graph_viper/blob/master/docs/{{ env.doc2path(env.docname, base=None) }}
-#
-#----
-#"""
-
-autoapi_dirs = ["../src/pyasdm/types"]
-autoapi_add_toctree_entry = False
-autoapi_generate_api_docs = True
-autoapi_root = "_api/autoapi"
-autoapi_options = ["show-module-summary"]
-autoapi_template_dir = "_templates"
-autoapi_keep_files = True
-autoapi_ignore = ["*/_utils/*", "*/__pycache__/*", "*/data/_*"]
-
-# Napoleon settings
-# napoleon_google_docstring = True
-# napoleon_numpy_docstring = True
-# napoleon_include_private_with_doc = False
-# napoleon_include_special_with_doc = False
-# napoleon_use_admonition_for_examples = False
-# napoleon_use_admonition_for_notes = False
-# napoleon_use_admonition_for_references = False
-# napoleon_use_ivar = True
-# napoleon_use_param = True
-# napoleon_use_rtype = True
+autodoc_member_order = 'bysource'
 
 # List of imports to mock (this ensures readthedocs works)
-# autodoc_mock_imports = ['numcodecs','os','numpy','time','xarray', 'numba', 'itertools','zarr','dask']
+autodoc_mock_imports = ['numcodecs','os','numpy','time','xarray', 'numba', 'itertools','zarr','dask']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -109,7 +83,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["build", "Thumbs.db", ".DS_Store", "html", "_build"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -122,7 +96,7 @@ pygments_style = "sphinx"
 #
 html_theme = "sphinx_rtd_theme"
 
-html_logo = "_media/toolviper_logo.jpeg"
+# html_logo = "_media/astrohack_logo.png"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -138,7 +112,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -154,7 +128,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "pyasdmdoc"
+# htmlhelp_basename = "astroHACKdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -177,35 +151,29 @@ latex_elements = {
     #'sphinxsetup': 'hmargin={0.5in,0.5in}, vmargin={0.7in,0.7in}'
 }
 
-latex_logo = "_media/toolviper_logo.jpeg"
+latex_logo = "_media/astrohack_logo.png"
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (
-        master_doc,
-        "pyasdm.tex",
-        "Python ASDM backend support module",
-        "National Radio Astronomy Observatory",
-        "manual",
-    ),
-]
+#latex_documents = [
+#    (
+#        master_doc,
+#        "astrohack.tex",
+#        "Holography Antenna Commissioning Kit",
+#        "National Radio Astronomy Observatory",
+#        "manual",
+#    ),
+#]
 
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (
-        master_doc,
-        "pyasdm",
-        "Python ASDM backend support module",
-        [author],
-        1,
-    )
-]
+#man_pages = [
+#    (master_doc, "astrohack", "Holography Antenna Commissioning Kit", [author], 1)
+#]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -213,17 +181,17 @@ man_pages = [
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [
-    (
-        master_doc,
-        "pyasdm",
-        "Python ASDM backend support module",
-        author,
-        "pyasdm",
-        "One line description of project.",
-        "Miscellaneous",
-    ),
-]
+#texinfo_documents = [
+#    (
+#        master_doc,
+#        "astrohack",
+#        "Holography Antenna Commissioning Kit Documentation",
+#        author,
+#        "astrohack",
+#        "One line description of project.",
+#        "Miscellaneous",
+#    ),
+#]
 
 
 # -- Options for Epub output -------------------------------------------------

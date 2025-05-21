@@ -29,19 +29,9 @@ import codecs
 from xml.dom import minidom
 import numpy as np
 
-from pyasdm.bdf.BDFHeader import BDFHeader
-
-from pyasdm.ByteOrder import ByteOrder
-from pyasdm.enumerations.CorrelationMode import CorrelationMode
-from pyasdm.enumerations.CorrelatorType import CorrelatorType
-from pyasdm.enumerations.SpectralResolutionType import SpectralResolutionType
-from pyasdm.enumerations.ProcessorType import ProcessorType
-from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
-from pyasdm.enumerations.StokesParameter import StokesParameter
-from pyasdm.enumerations.AxisName import AxisName
+from .BDFHeader import BDFHeader
 
 from pyasdm.exceptions.BDFReaderException import BDFReaderException
-
 
 class BDFReader:
     """
