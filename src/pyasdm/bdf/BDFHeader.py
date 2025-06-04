@@ -359,8 +359,8 @@ class BDFHeader:
         """
         sets the correlationMode, correlationMode is any value that can be used for the CorrelationMode enumeration
         """
-        self._correlationMode = (
-            pyasdm.enumerations.CorrelationMode.literal(correlationMode)
+        self._correlationMode = pyasdm.enumerations.CorrelationMode.literal(
+            correlationMode
         )
 
     def getCorrelationMode(self):
@@ -374,9 +374,7 @@ class BDFHeader:
         sets the spectralResolutionType, spectralResolutionType is any value that can be used for the SpectralResolutionType enumeration
         """
         self._spectralResolutionType = (
-            pyasdm.enumerations.SpectralResolutionType.literal(
-                spectralResolutionType
-            )
+            pyasdm.enumerations.SpectralResolutionType.literal(spectralResolutionType)
         )
 
     def getSpectralResolutionType(self):
@@ -389,9 +387,7 @@ class BDFHeader:
         """
         sets the processorType, processorType is any value that can be used for the ProcessorType enumeration
         """
-        self._processorType = pyasdm.enumerations.ProcessorType.literal(
-            processorType
-        )
+        self._processorType = pyasdm.enumerations.ProcessorType.literal(processorType)
 
     def getProcessorType(self):
         """
@@ -408,9 +404,7 @@ class BDFHeader:
             raise ValueError("apcList must be a list")
 
         for item in apcList:
-            if not isinstance(
-                item, pyasdm.enumerations.AtmPhaseCorrection
-            ):
+            if not isinstance(item, pyasdm.enumerations.AtmPhaseCorrection):
                 raise ValueError(
                     "apcList must be a list of AtmPhaseCorrection instances"
                 )
@@ -436,45 +430,100 @@ class BDFHeader:
         autoData, or zeroLags.
         """
         self._dataStruct[binaryNode.nodeName]["size"] = int(
-            binaryNode.attributes.getNamedItem("size").value
+            self._getRequiredAttributeValue(binaryNode, "size")
         )
-        axesStrList = binaryNode.attributes.getNamedItem("axes").value.split()
+        axesStrList = self._getRequiredAttributeValue(binaryNode, "axes").split()
         axesList = []
         for axisStr in axesStrList:
             axesList.append(pyasdm.enumerations.AxisName.literal(axisStr))
         self._dataStruct[binaryNode.nodeName]["axes"] = axesList
         if binaryNode.nodeName == "autoData":
             self._dataStruct[binaryNode.nodeName]["normalized"] = bool(
-                binaryNode.attributes.getNamedItem("normalized").value
+                self._getRequiredAttributeValue(binaryNode, "normalized")
             )
         elif binaryNode.nodeName == "zeroLags":
-            correlatorTypeValue = binaryNode.attributes.getNamedItem(
-                "correlatorType"
-            ).value
-            self._dataStruct[binaryNode.nodeName]["correlatorType"] = (
-                pyasdm.enumerations.CorrelatorType.literal(
-                    correlatorTypeValue
-                )
+            correlatorTypeValue = self._getRequiredAttributeValue(
+                binaryNode, "correlatorType"
             )
+            self._dataStruct[binaryNode.nodeName]["correlatorType"] = (
+                pyasdm.enumerations.CorrelatorType.literal(correlatorTypeValue)
+            )
+
+    def _getAttributeValue(self, nodeElement, attrName):
+        """
+        Get an attribute by name from an element without regard to the namespace.
+
+        BDF files are not consistent in their use of namespaces for attribute names.
+        Some of the time the attribute is not in a namespace and there are examples of
+        some attributes being found in different namespaces in different BDFs. A few
+        examples have been seen where the same attribute is in a namespace and repeated
+        outside of a namespace.
+
+        Possibly this is just an historical anomaly and possibly it represents different
+        implementations across different telescopes.
+
+        The DOM (minidom) attribute access for elements is clumsy with namespaces.
+        The python implementation requires the namespace to be given exactly.
+        Where the c++ code that does the same parsing of the same XML will find a named
+        attribute without regard of the namespace it may be found in. Some testing of
+        the c++ code shows that if a named attribute appears outside of any namespace and
+        also qualified with a namespace in the same XML that the value outside of the
+        namespace is preferred.
+
+        This routine returns the value using the attribute name as is (no namespace) if
+        that exists. Otherwise it finds the value of first attribute with a matching name of the
+        form <namespace>:attrName.
+
+        This returnes None if the attribute is not found.
+
+        @param nodeElement the XML node element from which the value of named attribute is to be found.
+        @param attrName a string giving the name of the attribute (no namespace prefix)
+        @returns the value of attrName in nodeElement if found, else None. The value of an attribute is always returned a string.
+        """
+
+        # this finds the value if no namespace is involved
+        if nodeElement.hasAttribute(attrName):
+            return nodeElement.getAttribute(attrName)
+
+        # look through the attributes individually, finding the first one in a namespace that matches.
+        for itemName, itemValue in nodeElement.attributes.items():
+            # only care about itemName if it has a colon (namespace)
+            indx = itemName.find(":")
+            if (
+                (indx >= 0)
+                and ((indx + 1) < len(itemName))
+                and (itemName[(indx + 1) :] == attrName)
+            ):
+                # found it
+                return itemValue
+
+        return None
+
+    def _getRequiredAttributeValue(self, nodeElement, attrName):
+        """
+        Use _getAttributeValue and raise an exception if the attribute name is not found.
+
+        @param nodeElement the XML node element from which the value of named attribute is to be found.
+        @param attrName a string giving the name of the attribute (no namespace prefix)
+        @returns the value of attrName in nodeElement if found, else raise BDFReaderException. The value of an attribute is always returned a string.
+        """
+        attrValue = self._getAttributeValue(nodeElement, attrName)
+        if attrValue is None:
+            raise pyasdm.exceptions.BDFReaderException(
+                "Required attribute " + attrName + " not found in BDF header"
+            )
+        return attrValue
 
     def fromDOM(self, dataHeaderElem):
         """
         set this from a minidom that is an sdmDataHeader element
         """
 
-        # schemaVersion is found sometimes in the xvers namespace and sometimes not in a namespace
-        # the c++ code finds it either way, when both are present it finds the one not in a namespace
-        # so look for that first
-        schemaVersionAttr = dataHeaderElem.attributes.getNamedItem("schemaVersion")
-        if schemaVersionAttr is None:
-            schemaVersionAttr = dataHeaderElem.attributes.getNamedItem(
-                "xvers:schemaVersion"
-            )
-        self.setSchemaVersion(schemaVersionAttr.value)
-
-        self.setByteOrder(dataHeaderElem.attributes.getNamedItem("byteOrder").value)
-
-        projectPath = dataHeaderElem.attributes.getNamedItem("projectPath").value
+        self.setSchemaVersion(
+            self._getRequiredAttributeValue(dataHeaderElem, "schemaVersion")
+        )
+        self.setByteOrder(self._getRequiredAttributeValue(dataHeaderElem, "byteOrder"))
+        projectPath = self._getRequiredAttributeValue(dataHeaderElem, "projectPath")
         projectPathParts = projectPath.split("/")
         # in general a projectPath can have 3 to 5 parts : execBlock / scanNum / subscanNum / integrationNum / subintegrationNum
         # here, it should only have the first 3 parts, there is a trailing / so 4 parts with an empty 4th part is OK
@@ -498,20 +547,17 @@ class BDFHeader:
             if childNode.nodeName == "startTime":
                 self.setStartTime(childNode.firstChild.data)
             if childNode.nodeName == "dataOID":
-                # get the href value from here, in the xlink namespace
-                self.setDataOID(childNode.attributes.getNamedItem("xlink:href").value)
+                # get the href value from here
+                self.setDataOID(self._getRequiredAttributeValue(childNode, "href"))
                 # and the title
-                self.setTitle(childNode.attributes.getNamedItem("xlink:title").value)
+                self.setTitle(self._getRequiredAttributeValue(childNode, "title"))
             if childNode.nodeName == "dimensionality":
                 self.setDimensionality(childNode.firstChild.data)
             if childNode.nodeName == "numTime":
                 self.setNumTime(childNode.firstChild.data)
             if childNode.nodeName == "execBlock":
-                # get the href value, xlink namespace, namespace may be missing, prefer non-namespace version
-                execBlockAttr = childNode.attributes.getNamedItem("href")
-                if execBlockAttr is None:
-                    execBlockAttr = childNode.attributes.getNamedItem("xlink:href")
-                self.setExecBlockUID(execBlockAttr.value)
+                # the href value is the execBlockUID
+                self.setExecBlockUID(self._getRequiredAttributeValue(childNode, "href"))
             if childNode.nodeName == "numAntenna":
                 self.setNumAntenna(childNode.firstChild.data)
             if childNode.nodeName == "correlationMode":
@@ -529,12 +575,10 @@ class BDFHeader:
                 ):
                     # apc is an atttribute that is expected here
                     # it is a space-separated list of AtmPhaseCorrection enumeration names
-                    apcList = childNode.attributes.getNamedItem("apc").value.split()
+                    apcList = self._getRequiredAttributeValue(childNode, "apc").split()
                     for apcName in apcList:
                         apcEnumList.append(
-                            pyasdm.enumerations.AtmPhaseCorrection.literal(
-                                apcName
-                            )
+                            pyasdm.enumerations.AtmPhaseCorrection.literal(apcName)
                         )
                 self.setAPClist(apcEnumList)
 
@@ -545,9 +589,9 @@ class BDFHeader:
                 while dsChildNode is not None:
                     if dsChildNode.nodeName == "baseband":
                         thisBaseband = {}
-                        thisBaseband["name"] = dsChildNode.attributes.getNamedItem(
-                            "name"
-                        ).value
+                        thisBaseband["name"] = self._getRequiredAttributeValue(
+                            dsChildNode, "name"
+                        )
                         # ths children describe the associated spectral windows
                         bbChildNode = dsChildNode.firstChild
                         spectralWindows = []
@@ -565,18 +609,16 @@ class BDFHeader:
                                 # the "swbb" attribute is ignored, it could be used as a name
                                 corrModeName = self.getCorrelationMode().getName()
                                 thisSpectralWindow["sw"] = (
-                                    bbChildNode.attributes.getNamedItem("sw").value
+                                    self._getRequiredAttributeValue(bbChildNode, "sw")
                                 )
                                 if (
                                     corrModeName == "CROSS_ONLY"
                                     or corrModeName == "CROSS_AND_AUTO"
                                 ):
                                     # cross data values
-                                    crossPolStrList = (
-                                        bbChildNode.attributes.getNamedItem(
-                                            "crossPolProducts"
-                                        ).value.split()
-                                    )
+                                    crossPolStrList = self._getRequiredAttributeValue(
+                                        bbChildNode, "crossPolProducts"
+                                    ).split()
                                     crossPolList = []
                                     for crossPolStr in crossPolStrList:
                                         crossPolList.append(
@@ -589,18 +631,18 @@ class BDFHeader:
                                         )
                                         # scale factor is a 32-bit float, keep that precision
                                         thisSpectralWindow["scaleFactor"] = np.float32(
-                                            bbChildNode.attributes.getNamedItem(
-                                                "scaleFactor"
-                                            ).value
+                                            self._getRequiredAttributeValue(
+                                                bbChildNode, "scaleFactor"
+                                            )
                                         )
                                 if (
                                     corrModeName == "AUTO_ONLY"
                                     or corrModeName == "CROSS_AND_AUTO"
                                 ):
                                     # auto data values
-                                    sdPolStrList = bbChildNode.attributes.getNamedItem(
-                                        "sdPolProducts"
-                                    ).value.split()
+                                    sdPolStrList = self._getRequiredAttributeValue(
+                                        bbChildNode, "sdPolProducts"
+                                    ).split()
                                     sdPolList = []
                                     for sdPolStr in sdPolStrList:
                                         sdPolList.append(
@@ -611,20 +653,20 @@ class BDFHeader:
                                     thisSpectralWindow["sdPolProducts"] = sdPolList
                                 # all types
                                 thisSpectralWindow["numSpectralPoint"] = int(
-                                    bbChildNode.attributes.getNamedItem(
-                                        "numSpectralPoint"
-                                    ).value
+                                    self._getRequiredAttributeValue(
+                                        bbChildNode, "numSpectralPoint"
+                                    )
                                 )
                                 thisSpectralWindow["numBin"] = int(
-                                    bbChildNode.attributes.getNamedItem("numBin").value
-                                )
-                                sidebandStr = bbChildNode.attributes.getNamedItem(
-                                    "sideband"
-                                ).value
-                                thisSpectralWindow["sideband"] = (
-                                    pyasdm.enumerations.NetSideband.literal(
-                                        sidebandStr
+                                    self._getRequiredAttributeValue(
+                                        bbChildNode, "numBin"
                                     )
+                                )
+                                sidebandStr = self._getRequiredAttributeValue(
+                                    bbChildNode, "sideband"
+                                )
+                                thisSpectralWindow["sideband"] = (
+                                    pyasdm.enumerations.NetSideband.literal(sidebandStr)
                                 )
 
                                 spectralWindows.append(thisSpectralWindow)
