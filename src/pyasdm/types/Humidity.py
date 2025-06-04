@@ -25,6 +25,7 @@
 
 import pyasdm.utils
 
+
 class Humidity:
     """
     The Humidity class implements a concept of a relative humidity in percent.

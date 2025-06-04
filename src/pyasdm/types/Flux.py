@@ -25,6 +25,7 @@
 
 import pyasdm.utils
 
+
 class Flux:
     """
     The Flux class implements a concept of a flux in Janskys.

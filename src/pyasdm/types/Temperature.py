@@ -25,6 +25,7 @@
 
 import pyasdm.utils
 
+
 class Temperature:
     """
     The Temperature class implements a concept of a temperature in degrees Centigrade.

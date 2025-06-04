@@ -25,6 +25,7 @@
 
 import pyasdm.utils
 
+
 class Complex:
     """
     The Complex class implements a complex number.

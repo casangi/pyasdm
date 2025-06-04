@@ -34,6 +34,7 @@ of time in units of nanoseconds.
 
 import pyasdm.utils
 
+
 class Interval:
 
     # the interval, in nanoseconds, this should be an integer, it should not be used directly

@@ -25,6 +25,7 @@
 
 import pyasdm.utils
 
+
 class Length:
     """
     The Length class implements a concept of a length in meters.

@@ -25,6 +25,7 @@
 
 import pyasdm.utils
 
+
 class Speed:
     """
     The Speed class implements a concept of an atmospheric speed in meters per second.

@@ -209,7 +209,7 @@ class EndianInput:
 
     def readStr(self):
         """
-        Identical to readString. Used because the type of the string value in 
+        Identical to readString. Used because the type of the string value in
         python is "str" and the template generator needs to use that type for
         various reasons in various palces and proving this here makes the
         tempalte code simpler.

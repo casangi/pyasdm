@@ -31,6 +31,7 @@ from xml.dom import minidom
 
 import pyasdm.utils
 
+
 class EntityRef:
     """
     The EntityRef class is an identification of a persistent

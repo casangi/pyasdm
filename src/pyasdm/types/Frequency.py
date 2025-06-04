@@ -25,6 +25,7 @@
 
 import pyasdm.utils
 
+
 class Frequency:
     """
     The Frequency class implements a concept of a frequency in hertz.

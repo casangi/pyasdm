@@ -33,6 +33,7 @@ from .BDFHeader import BDFHeader
 
 from pyasdm.exceptions.BDFReaderException import BDFReaderException
 
+
 class BDFReader:
     """
     A class to read the contents of a BDF file in a sequential way, as a stream of bytes.
@@ -402,14 +403,27 @@ class BDFReader:
         sdmDataSubsetHeaderDOM = minidom.parseString(sdmDataSubsetHeader)
         # it's all in the firstChild node
         sdmDataSubsetHeaderDOM = sdmDataSubsetHeaderDOM.firstChild
-        if (sdmDataSubsetHeaderDOM.nodeName != "sdmDataSubsetHeader"):
-            raise BDFReaderException("Unexpected XML node found where sdmDataSubsetHeader is expected.: %s" % sdmDataSubsetHeaderDOM.nodeName)
-        projectPath = sdmDataSubsetHeaderDOM.attributes.getNamedItem("projectPath").value
+        if sdmDataSubsetHeaderDOM.nodeName != "sdmDataSubsetHeader":
+            raise BDFReaderException(
+                "Unexpected XML node found where sdmDataSubsetHeader is expected.: %s"
+                % sdmDataSubsetHeaderDOM.nodeName
+            )
+        projectPath = sdmDataSubsetHeaderDOM.attributes.getNamedItem(
+            "projectPath"
+        ).value
         projectPathParts = projectPath.split("/")
         # should have 4 of 5 parts here, it's OK if there's a 6th one that's empty
         numPathParts = len(projectPathParts)
-        if (numPathParts < 4) or (numPathParts > 6) or (numPathParts == 6 and (len(projectPathParts[5]) != 0)):
-            raise BDFReaderException("Invalid string for projectPath, expectes 4 or 5 parts '" + projectPath + "'")
+        if (
+            (numPathParts < 4)
+            or (numPathParts > 6)
+            or (numPathParts == 6 and (len(projectPathParts[5]) != 0))
+        ):
+            raise BDFReaderException(
+                "Invalid string for projectPath, expectes 4 or 5 parts '"
+                + projectPath
+                + "'"
+            )
         execBlockNum = int(projectPathParts[0])
         scanNum = int(projectPathParts[1])
         subscanNum = int(projectPathParts[2])
@@ -420,11 +434,19 @@ class BDFReader:
             subIntNum = 0
 
         # the first 3 values should match those for this BDF
-        if (execBlockNum != self._bdfHeaderData.getExecBlockNum()) or (scanNum != self._bdfHeaderData.getScanNum()) or (subscanNum != self._bdfHeaderData.getSubscanNum()):
-            raise BDFReaderException("The project path of this data subset '"
-				     +projectPath
-				     +"' is not compatible with the project path announced in the global header"
-				     +" '"+self._bdfHeaderData.projectPath()+"'")
+        if (
+            (execBlockNum != self._bdfHeaderData.getExecBlockNum())
+            or (scanNum != self._bdfHeaderData.getScanNum())
+            or (subscanNum != self._bdfHeaderData.getSubscanNum())
+        ):
+            raise BDFReaderException(
+                "The project path of this data subset '"
+                + projectPath
+                + "' is not compatible with the project path announced in the global header"
+                + " '"
+                + self._bdfHeaderData.projectPath()
+                + "'"
+            )
 
         # TBD : SDMDataSubset should be a class, reset it here
 
@@ -829,21 +851,31 @@ class BDFReader:
         print("projectPath = " + subset["projectPath"])
         print("time = %s" % subset["midpointInNanoSeconds"])
         print("interval = %s" % subset["intervalInNanoSeconds"])
-        floatItems = ["autoData","zeroLags"]
+        floatItems = ["autoData", "zeroLags"]
         if "crossData" in subset and subset["crossData"]["present"]:
             print("crossDataType = " + subset["crossData"]["type"])
             if subset["crossData"]["type"] == "FLOAT32_TYPE":
                 floatItems.append("crossData")
         print("Binary attachments :")
-        for item in ["actualTimes","actualDurations","flags","crossData","autoData","zeroLags"]:
+        for item in [
+            "actualTimes",
+            "actualDurations",
+            "flags",
+            "crossData",
+            "autoData",
+            "zeroLags",
+        ]:
             if (item in subset) and subset[item]["present"]:
                 nOut = min(10, subset[item]["arr"].size)
-                outStr = "%s (%s values ) = " % ((item[0].upper()+item[1:]), subset[item]["arr"].size)
+                outStr = "%s (%s values ) = " % (
+                    (item[0].upper() + item[1:]),
+                    subset[item]["arr"].size,
+                )
                 nOut = min(10, subset[item]["arr"].size)
                 floatFormat = item in floatItems
                 for itemVal in subset[item]["arr"][0:nOut]:
                     if floatFormat:
-                        outStr = outStr + " " + f'{itemVal:.6f}'
+                        outStr = outStr + " " + f"{itemVal:.6f}"
                     else:
                         outStr = outStr + " " + str(itemVal)
                 if nOut < subset[item]["arr"].size:
