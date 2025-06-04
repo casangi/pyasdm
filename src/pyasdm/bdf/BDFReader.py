@@ -191,7 +191,7 @@ class BDFReader:
         if len(s) < 2:
             return s
         if (s[0] == ord('"') and s[-1] == ord('"')) or (
-            s[0] == ord["'"] and s[-1] == ord("'")
+            s[0] == ord("'") and s[-1] == ord("'")
         ):
             return s[1:-1]
         return s
@@ -348,6 +348,8 @@ class BDFReader:
             self._bdfHeaderData.fromDOM(dataHeaderElem)
 
         except Exception as exc:
+            # import traceback
+            # traceback.print_exc()
             raise BDFReaderException(
                 "Unexpected exception while parsing the main BDF header: '"
                 + str(exc)
