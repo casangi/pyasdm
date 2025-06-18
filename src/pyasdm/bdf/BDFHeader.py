@@ -166,6 +166,181 @@ class BDFHeader:
         """
         return self._dataStruct["zeroLags"]["correlatorType"]
 
+    def correlatorType(self):
+        """
+        Return the CorrelatorType if the processorType is CORRELATOR, else None.
+
+        Note that what is actually returned is the correlatorType from the zeroLags section.
+
+        Returns a CorrelatorType enumeration or None if not CORRELATOR data or not set.
+        """
+        if self.getProcessorType() == pyasdm.enumerations.ProcessorType.CORRELATOR:
+            return self.zeroLagsCorrelatorType()
+        return None
+
+    def hasPackedData(self):
+        """
+        Returns True if and only if all of the integrations are grouped in one subset.
+
+        This returns true if dimensionality returns 0.
+        """
+        return (self.getDimensionality() == 0)
+
+    def isTP(self):
+        """
+        Returns True if and only if the string "Total Power" appears in the title.
+
+        Note: as per the comments in SDMDataObject.cc this relies an un-said
+        convension used to form the title. Apparently it's difficult to be sure
+        what data is Total Power only data.
+        """
+        return (self.getTitle().find('Total Power') >= 0)
+
+    def isWVR(self):
+        """
+        Returns True if and only if the string "WVR" appears in the title.
+
+        Note: as per the comments in SDMDataObject.cc this relies an un-said
+        convension used to form the title. Apparently it's difficult to be sure
+        what data is WVR data.
+        """
+        return (self.getTitle().find('WVR') >= 0)
+
+    def isCorrelation(self):
+        """
+        Return True if and only if the ProcessorTpe is CORELLATOR
+        """
+        return (self.getProcessorType() == pyasdm.enumerations.ProcessorType.CORRELATOR)
+
+    def __str__(self):
+        """
+        Return a string representation of this global BDF header.
+
+        This can be printed but is not the XML form of the header.
+        """
+        result = ""
+        result += "XML Schema version = %s" % self.getSchemaVersion() + "\n"
+        result += "Byte order = %s" % self.getByteOrder() + "\n"
+        result += "startTime = %s" % self.getStartTime() + "\n"
+        result += "dataOID = %s" % self.getDataOID() + "\n"
+        result += "title = %s" % self.getTitle() + "\n"
+        if self.getDimensionality() > 0:
+            result += "dimensionality = %s" % self.getDimensionality() + "\n"
+        else:
+            result += "numTime = %s" % self.getNumTime() + "\n"
+        result += "execBlockUID = %s" % self.getExecBlockUID() +"\n"
+        result += "execBlockNum = %s" % self.getExecBlockNum() + "\n"
+        result += "scanNum = %s" % self.getScanNum() + "\n"
+        result += "subscanNum = %s" % self.getSubscanNum() + "\n"
+        result += "numAntenna = %s" % self.getNumAntenna() + "\n"
+        result += "correlationMode = %s" % self.getCorrelationMode() + "\n"
+        spectralResolutionType = self.getSpectralResolutionType()
+        if spectralResolutionType is not None:
+            result += "spectralResolutionType = %s" % spectralResolutionType + "\n"
+        result += "processorType = %s" % self.getProcessorType() + "\n"
+        if (self.getCorrelationMode() != pyasdm.enumerations.CorrelationMode.AUTO_ONLY):
+            apcString = " ".join(map(str,self.getAPClist()))
+            if len(apcString) > 0:
+                result += "atmospheric phase correction = %s" % apcString + "\n"
+            else:
+                result += "NOTE: no atmospheric phase correction found but one was expected.\n"
+                
+        basebandsList = self.getBasebandsList()
+        if len(basebandsList) > 0:
+            basebandCount = 0
+            for baseband in basebandsList:
+                result += "baseband #%s:" % basebandCount + "\n"
+                result += "\tname = %s" % baseband["name"] + "\n"
+                spwCount = 0
+                for spectralWindow in baseband["spectralWindows"]:
+                    result += "\tspectralWindow #%s:" % spwCount + "\n"
+                    result += "\t\tsw = %s" % spectralWindow["sw"] + "\n"
+
+                    if (self.getCorrelationMode() == pyasdm.enumerations.CorrelationMode.CROSS_ONLY):
+                        crossPolStr = " ".join(map(str, spectralWindow["crossPolProducts"]))
+                        result += "\t\tcrossPolProducts = %s" % crossPolStr + "\n"
+                        if spectralWindow["scaleFactor"] is not None:
+                            result += "\t\tscaleFactor = %.5f" % spectralWindow["scaleFactor"] + "\n"
+                        else:
+                            result += "\t\tNOTE: expected scaleFactor is missing.\n"
+                        result += "\t\tnumSpectralPoint = %s" % spectralWindow["numSpectralPoint"] + "\n"
+                        result += "\t\tnumBin = %s" % spectralWindow["numBin"] + "\n"
+                    elif (self.getCorrelationMode() == pyasdm.enumerations.CorrelationMode.AUTO_ONLY):
+                        sdPolStr = " ".join(map(str, spectralWindow["sdPolProducts"]))
+                        result += "\t\tsdPolProducts = %s" % sdPolStr + "\n"
+                        result += "\t\tnumSpectralPoint = %s" % spectralWindow["numSpectralPoint"] + "\n"
+                        result += "\t\tnumBin = %s" % spectralWindow["numBin"] + "\n"
+                    elif (self.getCorrelationMode() == pyasdm.enumerations.CorrelationMode.CROSS_AND_AUTO):
+                        crossPolStr = " ".join(map(str, spectralWindow["crossPolProducts"]))
+                        result += "\t\tcrossPolProducts = %s" % crossPolStr + "\n"
+                        sdPolStr = " ".join(map(str, spectralWindow["sdPolProducts"]))
+                        result += "\t\tsdPolProducts = %s" % sdPolStr + "\n"
+                        if spectralWindow["scaleFactor"] is not None:
+                            result += "\t\tscaleFactor = %.5f" % spectralWindow["scaleFactor"] + "\n"
+                        else:
+                            result += "\t\tNOTE: expected scaleFactor is missing"
+                        result += "\t\tnumSpectralPoint = %s" % spectralWindow["numSpectralPoint"] + "\n"
+                        result += "\t\tnumBin = %s" % spectralWindow["numBin"] + "\n"
+
+                    # else add nothing related to correlationMode
+                    
+                    result += "\t\tsideband = %s" % spectralWindow["sideband"].getName() + "\n"
+                    
+                    spwCount += 1
+                basebandCount += 1
+
+        result += "flags:" + "\n"
+        result += "\tsize = %s" % self.getSize("flags") + "\n"
+        axesListStr = " ".join(map(str,self.getAxes("flags")))
+        result += "\taxes = %s" % axesListStr + "\n"
+        
+        result += "actualTimes:" + "\n"
+        result += "\tsize = %s" % self.getSize("actualTimes") + "\n"
+        axesListStr = " ".join(map(str,self.getAxes("actualTimes")))
+        result += "\taxes = %s" % axesListStr + "\n"
+
+        result += "actualDurations" + "\n"
+        result += "\tsize = %s" % self.getSize("actualDurations") + "\n"
+        axesListStr = " ".join(map(str,self.getAxes("actualDurations")))
+        result += "\taxes = %s" % axesListStr + "\n"
+
+        if ((self.getProcessorType() == pyasdm.enumerations.ProcessorType.CORRELATOR) and
+            (self.zeroLagsCorrelatorType() != pyasdm.enumerations.CorrelatorType.FX) and
+            (self.getSize("zeroLags") > 0)):
+            result += "zeroLags" + "\n"
+            result += "\tsize = %s" % self.getSize("zeroLags") + "\n"
+            axesListStr = " ".join(map(str,self.getAxes("zeroLags")))
+            result += "\taxes = %s" % axesListStr + "\n"
+            result += "\tcorrelatorType = %s" % self.zeroLagsCorrelatorType() + "\n"
+
+
+        if self.getCorrelationMode() == pyasdm.enumerations.CorrelationMode.CROSS_ONLY:
+            result += "crossData" + "\n"
+            result += "\tsize = %s" % self.getSize("crossData") + "\n"
+            axesListStr = " ".join(map(str,self.getAxes("crossData")))
+            result += "\taxes = %s" % axesListStr + "\n"
+            
+        elif self.getCorrelationMode() == pyasdm.enumerations.CorrelationMode.AUTO_ONLY:
+            result += "autoData" + "\n"
+            result += "\tsize = %s" % self.getSize("autoData") + "\n"
+            axesListStr = " ".join(map(str,self.getAxes("autoData")))
+            result += "\taxes = %s" % axesListStr + "\n"
+            result += "\tnormalized = %s" % self.isAutoDataNormalized() + "\n"
+            
+        elif self.getCorrelationMode() == pyasdm.enumerations.CorrelationMode.CROSS_AND_AUTO:
+            result += "crossData" + "\n"
+            result += "\tsize = %s" % self.getSize("crossData") + "\n"
+            axesListStr = " ".join(map(str,self.getAxes("crossData")))
+            result += "\taxes = %s" % axesListStr + "\n"
+            
+            result += "autoData" + "\n"
+            result += "\tsize = %s" % self.getSize("autoData") + "\n"
+            axesListStr = " ".join(map(str,self.getAxes("autoData")))
+            result += "\taxes = %s" % axesListStr + "\n"
+            result += "\tnormalized = %s" % self.isAutoDataNormalized() + "\n"
+
+        return result
+
     # getters and setters
     def setSchemaVersion(self, schemaVersion):
         """

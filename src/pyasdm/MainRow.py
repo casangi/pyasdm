@@ -29,6 +29,8 @@
 # File MainRow.py
 #
 
+import os
+
 import pyasdm.MainTable
 
 from .Parser import Parser
@@ -686,6 +688,23 @@ class MainRow:
         """
 
         self._dataUID = EntityRef(dataUID)
+
+    def getBDFPath(self):
+        """
+        Return a path to the BDF using dataUID and the directory of this ASDM.
+
+        This is a MainRow specific method that takes the dataUID value and
+        the directory of the conainer in the table this row is attached to
+        and it returns a string containing the path where that BDF should
+        be found.
+        """
+        bdfName = str(self.getDataUID().getEntityId())
+        # convert "/" and ":" to "_"
+        bdfName = bdfName.replace("/","_")
+        bdfName = bdfName.replace(":","_")
+
+        result = os.path.join(self._table.getContainer().getDirectory(),"ASDMBinary",bdfName)
+        return result
 
     # Extrinsic Table Attributes
 
