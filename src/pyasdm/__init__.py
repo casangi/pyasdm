@@ -33,7 +33,7 @@
 Interface specification for all user facing top-level ASDM python classes
 """
 
-# make sure the bdf submodule is also included
+# make sure that the bdf submodule is also included
 from . import bdf
 
 from .ASDM import ASDM
