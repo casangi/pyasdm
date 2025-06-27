@@ -2347,8 +2347,12 @@ class ASDM:
         param directory The name of the directory containing the files.
         raises ConversionException If any error occurs while reading the
         files in the directory or parsing them.
+
+        os.path.expanduser is used on directory before directory is used.
+        The expanded version is kept internally and returned and used as necessary.
         """
 
+        directory = os.path.expanduser(directory)
         # directory must exist as a directory.
         if not os.path.isdir(directory):
             raise ConversionException(

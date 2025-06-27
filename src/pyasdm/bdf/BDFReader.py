@@ -1030,7 +1030,7 @@ class BDFReader:
                 actualDurationsDesc["arr"] = np.fromfile(
                     self._f, dtype=dt, count=numberOfElementsToRead
                 )
-                nReadBytes = len(actuaDurationsDesc["arr"]) * numberOfBytesPerValue
+                nReadBytes = len(actualDurationsDesc["arr"]) * numberOfBytesPerValue
             elif binaryPartName == b"crossData":
                 crossDataDesc["present"] = True
                 crossDataDesc["base"] = self.position()
