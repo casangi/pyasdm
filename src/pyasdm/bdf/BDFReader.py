@@ -848,21 +848,21 @@ class BDFReader:
 
         actualTimesDesc = {}
         actualTimesDesc["present"] = False
-        actualTimesDesc["base"] = -1
+        actualTimesDesc["startsAt"] = -1
         actualTimesDesc["arr"] = None
         actualTimesDesc["type"] = "INT64_TYPE"
         actualTimesDesc["np_type"] = np.dtype(np.int64)
 
         actualDurationsDesc = {}
         actualDurationsDesc["present"] = False
-        actualDurationsDesc["base"] = -1
+        actualDurationsDesc["startsAt"] = -1
         actualDurationsDesc["arr"] = None
         actualDurationsDesc["type"] = "INT64_TYPE"
         actualDurationsDesc["np_type"] = np.dtype(np.int64)
 
         crossDataDesc = {}
         crossDataDesc["present"] = False
-        crossDataDesc["base"] = -1
+        crossDataDesc["startsAt"] = -1
         crossDataDesc["arr"] = None
         crossDataDesc["type"] = None
         crossDataDesc["np_type"] = None
@@ -874,21 +874,21 @@ class BDFReader:
 
         autoDataDesc = {}
         autoDataDesc["present"] = False
-        autoDataDesc["base"] = -1
+        autoDataDesc["startsAt"] = -1
         autoDataDesc["arr"] = None
         autoDataDesc["type"] = "FLOAT32_TYPE"
         autoDataDesc["np_type"] = np.dtype(np.float32)
 
         flagsDesc = {}
         flagsDesc["present"] = False
-        flagsDesc["base"] = -1
+        flagsDesc["startsAt"] = -1
         flagsDesc["arr"] = None
         flagsDesc["type"] = "INT32_TYPE"
         flagsDesc["np_type"] = np.dtype(np.int32)
 
         zeroLagsDesc = {}
         zeroLagsDesc["present"] = False
-        zeroLagsDesc["base"] = -1
+        zeroLagsDesc["startsAt"] = -1
         zeroLagsDesc["arr"] = None
         zeroLagsDesc["type"] = "FLOAT32_TYPE"
         zeroLagsDesc["np_type"] = np.dtype(np.float32)
@@ -1009,7 +1009,7 @@ class BDFReader:
             nReadBytes = None
             if binaryPartName == b"zeroLags":
                 zeroLagsDesc["present"] = True
-                zeroLagsDesc["base"] = self.position()
+                zeroLagsDesc["startsAt"] = self.position()
                 dt = zeroLagsDesc["np_type"]
                 zeroLagsDesc["arr"] = np.fromfile(
                     self._f, dtype=dt, count=numberOfElementsToRead
@@ -1017,7 +1017,7 @@ class BDFReader:
                 nReadBytes = zeroLagsDesc["arr"].size * numberOfBytesPerValue
             elif binaryPartName == b"actualTimes":
                 actualTimesDesc["present"] = True
-                actualTimesDesc["base"] = self.position()
+                actualTimesDesc["startsAt"] = self.position()
                 dt = actualTimesDesc["np_type"]
                 actualTimesDesc["arr"] = np.fromfile(
                     self._f, dtype=dt, count=numberOfElementsToRead
@@ -1025,7 +1025,7 @@ class BDFReader:
                 nReadBytes = len(actualTimesDesc["arr"]) * numberOfBytesPerValue
             elif binaryPartName == b"actualDurations":
                 actualDurationsDesc["present"] = True
-                actualDurationsDesc["base"] = self.position()
+                actualDurationsDesc["startsAt"] = self.position()
                 dt = actualDurationsDesc["np_type"]
                 actualDurationsDesc["arr"] = np.fromfile(
                     self._f, dtype=dt, count=numberOfElementsToRead
@@ -1033,7 +1033,7 @@ class BDFReader:
                 nReadBytes = len(actualDurationsDesc["arr"]) * numberOfBytesPerValue
             elif binaryPartName == b"crossData":
                 crossDataDesc["present"] = True
-                crossDataDesc["base"] = self.position()
+                crossDataDesc["startsAt"] = self.position()
                 dt = crossDataDesc["np_type"]
                 crossDataDesc["arr"] = np.fromfile(
                     self._f, dtype=dt, count=numberOfElementsToRead
@@ -1041,7 +1041,7 @@ class BDFReader:
                 nReadBytes = len(crossDataDesc["arr"]) * numberOfBytesPerValue
             elif binaryPartName == b"autoData":
                 autoDataDesc["present"] = True
-                autoDataDesc["base"] = self.position()
+                autoDataDesc["startsAt"] = self.position()
                 dt = autoDataDesc["np_type"]
                 autoDataDesc["arr"] = np.fromfile(
                     self._f, dtype=dt, count=numberOfElementsToRead
@@ -1049,7 +1049,7 @@ class BDFReader:
                 nReadBytes = len(autoDataDesc["arr"]) * numberOfBytesPerValue
             elif binaryPartName == b"flags":
                 flagsDesc["present"] = True
-                flagsDesc["base"] = self.position()
+                flagsDesc["startsAt"] = self.position()
                 dt = flagsDesc["np_type"]
                 flagsDesc["arr"] = np.fromfile(
                     self._f, dtype=dt, count=numberOfElementsToRead
