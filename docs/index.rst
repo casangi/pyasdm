@@ -7,6 +7,7 @@ pyasdm is still under active development
    :maxdepth: 2
 
    api
+   examples
 
 Overview
 --------
