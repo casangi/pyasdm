@@ -512,7 +512,7 @@ class BDFReader:
         colonIndex = hf.find(b":")
         if colonIndex == -1:
             raise BDFReaderException(
-                "could not detect a well formed MIME header field in '" + hf + "'"
+                "could not detect a well formed MIME header field in '" + str(hf) + "'"
             )
         if colonIndex > 0:
             name = hf[:colonIndex]
