@@ -142,7 +142,7 @@ data itself is returned as numpy arrays.::
 
     >>> mr[0].getBDFPath()
     '/users/bgarwood/casa/casatestdata/sdm/uid___A002_X71e4ae_X317_short/ASDMBinary/uid___A002_X71e4ae_X328'
-    >>> bdf = pyasdm.bfd.BDFReader()
+    >>> bdf = pyasdm.bdf.BDFReader()
     >>> bdf.open(mr[0].getBDFPath())
     >>> print(bdf.getHeader())
     XML Schema version = 2
@@ -297,7 +297,7 @@ the size value.::
     >>> ss['crossData']
     {'present': True, 'startsAt': 18130, 'arr': array([ 13,  43,  72, ...,  29, -59,  26], shape=(890880,), dtype=int16), 'type': 'INT16_TYPE', 'np_type': dtype('int16')}
 
-    >>> # iterate through to the end with
+    >>> # iterate through to the end with (not all shown, there are 5 subsets in this BDF)
     >>> bdf.hasSubset()
     True
     >>> ss = bdf.getSubset()
@@ -337,7 +337,14 @@ on the BAB element being used.
 This example is from an SDM that where the BDFs were split to look
 like how we think WSU data will look like. The script to split a
 BDF is not robust for general use and is not part of pyasdm. The
-data used here is from a personal copy to illustrate the difference.::
+data used here is from a personal copy to illustrate the difference.
+
+Note: eventually it will be possible to close and reopen an ASDM, as
+it already is with a BDF. Tests indicate that something isn't being
+cleared properly so that does not yet work. If trying another
+ASDM or BDF you should currently create one each time, as in
+this example.
+::
 
     >>> asdm = pyasdm.ASDM()
     >>> asdm.setFromFile('~/casa/split_data/uid___A002_X10d9399_X6279')
@@ -345,7 +352,7 @@ data used here is from a personal copy to illustrate the difference.::
     >>> mr = mt.get()
     >>> bdf = pyasdm.bdf.BDFReader()
     >>> bdf.open(mr[4].getBDFPath())
-    >>> bh = bnf.getHeader()
+    >>> bh = bdf.getHeader()
     >>> print(bh)
     XML Schema version = 2
     Byte order = Little_Endian
@@ -392,6 +399,7 @@ data used here is from a personal copy to illustrate the difference.::
     >>> ss = bdf.getSubset()
     >>> ss['crossData']
     {'present': True, 'startsAt': 4200, 'arr': array([ 81,   6, -46, ...,  25,  53, -44], shape=(18432,), dtype=int16), 'type': 'INT16_TYPE', 'np_type': dtype('int16')}
+    >>> import numpy as np
     >>> farr = ss['crossData']['arr'].astype(np.float32)
     >>> spw = bh.getBasebandsList()[0]['spectralWindows'][0]
     >>> scaleFactor = spw['scaleFactor']
@@ -402,7 +410,9 @@ data used here is from a personal copy to illustrate the difference.::
     >>> npol = len(spw['crossPolProducts'])
     >>> shape = (nbl,nchan,npol,2)
     >>> farr_shaped = farr.reshape(shape)
-    >>> carr_shaped = farr_shaped[:,:,:,:,0] + 1j * farr_shaped[:,:,:,:,1]
+    >>> carr_shaped = farr_shaped[:,:,:,0] + 1j * farr_shaped[:,:,:,1]
+    >>> carr_shaped.shape
+    (36, 128, 2)
     >>> carr_shaped[0,0,0]
     np.complex64(0.00048107025+3.5634832e-05j)
 
@@ -415,12 +425,12 @@ Knowing that there is a single baseband here with a single spectral window
 simplifies extracting the data. Here, the crossData array is converted
 to a 32-bit float array and the scale factor is applied. The array is
 then reshaped, including the real and imaginary array implied as the
-final axis (note that the baseband axis is skipped as it as a single
-element here). Then a complex array is created from the real and imaginary
-parts of the floating point values and the value at the origin of the
-resulting array is printed. The axes are baseline, channel, and polarization
-(here "XX" and "YY"). See the BDF documentation for how baseline are
-ordered.
+final axis (note that the baseband axis is skipped in makeing the shape
+as it as a single element here). Then a complex array is created from the
+real and imaginary parts of the floating point values and the value at the
+origin of the resulting array is printed. The axes are baseline, channel,
+and polarization (here "XX" and "YY"). See the BDF documentation for
+how baseline are ordered.
 
 All of this illustrates the need for well-defined views that are useful for
 VIPER use. Presenting the data in such a view isn't difficult, but
