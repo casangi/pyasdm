@@ -53,59 +53,72 @@ import io
 
 class FlagTable:
     """
-        The FlagTable class is an Alma table.
+    The FlagTable class is an Alma table.
 
-        Role
-        This table is used for flagging visibility data and is used in addition to the Binary Data Format flags produced by the correlator software.
+    This table is used for flagging visibility data and is used in addition to the Binary Data Format flags produced by the correlator software.
 
-        Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-        Attributes of Flag
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                     Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-        flagId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-
-                     Value (Mandatory)
-
-        startTime  ArrayTime  the start time of the flagging period.
-
-        endTime  ArrayTime  the end time of the flagging period.
-
-        reason  str  Extensible list of flagging conditions.
-
-        numAntenna (numAntenna) int  The number of antennas to which the flagging refers.By convention numAntenna== 0 means that the flag applies to all the existing antennas, in such a case the array antennaId can be left empty.
-
-        antennaId  Tag []   numAntenna  An array of Tag which refers to a collection of rows in the Antenna table. The flag applies to the antennas described in these rows. It is an error to have different elements with a same value in this array.
-
-
-
-                     Value (Optional)
-
-        numPolarizationType (numPolarizationType) int  The number of polarization types , i.e. the size of the attribute polarizationType. By convention numPolarizationType == 0 means that the flag applies to all the defined polarization types. \b Remark : numPolarizationType and polarizationType, both optional, must be both present or both absent in one same row of the table, except if numPolarizationType==0 in which case all the defined polarization types are involved in the flagging.
-
-        numSpectralWindow (numSpectralWindow) int  The number of spectral windows targeted by the flagging. By convention numSpectralWindow == 0 means that the flag applies to all the existing spectral windows. \b Remark : numSpectralWindow and spectralWindow, both optional, must be both present or both absent in one same row of the table, except if numSpectralWindow==0, in which case all the declared spectral windows are involved in the flagging.
-
-        numPairedAntenna (numPairedAntenna) int  The number of antennas to be paired with to form the flagged baselines. By convention, numPairedAntenna == 0 means that the flag applies to all baselines built on the antennas declared in the attribute antennaId. \b Remark: numPairedAntenna and pairedAntenna, both optional, must be both present or both absent except if numPairedAntenna==0 in which case one has to consider all the baselines defined upon the antennas announced in  antennaId.
-
-        numChan (numChan) int  Number of channels to be flaggged.
-
-        polarizationType  PolarizationType []   numPolarizationType  An array of values of type PolarizationType. It specifies the polarization types where the flagging applies. It is an error to have different elements with a same value in this array.
-
-        channel  int []  []   numChan, 3  An array of triplets where the first element is the number spectralWindowId. The second and third values are the startChannel and endChannel,
-    respectively, which specify
-    the channels where flagging applies. It is
-    an error to have different elements with a
-    same value in this array.
+    Attributes:
 
 
-        pairedAntennaId  Tag []   numPairedAntenna  An array of Tag which refers to rows in the Antenna table. These rows contain the description of the antennas which are paired to form the flagged baselines. It is an error to have distinct elements with a same value in this array.
 
-        spectralWindowId  Tag []   numSpectralWindow  An array of Tag  which refers to a collection of rows in the SpectralWindow table. The flag applies to the spectral windows described in these rows. It is an error to have different elements with a same value in this array.
+        flagId (Tag): identifies a unique row in the table. auto-incrementable, key.
+
+
+
+
+
+        startTime (ArrayTime): the start time of the flagging period.
+
+        endTime (ArrayTime): the end time of the flagging period.
+
+        reason (str): Extensible list of flagging conditions.
+
+        numAntenna (int): The number of antennas to which the flagging refers.By convention numAntenna== 0 means that the flag applies to all the existing antennas, in such a case the array antennaId can be left empty.
+
+        antennaId (Tag [] ): Array(numAntenna) An array of Tag which refers to a collection of rows in the Antenna table. The flag applies to the antennas described in these rows. It is an error to have different elements with a same value in this array.
+
+
+
+
+        numPolarizationType (int): The number of polarization types , i.e. the size of the attribute polarizationType. By convention numPolarizationType == 0 means that the flag applies to all the defined polarization types. \b Remark : numPolarizationType and polarizationType, both optional, must be both present or both absent in one same row of the table, except if numPolarizationType==0 in which case all the defined polarization types are involved in the flagging. Optional.
+
+        numSpectralWindow (int): The number of spectral windows targeted by the flagging. By convention numSpectralWindow == 0 means that the flag applies to all the existing spectral windows. \b Remark : numSpectralWindow and spectralWindow, both optional, must be both present or both absent in one same row of the table, except if numSpectralWindow==0, in which case all the declared spectral windows are involved in the flagging. Optional.
+
+        numPairedAntenna (int): The number of antennas to be paired with to form the flagged baselines. By convention, numPairedAntenna == 0 means that the flag applies to all baselines built on the antennas declared in the attribute antennaId. \b Remark: numPairedAntenna and pairedAntenna, both optional, must be both present or both absent except if numPairedAntenna==0 in which case one has to consider all the baselines defined upon the antennas announced in  antennaId. Optional.
+
+        numChan (int): Number of channels to be flaggged. Optional.
+
+        polarizationType (PolarizationType [] ): Array(numPolarizationType) An array of values of type PolarizationType. It specifies the polarization types where the flagging applies. It is an error to have different elements with a same value in this array.  Optional.
+
+        channel (int []  [] ): Array(numChan, 3) An array of triplets where the first element is the number spectralWindowId. The second and third values are the startChannel and endChannel,  respectively, which specify the channels where flagging applies. It is an error to have different elements with a same value in this array.  Optional.
+
+        pairedAntennaId (Tag [] ): Array(numPairedAntenna) An array of Tag which refers to rows in the Antenna table. These rows contain the description of the antennas which are paired to form the flagged baselines. It is an error to have distinct elements with a same value in this array. Optional.
+
+        spectralWindowId (Tag [] ): Array(numSpectralWindow) An array of Tag  which refers to a collection of rows in the SpectralWindow table. The flag applies to the spectral windows described in these rows. It is an error to have different elements with a same value in this array.   Optional.
 
 
     """
@@ -273,7 +286,7 @@ class FlagTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\flagId,
+        homologues in x.  If a row is found that row else autoincrement x.flagId,
         add x to its table and returns x.
 
         returns a FlagRow.

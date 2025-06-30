@@ -55,52 +55,70 @@ class CalDeviceTable:
     """
     The CalDeviceTable class is an Alma table.
 
-    Role
     Calibration device characteristics. This table is not part of the   Calibration Data Model but describes the actual observations; it refers to   the amplitude calibration device which includes the hot loads.     Calibration device properties are assumed independent of frequency   throughout a spectral window.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalDevice
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaId Tag refers to a unique row  in AntennaTable. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    spectralWindowId Tag refers to a unique row in SpectralWindow Table. </TD>
-
-
-
-    timeInterval ArrayTimeInterval the period of validity of the data recorded in this row. </TD>
-
-
-
-    feedId int refers to the collection of rows in FeedTable having this value of feedId in their key. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    numCalload (numCalload) int  the number of calibration loads.
-
-    calLoadNames  CalibrationDevice []   numCalload  identifies the calibration loads (an array with one value per load).
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaId (Tag): refers to a unique row  in AntennaTable. key.
 
-    numReceptor (numReceptor) int  the number of receptors.
 
-    calEff  float []  []   numReceptor, numCalload  the calibration efficiencies (one value per receptor per load).
 
-    noiseCal  float []   numCalload  the equivalent temperatures of the of the noise sources used (one value per load).
+        spectralWindowId (Tag): refers to a unique row in SpectralWindow Table. key.
 
-    coupledNoiseCal  float []  []   numReceptor, numCalload
 
-    temperatureLoad  Temperature []   numCalload  the physical temperatures of the loads for a black body calibration source (one value per load).
+
+        timeInterval (ArrayTimeInterval): the period of validity of the data recorded in this row. key.
+
+
+
+        feedId (int): refers to the collection of rows in FeedTable having this value of feedId in their key. key.
+
+
+
+
+
+        numCalload (int): the number of calibration loads.
+
+        calLoadNames (CalibrationDevice [] ): Array(numCalload) identifies the calibration loads (an array with one value per load).
+
+
+
+
+        numReceptor (int): the number of receptors. Optional.
+
+        calEff (float []  [] ): Array(numReceptor, numCalload) the calibration efficiencies (one value per receptor per load). Optional.
+
+        noiseCal (float [] ): Array(numCalload) the equivalent temperatures of the of the noise sources used (one value per load). Optional.
+
+        coupledNoiseCal (float []  [] ): Array(numReceptor, numCalload)  Optional.
+
+        temperatureLoad (Temperature [] ): Array(numCalload) the physical temperatures of the loads for a black body calibration source (one value per load). Optional.
 
 
     """

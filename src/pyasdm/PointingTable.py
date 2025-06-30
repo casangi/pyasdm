@@ -55,62 +55,80 @@ class PointingTable:
     """
     The PointingTable class is an Alma table.
 
-    Role
     Antenna pointing information.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Pointing
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaId Tag refers to a unique row in AntennaTable. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    timeInterval ArrayTimeInterval the time interval of validity of the row's content. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    numSample (numSample) int  the number of time samples.
-
-    encoder  Angle []  []   numSample, 2  Encoder values
-
-    pointingTracking  bool  the antenna was in tracking mode (true) or not (false).
-
-    usePolynomials  bool  use polynomials expansions (true) or not (false).
-
-    timeOrigin  ArrayTime  the value used as origin in the polynomials expansions.
-
-    numTerm (numTerm) int  the number of terms of the polynomials.
-
-    pointingDirection  Angle []  []   numTerm, 2  the commanded pointing direction.
-
-    target  Angle []  []   numTerm, 2  the direction of the target.
-
-    offset  Angle []  []   numTerm, 2  Horizon mapping offsets
-
-    pointingModelId  int  refers to a collection of rows in PointingModelTable.
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaId (Tag): refers to a unique row in AntennaTable. key.
 
-    overTheTop  bool  pointing ar elevations larger than 90 degrees (true) or lower (false).
 
-    sourceOffset  Angle []  []   numTerm, 2  sources offsets (one pair per term of the polynomial).
 
-    sourceOffsetReferenceCode  DirectionReferenceCode  the  direction reference code associated to the source offset.
+        timeInterval (ArrayTimeInterval): the time interval of validity of the row's content. key.
 
-    sourceOffsetEquinox  ArrayTime  the equinox information (if needed by sourceReferenceCode).
 
-    sampledTimeInterval  ArrayTimeInterval []   numSample  an array of ArrayTimeInterval which must be given explicitly as soon as the data are irregularily sampled.
 
-    atmosphericCorrection  Angle []  []   numTerm, 2  This is the correction applied to the commanded position to take into account refraction and any other atmospheric effects. This term will always be zero if there is no atmosphere. For ALMA this is the atmospheric refraction correction and will result in a correction in just the elevation axis.
+
+
+        numSample (int): the number of time samples.
+
+        encoder (Angle []  [] ): Array(numSample, 2) Encoder values
+
+        pointingTracking (bool): the antenna was in tracking mode (true) or not (false).
+
+        usePolynomials (bool): use polynomials expansions (true) or not (false).
+
+        timeOrigin (ArrayTime): the value used as origin in the polynomials expansions.
+
+        numTerm (int): the number of terms of the polynomials.
+
+        pointingDirection (Angle []  [] ): Array(numTerm, 2) the commanded pointing direction.
+
+        target (Angle []  [] ): Array(numTerm, 2) the direction of the target.
+
+        offset (Angle []  [] ): Array(numTerm, 2) Horizon mapping offsets
+
+        pointingModelId (int): refers to a collection of rows in PointingModelTable.
+
+
+
+
+        overTheTop (bool): pointing ar elevations larger than 90 degrees (true) or lower (false). Optional.
+
+        sourceOffset (Angle []  [] ): Array(numTerm, 2) sources offsets (one pair per term of the polynomial). Optional.
+
+        sourceOffsetReferenceCode (DirectionReferenceCode): the  direction reference code associated to the source offset. Optional.
+
+        sourceOffsetEquinox (ArrayTime): the equinox information (if needed by sourceReferenceCode). Optional.
+
+        sampledTimeInterval (ArrayTimeInterval [] ): Array(numSample) an array of ArrayTimeInterval which must be given explicitly as soon as the data are irregularily sampled.  Optional.
+
+        atmosphericCorrection (Angle []  [] ): Array(numTerm, 2) This is the correction applied to the commanded position to take into account refraction and any other atmospheric effects. This term will always be zero if there is no atmosphere. For ALMA this is the atmospheric refraction correction and will result in a correction in just the elevation axis. Optional.
 
 
     """

@@ -55,88 +55,106 @@ class SpectralWindowTable:
     """
     The SpectralWindowTable class is an Alma table.
 
-    Role
-    Spectral window description. The convention in ALMA is to describe the  frequency axis in the topocentric reference frame. If this is not  the case (for instance if active Doppler tracking is implemented) then  \texttt{measFreqRef} should be set accordingly.
+    Spectral window description. The convention in ALMA is to describe the  frequency axis in the topocentric reference frame. If this is not  the case (for instance if active Doppler tracking is implemented) then  measFreqRef should be set accordingly.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of SpectralWindow
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    spectralWindowId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-
-                 Value (Mandatory)
-
-    basebandName  BasebandName  identifies the baseband.
-
-    netSideband  NetSideband  identifies the net sideband.
-
-    numChan (numChan) int  the number of frequency channels.
-
-    refFreq  Frequency  the reference frequency.
-
-    sidebandProcessingMode  SidebandProcessingMode  identifies the sideband processing mode.
-
-    totBandwidth  Frequency  the total bandwidth.
-
-    windowFunction  WindowFunction  identifies the window function.
+    Attributes:
 
 
 
-                 Value (Optional)
+        spectralWindowId (Tag): identifies a unique row in the table. auto-incrementable, key.
 
-    numBin (numBin) int  the number of channels used in any post-FFT averaging.
 
-    chanFreqStart  Frequency  the frequency of the first channel.
 
-    chanFreqStep  Frequency  the increment between two successive frequencies.
 
-    chanFreqArray  Frequency []   numChan  the frequencies defined as an array (\texttt{numChan} values).
 
-    chanWidth  Frequency  the nominal channel width.
+        basebandName (BasebandName): identifies the baseband.
 
-    chanWidthArray  Frequency []   numChan  Array of channel widths.
+        netSideband (NetSideband): identifies the net sideband.
 
-    correlationBit  CorrelationBit  identifies the number of bits used in the signal representation.
+        numChan (int): the number of frequency channels.
 
-    effectiveBw  Frequency  the effective noise bandwidth.
+        refFreq (Frequency): the reference frequency.
 
-    effectiveBwArray  Frequency []   numChan  array of effective bandwidths.
+        sidebandProcessingMode (SidebandProcessingMode): identifies the sideband processing mode.
 
-    freqGroup  int  the frequency group number.
+        totBandwidth (Frequency): the total bandwidth.
 
-    freqGroupName  str  the frequency group name.
+        windowFunction (WindowFunction): identifies the window function.
 
-    lineArray  bool []   numChan  indicates lines (true) versus baselines (false).
 
-    measFreqRef  FrequencyReferenceCode  the reference frame of the frequencies.
 
-    name  str  a name for this spectral window.
 
-    oversampling  bool  data are "oversampled" (true) or not (false).
+        numBin (int): the number of channels used in any post-FFT averaging. Optional.
 
-    quantization  bool  a quantization correction has been applied (true) or not applied (false).
+        chanFreqStart (Frequency): the frequency of the first channel. Optional.
 
-    refChan  float  the reference channel "number".
+        chanFreqStep (Frequency): the increment between two successive frequencies. Optional.
 
-    resolution  Frequency  the effective spectral resolution of one channel (see note).
+        chanFreqArray (Frequency [] ): Array(numChan) the frequencies defined as an array (numChan values). Optional.
 
-    resolutionArray  Frequency []   numChan  the array of frequency resolution.
+        chanWidth (Frequency): the nominal channel width. Optional.
 
-    numAssocValues (numAssocValues) int  the number of associated values.
+        chanWidthArray (Frequency [] ): Array(numChan) Array of channel widths. Optional.
 
-    assocNature  SpectralResolutionType []   numAssocValues  the natures of the associations with the rows refered to by assocSpectralWindowId.
+        correlationBit (CorrelationBit): identifies the number of bits used in the signal representation. Optional.
 
-    assocSpectralWindowId  Tag []   numAssocValues  refers to a collection of associated rows in the table.
+        effectiveBw (Frequency): the effective noise bandwidth. Optional.
 
-    imageSpectralWindowId  Tag  refers to a unique row in the table (image sideband description).
+        effectiveBwArray (Frequency [] ): Array(numChan) array of effective bandwidths. Optional.
 
-    dopplerId  int  refers to a collection of rows in DopplerTable.
+        freqGroup (int): the frequency group number. Optional.
+
+        freqGroupName (str): the frequency group name. Optional.
+
+        lineArray (bool [] ): Array(numChan) indicates lines (true) versus baselines (false). Optional.
+
+        measFreqRef (FrequencyReferenceCode): the reference frame of the frequencies. Optional.
+
+        name (str): a name for this spectral window. Optional.
+
+        oversampling (bool): data are "oversampled" (true) or not (false). Optional.
+
+        quantization (bool): a quantization correction has been applied (true) or not applied (false). Optional.
+
+        refChan (float): the reference channel "number". Optional.
+
+        resolution (Frequency): the effective spectral resolution of one channel (see note). Optional.
+
+        resolutionArray (Frequency [] ): Array(numChan) the array of frequency resolution. Optional.
+
+        numAssocValues (int): the number of associated values. Optional.
+
+        assocNature (SpectralResolutionType [] ): Array(numAssocValues) the natures of the associations with the rows refered to by assocSpectralWindowId. Optional.
+
+        assocSpectralWindowId (Tag [] ): Array(numAssocValues) refers to a collection of associated rows in the table. Optional.
+
+        imageSpectralWindowId (Tag): refers to a unique row in the table (image sideband description). Optional.
+
+        dopplerId (int): refers to a collection of rows in DopplerTable. Optional.
 
 
     """
@@ -515,7 +533,7 @@ class SpectralWindowTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\spectralWindowId,
+        homologues in x.  If a row is found that row else autoincrement x.spectralWindowId,
         add x to its table and returns x.
 
         returns a SpectralWindowRow.

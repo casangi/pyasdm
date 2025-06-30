@@ -55,70 +55,88 @@ class SysCalTable:
     """
     The SysCalTable class is an Alma table.
 
-    Role
-    System calibration. Gives information on the conversion  of data to temperature scale. This table is reduced to follow  the contents of the Measurement Set SysCal table. Use only spectral  values (use a single channel spectral window for single numbers).   \texttt{numChan} can be found in the SpectralWindow Table.  The contents of this table are used to scale the data in the filler.
+    System calibration. Gives information on the conversion  of data to temperature scale. This table is reduced to follow  the contents of the Measurement Set SysCal table. Use only spectral  values (use a single channel spectral window for single numbers).   numChan can be found in the SpectralWindow Table.  The contents of this table are used to scale the data in the filler.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of SysCal
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaId Tag refers to a unique row  in AntennaTable. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    spectralWindowId Tag refers to a unique row in SpectralWindowTable. </TD>
-
-
-
-    timeInterval ArrayTimeInterval time interval for which the row's content is valid. </TD>
-
-
-
-    feedId int refers to a collection of rows in FeedTable. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    numReceptor (numReceptor) int  the number of receptors.
-
-    numChan (numChan) int  the number of frequency channels.
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaId (Tag): refers to a unique row  in AntennaTable. key.
 
-    tcalFlag  bool  the calibration temperature flag.
 
-    tcalSpectrum  Temperature []  []   numReceptor, numChan  the calibration temperatures (one value per receptor per channel).
 
-    trxFlag  bool  the receiver temperature flag.
+        spectralWindowId (Tag): refers to a unique row in SpectralWindowTable. key.
 
-    trxSpectrum  Temperature []  []   numReceptor, numChan  the receiver temperatures (one value per receptor per channel).
 
-    tskyFlag  bool  the sky temperature flag.
 
-    tskySpectrum  Temperature []  []   numReceptor, numChan  the sky temperatures (one value per receptor per channel).
+        timeInterval (ArrayTimeInterval): time interval for which the row's content is valid. key.
 
-    tsysFlag  bool  the system temperature flag.
 
-    tsysSpectrum  Temperature []  []   numReceptor, numChan  the system temperatures (one value per receptor per channel).
 
-    tantFlag  bool  the tant flag.
+        feedId (int): refers to a collection of rows in FeedTable. key.
 
-    tantSpectrum  float []  []   numReceptor, numChan  the Tant spectrum (one value per receptor per channel).
 
-    tantTsysFlag  bool  the Tant/Tsys flag.
 
-    tantTsysSpectrum  float []  []   numReceptor, numChan  the Tant/Tsys spectrum(one value per receptor per channel) .
 
-    phaseDiffFlag  bool  the phase difference flag.
 
-    phaseDiffSpectrum  float []  []   numReceptor, numChan  the phase difference spectrum (one value per receptor per channel).
+        numReceptor (int): the number of receptors.
+
+        numChan (int): the number of frequency channels.
+
+
+
+
+        tcalFlag (bool): the calibration temperature flag. Optional.
+
+        tcalSpectrum (Temperature []  [] ): Array(numReceptor, numChan) the calibration temperatures (one value per receptor per channel). Optional.
+
+        trxFlag (bool): the receiver temperature flag. Optional.
+
+        trxSpectrum (Temperature []  [] ): Array(numReceptor, numChan) the receiver temperatures (one value per receptor per channel). Optional.
+
+        tskyFlag (bool): the sky temperature flag. Optional.
+
+        tskySpectrum (Temperature []  [] ): Array(numReceptor, numChan) the sky temperatures (one value per receptor per channel). Optional.
+
+        tsysFlag (bool): the system temperature flag. Optional.
+
+        tsysSpectrum (Temperature []  [] ): Array(numReceptor, numChan) the system temperatures (one value per receptor per channel). Optional.
+
+        tantFlag (bool): the tant flag. Optional.
+
+        tantSpectrum (float []  [] ): Array(numReceptor, numChan) the Tant spectrum (one value per receptor per channel). Optional.
+
+        tantTsysFlag (bool): the Tant/Tsys flag. Optional.
+
+        tantTsysSpectrum (float []  [] ): Array(numReceptor, numChan) the Tant/Tsys spectrum(one value per receptor per channel) . Optional.
+
+        phaseDiffFlag (bool): the phase difference flag. Optional.
+
+        phaseDiffSpectrum (float []  [] ): Array(numReceptor, numChan) the phase difference spectrum (one value per receptor per channel). Optional.
 
 
     """

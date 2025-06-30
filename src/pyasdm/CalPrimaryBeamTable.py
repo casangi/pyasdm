@@ -55,66 +55,85 @@ class CalPrimaryBeamTable:
     """
     The CalPrimaryBeamTable class is an Alma table.
 
-    Role
     Result of Primary Beam Map measurement.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalPrimaryBeam
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    antennaName str the name of the antenna. </TD>
+
+        antennaName (str): the name of the antenna. key.
 
 
 
-    receiverBand ReceiverBand identifies the receiver band. </TD>
+        receiverBand (ReceiverBand): identifies the receiver band. key.
 
 
 
-    calDataId Tag refers to a unique row in CalData Table. </TD>
+        calDataId (Tag): refers to a unique row in CalData Table. key.
 
 
 
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
 
 
 
 
-                 Value (Mandatory)
 
-    startValidTime  ArrayTime  the start time of result validity period.
+        startValidTime (ArrayTime): the start time of result validity period.
 
-    endValidTime  ArrayTime  the end time of result validity period.
+        endValidTime (ArrayTime): the end time of result validity period.
 
-    antennaMake  AntennaMake  the antenna make.
+        antennaMake (AntennaMake): the antenna make.
 
-    numSubband (numSubband) int  the number of subband images (frequency ranges simultaneously measured ).
+        numSubband (int): the number of subband images (frequency ranges simultaneously measured ).
 
-    frequencyRange  Frequency []  []   numSubband, 2  the range of frequencies over which the result is valid.
+        frequencyRange (Frequency []  [] ): Array(numSubband, 2) the range of frequencies over which the result is valid.
 
-    numReceptor (numReceptor) int  the number of receptors.
+        numReceptor (int): the number of receptors.
 
-    polarizationTypes  PolarizationType []   numReceptor  identifies the polarizations types of the receptors (one value per receptor).
+        polarizationTypes (PolarizationType [] ): Array(numReceptor) identifies the polarizations types of the receptors (one value per receptor).
 
-    mainBeamEfficiency  float []   numReceptor  the main beam efficiency as derived from the beam map.
+        mainBeamEfficiency (float [] ): Array(numReceptor) the main beam efficiency as derived from the beam map.
 
-    beamDescriptionUID  EntityRef  refers to the beam description image.
+        beamDescriptionUID (EntityRef): refers to the beam description image.
 
-    relativeAmplitudeRms  float  the RMS fluctuations in terms of the relative beam amplitude.
+        relativeAmplitudeRms (float): the RMS fluctuations in terms of the relative beam amplitude.
 
-    direction  Angle []   2  the center direction.
+        direction (Angle [] ): Array(2) the center direction.
 
-    minValidDirection  Angle []   2  the minimum center direction of validity.
+        minValidDirection (Angle [] ): Array(2) the minimum center direction of validity.
 
-    maxValidDirection  Angle []   2  the maximum center direction of validity.
+        maxValidDirection (Angle [] ): Array(2) the maximum center direction of validity.
 
-    descriptionType  PrimaryBeamDescription  quantity used to describe beam.
+        descriptionType (PrimaryBeamDescription): quantity used to describe beam.
 
-    imageChannelNumber  int []   numSubband  channel number in image for each subband.
+        imageChannelNumber (int [] ): Array(numSubband) channel number in image for each subband.
 
-    imageNominalFrequency  Frequency []   numSubband  nominal frequency for subband.
+        imageNominalFrequency (Frequency [] ): Array(numSubband) nominal frequency for subband.
 
 
 

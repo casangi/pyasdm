@@ -22,11 +22,7 @@ Following the c++ and Java class design, an ASDM is always instantiated
 first and then set to a specific ASDM by giving it the path to the directory
 containing that ASDM as shown here. Table instances are then fetched from
 that ASDM and individual rows can be gotten from a table. The classes at the
-*pyasdm* layer are the container (*ASDM*) and the tables and rows (e.g.
-*MainTable* and *MainRow* are the classes that handle the Main table and
-the individual rows within that table.
-
-Below *pyasdm* are *bdf*, *enumerations*, *exceptions, *types*, and *utils*.
+*pyasdm* layer are the container ( *ASDM* , *enumerations* , *exceptions* , *types* , and *utils* .
 The *bdf* classes deal with reading a BDF (binary data file/format) file
 (eventually that will also include classes to write a BDF to a file).
 The *enumerations* are classes that handle the enumerations found in the SDM
@@ -135,7 +131,7 @@ like *stateId* you can either get a single StateRow instance as shown
 here (getting the one for element 10 in that list of stateId values)
 or you can get all of the rows as a list of rows using the
 appropriate getter for that field in that row (here it is
-*getStatesUsingStateId*).
+*getStatesUsingStateId* ).
 
 For the ASDM tables and rows and types and enumerations, python
 lists are used when there are multiple values (and sometimes
@@ -236,7 +232,7 @@ for that spectral window in that baseband. In general, each baseband could
 have multiple spectral windows, with different scale factors and cross and
 sd pol products. The baseband information summarized here is currently
 available as a list of dict values with one dict valeu for each
-baseband, in order, through *getBasebandsList().
+baseband, in order, through *getBasebandsList()* .
 
 At the end are shown the possible binary components that may be found in
 this BDF. The binary components are found in data subsets. A subset is
@@ -273,11 +269,11 @@ type. In this case, BAL is the baseline axis, BAB is the baseband axis,
 SPP is the spectral axis (channels) and POL is the axes necessary to hold
 all of the pol products shown for the spectral window in question. In
 the more general case that can be complicated, but here there are 30
-antennas so the number of BAL elements is 30*29/2 (435), there are
+antennas so the number of BAL elements is 30x29/2 (435), there are
 4 basebands, each baseband has a single spectral window with 128 channels,
 and there are 2 elements along the POL axis. In addition, crossData is
 stored as a pair of values, one each for the real and imaginary parts.
-So the expected size here is 435*4*128*2*2 or 890880, as indicated by
+So the expected size here is 435x4x128x2x2 or 890880, as indicated by
 the size value.::
 
     >>> bdf.hasSubset()

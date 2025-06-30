@@ -55,90 +55,108 @@ class CalBandpassTable:
     """
     The CalBandpassTable class is an Alma table.
 
-    Role
     Result of passband calibration performed on-line by TelCal.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalBandpass
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    basebandName BasebandName identifies the baseband. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    sideband NetSideband identifies the first LO sideband. </TD>
-
-
-
-    atmPhaseCorrection AtmPhaseCorrection qualifies how the atmospheric phase correction has been applied. </TD>
-
-
-
-    typeCurve CalCurveType identifies the type of curve. </TD>
-
-
-
-    receiverBand ReceiverBand identifies the receiver band. </TD>
-
-
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
+    Attributes:
 
 
 
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
+        basebandName (BasebandName): identifies the baseband. key.
+
+
+
+        sideband (NetSideband): identifies the first LO sideband. key.
+
+
+
+        atmPhaseCorrection (AtmPhaseCorrection): qualifies how the atmospheric phase correction has been applied. key.
+
+
+
+        typeCurve (CalCurveType): identifies the type of curve. key.
+
+
+
+        receiverBand (ReceiverBand): identifies the receiver band. key.
+
+
+
+        calDataId (Tag): refers to a unique row in CalData Table. key.
+
+
+
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
 
 
 
 
-                 Value (Mandatory)
 
-    startValidTime  ArrayTime  the start time of result validity period.
+        startValidTime (ArrayTime): the start time of result validity period.
 
-    endValidTime  ArrayTime  the end time of result validity period.
+        endValidTime (ArrayTime): the end time of result validity period.
 
-    numAntenna (numAntenna) int  the number of antennas.
+        numAntenna (int): the number of antennas.
 
-    numPoly (numPoly) int  the number of coefficients of the polynomial.
+        numPoly (int): the number of coefficients of the polynomial.
 
-    numReceptor (numReceptor) int  the number of receptors.
+        numReceptor (int): the number of receptors.
 
-    antennaNames  str []   numAntenna  the names of the antennas.
+        antennaNames (str [] ): Array(numAntenna) the names of the antennas.
 
-    refAntennaName  str  the name of the reference antenna.
+        refAntennaName (str): the name of the reference antenna.
 
-    freqLimits  Frequency []   2  the frequency range for the polynomial description of the passband.
+        freqLimits (Frequency [] ): Array(2) the frequency range for the polynomial description of the passband.
 
-    polarizationTypes  PolarizationType []   numReceptor  the polarizations of the receptors (one value per receptor).
+        polarizationTypes (PolarizationType [] ): Array(numReceptor) the polarizations of the receptors (one value per receptor).
 
-    curve  float []  []  []   numAntenna, numReceptor, numPoly  the amplitude or phase coefficients, depending on the value of typeCurve (one array of numPoly values per antenna per receptor).
+        curve (float []  []  [] ): Array(numAntenna, numReceptor, numPoly) the amplitude or phase coefficients, depending on the value of typeCurve (one array of numPoly values per antenna per receptor).
 
-    reducedChiSquared  float []   numReceptor  measures the quality of the least squares fits (one value per receptor).
-
+        reducedChiSquared (float [] ): Array(numReceptor) measures the quality of the least squares fits (one value per receptor).
 
 
-                 Value (Optional)
 
-    numBaseline (numBaseline) int  the number of baselines.
 
-    numFreq (numFreq) int  the number of frequency points.
+        numBaseline (int): the number of baselines. Optional.
 
-    rms  float []  []   numReceptor, numBaseline  the amplitude or phase residuals ( one array of numBaseline values per receptor).
+        numFreq (int): the number of frequency points. Optional.
 
-    frequencyRange  Frequency []   2  the frequency range over which the result is valid.
+        rms (float []  [] ): Array(numReceptor, numBaseline) the amplitude or phase residuals ( one array of numBaseline values per receptor). Optional.
 
-    numSpectralWindow (numSpectralWindow) int  The number of spectral windows.
+        frequencyRange (Frequency [] ): Array(2) the frequency range over which the result is valid. Optional.
 
-    chanFreqStart  Frequency []   numSpectralWindow  the frequency of the first channel.
+        numSpectralWindow (int): The number of spectral windows. Optional.
 
-    chanFreqStep  Frequency []   numSpectralWindow  the increment between two successive frequencies.
+        chanFreqStart (Frequency [] ): Array(numSpectralWindow) the frequency of the first channel. Optional.
 
-    numSpectralWindowChan (numSpectralWindowChan) int []   numSpectralWindow  The number of channels for each spectral window.
+        chanFreqStep (Frequency [] ): Array(numSpectralWindow) the increment between two successive frequencies. Optional.
 
-    spectrum  float []  []  []   numAntenna, numReceptor, numFreq  The antenna-based spectrum per receptor averaging over the entire scan range.
+        numSpectralWindowChan (int [] ): Array(numSpectralWindow) The number of channels for each spectral window. Optional.
+
+        spectrum (float []  []  [] ): Array(numAntenna, numReceptor, numFreq) The antenna-based spectrum per receptor averaging over the entire scan range. Optional.
 
 
     """

@@ -53,53 +53,71 @@ import io
 
 class SysPowerTable:
     """
-        The SysPowerTable class is an Alma table.
+    The SysPowerTable class is an Alma table.
 
-        Role
-        This table is intended to store power measurements based on a synchronous power detector as  used at the EVLA. While the table is intended to be general enough for use with other arrays, it is  deeply entwined with the EVLA data acquisition scheme. The units of \f$P_{diff}\f$ and \f$P_{sum}\f$ are such that the system temperature, \f$T_{sys}\f$, is :
-    \f[
-    T_{sys}=\frac{P_{sum}}{P_{diff}} . \frac{T_{cal}}{2}
-    \f]
-    where \f$T_{cal}\f$ is the temperature of the noise tube.
+    This table is intended to store power measurements based on a synchronous power detector as  used at the EVLA. While the table is intended to be general enough for use with other arrays, it is  deeply entwined with the EVLA data acquisition scheme. The units of P_diff and P_sum are such that the system temperature, T_sys, is :
 
+    T_sys=(P_sum/P_diff) . (T_cal/2)
 
-        Generated from model's revision -1, branch
-
-        Attributes of SysPower
-
-                     Key
+    where T_cal is the temperature of the noise tube.
 
 
-        antennaId Tag  </TD>
+    Shown here are the fields found in each row.
 
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
+    Other fields are required unless "optional" is shown for that field.
 
-        spectralWindowId Tag  </TD>
+    The field description text here is as found in the model used to generate the code.
 
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-        feedId int  </TD>
-
-
-
-        timeInterval ArrayTimeInterval time interval over which the content of the row was measured. </TD>
-
-
-
-
-                     Value (Mandatory)
-
-        numReceptor (numReceptor) int  The number of receptors.
+    Attributes:
 
 
 
-                     Value (Optional)
+        antennaId (Tag):  key.
 
-        switchedPowerDifference  float []   numReceptor  the switched power difference \f$P_{diff}\f$ defined by \f$P_{diff} = G*(P_{on}-P_{off})\f$.
 
-        switchedPowerSum  float []   numReceptor  the switched power sum \f$P_{sum}\f$ defined by \f$P_{sum}=G(P_{on} + P_{off})\f$.
 
-        requantizerGain  float []   numReceptor  refers to the gain inserted after the synchronous power detector. For WIDAR, it is the requantizer gain (\f$G\f$).
+        spectralWindowId (Tag):  key.
+
+
+
+        feedId (int):  key.
+
+
+
+        timeInterval (ArrayTimeInterval): time interval over which the content of the row was measured. key.
+
+
+
+
+
+        numReceptor (int): The number of receptors.
+
+
+
+
+        switchedPowerDifference (float [] ): Array(numReceptor) the switched power difference P_{diff} defined by P_{diff} = G*(P_{on}-P_{off}). Optional.
+
+        switchedPowerSum (float [] ): Array(numReceptor) the switched power sum P_{sum} defined by P_{sum}=G(P_{on} + P_{off}). Optional.
+
+        requantizerGain (float [] ): Array(numReceptor) refers to the gain inserted after the synchronous power detector. For WIDAR, it is the requantizer gain (G). Optional.
 
 
     """

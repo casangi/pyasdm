@@ -55,44 +55,63 @@ class CalGainTable:
     """
     The CalGainTable class is an Alma table.
 
-    Role
     This Table is a placeholder to be used to wrap up casa gain tables produced  in the Science Pipeline and Offline so that they can be archived in the  ALMA Calibration Data Base.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalGain
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    calDataId Tag refers to a unique row in CalData Table. </TD>
+
+        calDataId (Tag): refers to a unique row in CalData Table. key.
 
 
 
-    calReductionId Tag refers to a unique row  in CalReductionTable. </TD>
+        calReductionId (Tag): refers to a unique row  in CalReductionTable. key.
 
 
 
 
-                 Value (Mandatory)
 
-    startValidTime  ArrayTime   the start time of result validity period.
+        startValidTime (ArrayTime):  the start time of result validity period.
 
-    endValidTime  ArrayTime   the end time of result validity period.
+        endValidTime (ArrayTime):  the end time of result validity period.
 
-    gain  float  TBD
+        gain (float): TBD
 
-    gainValid  bool  TBD
+        gainValid (bool): TBD
 
-    fit  float  TBD
+        fit (float): TBD
 
-    fitWeight  float  TBD
+        fitWeight (float): TBD
 
-    totalGainValid  bool  TBD
+        totalGainValid (bool): TBD
 
-    totalFit  float  TBD
+        totalFit (float): TBD
 
-    totalFitWeight  float  TBD
+        totalFitWeight (float): TBD
 
 
 

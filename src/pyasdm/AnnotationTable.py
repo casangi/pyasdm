@@ -55,56 +55,74 @@ class AnnotationTable:
     """
     The AnnotationTable class is an Alma table.
 
-    Role
     The Annotation Table is intended to offer space for unexpected data to be  added in the software development process at short notice, without  redefining the data model.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Annotation
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    annotationId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
+
+        annotationId (Tag): identifies a unique row in the table. auto-incrementable, key.
 
 
 
 
-                 Value (Mandatory)
 
-    time  ArrayTime  mid point of the interval of time on which the recorded information is pertinent.
+        time (ArrayTime): mid point of the interval of time on which the recorded information is pertinent.
 
-    issue  str  name of this annotation.
+        issue (str): name of this annotation.
 
-    details  str  details of this annotation.
-
+        details (str): details of this annotation.
 
 
-                 Value (Optional)
 
-    numAntenna (numAntenna) int  number of antennas.
 
-    basebandName  BasebandName []   numBaseband  an array of numBaseband baseband names.
+        numAntenna (int): number of antennas. Optional.
 
-    numBaseband (numBaseband) int  number of basebands.
+        basebandName (BasebandName [] ): Array(numBaseband) an array of numBaseband baseband names. Optional.
 
-    interval  Interval  time interval
+        numBaseband (int): number of basebands. Optional.
 
-    dValue  float  scalar data.
+        interval (Interval): time interval Optional.
 
-    vdValue  float []     useful to store an array of double values.
+        dValue (float): scalar data. Optional.
 
-    vvdValues  float []  []   ,   useful to store an array of array(s) of double values.
+        vdValue (float [] ): Array() useful to store an array of double values. Optional.
 
-    llValue  int  useful to record a long long data.
+        vvdValues (float []  [] ): Array(, ) useful to store an array of array(s) of double values. Optional.
 
-    vllValue  int []     useful to store an array of array(s) of long long values.
+        llValue (int): useful to record a long long data. Optional.
 
-    vvllValue  int []  []   ,   useful to store an array of array(s) long long values.
+        vllValue (int [] ): Array() useful to store an array of array(s) of long long values. Optional.
 
-    sValue  str  details of this annotation.
+        vvllValue (int []  [] ): Array(, ) useful to store an array of array(s) long long values. Optional.
 
-    antennaId  Tag []   numAntenna  refers to a collection of rows in the AntennaTable.
+        sValue (str): details of this annotation. Optional.
+
+        antennaId (Tag [] ): Array(numAntenna) refers to a collection of rows in the AntennaTable. Optional.
 
 
     """
@@ -272,7 +290,7 @@ class AnnotationTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\annotationId,
+        homologues in x.  If a row is found that row else autoincrement x.annotationId,
         add x to its table and returns x.
 
         returns a AnnotationRow.

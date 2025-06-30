@@ -55,50 +55,68 @@ class SubscanTable:
     """
     The SubscanTable class is an Alma table.
 
-    Role
     Subscan-based information.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Subscan
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    execBlockId Tag identifies a unique row in ExecBlockTable. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    scanNumber int the number of the scan this subscan belongs to. </TD>
-
-
-
-    subscanNumber int the subscan number. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startTime  ArrayTime  the actual start time of the subscan.
-
-    endTime  ArrayTime  the actual end time of the subscan.
-
-    fieldName  str  the name of the observed field.
-
-    subscanIntent  SubscanIntent  the intent of the subscan.
-
-    numIntegration (numIntegration) int  the number of integrations during the scan.
-
-    numSubintegration (numSubintegration) int []   numIntegration  the number of subintegrations for each integration.
+    Attributes:
 
 
 
-                 Value (Optional)
+        execBlockId (Tag): identifies a unique row in ExecBlockTable. key.
 
-    subscanMode  SwitchingMode  identifies the data acquisition mode during the subscan.
 
-    correlatorCalibration  CorrelatorCalibration  identifies the correlator calibration during the subscan.
+
+        scanNumber (int): the number of the scan this subscan belongs to. key.
+
+
+
+        subscanNumber (int): the subscan number. key.
+
+
+
+
+
+        startTime (ArrayTime): the actual start time of the subscan.
+
+        endTime (ArrayTime): the actual end time of the subscan.
+
+        fieldName (str): the name of the observed field.
+
+        subscanIntent (SubscanIntent): the intent of the subscan.
+
+        numIntegration (int): the number of integrations during the scan.
+
+        numSubintegration (int [] ): Array(numIntegration) the number of subintegrations for each integration.
+
+
+
+
+        subscanMode (SwitchingMode): identifies the data acquisition mode during the subscan. Optional.
+
+        correlatorCalibration (CorrelatorCalibration): identifies the correlator calibration during the subscan. Optional.
 
 
     """

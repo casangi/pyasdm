@@ -55,44 +55,62 @@ class AntennaTable:
     """
     The AntennaTable class is an Alma table.
 
-    Role
     Antenna characteristics.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Antenna
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-
-                 Value (Mandatory)
-
-    name  str  the antenna's name.
-
-    antennaMake  AntennaMake  the antenna's make.
-
-    antennaType  AntennaType  the antenna's type.
-
-    dishDiameter  Length  the diameter of the main reflector.
-
-    position  Length []   3  the antenna's position.
-
-    offset  Length []   3  the position's offset.
-
-    time  ArrayTime  the time of position's measurement.
-
-    stationId  Tag  refers to the station where this antenna is located (i.e. one row in the Station table).
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaId (Tag): identifies a unique row in the table. auto-incrementable, key.
 
-    assocAntennaId  Tag  refers to an associate antenna (i.e. one row in the Antenna table).
+
+
+
+
+        name (str): the antenna's name.
+
+        antennaMake (AntennaMake): the antenna's make.
+
+        antennaType (AntennaType): the antenna's type.
+
+        dishDiameter (Length): the diameter of the main reflector.
+
+        position (Length [] ): Array(3) the antenna's position.
+
+        offset (Length [] ): Array(3) the position's offset.
+
+        time (ArrayTime): the time of position's measurement.
+
+        stationId (Tag): refers to the station where this antenna is located (i.e. one row in the Station table).
+
+
+
+
+        assocAntennaId (Tag): refers to an associate antenna (i.e. one row in the Antenna table). Optional.
 
 
     """
@@ -317,7 +335,7 @@ class AntennaTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\antennaId,
+        homologues in x.  If a row is found that row else autoincrement x.antennaId,
         add x to its table and returns x.
 
         returns a AntennaRow.

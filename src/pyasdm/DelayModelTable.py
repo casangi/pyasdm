@@ -55,90 +55,108 @@ class DelayModelTable:
     """
     The DelayModelTable class is an Alma table.
 
-    Role
     Contains the delay model components. For ALMA this includes all TMCDB delay model components.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of DelayModel
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaId Tag refers to a unique row in AntennaTable. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    spectralWindowId Tag refers to a unique row in  SpectraWindowTable. </TD>
-
-
-
-    timeInterval ArrayTimeInterval time interval for which the row's content is valid. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    numPoly (numPoly) int  the number of coefficients of the polynomials.
-
-    phaseDelay  float []   numPoly  the phase delay polynomial (rad).
-
-    phaseDelayRate  float []   numPoly  Phase delay rate polynomial (rad/s).
-
-    groupDelay  float []   numPoly  Group delay polynomial (s).
-
-    groupDelayRate  float []   numPoly  Group delay rate polynomial (s/s)
-
-    fieldId  Tag
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaId (Tag): refers to a unique row in AntennaTable. key.
 
-    timeOrigin  ArrayTime  value used as the origin for the evaluation of the polynomials.
 
-    atmosphericGroupDelay  float  Atmosphere group delay.
 
-    atmosphericGroupDelayRate  float  Atmosphere group delay rate.
+        spectralWindowId (Tag): refers to a unique row in  SpectraWindowTable. key.
 
-    geometricDelay  float  Geometric delay.
 
-    geometricDelayRate  float  Geometric delay.
 
-    numLO (numLO) int  the number of local oscillators.
+        timeInterval (ArrayTimeInterval): time interval for which the row's content is valid. key.
 
-    LOOffset  Frequency []   numLO  Local oscillator offset.
 
-    LOOffsetRate  Frequency []   numLO  Local oscillator offset rate.
 
-    dispersiveDelay  float  Dispersive delay.
 
-    dispersiveDelayRate  float  Dispersive delay rate.
 
-    atmosphericDryDelay  float  the dry atmospheric delay component.
+        numPoly (int): the number of coefficients of the polynomials.
 
-    atmosphericWetDelay  float  the wet atmospheric delay.
+        phaseDelay (float [] ): Array(numPoly) the phase delay polynomial (rad).
 
-    padDelay  float  Pad delay.
+        phaseDelayRate (float [] ): Array(numPoly) Phase delay rate polynomial (rad/s).
 
-    antennaDelay  float  Antenna delay.
+        groupDelay (float [] ): Array(numPoly) Group delay polynomial (s).
 
-    numReceptor (numReceptor) int
+        groupDelayRate (float [] ): Array(numPoly) Group delay rate polynomial (s/s)
 
-    polarizationType  PolarizationType []   numReceptor  describes the polarizations of the receptors (one value per receptor).
+        fieldId (Tag):
 
-    electronicDelay  float []   numReceptor  the electronic delay.
 
-    electronicDelayRate  float []   numReceptor  the electronic delay rate.
 
-    receiverDelay  float []   numReceptor  the receiver delay.
 
-    IFDelay  float []   numReceptor  the intermediate frequency delay.
+        timeOrigin (ArrayTime): value used as the origin for the evaluation of the polynomials. Optional.
 
-    LODelay  float []   numReceptor  the local oscillator delay.
+        atmosphericGroupDelay (float): Atmosphere group delay. Optional.
 
-    crossPolarizationDelay  float  the cross polarization delay.
+        atmosphericGroupDelayRate (float): Atmosphere group delay rate. Optional.
+
+        geometricDelay (float): Geometric delay. Optional.
+
+        geometricDelayRate (float): Geometric delay. Optional.
+
+        numLO (int): the number of local oscillators. Optional.
+
+        LOOffset (Frequency [] ): Array(numLO) Local oscillator offset. Optional.
+
+        LOOffsetRate (Frequency [] ): Array(numLO) Local oscillator offset rate. Optional.
+
+        dispersiveDelay (float): Dispersive delay. Optional.
+
+        dispersiveDelayRate (float): Dispersive delay rate. Optional.
+
+        atmosphericDryDelay (float): the dry atmospheric delay component. Optional.
+
+        atmosphericWetDelay (float): the wet atmospheric delay. Optional.
+
+        padDelay (float): Pad delay. Optional.
+
+        antennaDelay (float): Antenna delay. Optional.
+
+        numReceptor (int):  Optional.
+
+        polarizationType (PolarizationType [] ): Array(numReceptor) describes the polarizations of the receptors (one value per receptor). Optional.
+
+        electronicDelay (float [] ): Array(numReceptor) the electronic delay. Optional.
+
+        electronicDelayRate (float [] ): Array(numReceptor) the electronic delay rate. Optional.
+
+        receiverDelay (float [] ): Array(numReceptor) the receiver delay. Optional.
+
+        IFDelay (float [] ): Array(numReceptor) the intermediate frequency delay. Optional.
+
+        LODelay (float [] ): Array(numReceptor) the local oscillator delay. Optional.
+
+        crossPolarizationDelay (float): the cross polarization delay. Optional.
 
 
     """

@@ -55,82 +55,100 @@ class ExecBlockTable:
     """
     The ExecBlockTable class is an Alma table.
 
-    Role
     Characteristics of the Execution block.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of ExecBlock
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    execBlockId Tag (auto-incrementable)     identifies a unique row in ExecBlock Table. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-
-                 Value (Mandatory)
-
-    startTime  ArrayTime  the start time of the execution block.
-
-    endTime  ArrayTime  the end time of the execution block.
-
-    execBlockNum  int  indicates the position of the execution block in the project (sequential numbering starting at 1).
-
-    execBlockUID  EntityRef  the archive's UID of the execution block.
-
-    projectUID  EntityRef  the archive's UID of the project.
-
-    configName  str  the name of the array's configuration.
-
-    telescopeName  str  the name of the telescope.
-
-    observerName  str  the name of the observer.
-
-    numObservingLog (numObservingLog) int  the number of elements in the (array) attribute observingLog.
-
-    observingLog  str []   numObservingLog   logs of the observation during this execution block.
-
-    sessionReference  EntityRef  the observing session reference.
-
-    baseRangeMin  Length  the length of the shortest baseline.
-
-    baseRangeMax  Length  the length of the longest baseline.
-
-    baseRmsMinor  Length  the minor axis of the representative ellipse of baseline lengths.
-
-    baseRmsMajor  Length  the major axis of the representative ellipse of baseline lengths.
-
-    basePa  Angle  the baselines position angle.
-
-    aborted  bool  the execution block has been aborted (true) or has completed (false).
-
-    numAntenna (numAntenna) int  the number of antennas.
-
-    antennaId  Tag []   numAntenna  refers to the relevant rows in AntennaTable.
-
-    sBSummaryId  Tag  refers to a unique row  in SBSummaryTable.
+    Attributes:
 
 
 
-                 Value (Optional)
+        execBlockId (Tag): identifies a unique row in ExecBlock Table. auto-incrementable, key.
 
-    releaseDate  ArrayTime  the date when the data go to the public domain.
 
-    schedulerMode  str  the mode of scheduling.
 
-    siteAltitude  Length  the altitude of the site.
 
-    siteLongitude  Angle  the longitude of the site.
 
-    siteLatitude  Angle  the latitude of the site.
+        startTime (ArrayTime): the start time of the execution block.
 
-    observingScript  str  The text of the observation script.
+        endTime (ArrayTime): the end time of the execution block.
 
-    observingScriptUID  EntityRef  A reference to the Entity which contains the observing script.
+        execBlockNum (int): indicates the position of the execution block in the project (sequential numbering starting at 1).
 
-    scaleId  Tag  refers to a unique row in the table Scale.
+        execBlockUID (EntityRef): the archive's UID of the execution block.
+
+        projectUID (EntityRef): the archive's UID of the project.
+
+        configName (str): the name of the array's configuration.
+
+        telescopeName (str): the name of the telescope.
+
+        observerName (str): the name of the observer.
+
+        numObservingLog (int): the number of elements in the (array) attribute observingLog.
+
+        observingLog (str [] ): Array(numObservingLog)  logs of the observation during this execution block.
+
+        sessionReference (EntityRef): the observing session reference.
+
+        baseRangeMin (Length): the length of the shortest baseline.
+
+        baseRangeMax (Length): the length of the longest baseline.
+
+        baseRmsMinor (Length): the minor axis of the representative ellipse of baseline lengths.
+
+        baseRmsMajor (Length): the major axis of the representative ellipse of baseline lengths.
+
+        basePa (Angle): the baselines position angle.
+
+        aborted (bool): the execution block has been aborted (true) or has completed (false).
+
+        numAntenna (int): the number of antennas.
+
+        antennaId (Tag [] ): Array(numAntenna) refers to the relevant rows in AntennaTable.
+
+        sBSummaryId (Tag): refers to a unique row  in SBSummaryTable.
+
+
+
+
+        releaseDate (ArrayTime): the date when the data go to the public domain. Optional.
+
+        schedulerMode (str): the mode of scheduling. Optional.
+
+        siteAltitude (Length): the altitude of the site. Optional.
+
+        siteLongitude (Angle): the longitude of the site. Optional.
+
+        siteLatitude (Angle): the latitude of the site. Optional.
+
+        observingScript (str): The text of the observation script. Optional.
+
+        observingScriptUID (EntityRef): A reference to the Entity which contains the observing script. Optional.
+
+        scaleId (Tag): refers to a unique row in the table Scale. Optional.
 
 
     """
@@ -450,7 +468,7 @@ class ExecBlockTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\execBlockId,
+        homologues in x.  If a row is found that row else autoincrement x.execBlockId,
         add x to its table and returns x.
 
         returns a ExecBlockRow.

@@ -55,104 +55,122 @@ class CalAtmosphereTable:
     """
     The CalAtmosphereTable class is an Alma table.
 
-    Role
     Results of atmosphere calibration by TelCal. This calibration determines the system temperatures corrected for atmospheric absorption. Ionospheric effects are not dealt with in the Table.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalAtmosphere
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaName str the name of the antenna. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    receiverBand ReceiverBand identifies the receiver band. </TD>
-
-
-
-    basebandName BasebandName identifies the baseband. </TD>
-
-
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  the start time of result validity period.
-
-    endValidTime  ArrayTime  the end time of result validity period.
-
-    numFreq (numFreq) int  the number of frequency points.
-
-    numLoad (numLoad) int  the number of loads.
-
-    numReceptor (numReceptor) int  the number of receptors.
-
-    forwardEffSpectrum  float []  []   numReceptor, numFreq  the spectra of forward efficiencies (one value per receptor, per frequency).
-
-    frequencyRange  Frequency []   2  the frequency range.
-
-    groundPressure  Pressure  the ground pressure.
-
-    groundRelHumidity  Humidity  the ground relative humidity.
-
-    frequencySpectrum  Frequency []   numFreq  the frequencies.
-
-    groundTemperature  Temperature  the ground temperature.
-
-    polarizationTypes  PolarizationType []   numReceptor  the polarizations of the receptors (an array with one value per receptor).
-
-    powerSkySpectrum  float []  []   numReceptor, numFreq  the powers on the sky (one value per receptor per frequency).
-
-    powerLoadSpectrum  float []  []  []   numLoad, numReceptor, numFreq  the powers on the loads (one value per load per receptor per frequency).
-
-    syscalType  SyscalMethod  the type of calibration used.
-
-    tAtmSpectrum  Temperature []  []   numReceptor, numFreq  the spectra of atmosphere physical  temperatures (one value per receptor per frequency).
-
-    tRecSpectrum  Temperature []  []   numReceptor, numFreq  the spectra of the receptors temperatures (one value  per receptor per frequency).
-
-    tSysSpectrum  Temperature []  []   numReceptor, numFreq  the spectra of system temperatures (one value  per receptor per frequency).
-
-    tauSpectrum  float []  []   numReceptor, numFreq  the spectra of atmosheric optical depths (one value  per receptor per frequency).
-
-    tAtm  Temperature []   numReceptor  the atmosphere physical temperatures (one value per receptor).
-
-    tRec  Temperature []   numReceptor  the receptors temperatures (one value per receptor).
-
-    tSys  Temperature []   numReceptor  the system temperatures (one value per receptor).
-
-    tau  float []   numReceptor  the atmospheric optical depths (one value per receptor).
-
-    water  Length []   numReceptor  the water vapor path lengths (one value per receptor).
-
-    waterError  Length []   numReceptor  the uncertainties of water vapor contents (one value per receptor).
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaName (str): the name of the antenna. key.
 
-    alphaSpectrum  float []  []   numReceptor, numFreq  the alpha coefficients, two loads only (one value per receptor per frequency).
 
-    forwardEfficiency  float []   numReceptor  the forward efficiencies (one value per receptor).
 
-    forwardEfficiencyError  float []   numReceptor  the uncertainties on forwardEfficiency (one value per receptor).
+        receiverBand (ReceiverBand): identifies the receiver band. key.
 
-    sbGain  float []   numReceptor  the relative gains of LO1 sideband (one value per receptor).
 
-    sbGainError  float []   numReceptor  the uncertainties on the relative gains of LO1 sideband (one value per receptor).
 
-    sbGainSpectrum  float []  []   numReceptor, numFreq  the spectra of relative sideband gains (one value  per receptor per frequency).
+        basebandName (BasebandName): identifies the baseband. key.
+
+
+
+        calDataId (Tag): refers to a unique row in CalData Table. key.
+
+
+
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
+
+
+
+
+
+        startValidTime (ArrayTime): the start time of result validity period.
+
+        endValidTime (ArrayTime): the end time of result validity period.
+
+        numFreq (int): the number of frequency points.
+
+        numLoad (int): the number of loads.
+
+        numReceptor (int): the number of receptors.
+
+        forwardEffSpectrum (float []  [] ): Array(numReceptor, numFreq) the spectra of forward efficiencies (one value per receptor, per frequency).
+
+        frequencyRange (Frequency [] ): Array(2) the frequency range.
+
+        groundPressure (Pressure): the ground pressure.
+
+        groundRelHumidity (Humidity): the ground relative humidity.
+
+        frequencySpectrum (Frequency [] ): Array(numFreq) the frequencies.
+
+        groundTemperature (Temperature): the ground temperature.
+
+        polarizationTypes (PolarizationType [] ): Array(numReceptor) the polarizations of the receptors (an array with one value per receptor).
+
+        powerSkySpectrum (float []  [] ): Array(numReceptor, numFreq) the powers on the sky (one value per receptor per frequency).
+
+        powerLoadSpectrum (float []  []  [] ): Array(numLoad, numReceptor, numFreq) the powers on the loads (one value per load per receptor per frequency).
+
+        syscalType (SyscalMethod): the type of calibration used.
+
+        tAtmSpectrum (Temperature []  [] ): Array(numReceptor, numFreq) the spectra of atmosphere physical  temperatures (one value per receptor per frequency).
+
+        tRecSpectrum (Temperature []  [] ): Array(numReceptor, numFreq) the spectra of the receptors temperatures (one value  per receptor per frequency).
+
+        tSysSpectrum (Temperature []  [] ): Array(numReceptor, numFreq) the spectra of system temperatures (one value  per receptor per frequency).
+
+        tauSpectrum (float []  [] ): Array(numReceptor, numFreq) the spectra of atmosheric optical depths (one value  per receptor per frequency).
+
+        tAtm (Temperature [] ): Array(numReceptor) the atmosphere physical temperatures (one value per receptor).
+
+        tRec (Temperature [] ): Array(numReceptor) the receptors temperatures (one value per receptor).
+
+        tSys (Temperature [] ): Array(numReceptor) the system temperatures (one value per receptor).
+
+        tau (float [] ): Array(numReceptor) the atmospheric optical depths (one value per receptor).
+
+        water (Length [] ): Array(numReceptor) the water vapor path lengths (one value per receptor).
+
+        waterError (Length [] ): Array(numReceptor) the uncertainties of water vapor contents (one value per receptor).
+
+
+
+
+        alphaSpectrum (float []  [] ): Array(numReceptor, numFreq) the alpha coefficients, two loads only (one value per receptor per frequency). Optional.
+
+        forwardEfficiency (float [] ): Array(numReceptor) the forward efficiencies (one value per receptor). Optional.
+
+        forwardEfficiencyError (float [] ): Array(numReceptor) the uncertainties on forwardEfficiency (one value per receptor). Optional.
+
+        sbGain (float [] ): Array(numReceptor) the relative gains of LO1 sideband (one value per receptor). Optional.
+
+        sbGainError (float [] ): Array(numReceptor) the uncertainties on the relative gains of LO1 sideband (one value per receptor). Optional.
+
+        sbGainSpectrum (float []  [] ): Array(numReceptor, numFreq) the spectra of relative sideband gains (one value  per receptor per frequency). Optional.
 
 
     """

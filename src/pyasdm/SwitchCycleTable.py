@@ -55,40 +55,58 @@ class SwitchCycleTable:
     """
     The SwitchCycleTable class is an Alma table.
 
-    Role
     Cycle information in switching modes. Describe each step in a switching cycle.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of SwitchCycle
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    switchCycleId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
+
+        switchCycleId (Tag): identifies a unique row in the table. auto-incrementable, key.
 
 
 
 
-                 Value (Mandatory)
 
-    numStep (numStep) int  the number of steps.
+        numStep (int): the number of steps.
 
-    weightArray  float []   numStep  the weights (one value per step).
+        weightArray (float [] ): Array(numStep) the weights (one value per step).
 
-    dirOffsetArray  Angle []  []   numStep, 2  the pointing direction offsets (one pair per step).
+        dirOffsetArray (Angle []  [] ): Array(numStep, 2) the pointing direction offsets (one pair per step).
 
-    freqOffsetArray  Frequency []   numStep  the frequencies offsets (one value per step).
+        freqOffsetArray (Frequency [] ): Array(numStep) the frequencies offsets (one value per step).
 
-    stepDurationArray  Interval []   numStep  the duration of the steps (one value per steps).
-
+        stepDurationArray (Interval [] ): Array(numStep) the duration of the steps (one value per steps).
 
 
-                 Value (Optional)
 
-    directionCode  DirectionReferenceCode  the reference frame associated to dirOffsetArray.t
 
-    directionEquinox  ArrayTime  the equinox associated to directionCode (if required).
+        directionCode (DirectionReferenceCode): the reference frame associated to dirOffsetArray.t Optional.
+
+        directionEquinox (ArrayTime): the equinox associated to directionCode (if required). Optional.
 
 
     """
@@ -294,7 +312,7 @@ class SwitchCycleTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\switchCycleId,
+        homologues in x.  If a row is found that row else autoincrement x.switchCycleId,
         add x to its table and returns x.
 
         returns a SwitchCycleRow.

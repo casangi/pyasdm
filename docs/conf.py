@@ -40,6 +40,7 @@ release = "0.1b"
 # ones.
 extensions = [
     "nbsphinx",
+    "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.todo",

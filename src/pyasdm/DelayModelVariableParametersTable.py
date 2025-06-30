@@ -55,52 +55,70 @@ class DelayModelVariableParametersTable:
     """
     The DelayModelVariableParametersTable class is an Alma table.
 
-    Role
 
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of DelayModelVariableParameters
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    delayModelVariableParametersId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-
-                 Value (Mandatory)
-
-    time  ArrayTime  the day and time relevant for the data in this row.
-
-    ut1_utc  float  \f$ UT1 - UTC \f$ in \f$ second \f$.
-
-    iat_utc  float  \f$ IAT - UTC \f$ in \f$ second \f$.
-
-    timeType  DifferenceType  the type of the two time differences expressed in ut1_utc and iat_utc
-
-    gstAtUt0  Angle  in \f$ radian \f$.
-
-    earthRotationRate  AngularRate  in \f$ radian \ s^{-1} \f$ (the seconds are in \f$ IAT \f$).
-
-    polarOffsets  float []   2  the \f$ X, Y \f$ polar offsets in \f$ arcsec \f$.
-
-    polarOffsetsType  DifferenceType  the type of the polar offsets (values found in polarOffsets).
-
-    delayModelFixedParametersId  Tag  refers to a unique row of the DelayModelFixedParameters table.
+    Attributes:
 
 
 
-                 Value (Optional)
+        delayModelVariableParametersId (Tag): identifies a unique row in the table. auto-incrementable, key.
 
-    nutationInLongitude  Angle  the nutation in longitude ( the part parallel to the ecliptic) in \f$ radian \f$.
 
-    nutationInLongitudeRate  AngularRate  the rate of nutation in longitude in \f$ radian \ s^{-1} \f$.
 
-    nutationInObliquity  Angle  the nutation in obliquity (the part perpendicular to the ecliptic) in \f$ radian \f$.
 
-    nutationInObliquityRate  AngularRate  the rate of nutation in obliquity in \f$ radian \ s^{-1} \f$.
+
+        time (ArrayTime): the day and time relevant for the data in this row.
+
+        ut1_utc (float):  UT1 - UTC  in  second .
+
+        iat_utc (float):  IAT - UTC  in  second .
+
+        timeType (DifferenceType): the type of the two time differences expressed in ut1_utc and iat_utc
+
+        gstAtUt0 (Angle): in  radian .
+
+        earthRotationRate (AngularRate): in  radian \ s^{-1}  (the seconds are in  IAT ).
+
+        polarOffsets (float [] ): Array(2) the  X, Y  polar offsets in  arcsec .
+
+        polarOffsetsType (DifferenceType): the type of the polar offsets (values found in polarOffsets).
+
+        delayModelFixedParametersId (Tag): refers to a unique row of the DelayModelFixedParameters table.
+
+
+
+
+        nutationInLongitude (Angle): the nutation in longitude ( the part parallel to the ecliptic) in  radian . Optional.
+
+        nutationInLongitudeRate (AngularRate): the rate of nutation in longitude in  radian \ s^{-1} . Optional.
+
+        nutationInObliquity (Angle): the nutation in obliquity (the part perpendicular to the ecliptic) in  radian . Optional.
+
+        nutationInObliquityRate (AngularRate): the rate of nutation in obliquity in  radian \ s^{-1} . Optional.
 
 
     """
@@ -390,7 +408,7 @@ class DelayModelVariableParametersTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\delayModelVariableParametersId,
+        homologues in x.  If a row is found that row else autoincrement x.delayModelVariableParametersId,
         add x to its table and returns x.
 
         returns a DelayModelVariableParametersRow.

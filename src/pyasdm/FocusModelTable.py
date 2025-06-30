@@ -55,42 +55,61 @@ class FocusModelTable:
     """
     The FocusModelTable class is an Alma table.
 
-    Role
     Contains the focus model data (function of elevation and temperature).
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of FocusModel
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    antennaId Tag refers to a unique row in AntennaTable. </TD>
+
+        antennaId (Tag): refers to a unique row in AntennaTable. key.
 
 
 
-    focusModelId int (auto-incrementable)     refers to a collection of rows in the table. </TD>
+        focusModelId (int): refers to a collection of rows in the table. auto-incrementable, key.
 
 
 
 
-                 Value (Mandatory)
 
-    polarizationType  PolarizationType  identifies the polarization type.
+        polarizationType (PolarizationType): identifies the polarization type.
 
-    receiverBand  ReceiverBand  identifies the receiver band.
+        receiverBand (ReceiverBand): identifies the receiver band.
 
-    numCoeff (numCoeff) int  the number of coefficients.
+        numCoeff (int): the number of coefficients.
 
-    coeffName  str []   numCoeff  the names of the coefficients (one string per coefficient).
+        coeffName (str [] ): Array(numCoeff) the names of the coefficients (one string per coefficient).
 
-    coeffFormula  str []   numCoeff  textual representations of the fitted functions (one string per coefficient).
+        coeffFormula (str [] ): Array(numCoeff) textual representations of the fitted functions (one string per coefficient).
 
-    coeffVal  float []   numCoeff  the values of the coefficients used (one value per coefficient).
+        coeffVal (float [] ): Array(numCoeff) the values of the coefficients used (one value per coefficient).
 
-    assocNature  str  nature of the association with the row refered to by associatedFocusModelId.
+        assocNature (str): nature of the association with the row refered to by associatedFocusModelId.
 
-    assocFocusModelId  int  refers to a collection of rows in the table.
+        assocFocusModelId (int): refers to a collection of rows in the table.
 
 
 
@@ -270,7 +289,7 @@ class FocusModelTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\focusModelId,
+        homologues in x.  If a row is found that row else autoincrement x.focusModelId,
         add x to its table and returns x.
 
         returns a FocusModelRow.

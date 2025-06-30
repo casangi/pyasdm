@@ -55,36 +55,55 @@ class FreqOffsetTable:
     """
     The FreqOffsetTable class is an Alma table.
 
-    Role
     Frequency offset information. Contains an additional antenna-based frequency  offset relative to the frequencies in the Spectral Windows. Useful for such  thing as Doppler tracking.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of FreqOffset
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    antennaId Tag refers to a unique row in AntennaTable. </TD>
+
+        antennaId (Tag): refers to a unique row in AntennaTable. key.
 
 
 
-    spectralWindowId Tag refers to a unique row in SpectralWindowTable. </TD>
+        spectralWindowId (Tag): refers to a unique row in SpectralWindowTable. key.
 
 
 
-    timeInterval ArrayTimeInterval the time interval of validity of the row's content. </TD>
+        timeInterval (ArrayTimeInterval): the time interval of validity of the row's content. key.
 
 
 
-    feedId int refers to a collection of rows in FeedTable. </TD>
+        feedId (int): refers to a collection of rows in FeedTable. key.
 
 
 
 
-                 Value (Mandatory)
 
-    offset  Frequency  frequency offset.
+        offset (Frequency): frequency offset.
 
 
 

@@ -55,102 +55,120 @@ class CalFocusTable:
     """
     The CalFocusTable class is an Alma table.
 
-    Role
     Result of focus calibration performed on-line by TelCal.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalFocus
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaName str the name of the antenna. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    receiverBand ReceiverBand identifies the receiver band. </TD>
-
-
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  the start time of the result validity period.
-
-    endValidTime  ArrayTime  the end time of the result validity period.
-
-    ambientTemperature  Temperature  the ambient temperature.
-
-    atmPhaseCorrection  AtmPhaseCorrection  qualifies how the atmospheric phase correction has been applied.
-
-    focusMethod  FocusMethod  identifies the method used during the calibration.
-
-    frequencyRange  Frequency []   2  the frequency range over which the result is valid.
-
-    pointingDirection  Angle []   2  the antenna pointing direction (horizontal coordinates).
-
-    numReceptor (numReceptor) int  the number of receptors.
-
-    polarizationTypes  PolarizationType []   numReceptor  identifies the polarization types (one value per receptor).
-
-    wereFixed  bool []   3  coordinates were fixed (true) or not fixed (false) (one value per individual coordinate).
-
-    offset  Length []  []   numReceptor, 3  the measured focus offsets in X,Y,Z (one triple of values per receptor).
-
-    offsetError  Length []  []   numReceptor, 3  the statistical uncertainties on measured focus offsets (one triple per receptor).
-
-    offsetWasTied  bool []  []   numReceptor, 3  focus was tied (true) or not tied (false) (one value per receptor and focus individual coordinate).
-
-    reducedChiSquared  float []  []   numReceptor, 3  a measure of the quality of the fit (one triple per receptor).
-
-    position  Length []  []   numReceptor, 3  the absolute focus position in X,Y,Z (one triple of values per receptor).
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaName (str): the name of the antenna. key.
 
-    polarizationsAveraged  bool  Polarizations were averaged.
 
-    focusCurveWidth  Length []  []   numReceptor, 3  half power width of fitted focus curve (one triple per receptor).
 
-    focusCurveWidthError  Length []  []   numReceptor, 3  Uncertainty of the focus curve width.
+        receiverBand (ReceiverBand): identifies the receiver band. key.
 
-    focusCurveWasFixed  bool []   3  each coordinate of the focus curve width was set (true) or not set (false) to an assumed value.
 
-    offIntensity  Temperature []   numReceptor  the off intensity levels (one value per receptor).
 
-    offIntensityError  Temperature []   numReceptor  the uncertainties on the off intensity levels (one value per receptor).
+        calDataId (Tag): refers to a unique row in CalData Table. key.
 
-    offIntensityWasFixed  bool  the off intensity level was fixed (true) or not fixed (false).
 
-    peakIntensity  Temperature []   numReceptor  the maximum intensities (one value per receptor).
 
-    peakIntensityError  Temperature []   numReceptor  the uncertainties on the maximum intensities (one value per receptor).
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
 
-    peakIntensityWasFixed  bool  the maximum intensity was fixed (true) or not fixed (false).
 
-    astigmPlus  Length []   numReceptor  the astigmatism component with 0 degree symmetry axis.
 
-    astigmPlusError  Length []   numReceptor  the statistical error on astigmPlus
 
-    astigmMult  Length []   numReceptor  the astigmatism component with 45 degrees symmetry axis.
 
-    astigmMultError  Length []   numReceptor  the statistical error on astigmMult
+        startValidTime (ArrayTime): the start time of the result validity period.
 
-    illumOffset  Length []  []   numReceptor, 2  the illumination offset of the primary reflector expressed as a pair of values.
+        endValidTime (ArrayTime): the end time of the result validity period.
 
-    illumOffsetError  Length []  []   numReceptor, 2  the statistical error on illumOffset.
+        ambientTemperature (Temperature): the ambient temperature.
 
-    fitRMS  Length []   numReceptor  The RMS of the half path length after removing the best fit parabola.
+        atmPhaseCorrection (AtmPhaseCorrection): qualifies how the atmospheric phase correction has been applied.
+
+        focusMethod (FocusMethod): identifies the method used during the calibration.
+
+        frequencyRange (Frequency [] ): Array(2) the frequency range over which the result is valid.
+
+        pointingDirection (Angle [] ): Array(2) the antenna pointing direction (horizontal coordinates).
+
+        numReceptor (int): the number of receptors.
+
+        polarizationTypes (PolarizationType [] ): Array(numReceptor) identifies the polarization types (one value per receptor).
+
+        wereFixed (bool [] ): Array(3) coordinates were fixed (true) or not fixed (false) (one value per individual coordinate).
+
+        offset (Length []  [] ): Array(numReceptor, 3) the measured focus offsets in X,Y,Z (one triple of values per receptor).
+
+        offsetError (Length []  [] ): Array(numReceptor, 3) the statistical uncertainties on measured focus offsets (one triple per receptor).
+
+        offsetWasTied (bool []  [] ): Array(numReceptor, 3) focus was tied (true) or not tied (false) (one value per receptor and focus individual coordinate).
+
+        reducedChiSquared (float []  [] ): Array(numReceptor, 3) a measure of the quality of the fit (one triple per receptor).
+
+        position (Length []  [] ): Array(numReceptor, 3) the absolute focus position in X,Y,Z (one triple of values per receptor).
+
+
+
+
+        polarizationsAveraged (bool): Polarizations were averaged. Optional.
+
+        focusCurveWidth (Length []  [] ): Array(numReceptor, 3) half power width of fitted focus curve (one triple per receptor). Optional.
+
+        focusCurveWidthError (Length []  [] ): Array(numReceptor, 3) Uncertainty of the focus curve width. Optional.
+
+        focusCurveWasFixed (bool [] ): Array(3) each coordinate of the focus curve width was set (true) or not set (false) to an assumed value. Optional.
+
+        offIntensity (Temperature [] ): Array(numReceptor) the off intensity levels (one value per receptor). Optional.
+
+        offIntensityError (Temperature [] ): Array(numReceptor) the uncertainties on the off intensity levels (one value per receptor). Optional.
+
+        offIntensityWasFixed (bool): the off intensity level was fixed (true) or not fixed (false). Optional.
+
+        peakIntensity (Temperature [] ): Array(numReceptor) the maximum intensities (one value per receptor). Optional.
+
+        peakIntensityError (Temperature [] ): Array(numReceptor) the uncertainties on the maximum intensities (one value per receptor). Optional.
+
+        peakIntensityWasFixed (bool): the maximum intensity was fixed (true) or not fixed (false). Optional.
+
+        astigmPlus (Length [] ): Array(numReceptor) the astigmatism component with 0 degree symmetry axis. Optional.
+
+        astigmPlusError (Length [] ): Array(numReceptor) the statistical error on astigmPlus Optional.
+
+        astigmMult (Length [] ): Array(numReceptor) the astigmatism component with 45 degrees symmetry axis. Optional.
+
+        astigmMultError (Length [] ): Array(numReceptor) the statistical error on astigmMult Optional.
+
+        illumOffset (Length []  [] ): Array(numReceptor, 2) the illumination offset of the primary reflector expressed as a pair of values. Optional.
+
+        illumOffsetError (Length []  [] ): Array(numReceptor, 2) the statistical error on illumOffset. Optional.
+
+        fitRMS (Length [] ): Array(numReceptor) The RMS of the half path length after removing the best fit parabola. Optional.
 
 
     """

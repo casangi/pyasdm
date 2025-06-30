@@ -55,60 +55,78 @@ class ConfigDescriptionTable:
     """
     The ConfigDescriptionTable class is an Alma table.
 
-    Role
     Defines the hardware configuration used to  obtain the science data.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of ConfigDescription
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    configDescriptionId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-
-                 Value (Mandatory)
-
-    numAntenna (numAntenna) int  the number of antennas.
-
-    numDataDescription (numDataDescription) int  the number of data descriptions.
-
-    numFeed (numFeed) int  the number of feeds.
-
-    correlationMode  CorrelationMode  identifies the correlation mode.
-
-    numAtmPhaseCorrection (numAtmPhaseCorrection) int  the number of descriptions of the atmospheric phase correction.
-
-    atmPhaseCorrection  AtmPhaseCorrection []   numAtmPhaseCorrection  describe how the atmospheric phase corrections have been applied (one value per correction).
-
-    processorType  ProcessorType  identifies the generic processor's type.
-
-    spectralType  SpectralResolutionType  identifies the spectral type of the data.
-
-    antennaId  Tag []   numAntenna  identifies numAntenna rows in AntennaTable.
-
-    feedId  int []   numAntenna*numFeed  refers to many collections of rows in the Feed Table.
-
-    switchCycleId  Tag []   numDataDescription  refers to a unique row in the SwitchCycle Table.
-
-    dataDescriptionId  Tag []   numDataDescription  refers to one or more rows in DataDescriptionTable.
-
-    processorId  Tag  refers to a unique row in ProcessorTable.
+    Attributes:
 
 
 
-                 Value (Optional)
+        configDescriptionId (Tag): identifies a unique row in the table. auto-incrementable, key.
 
-    phasedArrayList  int []   numAntenna  phased array identifiers.
 
-    numAssocValues (numAssocValues) int  the number of associated config descriptions.
 
-    assocNature  SpectralResolutionType []   numAssocValues  the natures of the associations with other config descriptions (one value per association).
 
-    assocConfigDescriptionId  Tag []   numAssocValues  refers to one or more rows in ConfigDescriptionTable.
+
+        numAntenna (int): the number of antennas.
+
+        numDataDescription (int): the number of data descriptions.
+
+        numFeed (int): the number of feeds.
+
+        correlationMode (CorrelationMode): identifies the correlation mode.
+
+        numAtmPhaseCorrection (int): the number of descriptions of the atmospheric phase correction.
+
+        atmPhaseCorrection (AtmPhaseCorrection [] ): Array(numAtmPhaseCorrection) describe how the atmospheric phase corrections have been applied (one value per correction).
+
+        processorType (ProcessorType): identifies the generic processor's type.
+
+        spectralType (SpectralResolutionType): identifies the spectral type of the data.
+
+        antennaId (Tag [] ): Array(numAntenna) identifies numAntenna rows in AntennaTable.
+
+        feedId (int [] ): Array(numAntenna*numFeed) refers to many collections of rows in the Feed Table.
+
+        switchCycleId (Tag [] ): Array(numDataDescription) refers to a unique row in the SwitchCycle Table.
+
+        dataDescriptionId (Tag [] ): Array(numDataDescription) refers to one or more rows in DataDescriptionTable.
+
+        processorId (Tag): refers to a unique row in ProcessorTable.
+
+
+
+
+        phasedArrayList (int [] ): Array(numAntenna) phased array identifiers. Optional.
+
+        numAssocValues (int): the number of associated config descriptions. Optional.
+
+        assocNature (SpectralResolutionType [] ): Array(numAssocValues) the natures of the associations with other config descriptions (one value per association). Optional.
+
+        assocConfigDescriptionId (Tag [] ): Array(numAssocValues) refers to one or more rows in ConfigDescriptionTable. Optional.
 
 
     """
@@ -280,7 +298,7 @@ class ConfigDescriptionTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\configDescriptionId,
+        homologues in x.  If a row is found that row else autoincrement x.configDescriptionId,
         add x to its table and returns x.
 
         returns a ConfigDescriptionRow.

@@ -55,70 +55,88 @@ class CalPointingModelTable:
     """
     The CalPointingModelTable class is an Alma table.
 
-    Role
     Result of pointing model calibration performed by TelCal.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalPointingModel
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaName str the name of the antenna. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    receiverBand ReceiverBand identifies the receiver band. </TD>
-
-
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  the start time of result validity period.
-
-    endValidTime  ArrayTime  the end time of result validity period.
-
-    antennaMake  AntennaMake  the antenna make.
-
-    pointingModelMode  PointingModelMode  identifies the pointing model mode.
-
-    polarizationType  PolarizationType  identifies the polarization type.
-
-    numCoeff (numCoeff) int  the number of coefficients in the pointing model.
-
-    coeffName  str []   numCoeff  the names of the coefficients (one string per coefficient).
-
-    coeffVal  float []   numCoeff  the values of the coefficients resulting from the pointing model fitting (one value per coefficient).
-
-    coeffError  float []   numCoeff  the uncertainties on the pointing model coefficients (one value per coefficient).
-
-    coeffFixed  bool []   numCoeff  indicates if one coefficient was fixed (true) or not fixed (false) (one boolean per coefficient).
-
-    azimuthRMS  Angle  Azimuth RMS (on Sky)
-
-    elevationRms  Angle  Elevation rms (on Sky)
-
-    skyRMS  Angle  rms on sky
-
-    reducedChiSquared  float  measures the quality of the least square fit.
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaName (str): the name of the antenna. key.
 
-    numObs (numObs) int  the number of source directions observed to derive the pointing model.
 
-    coeffFormula  str []   numCoeff  formulas used for the fitting (one string per coefficient).
+
+        receiverBand (ReceiverBand): identifies the receiver band. key.
+
+
+
+        calDataId (Tag): refers to a unique row in CalData Table. key.
+
+
+
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
+
+
+
+
+
+        startValidTime (ArrayTime): the start time of result validity period.
+
+        endValidTime (ArrayTime): the end time of result validity period.
+
+        antennaMake (AntennaMake): the antenna make.
+
+        pointingModelMode (PointingModelMode): identifies the pointing model mode.
+
+        polarizationType (PolarizationType): identifies the polarization type.
+
+        numCoeff (int): the number of coefficients in the pointing model.
+
+        coeffName (str [] ): Array(numCoeff) the names of the coefficients (one string per coefficient).
+
+        coeffVal (float [] ): Array(numCoeff) the values of the coefficients resulting from the pointing model fitting (one value per coefficient).
+
+        coeffError (float [] ): Array(numCoeff) the uncertainties on the pointing model coefficients (one value per coefficient).
+
+        coeffFixed (bool [] ): Array(numCoeff) indicates if one coefficient was fixed (true) or not fixed (false) (one boolean per coefficient).
+
+        azimuthRMS (Angle): Azimuth RMS (on Sky)
+
+        elevationRms (Angle): Elevation rms (on Sky)
+
+        skyRMS (Angle): rms on sky
+
+        reducedChiSquared (float): measures the quality of the least square fit.
+
+
+
+
+        numObs (int): the number of source directions observed to derive the pointing model. Optional.
+
+        coeffFormula (str [] ): Array(numCoeff) formulas used for the fitting (one string per coefficient). Optional.
 
 
     """

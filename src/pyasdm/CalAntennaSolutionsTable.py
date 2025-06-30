@@ -53,77 +53,93 @@ import io
 
 class CalAntennaSolutionsTable:
     """
-        The CalAntennaSolutionsTable class is an Alma table.
+    The CalAntennaSolutionsTable class is an Alma table.
 
-        Role
-        Results of atmosphere calibration by TelCal. This calibration determines the system temperatures corrected for atmospheric absorption. Ionospheric effects are not dealt with in the Table.
+    Results of atmosphere calibration by TelCal. This calibration determines the system temperatures corrected for atmospheric absorption. Ionospheric effects are not dealt with in the Table.
 
-        Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-        Attributes of CalAntennaSolutions
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                     Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-        antennaName str the name of the antenna. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-        atmPhaseCorrection AtmPhaseCorrection  describes how the atmospheric phase correction has been applied. </TD>
-
-
-
-        receiverBand ReceiverBand identifies the receiver band. </TD>
-
-
-
-        basebandName BasebandName identifies the baseband. </TD>
-
-
-
-        calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-        calReductionId Tag refers to a unique row in CalReduction Table. </TD>
+    Attributes:
 
 
 
-        spectralWindowId Tag  </TD>
+        antennaName (str): the name of the antenna. key.
+
+
+
+        atmPhaseCorrection (AtmPhaseCorrection):  describes how the atmospheric phase correction has been applied. key.
+
+
+
+        receiverBand (ReceiverBand): identifies the receiver band. key.
+
+
+
+        basebandName (BasebandName): identifies the baseband. key.
+
+
+
+        calDataId (Tag): refers to a unique row in CalData Table. key.
+
+
+
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
+
+
+
+        spectralWindowId (Tag):  key.
 
 
 
 
-                     Value (Mandatory)
 
-        startValidTime  ArrayTime  the start time of result validity period.
+        startValidTime (ArrayTime): the start time of result validity period.
 
-        endValidTime  ArrayTime  the end time of result validity period.
+        endValidTime (ArrayTime): the end time of result validity period.
 
-        numReceptor (numReceptor) int  the number of receptors.
+        numReceptor (int): the number of receptors.
 
-        refAntennaName  str  the name of the antenna used as a
-    reference to get the antenna-based
-    phases.
+        refAntennaName (str): the name of the antenna used as a reference to get the antenna-based phases.
 
+        direction (Angle [] ): Array(2) the direction of the source.
 
-        direction  Angle []   2  the direction of the source.
+        frequencyRange (Frequency [] ): Array(2) the frequency range.
 
-        frequencyRange  Frequency []   2  the frequency range.
+        integrationTime (Interval): the integration duration for a data point.
 
-        integrationTime  Interval  the integration duration for a data point.
+        polarizationTypes (PolarizationType [] ): Array(numReceptor) the polarizations of the receptors (an array with one value per receptor).
 
-        polarizationTypes  PolarizationType []   numReceptor  the polarizations of the receptors (an array with one value per receptor).
+        correctionValidity (bool): the deduced validity of atmospheric path length correction (from water vapor radiometers).
 
-        correctionValidity  bool  the deduced validity of atmospheric path length correction (from water vapor radiometers).
+        phaseAnt (float [] ): Array(numReceptor) the antenna based phase solution averaged over the scan (one value per receptor per antenna). See refAntennaName for the association of the values of this array with the antennas.
 
-        phaseAnt  float []   numReceptor  the antenna based phase solution averaged over the scan (one value per receptor per antenna). See refAntennaName for the association of the values of this array with the antennas.
+        phaseAntRMS (float [] ): Array(numReceptor) the RMS of the phase fluctuations relative to the antenna based average phase (one value per receptor per antenna). See refAntennaName for the association of the values of this array with the antennas.
 
-        phaseAntRMS  float []   numReceptor  the RMS of the phase fluctuations relative to the antenna based average phase (one value per receptor per antenna). See refAntennaName for the association of the values of this array with the antennas.
+        amplitudeAnt (float [] ): Array(numReceptor) the antenna based amplitude solution averaged over the scan (one value per receptor per antenna). See refAntennaName for the association of the values of this array with the antennas.
 
-        amplitudeAnt  float []   numReceptor  the antenna based amplitude solution averaged over the scan (one value per receptor per antenna). See refAntennaName for the association of the values of this array with the antennas.
-
-        amplitudeAntRMS  float []   numReceptor  the antenna based amplitude solution averaged over the scan (one value per receptor per antenna). See refAntennaName for the association of the values of this array with the antennas.
+        amplitudeAntRMS (float [] ): Array(numReceptor) the antenna based amplitude solution averaged over the scan (one value per receptor per antenna). See refAntennaName for the association of the values of this array with the antennas.
 
 
 

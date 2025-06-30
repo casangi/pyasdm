@@ -55,28 +55,47 @@ class ProcessorTable:
     """
     The ProcessorTable class is an Alma table.
 
-    Role
     Processor characteristics. This table holds summary information for the  back-end processing devices used to generate the basic science  data.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Processor
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    processorId Tag (auto-incrementable)     Processor identifier </TD>
+
+        processorId (Tag): Processor identifier auto-incrementable, key.
 
 
 
 
-                 Value (Mandatory)
 
-    modeId  Tag  refers to a unique row in CorrelatorModeTable or SquareLawDetectorTable or AlmaRadiometerTable.
+        modeId (Tag): refers to a unique row in CorrelatorModeTable or SquareLawDetectorTable or AlmaRadiometerTable.
 
-    processorType  ProcessorType  identifies the generic type of the processor.
+        processorType (ProcessorType): identifies the generic type of the processor.
 
-    processorSubType  ProcessorSubType  identifies the type of processor refered to by modeId.
+        processorSubType (ProcessorSubType): identifies the type of processor refered to by modeId.
 
 
 
@@ -245,7 +264,7 @@ class ProcessorTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\processorId,
+        homologues in x.  If a row is found that row else autoincrement x.processorId,
         add x to its table and returns x.
 
         returns a ProcessorRow.

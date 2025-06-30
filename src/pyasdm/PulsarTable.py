@@ -55,49 +55,66 @@ class PulsarTable:
     """
     The PulsarTable class is an Alma table.
 
-    Role
     Polarization information.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Pulsar
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    pulsarId Tag (auto-incrementable)     Pulsar Table identifier </TD>
+
+        pulsarId (Tag): Pulsar Table identifier auto-incrementable, key.
 
 
 
 
-                 Value (Mandatory)
 
-    refTime  ArrayTime  Reference time for a polynomial
+        refTime (ArrayTime): Reference time for a polynomial
 
-    refPulseFreq  Frequency  Reference pulse frequency
+        refPulseFreq (Frequency): Reference pulse frequency
 
-    refPhase  float  Reference pulse phase (turns)
+        refPhase (float): Reference pulse phase (turns)
 
-    numBin (numBin) int  Number of phase bins
-
+        numBin (int): Number of phase bins
 
 
-                 Value (Optional)
 
-    numPoly (numPoly) int  Number of polynomial coefficients
 
-    phasePoly  float []   numPoly  The phase polynomial coefficients (Tempo units)
+        numPoly (int): Number of polynomial coefficients Optional.
 
-    timeSpan  Interval  Time range over which the polynomial is valid
+        phasePoly (float [] ): Array(numPoly) The phase polynomial coefficients (Tempo units) Optional.
 
-    startPhaseBin  float []   numBin  Start phase for each bin (turns)
+        timeSpan (Interval): Time range over which the polynomial is valid Optional.
 
-    endPhaseBin  float []   numBin  End phase for each bin (turns)
+        startPhaseBin (float [] ): Array(numBin) Start phase for each bin (turns) Optional.
 
-    dispersionMeasure  float  Dispersion measure applied, if data have been dedispersed (pc cm?3 )
+        endPhaseBin (float [] ): Array(numBin) End phase for each bin (turns) Optional.
 
-    refFrequency  Frequency  Reference radio frequency for dedispersion
+        dispersionMeasure (float): Dispersion measure applied, if data have been dedispersed (pc cm?3 ) Optional.
 
+        refFrequency (Frequency): Reference radio frequency for dedispersion  Optional.
 
 
     """
@@ -303,7 +320,7 @@ class PulsarTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\pulsarId,
+        homologues in x.  If a row is found that row else autoincrement x.pulsarId,
         add x to its table and returns x.
 
         returns a PulsarRow.

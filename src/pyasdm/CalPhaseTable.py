@@ -55,86 +55,102 @@ class CalPhaseTable:
     """
     The CalPhaseTable class is an Alma table.
 
-    Role
     Result of the phase calibration performed by TelCal.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalPhase
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    basebandName BasebandName identifies the baseband. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    receiverBand ReceiverBand identifies the receiver band. </TD>
-
-
-
-    atmPhaseCorrection AtmPhaseCorrection  describes how the atmospheric phase correction has been applied. </TD>
-
-
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  the start time of result validity period.
-
-    endValidTime  ArrayTime  the end time of result validity period.
-
-    numBaseline (numBaseline) int  the number of baselines.
-
-    numReceptor (numReceptor) int  the number of receptors.
-
-    ampli  float []  []   numReceptor, numBaseline  the amplitudes (one value per receptor per baseline).
-
-    antennaNames  str []  []   numBaseline, 2  the names of the antennas (one pair of strings per baseline).
-
-    baselineLengths  Length []   numBaseline  the physical lengths of the baselines (one value per baseline).
-
-    decorrelationFactor  float []  []   numReceptor, numBaseline  the decorrelation factors (one value per receptor per baseline).
-
-    direction  Angle []   2  the direction of the source.
-
-    frequencyRange  Frequency []   2  the frequency range over which the result is valid.
-
-    integrationTime  Interval  the integration duration for a data point.
-
-    phase  float []  []   numReceptor, numBaseline  the phases of the averaged interferometer signal (one value per receptor per baseline).
-
-    polarizationTypes  PolarizationType []   numReceptor  identifies the polarization types of the receptors (one value per receptor).
-
-    phaseRMS  float []  []   numReceptor, numBaseline  the RMS of phase fluctuations relative to the average signal (one value per receptor per baseline).
-
-    statPhaseRMS  float []  []   numReceptor, numBaseline  the RMS of phase deviations expected from the thermal fluctuations (one value per receptor per baseline).
+    Attributes:
 
 
 
-                 Value (Optional)
-
-    correctionValidity  bool []   numBaseline  the deduced validity of atmospheric path length correction (from water vapor radiometers).
-
-    numAntenna (numAntenna) int  the number of antennas. Defines the size \texttt{singleAntennaName}, \texttt{phaseAnt}, \texttt{phaseAntRMS}. One must pay attention to the fact that \numBaseline  and  \numAntenna  must verify the the relation  : \numBaseline == \numAntenna * (  \numAntenna - 1 )  / 2
+        basebandName (BasebandName): identifies the baseband. key.
 
 
 
-    singleAntennaName  str []   numAntenna  the ordered list of antenna names. The size of the array must be equal to the number of antennas.
+        receiverBand (ReceiverBand): identifies the receiver band. key.
 
-    refAntennaName  str   the name of the antenna used as a reference to get the antenna-based phases.
 
-    phaseAnt  float []  []   numReceptor, numAntenna  the antenna based phase solution averaged over the scan (one value per receptor per antenna). See singleAntennaName for the association of the values of this array with the antennas.
 
-    phaseAntRMS  float []  []   numReceptor, numAntenna  the RMS of the phase fluctuations relative to the antenna based average phase (one value per receptor per antenna). See singleAntennaName for the association of the values of this array with the antennas.
+        atmPhaseCorrection (AtmPhaseCorrection):  describes how the atmospheric phase correction has been applied. key.
+
+
+
+        calDataId (Tag): refers to a unique row in CalData Table. key.
+
+
+
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
+
+
+
+
+
+        startValidTime (ArrayTime): the start time of result validity period.
+
+        endValidTime (ArrayTime): the end time of result validity period.
+
+        numBaseline (int): the number of baselines.
+
+        numReceptor (int): the number of receptors.
+
+        ampli (float []  [] ): Array(numReceptor, numBaseline) the amplitudes (one value per receptor per baseline).
+
+        antennaNames (str []  [] ): Array(numBaseline, 2) the names of the antennas (one pair of strings per baseline).
+
+        baselineLengths (Length [] ): Array(numBaseline) the physical lengths of the baselines (one value per baseline).
+
+        decorrelationFactor (float []  [] ): Array(numReceptor, numBaseline) the decorrelation factors (one value per receptor per baseline).
+
+        direction (Angle [] ): Array(2) the direction of the source.
+
+        frequencyRange (Frequency [] ): Array(2) the frequency range over which the result is valid.
+
+        integrationTime (Interval): the integration duration for a data point.
+
+        phase (float []  [] ): Array(numReceptor, numBaseline) the phases of the averaged interferometer signal (one value per receptor per baseline).
+
+        polarizationTypes (PolarizationType [] ): Array(numReceptor) identifies the polarization types of the receptors (one value per receptor).
+
+        phaseRMS (float []  [] ): Array(numReceptor, numBaseline) the RMS of phase fluctuations relative to the average signal (one value per receptor per baseline).
+
+        statPhaseRMS (float []  [] ): Array(numReceptor, numBaseline) the RMS of phase deviations expected from the thermal fluctuations (one value per receptor per baseline).
+
+
+
+
+        correctionValidity (bool [] ): Array(numBaseline) the deduced validity of atmospheric path length correction (from water vapor radiometers). Optional.
+
+        numAntenna (int): the number of antennas. Defines the size singleAntennaName, phaseAnt, phaseAntRMS. One must pay attention to the fact that numBaseline  and  numAntenna  must verify the the relation  : numBaseline == numAntenna * (  numAntenna - 1 )  / 2   Optional.
+
+        singleAntennaName (str [] ): Array(numAntenna) the ordered list of antenna names. The size of the array must be equal to the number of antennas. Optional.
+
+        refAntennaName (str):  the name of the antenna used as a reference to get the antenna-based phases. Optional.
+
+        phaseAnt (float []  [] ): Array(numReceptor, numAntenna) the antenna based phase solution averaged over the scan (one value per receptor per antenna). See singleAntennaName for the association of the values of this array with the antennas. Optional.
+
+        phaseAntRMS (float []  [] ): Array(numReceptor, numAntenna) the RMS of the phase fluctuations relative to the antenna based average phase (one value per receptor per antenna). See singleAntennaName for the association of the values of this array with the antennas. Optional.
 
 
     """

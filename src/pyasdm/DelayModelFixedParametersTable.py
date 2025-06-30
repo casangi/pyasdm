@@ -55,65 +55,82 @@ class DelayModelFixedParametersTable:
     """
     The DelayModelFixedParametersTable class is an Alma table.
 
-    Role
 
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of DelayModelFixedParameters
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    delayModelFixedParametersId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-
-                 Value (Mandatory)
-
-    delayModelVersion  str   should include the name of the software and its version.  Something like  "CALC v11" or "VDT v1.0" or "MODEST v2.1".
-
-    execBlockId  Tag  refers to a unique row of the ExecBlock table.
-
-
-
-                 Value (Optional)
-
-    gaussConstant  AngularRate  the Gauss gravitational constant (should be of order \f$ 1.720209895.10^{-2} rad/d \f$ but in SI units of \f$ rad s^{-1} \f$).
-
-    newtonianConstant  float  the newtonian constant of gravitation (should be of order \f$ 6.67259.10^{-11} m^3  kg^{-1}  s^2 \f$).
-
-    gravity  float  the gravity acceleration in \f$ m s^{-2} \f$.
-
-    earthFlattening  float  the ratio of equatorial to polar radii.
-
-    earthRadius  Length  the earth equatorial radius in \f$ m \f$.
-
-    moonEarthMassRatio  float
-
-    ephemerisEpoch  str  should always be 'J2000'.
-
-    earthTideLag  float
-
-    earthGM  float  the earth gravitation constant in \f$ m^3 s^{-2} \f$.
-
-    moonGM  float  the moon gravitation constant in \f$ m^3 s^{-2} \f$.
-
-    sunGM  float  the sun gravitation constant in \f$ m^3 s^{-2} \f$.
-
-    loveNumberH  float  the earth global Love number H.
-
-    loveNumberL  float  the earth global Love number L.
-
-    precessionConstant  AngularRate  the general precession constant in \f$ arcsec \  s^{-1} \f$.
-
-    lightTime1AU  float  the light time for 1 AU in seconds.
-
-    speedOfLight  Speed  the speed of light in \f$ m s^{-1} \f$.
+    Attributes:
 
 
-    delayModelFlags  str  the delay model switches.
+
+        delayModelFixedParametersId (Tag): identifies a unique row in the table. auto-incrementable, key.
+
+
+
+
+
+        delayModelVersion (str):  should include the name of the software and its version.  Something like  "CALC v11" or "VDT v1.0" or "MODEST v2.1".
+
+        execBlockId (Tag): refers to a unique row of the ExecBlock table.
+
+
+
+
+        gaussConstant (AngularRate): the Gauss gravitational constant (should be of order  1.720209895.10^{-2} rad/d  but in SI units of  rad s^{-1} ).  Optional.
+
+        newtonianConstant (float): the newtonian constant of gravitation (should be of order  6.67259.10^{-11} m^3  kg^{-1}  s^2 ).  Optional.
+
+        gravity (float): the gravity acceleration in  m s^{-2} . Optional.
+
+        earthFlattening (float): the ratio of equatorial to polar radii. Optional.
+
+        earthRadius (Length): the earth equatorial radius in  m . Optional.
+
+        moonEarthMassRatio (float):  Optional.
+
+        ephemerisEpoch (str): should always be 'J2000'. Optional.
+
+        earthTideLag (float):  Optional.
+
+        earthGM (float): the earth gravitation constant in  m^3 s^{-2} . Optional.
+
+        moonGM (float): the moon gravitation constant in  m^3 s^{-2} . Optional.
+
+        sunGM (float): the sun gravitation constant in  m^3 s^{-2} . Optional.
+
+        loveNumberH (float): the earth global Love number H. Optional.
+
+        loveNumberL (float): the earth global Love number L. Optional.
+
+        precessionConstant (AngularRate): the general precession constant in  arcsec \  s^{-1} . Optional.
+
+        lightTime1AU (float): the light time for 1 AU in seconds. Optional.
+
+        speedOfLight (Speed): the speed of light in  m s^{-1} .  Optional.
+
+        delayModelFlags (str): the delay model switches. Optional.
 
 
     """
@@ -363,7 +380,7 @@ class DelayModelFixedParametersTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\delayModelFixedParametersId,
+        homologues in x.  If a row is found that row else autoincrement x.delayModelFixedParametersId,
         add x to its table and returns x.
 
         returns a DelayModelFixedParametersRow.

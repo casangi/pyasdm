@@ -55,96 +55,114 @@ class CalPointingTable:
     """
     The CalPointingTable class is an Alma table.
 
-    Role
     Result of the pointing calibration performed on-line by TelCal.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalPointing
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaName str Antenna Name </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    receiverBand ReceiverBand identifies the receiver band. </TD>
-
-
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  the start time of result validity period.
-
-    endValidTime  ArrayTime  the end time of result validity period.
-
-    ambientTemperature  Temperature  the ambient temperature.
-
-    antennaMake  AntennaMake  identifies the antenna make.
-
-    atmPhaseCorrection  AtmPhaseCorrection  describes how the atmospheric phase correction has been applied.
-
-    direction  Angle []   2  the antenna pointing direction.
-
-    frequencyRange  Frequency []   2  the frequency range over which the result is valid.
-
-    pointingModelMode  PointingModelMode  identifies the pointing model mode.
-
-    pointingMethod  PointingMethod  identifies the pointing method.
-
-    numReceptor (numReceptor) int  the number of receptors.
-
-    polarizationTypes  PolarizationType []   numReceptor  identifies the polarizations types (one value per receptor).
-
-    collOffsetRelative  Angle []  []   numReceptor, 2  the collimation offsets (relative) (one pair of angles  per receptor).
-
-    collOffsetAbsolute  Angle []  []   numReceptor, 2  the collimation offsets (absolute) (one pair of angles per receptor).
-
-    collError  Angle []  []   numReceptor, 2  the uncertainties on collimation (one pair of angles per receptor)
-
-    collOffsetTied  bool []  []   numReceptor, 2  indicates if a collimation offset was tied (true) or not tied (false) to another polar (one pair of boolean values per receptor).
-
-    reducedChiSquared  float []   numReceptor  a measure of the quality of the least square fit.
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaName (str): Antenna Name key.
 
-    averagedPolarizations  bool  true when the polarizations were averaged together to improve sensitivity.
 
-    beamPA  Angle []   numReceptor  the fitted beam position angles (one value per receptor).
 
-    beamPAError  Angle []   numReceptor  the uncertaintes on the fitted beam position angles (one value per receptor).
+        receiverBand (ReceiverBand): identifies the receiver band. key.
 
-    beamPAWasFixed  bool  indicates if the beam position was fixed (true) or not fixed (false).
 
-    beamWidth  Angle []  []   numReceptor, 2  the fitted beam widths (one pair of angles per receptor).
 
-    beamWidthError  Angle []  []   numReceptor, 2  the uncertainties on the fitted beam widths (one pair of angles per receptor).
+        calDataId (Tag): refers to a unique row in CalData Table. key.
 
-    beamWidthWasFixed  bool []   2  indicates if the beam width was fixed (true) or not fixed (true) (one pair of booleans).
 
-    offIntensity  Temperature []   numReceptor  the off intensity levels (one value per receptor).
 
-    offIntensityError  Temperature []   numReceptor  the uncertainties on the off intensity levels (one value per receptor).
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
 
-    offIntensityWasFixed  bool  indicates if the off intensity level was fixed (true) or not fixed (false).
 
-    peakIntensity  Temperature []   numReceptor  the maximum intensities (one value per receptor).
 
-    peakIntensityError  Temperature []   numReceptor  the uncertainties on the maximum intensities (one value per receptor).
 
-    peakIntensityWasFixed  bool  the maximum intensity was fixed.
+
+        startValidTime (ArrayTime): the start time of result validity period.
+
+        endValidTime (ArrayTime): the end time of result validity period.
+
+        ambientTemperature (Temperature): the ambient temperature.
+
+        antennaMake (AntennaMake): identifies the antenna make.
+
+        atmPhaseCorrection (AtmPhaseCorrection): describes how the atmospheric phase correction has been applied.
+
+        direction (Angle [] ): Array(2) the antenna pointing direction.
+
+        frequencyRange (Frequency [] ): Array(2) the frequency range over which the result is valid.
+
+        pointingModelMode (PointingModelMode): identifies the pointing model mode.
+
+        pointingMethod (PointingMethod): identifies the pointing method.
+
+        numReceptor (int): the number of receptors.
+
+        polarizationTypes (PolarizationType [] ): Array(numReceptor) identifies the polarizations types (one value per receptor).
+
+        collOffsetRelative (Angle []  [] ): Array(numReceptor, 2) the collimation offsets (relative) (one pair of angles  per receptor).
+
+        collOffsetAbsolute (Angle []  [] ): Array(numReceptor, 2) the collimation offsets (absolute) (one pair of angles per receptor).
+
+        collError (Angle []  [] ): Array(numReceptor, 2) the uncertainties on collimation (one pair of angles per receptor)
+
+        collOffsetTied (bool []  [] ): Array(numReceptor, 2) indicates if a collimation offset was tied (true) or not tied (false) to another polar (one pair of boolean values per receptor).
+
+        reducedChiSquared (float [] ): Array(numReceptor) a measure of the quality of the least square fit.
+
+
+
+
+        averagedPolarizations (bool): true when the polarizations were averaged together to improve sensitivity. Optional.
+
+        beamPA (Angle [] ): Array(numReceptor) the fitted beam position angles (one value per receptor). Optional.
+
+        beamPAError (Angle [] ): Array(numReceptor) the uncertaintes on the fitted beam position angles (one value per receptor). Optional.
+
+        beamPAWasFixed (bool): indicates if the beam position was fixed (true) or not fixed (false). Optional.
+
+        beamWidth (Angle []  [] ): Array(numReceptor, 2) the fitted beam widths (one pair of angles per receptor). Optional.
+
+        beamWidthError (Angle []  [] ): Array(numReceptor, 2) the uncertainties on the fitted beam widths (one pair of angles per receptor). Optional.
+
+        beamWidthWasFixed (bool [] ): Array(2) indicates if the beam width was fixed (true) or not fixed (true) (one pair of booleans). Optional.
+
+        offIntensity (Temperature [] ): Array(numReceptor) the off intensity levels (one value per receptor). Optional.
+
+        offIntensityError (Temperature [] ): Array(numReceptor) the uncertainties on the off intensity levels (one value per receptor). Optional.
+
+        offIntensityWasFixed (bool): indicates if the off intensity level was fixed (true) or not fixed (false). Optional.
+
+        peakIntensity (Temperature [] ): Array(numReceptor) the maximum intensities (one value per receptor). Optional.
+
+        peakIntensityError (Temperature [] ): Array(numReceptor) the uncertainties on the maximum intensities (one value per receptor). Optional.
+
+        peakIntensityWasFixed (bool): the maximum intensity was fixed. Optional.
 
 
     """

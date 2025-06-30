@@ -53,74 +53,70 @@ import io
 
 class EphemerisTable:
     """
-        The EphemerisTable class is an Alma table.
-
-        Role
-
-
-        Generated from model's revision -1, branch
-
-        Attributes of Ephemeris
-
-                     Key
-
-
-        timeInterval ArrayTimeInterval interval of time during which the data are relevant.  </TD>
+    The EphemerisTable class is an Alma table.
 
 
 
-        ephemerisId int identifies a collection of rows in the table.  </TD>
+    Shown here are the fields found in each row.
+
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
+
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
+
+
+
+        timeInterval (ArrayTimeInterval): interval of time during which the data are relevant.  key.
+
+
+
+        ephemerisId (int): identifies a collection of rows in the table.  key.
 
 
 
 
-                     Value (Mandatory)
 
-        observerLocation  float []   3  a triple of double precision values defining the observer location. This triple contains in that order the longitude, the latitude and the altitude of the observer :
-    <ul>
-    <li> the longitude is expressed in radian. An east (resp. west) longitude is denoted as a positive (resp. negative) quantity.</li>
-    <li> the latitude is expressed in radian. A north (resp. south) latitude is denoted as a positive (resp. negative) quantity. </li>
-    <li> the altitude is expressed in meter. It's the altitude above the reference ellipsoid. </li>
-    </ul>
-    A triple with all its elements equal to 0.0 will mean that a geocentric coordinate system is in use instead of a topocentric one.
+        observerLocation (float [] ): Array(3) a triple of double precision values defining the observer location. This triple contains in that order the longitude, the latitude and the altitude of the observer : <ul> <li> the longitude is expressed in radian. An east (resp. west) longitude is denoted as a positive (resp. negative) quantity.</li> <li> the latitude is expressed in radian. A north (resp. south) latitude is denoted as a positive (resp. negative) quantity. </li> <li> the altitude is expressed in meter. It's the altitude above the reference ellipsoid. </li> </ul> A triple with all its elements equal to 0.0 will mean that a geocentric coordinate system is in use instead of a topocentric one.
 
-        equinoxEquator  float  epoch at which equator and equinox were calculated for ephemeris. Expresses a year as a decimal value (J2000 would be represented as 2000.0).
+        equinoxEquator (float): epoch at which equator and equinox were calculated for ephemeris. Expresses a year as a decimal value (J2000 would be represented as 2000.0).
 
-        numPolyDir (numPolyDir) int  the number of coefficients of the polynomial stored in phaseDir. It has to be \f$ \ge 1 \f$.
+        numPolyDir (int): the number of coefficients of the polynomial stored in phaseDir. It has to be  >= 1 .
 
-        dir  float []  []   numPolyDir, 2  the ephemeris direction expressed in radian. The nominal entry in the phaseDir, delayDir, or ReferenceDir in the Field table serves as additional offset to the direction described by "dir". The actual direction is obtained by composition, e.g. actual phase direction = [phasDir value from Field table] + [dir].
+        dir (float []  [] ): Array(numPolyDir, 2) the ephemeris direction expressed in radian. The nominal entry in the phaseDir, delayDir, or ReferenceDir in the Field table serves as additional offset to the direction described by "dir". The actual direction is obtained by composition, e.g. actual phase direction = [phasDir value from Field table] + [dir].  The direction described by dir  is the result of the sum  [ dir_{0,i} + dir_{1,i}*dt + dir_{2,i}*dt^2 + ... + dir_{numPolyDir-1,i}*dt^{numPolyDir-1}, forall i in {0,1} ]  where  [ dt = t - timeOrigin ]
 
-    The direction described by dir  is the result of the sum
+        numPolyDist (int): the number of coefficients of the polynomial stored in distance. It has to be  >= 1 .
 
-    \f[ dir_{0,i} + dir_{1,i}*dt + dir_{2,i}*dt^2 + ... + dir_{numPolyDir-1,i}*dt^{numPolyDir-1}, \forall i \in \{0,1\} \f]
+        distance (float [] ): Array(numPolyDist) the coefficiens of the polynomial used to calculate the distance, expressed in meter,  to the object from the position of the antenna along the given direction. This distance is the result of the sum :  [ distance_0 + distance_1*dt + distance_2*dt^2 + ... + distance_{numPolyDist-1}*dt^{numPolyDist-1} ]  where  [ dt = t - timeOrigin ].
 
-    where
+        timeOrigin (ArrayTime): the time origin used in the evaluation of the polynomial expressions.
 
-    \f[ dt = t - timeOrigin \f]
-
-
-        numPolyDist (numPolyDist) int  the number of coefficients of the polynomial stored in distance. It has to be \f$ \ge 1 \f$.
-
-        distance  float []   numPolyDist  the coefficiens of the polynomial used to calculate the distance, expressed in meter,  to the object from the position of the antenna along the given direction. This distance is the result of the sum :
-
-    \f[ distance_0 + distance_1*dt + distance_2*dt^2 + ... + distance_{numPolyDist-1}*dt^{numPolyDist-1} \f]
-
-    where
-
-    \f[ dt = t - timeOrigin \f].
-
-
-        timeOrigin  ArrayTime  the time origin used in the evaluation of the polynomial expressions.
-
-        origin  str  the origin of the ephemeris information.
+        origin (str): the origin of the ephemeris information.
 
 
 
-                     Value (Optional)
 
-        numPolyRadVel (numPolyRadVel) int  the number of coefficients of the polynomial stored in radVel . It has to be \f$ \ge 1 \f$.
+        numPolyRadVel (int): the number of coefficients of the polynomial stored in radVel . It has to be  >= 1 .  Optional.
 
-        radVel  float []   numPolyRadVel   the coefficients of a polynomial expressing a radial velocity as a function of the time expressed in m/s. The time origin used to tabulate the polynomial is stored in timeOrigin.
+        radVel (float [] ): Array(numPolyRadVel)  the coefficients of a polynomial expressing a radial velocity as a function of the time expressed in m/s. The time origin used to tabulate the polynomial is stored in timeOrigin.   Optional.
 
 
     """

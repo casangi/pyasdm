@@ -55,58 +55,76 @@ class CalSeeingTable:
     """
     The CalSeeingTable class is an Alma table.
 
-    Role
     The seeing parameters deduced from TelCal calibrations.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalSeeing
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    atmPhaseCorrection AtmPhaseCorrection describes how the atmospheric phase correction has been applied. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  the start time of result validity period.
-
-    endValidTime  ArrayTime  the end time of result validity period.
-
-    frequencyRange  Frequency []   2  the range of frequencies over which this result is valid.
-
-    integrationTime  Interval  the duration of averaging for the evaluation of the RMS.
-
-    numBaseLengths (numBaseLengths) int  the number of baselines for which the the RMS phase data is evaluated.
-
-    baselineLengths  Length []   numBaseLengths  the lengths of the baselines (one value per baseline).
-
-    phaseRMS  Angle []   numBaseLengths  the RMS of phase fluctuations (one value per baseline).
-
-    seeing  Angle  the seeing parameter, deduced for the LO1.
-
-    seeingError  Angle  the uncertainty on the seeing parameter.
+    Attributes:
 
 
 
-                 Value (Optional)
+        atmPhaseCorrection (AtmPhaseCorrection): describes how the atmospheric phase correction has been applied. key.
 
-    exponent  float  the exponent of the spatial structure function.
 
-    outerScale  Length  the outer scale.
 
-    outerScaleRMS  Angle  the RMS of phase fluctuations at scale length outerScale.
+        calDataId (Tag): refers to a unique row in CalData Table. key.
+
+
+
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
+
+
+
+
+
+        startValidTime (ArrayTime): the start time of result validity period.
+
+        endValidTime (ArrayTime): the end time of result validity period.
+
+        frequencyRange (Frequency [] ): Array(2) the range of frequencies over which this result is valid.
+
+        integrationTime (Interval): the duration of averaging for the evaluation of the RMS.
+
+        numBaseLengths (int): the number of baselines for which the the RMS phase data is evaluated.
+
+        baselineLengths (Length [] ): Array(numBaseLengths) the lengths of the baselines (one value per baseline).
+
+        phaseRMS (Angle [] ): Array(numBaseLengths) the RMS of phase fluctuations (one value per baseline).
+
+        seeing (Angle): the seeing parameter, deduced for the LO1.
+
+        seeingError (Angle): the uncertainty on the seeing parameter.
+
+
+
+
+        exponent (float): the exponent of the spatial structure function. Optional.
+
+        outerScale (Length): the outer scale. Optional.
+
+        outerScaleRMS (Angle): the RMS of phase fluctuations at scale length outerScale. Optional.
 
 
     """

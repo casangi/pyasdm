@@ -55,52 +55,70 @@ class CalDataTable:
     """
     The CalDataTable class is an Alma table.
 
-    Role
     This table describes the data used to derive the calibration results.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalData
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    calDataId Tag (auto-incrementable)     identifies a unique row in the table. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-
-                 Value (Mandatory)
-
-    startTimeObserved  ArrayTime  the start time of observation.
-
-    endTimeObserved  ArrayTime  the end time of observation.
-
-    execBlockUID  EntityRef  the UID of the Execution Block.
-
-    calDataType  CalDataOrigin  identifies the origin of the data used for the calibration.
-
-    calType  CalType  identifies the type of performed calibration.
-
-    numScan (numScan) int  the number of scans (in this Execution Block).
-
-    scanSet  int []   numScan  the set of scan numbers.
+    Attributes:
 
 
 
-                 Value (Optional)
+        calDataId (Tag): identifies a unique row in the table. auto-incrementable, key.
 
-    assocCalDataId  Tag  refers to an associate row in CalDataTable.
 
-    assocCalNature  AssociatedCalNature  identifies the nature of the relation with the associate row in CalDataTable.
 
-    fieldName  str []   numScan  the names of the fields (one name per scan).
 
-    sourceName  str []   numScan  the names of the sources as given during observations (one source name per scan).
 
-    sourceCode  str []   numScan  the special characteristics of sources expressed in a textual form (one string per scan).
+        startTimeObserved (ArrayTime): the start time of observation.
 
-    scanIntent  ScanIntent []   numScan  identifies the intents of  the scans (one value per scan).
+        endTimeObserved (ArrayTime): the end time of observation.
+
+        execBlockUID (EntityRef): the UID of the Execution Block.
+
+        calDataType (CalDataOrigin): identifies the origin of the data used for the calibration.
+
+        calType (CalType): identifies the type of performed calibration.
+
+        numScan (int): the number of scans (in this Execution Block).
+
+        scanSet (int [] ): Array(numScan) the set of scan numbers.
+
+
+
+
+        assocCalDataId (Tag): refers to an associate row in CalDataTable. Optional.
+
+        assocCalNature (AssociatedCalNature): identifies the nature of the relation with the associate row in CalDataTable. Optional.
+
+        fieldName (str [] ): Array(numScan) the names of the fields (one name per scan). Optional.
+
+        sourceName (str [] ): Array(numScan) the names of the sources as given during observations (one source name per scan). Optional.
+
+        sourceCode (str [] ): Array(numScan) the special characteristics of sources expressed in a textual form (one string per scan). Optional.
+
+        scanIntent (ScanIntent [] ): Array(numScan) identifies the intents of  the scans (one value per scan). Optional.
 
 
     """
@@ -268,7 +286,7 @@ class CalDataTable:
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.\calDataId,
+        homologues in x.  If a row is found that row else autoincrement x.calDataId,
         add x to its table and returns x.
 
         returns a CalDataRow.

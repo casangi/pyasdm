@@ -418,15 +418,18 @@ class ArrayTime(Interval):
         """
         Return a unit of time, as a long, from a FITS-formatted string that
         specifies the time.  The format must be of the form:
+
                          YYYY-MM-DDThh:mm:ss.ssss
+
         Leading zeros are required if months, days, hours, minutes, or seconds
         are single digits.  The value for months ranges from "01" to "12".
         The "T" separting the data and time values is optional.  If the "T" is
         not present, then a space MUST be present.
 
-         A ValueError is raised if the string is not a valid
-         time.
+        A ValueError is raised if the string is not a valid
+        time.
         """
+        
         if (
             len(t) < 19
             or t[4] != "-"

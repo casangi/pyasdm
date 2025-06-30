@@ -55,86 +55,104 @@ class CalAppPhaseTable:
     """
     The CalAppPhaseTable class is an Alma table.
 
-    Role
     The CalAppPhase table is relevant to the ALMA observatory when the antennas are being phased to form a coherent sum during the observation. For each scan, the table provides information about which antennas are included in the sum, their relative phase adjustments, the efficiency of the sum (relative to best performance) and the quality of each antenna participating in the system. This data is used in real-time to provide the phased sum signal, and after the observation to analyze the result.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalAppPhase
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    basebandName BasebandName identifies the baseband. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    scanNumber int The number of the scan processed by TELCAL. Along with an ExecBlock Id (which should be ExecBlock\_0 most of the time), the value of scanNumber can be used as the key to retrieve informations related to the scan (e.g. its start time).  </TD>
-
-
-
-    calDataId Tag identifies a unique row in the CalData table. </TD>
-
-
-
-    calReductionId Tag identifies a unique row in the CalReduction table. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  start of phasing solution validity.
-
-    endValidTime  ArrayTime  end of phasing solution validity.
-
-    adjustTime  ArrayTime  The time of the last adjustment to the phasing analysis via the \c ParameterTuning  interface.
-
-    adjustToken  str  A parameter supplied via the \c ParameterTuning interface to indicate the form of adjustment(s) made at adjustTime. Note that TELCAL merely passes this datum and adjustTime through to this table.
-
-    phasingMode  str  The mode in which the phasing system is being operated.
-
-    numPhasedAntennas (numPhasedAntennas) int  the number of antennas in phased sum, \f$N_p\f$.
-
-    phasedAntennas  str []   numPhasedAntennas  the names of the phased antennas.
-
-    refAntennaIndex  int  the index of the reference antenna in the array \c phasedAntennas . It must be an integer value in the interval \f$ [0, N_p-1]\f$.
-
-    candRefAntennaIndex  int  tne index of a candidate (new) reference antenna in the array phasedAntennas; it must be a integer in the interval \f$[0, N_p-1]\f$.
-
-    phasePacking  str  how to unpack \c phaseValues.
-
-    numReceptors (numReceptors) int  the number of receptors per antenna, \f$N_r\f$.The number (\f$N_r \le 2 \f$) of receptors per antenna, usually two (polarizations), but it might be one in special cases.
-
-    numChannels (numChannels) int  the number of data channels, \f$N_d\f$.
-
-    numPhaseValues (numPhaseValues) int  The number  of phase data values present in the table, \f$N_v\f$.
-
-    phaseValues  float []   numPhaseValues  the array of phase data values.
-
-    numCompare (numCompare) int  the number of comparison antennas, \f$N_c\f$.
-
-    numEfficiencies (numEfficiencies) int  the number of efficiencies, \f$N_e\f$.
-
-    compareArray  str []   numCompare  the names of the comparison antennas.
-
-    efficiencyIndices  int []   numEfficiencies  indices of the antenna(s) in \c compareArray used to calculate \c efficiencies; they must be distinct integers in the interval \f$[0, N_c]\f$.
-
-    efficiencies  float []  []   numEfficiencies, numChannels  an array of efficiencies of phased sum.
-
-    quality  float []   numPhasedAntennas+numCompare  quality of phased antennas.
-
-    phasedSumAntenna  str  the name of the phased sum antenna.
+    Attributes:
 
 
 
-                 Value (Optional)
+        basebandName (BasebandName): identifies the baseband. key.
 
-    typeSupports  str  encoding of supporting data values.
 
-    numSupports (numSupports) int  the number of supporting data values, \f$N_s\f$.
 
-    phaseSupports  float []   numSupports  an array of supporting data values.
+        scanNumber (int): The number of the scan processed by TELCAL. Along with an ExecBlock Id (which should be ExecBlock\_0 most of the time), the value of scanNumber can be used as the key to retrieve informations related to the scan (e.g. its start time).  key.
+
+
+
+        calDataId (Tag): identifies a unique row in the CalData table. key.
+
+
+
+        calReductionId (Tag): identifies a unique row in the CalReduction table. key.
+
+
+
+
+
+        startValidTime (ArrayTime): start of phasing solution validity.
+
+        endValidTime (ArrayTime): end of phasing solution validity.
+
+        adjustTime (ArrayTime): The time of the last adjustment to the phasing analysis via the  ParameterTuning  interface.
+
+        adjustToken (str): A parameter supplied via the  ParameterTuning interface to indicate the form of adjustment(s) made at adjustTime. Note that TELCAL merely passes this datum and adjustTime through to this table.
+
+        phasingMode (str): The mode in which the phasing system is being operated.
+
+        numPhasedAntennas (int): the number of antennas in phased sum, N_p.
+
+        phasedAntennas (str [] ): Array(numPhasedAntennas) the names of the phased antennas.
+
+        refAntennaIndex (int): the index of the reference antenna in the array  phasedAntennas . It must be an integer value in the interval  [0, N_p-1].
+
+        candRefAntennaIndex (int): tne index of a candidate (new) reference antenna in the array phasedAntennas; it must be a integer in the interval [0, N_p-1].
+
+        phasePacking (str): how to unpack  phaseValues.
+
+        numReceptors (int): the number of receptors per antenna, N_r.The number (N_r <= 2 ) of receptors per antenna, usually two (polarizations), but it might be one in special cases.
+
+        numChannels (int): the number of data channels, N_d.
+
+        numPhaseValues (int): The number  of phase data values present in the table, N_v.
+
+        phaseValues (float [] ): Array(numPhaseValues) the array of phase data values.
+
+        numCompare (int): the number of comparison antennas, N_c.
+
+        numEfficiencies (int): the number of efficiencies, N_e.
+
+        compareArray (str [] ): Array(numCompare) the names of the comparison antennas.
+
+        efficiencyIndices (int [] ): Array(numEfficiencies) indices of the antenna(s) in  compareArray used to calculate  efficiencies; they must be distinct integers in the interval [0, N_c].
+
+        efficiencies (float []  [] ): Array(numEfficiencies, numChannels) an array of efficiencies of phased sum.
+
+        quality (float [] ): Array(numPhasedAntennas+numCompare) quality of phased antennas.
+
+        phasedSumAntenna (str): the name of the phased sum antenna.
+
+
+
+
+        typeSupports (str): encoding of supporting data values. Optional.
+
+        numSupports (int): the number of supporting data values, N_s. Optional.
+
+        phaseSupports (float [] ): Array(numSupports) an array of supporting data values. Optional.
 
 
     """

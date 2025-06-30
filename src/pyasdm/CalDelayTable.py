@@ -55,76 +55,94 @@ class CalDelayTable:
     """
     The CalDelayTable class is an Alma table.
 
-    Role
     Result of delay offset calibration performed on-line by  TelCal. This calibration determines the delay offsets to be added in the  correlator to compensate for residual cable delays.   Delays are entered in seconds but represented as double precision floating point numbers.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalDelay
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaName str the name of the antenna. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    atmPhaseCorrection AtmPhaseCorrection qualifies how the atmospheric phase correction has been applied. </TD>
-
-
-
-    basebandName BasebandName Name of the Baseband </TD>
-
-
-
-    receiverBand ReceiverBand  identifies the receiver band. </TD>
-
-
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
+    Attributes:
 
 
 
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  the start time of the result validity period.
-
-    endValidTime  ArrayTime  the end time of the result validity period.
-
-    refAntennaName  str  the name of the reference antenna.
-
-    numReceptor (numReceptor) int  the number of receptors.
-
-    delayError  float []   numReceptor  the uncertainties on the measured delay offsets (one value per receptor).
-
-    delayOffset  float []   numReceptor  the measured delay offsets (one value per receptor).
-
-    polarizationTypes  PolarizationType []   numReceptor  identifies the polarizations of the receptors (one value per receptor).
-
-    reducedChiSquared  float []   numReceptor  measure of the quality of the fit (one value per receptor).
-
-    appliedDelay  float []   numReceptor  the delay that was applied (one value per receptor).
+        antennaName (str): the name of the antenna. key.
 
 
 
-                 Value (Optional)
+        atmPhaseCorrection (AtmPhaseCorrection): qualifies how the atmospheric phase correction has been applied. key.
 
-    crossDelayOffset  float  the measured cross delay offset (reference antenna only).
 
-    crossDelayOffsetError  float  the uncertainty for the cross delay offset.
 
-    numSideband (numSideband) int  the number of sideband.
+        basebandName (BasebandName): Name of the Baseband key.
 
-    refFreq  Frequency []   numSideband  the reference frequencies (one value per sideband).
 
-    refFreqPhase  Angle []   numSideband  the phases at reference frequencies (one value per sideband).
 
-    sidebands  ReceiverSideband []   numSideband  identifies the receiver's sidebands (one value per sideband).
+        receiverBand (ReceiverBand):  identifies the receiver band. key.
+
+
+
+        calDataId (Tag): refers to a unique row in CalData Table. key.
+
+
+
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
+
+
+
+
+
+        startValidTime (ArrayTime): the start time of the result validity period.
+
+        endValidTime (ArrayTime): the end time of the result validity period.
+
+        refAntennaName (str): the name of the reference antenna.
+
+        numReceptor (int): the number of receptors.
+
+        delayError (float [] ): Array(numReceptor) the uncertainties on the measured delay offsets (one value per receptor).
+
+        delayOffset (float [] ): Array(numReceptor) the measured delay offsets (one value per receptor).
+
+        polarizationTypes (PolarizationType [] ): Array(numReceptor) identifies the polarizations of the receptors (one value per receptor).
+
+        reducedChiSquared (float [] ): Array(numReceptor) measure of the quality of the fit (one value per receptor).
+
+        appliedDelay (float [] ): Array(numReceptor) the delay that was applied (one value per receptor).
+
+
+
+
+        crossDelayOffset (float): the measured cross delay offset (reference antenna only). Optional.
+
+        crossDelayOffsetError (float): the uncertainty for the cross delay offset. Optional.
+
+        numSideband (int): the number of sideband. Optional.
+
+        refFreq (Frequency [] ): Array(numSideband) the reference frequencies (one value per sideband). Optional.
+
+        refFreqPhase (Angle [] ): Array(numSideband) the phases at reference frequencies (one value per sideband). Optional.
+
+        sidebands (ReceiverSideband [] ): Array(numSideband) identifies the receiver's sidebands (one value per sideband). Optional.
 
 
     """

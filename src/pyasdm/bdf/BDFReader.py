@@ -112,37 +112,49 @@ class BDFReader:
         if self._currentState == self._States.S_NO_BDF:
             if transition == self._Transitions.T_OPEN:
                 return
-            
+
         elif self._currentState == self._States.S_AT_BEGINNING:
-            if transition in (self._Transitions.T_QUERY,
-                              self._Transitions.T_TEST_END,
-                              self._Transitions.T_READ,
-                              self._Transitions.T_READ_NEXT,
-                              self._Transitions.T_READ_ALL,
-                              self._Transitions.T_CLOSE):
+            if transition in (
+                self._Transitions.T_QUERY,
+                self._Transitions.T_TEST_END,
+                self._Transitions.T_READ,
+                self._Transitions.T_READ_NEXT,
+                self._Transitions.T_READ_ALL,
+                self._Transitions.T_CLOSE,
+            ):
                 return
 
         elif self._currentState == self._States.S_READING:
-            if transition in (self._Transitions.T_TEST_END,
-                              self._Transitions.T_READ,
-                              self._Transitions.T_READ_NEXT,
-                              self._Transitions.T_READ_ALL,
-                              self._Transitions.T_QUERY,
-                              self._Transitions.T_CLOSE):
+            if transition in (
+                self._Transitions.T_TEST_END,
+                self._Transitions.T_READ,
+                self._Transitions.T_READ_NEXT,
+                self._Transitions.T_READ_ALL,
+                self._Transitions.T_QUERY,
+                self._Transitions.T_CLOSE,
+            ):
                 return
-            
+
         elif self._currentState == self._States.S_AT_END:
-            if transition in (self._Transitions.T_TEST_END,
-                              self._Transitions.T_QUERY,
-                              self._Transitions.T_READ_NEXT,
-                              self._Transitions.T_READ_ALL,
-                              self._Transitions.T_CLOSE):
+            if transition in (
+                self._Transitions.T_TEST_END,
+                self._Transitions.T_QUERY,
+                self._Transitions.T_READ_NEXT,
+                self._Transitions.T_READ_ALL,
+                self._Transitions.T_CLOSE,
+            ):
                 return
 
         # end of if/elif on _currentState
 
         # any other combination of transition and current state raises this exception
-        raise BDFReaderException("Invalid call of method '" + methodName + "' in the current context: " + self.currentState() + ".")
+        raise BDFReaderException(
+            "Invalid call of method '"
+            + methodName
+            + "' in the current context: "
+            + self.currentState()
+            + "."
+        )
 
     def reset(self):
         """
@@ -211,7 +223,10 @@ class BDFReader:
             self._f = open(self._path, mode="rb")
         except Exception as exc:
             raise BDFReaderException(
-                "Error while opening '" + self._path + "'. The exception was " + str(exc)
+                "Error while opening '"
+                + self._path
+                + "'. The exception was "
+                + str(exc)
             ) from None
         # I don't think this can happen without throwing an exception
         if self._f is None:
@@ -741,7 +756,7 @@ class BDFReader:
 
     def _requireSDMDataSubsetMIMEPart(self):
         self._integrationStartsAt = self.position()
-        
+
         # CAS-8151, apparently there are cases where there are two occurrences of the MIME bouneary instead of only one
         self._skipAsLongAsLineStartsWith(b"--" + self._boundary_1)
         # CONTENT-TYPE
@@ -759,7 +774,7 @@ class BDFReader:
 
         # read the SDM Data Subset header, assume it can't be more than 100 lines
         sdmDataSubsetHeader = self._accumulateUntilBoundary(self._boundary_2, 100)
-        
+
         sdmDataSubsetHeaderDOM = minidom.parseString(sdmDataSubsetHeader)
         # it's all in the firstChild node
         sdmDataSubsetHeaderDOM = sdmDataSubsetHeaderDOM.firstChild
@@ -813,7 +828,9 @@ class BDFReader:
         aborted = False
         stopTime = None
         abortReason = None
-        abortedObservationElements = sdmDataSubsetHeaderDOM.getElementsByTagName("abortedObservation")
+        abortedObservationElements = sdmDataSubsetHeaderDOM.getElementsByTagName(
+            "abortedObservation"
+        )
         if len(abortedObservationElements) > 0:
             # aborted subscan
             aborted = True
@@ -821,21 +838,30 @@ class BDFReader:
             abortedNode = abotedObservationElements[0]
             stopTime = abortedNode.getElementsByTagName("stopTime")
             if stopTime is None or len(stopTime) == 0:
-                raise BDFReaderException("expected 'stopTime' element not found in aborted subscan at integrationIndex " + str(self._integrationIndex))
+                raise BDFReaderException(
+                    "expected 'stopTime' element not found in aborted subscan at integrationIndex "
+                    + str(self._integrationIndex)
+                )
             stopTime = int(stopTime[0].childNodes[0].nodeValue)
             reason = abortedNode.getElementsByTagName("reason")
             if reason is None or len(reason) == 0:
-                raise BDFReaderException("expected 'reason' element not found in aborted subscan at integrationIndex " + str(self._integrationIndex))
+                raise BDFReaderException(
+                    "expected 'reason' element not found in aborted subscan at integrationIndex "
+                    + str(self._integrationIndex)
+                )
             abortReason = reason[0].childNodes[0].nodeValue
 
-        schedulePeriodTime = sdmDataSubsetHeaderDOM.getElementsByTagName("schedulePeriodTime")
+        schedulePeriodTime = sdmDataSubsetHeaderDOM.getElementsByTagName(
+            "schedulePeriodTime"
+        )
         if schedulePeriodTime is None or len(schedulePeriodTime) == 0:
-            raise BDFReaderException("expected 'schedulePeriodTime' element not found in subscan at integrationIndex " + str(self._integrationIndex))
+            raise BDFReaderException(
+                "expected 'schedulePeriodTime' element not found in subscan at integrationIndex "
+                + str(self._integrationIndex)
+            )
         schedulePeriodTime = schedulePeriodTime[0]
         integrationMidpoint = int(
-            (schedulePeriodTime.getElementsByTagName("time"))[0]
-            .childNodes[0]
-            .nodeValue
+            (schedulePeriodTime.getElementsByTagName("time"))[0].childNodes[0].nodeValue
         )
         integrationInterval = int(
             (schedulePeriodTime.getElementsByTagName("interval"))[0]
@@ -1100,7 +1126,7 @@ class BDFReader:
             "intervalInNanoSeconds": integrationInterval,
             "aborted": aborted,
             "stopTime": stopTime,
-            "abortReason" : abortReason,
+            "abortReason": abortReason,
             "actualTimes": actualTimesDesc,
             "actualDurations": actualDurationsDesc,
             "crossData": crossDataDesc,

@@ -55,100 +55,118 @@ class SourceTable:
     """
     The SourceTable class is an Alma table.
 
-    Role
     Summary of astromomical source information.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Source
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    sourceId int (auto-incrementable)     identifies a collection of rows in the table. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    timeInterval ArrayTimeInterval  the time interval of validity of the row's content. </TD>
-
-
-
-    spectralWindowId Tag refers to a unique row in SpectralWindowTable. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    code  str  indicates the nature of the source.
-
-    direction  Angle []   2  the direction of the source.
-
-    properMotion  AngularRate []   2  the proper motion of the source.
-
-    sourceName  str  the name of the source.
+    Attributes:
 
 
 
-                 Value (Optional)
+        sourceId (int): identifies a collection of rows in the table. auto-incrementable, key.
 
-    directionCode  DirectionReferenceCode  identifies the direction reference frame associated to direction.
 
-    directionEquinox  ArrayTime  the equinox associated to the direction reference frame (if required).
 
-    calibrationGroup  int  the calibration group number.
+        timeInterval (ArrayTimeInterval):  the time interval of validity of the row's content. key.
 
-    catalog  str  the name of the catalog.
 
-    deltaVel  Speed  the velocity resolution.
 
-    position  Length []   3  the position of the source.
+        spectralWindowId (Tag): refers to a unique row in SpectralWindowTable. key.
 
-    numLines (numLines) int  the number of line transitions.
 
-    transition  str []   numLines  the names of the transitions.
 
-    restFrequency  Frequency []   numLines  the rest frequencies (one value per transition line).
 
-    sysVel  Speed []   numLines  the systemic velocity.
 
-    rangeVel  Speed []   2  the velocity range.
+        code (str): indicates the nature of the source.
 
-    sourceModel  SourceModel  identifies the source model.
+        direction (Angle [] ): Array(2) the direction of the source.
 
-    frequencyRefCode  FrequencyReferenceCode  the frequency reference code.
+        properMotion (AngularRate [] ): Array(2) the proper motion of the source.
 
-    numFreq (numFreq) int  the number of frequencies.
+        sourceName (str): the name of the source.
 
-    numStokes (numStokes) int  the number of Stokes parameters.
 
-    frequency  Frequency []   numFreq  the array of frequencies (one value per frequency).
 
-    frequencyInterval  Frequency []   numFreq  an array of frequency intervals (one value per interval).
 
-    stokesParameter  StokesParameter []   numStokes  the array of Stokes parameters (one value per parameter).
+        directionCode (DirectionReferenceCode): identifies the direction reference frame associated to direction. Optional.
 
-    flux  Flux []  []   numFreq, numStokes  the array of flux densities expressed in Jansky (Jy).
+        directionEquinox (ArrayTime): the equinox associated to the direction reference frame (if required). Optional.
 
-    fluxErr  Flux []  []   numFreq, numStokes  the array of uncertainties on flux densities.
+        calibrationGroup (int): the calibration group number. Optional.
 
-    positionAngle  Angle []   numFreq  the major axis position angles (one value per frequency).
+        catalog (str): the name of the catalog. Optional.
 
-    positionAngleErr  Angle []   numFreq  the uncertainties on major axis position angles.
+        deltaVel (Speed): the velocity resolution. Optional.
 
-    size  Angle []  []   numFreq, 2  the sizes of source (one pair of values per frequency).
+        position (Length [] ): Array(3) the position of the source. Optional.
 
-    sizeErr  Angle []  []   numFreq, 2  the uncertainties on the source sizes (one pair of value per frequency).
+        numLines (int): the number of line transitions. Optional.
 
-    velRefCode  RadialVelocityReferenceCode  the velocity reference code for velocities: sysVel, rangeVel, deltaVel.
+        transition (str [] ): Array(numLines) the names of the transitions. Optional.
 
-    dopplerVelocity  Speed []   numLines  the systemic velocity.
+        restFrequency (Frequency [] ): Array(numLines) the rest frequencies (one value per transition line). Optional.
 
-    dopplerReferenceSystem  RadialVelocityReferenceCode  the velocity reference code for velocities: sysVel, rangeVel, deltaVel.
+        sysVel (Speed [] ): Array(numLines) the systemic velocity. Optional.
 
-    dopplerCalcType  DopplerReferenceCode  the velocity reference code for velocities: sysVel, rangeVel, deltaVel.
+        rangeVel (Speed [] ): Array(2) the velocity range. Optional.
 
-    parallax  Angle []   numFreq  the sizes of source (one pair of values per frequency).
+        sourceModel (SourceModel): identifies the source model. Optional.
+
+        frequencyRefCode (FrequencyReferenceCode): the frequency reference code. Optional.
+
+        numFreq (int): the number of frequencies. Optional.
+
+        numStokes (int): the number of Stokes parameters. Optional.
+
+        frequency (Frequency [] ): Array(numFreq) the array of frequencies (one value per frequency). Optional.
+
+        frequencyInterval (Frequency [] ): Array(numFreq) an array of frequency intervals (one value per interval). Optional.
+
+        stokesParameter (StokesParameter [] ): Array(numStokes) the array of Stokes parameters (one value per parameter). Optional.
+
+        flux (Flux []  [] ): Array(numFreq, numStokes) the array of flux densities expressed in Jansky (Jy). Optional.
+
+        fluxErr (Flux []  [] ): Array(numFreq, numStokes) the array of uncertainties on flux densities. Optional.
+
+        positionAngle (Angle [] ): Array(numFreq) the major axis position angles (one value per frequency). Optional.
+
+        positionAngleErr (Angle [] ): Array(numFreq) the uncertainties on major axis position angles. Optional.
+
+        size (Angle []  [] ): Array(numFreq, 2) the sizes of source (one pair of values per frequency). Optional.
+
+        sizeErr (Angle []  [] ): Array(numFreq, 2) the uncertainties on the source sizes (one pair of value per frequency). Optional.
+
+        velRefCode (RadialVelocityReferenceCode): the velocity reference code for velocities: sysVel, rangeVel, deltaVel. Optional.
+
+        dopplerVelocity (Speed [] ): Array(numLines) the systemic velocity. Optional.
+
+        dopplerReferenceSystem (RadialVelocityReferenceCode): the velocity reference code for velocities: sysVel, rangeVel, deltaVel. Optional.
+
+        dopplerCalcType (DopplerReferenceCode): the velocity reference code for velocities: sysVel, rangeVel, deltaVel. Optional.
+
+        parallax (Angle [] ): Array(numFreq) the sizes of source (one pair of values per frequency). Optional.
 
 
     """

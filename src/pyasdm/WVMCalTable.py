@@ -55,46 +55,65 @@ class WVMCalTable:
     """
     The WVMCalTable class is an Alma table.
 
-    Role
     Coefficients to use water vapour monitor information to correct for  pathlength variations. This contains the coefficients actually used, while  CalWVR contains the coefficients derived from TelCal calibration.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of WVMCal
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    antennaId Tag refers to a unique row in AntennaTable. </TD>
+
+        antennaId (Tag): refers to a unique row in AntennaTable. key.
 
 
 
-    spectralWindowId Tag refers to a unique row in SpectralWindowTable. </TD>
+        spectralWindowId (Tag): refers to a unique row in SpectralWindowTable. key.
 
 
 
-    timeInterval ArrayTimeInterval the time interval for which the row's content is valid. </TD>
+        timeInterval (ArrayTimeInterval): the time interval for which the row's content is valid. key.
 
 
 
 
-                 Value (Mandatory)
 
-    wvrMethod  WVRMethod  identifies the calibration method.
+        wvrMethod (WVRMethod): identifies the calibration method.
 
-    polyFreqLimits  Frequency []   2  the range of frequencies in which the computation is performed.
+        polyFreqLimits (Frequency [] ): Array(2) the range of frequencies in which the computation is performed.
 
-    numInputAntenna (numInputAntenna) int  The number of antennas used for the calculations.
+        numInputAntenna (int): The number of antennas used for the calculations.
 
-    numChan (numChan) int  the number of WVR channels.
+        numChan (int): the number of WVR channels.
 
-    numPoly (numPoly) int  the number of coefficients used in the polynomial expansions.
+        numPoly (int): the number of coefficients used in the polynomial expansions.
 
-    pathCoeff  float []  []  []   numInputAntenna, numChan, numPoly  the pathlengths coefficients (one value per antenna per chan per coefficient).
+        pathCoeff (float []  []  [] ): Array(numInputAntenna, numChan, numPoly) the pathlengths coefficients (one value per antenna per chan per coefficient).
 
-    refTemp  Temperature []  []   numInputAntenna, numChan  the reference temperatures (one value par antenna per channel).
+        refTemp (Temperature []  [] ): Array(numInputAntenna, numChan) the reference temperatures (one value par antenna per channel).
 
-    inputAntennaId  Tag []   numInputAntenna  Refers to row(s) in the Antenna table describing the antenna(s) used for the calculations. It is a 1D array expected to have numInputAntenna elements.
+        inputAntennaId (Tag [] ): Array(numInputAntenna) Refers to row(s) in the Antenna table describing the antenna(s) used for the calculations. It is a 1D array expected to have numInputAntenna elements.
 
 
 

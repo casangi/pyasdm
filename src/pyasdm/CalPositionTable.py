@@ -55,72 +55,90 @@ class CalPositionTable:
     """
     The CalPositionTable class is an Alma table.
 
-    Role
     Result of antenna positions calibration performed by TelCal.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalPosition
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaName str the name of the antenna. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    atmPhaseCorrection AtmPhaseCorrection describes how the atmospheric phase correction has been applied. </TD>
-
-
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-    calReductionId Tag refers to a unique row in CalReduction Table. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  the start time of result validity period.
-
-    endValidTime  ArrayTime  the end time of result validity period.
-
-    antennaPosition  Length []   3  the position of the antenna.
-
-    stationName  str  the name of the station.
-
-    stationPosition  Length []   3  the position of the station.
-
-    positionMethod  PositionMethod  identifies the method used for the position calibration.
-
-    receiverBand  ReceiverBand  identifies the receiver band.
-
-    numAntenna (numAntenna) int  the number of antennas of reference.
-
-    refAntennaNames  str []   numAntenna  the names of the antennas of reference (one string per antenna).
-
-    axesOffset  Length  the measured axe's offset.
-
-    axesOffsetErr  Length  the uncertainty on the determination of the axe's offset.
-
-    axesOffsetFixed  bool  the axe's offset was fixed (true) or not fixed (false).
-
-    positionOffset  Length []   3  the measured position offsets (a triple).
-
-    positionErr  Length []   3  the uncertainties on the measured position offsets (a triple).
-
-    reducedChiSquared  float  measures the quality of the fit.
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaName (str): the name of the antenna. key.
 
-    delayRms  float  the RMS deviation for the observed delays.
 
-    phaseRms  Angle  the RMS deviation for the observed phases.
+
+        atmPhaseCorrection (AtmPhaseCorrection): describes how the atmospheric phase correction has been applied. key.
+
+
+
+        calDataId (Tag): refers to a unique row in CalData Table. key.
+
+
+
+        calReductionId (Tag): refers to a unique row in CalReduction Table. key.
+
+
+
+
+
+        startValidTime (ArrayTime): the start time of result validity period.
+
+        endValidTime (ArrayTime): the end time of result validity period.
+
+        antennaPosition (Length [] ): Array(3) the position of the antenna.
+
+        stationName (str): the name of the station.
+
+        stationPosition (Length [] ): Array(3) the position of the station.
+
+        positionMethod (PositionMethod): identifies the method used for the position calibration.
+
+        receiverBand (ReceiverBand): identifies the receiver band.
+
+        numAntenna (int): the number of antennas of reference.
+
+        refAntennaNames (str [] ): Array(numAntenna) the names of the antennas of reference (one string per antenna).
+
+        axesOffset (Length): the measured axe's offset.
+
+        axesOffsetErr (Length): the uncertainty on the determination of the axe's offset.
+
+        axesOffsetFixed (bool): the axe's offset was fixed (true) or not fixed (false).
+
+        positionOffset (Length [] ): Array(3) the measured position offsets (a triple).
+
+        positionErr (Length [] ): Array(3) the uncertainties on the measured position offsets (a triple).
+
+        reducedChiSquared (float): measures the quality of the fit.
+
+
+
+
+        delayRms (float): the RMS deviation for the observed delays. Optional.
+
+        phaseRms (Angle): the RMS deviation for the observed phases. Optional.
 
 
     """

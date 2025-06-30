@@ -55,64 +55,82 @@ class FeedTable:
     """
     The FeedTable class is an Alma table.
 
-    Role
     Contains characteristics of the feeds.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Feed
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaId Tag refers to a unique row in AntennaTable. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    spectralWindowId Tag refers to a unique row in SpectralWindowTable. </TD>
-
-
-
-    timeInterval ArrayTimeInterval the time interval of validity of the content of the row. </TD>
-
-
-
-    feedId int (auto-incrementable)     identifies a collection of rows in the table. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    numReceptor (numReceptor) int  the number of receptors.
-
-    beamOffset  float []  []   numReceptor, 2  the offsets of the beam (one pair per receptor).
-
-    focusReference  Length []  []   numReceptor, 3  the references for the focus position (one triple per receptor).
-
-    polarizationTypes  PolarizationType []   numReceptor  identifies the polarization types (one value per receptor).
-
-    polResponse  Complex []  []   numReceptor, numReceptor  the polarization response (one value per pair of receptors).
-
-    receptorAngle  Angle []   numReceptor  the receptors angles (one value per receptor).
-
-    receiverId  int []   numReceptor  refers to one or more collections of rows in ReceiverTable.
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaId (Tag): refers to a unique row in AntennaTable. key.
 
-    feedNum  int  the feed number to be used for multi-feed receivers.
 
-    illumOffset  Length []   2  the illumination offset.
 
-    position  Length []   3  the position of the feed.
+        spectralWindowId (Tag): refers to a unique row in SpectralWindowTable. key.
 
-    skyCoupling  float  the sky coupling is the coupling efficiency to the sky of the WVR radiometer's. Note that in general one expects to see whether \b no sky coupling efficiency recorded or \b only \b one of the two forms  scalar (skyCoupling) or array (skyCouplingSpectrum, numChan).
 
-    numChan (numChan) int  the size of skyCouplingSpectrum. This attribute must be present when the (array) attribute skyCouplingSpectrum is present since it defines its number of elements. The value of this attribute must be equal to the value of numChan in the row of the SpectralWindow table refered to by spectralWindowId.
 
-    skyCouplingSpectrum  float []   numChan  the sky coupling is the coupling efficiency to the sky of the WVR radiometer's. This column differs from the skyCoupling column because it contains one value for each of the individual channels of that spectralWindow. See the documentation of numChan for the size and the presence of this attribute. Note that in general one expects to see whether \b no sky coupling efficiency recorded or \b only \b one of the two forms  scalar (skyCoupling) or array (skyCouplingSpectrum, numChan).
+        timeInterval (ArrayTimeInterval): the time interval of validity of the content of the row. key.
+
+
+
+        feedId (int): identifies a collection of rows in the table. auto-incrementable, key.
+
+
+
+
+
+        numReceptor (int): the number of receptors.
+
+        beamOffset (float []  [] ): Array(numReceptor, 2) the offsets of the beam (one pair per receptor).
+
+        focusReference (Length []  [] ): Array(numReceptor, 3) the references for the focus position (one triple per receptor).
+
+        polarizationTypes (PolarizationType [] ): Array(numReceptor) identifies the polarization types (one value per receptor).
+
+        polResponse (Complex []  [] ): Array(numReceptor, numReceptor) the polarization response (one value per pair of receptors).
+
+        receptorAngle (Angle [] ): Array(numReceptor) the receptors angles (one value per receptor).
+
+        receiverId (int [] ): Array(numReceptor) refers to one or more collections of rows in ReceiverTable.
+
+
+
+
+        feedNum (int): the feed number to be used for multi-feed receivers. Optional.
+
+        illumOffset (Length [] ): Array(2) the illumination offset. Optional.
+
+        position (Length [] ): Array(3) the position of the feed. Optional.
+
+        skyCoupling (float): the sky coupling is the coupling efficiency to the sky of the WVR radiometer's. Note that in general one expects to see whether \b no sky coupling efficiency recorded or \b only \b one of the two forms  scalar (skyCoupling) or array (skyCouplingSpectrum, numChan). Optional.
+
+        numChan (int): the size of skyCouplingSpectrum. This attribute must be present when the (array) attribute skyCouplingSpectrum is present since it defines its number of elements. The value of this attribute must be equal to the value of numChan in the row of the SpectralWindow table refered to by spectralWindowId. Optional.
+
+        skyCouplingSpectrum (float [] ): Array(numChan) the sky coupling is the coupling efficiency to the sky of the WVR radiometer's. This column differs from the skyCoupling column because it contains one value for each of the individual channels of that spectralWindow. See the documentation of numChan for the size and the presence of this attribute. Note that in general one expects to see whether \b no sky coupling efficiency recorded or \b only \b one of the two forms  scalar (skyCoupling) or array (skyCouplingSpectrum, numChan). Optional.
 
 
     """

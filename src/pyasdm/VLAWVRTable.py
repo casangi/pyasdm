@@ -55,42 +55,60 @@ class VLAWVRTable:
     """
     The VLAWVRTable class is an Alma table.
 
-    Role
     VLA-specific table designed to store raw WVR data. This is different than the calWVR and WVMCal tables which are already defined in the SDM and are meant to hold calibration solutions, not raw data.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of VLAWVR
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    antennaId Tag  </TD>
+
+        antennaId (Tag):  key.
 
 
 
-    timeInterval ArrayTimeInterval the period of validity of the data recorded in this row. </TD>
+        timeInterval (ArrayTimeInterval): the period of validity of the data recorded in this row. key.
 
 
 
 
-                 Value (Mandatory)
 
-    numChan (numChan) int  The number of WVR channels.
+        numChan (int): The number of WVR channels.
 
-    hiValues  float []   numChan  The measured hi state power values for the channels.
+        hiValues (float [] ): Array(numChan) The measured hi state power values for the channels.
 
-    loValues  float []   numChan  The measured lo state power values for the channels.
-
+        loValues (float [] ): Array(numChan) The measured lo state power values for the channels.
 
 
-                 Value (Optional)
 
-    chanFreqCenter  Frequency []   numChan  Center frequencies of the WVR channels.
 
-    chanWidth  Frequency []   numChan  Center widths of the WVR channels.
+        chanFreqCenter (Frequency [] ): Array(numChan) Center frequencies of the WVR channels. Optional.
 
-    wvrId  str  The name of the WVR (like CWVR, DWVR, etc).
+        chanWidth (Frequency [] ): Array(numChan) Center widths of the WVR channels. Optional.
+
+        wvrId (str): The name of the WVR (like CWVR, DWVR, etc). Optional.
 
 
     """

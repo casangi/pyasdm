@@ -55,42 +55,61 @@ class ReceiverTable:
     """
     The ReceiverTable class is an Alma table.
 
-    Role
     Receiver properties.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Receiver
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    receiverId int (auto-incrementable)     Receiver identifier </TD>
+
+        receiverId (int): Receiver identifier auto-incrementable, key.
 
 
 
-    spectralWindowId Tag refers to a unique row in SpectralwindowTable. </TD>
+        spectralWindowId (Tag): refers to a unique row in SpectralwindowTable. key.
 
 
 
-    timeInterval ArrayTimeInterval time interval for which the content is valid. </TD>
+        timeInterval (ArrayTimeInterval): time interval for which the content is valid. key.
 
 
 
 
-                 Value (Mandatory)
 
-    name  str  the name of the frontend.
+        name (str): the name of the frontend.
 
-    numLO (numLO) int  the number of frequencies of the local oscillator.
+        numLO (int): the number of frequencies of the local oscillator.
 
-    frequencyBand  ReceiverBand  identifies the band of frequencies.
+        frequencyBand (ReceiverBand): identifies the band of frequencies.
 
-    freqLO  Frequency []   numLO  the frequencies of the local oscillator.
+        freqLO (Frequency [] ): Array(numLO) the frequencies of the local oscillator.
 
-    receiverSideband  ReceiverSideband  the receiver sideband used.
+        receiverSideband (ReceiverSideband): the receiver sideband used.
 
-    sidebandLO  NetSideband []   numLO  the sideband conversions.
+        sidebandLO (NetSideband [] ): Array(numLO) the sideband conversions.
 
 
 

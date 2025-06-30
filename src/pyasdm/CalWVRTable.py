@@ -55,66 +55,84 @@ class CalWVRTable:
     """
     The CalWVRTable class is an Alma table.
 
-    Role
     Result of the water vapour radiometric  calibration performed by TelCal.
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of CalWVR
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
 
+    The field description text here is as found in the model used to generate the code.
 
-    antennaName str the name of the antenna. </TD>
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
 
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
 
-
-    calDataId Tag refers to a unique row in CalData Table. </TD>
-
-
-
-    calReductionId Tag refers to unique row  in CalReductionTable. </TD>
-
-
-
-
-                 Value (Mandatory)
-
-    startValidTime  ArrayTime  the start time of result validity period.
-
-    endValidTime  ArrayTime  the end time of result validity period.
-
-    wvrMethod  WVRMethod  identifies the method used for the calibration.
-
-    numInputAntennas (numInputAntennas) int  the number of input antennas (i.e. equiped with functional WVRs).
-
-    inputAntennaNames  str []   numInputAntennas  the names of the input antennas (one string per antenna).
-
-    numChan (numChan) int  the number of frequency channels in the WVR receiver.
-
-    chanFreq  Frequency []   numChan  the channel frequencies (one value per channel).
-
-    chanWidth  Frequency []   numChan  the widths of the channels (one value per channel).
-
-    refTemp  Temperature []  []   numInputAntennas, numChan  the reference temperatures (one value per input antenna per channel).
-
-    numPoly (numPoly) int  the number of polynomial coefficients.
-
-    pathCoeff  float []  []  []   numInputAntennas, numChan, numPoly  the path length coefficients (one value per input antenna per channel per polynomial coefficient).
-
-    polyFreqLimits  Frequency []   2  the limits of the interval of frequencies for which the path length coefficients are computed.
-
-    wetPath  float []   numPoly  The wet path as a function frequency (expressed as a polynomial).
-
-    dryPath  float []   numPoly  The dry path as a function frequency (expressed as a polynomial).
-
-    water  Length  The precipitable water vapor corresponding to the reference model.
+    Attributes:
 
 
 
-                 Value (Optional)
+        antennaName (str): the name of the antenna. key.
 
-    tauBaseline  float  Constant opacity term (frequency independent).
+
+
+        calDataId (Tag): refers to a unique row in CalData Table. key.
+
+
+
+        calReductionId (Tag): refers to unique row  in CalReductionTable. key.
+
+
+
+
+
+        startValidTime (ArrayTime): the start time of result validity period.
+
+        endValidTime (ArrayTime): the end time of result validity period.
+
+        wvrMethod (WVRMethod): identifies the method used for the calibration.
+
+        numInputAntennas (int): the number of input antennas (i.e. equiped with functional WVRs).
+
+        inputAntennaNames (str [] ): Array(numInputAntennas) the names of the input antennas (one string per antenna).
+
+        numChan (int): the number of frequency channels in the WVR receiver.
+
+        chanFreq (Frequency [] ): Array(numChan) the channel frequencies (one value per channel).
+
+        chanWidth (Frequency [] ): Array(numChan) the widths of the channels (one value per channel).
+
+        refTemp (Temperature []  [] ): Array(numInputAntennas, numChan) the reference temperatures (one value per input antenna per channel).
+
+        numPoly (int): the number of polynomial coefficients.
+
+        pathCoeff (float []  []  [] ): Array(numInputAntennas, numChan, numPoly) the path length coefficients (one value per input antenna per channel per polynomial coefficient).
+
+        polyFreqLimits (Frequency [] ): Array(2) the limits of the interval of frequencies for which the path length coefficients are computed.
+
+        wetPath (float [] ): Array(numPoly) The wet path as a function frequency (expressed as a polynomial).
+
+        dryPath (float [] ): Array(numPoly) The dry path as a function frequency (expressed as a polynomial).
+
+        water (Length): The precipitable water vapor corresponding to the reference model.
+
+
+
+
+        tauBaseline (float): Constant opacity term (frequency independent). Optional.
 
 
     """

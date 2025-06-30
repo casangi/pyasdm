@@ -55,51 +55,70 @@ class MainTable:
     """
     The MainTable class is an Alma table.
 
-    Role
      Contains links to all data subsets. Each data subset is contained in a separate entity, usually a BLOB.
 
 
-    Generated from model's revision -1, branch
+    Shown here are the fields found in each row.
 
-    Attributes of Main
+    The key fields are shown first and used (together) to index a unique row. Key fields
+    are all required and indicated by "Key." following the description.
 
-                 Key
+    Other fields are required unless "optional" is shown for that field.
+
+    The field description text here is as found in the model used to generate the code.
+
+    Types may be an enumeration or extended pyasdm type. Fields that are python lists
+    are indicated that by "[]" in the type and having the word "Array" at the start of
+    description followed by the expected number of elements in that list in parentheses.
+    Lists (arrays) may be multi-dimensional (lists of lists) and are indicated
+    by [][] ... etc as needed to indicate the expected number of
+    dimensions. Multi-dimenstional lists will show the expected number of elements
+    for each dimension also in the parenthese after "Array".
+
+    The use of "auto-incrementable" indicates that that field is auto-generated
+    when the table is created and that field is set, as necessary, to create a
+    unique key for the specific row being added, by incrementing that value from
+    the previous highest value needed for the rest of the elements of the key on
+    that row. Such a field can not be set independently, it is only set when
+    the row is added to the table by that auto-increment mechanism.
+
+    Attributes:
 
 
-    time ArrayTime mid point of scheduled period. </TD>
+
+        time (ArrayTime): mid point of scheduled period. key.
 
 
 
-    configDescriptionId Tag Configuration description identifier. </TD>
+        configDescriptionId (Tag): Configuration description identifier. key.
 
 
 
-    fieldId Tag Field identifier. </TD>
+        fieldId (Tag): Field identifier. key.
 
 
 
 
-                 Value (Mandatory)
 
-    numAntenna (numAntenna) int  Number of antennas.
+        numAntenna (int): Number of antennas.
 
-    timeSampling  TimeSampling  time sampling mode.
+        timeSampling (TimeSampling): time sampling mode.
 
-    interval  Interval  data sampling interval.
+        interval (Interval): data sampling interval.
 
-    numIntegration (numIntegration) int  number of integrations.
+        numIntegration (int): number of integrations.
 
-    scanNumber  int  scan number.
+        scanNumber (int): scan number.
 
-    subscanNumber  int  subscan number.
+        subscanNumber (int): subscan number.
 
-    dataSize  int  size of the binary data , as a number of bytes.
+        dataSize (int): size of the binary data , as a number of bytes.
 
-    dataUID  EntityRef  reference to the binary data.
+        dataUID (EntityRef): reference to the binary data.
 
-    stateId  Tag []   numAntenna  State identifier.
+        stateId (Tag [] ): Array(numAntenna) State identifier.
 
-    execBlockId  Tag  ExecBlock identifier.
+        execBlockId (Tag): ExecBlock identifier.
 
 
 
