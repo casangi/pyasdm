@@ -38,6 +38,13 @@ Documents
 Todo
 ----
 
+DataViews
+    The c++ BDF code includes classes and structures that are useful when filling a MeasurementSet v2.
+    Those date data views are unlikely to be useful for the users of pyasdm. Useful views need to be
+    defined an implemented. This layer also includes useful methods to link back from a BDF to the
+    relevant meta data in the ASDM. This layer may also include some data selection methods and
+    criteria.
+
 PackedData
     PackedData contains all of the integrations in a single data subset. The internal processing is slightly
     different. This type of data is not yet correctly handled. This not include correlator data, which is
