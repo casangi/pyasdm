@@ -110,7 +110,6 @@ class ArrayTime(Interval):
                     # integer nanoseconds
                     self.set(thisArg)
                 else:
-                    # TODO - this needs to throw an InvalidArgumentException or equivalent
                     raise ValueError("invalid argument value")
             elif len(args) == 2:
                 # mjd, seconds
@@ -141,17 +140,16 @@ class ArrayTime(Interval):
                     raise ValueError("invalid hour, minute or second value")
                 self.init(year, month, day, hour, minute, second)
             else:
-                # TODO - probably InvalidArgumentException here
                 raise ValueError("invalid ArrayTime constructor used")
 
     # constants used in conversions
-    numberSigDigitsInASecond = 9
-    unitsInASecond = 1000000000
-    unitsInADayL = 86400000000000
-    unitsInADay = 86400000000000.0
-    unitsInADayDiv100 = 864000000000.0
-    julianDayOfBase = 2400000.5
-    julianDayOfBaseInUnitsInADayDiv100 = 2073600432000000000
+    _numberSigDigitsInASecond = 9
+    _unitsInASecond = 1000000000
+    _unitsInADayL = 86400000000000
+    _unitsInADayD = 86400000000000.0
+    _unitsInADayDiv100 = 864000000000.0
+    _julianDayOfBase = 2400000.5
+    _julianDayOfBaseInUnitsInADayDiv100 = 2073600432000000000
 
     def getJD(self, mjd=None):
         """
@@ -220,7 +218,7 @@ class ArrayTime(Interval):
         # then we will have 9 significant digits in a fraction
         # string.
         tmp = "0000000000000000"
-        s = s + tmp[0 : self.numberSigDigitsInASecond - len(fracStr)]
+        s = s + tmp[0 : self._numberSigDigitsInASecond - len(fracStr)]
         s = s + fracStr
         return s
 
@@ -236,13 +234,13 @@ class ArrayTime(Interval):
         the number of nanoseconds that remain in this fraction of a second.
         """
 
-        fractionOfADay = int(self.get() % self.unitsInADayL)
+        fractionOfADay = int(self.get() % self._unitsInADayL)
 
         if fractionOfADay < 0:
-            fractionOfADay = self.unitsInADayL - fractionOfADay
+            fractionOfADay = self._unitsInADayL - fractionOfADay
 
-        nsec = int(fractionOfADay / self.unitsInASecond)
-        frac = fractionOfADay - nsec * self.unitsInASecond
+        nsec = int(fractionOfADay / self._unitsInASecond)
+        frac = fractionOfADay - nsec * self._unitsInASecond
         nmin = int(nsec / 60)
         second = nsec - nmin * 60
         hour = int(nmin / 60)
@@ -267,15 +265,8 @@ class ArrayTime(Interval):
         E = int((B - D) / 30.6001)
         day = B - D - int(30.6001 * E) + F
 
-        if E < 14:
-            month = E - 1
-        else:
-            month = E - 13
-
-        if month > 2:
-            year = C - 4716
-        else:
-            year = C - 4715
+        month = (E-1) if (E<14) else (E-13)
+        year = (C-4716) if (month>2) else (C-4715)
 
         day = int(day)
         month = month
@@ -305,9 +296,7 @@ class ArrayTime(Interval):
         year = dateTuple[0]
         month = dateTuple[1]
         day = dateTuple[2]
-        leapYearMult = 2
-        if self.isLeapYear(year):
-            leapYearMult = 1
+        leapYearMult = 1 if self.isLeapYear(year) else 2
 
         # watch for auto promotion of integer division to floats in python
         return (
@@ -372,21 +361,11 @@ class ArrayTime(Interval):
             )
 
         # check for valid day
-        if (iday < 1 or iday > 31) or (
-            (month == 4 or month == 6 or month == 9 or month == 11) and iday > 30
-        ):
+        if (iday < 1 or iday > 31) or ((month == 4 or month == 6 or month == 9 or month == 11) and iday > 30) or (month == 2 and (iday > (29 if self.isLeapYear(year) else 28))):
             raise ValueError("Illegal value of day: " + year + "-" + month + "-" + day)
-        if month == 2:
-            maxDays = 28
-            if self.isLeapYear(year):
-                maxDays = 29
-            if leapYear > maxDays:
-                raise ValueError(
-                    "Illegal value of day: " + year + "-" + month + "-" + day
-                )
 
         if month <= 2:
-            --year
+            year -= 1
             month += 12
 
         A = int(year / 100)
@@ -396,7 +375,7 @@ class ArrayTime(Interval):
         )
         u = self.jdToUnit(jd)
         # Now add the fraction of a day.
-        u += int(((day - iday) * self.unitsInADay + 0.5))
+        u += int(((day - iday) * self._unitsInADayD + 0.5))
         self.set(u)
         return u
 
@@ -465,7 +444,7 @@ class ArrayTime(Interval):
         @param unit The unit to be converted.
         @return The Julian day corresponding to the specified unit of time.
         """
-        return (1.0 * unit / self.unitsInADay) + self.julianDayOfBase
+        return (1.0 * unit / self._unitsInADayD) + self._julianDayOfBase
 
     def unitToMJD(self, unit):
         """
@@ -473,7 +452,7 @@ class ArrayTime(Interval):
         @param unit The unit to be converted.
         @return The Modified Julian day corresponding to the specified unit of time.
         """
-        return 1.0 * unit / self.unitsInADay
+        return 1.0 * unit / self._unitsInADayD
 
     def jdToUnit(self, jd):
         """
@@ -483,7 +462,7 @@ class ArrayTime(Interval):
         @return The unit corresponding to the specified Julian day.
         """
         return (
-            int(jd * self.unitsInADayDiv100) - self.julianDayOfBaseInUnitsInADayDiv100
+            int(jd * self._unitsInADayDiv100) - self._julianDayOfBaseInUnitsInADayDiv100
         ) * 100
 
     def mjdToUnit(self, mjd):
@@ -492,7 +471,7 @@ class ArrayTime(Interval):
         @param mjd The Modified Julian day to be converted.
         @return The unit corresponding to the specified Modified Julian day.
         """
-        return int(mjd * self.unitsInADay)
+        return int(mjd * self._unitsInADayD)
 
     @staticmethod
     def isLeapYear(year):

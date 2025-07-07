@@ -76,6 +76,10 @@ class arraytime_test(unittest.TestCase):
         self.assertEqual(at.toFITS(), "1983-07-14T22:02:05.752800000","non leap year test, toFITS")
         self.assertEqual(at.getDayOfYear(),195,"non leap year test, getDayOfYear")
 
+        # from a FITS date that involves February
+        at = ArrayTime("2012-02-22T22:30:50.000136")
+        self.assertEqual(at.toFITS(),"2012-02-22T22:30:50.000136000","FITS date in February test, toFITS")
+
 if __name__ == "__main__":
 
     unittest.main()
