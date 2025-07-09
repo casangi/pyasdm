@@ -66,6 +66,15 @@ Row uniqueness checks
     The Java classes always check on row uniqueness for the required key fields when a table is ready. The
     c++ classes can optionally skip that step. Skipping that step can save considerable time when reading
     large binary tables (see the previous item). This needs to be implemented.
+
+Read early SDM versions
+    The current code only reads versions (schemaVersion in ASDM.xml) >= 3. Earlier versions
+    are handled in the c++ code by using the libxslt library and two xsl (stylesheet) files packaged
+    with casarundata that describe the transformations from version 2 to version 3 for both
+    ALMA and EVLA data (the transformations are different). That transformation is not
+    yet available in pyasdm. Attempting to read an ASDM without a schemaVersion or with
+    a schemaVersion value < 3 will raise a ConversionException. That transformation is also not
+    available in the Java code (so pyasdm currently behaves as the Java code does).
     
 BDF write.
     This will be added.

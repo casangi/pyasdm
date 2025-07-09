@@ -2,6 +2,8 @@ Examples
 ======================================================
 
 Examples may eventually be found in one or more jupyter notebook(s). This is very preliminary.
+Note that pyasdm can not read ASDM with versions < "3" (the schemaVersion
+value in the ASDM.xml file).
 
 .. toctree::
    :maxdepth: 2
