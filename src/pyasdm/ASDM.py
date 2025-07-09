@@ -1640,7 +1640,13 @@ class ASDM:
         asdmdom = xmldom.firstChild
 
         # get the version from the schemaVersion attribute, which must be there
-        versionStr = asdmdom.attributes.getNamedItem("schemaVersion").value
+        # default to an unknown version, caught later
+        versionStr = "-1"
+        # in early versions, schemaVersion is missing
+        schemaVersionAttr = asdmdom.attributes.getNamedItem("schemaVersion")
+        if schemaVersionAttr is not None:
+            versionStr = schemaVersionAttr.value
+
         # raises a ValueError if not an integer
         try:
             self.setVersion(int(versionStr))
@@ -1648,6 +1654,14 @@ class ASDM:
             # all errors here should appear as a ConversionException
             raise ConversionException(
                 "schemaVersion is not an integer as expected", "ASDM"
+            )
+
+        # can not continue if version is < 3
+        # eventually an earlier version should be possible, but not yet
+        if self.getVersion() < 3:
+            raise ConversionException(
+                "Only ASDM versions >=3 can be processed. Older versions require a pre-processing step that is not yet available.",
+                "ASDM",
             )
 
         # go through the child nodes of asdmdom
