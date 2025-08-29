@@ -333,7 +333,7 @@ class BDFHeader:
         axesListStr = " ".join(map(str, self.getAxes("actualTimes")))
         result += "\taxes = %s" % axesListStr + "\n"
 
-        result += "actualDurations" + "\n"
+        result += "actualDurations:" + "\n"
         result += "\tsize = %s" % self.getSize("actualDurations") + "\n"
         axesListStr = " ".join(map(str, self.getAxes("actualDurations")))
         result += "\taxes = %s" % axesListStr + "\n"
@@ -343,20 +343,20 @@ class BDFHeader:
             and (self.zeroLagsCorrelatorType() != pyasdm.enumerations.CorrelatorType.FX)
             and (self.getSize("zeroLags") > 0)
         ):
-            result += "zeroLags" + "\n"
+            result += "zeroLags:" + "\n"
             result += "\tsize = %s" % self.getSize("zeroLags") + "\n"
             axesListStr = " ".join(map(str, self.getAxes("zeroLags")))
             result += "\taxes = %s" % axesListStr + "\n"
             result += "\tcorrelatorType = %s" % self.zeroLagsCorrelatorType() + "\n"
 
         if self.getCorrelationMode() == pyasdm.enumerations.CorrelationMode.CROSS_ONLY:
-            result += "crossData" + "\n"
+            result += "crossData:" + "\n"
             result += "\tsize = %s" % self.getSize("crossData") + "\n"
             axesListStr = " ".join(map(str, self.getAxes("crossData")))
             result += "\taxes = %s" % axesListStr + "\n"
 
         elif self.getCorrelationMode() == pyasdm.enumerations.CorrelationMode.AUTO_ONLY:
-            result += "autoData" + "\n"
+            result += "autoData:" + "\n"
             result += "\tsize = %s" % self.getSize("autoData") + "\n"
             axesListStr = " ".join(map(str, self.getAxes("autoData")))
             result += "\taxes = %s" % axesListStr + "\n"
@@ -366,12 +366,12 @@ class BDFHeader:
             self.getCorrelationMode()
             == pyasdm.enumerations.CorrelationMode.CROSS_AND_AUTO
         ):
-            result += "crossData" + "\n"
+            result += "crossData:" + "\n"
             result += "\tsize = %s" % self.getSize("crossData") + "\n"
             axesListStr = " ".join(map(str, self.getAxes("crossData")))
             result += "\taxes = %s" % axesListStr + "\n"
 
-            result += "autoData" + "\n"
+            result += "autoData:" + "\n"
             result += "\tsize = %s" % self.getSize("autoData") + "\n"
             axesListStr = " ".join(map(str, self.getAxes("autoData")))
             result += "\taxes = %s" % axesListStr + "\n"
@@ -651,9 +651,15 @@ class BDFHeader:
             axesList.append(pyasdm.enumerations.AxisName.literal(axisStr))
         self._dataStruct[binaryNode.nodeName]["axes"] = axesList
         if binaryNode.nodeName == "autoData":
-            self._dataStruct[binaryNode.nodeName]["normalized"] = bool(
-                self._getRequiredAttributeValue(binaryNode, "normalized")
-            )
+            normalizedAttrValue = self._getRequiredAttributeValue(binaryNode, "normalized")
+            # this should be either 'true' or 'false', store as a boolean value
+            if normalizedAttrValue == "true":
+                self._dataStruct[binaryNode.nodeName]["normalized"] = True
+            elif normalizedAttrValue == "false":
+                self._dataStruct[binaryNode.nodeName]["normalized"] = False
+            else:
+                raise ValueError("unrecognized 'normalized' value for autoData, must be either 'true' or 'false', value is '" + normalizedAttrValue + "'")
+                
         elif binaryNode.nodeName == "zeroLags":
             correlatorTypeValue = self._getRequiredAttributeValue(
                 binaryNode, "correlatorType"

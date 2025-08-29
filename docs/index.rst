@@ -45,11 +45,6 @@ DataViews
     relevant meta data in the ASDM. This layer may also include some data selection methods and
     criteria.
 
-PackedData
-    PackedData contains all of the integrations in a single data subset. The internal processing is slightly
-    different. This type of data is not yet correctly handled. This not include correlator data, which is
-    never packed.
-
 Binary Tables
     Tables can be stored in binary form. These are read by the current classes but it follows the Java
     implementation which reads of the data into memory at once. For some tables (e.g. Pointing) that can

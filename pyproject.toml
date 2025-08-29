@@ -1,6 +1,6 @@
 [project]
 name = "pyasdm"
-version = "0.0.2"
+version = "0.0.3"
 description = ""
 authors = [
     {name = "Bob Garwood", email="bgarwood@nrao.edu"}

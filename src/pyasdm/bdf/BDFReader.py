@@ -67,11 +67,11 @@ class BDFReader:
 
     _currentState = _States.S_NO_BDF
 
-    def currentState(self):
+    def _getCurrentState(self):
         """
         Returns a string representation of the current state.
 
-        This useful to enhance the raised exceptions by adding the current state to
+        This is useful to enhance the raised exceptions by adding the current state to
         the message.
         """
         result = "Unknown, this should NEVER happen."
@@ -152,7 +152,7 @@ class BDFReader:
             "Invalid call of method '"
             + methodName
             + "' in the current context: "
-            + self.currentState()
+            + self._getCurrentState()
             + "."
         )
 
@@ -720,8 +720,8 @@ class BDFReader:
             self._bdfHeaderData.fromDOM(dataHeaderElem)
 
         except Exception as exc:
-            # import traceback
-            # traceback.print_exc()
+            import traceback
+            traceback.print_exc()
             raise BDFReaderException(
                 "Unexpected exception while parsing the main BDF header: '"
                 + str(exc)
@@ -787,26 +787,36 @@ class BDFReader:
             "projectPath"
         ).value
         projectPathParts = projectPath.split("/")
-        # should have 4 of 5 parts here, it's OK if there's a 6th one that's empty
+        # drop the last part if projectPath ends in a "/"
+        if projectPath.endswith('/'):
+            projectPathParts = projectPathParts[:-1]
         numPathParts = len(projectPathParts)
-        if (
-            (numPathParts < 4)
-            or (numPathParts > 6)
-            or (numPathParts == 6 and (len(projectPathParts[5]) != 0))
-        ):
-            raise BDFReaderException(
-                "Invalid string for projectPath, expectes 4 or 5 parts '"
-                + projectPath
-                + "'"
-            )
+        if self.isCorrelation():
+            # correlator data should have 4 of 5 parts here
+            if ((numPathParts < 4) or (numPathParts > 5)):
+                raise BDFReaderException(
+                    "Invalid string for projectPath, expectes 4 or 5 parts '"
+                    + projectPath
+                    + "'"
+                )
+        else:
+            # TP data should have 3 or 4 parts here
+            if ((numPathParts < 3) or (numPathParts > 4)):
+                raise BDFReaderException(
+                    "Invalid string for projectPath, expects 3 or 4 parts '"
+                    + projectPath
+                    + "'"
+                    )
+            
         execBlockNum = int(projectPathParts[0])
         scanNum = int(projectPathParts[1])
         subscanNum = int(projectPathParts[2])
-        intNum = int(projectPathParts[3])
-        if numPathParts > 5:
+        intNum = 0
+        subIntNum = 0
+        if numPathParts > 3:
+            intNum = int(projectPathParts[3])
+        if numPathParts > 4:
             subIntNum = int(projectPathParts[4])
-        else:
-            subIntNum = 0
 
         # the first 3 values should match those for this BDF
         if (
@@ -1105,7 +1115,7 @@ class BDFReader:
             if line.find(b"--" + self._boundary_2.strip(b'"')) != 0:
                 raise BDFReaderException(
                     "Processing integration # "
-                    + self._integration
+                    + str(self._integrationIndex)
                     + ":Unexpected '"
                     + line.decode("utf-8")
                     + "' after the binary part '"
