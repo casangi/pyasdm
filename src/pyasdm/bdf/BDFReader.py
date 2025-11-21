@@ -481,15 +481,32 @@ class BDFReader:
             self._currentState = self._States.S_AT_END
         return not atEnd
 
-    def getSubset(self):
+    def getSubset(self, loadOnlyComponents: set[str] | None = None):
         """
         Returns an SDM Data Subset (one integration) as a dictionary.
 
         This reads the next subset found at the current location in the file.
+
+        Parameters
+        ----------
+        loadOnlyComponents: set[str]
+            If given, only the binary components included in the dictionary will be
+            loaded. This can be used for example to load only the actualTimes and
+            actualDurations components, skipping the loading of data, flags, etc.
+            For the not included (not loaded) components, the "present", "type" and
+            other fields will be populated but the "arr" field will be left empty.
+
+        Returns
+        -------
+        sdmSubset: dict
+            dictionary with entries from the subset metadata (projectPath,
+            integrationNumber, midPpointInNanoSeconds, intervalInNanoSeconds, aborted,
+            stopTime, abortReason) and binary components (flags, actualTimes,
+            actualDurations, zeroLags, autoData, crossData)
         """
         self._checkState(self._Transitions.T_READ, "getSubset")
         self._integrationIndex += 1
-        sdmSubset = self._requireSDMDataSubsetMIMEPart()
+        sdmSubset = self._requireSDMDataSubsetMIMEPart(loadOnlyComponents)
         # this line isn't used, but the file should be advanced to the next line
         line = self._nextLine()
         self._currentState = self._States.S_READING
@@ -721,6 +738,7 @@ class BDFReader:
 
         except Exception as exc:
             import traceback
+
             traceback.print_exc()
             raise BDFReaderException(
                 "Unexpected exception while parsing the main BDF header: '"
@@ -754,7 +772,7 @@ class BDFReader:
 
         self._setPosition(curpos)
 
-    def _requireSDMDataSubsetMIMEPart(self):
+    def _requireSDMDataSubsetMIMEPart(self, loadOnlyComponents: set["str"] | None):
         self._integrationStartsAt = self.position()
 
         # CAS-8151, apparently there are cases where there are two occurrences of the MIME bouneary instead of only one
@@ -788,12 +806,12 @@ class BDFReader:
         ).value
         projectPathParts = projectPath.split("/")
         # drop the last part if projectPath ends in a "/"
-        if projectPath.endswith('/'):
+        if projectPath.endswith("/"):
             projectPathParts = projectPathParts[:-1]
         numPathParts = len(projectPathParts)
         if self.isCorrelation():
             # correlator data should have 4 of 5 parts here
-            if ((numPathParts < 4) or (numPathParts > 5)):
+            if (numPathParts < 4) or (numPathParts > 5):
                 raise BDFReaderException(
                     "Invalid string for projectPath, expectes 4 or 5 parts '"
                     + projectPath
@@ -801,13 +819,13 @@ class BDFReader:
                 )
         else:
             # TP data should have 3 or 4 parts here
-            if ((numPathParts < 3) or (numPathParts > 4)):
+            if (numPathParts < 3) or (numPathParts > 4):
                 raise BDFReaderException(
                     "Invalid string for projectPath, expects 3 or 4 parts '"
                     + projectPath
                     + "'"
-                    )
-            
+                )
+
         execBlockNum = int(projectPathParts[0])
         scanNum = int(projectPathParts[1])
         subscanNum = int(projectPathParts[2])
@@ -882,52 +900,28 @@ class BDFReader:
         # if it's aborted, this can probably be skipped, but it should also be harmless to not skip it just in case there's more there to be skipped over
         # no aborted scans available yet to test this on
 
-        actualTimesDesc = {}
-        actualTimesDesc["present"] = False
-        actualTimesDesc["startsAt"] = -1
-        actualTimesDesc["arr"] = None
-        actualTimesDesc["type"] = "INT64_TYPE"
-        actualTimesDesc["np_type"] = np.dtype(np.int64)
-
-        actualDurationsDesc = {}
-        actualDurationsDesc["present"] = False
-        actualDurationsDesc["startsAt"] = -1
-        actualDurationsDesc["arr"] = None
-        actualDurationsDesc["type"] = "INT64_TYPE"
-        actualDurationsDesc["np_type"] = np.dtype(np.int64)
-
-        crossDataDesc = {}
-        crossDataDesc["present"] = False
-        crossDataDesc["startsAt"] = -1
-        crossDataDesc["arr"] = None
-        crossDataDesc["type"] = None
-        crossDataDesc["np_type"] = None
+        binaryComponents = {
+            "actualTimes": {"type": "INT64_TYPE", "np_type": np.dtype(np.int64)},
+            "actualDurations": {"type": "INT64_TYPE", "np_type": np.dtype(np.int64)},
+            "crossData": {"type": None, "np_type": None},
+            "autoData": {"type": "FLOAT32_TYPE", "np_type": np.dtype(np.float32)},
+            "flags": {"type": "INT32_TYPE", "np_type": np.dtype(np.int32)},
+            "zeroLags": {"type": "FLOAT32_TYPE", "np_type": np.dtype(np.float32)},
+        }
+        binaryComponentsDesc = {}
+        for component in binaryComponents:
+            binaryComponentsDesc[component] = {
+                "present": False,
+                "startsAt": -1,
+                "arr": None,
+                "type": binaryComponents[component]["type"],
+                "np_type": binaryComponents[component]["np_type"],
+            }
 
         # the actual crossDataDesc varies among these types
         npInt16 = np.dtype(np.int16)
         npInt32 = np.dtype(np.int32)
         npFloat32 = np.dtype(np.float32)
-
-        autoDataDesc = {}
-        autoDataDesc["present"] = False
-        autoDataDesc["startsAt"] = -1
-        autoDataDesc["arr"] = None
-        autoDataDesc["type"] = "FLOAT32_TYPE"
-        autoDataDesc["np_type"] = np.dtype(np.float32)
-
-        flagsDesc = {}
-        flagsDesc["present"] = False
-        flagsDesc["startsAt"] = -1
-        flagsDesc["arr"] = None
-        flagsDesc["type"] = "INT32_TYPE"
-        flagsDesc["np_type"] = np.dtype(np.int32)
-
-        zeroLagsDesc = {}
-        zeroLagsDesc["present"] = False
-        zeroLagsDesc["startsAt"] = -1
-        zeroLagsDesc["arr"] = None
-        zeroLagsDesc["type"] = "FLOAT32_TYPE"
-        zeroLagsDesc["np_type"] = np.dtype(np.float32)
 
         # adjust the numpy data types when the byte order is not native
         if not self._bdfHeaderData.getByteOrder().isNative():
@@ -1001,7 +995,7 @@ class BDFReader:
                         % elements[0].nodeName
                     )
 
-                crossDataDesc["type"] = crossDataType
+                binaryComponentsDesc["crossData"]["type"] = crossDataType
 
             self._skipUntilEmptyLine(10)
 
@@ -1015,13 +1009,13 @@ class BDFReader:
             elif binaryPartName == b"crossData":
                 if crossDataType == "INT16_TYPE":
                     numberOfBytesPerValue = 2
-                    crossDataDesc["np_type"] = npInt16
+                    binaryComponentsDesc["crossData"]["np_type"] = npInt16
                 elif crossDataType == "INT32_TYPE":
                     numberOfBytesPerValue = 4
-                    crossDataDesc["np_type"] = npInt32
+                    binaryComponentsDesc["crossData"]["np_type"] = npInt32
                 elif crossDataType == "FLOAT32_TYPE":
                     numberOfBytesPerValue = 4
-                    crossDataDesc["np_type"] = npFloat32
+                    binaryComponentsDesc["crossData"]["np_type"] = npFloat32
             elif binaryPartName == b"flags":
                 numberOfBytesPerValue = 4
             elif binaryPartName == b"zeroLags":
@@ -1035,62 +1029,27 @@ class BDFReader:
                     + "'."
                 )
 
-            numberOfElementsToRead = self._binaryPartSize[
-                binaryPartName.decode("utf-8")
-            ]
+            componentName = binaryPartName.decode("utf-8")
+            numberOfElementsToRead = self._binaryPartSize[componentName]
             numberOfBytesToRead = numberOfBytesPerValue * numberOfElementsToRead
 
             # with restructuring, this can also be cleaner - TBD
             # actual number of bytes read
             nReadBytes = None
-            if binaryPartName == b"zeroLags":
-                zeroLagsDesc["present"] = True
-                zeroLagsDesc["startsAt"] = self.position()
-                dt = zeroLagsDesc["np_type"]
-                zeroLagsDesc["arr"] = np.fromfile(
-                    self._f, dtype=dt, count=numberOfElementsToRead
-                )
-                nReadBytes = zeroLagsDesc["arr"].size * numberOfBytesPerValue
-            elif binaryPartName == b"actualTimes":
-                actualTimesDesc["present"] = True
-                actualTimesDesc["startsAt"] = self.position()
-                dt = actualTimesDesc["np_type"]
-                actualTimesDesc["arr"] = np.fromfile(
-                    self._f, dtype=dt, count=numberOfElementsToRead
-                )
-                nReadBytes = len(actualTimesDesc["arr"]) * numberOfBytesPerValue
-            elif binaryPartName == b"actualDurations":
-                actualDurationsDesc["present"] = True
-                actualDurationsDesc["startsAt"] = self.position()
-                dt = actualDurationsDesc["np_type"]
-                actualDurationsDesc["arr"] = np.fromfile(
-                    self._f, dtype=dt, count=numberOfElementsToRead
-                )
-                nReadBytes = len(actualDurationsDesc["arr"]) * numberOfBytesPerValue
-            elif binaryPartName == b"crossData":
-                crossDataDesc["present"] = True
-                crossDataDesc["startsAt"] = self.position()
-                dt = crossDataDesc["np_type"]
-                crossDataDesc["arr"] = np.fromfile(
-                    self._f, dtype=dt, count=numberOfElementsToRead
-                )
-                nReadBytes = len(crossDataDesc["arr"]) * numberOfBytesPerValue
-            elif binaryPartName == b"autoData":
-                autoDataDesc["present"] = True
-                autoDataDesc["startsAt"] = self.position()
-                dt = autoDataDesc["np_type"]
-                autoDataDesc["arr"] = np.fromfile(
-                    self._f, dtype=dt, count=numberOfElementsToRead
-                )
-                nReadBytes = len(autoDataDesc["arr"]) * numberOfBytesPerValue
-            elif binaryPartName == b"flags":
-                flagsDesc["present"] = True
-                flagsDesc["startsAt"] = self.position()
-                dt = flagsDesc["np_type"]
-                flagsDesc["arr"] = np.fromfile(
-                    self._f, dtype=dt, count=numberOfElementsToRead
-                )
-                nReadBytes = len(flagsDesc["arr"]) * numberOfBytesPerValue
+            actualReadSkipped = False
+            if componentName in binaryComponents:
+                componentDesc = binaryComponentsDesc[componentName]
+                componentDesc["present"] = True
+                componentDesc["startsAt"] = self.position()
+                dt = componentDesc["np_type"]
+                if not loadOnlyComponents or componentName in loadOnlyComponents:
+                    componentDesc["arr"] = np.fromfile(
+                        self._f, dtype=dt, count=numberOfElementsToRead
+                    )
+                    nReadBytes = componentDesc["arr"].size * numberOfBytesPerValue
+                else:
+                    componentDesc["arr"] = None
+                    actualReadSkipped = True
             else:
                 # should never reach here ! but just in case
                 bytes = self._f.read(numberOfBytesToRead)
@@ -1099,6 +1058,10 @@ class BDFReader:
                     "Unknown binary part name '(%s)' with %s bytes to read, skipping in case it's possible to continue, this should never happen!"
                     % (binaryPartName.decode("utf-8"), numberOfBytesToRead)
                 )
+
+            if loadOnlyComponents and actualReadSkipped:
+                self._f.seek(numberOfBytesToRead, os.SEEK_CUR)
+                nReadBytes = numberOfBytesToRead
 
             if nReadBytes < numberOfBytesToRead:
                 raise BDFReaderException(
@@ -1137,18 +1100,18 @@ class BDFReader:
             "aborted": aborted,
             "stopTime": stopTime,
             "abortReason": abortReason,
-            "actualTimes": actualTimesDesc,
-            "actualDurations": actualDurationsDesc,
-            "crossData": crossDataDesc,
-            "autoData": autoDataDesc,
-            "flags": flagsDesc,
-            "zeroLags": zeroLagsDesc,
+            "actualTimes": binaryComponentsDesc["actualTimes"],
+            "actualDurations": binaryComponentsDesc["actualDurations"],
+            "crossData": binaryComponentsDesc["crossData"],
+            "autoData": binaryComponentsDesc["autoData"],
+            "flags": binaryComponentsDesc["flags"],
+            "zeroLags": binaryComponentsDesc["zeroLags"],
         }
 
     def _setPosition(self, newpos):
         """
         Set the position of the BDF to the location given by newpos (bytes).
-        This is intended for inernal use because it may confuse the public methods if this is
+        This is intended for internal use because it may confuse the public methods if this is
         used out of the normal sequence.
         """
         self._f.seek(newpos, 0)
