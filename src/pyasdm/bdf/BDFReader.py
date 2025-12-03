@@ -23,12 +23,14 @@
 # File BDFReader.py
 #
 
-import sys
-import re
-import os
-from enum import Enum, auto
 import codecs
+from enum import Enum, auto
+import os
+import re
+import sys
+from typing import Callable
 from xml.dom import minidom
+
 import numpy as np
 
 from .BDFHeader import BDFHeader
@@ -481,7 +483,13 @@ class BDFReader:
             self._currentState = self._States.S_AT_END
         return not atEnd
 
-    def getSubset(self, loadOnlyComponents: set[str] | None = None):
+    def getSubset(
+        self,
+        loadOnlyComponents: set[str] | None = None,
+        spwId: int | None = None,
+        loadOneSPWFunction: Callable | None = None,
+        loadOneSPWFunctionParams: tuple = None,
+    ) -> dict:
         """
         Returns an SDM Data Subset (one integration) as a dictionary.
 
@@ -495,6 +503,14 @@ class BDFReader:
             actualDurations components, skipping the loading of data, flags, etc.
             For the not included (not loaded) components, the "present", "type" and
             other fields will be populated but the "arr" field will be left empty.
+        spwId: int
+            If given, the binary data/flags will be loaded only for that spw ID.
+            The binary data for other SPWs will be skipped.
+        loadOneSPWFunction: Callable
+            When spwId is given, function that takes care of loading the data for
+            that SPW.
+        loadOneSPWFunctionParams: tuple
+            Parameters to pass to the function.
 
         Returns
         -------
@@ -502,11 +518,17 @@ class BDFReader:
             dictionary with entries from the subset metadata (projectPath,
             integrationNumber, midPpointInNanoSeconds, intervalInNanoSeconds, aborted,
             stopTime, abortReason) and binary components (flags, actualTimes,
-            actualDurations, zeroLags, autoData, crossData)
+            actualDurations, zeroLags, autoData, crossData).
+
+            To-be-cleaned-up: when requesting components autoData and/or crossData and
+            using spwId, the subset will have one entry 'visibilities' instead of
+            'autoData' and 'crossData' with the visibilities in MSv4 shape.
         """
         self._checkState(self._Transitions.T_READ, "getSubset")
         self._integrationIndex += 1
-        sdmSubset = self._requireSDMDataSubsetMIMEPart(loadOnlyComponents)
+        sdmSubset = self._requireSDMDataSubsetMIMEPart(
+            loadOnlyComponents, spwId, loadOneSPWFunction, loadOneSPWFunctionParams
+        )
         # this line isn't used, but the file should be advanced to the next line
         line = self._nextLine()
         self._currentState = self._States.S_READING
@@ -772,7 +794,13 @@ class BDFReader:
 
         self._setPosition(curpos)
 
-    def _requireSDMDataSubsetMIMEPart(self, loadOnlyComponents: set["str"] | None):
+    def _requireSDMDataSubsetMIMEPart(
+        self,
+        loadOnlyComponents: set[str] | None,
+        spwId: int | None = None,
+        loadOneSPWFunction: Callable = None,
+        loadOneSPWFunctionParams: tuple = None,
+    ):
         self._integrationStartsAt = self.position()
 
         # CAS-8151, apparently there are cases where there are two occurrences of the MIME bouneary instead of only one
@@ -1043,10 +1071,29 @@ class BDFReader:
                 componentDesc["startsAt"] = self.position()
                 dt = componentDesc["np_type"]
                 if not loadOnlyComponents or componentName in loadOnlyComponents:
-                    componentDesc["arr"] = np.fromfile(
-                        self._f, dtype=dt, count=numberOfElementsToRead
-                    )
-                    nReadBytes = componentDesc["arr"].size * numberOfBytesPerValue
+                    if spwId is None:
+                        componentDesc["arr"] = np.fromfile(
+                            self._f, dtype=dt, count=numberOfElementsToRead
+                        )
+                        nReadBytes = componentDesc["arr"].size * numberOfBytesPerValue
+                    else:
+                        prevPosition = self._f.tell()
+                        componentDesc["arr"] = loadOneSPWFunction(
+                            componentName,
+                            spwId,
+                            self._f,
+                            dt,
+                            numberOfElementsToRead,
+                            *loadOneSPWFunctionParams,
+                        )
+                        if componentDesc["arr"].size > numberOfElementsToRead:
+                            raise RuntimeError(
+                                f"Inconsistency when loading one SPW, {componentDesc['arr'].size=}"
+                                f", {numberOfElementsToRead=}"
+                            )
+                        nReadBytes = numberOfBytesToRead
+                        self._f.seek(prevPosition + numberOfBytesToRead, os.SEEK_SET)
+
                 else:
                     componentDesc["arr"] = None
                     actualReadSkipped = True
@@ -1091,7 +1138,7 @@ class BDFReader:
 
         # TBD - this struct could be assembed earlier and used more efficiently in the middle
         # TBD - pyBDFExplorer returns sdmDataSubsetHeaderDOM here, is that useful?
-        return {
+        subset = {
             "projectPath": projectPath,
             "integrationNumber": intNum,
             "subIntegrationNumber": subIntNum,
@@ -1102,11 +1149,29 @@ class BDFReader:
             "abortReason": abortReason,
             "actualTimes": binaryComponentsDesc["actualTimes"],
             "actualDurations": binaryComponentsDesc["actualDurations"],
-            "crossData": binaryComponentsDesc["crossData"],
-            "autoData": binaryComponentsDesc["autoData"],
             "flags": binaryComponentsDesc["flags"],
             "zeroLags": binaryComponentsDesc["zeroLags"],
         }
+
+        # TODO:
+        # Finalize/prepare: crossData+autoData => visibility (if any of them in loadOnlyComponents (or None))
+        # ... or leave it up to xradio, etc. users?
+        if spwId is not None:
+            if not binaryComponentsDesc["crossData"]["present"]:
+                subset["visibilities"] = binaryComponentsDesc["autoData"]["arr"]
+            else:
+                subset["visibilities"] = np.concatenate(
+                    [
+                        binaryComponentsDesc["crossData"]["arr"],
+                        binaryComponentsDesc["autoData"]["arr"],
+                    ],
+                    axis=1,
+                )
+        else:
+            subset["autoData"] = binaryComponentsDesc["autoData"]
+            subset["crossData"] = binaryComponentsDesc["crossData"]
+
+        return subset
 
     def _setPosition(self, newpos):
         """
