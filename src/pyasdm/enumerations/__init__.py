@@ -34,7 +34,6 @@
 Interface specification for all user facing top-level pyasdm Enumerations
 """
 
-
 from .ACAPolarization import ACAPolarization
 
 from .AccumMode import AccumMode
