@@ -129,6 +129,8 @@ from pyasdm.HistoryTable import HistoryTable
 
 from pyasdm.HolographyTable import HolographyTable
 
+from pyasdm.ModulationTable import ModulationTable
+
 from pyasdm.ObservationTable import ObservationTable
 
 from pyasdm.PointingTable import PointingTable
@@ -136,6 +138,8 @@ from pyasdm.PointingTable import PointingTable
 from pyasdm.PointingModelTable import PointingModelTable
 
 from pyasdm.PolarizationTable import PolarizationTable
+
+from pyasdm.PostProcessingTable import PostProcessingTable
 
 from pyasdm.ProcessorTable import ProcessorTable
 
@@ -310,6 +314,8 @@ class ASDM:
 
     _holography = None
 
+    _modulation = None
+
     _observation = None
 
     _pointing = None
@@ -317,6 +323,8 @@ class ASDM:
     _pointingModel = None
 
     _polarization = None
+
+    _postProcessing = None
 
     _processor = None
 
@@ -489,6 +497,8 @@ class ASDM:
 
         self._holography = HolographyTable(self)
 
+        self._modulation = ModulationTable(self)
+
         self._observation = ObservationTable(self)
 
         self._pointing = PointingTable(self)
@@ -496,6 +506,8 @@ class ASDM:
         self._pointingModel = PointingModelTable(self)
 
         self._polarization = PolarizationTable(self)
+
+        self._postProcessing = PostProcessingTable(self)
 
         self._processor = ProcessorTable(self)
 
@@ -1042,6 +1054,17 @@ class ASDM:
     # associate the function with the table name in a map
     _tableGetters["Holography"] = getHolography
 
+    def getModulation(self):
+        """
+        Get the Modulation table.
+        return The table Modulation as a ModulationTable.
+        """
+        self._modulation.checkPresenceInMemory()
+        return self._modulation
+
+    # associate the function with the table name in a map
+    _tableGetters["Modulation"] = getModulation
+
     def getObservation(self):
         """
         Get the Observation table.
@@ -1085,6 +1108,17 @@ class ASDM:
 
     # associate the function with the table name in a map
     _tableGetters["Polarization"] = getPolarization
+
+    def getPostProcessing(self):
+        """
+        Get the PostProcessing table.
+        return The table PostProcessing as a PostProcessingTable.
+        """
+        self._postProcessing.checkPresenceInMemory()
+        return self._postProcessing
+
+    # associate the function with the table name in a map
+    _tableGetters["PostProcessing"] = getPostProcessing
 
     def getProcessor(self):
         """
@@ -1551,6 +1585,9 @@ class ASDM:
         result = self.addTableRowToXML(result, self.getHolography())
         # print("ASDM result row for table added as necessary for Holography, size = " + str(self.getHolography().size()))
 
+        result = self.addTableRowToXML(result, self.getModulation())
+        # print("ASDM result row for table added as necessary for Modulation, size = " + str(self.getModulation().size()))
+
         result = self.addTableRowToXML(result, self.getObservation())
         # print("ASDM result row for table added as necessary for Observation, size = " + str(self.getObservation().size()))
 
@@ -1562,6 +1599,9 @@ class ASDM:
 
         result = self.addTableRowToXML(result, self.getPolarization())
         # print("ASDM result row for table added as necessary for Polarization, size = " + str(self.getPolarization().size()))
+
+        result = self.addTableRowToXML(result, self.getPostProcessing())
+        # print("ASDM result row for table added as necessary for PostProcessing, size = " + str(self.getPostProcessing().size()))
 
         result = self.addTableRowToXML(result, self.getProcessor())
         # print("ASDM result row for table added as necessary for Processor, size = " + str(self.getProcessor().size()))
@@ -1891,6 +1931,9 @@ class ASDM:
         if "Holography" in self._tableEntity:
             self._holography.setNotPresentInMemory()
 
+        if "Modulation" in self._tableEntity:
+            self._modulation.setNotPresentInMemory()
+
         if "Observation" in self._tableEntity:
             self._observation.setNotPresentInMemory()
 
@@ -1902,6 +1945,9 @@ class ASDM:
 
         if "Polarization" in self._tableEntity:
             self._polarization.setNotPresentInMemory()
+
+        if "PostProcessing" in self._tableEntity:
+            self._postProcessing.setNotPresentInMemory()
 
         if "Processor" in self._tableEntity:
             self._processor.setNotPresentInMemory()
@@ -2248,6 +2294,10 @@ class ASDM:
             print("writing Holography of size = " + str(self.getHolography().size()))
             self.getHolography().toFile(directory)
 
+        if self.getModulation().size() > 0:
+            print("writing Modulation of size = " + str(self.getModulation().size()))
+            self.getModulation().toFile(directory)
+
         if self.getObservation().size() > 0:
             print("writing Observation of size = " + str(self.getObservation().size()))
             self.getObservation().toFile(directory)
@@ -2267,6 +2317,13 @@ class ASDM:
                 "writing Polarization of size = " + str(self.getPolarization().size())
             )
             self.getPolarization().toFile(directory)
+
+        if self.getPostProcessing().size() > 0:
+            print(
+                "writing PostProcessing of size = "
+                + str(self.getPostProcessing().size())
+            )
+            self.getPostProcessing().toFile(directory)
 
         if self.getProcessor().size() > 0:
             print("writing Processor of size = " + str(self.getProcessor().size()))
@@ -3096,6 +3153,21 @@ class ASDM:
                 + str(self._holography.size())
             )
 
+        if "Modulation" in self._tableEntity:
+            print(
+                "'Modulation' : IS present in _tableEntity, presentInMemory = "
+                + str(self._modulation._presentInMemory)
+                + " size = "
+                + str(self._modulation.size())
+            )
+        else:
+            print(
+                "'Modulation' : IS NOT present in _tableEntity, presentInMemory = "
+                + str(self._modulation._presentInMemory)
+                + " size = "
+                + str(self._modulation.size())
+            )
+
         if "Observation" in self._tableEntity:
             print(
                 "'Observation' : IS present in _tableEntity, presentInMemory = "
@@ -3154,6 +3226,21 @@ class ASDM:
                 + str(self._polarization._presentInMemory)
                 + " size = "
                 + str(self._polarization.size())
+            )
+
+        if "PostProcessing" in self._tableEntity:
+            print(
+                "'PostProcessing' : IS present in _tableEntity, presentInMemory = "
+                + str(self._postProcessing._presentInMemory)
+                + " size = "
+                + str(self._postProcessing.size())
+            )
+        else:
+            print(
+                "'PostProcessing' : IS NOT present in _tableEntity, presentInMemory = "
+                + str(self._postProcessing._presentInMemory)
+                + " size = "
+                + str(self._postProcessing.size())
             )
 
         if "Processor" in self._tableEntity:

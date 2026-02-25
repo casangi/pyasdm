@@ -148,6 +148,8 @@ class ExecBlockTable:
 
         observingScriptUID (EntityRef): A reference to the Entity which contains the observing script. Optional.
 
+        arrayName (str): antenna array configuration description. Optional.
+
         scaleId (Tag): refers to a unique row in the table Scale. Optional.
 
 
@@ -940,6 +942,7 @@ class ExecBlockTable:
         result += "<siteLatitude/>\n"
         result += "<observingScript/>\n"
         result += "<observingScriptUID/>\n"
+        result += "<arrayName/>\n"
         result += "<scaleId/>\n"
         result += "</Attributes>\n"
         result += "</ExecBlockTable>\n"
@@ -1143,6 +1146,8 @@ class ExecBlockTable:
             attributesSeq.append("observingScript")
 
             attributesSeq.append("observingScriptUID")
+
+            attributesSeq.append("arrayName")
 
             attributesSeq.append("scaleId")
 

@@ -46,6 +46,8 @@ _FILTER_TFB = 2  # The Tunable Filter Bank is implemented and used
 
 _UNDEFINED = 3  # Not defined or not applicable.
 
+_FILTER_PFB = 4  # The polyphase filter bank is implemented and used
+
 
 # their names in a dictionary
 _filterModeNames = {}
@@ -57,6 +59,8 @@ _filterModeNames[_FILTER_TDM] = "FILTER_TDM"
 _filterModeNames[_FILTER_TFB] = "FILTER_TFB"
 
 _filterModeNames[_UNDEFINED] = "UNDEFINED"
+
+_filterModeNames[_FILTER_PFB] = "FILTER_PFB"
 
 
 class FilterMode:
@@ -191,3 +195,5 @@ FILTER_TDM = FilterMode(_FILTER_TDM)
 FILTER_TFB = FilterMode(_FILTER_TFB)
 
 UNDEFINED = FilterMode(_UNDEFINED)
+
+FILTER_PFB = FilterMode(_FILTER_PFB)

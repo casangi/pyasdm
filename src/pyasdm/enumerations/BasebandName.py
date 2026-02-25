@@ -68,6 +68,10 @@ _B2D2_3BIT = 14  #
 
 _BD_8BIT = 15  #
 
+_BB_LSB = 16  # one baseband per sideband and the sideband is the lower sideband
+
+_BB_USB = 17  # one baseband per sideband and the sideband is the upper sideband
+
 
 # their names in a dictionary
 _basebandNameNames = {}
@@ -103,6 +107,10 @@ _basebandNameNames[_B1D1_3BIT] = "B1D1_3BIT"
 _basebandNameNames[_B2D2_3BIT] = "B2D2_3BIT"
 
 _basebandNameNames[_BD_8BIT] = "BD_8BIT"
+
+_basebandNameNames[_BB_LSB] = "BB_LSB"
+
+_basebandNameNames[_BB_USB] = "BB_USB"
 
 
 class BasebandName:
@@ -261,3 +269,7 @@ B1D1_3BIT = BasebandName(_B1D1_3BIT)
 B2D2_3BIT = BasebandName(_B2D2_3BIT)
 
 BD_8BIT = BasebandName(_BD_8BIT)
+
+BB_LSB = BasebandName(_BB_LSB)
+
+BB_USB = BasebandName(_BB_USB)

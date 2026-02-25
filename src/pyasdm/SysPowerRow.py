@@ -99,6 +99,34 @@ class SysPowerRow:
 
         self._requantizerGain = []  # this is a list of float []
 
+        self._numChannelsExists = False
+
+        self._numChannels = 0
+
+        self._numPolarizationTypeExists = False
+
+        self._numPolarizationType = 0
+
+        self._chanFreqStartExists = False
+
+        self._chanFreqStart = Frequency()
+
+        self._chanFreqStepExists = False
+
+        self._chanFreqStep = Frequency()
+
+        self._switchedPowerDifferenceSpectrumExists = False
+
+        self._switchedPowerDifferenceSpectrum = []  # this is a list of float []  []
+
+        self._switchedPowerSumSpectrumExists = False
+
+        self._switchedPowerSumSpectrum = []  # this is a list of float []  []
+
+        self._requantizerGainSpectrumExists = False
+
+        self._requantizerGainSpectrum = []  # this is a list of float []  []
+
         # extrinsic attributes
 
         self._antennaId = Tag()
@@ -152,6 +180,71 @@ class SysPowerRow:
 
                 self._requantizerGainExists = True
 
+            # by default set systematically numChannels's value to something not None
+
+            if row._numChannelsExists:
+
+                self._numChannels = row._numChannels
+
+                self._numChannelsExists = True
+
+            # by default set systematically numPolarizationType's value to something not None
+
+            if row._numPolarizationTypeExists:
+
+                self._numPolarizationType = row._numPolarizationType
+
+                self._numPolarizationTypeExists = True
+
+            # by default set systematically chanFreqStart's value to something not None
+
+            if row._chanFreqStartExists:
+
+                self._chanFreqStart = Frequency(row._chanFreqStart)
+
+                self._chanFreqStartExists = True
+
+            # by default set systematically chanFreqStep's value to something not None
+
+            if row._chanFreqStepExists:
+
+                self._chanFreqStep = Frequency(row._chanFreqStep)
+
+                self._chanFreqStepExists = True
+
+            # by default set systematically switchedPowerDifferenceSpectrum's value to something not None
+
+            if row._switchedPowerDifferenceSpectrumExists:
+
+                # switchedPowerDifferenceSpectrum is a list, make a deep copy
+                self._switchedPowerDifferenceSpectrum = copy.deepcopy(
+                    row._switchedPowerDifferenceSpectrum
+                )
+
+                self._switchedPowerDifferenceSpectrumExists = True
+
+            # by default set systematically switchedPowerSumSpectrum's value to something not None
+
+            if row._switchedPowerSumSpectrumExists:
+
+                # switchedPowerSumSpectrum is a list, make a deep copy
+                self._switchedPowerSumSpectrum = copy.deepcopy(
+                    row._switchedPowerSumSpectrum
+                )
+
+                self._switchedPowerSumSpectrumExists = True
+
+            # by default set systematically requantizerGainSpectrum's value to something not None
+
+            if row._requantizerGainSpectrumExists:
+
+                # requantizerGainSpectrum is a list, make a deep copy
+                self._requantizerGainSpectrum = copy.deepcopy(
+                    row._requantizerGainSpectrum
+                )
+
+                self._requantizerGainSpectrumExists = True
+
     def isAdded(self):
         self._hasBeenAdded = True
 
@@ -188,6 +281,42 @@ class SysPowerRow:
         if self._requantizerGainExists:
 
             result += Parser.listValueToXML("requantizerGain", self._requantizerGain)
+
+        if self._numChannelsExists:
+
+            result += Parser.valueToXML("numChannels", self._numChannels)
+
+        if self._numPolarizationTypeExists:
+
+            result += Parser.valueToXML(
+                "numPolarizationType", self._numPolarizationType
+            )
+
+        if self._chanFreqStartExists:
+
+            result += Parser.extendedValueToXML("chanFreqStart", self._chanFreqStart)
+
+        if self._chanFreqStepExists:
+
+            result += Parser.extendedValueToXML("chanFreqStep", self._chanFreqStep)
+
+        if self._switchedPowerDifferenceSpectrumExists:
+
+            result += Parser.listValueToXML(
+                "switchedPowerDifferenceSpectrum", self._switchedPowerDifferenceSpectrum
+            )
+
+        if self._switchedPowerSumSpectrumExists:
+
+            result += Parser.listValueToXML(
+                "switchedPowerSumSpectrum", self._switchedPowerSumSpectrum
+            )
+
+        if self._requantizerGainSpectrumExists:
+
+            result += Parser.listValueToXML(
+                "requantizerGainSpectrum", self._requantizerGainSpectrum
+            )
 
         # extrinsic attributes
 
@@ -271,6 +400,83 @@ class SysPowerRow:
 
             self._requantizerGainExists = True
 
+        numChannelsNode = rowdom.getElementsByTagName("numChannels")
+        if len(numChannelsNode) > 0:
+
+            self._numChannels = int(numChannelsNode[0].firstChild.data.strip())
+
+            self._numChannelsExists = True
+
+        numPolarizationTypeNode = rowdom.getElementsByTagName("numPolarizationType")
+        if len(numPolarizationTypeNode) > 0:
+
+            self._numPolarizationType = int(
+                numPolarizationTypeNode[0].firstChild.data.strip()
+            )
+
+            self._numPolarizationTypeExists = True
+
+        chanFreqStartNode = rowdom.getElementsByTagName("chanFreqStart")
+        if len(chanFreqStartNode) > 0:
+
+            self._chanFreqStart = Frequency(
+                chanFreqStartNode[0].firstChild.data.strip()
+            )
+
+            self._chanFreqStartExists = True
+
+        chanFreqStepNode = rowdom.getElementsByTagName("chanFreqStep")
+        if len(chanFreqStepNode) > 0:
+
+            self._chanFreqStep = Frequency(chanFreqStepNode[0].firstChild.data.strip())
+
+            self._chanFreqStepExists = True
+
+        switchedPowerDifferenceSpectrumNode = rowdom.getElementsByTagName(
+            "switchedPowerDifferenceSpectrum"
+        )
+        if len(switchedPowerDifferenceSpectrumNode) > 0:
+
+            switchedPowerDifferenceSpectrumStr = switchedPowerDifferenceSpectrumNode[
+                0
+            ].firstChild.data.strip()
+
+            self._switchedPowerDifferenceSpectrum = Parser.stringListToLists(
+                switchedPowerDifferenceSpectrumStr, float, "SysPower", False
+            )
+
+            self._switchedPowerDifferenceSpectrumExists = True
+
+        switchedPowerSumSpectrumNode = rowdom.getElementsByTagName(
+            "switchedPowerSumSpectrum"
+        )
+        if len(switchedPowerSumSpectrumNode) > 0:
+
+            switchedPowerSumSpectrumStr = switchedPowerSumSpectrumNode[
+                0
+            ].firstChild.data.strip()
+
+            self._switchedPowerSumSpectrum = Parser.stringListToLists(
+                switchedPowerSumSpectrumStr, float, "SysPower", False
+            )
+
+            self._switchedPowerSumSpectrumExists = True
+
+        requantizerGainSpectrumNode = rowdom.getElementsByTagName(
+            "requantizerGainSpectrum"
+        )
+        if len(requantizerGainSpectrumNode) > 0:
+
+            requantizerGainSpectrumStr = requantizerGainSpectrumNode[
+                0
+            ].firstChild.data.strip()
+
+            self._requantizerGainSpectrum = Parser.stringListToLists(
+                requantizerGainSpectrumStr, float, "SysPower", False
+            )
+
+            self._requantizerGainSpectrumExists = True
+
         # extrinsic attribute values
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
@@ -325,6 +531,80 @@ class SysPowerRow:
             for i in range(len(self._requantizerGain)):
 
                 eos.writeFloat(self._requantizerGain[i])
+
+        eos.writeBool(self._numChannelsExists)
+        if self._numChannelsExists:
+
+            eos.writeInt(self._numChannels)
+
+        eos.writeBool(self._numPolarizationTypeExists)
+        if self._numPolarizationTypeExists:
+
+            eos.writeInt(self._numPolarizationType)
+
+        eos.writeBool(self._chanFreqStartExists)
+        if self._chanFreqStartExists:
+
+            self._chanFreqStart.toBin(eos)
+
+        eos.writeBool(self._chanFreqStepExists)
+        if self._chanFreqStepExists:
+
+            self._chanFreqStep.toBin(eos)
+
+        eos.writeBool(self._switchedPowerDifferenceSpectrumExists)
+        if self._switchedPowerDifferenceSpectrumExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._switchedPowerDifferenceSpectrum is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                switchedPowerDifferenceSpectrum_dims = pyasdm.utils.getListDims(
+                    self._switchedPowerDifferenceSpectrum
+                )
+            # assumes it really is 2D
+            eos.writeInt(switchedPowerDifferenceSpectrum_dims[0])
+            eos.writeInt(switchedPowerDifferenceSpectrum_dims[1])
+            for i in range(switchedPowerDifferenceSpectrum_dims[0]):
+                for j in range(switchedPowerDifferenceSpectrum_dims[1]):
+                    eos.writeFloat(self._switchedPowerDifferenceSpectrum[i][j])
+
+        eos.writeBool(self._switchedPowerSumSpectrumExists)
+        if self._switchedPowerSumSpectrumExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._switchedPowerSumSpectrum is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                switchedPowerSumSpectrum_dims = pyasdm.utils.getListDims(
+                    self._switchedPowerSumSpectrum
+                )
+            # assumes it really is 2D
+            eos.writeInt(switchedPowerSumSpectrum_dims[0])
+            eos.writeInt(switchedPowerSumSpectrum_dims[1])
+            for i in range(switchedPowerSumSpectrum_dims[0]):
+                for j in range(switchedPowerSumSpectrum_dims[1]):
+                    eos.writeFloat(self._switchedPowerSumSpectrum[i][j])
+
+        eos.writeBool(self._requantizerGainSpectrumExists)
+        if self._requantizerGainSpectrumExists:
+
+            # null array case, unsure if this is possible but this should work
+            if self._requantizerGainSpectrum is None:
+                eos.writeInt(0)
+                eos.writeInt(0)
+            else:
+                requantizerGainSpectrum_dims = pyasdm.utils.getListDims(
+                    self._requantizerGainSpectrum
+                )
+            # assumes it really is 2D
+            eos.writeInt(requantizerGainSpectrum_dims[0])
+            eos.writeInt(requantizerGainSpectrum_dims[1])
+            for i in range(requantizerGainSpectrum_dims[0]):
+                for j in range(requantizerGainSpectrum_dims[1]):
+                    eos.writeFloat(self._requantizerGainSpectrum[i][j])
 
     @staticmethod
     def antennaIdFromBin(row, eis):
@@ -412,6 +692,103 @@ class SysPowerRow:
             row._requantizerGain = thisList
 
     @staticmethod
+    def numChannelsFromBin(row, eis):
+        """
+        Set the optional numChannels in row from the EndianInput (eis) instance.
+        """
+        row._numChannelsExists = eis.readBool()
+        if row._numChannelsExists:
+
+            row._numChannels = eis.readInt()
+
+    @staticmethod
+    def numPolarizationTypeFromBin(row, eis):
+        """
+        Set the optional numPolarizationType in row from the EndianInput (eis) instance.
+        """
+        row._numPolarizationTypeExists = eis.readBool()
+        if row._numPolarizationTypeExists:
+
+            row._numPolarizationType = eis.readInt()
+
+    @staticmethod
+    def chanFreqStartFromBin(row, eis):
+        """
+        Set the optional chanFreqStart in row from the EndianInput (eis) instance.
+        """
+        row._chanFreqStartExists = eis.readBool()
+        if row._chanFreqStartExists:
+
+            row._chanFreqStart = Frequency.fromBin(eis)
+
+    @staticmethod
+    def chanFreqStepFromBin(row, eis):
+        """
+        Set the optional chanFreqStep in row from the EndianInput (eis) instance.
+        """
+        row._chanFreqStepExists = eis.readBool()
+        if row._chanFreqStepExists:
+
+            row._chanFreqStep = Frequency.fromBin(eis)
+
+    @staticmethod
+    def switchedPowerDifferenceSpectrumFromBin(row, eis):
+        """
+        Set the optional switchedPowerDifferenceSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._switchedPowerDifferenceSpectrumExists = eis.readBool()
+        if row._switchedPowerDifferenceSpectrumExists:
+
+            switchedPowerDifferenceSpectrumDim1 = eis.readInt()
+            switchedPowerDifferenceSpectrumDim2 = eis.readInt()
+            thisList = []
+            for i in range(switchedPowerDifferenceSpectrumDim1):
+                thisList_j = []
+                for j in range(switchedPowerDifferenceSpectrumDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row._switchedPowerDifferenceSpectrum = thisList
+
+    @staticmethod
+    def switchedPowerSumSpectrumFromBin(row, eis):
+        """
+        Set the optional switchedPowerSumSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._switchedPowerSumSpectrumExists = eis.readBool()
+        if row._switchedPowerSumSpectrumExists:
+
+            switchedPowerSumSpectrumDim1 = eis.readInt()
+            switchedPowerSumSpectrumDim2 = eis.readInt()
+            thisList = []
+            for i in range(switchedPowerSumSpectrumDim1):
+                thisList_j = []
+                for j in range(switchedPowerSumSpectrumDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row._switchedPowerSumSpectrum = thisList
+
+    @staticmethod
+    def requantizerGainSpectrumFromBin(row, eis):
+        """
+        Set the optional requantizerGainSpectrum in row from the EndianInput (eis) instance.
+        """
+        row._requantizerGainSpectrumExists = eis.readBool()
+        if row._requantizerGainSpectrumExists:
+
+            requantizerGainSpectrumDim1 = eis.readInt()
+            requantizerGainSpectrumDim2 = eis.readInt()
+            thisList = []
+            for i in range(requantizerGainSpectrumDim1):
+                thisList_j = []
+                for j in range(requantizerGainSpectrumDim2):
+                    thisValue = eis.readFloat()
+                    thisList_j.append(thisValue)
+                thisList.append(thisList_j)
+            row._requantizerGainSpectrum = thisList
+
+    @staticmethod
     def initFromBinMethods():
         global _fromBinMethods
         if len(_fromBinMethods) > 0:
@@ -428,6 +805,19 @@ class SysPowerRow:
         )
         _fromBinMethods["switchedPowerSum"] = SysPowerRow.switchedPowerSumFromBin
         _fromBinMethods["requantizerGain"] = SysPowerRow.requantizerGainFromBin
+        _fromBinMethods["numChannels"] = SysPowerRow.numChannelsFromBin
+        _fromBinMethods["numPolarizationType"] = SysPowerRow.numPolarizationTypeFromBin
+        _fromBinMethods["chanFreqStart"] = SysPowerRow.chanFreqStartFromBin
+        _fromBinMethods["chanFreqStep"] = SysPowerRow.chanFreqStepFromBin
+        _fromBinMethods["switchedPowerDifferenceSpectrum"] = (
+            SysPowerRow.switchedPowerDifferenceSpectrumFromBin
+        )
+        _fromBinMethods["switchedPowerSumSpectrum"] = (
+            SysPowerRow.switchedPowerSumSpectrumFromBin
+        )
+        _fromBinMethods["requantizerGainSpectrum"] = (
+            SysPowerRow.requantizerGainSpectrumFromBin
+        )
 
     @staticmethod
     def fromBin(eis, table, attributesSeq):
@@ -706,6 +1096,392 @@ class SysPowerRow:
         Mark requantizerGain, which is an optional field, as non-existent.
         """
         self._requantizerGainExists = False
+
+    # ===> Attribute numChannels, which is optional
+    _numChannelsExists = False
+
+    _numChannels = 0
+
+    def isNumChannelsExists(self):
+        """
+        The attribute numChannels is optional. Return True if this attribute exists.
+        return True if and only if the numChannels attribute exists.
+        """
+        return self._numChannelsExists
+
+    def getNumChannels(self):
+        """
+        Get numChannels, which is optional.
+        return numChannels as int
+        raises ValueError If numChannels does not exist.
+        """
+        if not self._numChannelsExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + numChannels
+                + " attribute in table SysPower does not exist!"
+            )
+
+        return self._numChannels
+
+    def setNumChannels(self, numChannels):
+        """
+        Set numChannels with the specified int value.
+        numChannels The int value to which numChannels is to be set.
+
+
+        """
+
+        self._numChannels = int(numChannels)
+
+        self._numChannelsExists = True
+
+    def clearNumChannels(self):
+        """
+        Mark numChannels, which is an optional field, as non-existent.
+        """
+        self._numChannelsExists = False
+
+    # ===> Attribute numPolarizationType, which is optional
+    _numPolarizationTypeExists = False
+
+    _numPolarizationType = 0
+
+    def isNumPolarizationTypeExists(self):
+        """
+        The attribute numPolarizationType is optional. Return True if this attribute exists.
+        return True if and only if the numPolarizationType attribute exists.
+        """
+        return self._numPolarizationTypeExists
+
+    def getNumPolarizationType(self):
+        """
+        Get numPolarizationType, which is optional.
+        return numPolarizationType as int
+        raises ValueError If numPolarizationType does not exist.
+        """
+        if not self._numPolarizationTypeExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + numPolarizationType
+                + " attribute in table SysPower does not exist!"
+            )
+
+        return self._numPolarizationType
+
+    def setNumPolarizationType(self, numPolarizationType):
+        """
+        Set numPolarizationType with the specified int value.
+        numPolarizationType The int value to which numPolarizationType is to be set.
+
+
+        """
+
+        self._numPolarizationType = int(numPolarizationType)
+
+        self._numPolarizationTypeExists = True
+
+    def clearNumPolarizationType(self):
+        """
+        Mark numPolarizationType, which is an optional field, as non-existent.
+        """
+        self._numPolarizationTypeExists = False
+
+    # ===> Attribute chanFreqStart, which is optional
+    _chanFreqStartExists = False
+
+    _chanFreqStart = Frequency()
+
+    def isChanFreqStartExists(self):
+        """
+        The attribute chanFreqStart is optional. Return True if this attribute exists.
+        return True if and only if the chanFreqStart attribute exists.
+        """
+        return self._chanFreqStartExists
+
+    def getChanFreqStart(self):
+        """
+        Get chanFreqStart, which is optional.
+        return chanFreqStart as Frequency
+        raises ValueError If chanFreqStart does not exist.
+        """
+        if not self._chanFreqStartExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + chanFreqStart
+                + " attribute in table SysPower does not exist!"
+            )
+
+        # make sure it is a copy of Frequency
+        return Frequency(self._chanFreqStart)
+
+    def setChanFreqStart(self, chanFreqStart):
+        """
+        Set chanFreqStart with the specified Frequency value.
+        chanFreqStart The Frequency value to which chanFreqStart is to be set.
+        The value of chanFreqStart can be anything allowed by the Frequency constructor.
+
+        """
+
+        self._chanFreqStart = Frequency(chanFreqStart)
+
+        self._chanFreqStartExists = True
+
+    def clearChanFreqStart(self):
+        """
+        Mark chanFreqStart, which is an optional field, as non-existent.
+        """
+        self._chanFreqStartExists = False
+
+    # ===> Attribute chanFreqStep, which is optional
+    _chanFreqStepExists = False
+
+    _chanFreqStep = Frequency()
+
+    def isChanFreqStepExists(self):
+        """
+        The attribute chanFreqStep is optional. Return True if this attribute exists.
+        return True if and only if the chanFreqStep attribute exists.
+        """
+        return self._chanFreqStepExists
+
+    def getChanFreqStep(self):
+        """
+        Get chanFreqStep, which is optional.
+        return chanFreqStep as Frequency
+        raises ValueError If chanFreqStep does not exist.
+        """
+        if not self._chanFreqStepExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + chanFreqStep
+                + " attribute in table SysPower does not exist!"
+            )
+
+        # make sure it is a copy of Frequency
+        return Frequency(self._chanFreqStep)
+
+    def setChanFreqStep(self, chanFreqStep):
+        """
+        Set chanFreqStep with the specified Frequency value.
+        chanFreqStep The Frequency value to which chanFreqStep is to be set.
+        The value of chanFreqStep can be anything allowed by the Frequency constructor.
+
+        """
+
+        self._chanFreqStep = Frequency(chanFreqStep)
+
+        self._chanFreqStepExists = True
+
+    def clearChanFreqStep(self):
+        """
+        Mark chanFreqStep, which is an optional field, as non-existent.
+        """
+        self._chanFreqStepExists = False
+
+    # ===> Attribute switchedPowerDifferenceSpectrum, which is optional
+    _switchedPowerDifferenceSpectrumExists = False
+
+    _switchedPowerDifferenceSpectrum = None  # this is a 2D list of float
+
+    def isSwitchedPowerDifferenceSpectrumExists(self):
+        """
+        The attribute switchedPowerDifferenceSpectrum is optional. Return True if this attribute exists.
+        return True if and only if the switchedPowerDifferenceSpectrum attribute exists.
+        """
+        return self._switchedPowerDifferenceSpectrumExists
+
+    def getSwitchedPowerDifferenceSpectrum(self):
+        """
+        Get switchedPowerDifferenceSpectrum, which is optional.
+        return switchedPowerDifferenceSpectrum as float []  []
+        raises ValueError If switchedPowerDifferenceSpectrum does not exist.
+        """
+        if not self._switchedPowerDifferenceSpectrumExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + switchedPowerDifferenceSpectrum
+                + " attribute in table SysPower does not exist!"
+            )
+
+        return copy.deepcopy(self._switchedPowerDifferenceSpectrum)
+
+    def setSwitchedPowerDifferenceSpectrum(self, switchedPowerDifferenceSpectrum):
+        """
+        Set switchedPowerDifferenceSpectrum with the specified float []  []  value.
+        switchedPowerDifferenceSpectrum The float []  []  value to which switchedPowerDifferenceSpectrum is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(switchedPowerDifferenceSpectrum, list):
+            raise ValueError(
+                "The value of switchedPowerDifferenceSpectrum must be a list"
+            )
+        # check the shape
+        try:
+            listDims = pyasdm.utils.getListDims(switchedPowerDifferenceSpectrum)
+
+            shapeOK = len(listDims) == 2
+
+            if not shapeOK:
+                raise ValueError(
+                    "shape of switchedPowerDifferenceSpectrum is not correct"
+                )
+
+            # the type of the values in the list must be float
+            # note : this only checks the first value found
+            if not pyasdm.utils.checkListType(switchedPowerDifferenceSpectrum, float):
+                raise ValueError(
+                    "type of the first value in switchedPowerDifferenceSpectrum is not float as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._switchedPowerDifferenceSpectrum = copy.deepcopy(
+                switchedPowerDifferenceSpectrum
+            )
+        except Exception as exc:
+            raise ValueError("Invalid switchedPowerDifferenceSpectrum : " + str(exc))
+
+        self._switchedPowerDifferenceSpectrumExists = True
+
+    def clearSwitchedPowerDifferenceSpectrum(self):
+        """
+        Mark switchedPowerDifferenceSpectrum, which is an optional field, as non-existent.
+        """
+        self._switchedPowerDifferenceSpectrumExists = False
+
+    # ===> Attribute switchedPowerSumSpectrum, which is optional
+    _switchedPowerSumSpectrumExists = False
+
+    _switchedPowerSumSpectrum = None  # this is a 2D list of float
+
+    def isSwitchedPowerSumSpectrumExists(self):
+        """
+        The attribute switchedPowerSumSpectrum is optional. Return True if this attribute exists.
+        return True if and only if the switchedPowerSumSpectrum attribute exists.
+        """
+        return self._switchedPowerSumSpectrumExists
+
+    def getSwitchedPowerSumSpectrum(self):
+        """
+        Get switchedPowerSumSpectrum, which is optional.
+        return switchedPowerSumSpectrum as float []  []
+        raises ValueError If switchedPowerSumSpectrum does not exist.
+        """
+        if not self._switchedPowerSumSpectrumExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + switchedPowerSumSpectrum
+                + " attribute in table SysPower does not exist!"
+            )
+
+        return copy.deepcopy(self._switchedPowerSumSpectrum)
+
+    def setSwitchedPowerSumSpectrum(self, switchedPowerSumSpectrum):
+        """
+        Set switchedPowerSumSpectrum with the specified float []  []  value.
+        switchedPowerSumSpectrum The float []  []  value to which switchedPowerSumSpectrum is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(switchedPowerSumSpectrum, list):
+            raise ValueError("The value of switchedPowerSumSpectrum must be a list")
+        # check the shape
+        try:
+            listDims = pyasdm.utils.getListDims(switchedPowerSumSpectrum)
+
+            shapeOK = len(listDims) == 2
+
+            if not shapeOK:
+                raise ValueError("shape of switchedPowerSumSpectrum is not correct")
+
+            # the type of the values in the list must be float
+            # note : this only checks the first value found
+            if not pyasdm.utils.checkListType(switchedPowerSumSpectrum, float):
+                raise ValueError(
+                    "type of the first value in switchedPowerSumSpectrum is not float as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._switchedPowerSumSpectrum = copy.deepcopy(switchedPowerSumSpectrum)
+        except Exception as exc:
+            raise ValueError("Invalid switchedPowerSumSpectrum : " + str(exc))
+
+        self._switchedPowerSumSpectrumExists = True
+
+    def clearSwitchedPowerSumSpectrum(self):
+        """
+        Mark switchedPowerSumSpectrum, which is an optional field, as non-existent.
+        """
+        self._switchedPowerSumSpectrumExists = False
+
+    # ===> Attribute requantizerGainSpectrum, which is optional
+    _requantizerGainSpectrumExists = False
+
+    _requantizerGainSpectrum = None  # this is a 2D list of float
+
+    def isRequantizerGainSpectrumExists(self):
+        """
+        The attribute requantizerGainSpectrum is optional. Return True if this attribute exists.
+        return True if and only if the requantizerGainSpectrum attribute exists.
+        """
+        return self._requantizerGainSpectrumExists
+
+    def getRequantizerGainSpectrum(self):
+        """
+        Get requantizerGainSpectrum, which is optional.
+        return requantizerGainSpectrum as float []  []
+        raises ValueError If requantizerGainSpectrum does not exist.
+        """
+        if not self._requantizerGainSpectrumExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + requantizerGainSpectrum
+                + " attribute in table SysPower does not exist!"
+            )
+
+        return copy.deepcopy(self._requantizerGainSpectrum)
+
+    def setRequantizerGainSpectrum(self, requantizerGainSpectrum):
+        """
+        Set requantizerGainSpectrum with the specified float []  []  value.
+        requantizerGainSpectrum The float []  []  value to which requantizerGainSpectrum is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(requantizerGainSpectrum, list):
+            raise ValueError("The value of requantizerGainSpectrum must be a list")
+        # check the shape
+        try:
+            listDims = pyasdm.utils.getListDims(requantizerGainSpectrum)
+
+            shapeOK = len(listDims) == 2
+
+            if not shapeOK:
+                raise ValueError("shape of requantizerGainSpectrum is not correct")
+
+            # the type of the values in the list must be float
+            # note : this only checks the first value found
+            if not pyasdm.utils.checkListType(requantizerGainSpectrum, float):
+                raise ValueError(
+                    "type of the first value in requantizerGainSpectrum is not float as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._requantizerGainSpectrum = copy.deepcopy(requantizerGainSpectrum)
+        except Exception as exc:
+            raise ValueError("Invalid requantizerGainSpectrum : " + str(exc))
+
+        self._requantizerGainSpectrumExists = True
+
+    def clearRequantizerGainSpectrum(self):
+        """
+        Mark requantizerGainSpectrum, which is an optional field, as non-existent.
+        """
+        self._requantizerGainSpectrumExists = False
 
     # Extrinsic Table Attributes
 

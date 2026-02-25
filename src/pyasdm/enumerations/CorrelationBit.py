@@ -42,6 +42,10 @@ _BITS_3x3 = 1  #  three bit correlation
 
 _BITS_4x4 = 2  # four bit correlation
 
+_BITS_6x6 = 3  # six bit correlation
+
+_BITS_32x32 = 4  # thirty-two bit correlation
+
 
 # their names in a dictionary
 _correlationBitNames = {}
@@ -51,6 +55,10 @@ _correlationBitNames[_BITS_2x2] = "BITS_2x2"
 _correlationBitNames[_BITS_3x3] = "BITS_3x3"
 
 _correlationBitNames[_BITS_4x4] = "BITS_4x4"
+
+_correlationBitNames[_BITS_6x6] = "BITS_6x6"
+
+_correlationBitNames[_BITS_32x32] = "BITS_32x32"
 
 
 class CorrelationBit:
@@ -185,3 +193,7 @@ BITS_2x2 = CorrelationBit(_BITS_2x2)
 BITS_3x3 = CorrelationBit(_BITS_3x3)
 
 BITS_4x4 = CorrelationBit(_BITS_4x4)
+
+BITS_6x6 = CorrelationBit(_BITS_6x6)
+
+BITS_32x32 = CorrelationBit(_BITS_32x32)

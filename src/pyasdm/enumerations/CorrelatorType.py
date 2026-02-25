@@ -42,6 +42,8 @@ _XF = 1  # identifies a digital correlator of type XF.
 
 _FXF = 2  # identifies a correlator of type FXF.
 
+_FFX = 3  # two stages of channelization followed by a correlation
+
 
 # their names in a dictionary
 _correlatorTypeNames = {}
@@ -51,6 +53,8 @@ _correlatorTypeNames[_FX] = "FX"
 _correlatorTypeNames[_XF] = "XF"
 
 _correlatorTypeNames[_FXF] = "FXF"
+
+_correlatorTypeNames[_FFX] = "FFX"
 
 
 class CorrelatorType:
@@ -185,3 +189,5 @@ FX = CorrelatorType(_FX)
 XF = CorrelatorType(_XF)
 
 FXF = CorrelatorType(_FXF)
+
+FFX = CorrelatorType(_FFX)

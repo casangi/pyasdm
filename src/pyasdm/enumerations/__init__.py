@@ -123,6 +123,8 @@ from .PositionMethod import PositionMethod
 
 from .PositionReferenceCode import PositionReferenceCode
 
+from .PostProcessingIntent import PostProcessingIntent
+
 from .PrimaryBeamDescription import PrimaryBeamDescription
 
 from .PrimitiveDataType import PrimitiveDataType
