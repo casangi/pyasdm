@@ -308,7 +308,7 @@ class CorrelatorModeTable:
         # Autoincrement correlatorModeId
         x.setCorrelatorModeId(Tag(self.size(), TagType.CorrelatorMode))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

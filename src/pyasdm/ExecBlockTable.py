@@ -507,7 +507,7 @@ class ExecBlockTable:
         # Autoincrement execBlockId
         x.setExecBlockId(Tag(self.size(), TagType.ExecBlock))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

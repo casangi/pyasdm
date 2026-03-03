@@ -328,7 +328,7 @@ class ConfigDescriptionTable:
         # Autoincrement configDescriptionId
         x.setConfigDescriptionId(Tag(self.size(), TagType.ConfigDescription))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

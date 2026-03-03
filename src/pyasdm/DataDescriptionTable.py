@@ -284,7 +284,7 @@ class DataDescriptionTable:
         # Autoincrement dataDescriptionId
         x.setDataDescriptionId(Tag(self.size(), TagType.DataDescription))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

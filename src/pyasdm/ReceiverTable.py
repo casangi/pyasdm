@@ -427,7 +427,7 @@ class ReceiverTable:
             # row that matches this time and other required values
             for autoIncList in range(len(contextRows)):
                 for thisRow in autoIncList:
-                    if startTime.eq(thisRow.getTimeInterval().getStart()):
+                    if startTime.equals(thisRow.getTimeInterval().getStart()):
                         if thisRow.compareRequiredValue(
                             x.getName(),
                             x.getNumLO(),
@@ -459,7 +459,7 @@ class ReceiverTable:
         # make sure there are enough rows in contextRows to hold insertionId
         # probably this just adds one list to contextRows
         while len(contextRows) <= insertionId:
-            contetRows.append([])
+            contextRows.append([])
 
         # and insert this row into the list at insertionId so that list remains ordered in time
         result = self.insertByStartTime(x, contextRows[insertionId])

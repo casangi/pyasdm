@@ -280,7 +280,7 @@ class ProcessorTable:
         # Autoincrement processorId
         x.setProcessorId(Tag(self.size(), TagType.Processor))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

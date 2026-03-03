@@ -360,7 +360,7 @@ class AntennaTable:
         # Autoincrement antennaId
         x.setAntennaId(Tag(self.size(), TagType.Antenna))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 
