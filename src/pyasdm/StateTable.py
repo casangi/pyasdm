@@ -286,7 +286,7 @@ class StateTable:
         # Autoincrement stateId
         x.setStateId(Tag(self.size(), TagType.State))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

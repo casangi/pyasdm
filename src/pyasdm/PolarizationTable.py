@@ -280,7 +280,7 @@ class PolarizationTable:
         # Autoincrement polarizationId
         x.setPolarizationId(Tag(self.size(), TagType.Polarization))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

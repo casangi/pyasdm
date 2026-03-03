@@ -344,7 +344,7 @@ class SBSummaryTable:
         # Autoincrement sBSummaryId
         x.setSBSummaryId(Tag(self.size(), TagType.SBSummary))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

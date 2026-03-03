@@ -320,7 +320,7 @@ class HolographyTable:
         # Autoincrement holographyId
         x.setHolographyId(Tag(self.size(), TagType.Holography))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

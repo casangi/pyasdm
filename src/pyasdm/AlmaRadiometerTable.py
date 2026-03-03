@@ -276,7 +276,7 @@ class AlmaRadiometerTable:
         # Autoincrement almaRadiometerId
         x.setAlmaRadiometerId(Tag(self.size(), TagType.AlmaRadiometer))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

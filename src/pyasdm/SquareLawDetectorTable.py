@@ -282,7 +282,7 @@ class SquareLawDetectorTable:
         # Autoincrement squareLawDetectorId
         x.setSquareLawDetectorId(Tag(self.size(), TagType.SquareLawDetector))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

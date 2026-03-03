@@ -268,7 +268,7 @@ class ObservationTable:
         # Autoincrement observationId
         x.setObservationId(Tag(self.size(), TagType.Observation))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

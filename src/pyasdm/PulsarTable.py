@@ -338,7 +338,7 @@ class PulsarTable:
         # Autoincrement pulsarId
         x.setPulsarId(Tag(self.size(), TagType.Pulsar))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

@@ -305,7 +305,7 @@ class CalReductionTable:
         # Autoincrement calReductionId
         x.setCalReductionId(Tag(self.size(), TagType.CalReduction))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 
