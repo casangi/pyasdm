@@ -26,12 +26,12 @@
 # | If you do, all changes will be lost when the file is re-generated. |
 #  --------------------------------------------------------------------
 #
-# File ExecBlockTable.py
+# File ModulationTable.py
 #
 
 import pyasdm.ASDM
 
-from .ExecBlockRow import ExecBlockRow
+from .ModulationRow import ModulationRow
 
 # All of the extended types are imported
 from pyasdm.types import *
@@ -51,11 +51,11 @@ import os
 import io
 
 
-class ExecBlockTable:
+class ModulationTable:
     """
-    The ExecBlockTable class is an Alma table.
+    The ModulationTable class is an Alma table.
 
-    Characteristics of the Execution block.
+    A table to hold antenna dependent LO frequencies or their offsets and additional related parameters.
 
     Shown here are the fields found in each row.
 
@@ -85,72 +85,36 @@ class ExecBlockTable:
 
 
 
-        execBlockId (Tag): identifies a unique row in ExecBlock Table. auto-incrementable, key.
+        antennaId (Tag): refers to a unique row in AntennaTable. key.
+
+
+
+        receiverId (int): receiver identifier. key.
+
+
+
+        spectralWindowId (Tag): spectral window identifier. key.
+
+
+
+        timeInterval (ArrayTimeInterval): time interval for which the row's content is valid. key.
 
 
 
 
 
-        startTime (ArrayTime): the start time of the execution block.
+        localOscillatorOffset (Frequency): LO offset.
 
-        endTime (ArrayTime): the end time of the execution block.
+        walsh180enabled (bool): is Walsh 180 enabled?
 
-        execBlockNum (int): indicates the position of the execution block in the project (sequential numbering starting at 1).
-
-        execBlockUID (EntityRef): the archive's UID of the execution block.
-
-        projectUID (EntityRef): the archive's UID of the project.
-
-        configName (str): the name of the array's configuration.
-
-        telescopeName (str): the name of the telescope.
-
-        observerName (str): the name of the observer.
-
-        numObservingLog (int): the number of elements in the (array) attribute observingLog.
-
-        observingLog (str [] ): Array(numObservingLog)  logs of the observation during this execution block.
-
-        sessionReference (EntityRef): the observing session reference.
-
-        baseRangeMin (Length): the length of the shortest baseline.
-
-        baseRangeMax (Length): the length of the longest baseline.
-
-        baseRmsMinor (Length): the minor axis of the representative ellipse of baseline lengths.
-
-        baseRmsMajor (Length): the major axis of the representative ellipse of baseline lengths.
-
-        basePa (Angle): the baselines position angle.
-
-        aborted (bool): the execution block has been aborted (true) or has completed (false).
-
-        numAntenna (int): the number of antennas.
-
-        antennaId (Tag [] ): Array(numAntenna) refers to the relevant rows in AntennaTable.
-
-        sBSummaryId (Tag): refers to a unique row  in SBSummaryTable.
+        walsh90enabled (bool): is Walsh 90 enabled?
 
 
 
 
-        releaseDate (ArrayTime): the date when the data go to the public domain. Optional.
+        walsh180index (int): index for the 180 degree Walsh function pattern. Optional.
 
-        schedulerMode (str): the mode of scheduling. Optional.
-
-        siteAltitude (Length): the altitude of the site. Optional.
-
-        siteLongitude (Angle): the longitude of the site. Optional.
-
-        siteLatitude (Angle): the latitude of the site. Optional.
-
-        observingScript (str): The text of the observation script. Optional.
-
-        observingScriptUID (EntityRef): A reference to the Entity which contains the observing script. Optional.
-
-        arrayName (str): antenna array configuration description. Optional.
-
-        scaleId (Tag): refers to a unique row in the table Scale. Optional.
+        walsh90index (int): index for the 90 degree Walsh function pattern. Optional.
 
 
     """
@@ -164,10 +128,10 @@ class ExecBlockTable:
     _loadInProgress = False
 
     # The name of this table.
-    _tableName = "ExecBlock"
+    _tableName = "Modulation"
 
     # The list of field names that make up key 'key'.
-    _key = ["execBlockId"]
+    _key = ["antennaId", "receiverId", "spectralWindowId", "timeInterval"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
@@ -176,11 +140,14 @@ class ExecBlockTable:
     # _archiveAsBin = False # If True archive binary else archive XML
     _fileAsBin = False  # If True file binary else file XML
 
-    # A data structure to store the ExecBlockRow s.
-    # In all cases we maintain a private list of ExecBlockRow s.
+    # A data structure to store the ModulationRow s.
+    # In all cases we maintain a private list of ModulationRow s.
     _privateRows = []
 
-    # non-temporal ASDM in Java had a private row element here to also hold  ExecBlockRow s. Not needed in python.
+    # this table has a temporal key with other key fields and no auto-incrementable key
+    # context is a dictionary where the key is the key without the temporal field
+    # and the value is a list of rows having those key values kept in temporal order
+    _context = {}
 
     # the Entity of this table
     _entity = None
@@ -188,157 +155,24 @@ class ExecBlockTable:
     # from the schemaVersion string found in the table, must be an integer
     _version = 0
 
-    # The tolerance which will be used on baseRangeMin during an add operation on the table
-    _baseRangeMinEqTolerance = Length(0.0)
+    # The tolerance which will be used on localOscillatorOffset during an add operation on the table
+    _localOscillatorOffsetEqTolerance = Frequency(0.0)
 
-    def setBaseRangeMinEqTolerance(self, tolerance):
+    def setLocalOscillatorOffsetEqTolerance(self, tolerance):
         """
-        A setter for the tolerance on baseRangeMin
+        A setter for the tolerance on localOscillatorOffset
         """
-        if not isinstance(tolerance, Length):
-            print("tolerance must be a  Length instance")
+        if not isinstance(tolerance, Frequency):
+            print("tolerance must be a  Frequency instance")
 
-        self._baseRangeMinEqTolerance = Length(tolerance)
+        self._localOscillatorOffsetEqTolerance = Frequency(tolerance)
 
-    def getBaseRangeMinEqTolerance(self):
+    def getLocalOscillatorOffsetEqTolerance(self):
         """
-        A getter for the tolerance on baseRangeMin
-        Returns the tolerance as a  Length
+        A getter for the tolerance on localOscillatorOffset
+        Returns the tolerance as a  Frequency
         """
-        return self._baseRangeMinEqTolerance
-
-    # The tolerance which will be used on baseRangeMax during an add operation on the table
-    _baseRangeMaxEqTolerance = Length(0.0)
-
-    def setBaseRangeMaxEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on baseRangeMax
-        """
-        if not isinstance(tolerance, Length):
-            print("tolerance must be a  Length instance")
-
-        self._baseRangeMaxEqTolerance = Length(tolerance)
-
-    def getBaseRangeMaxEqTolerance(self):
-        """
-        A getter for the tolerance on baseRangeMax
-        Returns the tolerance as a  Length
-        """
-        return self._baseRangeMaxEqTolerance
-
-    # The tolerance which will be used on baseRmsMinor during an add operation on the table
-    _baseRmsMinorEqTolerance = Length(0.0)
-
-    def setBaseRmsMinorEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on baseRmsMinor
-        """
-        if not isinstance(tolerance, Length):
-            print("tolerance must be a  Length instance")
-
-        self._baseRmsMinorEqTolerance = Length(tolerance)
-
-    def getBaseRmsMinorEqTolerance(self):
-        """
-        A getter for the tolerance on baseRmsMinor
-        Returns the tolerance as a  Length
-        """
-        return self._baseRmsMinorEqTolerance
-
-    # The tolerance which will be used on baseRmsMajor during an add operation on the table
-    _baseRmsMajorEqTolerance = Length(0.0)
-
-    def setBaseRmsMajorEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on baseRmsMajor
-        """
-        if not isinstance(tolerance, Length):
-            print("tolerance must be a  Length instance")
-
-        self._baseRmsMajorEqTolerance = Length(tolerance)
-
-    def getBaseRmsMajorEqTolerance(self):
-        """
-        A getter for the tolerance on baseRmsMajor
-        Returns the tolerance as a  Length
-        """
-        return self._baseRmsMajorEqTolerance
-
-    # The tolerance which will be used on basePa during an add operation on the table
-    _basePaEqTolerance = Angle(0.0)
-
-    def setBasePaEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on basePa
-        """
-        if not isinstance(tolerance, Angle):
-            print("tolerance must be a  Angle instance")
-
-        self._basePaEqTolerance = Angle(tolerance)
-
-    def getBasePaEqTolerance(self):
-        """
-        A getter for the tolerance on basePa
-        Returns the tolerance as a  Angle
-        """
-        return self._basePaEqTolerance
-
-    # The tolerance which will be used on siteAltitude during an add operation on the table
-    _siteAltitudeEqTolerance = Length(0.0)
-
-    def setSiteAltitudeEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on siteAltitude
-        """
-        if not isinstance(tolerance, Length):
-            print("tolerance must be a  Length instance")
-
-        self._siteAltitudeEqTolerance = Length(tolerance)
-
-    def getSiteAltitudeEqTolerance(self):
-        """
-        A getter for the tolerance on siteAltitude
-        Returns the tolerance as a  Length
-        """
-        return self._siteAltitudeEqTolerance
-
-    # The tolerance which will be used on siteLongitude during an add operation on the table
-    _siteLongitudeEqTolerance = Angle(0.0)
-
-    def setSiteLongitudeEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on siteLongitude
-        """
-        if not isinstance(tolerance, Angle):
-            print("tolerance must be a  Angle instance")
-
-        self._siteLongitudeEqTolerance = Angle(tolerance)
-
-    def getSiteLongitudeEqTolerance(self):
-        """
-        A getter for the tolerance on siteLongitude
-        Returns the tolerance as a  Angle
-        """
-        return self._siteLongitudeEqTolerance
-
-    # The tolerance which will be used on siteLatitude during an add operation on the table
-    _siteLatitudeEqTolerance = Angle(0.0)
-
-    def setSiteLatitudeEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on siteLatitude
-        """
-        if not isinstance(tolerance, Angle):
-            print("tolerance must be a  Angle instance")
-
-        self._siteLatitudeEqTolerance = Angle(tolerance)
-
-    def getSiteLatitudeEqTolerance(self):
-        """
-        A getter for the tolerance on siteLatitude
-        Returns the tolerance as a  Angle
-        """
-        return self._siteLatitudeEqTolerance
+        return self._localOscillatorOffsetEqTolerance
 
     def getKeyName(self):
         """
@@ -347,52 +181,154 @@ class ExecBlockTable:
         """
         return self._key
 
-    # a dictionary for the autoincrementation algorithm
-    # the key is the key, excluding that auto-incrementable
-    # the value is an integer that's the largest auto-incrementable for that key
-    _noAutoIncIds = {}
-
-    def autoIncrement(self, key, x):
+    def Key(self, antennaId, receiverId, spectralWindowId):
         """
-        For internal use.
-        key is a key string
-        x is a row.
+        Returns a string built by concatenating the ascii representation of the
+        parameters values suffixed with a "_" character.
         """
-        if key not in self._noAutoIncIds:
-            # There is not yet a combination of the non autoinc attributes values in the dict
+        result = ""
 
-            # Initialize  execBlockId to Tag(0).
-            x.setExecBlockId(Tag(0, TagType.ExecBlock))
+        result += str(antennaId) + "_"
 
-            # Record it in the dict.
-            self._noAutoIncIds[key] = 0
+        result += str(receiverId) + "_"
+
+        result += str(spectralWindowId) + "_"
+
+        return result
+
+    def insertByStartTime(self, x, rowlist):
+        """
+        Insert a ModulationRow in a list of ModulationRow so that it's ordered by ascending start time.
+
+        x The ModulationRow to be inserted.
+        rowlist The list where x is to be inserted.
+
+        The inserted row is returned. If x already exists in rowlist then it is not added and
+        the row in rowlist is returned.
+
+        If a row matching the value of the start time of timeInterval is
+        found in rowlist but the other required parameters do not have the same value
+        then a DuplicateKey exception is raised.
+        """
+
+        # get the ArrayTime value at the start of the ArrayTimeInterval found in x
+        xTimeStart = x.getTimeInterval().getStart().get()
+
+        # work out where to add x to rowlist
+        if (len(rowlist) == 0) or (
+            xTimeStart > (rowlist[-1].getTimeInterval().getStart().get())
+        ):
+            # it belongs at the end
+            if len(rowlist) > 0:
+                lastRow = rowlist[-1]
+                # Modify the duration of lastRow if and only if the start time of x
+                # is located strictly before the end time of last.
+                if xTimeStart < (
+                    lastRow.getTimeInterval().getStart().get()
+                    + lastRow.getTimeInterval().getDuration().get()
+                ):
+                    lastRow.getTimeInterval().setDuration(
+                        xTimeStart - lastRow.getTimeInterval().getStart().get()
+                    )
+            rowlist.append(x)
+        elif xTimeStart < rowlist[0].getTimeInterval().getStart().get():
+            # it belongs at the start
+            firstRow = rowlist[0]
+            # Modify the duration of x if and only if the start time of firstRow
+            # is located strictly before the end time of x.
+            if firstRow.getTimeInterval().getStart().get() < (
+                xTimeStart + x.getTimeInterval().getDuration().get()
+            ):
+                x.getTimeInterval().setDuration(
+                    firstRow.getTimeInterval().getStart().get() - xTimeStart
+                )
+
+            rowlist.insert(0, x)
         else:
-            # There is already a combination of the non autoinc attributes values in the dict
-            nextInt = int(self._noAutoIncIds[key]) + 1
+            # x is inserted somewhere inside rowlist; let's use a dichotomoy
+            # method to find the insertion index.
 
-            # Initialize  execBlockId to Tag(nextInt).
-            x.setExecBlockId(Tag(nextInt, TagType.ExecBlock))
+            k0 = 0
+            k1 = len(rowlist) - 1
 
-            # Record it in the hashtable.
-            self._noAutoIncIds[key] = nextInt
+            while k0 != (k1 - 1):
+                if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
+                    if rowlist[k0].equalByRequiredValue(x):
+                        # this row already exists at k0, nothing to insert or add, return that row
+                        return rowlist[k0]
+                    else:
+                        # the start time matches, but the rest of the required parameters do not
+                        raise DuplicateKey(
+                            "DuplicateKey exception in ", "ModulationTable"
+                        )
+                elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
+                    if rowlist[k1].equalByRequiredValue(x):
+                        # this row already exists at k1, nothing to insert or add, return that row
+                        return rowlist[k1]
+                    else:
+                        # the start time matches, but the rest of the required parameters do not
+                        raise DuplicateKey(
+                            "DuplicateKey exception in ", "ModulationTable"
+                        )
+                else:
+                    # make sure new index is an integer
+                    newIndex = int((k0 + k1) / 2)
+                    if (
+                        xTimeStart
+                        <= rowlist[newIndex].getTimeInterval().getStart().get()
+                    ):
+                        k1 = newIndex
+                    else:
+                        k0 = newIndex
+
+            if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
+                if rowlist[k0].equalByRequiredValue(x):
+                    # this row already exists at k0, nothing to insert or add, return that row
+                    return rowlist[k0]
+                else:
+                    # the start time matches, but the rest of the required paramters do not
+                    raise DuplicateKey("DuplicateKey exception in ", "ModulationTable")
+            elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
+                if rowlist[k1].equalByRequiredValue(x):
+                    # this row already exists at k1, nothing to insert or add, return that row
+                    return rowlist[k1]
+                else:
+                    # the start time matches, but the rest of the required parameters do not
+                    raise DuplicateKey("DuplicateKey exception in ", "ModulationTable")
+
+            # if it reaches here, it should be added, set the duration as appropriate for
+            # insertion at k1, after k0, adjust duration of k0 as appropriate
+            rowlist[k0].getTimeInterval().setDuration(
+                xTimeStart - rowlist[k0].getTimeInterval().getStart().get()
+            )
+            x.getTimeInterval().setDuration(
+                rowlist[k0 + 1].getTimeInterval().getStart().get() - xTimeStart
+            )
+            rowlist.insert(k1, x)
+
+        # if it reaches here then x has already been addded to rowlist and it needs to be
+        # appended to privateRows and marked as added internally before being returned
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     def __init__(self, container):
         """
-        Create a ExecBlockTable attached to container.
+        Create a ModulationTable attached to container.
 
         container must be a ASDM instance
         All tables must know the container
         """
 
         if not isinstance(container, pyasdm.ASDM):
-            raise (ValueError("ExecBlockTable constructor must use a ASDM instance"))
+            raise (ValueError("ModulationTable constructor must use a ASDM instance"))
 
         self._container = container
 
         self._entity = Entity()
         self._entity.setEntityId(EntityId("uid://X0/X0/X0"))
         self._entity.setEntityIdEncrypted("na")
-        self._entity.setEntityTypeName("ExecBlockTable")
+        self._entity.setEntityTypeName("ModulationTable")
         self._entity.setEntityVersion("1")
         self._entity.setInstanceVersion("1")
 
@@ -402,7 +338,7 @@ class ExecBlockTable:
 
         self._privateRows = []
 
-        self._noAutoIncIds = {}
+        self._context = {}
 
         self._version = 0
 
@@ -424,7 +360,7 @@ class ExecBlockTable:
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
-            # print("ExecBlock is not present in memory, setting from file")
+            # print("Modulation is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -451,11 +387,11 @@ class ExecBlockTable:
 
     def __str__(self):
         """
-        Returns "ExecBlockTable" followed by the current size of the table
+        Returns "ModulationTable" followed by the current size of the table
         between parenthesis.
-        Example : ExecBlockTable(12)
+        Example : ModulationTable(12)
         """
-        return "ExecBlockTable(" + size() + ")"
+        return "ModulationTable(" + size() + ")"
 
     # ====> Row creation.
 
@@ -464,124 +400,73 @@ class ExecBlockTable:
         Create a new row with default values.
         The new row is not added to this table but it knows about it.
         """
-        thisRow = ExecBlockRow(self)
+        thisRow = ModulationRow(self)
         return thisRow
 
     def add(self, x):
         """
-        Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.execBlockId,
-        add x to its table and returns x.
+        Add a row.
+        x the ModulationRow to be added.
 
-        returns a ExecBlockRow.
-        x. A row to be added.
+        return a ModulationRow. If the table contains a ModulationRow whose attributes (key and mandatory values) are equal to this in x
+        then this returns that previously added ModulationRow, otherwise x is returned.
+
+        raises  DuplicateKey when the table contains a ModulationRow with a key equal to the key in x but having
+         a value section different from the values in x.
+
+         note The row is inserted in the table in such a way that all the rows having the same value of
+         ( antennaId, receiverId, spectralWindowId ) are stored by ascending time.
         """
-        if not isinstance(x, ExecBlockRow):
-            raise ValueError("x must be a  ExecBlockRow instance.")
+        if not isinstance(x, ModulationRow):
+            raise ValueError("x must be a  ModulationRow instance.")
 
-        aRow = self.lookup(
-            x.getStartTime(),
-            x.getEndTime(),
-            x.getExecBlockNum(),
-            x.getExecBlockUID(),
-            x.getProjectUID(),
-            x.getConfigName(),
-            x.getTelescopeName(),
-            x.getObserverName(),
-            x.getNumObservingLog(),
-            x.getObservingLog(),
-            x.getSessionReference(),
-            x.getBaseRangeMin(),
-            x.getBaseRangeMax(),
-            x.getBaseRmsMinor(),
-            x.getBaseRmsMajor(),
-            x.getBasePa(),
-            x.getAborted(),
-            x.getNumAntenna(),
-            x.getAntennaId(),
-            x.getSBSummaryId(),
-        )
-        if aRow is not None:
-            return aRow
+        # get the key for x
+        keystr = self.Key(x.getAntennaId(), x.getReceiverId(), x.getSpectralWindowId())
 
-        # Autoincrement execBlockId
-        x.setExecBlockId(Tag(self.size(), TagType.ExecBlock))
+        if keystr not in self._context:
+            # add a list to context for this key
+            self._context[keystr] = []
 
-        self._privateRows.add(x)
-        x.isAdded()
-        return x
+        result = None
+        try:
+            result = self.insertByStartTime(x, self._context[keystr])
+        except DuplicateKey as exc:
+            raise  # Simply reraise it
+
+        return result
 
     def newRow(
         self,
-        startTime,
-        endTime,
-        execBlockNum,
-        execBlockUID,
-        projectUID,
-        configName,
-        telescopeName,
-        observerName,
-        numObservingLog,
-        observingLog,
-        sessionReference,
-        baseRangeMin,
-        baseRangeMax,
-        baseRmsMinor,
-        baseRmsMajor,
-        basePa,
-        aborted,
-        numAntenna,
         antennaId,
-        sBSummaryId,
+        receiverId,
+        spectralWindowId,
+        timeInterval,
+        localOscillatorOffset,
+        walsh180enabled,
+        walsh90enabled,
     ):
         """
-        Create a new ExecBlockRow initialized to the specified values.
+        Create a new ModulationRow initialized to the specified values.
 
         The new row is not added to this table, but it does know about it.
         (the autoincrementable attribute, if any, is not in the parameter list)
         """
 
-        thisRow = ExecBlockRow(self)
-
-        thisRow.setStartTime(startTime)
-
-        thisRow.setEndTime(endTime)
-
-        thisRow.setExecBlockNum(execBlockNum)
-
-        thisRow.setExecBlockUID(execBlockUID)
-
-        thisRow.setProjectUID(projectUID)
-
-        thisRow.setConfigName(configName)
-
-        thisRow.setTelescopeName(telescopeName)
-
-        thisRow.setObserverName(observerName)
-
-        thisRow.setNumObservingLog(numObservingLog)
-
-        thisRow.setObservingLog(observingLog)
-
-        thisRow.setSessionReference(sessionReference)
-
-        thisRow.setBaseRangeMin(baseRangeMin)
-
-        thisRow.setBaseRangeMax(baseRangeMax)
-
-        thisRow.setBaseRmsMinor(baseRmsMinor)
-
-        thisRow.setBaseRmsMajor(baseRmsMajor)
-
-        thisRow.setBasePa(basePa)
-
-        thisRow.setAborted(aborted)
-
-        thisRow.setNumAntenna(numAntenna)
+        thisRow = ModulationRow(self)
 
         thisRow.setAntennaId(antennaId)
 
-        thisRow.setSBSummaryId(sBSummaryId)
+        thisRow.setReceiverId(receiverId)
+
+        thisRow.setSpectralWindowId(spectralWindowId)
+
+        thisRow.setTimeInterval(timeInterval)
+
+        thisRow.setLocalOscillatorOffset(localOscillatorOffset)
+
+        thisRow.setWalsh180enabled(walsh180enabled)
+
+        thisRow.setWalsh90enabled(walsh90enabled)
 
         return thisRow
 
@@ -589,191 +474,133 @@ class ExecBlockTable:
         """
         Create a new row using a copy constructor mechanism.
 
-        The method creates a new ExecBlockRow which knows about this table.
+        The method creates a new ModulationRow which knows about this table.
         Each attribute of the created row is a (deep) copy of the corresponding
         attribute of row. The method does not add the created row to this,
         it simply parents it to this, a call to the add method
         has to be done in order to get the row added (very likely after having modified
         some of its attributes.
-        If row is None then the method returns a new ExecBlockRow with default values for its attributes.
+        If row is None then the method returns a new ModulationRow with default values for its attributes.
         """
 
-        return ExecBlockRow(self, row)
+        return ModulationRow(self, row)
 
     # ====> Append a row to its table.
 
     def checkAndAdd(self, x):
         """
-        A method to append a row to it's table, used by input conversion methods.
+        A method to append a row to its table, used by input conversion methods.
         Not indended for external use.
 
         If this table has an autoincrementable attribute then check if
-        x verifies the rule of uniqueness and raise an exception if not.
+        x verifies the rule of uniqueness and throw exception if not.
+
+        This method is appropriate for the case with a ArrayTimeInterval temporal key,
+        no auto incrementable attribute, with other values in the key.
 
         Append x to its table.
-        x is the row to be appended.
-        returns x.
+        x The row to be appended.
+        returns  x.
         """
+        keystr = self.Key(x.getAntennaId(), x.getReceiverId(), x.getSpectralWindowId())
 
-        if (
-            self.lookup(
-                x.getStartTime(),
-                x.getEndTime(),
-                x.getExecBlockNum(),
-                x.getExecBlockUID(),
-                x.getProjectUID(),
-                x.getConfigName(),
-                x.getTelescopeName(),
-                x.getObserverName(),
-                x.getNumObservingLog(),
-                x.getObservingLog(),
-                x.getSessionReference(),
-                x.getBaseRangeMin(),
-                x.getBaseRangeMax(),
-                x.getBaseRmsMinor(),
-                x.getBaseRmsMajor(),
-                x.getBasePa(),
-                x.getAborted(),
-                x.getNumAntenna(),
-                x.getAntennaId(),
-                x.getSBSummaryId(),
-            )
-            is not None
-        ):
-            raise UniquenessViolationException(
-                "Uniqueness violation exception in table ExecBlockTable"
-            )
+        if keystr not in self._context:
+            self._context[keystr] = []
 
-        if self.getRowByKey(x.getExecBlockId()) is not None:
-            raise DuplicateKey("Duplicate key exception in ", "ExecBlockTable")
-
-        self._privateRows.append(x)
-        x.isAdded()
-        return x
+        return self.insertByStartTime(x, self._context[keystr])
 
     # ====> methods returning rows.
 
     def get(self):
         """
         Get all rows.
-        return Alls rows as a list of ExecBlockRow
+        return all rows as a list of ModulationRow
         """
         return self._privateRows
 
-    def getRowByKey(self, execBlockId):
+    def getByContext(self, antennaId, receiverId, spectralWindowId):
         """
-        Returns a ExecBlockRow given a key.
+        Returns all the rows sorted by ascending startTime for a given context.
+        The context is defined by a value of ( antennaId, receiverId, spectralWindowId ).
+
+        return a list  of ModulationRow. A None value is returned if the table contains
+        no ModulationRow for the given ( antennaId, receiverId, spectralWindowId ).
+        """
+
+        keystr = self.Key(antennaId, receiverId, spectralWindowId)
+
+        result = None
+        if keystr in self._context:
+            result = self._context[keystr]
+
+    def getRowByKey(self, antennaId, receiverId, spectralWindowId, timeInterval):
+        """
+        Returns a ModulationRow given a key.
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
-
-        param execBlockId.
-
         """
-        for row in self._privateRows:
 
-            if not row.getExecBlockId().equals(execBlockId):
-                continue
+        keystr = self.Key(antennaId, receiverId, spectralWindowId)
 
-            return row
+        if keystr not in self._context:
+            return None
 
-        # no match found
-        return None
+        contextRows = self._context[keystr]
+        # Is the context list empty...impossible in principle !
+        if len(contextRowsrow) == 0:
+            return None
 
-    def lookup(
-        self,
-        startTime,
-        endTime,
-        execBlockNum,
-        execBlockUID,
-        projectUID,
-        configName,
-        telescopeName,
-        observerName,
-        numObservingLog,
-        observingLog,
-        sessionReference,
-        baseRangeMin,
-        baseRangeMax,
-        baseRmsMinor,
-        baseRmsMajor,
-        basePa,
-        aborted,
-        numAntenna,
-        antennaId,
-        sBSummaryId,
-    ):
-        """
-        Look up the table for a row whose all attributes  except the autoincrementable one
-        are equal to the corresponding parameters of the method.
-        return this row if any, None otherwise.
+        # Only one element in the context list
+        if len(contextRows) == 1:
+            r = contextRows[0]
+            if r.getTimeInterval().contains(timeInterval.getStart()):
+                return r
+            return None
 
+        # Optimizations
+        lastRow = contextRows[-1]
+        if timeInterval.getStart().get() >= (
+            lastRow.getTimeInterval().getStart().get()
+            + lastRow.getTimeInterval().getDuration().get()
+        ):
+            # the requested timeInterval is after the last row in this context, it does not exist here
+            return None
 
-        param startTime.
+        firstRow = contextRows[0]
+        if timeInterval.getStart().get() < firstRow.getTimeInterval().getStart().get():
+            # the requested timeInterval is before the start of this context, it does not exist here
+            return None
 
-        param endTime.
+        # the requested timeInterval falls within the range of this context, find the row
+        # if it exists in this context
+        # let's use dichotomy method
+        k0 = 0
+        k1 = len(contextRows) - 1
+        while k0 != k1:
+            # Is the start time contained in the time interval of row at k0
+            r = contextRows[k0]
+            if r.getTimeInterval().contains(timeInterval.getStart()):
+                return r
 
-        param execBlockNum.
+            # Is the start time contained in the time interval of row at k1
+            r = contextRows[k1]
+            if r.getTimeInterval().contains(timeInterval.getStart()):
+                return r
 
-        param execBlockUID.
+            # Are the rows k0 and k1 consecutive
+            # Then we know for sure that there is no row containing the start of timeInterval.
+            if k1 == (k0 + 1):
+                return None
 
-        param projectUID.
+            # ensure that the next row is also an integer
+            nextRowIndx = int((k0 + k1) / 2)
+            r = contextRows[nextRowIndx]
+            if timeInterval.getStart().get() <= r.getTimeInterval().getStart().get():
+                k1 = nextRowIndx
+            else:
+                k0 = nextRowIndx
 
-        param configName.
-
-        param telescopeName.
-
-        param observerName.
-
-        param numObservingLog.
-
-        param observingLog.
-
-        param sessionReference.
-
-        param baseRangeMin.
-
-        param baseRangeMax.
-
-        param baseRmsMinor.
-
-        param baseRmsMajor.
-
-        param basePa.
-
-        param aborted.
-
-        param numAntenna.
-
-        param antennaId.
-
-        param sBSummaryId.
-
-        """
-        for row in self._privateRows:
-            if row.compareNoAutoInc(
-                startTime,
-                endTime,
-                execBlockNum,
-                execBlockUID,
-                projectUID,
-                configName,
-                telescopeName,
-                observerName,
-                numObservingLog,
-                observingLog,
-                sessionReference,
-                baseRangeMin,
-                baseRangeMax,
-                baseRmsMinor,
-                baseRmsMajor,
-                basePa,
-                aborted,
-                numAntenna,
-                antennaId,
-                sBSummaryId,
-            ):
-                return row
-
+        # not found
         return None
 
     def getRows(self):
@@ -787,13 +614,13 @@ class ExecBlockTable:
     def toXML(self):
         """
         Translate this table to an XML representation conforming
-        to the schema defined for ExecBlock (ExecBlockTable.xsd).
+        to the schema defined for Modulation (ModulationTable.xsd).
 
         returns a string containing the XML representation.
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<ExecBlockTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:excblk="http://Alma/XASDM/ExecBlockTable" xsi:schemaLocation="http://Alma/XASDM/ExecBlockTable http://almaobservatory.org/XML/XASDM/4/ExecBlockTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
+        result += '<ModulationTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modlatn="http://Alma/XASDM/ModulationTable" xsi:schemaLocation="http://Alma/XASDM/ModulationTable http://almaobservatory.org/XML/XASDM/4/ModulationTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
         result += self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
@@ -801,22 +628,25 @@ class ExecBlockTable:
         for thisRow in self._privateRows:
             result += thisRow.toXML()
             result += " "
-        result += "</ExecBlockTable>"
+        result += "</ModulationTable>"
         return result
 
     def fromXML(self, xmlstr):
         """
         Populate this table from the content of a XML document that is required to
-        conform to the XML schema defined for a ExecBlock (ExecBlockTable.xsd).
+        conform to the XML schema defined for a Modulation (ModulationTable.xsd).
         """
         if not isinstance(xmlstr, str):
             raise ConversionException("xmlstr must be a string")
 
         xmldom = minidom.parseString(xmlstr)
-        # this should have at least one child node with a name of "ExecBlockTable".
-        if not xmldom.hasChildNodes() or xmldom.firstChild.nodeName != "ExecBlockTable":
+        # this should have at least one child node with a name of "ModulationTable".
+        if (
+            not xmldom.hasChildNodes()
+            or xmldom.firstChild.nodeName != "ModulationTable"
+        ):
             raise ConversionException(
-                "XML is not from the expected table", "ExecBlockTable"
+                "XML is not from the expected table", "ModulationTable"
             )
 
         # ignore everything but the first child node
@@ -834,7 +664,7 @@ class ExecBlockTable:
         except Exception as ex:
             # reraise it as a ConversionException
             raise ConversionException(
-                "schemaVersion is not an integer", "ExecBlockTable"
+                "schemaVersion is not an integer", "ModulationTable"
             ) from None
 
         # go through the child nodes of tabdom
@@ -844,7 +674,7 @@ class ExecBlockTable:
 
         if not tabdom.hasChildNodes():
             raise ConversionException(
-                "XML is missing all of the expected elements", "ExecBlockTable"
+                "XML is missing all of the expected elements", "ModulationTable"
             )
 
         for thisNode in tabdom.childNodes:
@@ -852,19 +682,19 @@ class ExecBlockTable:
             if nodeName == "Entity":
                 if tabEntity is not None:
                     raise ConversionException(
-                        "More than one Entity found in XML", "ExecBlockTable"
+                        "More than one Entity found in XML", "ModulationTable"
                     )
                 tabEntity = Entity(thisNode.toxml())
-                if not (tabEntity.getEntityTypeName() == "ExecBlockTable"):
+                if not (tabEntity.getEntityTypeName() == "ModulationTable"):
                     raise ConversionException(
                         "Entity type name in XML is not the expected value of the table name",
-                        "ExecBlockTable",
+                        "ModulationTable",
                     )
             elif nodeName == "ContainerEntity":
                 # there must be one, but no more than one
                 if hasContainerEntity:
                     raise ConversionException(
-                        "More than one ContainerEntity found in XML", "ExecBlockTable"
+                        "More than one ContainerEntity found in XML", "ModulationTable"
                     )
                 hasContainerEntity = True
             elif nodeName == "row":
@@ -874,18 +704,12 @@ class ExecBlockTable:
                     self.checkAndAdd(row)
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
-                    raise ConversionException(str(exc), "ExecBlockTable") from None
-
-                except UniquenessViolationException as exc:
-                    msg = (
-                        "UniquenessViolationException in row in ExecBlockTable : %s"
-                        % str(exc)
-                    )
+                    raise ConversionException(str(exc), "ModulationTable") from None
 
         if tabEntity is None:
-            raise ConversionException("No Entity seen in XML", "ExecBlockTable")
+            raise ConversionException("No Entity seen in XML", "ModulationTable")
         if not hasContainerEntity:
-            raise ValueError("No Container Entity seen in XL", "ExecBlockTable")
+            raise ValueError("No Container Entity seen in XL", "ModulationTable")
 
         self.setEntity(tabEntity)
 
@@ -901,10 +725,10 @@ class ExecBlockTable:
         result = ""
         result += "<?xml version='1.0'  encoding='ISO-8859-1'?>"
         result += "\n"
-        result += '<ExecBlockTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:excblk="http://Alma/XASDM/ExecBlockTable" xsi:schemaLocation="http://Alma/XASDM/ExecBlockTable http://almaobservatory.org/XML/XASDM/4/ExecBlockTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
+        result += '<ModulationTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modlatn="http://Alma/XASDM/ModulationTable" xsi:schemaLocation="http://Alma/XASDM/ModulationTable http://almaobservatory.org/XML/XASDM/4/ModulationTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
         result += "<Entity entityId='"
         result += uidStr
-        result += "' entityIdEncrypted='na' entityTypeName='ExecBlockTable' schemaVersion='1' documentVersion='1'/>\n"
+        result += "' entityIdEncrypted='na' entityTypeName='ModulationTable' schemaVersion='1' documentVersion='1'/>\n"
         result += "<ContainerEntity entityId='"
         result += containerUID
         result += "' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n"
@@ -913,39 +737,18 @@ class ExecBlockTable:
         result += "' byteOrder='" + str(byteOrder) + "' />\n"
         result += "<Attributes>\n"
 
-        result += "<execBlockId/>\n"
-        result += "<startTime/>\n"
-        result += "<endTime/>\n"
-        result += "<execBlockNum/>\n"
-        result += "<execBlockUID/>\n"
-        result += "<projectUID/>\n"
-        result += "<configName/>\n"
-        result += "<telescopeName/>\n"
-        result += "<observerName/>\n"
-        result += "<numObservingLog/>\n"
-        result += "<observingLog/>\n"
-        result += "<sessionReference/>\n"
-        result += "<baseRangeMin/>\n"
-        result += "<baseRangeMax/>\n"
-        result += "<baseRmsMinor/>\n"
-        result += "<baseRmsMajor/>\n"
-        result += "<basePa/>\n"
-        result += "<aborted/>\n"
-        result += "<numAntenna/>\n"
         result += "<antennaId/>\n"
-        result += "<sBSummaryId/>\n"
+        result += "<receiverId/>\n"
+        result += "<spectralWindowId/>\n"
+        result += "<timeInterval/>\n"
+        result += "<localOscillatorOffset/>\n"
+        result += "<walsh180enabled/>\n"
+        result += "<walsh90enabled/>\n"
 
-        result += "<releaseDate/>\n"
-        result += "<schedulerMode/>\n"
-        result += "<siteAltitude/>\n"
-        result += "<siteLongitude/>\n"
-        result += "<siteLatitude/>\n"
-        result += "<observingScript/>\n"
-        result += "<observingScriptUID/>\n"
-        result += "<arrayName/>\n"
-        result += "<scaleId/>\n"
+        result += "<walsh180index/>\n"
+        result += "<walsh90index/>\n"
         result += "</Attributes>\n"
-        result += "</ExecBlockTable>\n"
+        result += "</ModulationTable>\n"
 
         return result
 
@@ -1040,7 +843,7 @@ class ExecBlockTable:
             byteStream.close()
             raise ConversionException(
                 "opened byteStream is not the expected io.BufferedReader or it is not seekable, this should never happen.",
-                "ExecBlock",
+                "Modulation",
             )
 
         xmlPartMIMEHeader = bytes(str("Content-ID: <header.xml>\n\n").encode())
@@ -1060,7 +863,7 @@ class ExecBlockTable:
         if loc0 < 0:
             byteStream.close()
             raise ConversionException(
-                "Failed to detect the begining of the XML header.", "ExecBlock"
+                "Failed to detect the begining of the XML header.", "Modulation"
             )
 
         loc0 += len(xmlPartMIMEHeader)
@@ -1070,7 +873,7 @@ class ExecBlockTable:
         if loc1 < 0:
             byteStream.close()
             raise ConversionException(
-                "Failed to detect the begining of the binary part.", "ExecBlock"
+                "Failed to detect the begining of the binary part.", "Modulation"
             )
 
         # extract the XML header as a string
@@ -1079,7 +882,7 @@ class ExecBlockTable:
         xmldom = minidom.parseString(xmlHeader)
         if not xmldom.hasChildNodes():
             byteStream.close()
-            raise ConversionException("XML is not properly structured.", "ExecBlock")
+            raise ConversionException("XML is not properly structured.", "Modulation")
 
         attributesSeq = []
         byteOrderStr = None
@@ -1091,75 +894,33 @@ class ExecBlockTable:
             # assume Big_Endian and the default order of the elements
             byteOrderStr = "Big_Endian"
 
-            attributesSeq.append("execBlockId")
-
-            attributesSeq.append("startTime")
-
-            attributesSeq.append("endTime")
-
-            attributesSeq.append("execBlockNum")
-
-            attributesSeq.append("execBlockUID")
-
-            attributesSeq.append("projectUID")
-
-            attributesSeq.append("configName")
-
-            attributesSeq.append("telescopeName")
-
-            attributesSeq.append("observerName")
-
-            attributesSeq.append("numObservingLog")
-
-            attributesSeq.append("observingLog")
-
-            attributesSeq.append("sessionReference")
-
-            attributesSeq.append("baseRangeMin")
-
-            attributesSeq.append("baseRangeMax")
-
-            attributesSeq.append("baseRmsMinor")
-
-            attributesSeq.append("baseRmsMajor")
-
-            attributesSeq.append("basePa")
-
-            attributesSeq.append("aborted")
-
-            attributesSeq.append("numAntenna")
-
             attributesSeq.append("antennaId")
 
-            attributesSeq.append("sBSummaryId")
+            attributesSeq.append("receiverId")
 
-            attributesSeq.append("releaseDate")
+            attributesSeq.append("spectralWindowId")
 
-            attributesSeq.append("schedulerMode")
+            attributesSeq.append("timeInterval")
 
-            attributesSeq.append("siteAltitude")
+            attributesSeq.append("localOscillatorOffset")
 
-            attributesSeq.append("siteLongitude")
+            attributesSeq.append("walsh180enabled")
 
-            attributesSeq.append("siteLatitude")
+            attributesSeq.append("walsh90enabled")
 
-            attributesSeq.append("observingScript")
+            attributesSeq.append("walsh180index")
 
-            attributesSeq.append("observingScriptUID")
-
-            attributesSeq.append("arrayName")
-
-            attributesSeq.append("scaleId")
+            attributesSeq.append("walsh90index")
 
             versionStr = "2"
 
         else:
-            # c++ and Java just assume it then must be a ExecBlock table
+            # c++ and Java just assume it then must be a Modulation table
             # this is more insistant, just in case
-            if hdrdom.nodeName != "ExecBlockTable":
+            if hdrdom.nodeName != "ModulationTable":
                 byteStream.close()
                 raise ConversionException(
-                    "XML Header is not from the expected table.", "ExecBlock"
+                    "XML Header is not from the expected table.", "Modulation"
                 )
 
             # schemaVersion becomes versionStr
@@ -1173,7 +934,7 @@ class ExecBlockTable:
                 byteStream.close()
                 raise ConversionException(
                     "THe XML header is missing all of the expected elements.",
-                    "ExecBlock",
+                    "Modulation",
                 )
 
             # loop through the child nodes, looking for BulkStoreRef and Attributes
@@ -1183,20 +944,20 @@ class ExecBlockTable:
                         byteStream.close()
                         raise ConversionException(
                             "More than one BulkStoreRef element seen. Invalid XML header.",
-                            "ExecBlock",
+                            "Modulation",
                         )
                     if not hdrnode.hasAttributes():
                         byteStream.close()
                         raise ConversionException(
                             "BulkStoreRef does not contain any attributes. Invalid XML header.",
-                            "ExecBlock",
+                            "Modulation",
                         )
                     byteOrderAttr = hdrnode.attributes.getNamedItem("byteOrder")
                     if byteOrderAttr is None:
                         byteStream.close()
                         raise ConversionException(
                             "byteOrder attribute not found in BulkStoreRef element. Invalid XML header.",
-                            "ExecBlock",
+                            "Modulation",
                         )
                     byteOrderStr = byteOrderAttr.value
                 elif hdrnode.nodeName == "Attributes":
@@ -1204,13 +965,13 @@ class ExecBlockTable:
                         byteStream.close()
                         raise ConversionException(
                             "More than one Attributes node seen. Invalid XML header.",
-                            "ExecBlock",
+                            "Modulation",
                         )
                     if not hdrnode.hasChildNodes():
                         byteStream.close()
                         raise ConversionException(
                             "Attributes element has no child nodes. Invalid XML header.",
-                            "ExecBlock",
+                            "Modulation",
                         )
                     for attrnode in hdrnode.childNodes:
                         if attrnode.nodeType == attrnode.ELEMENT_NODE:
@@ -1220,14 +981,14 @@ class ExecBlockTable:
             byteStream.close()
             raise ConversionException(
                 "BulkStoreRef element not seen and this is not an older version 2 XML header. Invalid XML header.",
-                "ExecBlock",
+                "Modulation",
             )
 
         if len(attributesSeq) == 0:
             byteStream.close()
             raise ConversionException(
                 "Attributes element not seen and this is not an older version 2 XML header. Invalid XML header.",
-                "ExecBlock",
+                "Modulation",
             )
 
         byteOrder = ByteOrder(byteOrderStr)
@@ -1249,14 +1010,14 @@ class ExecBlockTable:
         # c++ checks numRows against what is reported in the ASDM for this table, this is what Java does
         try:
             for i in range(numRows):
-                self.checkAndAdd(ExecBlockRow.fromBin(eis, self, attributesSeq))
+                self.checkAndAdd(ModulationRow.fromBin(eis, self, attributesSeq))
                 # print("row %s added, loc = %s" % (i, eis.tell()))
         except Exception as exc:
             byteStream.close()
             eis.close()
             raise ConversionException(
                 "Error while reading binary data, the exception was " + str(exc),
-                "ExecBlock",
+                "Modulation",
             ) from None
 
         # there is no harm in closing both
@@ -1269,7 +1030,7 @@ class ExecBlockTable:
 
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a ExecBlockTable as those produced  by the toFile method.
+        Reads and parses a file containing a representation of a ModulationTable as those produced  by the toFile method.
         This table is populated with the result of the parsing.
         param directory The name of the directory containing the file te be read and parsed.
         raises ConversionException If any error occurs while reading the
@@ -1282,16 +1043,16 @@ class ExecBlockTable:
         if not os.path.isdir(directory):
             raise ConversionException(
                 "Directory " + directory + " must be a path to an existing directory",
-                "ExecBlockTable",
+                "ModulationTable",
             )
 
-        if os.path.exists(os.path.join(directory, "ExecBlock.xml")):
+        if os.path.exists(os.path.join(directory, "Modulation.xml")):
             self.setFromXMLFile(directory)
-        elif os.path.exists(os.path.join(directory, "ExecBlock.bin")):
+        elif os.path.exists(os.path.join(directory, "Modulation.bin")):
             self.setFromMIMEFile(directory)
         else:
             raise ConversionException(
-                "No file found for the ExecBlock table", "ExecBlockTable"
+                "No file found for the Modulation table", "ModulationTable"
             )
 
     def setFromMIMEFile(self, directory):
@@ -1303,14 +1064,14 @@ class ExecBlockTable:
         # This uses a buffered byte stream. Created here and then
         # handed off to the setFromMIME method, which is responsible for closing it.
 
-        filename = os.path.join(directory, "ExecBlock.bin")
+        filename = os.path.join(directory, "Modulation.bin")
         byteStream = None
         try:
             byteStream = open(filename, "rb")
         except Exception as exc:
             raise ConversionException(
                 "Error while opening " + filename + ". The exception was " + str(exc),
-                "ExecBlock",
+                "Modulation",
             )
 
         self.setFromMIME(byteStream)
@@ -1325,11 +1086,11 @@ class ExecBlockTable:
         # read the entire file into a string
         xmlstr = None
         try:
-            with open(os.path.join(directory, "ExecBlock.xml")) as f:
+            with open(os.path.join(directory, "Modulation.xml")) as f:
                 xmlstr = f.read()
         except Exception as exc:
             # reraise it as a ConversionException
-            raise ConversionException(str(exc), "ExecBlockTable") from None
+            raise ConversionException(str(exc), "ModulationTable") from None
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
@@ -1342,8 +1103,8 @@ class ExecBlockTable:
         Stores a representation (binary or XML) of this table into a file.
 
         Depending on the boolean value of its _fileAsBin data member a binary serialization
-        of this (_fileAsBin==True) will be saved in a file "ExecBlock.bin" or
-        an XML representation (_fileAsBin==False) will be saved in a file "ExecBlock.xml".
+        of this (_fileAsBin==True) will be saved in a file "Modulation.bin" or
+        an XML representation (_fileAsBin==False) will be saved in a file "Modulation.xml".
         The file is always written in a directory whose name is passed as a parameter.
         param directory The name of directory where the file containing the table's
         representation will be saved.
@@ -1354,9 +1115,9 @@ class ExecBlockTable:
 
         if os.path.exists(directory) and not os.path.isdir(directory):
             raise ConversionException(
-                "Cannot write into directory %s. This file already exists and is not a directory. (ExecBlock)"
+                "Cannot write into directory %s. This file already exists and is not a directory. (Modulation)"
                 % directory,
-                "ExecBlockTable",
+                "ModulationTable",
             )
 
         # if not let's create it.
@@ -1371,7 +1132,7 @@ class ExecBlockTable:
                 + directory
                 + " exception caught "
                 + str(exc),
-                "ExecBlockTable",
+                "ModulationTable",
             ) from None
 
         if self._fileAsBin:
@@ -1383,7 +1144,7 @@ class ExecBlockTable:
             byteOrder = ByteOrder()
 
             # first, just the short XML file
-            xmlFilePath = os.path.join(directory, "ExecBlock.xml")
+            xmlFilePath = os.path.join(directory, "Modulation.xml")
             if os.path.exists(xmlFilePath):
                 try:
                     os.remove(xmlFilePath)
@@ -1393,7 +1154,7 @@ class ExecBlockTable:
                         + xmlFilePath
                         + ", exception caught "
                         + str(exc),
-                        "ExecBlock",
+                        "Modulation",
                     ) from None
 
             # used in both files
@@ -1404,7 +1165,7 @@ class ExecBlockTable:
                 xmlfile.write(mimeXMLpart)
 
             # now open the possibly much longer MIME file
-            mimeFilePath = os.path.join(directory, "ExecBlock.bin")
+            mimeFilePath = os.path.join(directory, "Modulation.bin")
             if os.path.exists(mimeFilePath):
                 try:
                     os.remove(mimeFilePath)
@@ -1414,14 +1175,14 @@ class ExecBlockTable:
                         + mimeFilePath
                         + ", exception caught "
                         + str(exc),
-                        "ExecBlock",
+                        "Modulation",
                     ) from None
 
             # the details are all handled in toMIME
             self.toMIME(mimeFilePath, mimeXMLpart, byteOrder)
         else:
             # The table is totally exported in a XML file.
-            filePath = os.path.join(directory, "ExecBlock.xml")
+            filePath = os.path.join(directory, "Modulation.xml")
             if os.path.exists(filePath):
                 try:
                     # try to delete it, this will raise an exception if the user does not have permission to do that
@@ -1433,7 +1194,7 @@ class ExecBlockTable:
                         + filePath
                         + " exception caught "
                         + str(exc),
-                        "ExecBlockTable",
+                        "ModulationTable",
                     ) from None
 
             try:
@@ -1447,7 +1208,7 @@ class ExecBlockTable:
                 raise ConversionException(
                     "Problem while writing the XML representation, the message was : "
                     + str(exc),
-                    "ExecBlock",
+                    "Modulation",
                 ) from None
 
     def getEntity(self):

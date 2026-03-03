@@ -149,6 +149,10 @@ class ExecBlockRow:
 
         self._observingScriptUID = EntityRef()
 
+        self._arrayNameExists = False
+
+        self._arrayName = None
+
         # extrinsic attributes
 
         self._antennaId = []  # this is a list of Tag []
@@ -270,6 +274,14 @@ class ExecBlockRow:
 
                 self._observingScriptUIDExists = True
 
+            # by default set systematically arrayName's value to something not None
+
+            if row._arrayNameExists:
+
+                self._arrayName = row._arrayName
+
+                self._arrayNameExists = True
+
             # by default set systematically scaleId's value to something not None
 
             if row._scaleIdExists:
@@ -364,6 +376,10 @@ class ExecBlockRow:
             result += Parser.extendedValueToXML(
                 "observingScriptUID", self._observingScriptUID
             )
+
+        if self._arrayNameExists:
+
+            result += Parser.valueToXML("arrayName", self._arrayName)
 
         # extrinsic attributes
 
@@ -535,6 +551,13 @@ class ExecBlockRow:
 
             self._observingScriptUIDExists = True
 
+        arrayNameNode = rowdom.getElementsByTagName("arrayName")
+        if len(arrayNameNode) > 0:
+
+            self._arrayName = str(arrayNameNode[0].firstChild.data.strip())
+
+            self._arrayNameExists = True
+
         # extrinsic attribute values
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
@@ -640,6 +663,11 @@ class ExecBlockRow:
         if self._observingScriptUIDExists:
 
             self._observingScriptUID.toBin(eos)
+
+        eos.writeBool(self._arrayNameExists)
+        if self._arrayNameExists:
+
+            eos.writeStr(self._arrayName)
 
         eos.writeBool(self._scaleIdExists)
         if self._scaleIdExists:
@@ -890,6 +918,16 @@ class ExecBlockRow:
             row._observingScriptUID = EntityRef.fromBin(eis)
 
     @staticmethod
+    def arrayNameFromBin(row, eis):
+        """
+        Set the optional arrayName in row from the EndianInput (eis) instance.
+        """
+        row._arrayNameExists = eis.readBool()
+        if row._arrayNameExists:
+
+            row._arrayName = eis.readStr()
+
+    @staticmethod
     def scaleIdFromBin(row, eis):
         """
         Set the optional scaleId in row from the EndianInput (eis) instance.
@@ -934,6 +972,7 @@ class ExecBlockRow:
         _fromBinMethods["siteLatitude"] = ExecBlockRow.siteLatitudeFromBin
         _fromBinMethods["observingScript"] = ExecBlockRow.observingScriptFromBin
         _fromBinMethods["observingScriptUID"] = ExecBlockRow.observingScriptUIDFromBin
+        _fromBinMethods["arrayName"] = ExecBlockRow.arrayNameFromBin
         _fromBinMethods["scaleId"] = ExecBlockRow.scaleIdFromBin
 
     @staticmethod
@@ -1740,6 +1779,51 @@ class ExecBlockRow:
         Mark observingScriptUID, which is an optional field, as non-existent.
         """
         self._observingScriptUIDExists = False
+
+    # ===> Attribute arrayName, which is optional
+    _arrayNameExists = False
+
+    _arrayName = None
+
+    def isArrayNameExists(self):
+        """
+        The attribute arrayName is optional. Return True if this attribute exists.
+        return True if and only if the arrayName attribute exists.
+        """
+        return self._arrayNameExists
+
+    def getArrayName(self):
+        """
+        Get arrayName, which is optional.
+        return arrayName as str
+        raises ValueError If arrayName does not exist.
+        """
+        if not self._arrayNameExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + arrayName
+                + " attribute in table ExecBlock does not exist!"
+            )
+
+        return self._arrayName
+
+    def setArrayName(self, arrayName):
+        """
+        Set arrayName with the specified str value.
+        arrayName The str value to which arrayName is to be set.
+
+
+        """
+
+        self._arrayName = str(arrayName)
+
+        self._arrayNameExists = True
+
+    def clearArrayName(self):
+        """
+        Mark arrayName, which is an optional field, as non-existent.
+        """
+        self._arrayNameExists = False
 
     # Extrinsic Table Attributes
 

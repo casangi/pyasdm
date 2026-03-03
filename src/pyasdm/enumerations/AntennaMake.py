@@ -54,6 +54,10 @@ _IRAM_15 = 7  # 15-m IRAM antenna
 
 _UNDEFINED = 8  # Not defined or not applicable.
 
+_VLA_25 = 9  # the original 25 meter VLA antenna
+
+_MTEX_18_PROTO = 10  # the first 18 meter ngVLA prototype antenna
+
 
 # their names in a dictionary
 _antennaMakeNames = {}
@@ -75,6 +79,10 @@ _antennaMakeNames[_VERTEX_12] = "VERTEX_12"
 _antennaMakeNames[_IRAM_15] = "IRAM_15"
 
 _antennaMakeNames[_UNDEFINED] = "UNDEFINED"
+
+_antennaMakeNames[_VLA_25] = "VLA_25"
+
+_antennaMakeNames[_MTEX_18_PROTO] = "MTEX_18_PROTO"
 
 
 class AntennaMake:
@@ -219,3 +227,7 @@ VERTEX_12 = AntennaMake(_VERTEX_12)
 IRAM_15 = AntennaMake(_IRAM_15)
 
 UNDEFINED = AntennaMake(_UNDEFINED)
+
+VLA_25 = AntennaMake(_VLA_25)
+
+MTEX_18_PROTO = AntennaMake(_MTEX_18_PROTO)

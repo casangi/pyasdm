@@ -126,6 +126,14 @@ class FeedRow:
 
         self._skyCouplingSpectrum = []  # this is a list of float []
 
+        self._receiverGenerationExists = False
+
+        self._receiverGeneration = 0
+
+        self._digitizerOffsetExists = False
+
+        self._digitizerOffset = Frequency()
+
         # extrinsic attributes
 
         self._antennaId = Tag()
@@ -224,6 +232,22 @@ class FeedRow:
 
                 self._skyCouplingSpectrumExists = True
 
+            # by default set systematically receiverGeneration's value to something not None
+
+            if row._receiverGenerationExists:
+
+                self._receiverGeneration = row._receiverGeneration
+
+                self._receiverGenerationExists = True
+
+            # by default set systematically digitizerOffset's value to something not None
+
+            if row._digitizerOffsetExists:
+
+                self._digitizerOffset = Frequency(row._digitizerOffset)
+
+                self._digitizerOffsetExists = True
+
     def isAdded(self):
         self._hasBeenAdded = True
 
@@ -285,6 +309,16 @@ class FeedRow:
 
             result += Parser.listValueToXML(
                 "skyCouplingSpectrum", self._skyCouplingSpectrum
+            )
+
+        if self._receiverGenerationExists:
+
+            result += Parser.valueToXML("receiverGeneration", self._receiverGeneration)
+
+        if self._digitizerOffsetExists:
+
+            result += Parser.extendedValueToXML(
+                "digitizerOffset", self._digitizerOffset
             )
 
         # extrinsic attributes
@@ -425,6 +459,24 @@ class FeedRow:
 
             self._skyCouplingSpectrumExists = True
 
+        receiverGenerationNode = rowdom.getElementsByTagName("receiverGeneration")
+        if len(receiverGenerationNode) > 0:
+
+            self._receiverGeneration = int(
+                receiverGenerationNode[0].firstChild.data.strip()
+            )
+
+            self._receiverGenerationExists = True
+
+        digitizerOffsetNode = rowdom.getElementsByTagName("digitizerOffset")
+        if len(digitizerOffsetNode) > 0:
+
+            self._digitizerOffset = Frequency(
+                digitizerOffsetNode[0].firstChild.data.strip()
+            )
+
+            self._digitizerOffsetExists = True
+
         # extrinsic attribute values
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
@@ -519,6 +571,16 @@ class FeedRow:
             for i in range(len(self._skyCouplingSpectrum)):
 
                 eos.writeFloat(self._skyCouplingSpectrum[i])
+
+        eos.writeBool(self._receiverGenerationExists)
+        if self._receiverGenerationExists:
+
+            eos.writeInt(self._receiverGeneration)
+
+        eos.writeBool(self._digitizerOffsetExists)
+        if self._digitizerOffsetExists:
+
+            self._digitizerOffset.toBin(eos)
 
     @staticmethod
     def antennaIdFromBin(row, eis):
@@ -692,6 +754,26 @@ class FeedRow:
             row._skyCouplingSpectrum = thisList
 
     @staticmethod
+    def receiverGenerationFromBin(row, eis):
+        """
+        Set the optional receiverGeneration in row from the EndianInput (eis) instance.
+        """
+        row._receiverGenerationExists = eis.readBool()
+        if row._receiverGenerationExists:
+
+            row._receiverGeneration = eis.readInt()
+
+    @staticmethod
+    def digitizerOffsetFromBin(row, eis):
+        """
+        Set the optional digitizerOffset in row from the EndianInput (eis) instance.
+        """
+        row._digitizerOffsetExists = eis.readBool()
+        if row._digitizerOffsetExists:
+
+            row._digitizerOffset = Frequency.fromBin(eis)
+
+    @staticmethod
     def initFromBinMethods():
         global _fromBinMethods
         if len(_fromBinMethods) > 0:
@@ -715,6 +797,8 @@ class FeedRow:
         _fromBinMethods["skyCoupling"] = FeedRow.skyCouplingFromBin
         _fromBinMethods["numChan"] = FeedRow.numChanFromBin
         _fromBinMethods["skyCouplingSpectrum"] = FeedRow.skyCouplingSpectrumFromBin
+        _fromBinMethods["receiverGeneration"] = FeedRow.receiverGenerationFromBin
+        _fromBinMethods["digitizerOffset"] = FeedRow.digitizerOffsetFromBin
 
     @staticmethod
     def fromBin(eis, table, attributesSeq):
@@ -1372,6 +1456,97 @@ class FeedRow:
         Mark skyCouplingSpectrum, which is an optional field, as non-existent.
         """
         self._skyCouplingSpectrumExists = False
+
+    # ===> Attribute receiverGeneration, which is optional
+    _receiverGenerationExists = False
+
+    _receiverGeneration = 0
+
+    def isReceiverGenerationExists(self):
+        """
+        The attribute receiverGeneration is optional. Return True if this attribute exists.
+        return True if and only if the receiverGeneration attribute exists.
+        """
+        return self._receiverGenerationExists
+
+    def getReceiverGeneration(self):
+        """
+        Get receiverGeneration, which is optional.
+        return receiverGeneration as int
+        raises ValueError If receiverGeneration does not exist.
+        """
+        if not self._receiverGenerationExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + receiverGeneration
+                + " attribute in table Feed does not exist!"
+            )
+
+        return self._receiverGeneration
+
+    def setReceiverGeneration(self, receiverGeneration):
+        """
+        Set receiverGeneration with the specified int value.
+        receiverGeneration The int value to which receiverGeneration is to be set.
+
+
+        """
+
+        self._receiverGeneration = int(receiverGeneration)
+
+        self._receiverGenerationExists = True
+
+    def clearReceiverGeneration(self):
+        """
+        Mark receiverGeneration, which is an optional field, as non-existent.
+        """
+        self._receiverGenerationExists = False
+
+    # ===> Attribute digitizerOffset, which is optional
+    _digitizerOffsetExists = False
+
+    _digitizerOffset = Frequency()
+
+    def isDigitizerOffsetExists(self):
+        """
+        The attribute digitizerOffset is optional. Return True if this attribute exists.
+        return True if and only if the digitizerOffset attribute exists.
+        """
+        return self._digitizerOffsetExists
+
+    def getDigitizerOffset(self):
+        """
+        Get digitizerOffset, which is optional.
+        return digitizerOffset as Frequency
+        raises ValueError If digitizerOffset does not exist.
+        """
+        if not self._digitizerOffsetExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + digitizerOffset
+                + " attribute in table Feed does not exist!"
+            )
+
+        # make sure it is a copy of Frequency
+        return Frequency(self._digitizerOffset)
+
+    def setDigitizerOffset(self, digitizerOffset):
+        """
+        Set digitizerOffset with the specified Frequency value.
+        digitizerOffset The Frequency value to which digitizerOffset is to be set.
+        The value of digitizerOffset can be anything allowed by the Frequency constructor.
+
+        """
+
+        self._digitizerOffset = Frequency(digitizerOffset)
+
+        self._digitizerOffsetExists = True
+
+    def clearDigitizerOffset(self):
+        """
+        Mark digitizerOffset, which is an optional field, as non-existent.
+        """
+        self._digitizerOffsetExists = False
 
     # Extrinsic Table Attributes
 

@@ -89,7 +89,7 @@ class DelayModelTable:
 
 
 
-        spectralWindowId (Tag): refers to a unique row in  SpectraWindowTable. key.
+        spectralWindowId (Tag): Refers to a unique row in the SpectralWindow Table. key.
 
 
 
@@ -101,62 +101,68 @@ class DelayModelTable:
 
         numPoly (int): the number of coefficients of the polynomials.
 
-        phaseDelay (float [] ): Array(numPoly) the phase delay polynomial (rad).
+        phaseDelay (float [] ): Array(numPoly) phase delay polynomial (rad).
 
-        phaseDelayRate (float [] ): Array(numPoly) Phase delay rate polynomial (rad/s).
+        phaseDelayRate (float [] ): Array(numPoly) phase delay rate polynomial.
 
-        groupDelay (float [] ): Array(numPoly) Group delay polynomial (s).
+        groupDelay (float [] ): Array(numPoly) group delay polynomial (s).
 
-        groupDelayRate (float [] ): Array(numPoly) Group delay rate polynomial (s/s)
+        groupDelayRate (float [] ): Array(numPoly) group delay rate polynomial (s/s).
 
-        fieldId (Tag):
+        fieldId (Tag): the associated field ID.
 
 
 
 
         timeOrigin (ArrayTime): value used as the origin for the evaluation of the polynomials. Optional.
 
-        atmosphericGroupDelay (float): Atmosphere group delay. Optional.
+        atmosphericGroupDelay (float): atmosphere group delay. Optional.
 
-        atmosphericGroupDelayRate (float): Atmosphere group delay rate. Optional.
+        atmosphericGroupDelayRate (float): atmosphere group delay rate. Optional.
 
-        geometricDelay (float): Geometric delay. Optional.
+        geometricDelay (float): geometric delay. Optional.
 
-        geometricDelayRate (float): Geometric delay. Optional.
+        geometricDelayRate (float): geometric delay rate. Optional.
 
-        numLO (int): the number of local oscillators. Optional.
+        numLO (int): number of local oscillators. Optional.
 
-        LOOffset (Frequency [] ): Array(numLO) Local oscillator offset. Optional.
+        LOOffset (Frequency [] ): Array(numLO) local oscillator offset. Optional.
 
-        LOOffsetRate (Frequency [] ): Array(numLO) Local oscillator offset rate. Optional.
+        LOOffsetRate (Frequency [] ): Array(numLO) local oscillator offset rate. Optional.
 
-        dispersiveDelay (float): Dispersive delay. Optional.
+        dispersiveDelay (float): dispersive delay. Optional.
 
-        dispersiveDelayRate (float): Dispersive delay rate. Optional.
+        dispersiveDelayRate (float): dispersive delay rate. Optional.
 
-        atmosphericDryDelay (float): the dry atmospheric delay component. Optional.
+        atmosphericDryDelay (float): dry atmospheric delay component. Optional.
 
-        atmosphericWetDelay (float): the wet atmospheric delay. Optional.
+        atmosphericWetDelay (float): wet atmospheric delay. Optional.
 
-        padDelay (float): Pad delay. Optional.
+        padDelay (float): pad delay. Optional.
 
-        antennaDelay (float): Antenna delay. Optional.
+        antennaDelay (float): antenna delay. Optional.
 
-        numReceptor (int):  Optional.
+        numReceptor (int): number of receptors. Optional.
 
-        polarizationType (PolarizationType [] ): Array(numReceptor) describes the polarizations of the receptors (one value per receptor). Optional.
+        polarizationType (PolarizationType [] ): Array(numReceptor) polarization types(one value per receptor). Optional.
 
-        electronicDelay (float [] ): Array(numReceptor) the electronic delay. Optional.
+        electronicDelay (float [] ): Array(numReceptor) electronic delay. Optional.
 
-        electronicDelayRate (float [] ): Array(numReceptor) the electronic delay rate. Optional.
+        electronicDelayRate (float [] ): Array(numReceptor) electronic delay rate. Optional.
 
-        receiverDelay (float [] ): Array(numReceptor) the receiver delay. Optional.
+        receiverDelay (float [] ): Array(numReceptor) receiver delay. Optional.
 
-        IFDelay (float [] ): Array(numReceptor) the intermediate frequency delay. Optional.
+        IFDelay (float [] ): Array(numReceptor) intermediate frequency delay. Optional.
 
-        LODelay (float [] ): Array(numReceptor) the local oscillator delay. Optional.
+        LODelay (float [] ): Array(numReceptor) local oscillator delay. Optional.
 
-        crossPolarizationDelay (float): the cross polarization delay. Optional.
+        crossPolarizationDelay (float): cross polarization delay. Optional.
+
+        centerOfArray (Length [] ): Array(3) center of the array. Optional.
+
+        delayModelVersion (str): delay model version. Optional.
+
+        ionosphericDelay (Interval): ionospheric delay. Optional.
 
 
     """
@@ -234,6 +240,25 @@ class DelayModelTable:
         Returns the tolerance as a  Frequency
         """
         return self._LOOffsetRateEqTolerance
+
+    # The tolerance which will be used on centerOfArray during an add operation on the table
+    _centerOfArrayEqTolerance = Length(0.0)
+
+    def setCenterOfArrayEqTolerance(self, tolerance):
+        """
+        A setter for the tolerance on centerOfArray
+        """
+        if not isinstance(tolerance, Length):
+            print("tolerance must be a  Length instance")
+
+        self._centerOfArrayEqTolerance = Length(tolerance)
+
+    def getCenterOfArrayEqTolerance(self):
+        """
+        A getter for the tolerance on centerOfArray
+        Returns the tolerance as a  Length
+        """
+        return self._centerOfArrayEqTolerance
 
     def getKeyName(self):
         """
@@ -834,6 +859,9 @@ class DelayModelTable:
         result += "<IFDelay/>\n"
         result += "<LODelay/>\n"
         result += "<crossPolarizationDelay/>\n"
+        result += "<centerOfArray/>\n"
+        result += "<delayModelVersion/>\n"
+        result += "<ionosphericDelay/>\n"
         result += "</Attributes>\n"
         result += "</DelayModelTable>\n"
 
@@ -1042,6 +1070,12 @@ class DelayModelTable:
             attributesSeq.append("LODelay")
 
             attributesSeq.append("crossPolarizationDelay")
+
+            attributesSeq.append("centerOfArray")
+
+            attributesSeq.append("delayModelVersion")
+
+            attributesSeq.append("ionosphericDelay")
 
             versionStr = "2"
 

@@ -111,6 +111,10 @@ class CorrelatorModeTable:
 
 
 
+
+        correlatorSoftwareVersion (str): correlator software version. Optional.
+
+
     """
 
     # This is True if the file is considered present in memory (nothing to be loaded).
@@ -637,6 +641,7 @@ class CorrelatorModeTable:
         result += "<filterMode/>\n"
         result += "<correlatorName/>\n"
 
+        result += "<correlatorSoftwareVersion/>\n"
         result += "</Attributes>\n"
         result += "</CorrelatorModeTable>\n"
 
@@ -805,6 +810,8 @@ class CorrelatorModeTable:
             attributesSeq.append("filterMode")
 
             attributesSeq.append("correlatorName")
+
+            attributesSeq.append("correlatorSoftwareVersion")
 
             versionStr = "2"
 

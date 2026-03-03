@@ -28,72 +28,66 @@
 # //  ---------------------------------------------------------  //
 # /////////////////////////////////////////////////////////////////
 #
-# File CorrelationBit.py
+# File PostProcessingIntent.py
 
 # to keep track of the attributes added to this class for each value of this enumeration
 
-_correlationBitDict = {}
+_postProcessingIntentDict = {}
 
 # the possible enumerations
 
-_BITS_2x2 = 0  # two bit correlation
+_CONTINUUM = 0  # continuum
 
-_BITS_3x3 = 1  #  three bit correlation
+_CUBE = 1  # cube
 
-_BITS_4x4 = 2  # four bit correlation
-
-_BITS_6x6 = 3  # six bit correlation
-
-_BITS_32x32 = 4  # thirty-two bit correlation
+_CUBE_HANNING = 2  # cube hanning
 
 
 # their names in a dictionary
-_correlationBitNames = {}
+_postProcessingIntentNames = {}
 
-_correlationBitNames[_BITS_2x2] = "BITS_2x2"
+_postProcessingIntentNames[_CONTINUUM] = "CONTINUUM"
 
-_correlationBitNames[_BITS_3x3] = "BITS_3x3"
+_postProcessingIntentNames[_CUBE] = "CUBE"
 
-_correlationBitNames[_BITS_4x4] = "BITS_4x4"
-
-_correlationBitNames[_BITS_6x6] = "BITS_6x6"
-
-_correlationBitNames[_BITS_32x32] = "BITS_32x32"
+_postProcessingIntentNames[_CUBE_HANNING] = "CUBE_HANNING"
 
 
-class CorrelationBit:
+class PostProcessingIntent:
     """
-    A class for the CorrelationBit enumeration.
+    A class for the PostProcessingIntent enumeration.
     """
 
-    # The value of this CorrelationBit, one of the possible enumerations.
+    # The value of this PostProcessingIntent, one of the possible enumerations.
     _value = None
 
     # its name
     _name = None
 
-    def __init__(self, correlationBit):
-        # construct a CorrelationBit from an integer, a string, or another CorrelationBit
-        # if correlationBit is a string, convert it to an instance of this class using literal
-        if isinstance(correlationBit, CorrelationBit):
+    def __init__(self, postProcessingIntent):
+        # construct a PostProcessingIntent from an integer, a string, or another PostProcessingIntent
+        # if postProcessingIntent is a string, convert it to an instance of this class using literal
+        if isinstance(postProcessingIntent, PostProcessingIntent):
             # copy constructor
-            self._value = correlationBit.getValue()
-            self._name = correlationBit.getName()
-        elif isinstance(correlationBit, str):
+            self._value = postProcessingIntent.getValue()
+            self._name = postProcessingIntent.getName()
+        elif isinstance(postProcessingIntent, str):
             # convert it to an instance of this class using literal
-            thisEnum = CorrelationBit.literal(correlationBit)
+            thisEnum = PostProcessingIntent.literal(postProcessingIntent)
             self._value = thisEnum.getValue()
             self._name = thisEnum.getName()
         else:
             # it must be in the names dictionary
-            if correlationBit not in _correlationBitNames:
-                raise ValueError("unrecognized CorrelationBit")
-            self._value = correlationBit
-            self._name = _correlationBitNames[correlationBit]
-            if self._name not in _correlationBitDict:
-                # add this CorrelationBit as an attribute to this class using its name
-                setattr(CorrelationBit, self._name, self)
-                _correlationBitDict[self._name] = getattr(CorrelationBit, self._name)
+            if postProcessingIntent not in _postProcessingIntentNames:
+                raise ValueError("unrecognized PostProcessingIntent")
+            self._value = postProcessingIntent
+            self._name = _postProcessingIntentNames[postProcessingIntent]
+            if self._name not in _postProcessingIntentDict:
+                # add this PostProcessingIntent as an attribute to this class using its name
+                setattr(PostProcessingIntent, self._name, self)
+                _postProcessingIntentDict[self._name] = getattr(
+                    PostProcessingIntent, self._name
+                )
 
     def getValue(self):
         """
@@ -115,9 +109,9 @@ class CorrelationBit:
 
     def __eq__(self, other):
         """
-        Returns True if other is a CorrelationBit and its value is the same as this one.
+        Returns True if other is a PostProcessingIntent and its value is the same as this one.
         """
-        return isinstance(other, CorrelationBit) and (
+        return isinstance(other, PostProcessingIntent) and (
             other.getValue() == self.getValue()
         )
 
@@ -145,55 +139,51 @@ class CorrelationBit:
     @staticmethod
     def size():
         """
-        the number of known enumerators in CorrelationBit
+        the number of known enumerators in PostProcessingIntent
         """
-        return len(_correlationBitNames)
+        return len(_postProcessingIntentNames)
 
     @staticmethod
-    def name(correlationBit):
+    def name(postProcessingIntent):
         """
-        Returns the string form of correlationBit
+        Returns the string form of postProcessingIntent
         """
-        return str(correlationBit)
+        return str(postProcessingIntent)
 
     @staticmethod
     def names():
         """
-        Return the list of all known CorrelationBit enumeration names
+        Return the list of all known PostProcessingIntent enumeration names
         """
-        return list(_correlationBitNames.values())
+        return list(_postProcessingIntentNames.values())
 
     @staticmethod
-    def newCorrelationBit(name):
+    def newPostProcessingIntent(name):
         """
         Equivalent to the literal method
         """
-        return CorrelationBit.literal(name)
+        return PostProcessingIntent.literal(name)
 
     @staticmethod
     def literal(name):
         """
-        Return the CorrelationBit enumerator value given a string
+        Return the PostProcessingIntent enumerator value given a string
         """
         # it must be available as an attribute
-        if not hasattr(CorrelationBit, name):
-            raise ValueError("Unrecognized CorrelationBit name")
-        return CorrelationBit(getattr(CorrelationBit, name).getValue())
+        if not hasattr(PostProcessingIntent, name):
+            raise ValueError("Unrecognized PostProcessingIntent name")
+        return PostProcessingIntent(getattr(PostProcessingIntent, name).getValue())
 
     @staticmethod
     def from_int(i):
         """
-        Return a CorrelationBit from an integration matching an enumeration.
+        Return a PostProcessingIntent from an integration matching an enumeration.
         """
-        return CorrelationBit(i)
+        return PostProcessingIntent(i)
 
 
-BITS_2x2 = CorrelationBit(_BITS_2x2)
+CONTINUUM = PostProcessingIntent(_CONTINUUM)
 
-BITS_3x3 = CorrelationBit(_BITS_3x3)
+CUBE = PostProcessingIntent(_CUBE)
 
-BITS_4x4 = CorrelationBit(_BITS_4x4)
-
-BITS_6x6 = CorrelationBit(_BITS_6x6)
-
-BITS_32x32 = CorrelationBit(_BITS_32x32)
+CUBE_HANNING = PostProcessingIntent(_CUBE_HANNING)
