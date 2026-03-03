@@ -1068,8 +1068,7 @@ class PointingRow:
         if not self._overTheTopExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + overTheTop
-                + " attribute in table Pointing does not exist!"
+                + "'overTheTop' attribute in table Pointing does not exist!"
             )
 
         return self._overTheTop
@@ -1113,8 +1112,7 @@ class PointingRow:
         if not self._sourceOffsetExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sourceOffset
-                + " attribute in table Pointing does not exist!"
+                + "'sourceOffset' attribute in table Pointing does not exist!"
             )
 
         return copy.deepcopy(self._sourceOffset)
@@ -1179,8 +1177,7 @@ class PointingRow:
         if not self._sourceOffsetReferenceCodeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sourceOffsetReferenceCode
-                + " attribute in table Pointing does not exist!"
+                + "'sourceOffsetReferenceCode' attribute in table Pointing does not exist!"
             )
 
         return self._sourceOffsetReferenceCode
@@ -1226,8 +1223,7 @@ class PointingRow:
         if not self._sourceOffsetEquinoxExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sourceOffsetEquinox
-                + " attribute in table Pointing does not exist!"
+                + "'sourceOffsetEquinox' attribute in table Pointing does not exist!"
             )
 
         # make sure it is a copy of ArrayTime
@@ -1272,8 +1268,7 @@ class PointingRow:
         if not self._sampledTimeIntervalExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sampledTimeInterval
-                + " attribute in table Pointing does not exist!"
+                + "'sampledTimeInterval' attribute in table Pointing does not exist!"
             )
 
         return copy.deepcopy(self._sampledTimeInterval)
@@ -1338,8 +1333,7 @@ class PointingRow:
         if not self._atmosphericCorrectionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + atmosphericCorrection
-                + " attribute in table Pointing does not exist!"
+                + "'atmosphericCorrection' attribute in table Pointing does not exist!"
             )
 
         return copy.deepcopy(self._atmosphericCorrection)

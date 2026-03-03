@@ -920,8 +920,7 @@ class SysPowerRow:
         if not self._switchedPowerDifferenceExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + switchedPowerDifference
-                + " attribute in table SysPower does not exist!"
+                + "'switchedPowerDifference' attribute in table SysPower does not exist!"
             )
 
         return copy.deepcopy(self._switchedPowerDifference)
@@ -986,8 +985,7 @@ class SysPowerRow:
         if not self._switchedPowerSumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + switchedPowerSum
-                + " attribute in table SysPower does not exist!"
+                + "'switchedPowerSum' attribute in table SysPower does not exist!"
             )
 
         return copy.deepcopy(self._switchedPowerSum)
@@ -1052,8 +1050,7 @@ class SysPowerRow:
         if not self._requantizerGainExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + requantizerGain
-                + " attribute in table SysPower does not exist!"
+                + "'requantizerGain' attribute in table SysPower does not exist!"
             )
 
         return copy.deepcopy(self._requantizerGain)
@@ -1118,8 +1115,7 @@ class SysPowerRow:
         if not self._numChannelsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numChannels
-                + " attribute in table SysPower does not exist!"
+                + "'numChannels' attribute in table SysPower does not exist!"
             )
 
         return self._numChannels
@@ -1163,8 +1159,7 @@ class SysPowerRow:
         if not self._numPolarizationTypeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numPolarizationType
-                + " attribute in table SysPower does not exist!"
+                + "'numPolarizationType' attribute in table SysPower does not exist!"
             )
 
         return self._numPolarizationType
@@ -1208,8 +1203,7 @@ class SysPowerRow:
         if not self._chanFreqStartExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqStart
-                + " attribute in table SysPower does not exist!"
+                + "'chanFreqStart' attribute in table SysPower does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -1254,8 +1248,7 @@ class SysPowerRow:
         if not self._chanFreqStepExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqStep
-                + " attribute in table SysPower does not exist!"
+                + "'chanFreqStep' attribute in table SysPower does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -1300,8 +1293,7 @@ class SysPowerRow:
         if not self._switchedPowerDifferenceSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + switchedPowerDifferenceSpectrum
-                + " attribute in table SysPower does not exist!"
+                + "'switchedPowerDifferenceSpectrum' attribute in table SysPower does not exist!"
             )
 
         return copy.deepcopy(self._switchedPowerDifferenceSpectrum)
@@ -1372,8 +1364,7 @@ class SysPowerRow:
         if not self._switchedPowerSumSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + switchedPowerSumSpectrum
-                + " attribute in table SysPower does not exist!"
+                + "'switchedPowerSumSpectrum' attribute in table SysPower does not exist!"
             )
 
         return copy.deepcopy(self._switchedPowerSumSpectrum)
@@ -1438,8 +1429,7 @@ class SysPowerRow:
         if not self._requantizerGainSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + requantizerGainSpectrum
-                + " attribute in table SysPower does not exist!"
+                + "'requantizerGainSpectrum' attribute in table SysPower does not exist!"
             )
 
         return copy.deepcopy(self._requantizerGainSpectrum)

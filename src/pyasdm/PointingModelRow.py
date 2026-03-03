@@ -705,8 +705,7 @@ class PointingModelRow:
         if not self._coeffFormulaExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + coeffFormula
-                + " attribute in table PointingModel does not exist!"
+                + "'coeffFormula' attribute in table PointingModel does not exist!"
             )
 
         return copy.deepcopy(self._coeffFormula)

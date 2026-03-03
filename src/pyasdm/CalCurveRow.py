@@ -1188,8 +1188,7 @@ class CalCurveRow:
         if not self._numBaselineExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numBaseline
-                + " attribute in table CalCurve does not exist!"
+                + "'numBaseline' attribute in table CalCurve does not exist!"
             )
 
         return self._numBaseline
@@ -1233,8 +1232,7 @@ class CalCurveRow:
         if not self._rmsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + rms
-                + " attribute in table CalCurve does not exist!"
+                + "'rms' attribute in table CalCurve does not exist!"
             )
 
         return copy.deepcopy(self._rms)

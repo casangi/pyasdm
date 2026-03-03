@@ -1800,8 +1800,7 @@ class DelayModelRow:
         if not self._timeOriginExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + timeOrigin
-                + " attribute in table DelayModel does not exist!"
+                + "'timeOrigin' attribute in table DelayModel does not exist!"
             )
 
         # make sure it is a copy of ArrayTime
@@ -1846,8 +1845,7 @@ class DelayModelRow:
         if not self._atmosphericGroupDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + atmosphericGroupDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'atmosphericGroupDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._atmosphericGroupDelay
@@ -1891,8 +1889,7 @@ class DelayModelRow:
         if not self._atmosphericGroupDelayRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + atmosphericGroupDelayRate
-                + " attribute in table DelayModel does not exist!"
+                + "'atmosphericGroupDelayRate' attribute in table DelayModel does not exist!"
             )
 
         return self._atmosphericGroupDelayRate
@@ -1936,8 +1933,7 @@ class DelayModelRow:
         if not self._geometricDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + geometricDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'geometricDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._geometricDelay
@@ -1981,8 +1977,7 @@ class DelayModelRow:
         if not self._geometricDelayRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + geometricDelayRate
-                + " attribute in table DelayModel does not exist!"
+                + "'geometricDelayRate' attribute in table DelayModel does not exist!"
             )
 
         return self._geometricDelayRate
@@ -2026,8 +2021,7 @@ class DelayModelRow:
         if not self._numLOExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numLO
-                + " attribute in table DelayModel does not exist!"
+                + "'numLO' attribute in table DelayModel does not exist!"
             )
 
         return self._numLO
@@ -2071,8 +2065,7 @@ class DelayModelRow:
         if not self._LOOffsetExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + LOOffset
-                + " attribute in table DelayModel does not exist!"
+                + "'LOOffset' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._LOOffset)
@@ -2137,8 +2130,7 @@ class DelayModelRow:
         if not self._LOOffsetRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + LOOffsetRate
-                + " attribute in table DelayModel does not exist!"
+                + "'LOOffsetRate' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._LOOffsetRate)
@@ -2203,8 +2195,7 @@ class DelayModelRow:
         if not self._dispersiveDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dispersiveDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'dispersiveDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._dispersiveDelay
@@ -2248,8 +2239,7 @@ class DelayModelRow:
         if not self._dispersiveDelayRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dispersiveDelayRate
-                + " attribute in table DelayModel does not exist!"
+                + "'dispersiveDelayRate' attribute in table DelayModel does not exist!"
             )
 
         return self._dispersiveDelayRate
@@ -2293,8 +2283,7 @@ class DelayModelRow:
         if not self._atmosphericDryDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + atmosphericDryDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'atmosphericDryDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._atmosphericDryDelay
@@ -2338,8 +2327,7 @@ class DelayModelRow:
         if not self._atmosphericWetDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + atmosphericWetDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'atmosphericWetDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._atmosphericWetDelay
@@ -2383,8 +2371,7 @@ class DelayModelRow:
         if not self._padDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + padDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'padDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._padDelay
@@ -2428,8 +2415,7 @@ class DelayModelRow:
         if not self._antennaDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + antennaDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'antennaDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._antennaDelay
@@ -2473,8 +2459,7 @@ class DelayModelRow:
         if not self._numReceptorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numReceptor
-                + " attribute in table DelayModel does not exist!"
+                + "'numReceptor' attribute in table DelayModel does not exist!"
             )
 
         return self._numReceptor
@@ -2518,8 +2503,7 @@ class DelayModelRow:
         if not self._polarizationTypeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + polarizationType
-                + " attribute in table DelayModel does not exist!"
+                + "'polarizationType' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._polarizationType)
@@ -2584,8 +2568,7 @@ class DelayModelRow:
         if not self._electronicDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + electronicDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'electronicDelay' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._electronicDelay)
@@ -2650,8 +2633,7 @@ class DelayModelRow:
         if not self._electronicDelayRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + electronicDelayRate
-                + " attribute in table DelayModel does not exist!"
+                + "'electronicDelayRate' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._electronicDelayRate)
@@ -2716,8 +2698,7 @@ class DelayModelRow:
         if not self._receiverDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + receiverDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'receiverDelay' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._receiverDelay)
@@ -2782,8 +2763,7 @@ class DelayModelRow:
         if not self._IFDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + IFDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'IFDelay' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._IFDelay)
@@ -2848,8 +2828,7 @@ class DelayModelRow:
         if not self._LODelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + LODelay
-                + " attribute in table DelayModel does not exist!"
+                + "'LODelay' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._LODelay)
@@ -2914,8 +2893,7 @@ class DelayModelRow:
         if not self._crossPolarizationDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + crossPolarizationDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'crossPolarizationDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._crossPolarizationDelay
@@ -2959,8 +2937,7 @@ class DelayModelRow:
         if not self._centerOfArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + centerOfArray
-                + " attribute in table DelayModel does not exist!"
+                + "'centerOfArray' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._centerOfArray)
@@ -3025,8 +3002,7 @@ class DelayModelRow:
         if not self._delayModelVersionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + delayModelVersion
-                + " attribute in table DelayModel does not exist!"
+                + "'delayModelVersion' attribute in table DelayModel does not exist!"
             )
 
         return self._delayModelVersion
@@ -3070,8 +3046,7 @@ class DelayModelRow:
         if not self._ionosphericDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + ionosphericDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'ionosphericDelay' attribute in table DelayModel does not exist!"
             )
 
         # make sure it is a copy of Interval

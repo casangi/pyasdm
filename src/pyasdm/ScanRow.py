@@ -979,8 +979,7 @@ class ScanRow:
         if not self._calibrationFunctionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + calibrationFunction
-                + " attribute in table Scan does not exist!"
+                + "'calibrationFunction' attribute in table Scan does not exist!"
             )
 
         return copy.deepcopy(self._calibrationFunction)
@@ -1045,8 +1044,7 @@ class ScanRow:
         if not self._calibrationSetExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + calibrationSet
-                + " attribute in table Scan does not exist!"
+                + "'calibrationSet' attribute in table Scan does not exist!"
             )
 
         return copy.deepcopy(self._calibrationSet)
@@ -1111,8 +1109,7 @@ class ScanRow:
         if not self._calPatternExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + calPattern
-                + " attribute in table Scan does not exist!"
+                + "'calPattern' attribute in table Scan does not exist!"
             )
 
         return copy.deepcopy(self._calPattern)
@@ -1177,8 +1174,7 @@ class ScanRow:
         if not self._numFieldExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numField
-                + " attribute in table Scan does not exist!"
+                + "'numField' attribute in table Scan does not exist!"
             )
 
         return self._numField
@@ -1222,8 +1218,7 @@ class ScanRow:
         if not self._fieldNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + fieldName
-                + " attribute in table Scan does not exist!"
+                + "'fieldName' attribute in table Scan does not exist!"
             )
 
         return copy.deepcopy(self._fieldName)
@@ -1288,8 +1283,7 @@ class ScanRow:
         if not self._sourceNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sourceName
-                + " attribute in table Scan does not exist!"
+                + "'sourceName' attribute in table Scan does not exist!"
             )
 
         return self._sourceName

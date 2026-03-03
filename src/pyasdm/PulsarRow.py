@@ -740,8 +740,7 @@ class PulsarRow:
         if not self._numPolyExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numPoly
-                + " attribute in table Pulsar does not exist!"
+                + "'numPoly' attribute in table Pulsar does not exist!"
             )
 
         return self._numPoly
@@ -785,8 +784,7 @@ class PulsarRow:
         if not self._phasePolyExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + phasePoly
-                + " attribute in table Pulsar does not exist!"
+                + "'phasePoly' attribute in table Pulsar does not exist!"
             )
 
         return copy.deepcopy(self._phasePoly)
@@ -851,8 +849,7 @@ class PulsarRow:
         if not self._timeSpanExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + timeSpan
-                + " attribute in table Pulsar does not exist!"
+                + "'timeSpan' attribute in table Pulsar does not exist!"
             )
 
         # make sure it is a copy of Interval
@@ -897,8 +894,7 @@ class PulsarRow:
         if not self._startPhaseBinExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + startPhaseBin
-                + " attribute in table Pulsar does not exist!"
+                + "'startPhaseBin' attribute in table Pulsar does not exist!"
             )
 
         return copy.deepcopy(self._startPhaseBin)
@@ -963,8 +959,7 @@ class PulsarRow:
         if not self._endPhaseBinExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + endPhaseBin
-                + " attribute in table Pulsar does not exist!"
+                + "'endPhaseBin' attribute in table Pulsar does not exist!"
             )
 
         return copy.deepcopy(self._endPhaseBin)
@@ -1029,8 +1024,7 @@ class PulsarRow:
         if not self._dispersionMeasureExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dispersionMeasure
-                + " attribute in table Pulsar does not exist!"
+                + "'dispersionMeasure' attribute in table Pulsar does not exist!"
             )
 
         return self._dispersionMeasure
@@ -1074,8 +1068,7 @@ class PulsarRow:
         if not self._refFrequencyExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + refFrequency
-                + " attribute in table Pulsar does not exist!"
+                + "'refFrequency' attribute in table Pulsar does not exist!"
             )
 
         # make sure it is a copy of Frequency

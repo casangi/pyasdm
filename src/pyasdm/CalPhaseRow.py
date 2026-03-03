@@ -1786,8 +1786,7 @@ class CalPhaseRow:
         if not self._correctionValidityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + correctionValidity
-                + " attribute in table CalPhase does not exist!"
+                + "'correctionValidity' attribute in table CalPhase does not exist!"
             )
 
         return copy.deepcopy(self._correctionValidity)
@@ -1852,8 +1851,7 @@ class CalPhaseRow:
         if not self._numAntennaExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numAntenna
-                + " attribute in table CalPhase does not exist!"
+                + "'numAntenna' attribute in table CalPhase does not exist!"
             )
 
         return self._numAntenna
@@ -1897,8 +1895,7 @@ class CalPhaseRow:
         if not self._singleAntennaNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + singleAntennaName
-                + " attribute in table CalPhase does not exist!"
+                + "'singleAntennaName' attribute in table CalPhase does not exist!"
             )
 
         return copy.deepcopy(self._singleAntennaName)
@@ -1963,8 +1960,7 @@ class CalPhaseRow:
         if not self._refAntennaNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + refAntennaName
-                + " attribute in table CalPhase does not exist!"
+                + "'refAntennaName' attribute in table CalPhase does not exist!"
             )
 
         return self._refAntennaName
@@ -2008,8 +2004,7 @@ class CalPhaseRow:
         if not self._phaseAntExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + phaseAnt
-                + " attribute in table CalPhase does not exist!"
+                + "'phaseAnt' attribute in table CalPhase does not exist!"
             )
 
         return copy.deepcopy(self._phaseAnt)
@@ -2074,8 +2069,7 @@ class CalPhaseRow:
         if not self._phaseAntRMSExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + phaseAntRMS
-                + " attribute in table CalPhase does not exist!"
+                + "'phaseAntRMS' attribute in table CalPhase does not exist!"
             )
 
         return copy.deepcopy(self._phaseAntRMS)

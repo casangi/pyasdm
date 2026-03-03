@@ -850,8 +850,7 @@ class EphemerisRow:
         if not self._numPolyRadVelExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numPolyRadVel
-                + " attribute in table Ephemeris does not exist!"
+                + "'numPolyRadVel' attribute in table Ephemeris does not exist!"
             )
 
         return self._numPolyRadVel
@@ -895,8 +894,7 @@ class EphemerisRow:
         if not self._radVelExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + radVel
-                + " attribute in table Ephemeris does not exist!"
+                + "'radVel' attribute in table Ephemeris does not exist!"
             )
 
         return copy.deepcopy(self._radVel)

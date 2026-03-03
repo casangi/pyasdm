@@ -1251,8 +1251,7 @@ class CalPositionRow:
         if not self._delayRmsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + delayRms
-                + " attribute in table CalPosition does not exist!"
+                + "'delayRms' attribute in table CalPosition does not exist!"
             )
 
         return self._delayRms
@@ -1296,8 +1295,7 @@ class CalPositionRow:
         if not self._phaseRmsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + phaseRms
-                + " attribute in table CalPosition does not exist!"
+                + "'phaseRms' attribute in table CalPosition does not exist!"
             )
 
         # make sure it is a copy of Angle

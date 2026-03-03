@@ -942,8 +942,7 @@ class DelayModelVariableParametersRow:
         if not self._nutationInLongitudeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + nutationInLongitude
-                + " attribute in table DelayModelVariableParameters does not exist!"
+                + "'nutationInLongitude' attribute in table DelayModelVariableParameters does not exist!"
             )
 
         # make sure it is a copy of Angle
@@ -988,8 +987,7 @@ class DelayModelVariableParametersRow:
         if not self._nutationInLongitudeRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + nutationInLongitudeRate
-                + " attribute in table DelayModelVariableParameters does not exist!"
+                + "'nutationInLongitudeRate' attribute in table DelayModelVariableParameters does not exist!"
             )
 
         # make sure it is a copy of AngularRate
@@ -1034,8 +1032,7 @@ class DelayModelVariableParametersRow:
         if not self._nutationInObliquityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + nutationInObliquity
-                + " attribute in table DelayModelVariableParameters does not exist!"
+                + "'nutationInObliquity' attribute in table DelayModelVariableParameters does not exist!"
             )
 
         # make sure it is a copy of Angle
@@ -1080,8 +1077,7 @@ class DelayModelVariableParametersRow:
         if not self._nutationInObliquityRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + nutationInObliquityRate
-                + " attribute in table DelayModelVariableParameters does not exist!"
+                + "'nutationInObliquityRate' attribute in table DelayModelVariableParameters does not exist!"
             )
 
         # make sure it is a copy of AngularRate
@@ -1126,8 +1122,7 @@ class DelayModelVariableParametersRow:
         if not self._delayModelVersionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + delayModelVersion
-                + " attribute in table DelayModelVariableParameters does not exist!"
+                + "'delayModelVersion' attribute in table DelayModelVariableParameters does not exist!"
             )
 
         return self._delayModelVersion

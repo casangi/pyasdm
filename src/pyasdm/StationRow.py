@@ -451,8 +451,7 @@ class StationRow:
         if not self._timeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + time
-                + " attribute in table Station does not exist!"
+                + "'time' attribute in table Station does not exist!"
             )
 
         # make sure it is a copy of ArrayTime

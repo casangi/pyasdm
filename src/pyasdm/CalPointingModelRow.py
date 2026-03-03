@@ -1233,8 +1233,7 @@ class CalPointingModelRow:
         if not self._numObsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numObs
-                + " attribute in table CalPointingModel does not exist!"
+                + "'numObs' attribute in table CalPointingModel does not exist!"
             )
 
         return self._numObs
@@ -1278,8 +1277,7 @@ class CalPointingModelRow:
         if not self._coeffFormulaExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + coeffFormula
-                + " attribute in table CalPointingModel does not exist!"
+                + "'coeffFormula' attribute in table CalPointingModel does not exist!"
             )
 
         return copy.deepcopy(self._coeffFormula)
