@@ -772,10 +772,22 @@ class BDFReader:
 
         self._setPosition(curpos)
 
-    def _requireSDMDataSubsetMIMEPart(self, loadOnlyComponents: set["str"] | None):
-        self._integrationStartsAt = self.position()
+    def _parseMIMEHeadersForSubset(self):
+        """
+        Parse the initial MIME headers for an SDM Data Subset integration.
 
-        # CAS-8151, apparently there are cases where there are two occurrences of the MIME bouneary instead of only one
+        Handles:
+        - Duplicate boundary markers (CAS-8151)
+        - CONTENT-TYPE header to extract boundary_2
+        - CONTENT-DESCRIPTION header
+        - Position movement to boundary_2 and empty line
+
+        Sets self._boundary_2 and advances file position.
+        Returns nothing.
+
+        This method is only for internal use.
+        """
+        # CAS-8151, apparently there are cases where there are two occurrences of the MIME boundary instead of only one
         self._skipAsLongAsLineStartsWith(b"--" + self._boundary_1)
         # CONTENT-TYPE
         name, value = self._requireHeaderField("CONTENT-TYPE")
@@ -790,6 +802,21 @@ class BDFReader:
         # and skip until the empty line is reached, or 10 lines
         self._skipUntilEmptyLine(10)
 
+    def _parseSDMDataSubsetHeaderXML(self):
+        """
+        Parse the SDM Data Subset header XML and extract project path information.
+
+        Returns a dictionary with keys:
+        - projectPath: the project path string
+        - execBlockNum: execution block number
+        - scanNum: scan number
+        - subscanNum: subscan number
+        - intNum: integration number (0 if not present)
+        - subIntNum: sub-integration number (0 if not present)
+        - sdmDataSubsetHeaderDOM: the parsed XML DOM object
+
+        This method is only for internal use.
+        """
         # read the SDM Data Subset header, assume it can't be more than 100 lines
         sdmDataSubsetHeader = self._accumulateUntilBoundary(self._boundary_2, 100)
 
@@ -851,8 +878,27 @@ class BDFReader:
                 + "'"
             )
 
-        # TBD : SDMDataSubset should be a class, reset it here
+        return {
+            "projectPath": projectPath,
+            "execBlockNum": execBlockNum,
+            "scanNum": scanNum,
+            "subscanNum": subscanNum,
+            "intNum": intNum,
+            "subIntNum": subIntNum,
+            "sdmDataSubsetHeaderDOM": sdmDataSubsetHeaderDOM,
+        }
 
+    def _extractAbortedObservationInfo(self, sdmDataSubsetHeaderDOM):
+        """
+        Extract aborted observation information from the XML DOM.
+
+        Returns a dictionary with keys:
+        - aborted: boolean indicating if the observation was aborted
+        - stopTime: timestamp when observation stopped (or None if not aborted)
+        - abortReason: reason for abort (or None if not aborted)
+
+        This method is only for internal use.
+        """
         aborted = False
         stopTime = None
         abortReason = None
@@ -863,14 +909,14 @@ class BDFReader:
             # aborted subscan
             aborted = True
             # it must have stopTime and reason
-            abortedNode = abotedObservationElements[0]
-            stopTime = abortedNode.getElementsByTagName("stopTime")
-            if stopTime is None or len(stopTime) == 0:
+            abortedNode = abortedObservationElements[0]
+            stopTimeElements = abortedNode.getElementsByTagName("stopTime")
+            if stopTimeElements is None or len(stopTimeElements) == 0:
                 raise BDFReaderException(
                     "expected 'stopTime' element not found in aborted subscan at integrationIndex "
                     + str(self._integrationIndex)
                 )
-            stopTime = int(stopTime[0].childNodes[0].nodeValue)
+            stopTime = int(stopTimeElements[0].childNodes[0].nodeValue)
             reason = abortedNode.getElementsByTagName("reason")
             if reason is None or len(reason) == 0:
                 raise BDFReaderException(
@@ -879,6 +925,22 @@ class BDFReader:
                 )
             abortReason = reason[0].childNodes[0].nodeValue
 
+        return {
+            "aborted": aborted,
+            "stopTime": stopTime,
+            "abortReason": abortReason,
+        }
+
+    def _extractSchedulePeriodTimeInfo(self, sdmDataSubsetHeaderDOM):
+        """
+        Extract schedule period timing information from the XML DOM.
+
+        Returns a dictionary with keys:
+        - integrationMidpoint: integration midpoint in nanoseconds
+        - integrationInterval: integration interval in nanoseconds
+
+        This method is only for internal use.
+        """
         schedulePeriodTime = sdmDataSubsetHeaderDOM.getElementsByTagName(
             "schedulePeriodTime"
         )
@@ -897,9 +959,26 @@ class BDFReader:
             .nodeValue
         )
 
-        # if it's aborted, this can probably be skipped, but it should also be harmless to not skip it just in case there's more there to be skipped over
-        # no aborted scans available yet to test this on
+        return {
+            "integrationMidpoint": integrationMidpoint,
+            "integrationInterval": integrationInterval,
+        }
 
+    def _initializeBinaryComponentDescriptors(self):
+        """
+        Initialize binary component descriptors with type and numpy dtype information.
+
+        Handles byte order adjustments when necessary.
+
+        Returns a dictionary mapping component names to descriptor dictionaries containing:
+        - present: whether the component is present
+        - startsAt: file position where component starts
+        - arr: numpy array (initially None)
+        - type: component data type
+        - np_type: numpy dtype
+
+        This method is only for internal use.
+        """
         binaryComponents = {
             "actualTimes": {"type": "INT64_TYPE", "np_type": np.dtype(np.int64)},
             "actualDurations": {"type": "INT64_TYPE", "np_type": np.dtype(np.int64)},
@@ -918,6 +997,59 @@ class BDFReader:
                 "np_type": binaryComponents[component]["np_type"],
             }
 
+        # adjust the numpy data types when the byte order is not native
+        if not self._bdfHeaderData.getByteOrder().isNative():
+            np_byteOrder = "<"
+            if self._bdfHeaderData.getByteOrder().getByteOrder() == "big":
+                np_byteOrder = ">"
+
+            binaryComponentsDesc["actualTimes"]["np_type"] = binaryComponentsDesc[
+                "actualTimes"
+            ]["np_type"].newbyteorder(np_byteOrder)
+            binaryComponentsDesc["actualDurations"]["np_type"] = binaryComponentsDesc[
+                "actualDurations"
+            ]["np_type"].newbyteorder(np_byteOrder)
+            binaryComponentsDesc["autoData"]["np_type"] = binaryComponentsDesc[
+                "autoData"
+            ]["np_type"].newbyteorder(np_byteOrder)
+            binaryComponentsDesc["flags"]["np_type"] = binaryComponentsDesc["flags"][
+                "np_type"
+            ].newbyteorder(np_byteOrder)
+            binaryComponentsDesc["zeroLags"]["np_type"] = binaryComponentsDesc[
+                "zeroLags"
+            ]["np_type"].newbyteorder(np_byteOrder)
+
+        return binaryComponentsDesc
+
+    def _readBinaryParts(
+        self, binaryComponentsDesc, sdmDataSubsetHeaderDOM, loadOnlyComponents
+    ):
+        """
+        Read all binary parts for the current integration.
+
+        Handles:
+        - Parsing MIME headers for each binary part
+        - Determining component type and byte size
+        - Special handling for crossData type detection
+        - Reading or skipping binary data based on loadOnlyComponents
+        - Validating boundary markers between parts
+        - Detecting end of binary parts
+
+        Parameters
+        ----------
+        binaryComponentsDesc : dict
+            Binary component descriptors to populate with data
+        sdmDataSubsetHeaderDOM : DOM element
+            XML DOM containing metadata including crossData type info
+        loadOnlyComponents : set of str or None
+            Component names to load; if None, load all
+
+        Returns
+        -------
+        None (modifies binaryComponentsDesc in place)
+
+        This method is only for internal use.
+        """
         # the actual crossDataDesc varies among these types
         npInt16 = np.dtype(np.int16)
         npInt32 = np.dtype(np.int32)
@@ -928,21 +1060,18 @@ class BDFReader:
             np_byteOrder = "<"
             if self._bdfHeaderData.getByteOrder().getByteOrder() == "big":
                 np_byteOrder = ">"
-
-            actualTimesDesc["np_type"] = actualTimesDesc["np_type"].newbyteorder(
-                np_byteOrder
-            )
-            actualDurationsDesc["np_type"] = actualDurationsDesc[
-                "np_type"
-            ].newbyteorder(np_byteOrder)
-            autoDataDesc["np_type"] = autoDataDesc["np_type"].newbyteorder(np_byteOrder)
-            flagsDesc["np_type"] = flagsDesc["np_type"].newbyteorder(np_byteOrder)
-            zeroLagsDesc["np_type"] = zeroLagsDesc["np_type"].newbyteorder(np_byteOrder)
             npInt16 = npInt16.newbyteorder(np_byteOrder)
             npInt32 = npInt32.newbyteorder(np_byteOrder)
             npFloat32 = npFloat32.newbyteorder(np_byteOrder)
 
-        dataPath = None
+        binaryComponents = {
+            "actualTimes",
+            "actualDurations",
+            "crossData",
+            "autoData",
+            "flags",
+            "zeroLags",
+        }
 
         done = False
         while not done:
@@ -1007,6 +1136,7 @@ class BDFReader:
             elif binaryPartName == b"autoData":
                 numberOfBytesPerValue = 4
             elif binaryPartName == b"crossData":
+                crossDataType = binaryComponentsDesc["crossData"]["type"]
                 if crossDataType == "INT16_TYPE":
                     numberOfBytesPerValue = 2
                     binaryComponentsDesc["crossData"]["np_type"] = npInt16
@@ -1052,8 +1182,8 @@ class BDFReader:
                     actualReadSkipped = True
             else:
                 # should never reach here ! but just in case
-                bytes = self._f.read(numberOfBytesToRead)
-                nReadBytes = len(bytes)
+                bytes_data = self._f.read(numberOfBytesToRead)
+                nReadBytes = len(bytes_data)
                 print(
                     "Unknown binary part name '(%s)' with %s bytes to read, skipping in case it's possible to continue, this should never happen!"
                     % (binaryPartName.decode("utf-8"), numberOfBytesToRead)
@@ -1066,7 +1196,7 @@ class BDFReader:
             if nReadBytes < numberOfBytesToRead:
                 raise BDFReaderException(
                     "End of file reached while reading binary attachment '"
-                    + binaryPartName.decode("utf")
+                    + binaryPartName.decode("utf-8")
                     + "'."
                 )
 
@@ -1089,8 +1219,49 @@ class BDFReader:
             # is this the end?
             done = line == b"--" + self._boundary_2.strip(b'"') + b"--"
 
-        # TBD - this struct could be assembed earlier and used more efficiently in the middle
-        # TBD - pyBDFExplorer returns sdmDataSubsetHeaderDOM here, is that useful?
+    def _assembleSubsetResult(
+        self,
+        projectPath,
+        intNum,
+        subIntNum,
+        integrationMidpoint,
+        integrationInterval,
+        aborted,
+        stopTime,
+        abortReason,
+        binaryComponentsDesc,
+    ):
+        """
+        Assemble the final result dictionary for a subset integration.
+
+        Parameters
+        ----------
+        projectPath : str
+            Project path from subset header
+        intNum : int
+            Integration number
+        subIntNum : int
+            Sub-integration number
+        integrationMidpoint : int
+            Integration midpoint in nanoseconds
+        integrationInterval : int
+            Integration interval in nanoseconds
+        aborted : bool
+            Whether observation was aborted
+        stopTime : int or None
+            Stop time if aborted
+        abortReason : str or None
+            Abort reason if aborted
+        binaryComponentsDesc : dict
+            Binary component descriptors with data
+
+        Returns
+        -------
+        dict
+            Dictionary with all subset metadata and binary components
+
+        This method is only for internal use.
+        """
         return {
             "projectPath": projectPath,
             "integrationNumber": intNum,
@@ -1107,6 +1278,69 @@ class BDFReader:
             "flags": binaryComponentsDesc["flags"],
             "zeroLags": binaryComponentsDesc["zeroLags"],
         }
+
+    def _requireSDMDataSubsetMIMEPart(self, loadOnlyComponents: set["str"] | None):
+        """
+        Read and parse a single SDM Data Subset MIME part from the BDF file.
+
+        This method orchestrates the reading of an integration's data by:
+        1. Parsing initial MIME headers
+        2. Parsing the XML header with project path and timing info
+        3. Extracting abort information if present
+        4. Extracting schedule period timing
+        5. Initializing binary component descriptors
+        6. Reading all binary parts
+        7. Assembling the result dictionary
+
+        Parameters
+        ----------
+        loadOnlyComponents : set of str or None
+            Component names to load; if None, load all components
+
+        Returns
+        -------
+        dict
+            Dictionary with keys for project path, integration numbers, timing information,
+            abort status, and binary components (actualTimes, actualDurations, autoData,
+            crossData, flags, zeroLags)
+
+        This method is only for internal use.
+        """
+        self._integrationStartsAt = self.position()
+
+        # Parse initial MIME headers and establish boundary_2
+        self._parseMIMEHeadersForSubset()
+
+        # Parse XML header and extract project path components
+        headerInfo = self._parseSDMDataSubsetHeaderXML()
+        sdmDataSubsetHeaderDOM = headerInfo["sdmDataSubsetHeaderDOM"]
+
+        # Extract abort information if present
+        abortInfo = self._extractAbortedObservationInfo(sdmDataSubsetHeaderDOM)
+
+        # Extract schedule period timing information
+        timingInfo = self._extractSchedulePeriodTimeInfo(sdmDataSubsetHeaderDOM)
+
+        # Initialize binary component descriptors with proper types and byte order
+        binaryComponentsDesc = self._initializeBinaryComponentDescriptors()
+
+        # Read all binary parts
+        self._readBinaryParts(
+            binaryComponentsDesc, sdmDataSubsetHeaderDOM, loadOnlyComponents
+        )
+
+        # Assemble and return the final result
+        return self._assembleSubsetResult(
+            projectPath=headerInfo["projectPath"],
+            intNum=headerInfo["intNum"],
+            subIntNum=headerInfo["subIntNum"],
+            integrationMidpoint=timingInfo["integrationMidpoint"],
+            integrationInterval=timingInfo["integrationInterval"],
+            aborted=abortInfo["aborted"],
+            stopTime=abortInfo["stopTime"],
+            abortReason=abortInfo["abortReason"],
+            binaryComponentsDesc=binaryComponentsDesc,
+        )
 
     def _setPosition(self, newpos):
         """

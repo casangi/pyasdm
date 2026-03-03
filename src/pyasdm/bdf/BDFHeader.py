@@ -651,15 +651,21 @@ class BDFHeader:
             axesList.append(pyasdm.enumerations.AxisName.literal(axisStr))
         self._dataStruct[binaryNode.nodeName]["axes"] = axesList
         if binaryNode.nodeName == "autoData":
-            normalizedAttrValue = self._getRequiredAttributeValue(binaryNode, "normalized")
+            normalizedAttrValue = self._getRequiredAttributeValue(
+                binaryNode, "normalized"
+            )
             # this should be either 'true' or 'false', store as a boolean value
             if normalizedAttrValue == "true":
                 self._dataStruct[binaryNode.nodeName]["normalized"] = True
             elif normalizedAttrValue == "false":
                 self._dataStruct[binaryNode.nodeName]["normalized"] = False
             else:
-                raise ValueError("unrecognized 'normalized' value for autoData, must be either 'true' or 'false', value is '" + normalizedAttrValue + "'")
-                
+                raise ValueError(
+                    "unrecognized 'normalized' value for autoData, must be either 'true' or 'false', value is '"
+                    + normalizedAttrValue
+                    + "'"
+                )
+
         elif binaryNode.nodeName == "zeroLags":
             correlatorTypeValue = self._getRequiredAttributeValue(
                 binaryNode, "correlatorType"

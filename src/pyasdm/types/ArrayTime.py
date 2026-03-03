@@ -265,8 +265,8 @@ class ArrayTime(Interval):
         E = int((B - D) / 30.6001)
         day = B - D - int(30.6001 * E) + F
 
-        month = (E-1) if (E<14) else (E-13)
-        year = (C-4716) if (month>2) else (C-4715)
+        month = (E - 1) if (E < 14) else (E - 13)
+        year = (C - 4716) if (month > 2) else (C - 4715)
 
         day = int(day)
         month = month
@@ -361,7 +361,11 @@ class ArrayTime(Interval):
             )
 
         # check for valid day
-        if (iday < 1 or iday > 31) or ((month == 4 or month == 6 or month == 9 or month == 11) and iday > 30) or (month == 2 and (iday > (29 if self.isLeapYear(year) else 28))):
+        if (
+            (iday < 1 or iday > 31)
+            or ((month == 4 or month == 6 or month == 9 or month == 11) and iday > 30)
+            or (month == 2 and (iday > (29 if self.isLeapYear(year) else 28)))
+        ):
             raise ValueError("Illegal value of day: " + year + "-" + month + "-" + day)
 
         if month <= 2:
@@ -408,7 +412,7 @@ class ArrayTime(Interval):
         A ValueError is raised if the string is not a valid
         time.
         """
-        
+
         if (
             len(t) < 19
             or t[4] != "-"
