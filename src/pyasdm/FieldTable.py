@@ -365,7 +365,7 @@ class FieldTable:
         # Autoincrement fieldId
         x.setFieldId(Tag(self.size(), TagType.Field))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

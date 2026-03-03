@@ -334,7 +334,7 @@ class SwitchCycleTable:
         # Autoincrement switchCycleId
         x.setSwitchCycleId(Tag(self.size(), TagType.SwitchCycle))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

@@ -398,7 +398,7 @@ class DelayModelFixedParametersTable:
             Tag(self.size(), TagType.DelayModelFixedParameters)
         )
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

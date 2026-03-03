@@ -573,7 +573,7 @@ class SpectralWindowTable:
         # Autoincrement spectralWindowId
         x.setSpectralWindowId(Tag(self.size(), TagType.SpectralWindow))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

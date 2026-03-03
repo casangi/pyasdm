@@ -310,7 +310,7 @@ class CalDataTable:
         # Autoincrement calDataId
         x.setCalDataId(Tag(self.size(), TagType.CalData))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

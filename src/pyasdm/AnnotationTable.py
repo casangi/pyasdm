@@ -306,7 +306,7 @@ class AnnotationTable:
         # Autoincrement annotationId
         x.setAnnotationId(Tag(self.size(), TagType.Annotation))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 
