@@ -1145,8 +1145,7 @@ class FeedRow:
         if not self._feedNumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + feedNum
-                + " attribute in table Feed does not exist!"
+                + "'feedNum' attribute in table Feed does not exist!"
             )
 
         return self._feedNum
@@ -1190,8 +1189,7 @@ class FeedRow:
         if not self._illumOffsetExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + illumOffset
-                + " attribute in table Feed does not exist!"
+                + "'illumOffset' attribute in table Feed does not exist!"
             )
 
         return copy.deepcopy(self._illumOffset)
@@ -1256,8 +1254,7 @@ class FeedRow:
         if not self._positionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + position
-                + " attribute in table Feed does not exist!"
+                + "'position' attribute in table Feed does not exist!"
             )
 
         return copy.deepcopy(self._position)
@@ -1322,8 +1319,7 @@ class FeedRow:
         if not self._skyCouplingExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + skyCoupling
-                + " attribute in table Feed does not exist!"
+                + "'skyCoupling' attribute in table Feed does not exist!"
             )
 
         return self._skyCoupling
@@ -1367,8 +1363,7 @@ class FeedRow:
         if not self._numChanExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numChan
-                + " attribute in table Feed does not exist!"
+                + "'numChan' attribute in table Feed does not exist!"
             )
 
         return self._numChan
@@ -1412,8 +1407,7 @@ class FeedRow:
         if not self._skyCouplingSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + skyCouplingSpectrum
-                + " attribute in table Feed does not exist!"
+                + "'skyCouplingSpectrum' attribute in table Feed does not exist!"
             )
 
         return copy.deepcopy(self._skyCouplingSpectrum)
@@ -1478,8 +1472,7 @@ class FeedRow:
         if not self._receiverGenerationExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + receiverGeneration
-                + " attribute in table Feed does not exist!"
+                + "'receiverGeneration' attribute in table Feed does not exist!"
             )
 
         return self._receiverGeneration
@@ -1523,8 +1516,7 @@ class FeedRow:
         if not self._digitizerOffsetExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + digitizerOffset
-                + " attribute in table Feed does not exist!"
+                + "'digitizerOffset' attribute in table Feed does not exist!"
             )
 
         # make sure it is a copy of Frequency

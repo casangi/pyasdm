@@ -1034,8 +1034,7 @@ class TotalPowerRow:
         if not self._subintegrationNumberExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + subintegrationNumber
-                + " attribute in table TotalPower does not exist!"
+                + "'subintegrationNumber' attribute in table TotalPower does not exist!"
             )
 
         return self._subintegrationNumber

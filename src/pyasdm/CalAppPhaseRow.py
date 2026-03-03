@@ -1614,8 +1614,7 @@ class CalAppPhaseRow:
         if not self._typeSupportsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + typeSupports
-                + " attribute in table CalAppPhase does not exist!"
+                + "'typeSupports' attribute in table CalAppPhase does not exist!"
             )
 
         return self._typeSupports
@@ -1659,8 +1658,7 @@ class CalAppPhaseRow:
         if not self._numSupportsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numSupports
-                + " attribute in table CalAppPhase does not exist!"
+                + "'numSupports' attribute in table CalAppPhase does not exist!"
             )
 
         return self._numSupports
@@ -1704,8 +1702,7 @@ class CalAppPhaseRow:
         if not self._phaseSupportsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + phaseSupports
-                + " attribute in table CalAppPhase does not exist!"
+                + "'phaseSupports' attribute in table CalAppPhase does not exist!"
             )
 
         return copy.deepcopy(self._phaseSupports)

@@ -1859,8 +1859,7 @@ class SourceRow:
         if not self._directionCodeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + directionCode
-                + " attribute in table Source does not exist!"
+                + "'directionCode' attribute in table Source does not exist!"
             )
 
         return self._directionCode
@@ -1904,8 +1903,7 @@ class SourceRow:
         if not self._directionEquinoxExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + directionEquinox
-                + " attribute in table Source does not exist!"
+                + "'directionEquinox' attribute in table Source does not exist!"
             )
 
         # make sure it is a copy of ArrayTime
@@ -1950,8 +1948,7 @@ class SourceRow:
         if not self._calibrationGroupExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + calibrationGroup
-                + " attribute in table Source does not exist!"
+                + "'calibrationGroup' attribute in table Source does not exist!"
             )
 
         return self._calibrationGroup
@@ -1995,8 +1992,7 @@ class SourceRow:
         if not self._catalogExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + catalog
-                + " attribute in table Source does not exist!"
+                + "'catalog' attribute in table Source does not exist!"
             )
 
         return self._catalog
@@ -2040,8 +2036,7 @@ class SourceRow:
         if not self._deltaVelExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + deltaVel
-                + " attribute in table Source does not exist!"
+                + "'deltaVel' attribute in table Source does not exist!"
             )
 
         # make sure it is a copy of Speed
@@ -2086,8 +2081,7 @@ class SourceRow:
         if not self._positionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + position
-                + " attribute in table Source does not exist!"
+                + "'position' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._position)
@@ -2152,8 +2146,7 @@ class SourceRow:
         if not self._numLinesExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numLines
-                + " attribute in table Source does not exist!"
+                + "'numLines' attribute in table Source does not exist!"
             )
 
         return self._numLines
@@ -2197,8 +2190,7 @@ class SourceRow:
         if not self._transitionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + transition
-                + " attribute in table Source does not exist!"
+                + "'transition' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._transition)
@@ -2263,8 +2255,7 @@ class SourceRow:
         if not self._restFrequencyExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + restFrequency
-                + " attribute in table Source does not exist!"
+                + "'restFrequency' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._restFrequency)
@@ -2329,8 +2320,7 @@ class SourceRow:
         if not self._sysVelExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sysVel
-                + " attribute in table Source does not exist!"
+                + "'sysVel' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._sysVel)
@@ -2395,8 +2385,7 @@ class SourceRow:
         if not self._rangeVelExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + rangeVel
-                + " attribute in table Source does not exist!"
+                + "'rangeVel' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._rangeVel)
@@ -2461,8 +2450,7 @@ class SourceRow:
         if not self._sourceModelExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sourceModel
-                + " attribute in table Source does not exist!"
+                + "'sourceModel' attribute in table Source does not exist!"
             )
 
         return self._sourceModel
@@ -2506,8 +2494,7 @@ class SourceRow:
         if not self._frequencyRefCodeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + frequencyRefCode
-                + " attribute in table Source does not exist!"
+                + "'frequencyRefCode' attribute in table Source does not exist!"
             )
 
         return self._frequencyRefCode
@@ -2551,8 +2538,7 @@ class SourceRow:
         if not self._numFreqExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numFreq
-                + " attribute in table Source does not exist!"
+                + "'numFreq' attribute in table Source does not exist!"
             )
 
         return self._numFreq
@@ -2596,8 +2582,7 @@ class SourceRow:
         if not self._numStokesExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numStokes
-                + " attribute in table Source does not exist!"
+                + "'numStokes' attribute in table Source does not exist!"
             )
 
         return self._numStokes
@@ -2641,8 +2626,7 @@ class SourceRow:
         if not self._frequencyExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + frequency
-                + " attribute in table Source does not exist!"
+                + "'frequency' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._frequency)
@@ -2707,8 +2691,7 @@ class SourceRow:
         if not self._frequencyIntervalExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + frequencyInterval
-                + " attribute in table Source does not exist!"
+                + "'frequencyInterval' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._frequencyInterval)
@@ -2773,8 +2756,7 @@ class SourceRow:
         if not self._stokesParameterExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + stokesParameter
-                + " attribute in table Source does not exist!"
+                + "'stokesParameter' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._stokesParameter)
@@ -2839,8 +2821,7 @@ class SourceRow:
         if not self._fluxExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + flux
-                + " attribute in table Source does not exist!"
+                + "'flux' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._flux)
@@ -2905,8 +2886,7 @@ class SourceRow:
         if not self._fluxErrExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + fluxErr
-                + " attribute in table Source does not exist!"
+                + "'fluxErr' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._fluxErr)
@@ -2971,8 +2951,7 @@ class SourceRow:
         if not self._positionAngleExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + positionAngle
-                + " attribute in table Source does not exist!"
+                + "'positionAngle' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._positionAngle)
@@ -3037,8 +3016,7 @@ class SourceRow:
         if not self._positionAngleErrExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + positionAngleErr
-                + " attribute in table Source does not exist!"
+                + "'positionAngleErr' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._positionAngleErr)
@@ -3103,8 +3081,7 @@ class SourceRow:
         if not self._sizeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + size
-                + " attribute in table Source does not exist!"
+                + "'size' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._size)
@@ -3169,8 +3146,7 @@ class SourceRow:
         if not self._sizeErrExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sizeErr
-                + " attribute in table Source does not exist!"
+                + "'sizeErr' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._sizeErr)
@@ -3235,8 +3211,7 @@ class SourceRow:
         if not self._velRefCodeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + velRefCode
-                + " attribute in table Source does not exist!"
+                + "'velRefCode' attribute in table Source does not exist!"
             )
 
         return self._velRefCode
@@ -3280,8 +3255,7 @@ class SourceRow:
         if not self._dopplerVelocityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dopplerVelocity
-                + " attribute in table Source does not exist!"
+                + "'dopplerVelocity' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._dopplerVelocity)
@@ -3346,8 +3320,7 @@ class SourceRow:
         if not self._dopplerReferenceSystemExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dopplerReferenceSystem
-                + " attribute in table Source does not exist!"
+                + "'dopplerReferenceSystem' attribute in table Source does not exist!"
             )
 
         return self._dopplerReferenceSystem
@@ -3393,8 +3366,7 @@ class SourceRow:
         if not self._dopplerCalcTypeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dopplerCalcType
-                + " attribute in table Source does not exist!"
+                + "'dopplerCalcType' attribute in table Source does not exist!"
             )
 
         return self._dopplerCalcType
@@ -3438,8 +3410,7 @@ class SourceRow:
         if not self._parallaxExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + parallax
-                + " attribute in table Source does not exist!"
+                + "'parallax' attribute in table Source does not exist!"
             )
 
         return copy.deepcopy(self._parallax)

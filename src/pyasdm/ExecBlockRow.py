@@ -1481,8 +1481,7 @@ class ExecBlockRow:
         if not self._releaseDateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + releaseDate
-                + " attribute in table ExecBlock does not exist!"
+                + "'releaseDate' attribute in table ExecBlock does not exist!"
             )
 
         # make sure it is a copy of ArrayTime
@@ -1527,8 +1526,7 @@ class ExecBlockRow:
         if not self._schedulerModeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + schedulerMode
-                + " attribute in table ExecBlock does not exist!"
+                + "'schedulerMode' attribute in table ExecBlock does not exist!"
             )
 
         return self._schedulerMode
@@ -1572,8 +1570,7 @@ class ExecBlockRow:
         if not self._siteAltitudeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + siteAltitude
-                + " attribute in table ExecBlock does not exist!"
+                + "'siteAltitude' attribute in table ExecBlock does not exist!"
             )
 
         # make sure it is a copy of Length
@@ -1618,8 +1615,7 @@ class ExecBlockRow:
         if not self._siteLongitudeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + siteLongitude
-                + " attribute in table ExecBlock does not exist!"
+                + "'siteLongitude' attribute in table ExecBlock does not exist!"
             )
 
         # make sure it is a copy of Angle
@@ -1664,8 +1660,7 @@ class ExecBlockRow:
         if not self._siteLatitudeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + siteLatitude
-                + " attribute in table ExecBlock does not exist!"
+                + "'siteLatitude' attribute in table ExecBlock does not exist!"
             )
 
         # make sure it is a copy of Angle
@@ -1710,8 +1705,7 @@ class ExecBlockRow:
         if not self._observingScriptExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + observingScript
-                + " attribute in table ExecBlock does not exist!"
+                + "'observingScript' attribute in table ExecBlock does not exist!"
             )
 
         return self._observingScript
@@ -1755,8 +1749,7 @@ class ExecBlockRow:
         if not self._observingScriptUIDExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + observingScriptUID
-                + " attribute in table ExecBlock does not exist!"
+                + "'observingScriptUID' attribute in table ExecBlock does not exist!"
             )
 
         # make sure it is a copy of EntityRef
@@ -1801,8 +1794,7 @@ class ExecBlockRow:
         if not self._arrayNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + arrayName
-                + " attribute in table ExecBlock does not exist!"
+                + "'arrayName' attribute in table ExecBlock does not exist!"
             )
 
         return self._arrayName
@@ -1914,8 +1906,7 @@ class ExecBlockRow:
         if not self._scaleIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + scaleId
-                + " attribute in table ExecBlock does not exist!"
+                + "'scaleId' attribute in table ExecBlock does not exist!"
             )
 
         # make sure it is a copy of Tag

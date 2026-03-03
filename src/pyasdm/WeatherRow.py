@@ -844,8 +844,7 @@ class WeatherRow:
         if not self._pressureExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + pressure
-                + " attribute in table Weather does not exist!"
+                + "'pressure' attribute in table Weather does not exist!"
             )
 
         # make sure it is a copy of Pressure
@@ -890,8 +889,7 @@ class WeatherRow:
         if not self._relHumidityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + relHumidity
-                + " attribute in table Weather does not exist!"
+                + "'relHumidity' attribute in table Weather does not exist!"
             )
 
         # make sure it is a copy of Humidity
@@ -936,8 +934,7 @@ class WeatherRow:
         if not self._temperatureExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + temperature
-                + " attribute in table Weather does not exist!"
+                + "'temperature' attribute in table Weather does not exist!"
             )
 
         # make sure it is a copy of Temperature
@@ -982,8 +979,7 @@ class WeatherRow:
         if not self._windDirectionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + windDirection
-                + " attribute in table Weather does not exist!"
+                + "'windDirection' attribute in table Weather does not exist!"
             )
 
         # make sure it is a copy of Angle
@@ -1028,8 +1024,7 @@ class WeatherRow:
         if not self._windSpeedExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + windSpeed
-                + " attribute in table Weather does not exist!"
+                + "'windSpeed' attribute in table Weather does not exist!"
             )
 
         # make sure it is a copy of Speed
@@ -1074,8 +1069,7 @@ class WeatherRow:
         if not self._windMaxExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + windMax
-                + " attribute in table Weather does not exist!"
+                + "'windMax' attribute in table Weather does not exist!"
             )
 
         # make sure it is a copy of Speed
@@ -1120,8 +1114,7 @@ class WeatherRow:
         if not self._dewPointExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dewPoint
-                + " attribute in table Weather does not exist!"
+                + "'dewPoint' attribute in table Weather does not exist!"
             )
 
         # make sure it is a copy of Temperature
@@ -1166,8 +1159,7 @@ class WeatherRow:
         if not self._numLayerExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numLayer
-                + " attribute in table Weather does not exist!"
+                + "'numLayer' attribute in table Weather does not exist!"
             )
 
         return self._numLayer
@@ -1211,8 +1203,7 @@ class WeatherRow:
         if not self._layerHeightExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + layerHeight
-                + " attribute in table Weather does not exist!"
+                + "'layerHeight' attribute in table Weather does not exist!"
             )
 
         return copy.deepcopy(self._layerHeight)
@@ -1277,8 +1268,7 @@ class WeatherRow:
         if not self._temperatureProfileExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + temperatureProfile
-                + " attribute in table Weather does not exist!"
+                + "'temperatureProfile' attribute in table Weather does not exist!"
             )
 
         return copy.deepcopy(self._temperatureProfile)
@@ -1343,8 +1333,7 @@ class WeatherRow:
         if not self._cloudMonitorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + cloudMonitor
-                + " attribute in table Weather does not exist!"
+                + "'cloudMonitor' attribute in table Weather does not exist!"
             )
 
         # make sure it is a copy of Temperature
@@ -1389,8 +1378,7 @@ class WeatherRow:
         if not self._numWVRExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numWVR
-                + " attribute in table Weather does not exist!"
+                + "'numWVR' attribute in table Weather does not exist!"
             )
 
         return self._numWVR
@@ -1434,8 +1422,7 @@ class WeatherRow:
         if not self._wvrTempExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + wvrTemp
-                + " attribute in table Weather does not exist!"
+                + "'wvrTemp' attribute in table Weather does not exist!"
             )
 
         return copy.deepcopy(self._wvrTemp)
@@ -1500,8 +1487,7 @@ class WeatherRow:
         if not self._waterExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + water
-                + " attribute in table Weather does not exist!"
+                + "'water' attribute in table Weather does not exist!"
             )
 
         return self._water

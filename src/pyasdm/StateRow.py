@@ -474,8 +474,7 @@ class StateRow:
         if not self._weightExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + weight
-                + " attribute in table State does not exist!"
+                + "'weight' attribute in table State does not exist!"
             )
 
         return self._weight

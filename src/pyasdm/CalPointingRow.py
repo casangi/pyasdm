@@ -1937,8 +1937,7 @@ class CalPointingRow:
         if not self._averagedPolarizationsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + averagedPolarizations
-                + " attribute in table CalPointing does not exist!"
+                + "'averagedPolarizations' attribute in table CalPointing does not exist!"
             )
 
         return self._averagedPolarizations
@@ -1982,8 +1981,7 @@ class CalPointingRow:
         if not self._beamPAExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + beamPA
-                + " attribute in table CalPointing does not exist!"
+                + "'beamPA' attribute in table CalPointing does not exist!"
             )
 
         return copy.deepcopy(self._beamPA)
@@ -2048,8 +2046,7 @@ class CalPointingRow:
         if not self._beamPAErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + beamPAError
-                + " attribute in table CalPointing does not exist!"
+                + "'beamPAError' attribute in table CalPointing does not exist!"
             )
 
         return copy.deepcopy(self._beamPAError)
@@ -2114,8 +2111,7 @@ class CalPointingRow:
         if not self._beamPAWasFixedExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + beamPAWasFixed
-                + " attribute in table CalPointing does not exist!"
+                + "'beamPAWasFixed' attribute in table CalPointing does not exist!"
             )
 
         return self._beamPAWasFixed
@@ -2159,8 +2155,7 @@ class CalPointingRow:
         if not self._beamWidthExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + beamWidth
-                + " attribute in table CalPointing does not exist!"
+                + "'beamWidth' attribute in table CalPointing does not exist!"
             )
 
         return copy.deepcopy(self._beamWidth)
@@ -2225,8 +2220,7 @@ class CalPointingRow:
         if not self._beamWidthErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + beamWidthError
-                + " attribute in table CalPointing does not exist!"
+                + "'beamWidthError' attribute in table CalPointing does not exist!"
             )
 
         return copy.deepcopy(self._beamWidthError)
@@ -2291,8 +2285,7 @@ class CalPointingRow:
         if not self._beamWidthWasFixedExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + beamWidthWasFixed
-                + " attribute in table CalPointing does not exist!"
+                + "'beamWidthWasFixed' attribute in table CalPointing does not exist!"
             )
 
         return copy.deepcopy(self._beamWidthWasFixed)
@@ -2357,8 +2350,7 @@ class CalPointingRow:
         if not self._offIntensityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + offIntensity
-                + " attribute in table CalPointing does not exist!"
+                + "'offIntensity' attribute in table CalPointing does not exist!"
             )
 
         return copy.deepcopy(self._offIntensity)
@@ -2423,8 +2415,7 @@ class CalPointingRow:
         if not self._offIntensityErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + offIntensityError
-                + " attribute in table CalPointing does not exist!"
+                + "'offIntensityError' attribute in table CalPointing does not exist!"
             )
 
         return copy.deepcopy(self._offIntensityError)
@@ -2489,8 +2480,7 @@ class CalPointingRow:
         if not self._offIntensityWasFixedExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + offIntensityWasFixed
-                + " attribute in table CalPointing does not exist!"
+                + "'offIntensityWasFixed' attribute in table CalPointing does not exist!"
             )
 
         return self._offIntensityWasFixed
@@ -2534,8 +2524,7 @@ class CalPointingRow:
         if not self._peakIntensityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + peakIntensity
-                + " attribute in table CalPointing does not exist!"
+                + "'peakIntensity' attribute in table CalPointing does not exist!"
             )
 
         return copy.deepcopy(self._peakIntensity)
@@ -2600,8 +2589,7 @@ class CalPointingRow:
         if not self._peakIntensityErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + peakIntensityError
-                + " attribute in table CalPointing does not exist!"
+                + "'peakIntensityError' attribute in table CalPointing does not exist!"
             )
 
         return copy.deepcopy(self._peakIntensityError)
@@ -2666,8 +2654,7 @@ class CalPointingRow:
         if not self._peakIntensityWasFixedExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + peakIntensityWasFixed
-                + " attribute in table CalPointing does not exist!"
+                + "'peakIntensityWasFixed' attribute in table CalPointing does not exist!"
             )
 
         return self._peakIntensityWasFixed

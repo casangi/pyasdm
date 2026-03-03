@@ -1483,8 +1483,7 @@ class CalHolographyRow:
         if not self._numScrewExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numScrew
-                + " attribute in table CalHolography does not exist!"
+                + "'numScrew' attribute in table CalHolography does not exist!"
             )
 
         return self._numScrew
@@ -1528,8 +1527,7 @@ class CalHolographyRow:
         if not self._screwNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + screwName
-                + " attribute in table CalHolography does not exist!"
+                + "'screwName' attribute in table CalHolography does not exist!"
             )
 
         return copy.deepcopy(self._screwName)
@@ -1594,8 +1592,7 @@ class CalHolographyRow:
         if not self._screwMotionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + screwMotion
-                + " attribute in table CalHolography does not exist!"
+                + "'screwMotion' attribute in table CalHolography does not exist!"
             )
 
         return copy.deepcopy(self._screwMotion)
@@ -1660,8 +1657,7 @@ class CalHolographyRow:
         if not self._screwMotionErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + screwMotionError
-                + " attribute in table CalHolography does not exist!"
+                + "'screwMotionError' attribute in table CalHolography does not exist!"
             )
 
         return copy.deepcopy(self._screwMotionError)
@@ -1726,8 +1722,7 @@ class CalHolographyRow:
         if not self._gravCorrectionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + gravCorrection
-                + " attribute in table CalHolography does not exist!"
+                + "'gravCorrection' attribute in table CalHolography does not exist!"
             )
 
         return self._gravCorrection
@@ -1771,8 +1766,7 @@ class CalHolographyRow:
         if not self._gravOptRangeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + gravOptRange
-                + " attribute in table CalHolography does not exist!"
+                + "'gravOptRange' attribute in table CalHolography does not exist!"
             )
 
         return copy.deepcopy(self._gravOptRange)
@@ -1837,8 +1831,7 @@ class CalHolographyRow:
         if not self._tempCorrectionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tempCorrection
-                + " attribute in table CalHolography does not exist!"
+                + "'tempCorrection' attribute in table CalHolography does not exist!"
             )
 
         return self._tempCorrection
@@ -1882,8 +1875,7 @@ class CalHolographyRow:
         if not self._tempOptRangeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tempOptRange
-                + " attribute in table CalHolography does not exist!"
+                + "'tempOptRange' attribute in table CalHolography does not exist!"
             )
 
         return copy.deepcopy(self._tempOptRange)

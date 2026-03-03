@@ -843,8 +843,7 @@ class FlagRow:
         if not self._numPolarizationTypeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numPolarizationType
-                + " attribute in table Flag does not exist!"
+                + "'numPolarizationType' attribute in table Flag does not exist!"
             )
 
         return self._numPolarizationType
@@ -888,8 +887,7 @@ class FlagRow:
         if not self._numSpectralWindowExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numSpectralWindow
-                + " attribute in table Flag does not exist!"
+                + "'numSpectralWindow' attribute in table Flag does not exist!"
             )
 
         return self._numSpectralWindow
@@ -933,8 +931,7 @@ class FlagRow:
         if not self._numPairedAntennaExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numPairedAntenna
-                + " attribute in table Flag does not exist!"
+                + "'numPairedAntenna' attribute in table Flag does not exist!"
             )
 
         return self._numPairedAntenna
@@ -978,8 +975,7 @@ class FlagRow:
         if not self._numChanExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numChan
-                + " attribute in table Flag does not exist!"
+                + "'numChan' attribute in table Flag does not exist!"
             )
 
         return self._numChan
@@ -1023,8 +1019,7 @@ class FlagRow:
         if not self._polarizationTypeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + polarizationType
-                + " attribute in table Flag does not exist!"
+                + "'polarizationType' attribute in table Flag does not exist!"
             )
 
         return copy.deepcopy(self._polarizationType)
@@ -1089,8 +1084,7 @@ class FlagRow:
         if not self._channelExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + channel
-                + " attribute in table Flag does not exist!"
+                + "'channel' attribute in table Flag does not exist!"
             )
 
         return copy.deepcopy(self._channel)
@@ -1200,8 +1194,7 @@ class FlagRow:
         if not self._pairedAntennaIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + pairedAntennaId
-                + " attribute in table Flag does not exist!"
+                + "'pairedAntennaId' attribute in table Flag does not exist!"
             )
 
         return copy.deepcopy(self._pairedAntennaId)
@@ -1266,8 +1259,7 @@ class FlagRow:
         if not self._spectralWindowIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + spectralWindowId
-                + " attribute in table Flag does not exist!"
+                + "'spectralWindowId' attribute in table Flag does not exist!"
             )
 
         return copy.deepcopy(self._spectralWindowId)

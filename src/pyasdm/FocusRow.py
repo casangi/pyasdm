@@ -579,8 +579,7 @@ class FocusRow:
         if not self._measuredFocusPositionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + measuredFocusPosition
-                + " attribute in table Focus does not exist!"
+                + "'measuredFocusPosition' attribute in table Focus does not exist!"
             )
 
         return copy.deepcopy(self._measuredFocusPosition)
@@ -645,8 +644,7 @@ class FocusRow:
         if not self._measuredFocusRotationExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + measuredFocusRotation
-                + " attribute in table Focus does not exist!"
+                + "'measuredFocusRotation' attribute in table Focus does not exist!"
             )
 
         return copy.deepcopy(self._measuredFocusRotation)

@@ -956,8 +956,7 @@ class AnnotationRow:
         if not self._numAntennaExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numAntenna
-                + " attribute in table Annotation does not exist!"
+                + "'numAntenna' attribute in table Annotation does not exist!"
             )
 
         return self._numAntenna
@@ -1001,8 +1000,7 @@ class AnnotationRow:
         if not self._basebandNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + basebandName
-                + " attribute in table Annotation does not exist!"
+                + "'basebandName' attribute in table Annotation does not exist!"
             )
 
         return copy.deepcopy(self._basebandName)
@@ -1067,8 +1065,7 @@ class AnnotationRow:
         if not self._numBasebandExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numBaseband
-                + " attribute in table Annotation does not exist!"
+                + "'numBaseband' attribute in table Annotation does not exist!"
             )
 
         return self._numBaseband
@@ -1112,8 +1109,7 @@ class AnnotationRow:
         if not self._intervalExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + interval
-                + " attribute in table Annotation does not exist!"
+                + "'interval' attribute in table Annotation does not exist!"
             )
 
         # make sure it is a copy of Interval
@@ -1158,8 +1154,7 @@ class AnnotationRow:
         if not self._dValueExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dValue
-                + " attribute in table Annotation does not exist!"
+                + "'dValue' attribute in table Annotation does not exist!"
             )
 
         return self._dValue
@@ -1203,8 +1198,7 @@ class AnnotationRow:
         if not self._vdValueExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + vdValue
-                + " attribute in table Annotation does not exist!"
+                + "'vdValue' attribute in table Annotation does not exist!"
             )
 
         return copy.deepcopy(self._vdValue)
@@ -1269,8 +1263,7 @@ class AnnotationRow:
         if not self._vvdValuesExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + vvdValues
-                + " attribute in table Annotation does not exist!"
+                + "'vvdValues' attribute in table Annotation does not exist!"
             )
 
         return copy.deepcopy(self._vvdValues)
@@ -1335,8 +1328,7 @@ class AnnotationRow:
         if not self._llValueExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + llValue
-                + " attribute in table Annotation does not exist!"
+                + "'llValue' attribute in table Annotation does not exist!"
             )
 
         return self._llValue
@@ -1380,8 +1372,7 @@ class AnnotationRow:
         if not self._vllValueExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + vllValue
-                + " attribute in table Annotation does not exist!"
+                + "'vllValue' attribute in table Annotation does not exist!"
             )
 
         return copy.deepcopy(self._vllValue)
@@ -1446,8 +1437,7 @@ class AnnotationRow:
         if not self._vvllValueExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + vvllValue
-                + " attribute in table Annotation does not exist!"
+                + "'vvllValue' attribute in table Annotation does not exist!"
             )
 
         return copy.deepcopy(self._vvllValue)
@@ -1512,8 +1502,7 @@ class AnnotationRow:
         if not self._sValueExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sValue
-                + " attribute in table Annotation does not exist!"
+                + "'sValue' attribute in table Annotation does not exist!"
             )
 
         return self._sValue
@@ -1559,8 +1548,7 @@ class AnnotationRow:
         if not self._antennaIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + antennaId
-                + " attribute in table Annotation does not exist!"
+                + "'antennaId' attribute in table Annotation does not exist!"
             )
 
         return copy.deepcopy(self._antennaId)

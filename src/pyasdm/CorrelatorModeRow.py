@@ -848,8 +848,7 @@ class CorrelatorModeRow:
         if not self._correlatorSoftwareVersionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + correlatorSoftwareVersion
-                + " attribute in table CorrelatorMode does not exist!"
+                + "'correlatorSoftwareVersion' attribute in table CorrelatorMode does not exist!"
             )
 
         return self._correlatorSoftwareVersion

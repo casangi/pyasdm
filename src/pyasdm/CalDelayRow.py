@@ -1312,8 +1312,7 @@ class CalDelayRow:
         if not self._crossDelayOffsetExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + crossDelayOffset
-                + " attribute in table CalDelay does not exist!"
+                + "'crossDelayOffset' attribute in table CalDelay does not exist!"
             )
 
         return self._crossDelayOffset
@@ -1357,8 +1356,7 @@ class CalDelayRow:
         if not self._crossDelayOffsetErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + crossDelayOffsetError
-                + " attribute in table CalDelay does not exist!"
+                + "'crossDelayOffsetError' attribute in table CalDelay does not exist!"
             )
 
         return self._crossDelayOffsetError
@@ -1402,8 +1400,7 @@ class CalDelayRow:
         if not self._numSidebandExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numSideband
-                + " attribute in table CalDelay does not exist!"
+                + "'numSideband' attribute in table CalDelay does not exist!"
             )
 
         return self._numSideband
@@ -1447,8 +1444,7 @@ class CalDelayRow:
         if not self._refFreqExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + refFreq
-                + " attribute in table CalDelay does not exist!"
+                + "'refFreq' attribute in table CalDelay does not exist!"
             )
 
         return copy.deepcopy(self._refFreq)
@@ -1513,8 +1509,7 @@ class CalDelayRow:
         if not self._refFreqPhaseExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + refFreqPhase
-                + " attribute in table CalDelay does not exist!"
+                + "'refFreqPhase' attribute in table CalDelay does not exist!"
             )
 
         return copy.deepcopy(self._refFreqPhase)
@@ -1579,8 +1574,7 @@ class CalDelayRow:
         if not self._sidebandsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sidebands
-                + " attribute in table CalDelay does not exist!"
+                + "'sidebands' attribute in table CalDelay does not exist!"
             )
 
         return copy.deepcopy(self._sidebands)

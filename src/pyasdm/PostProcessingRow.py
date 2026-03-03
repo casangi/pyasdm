@@ -628,8 +628,7 @@ class PostProcessingRow:
         if not self._descriptionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + description
-                + " attribute in table PostProcessing does not exist!"
+                + "'description' attribute in table PostProcessing does not exist!"
             )
 
         return self._description
@@ -673,8 +672,7 @@ class PostProcessingRow:
         if not self._numSpectralWindowExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numSpectralWindow
-                + " attribute in table PostProcessing does not exist!"
+                + "'numSpectralWindow' attribute in table PostProcessing does not exist!"
             )
 
         return self._numSpectralWindow
@@ -718,8 +716,7 @@ class PostProcessingRow:
         if not self._numScanExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numScan
-                + " attribute in table PostProcessing does not exist!"
+                + "'numScan' attribute in table PostProcessing does not exist!"
             )
 
         return self._numScan
@@ -763,8 +760,7 @@ class PostProcessingRow:
         if not self._scanNumberExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + scanNumber
-                + " attribute in table PostProcessing does not exist!"
+                + "'scanNumber' attribute in table PostProcessing does not exist!"
             )
 
         return copy.deepcopy(self._scanNumber)
@@ -829,8 +825,7 @@ class PostProcessingRow:
         if not self._calibrationStrategyExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + calibrationStrategy
-                + " attribute in table PostProcessing does not exist!"
+                + "'calibrationStrategy' attribute in table PostProcessing does not exist!"
             )
 
         return self._calibrationStrategy
@@ -876,8 +871,7 @@ class PostProcessingRow:
         if not self._execBlockIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + execBlockId
-                + " attribute in table PostProcessing does not exist!"
+                + "'execBlockId' attribute in table PostProcessing does not exist!"
             )
 
         return copy.deepcopy(self._execBlockId)
@@ -942,8 +936,7 @@ class PostProcessingRow:
         if not self._spectralWindowIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + spectralWindowId
-                + " attribute in table PostProcessing does not exist!"
+                + "'spectralWindowId' attribute in table PostProcessing does not exist!"
             )
 
         return copy.deepcopy(self._spectralWindowId)

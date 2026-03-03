@@ -566,8 +566,7 @@ class ModulationRow:
         if not self._walsh180indexExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + walsh180index
-                + " attribute in table Modulation does not exist!"
+                + "'walsh180index' attribute in table Modulation does not exist!"
             )
 
         return self._walsh180index
@@ -611,8 +610,7 @@ class ModulationRow:
         if not self._walsh90indexExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + walsh90index
-                + " attribute in table Modulation does not exist!"
+                + "'walsh90index' attribute in table Modulation does not exist!"
             )
 
         return self._walsh90index

@@ -601,8 +601,7 @@ class VLAWVRRow:
         if not self._chanFreqCenterExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqCenter
-                + " attribute in table VLAWVR does not exist!"
+                + "'chanFreqCenter' attribute in table VLAWVR does not exist!"
             )
 
         return copy.deepcopy(self._chanFreqCenter)
@@ -667,8 +666,7 @@ class VLAWVRRow:
         if not self._chanWidthExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanWidth
-                + " attribute in table VLAWVR does not exist!"
+                + "'chanWidth' attribute in table VLAWVR does not exist!"
             )
 
         return copy.deepcopy(self._chanWidth)
@@ -733,8 +731,7 @@ class VLAWVRRow:
         if not self._wvrIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + wvrId
-                + " attribute in table VLAWVR does not exist!"
+                + "'wvrId' attribute in table VLAWVR does not exist!"
             )
 
         return self._wvrId

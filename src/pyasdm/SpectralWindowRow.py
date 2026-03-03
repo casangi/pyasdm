@@ -1941,8 +1941,7 @@ class SpectralWindowRow:
         if not self._numBinExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numBin
-                + " attribute in table SpectralWindow does not exist!"
+                + "'numBin' attribute in table SpectralWindow does not exist!"
             )
 
         return self._numBin
@@ -2076,8 +2075,7 @@ class SpectralWindowRow:
         if not self._chanFreqStartExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqStart
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanFreqStart' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -2122,8 +2120,7 @@ class SpectralWindowRow:
         if not self._chanFreqStepExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqStep
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanFreqStep' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -2168,8 +2165,7 @@ class SpectralWindowRow:
         if not self._chanFreqArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanFreqArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._chanFreqArray)
@@ -2234,8 +2230,7 @@ class SpectralWindowRow:
         if not self._chanWidthExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanWidth
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanWidth' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -2280,8 +2275,7 @@ class SpectralWindowRow:
         if not self._chanWidthArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanWidthArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanWidthArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._chanWidthArray)
@@ -2346,8 +2340,7 @@ class SpectralWindowRow:
         if not self._correlationBitExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + correlationBit
-                + " attribute in table SpectralWindow does not exist!"
+                + "'correlationBit' attribute in table SpectralWindow does not exist!"
             )
 
         return self._correlationBit
@@ -2391,8 +2384,7 @@ class SpectralWindowRow:
         if not self._effectiveBwExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + effectiveBw
-                + " attribute in table SpectralWindow does not exist!"
+                + "'effectiveBw' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -2437,8 +2429,7 @@ class SpectralWindowRow:
         if not self._effectiveBwArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + effectiveBwArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'effectiveBwArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._effectiveBwArray)
@@ -2503,8 +2494,7 @@ class SpectralWindowRow:
         if not self._freqGroupExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + freqGroup
-                + " attribute in table SpectralWindow does not exist!"
+                + "'freqGroup' attribute in table SpectralWindow does not exist!"
             )
 
         return self._freqGroup
@@ -2548,8 +2538,7 @@ class SpectralWindowRow:
         if not self._freqGroupNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + freqGroupName
-                + " attribute in table SpectralWindow does not exist!"
+                + "'freqGroupName' attribute in table SpectralWindow does not exist!"
             )
 
         return self._freqGroupName
@@ -2593,8 +2582,7 @@ class SpectralWindowRow:
         if not self._lineArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + lineArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'lineArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._lineArray)
@@ -2659,8 +2647,7 @@ class SpectralWindowRow:
         if not self._measFreqRefExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + measFreqRef
-                + " attribute in table SpectralWindow does not exist!"
+                + "'measFreqRef' attribute in table SpectralWindow does not exist!"
             )
 
         return self._measFreqRef
@@ -2704,8 +2691,7 @@ class SpectralWindowRow:
         if not self._nameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + name
-                + " attribute in table SpectralWindow does not exist!"
+                + "'name' attribute in table SpectralWindow does not exist!"
             )
 
         return self._name
@@ -2749,8 +2735,7 @@ class SpectralWindowRow:
         if not self._oversamplingExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + oversampling
-                + " attribute in table SpectralWindow does not exist!"
+                + "'oversampling' attribute in table SpectralWindow does not exist!"
             )
 
         return self._oversampling
@@ -2794,8 +2779,7 @@ class SpectralWindowRow:
         if not self._quantizationExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + quantization
-                + " attribute in table SpectralWindow does not exist!"
+                + "'quantization' attribute in table SpectralWindow does not exist!"
             )
 
         return self._quantization
@@ -2839,8 +2823,7 @@ class SpectralWindowRow:
         if not self._refChanExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + refChan
-                + " attribute in table SpectralWindow does not exist!"
+                + "'refChan' attribute in table SpectralWindow does not exist!"
             )
 
         return self._refChan
@@ -2884,8 +2867,7 @@ class SpectralWindowRow:
         if not self._resolutionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + resolution
-                + " attribute in table SpectralWindow does not exist!"
+                + "'resolution' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -2930,8 +2912,7 @@ class SpectralWindowRow:
         if not self._resolutionArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + resolutionArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'resolutionArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._resolutionArray)
@@ -2996,8 +2977,7 @@ class SpectralWindowRow:
         if not self._numAssocValuesExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numAssocValues
-                + " attribute in table SpectralWindow does not exist!"
+                + "'numAssocValues' attribute in table SpectralWindow does not exist!"
             )
 
         return self._numAssocValues
@@ -3041,8 +3021,7 @@ class SpectralWindowRow:
         if not self._assocNatureExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocNature
-                + " attribute in table SpectralWindow does not exist!"
+                + "'assocNature' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._assocNature)
@@ -3107,8 +3086,7 @@ class SpectralWindowRow:
         if not self._numFactorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numFactor
-                + " attribute in table SpectralWindow does not exist!"
+                + "'numFactor' attribute in table SpectralWindow does not exist!"
             )
 
         return self._numFactor
@@ -3152,8 +3130,7 @@ class SpectralWindowRow:
         if not self._numBinFactorsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numBinFactors
-                + " attribute in table SpectralWindow does not exist!"
+                + "'numBinFactors' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._numBinFactors)
@@ -3218,8 +3195,7 @@ class SpectralWindowRow:
         if not self._numOrigFreqSliceExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numOrigFreqSlice
-                + " attribute in table SpectralWindow does not exist!"
+                + "'numOrigFreqSlice' attribute in table SpectralWindow does not exist!"
             )
 
         return self._numOrigFreqSlice
@@ -3263,8 +3239,7 @@ class SpectralWindowRow:
         if not self._originatingFrequencySlicesExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + originatingFrequencySlices
-                + " attribute in table SpectralWindow does not exist!"
+                + "'originatingFrequencySlices' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._originatingFrequencySlices)
@@ -3329,8 +3304,7 @@ class SpectralWindowRow:
         if not self._quantizationBitsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + quantizationBits
-                + " attribute in table SpectralWindow does not exist!"
+                + "'quantizationBits' attribute in table SpectralWindow does not exist!"
             )
 
         return self._quantizationBits
@@ -3374,8 +3348,7 @@ class SpectralWindowRow:
         if not self._numRequantStageExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numRequantStage
-                + " attribute in table SpectralWindow does not exist!"
+                + "'numRequantStage' attribute in table SpectralWindow does not exist!"
             )
 
         return self._numRequantStage
@@ -3419,8 +3392,7 @@ class SpectralWindowRow:
         if not self._requantizationExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + requantization
-                + " attribute in table SpectralWindow does not exist!"
+                + "'requantization' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._requantization)
@@ -3485,8 +3457,7 @@ class SpectralWindowRow:
         if not self._requantizationBitsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + requantizationBits
-                + " attribute in table SpectralWindow does not exist!"
+                + "'requantizationBits' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._requantizationBits)
@@ -3553,8 +3524,7 @@ class SpectralWindowRow:
         if not self._assocSpectralWindowIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocSpectralWindowId
-                + " attribute in table SpectralWindow does not exist!"
+                + "'assocSpectralWindowId' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._assocSpectralWindowId)
@@ -3619,8 +3589,7 @@ class SpectralWindowRow:
         if not self._dopplerIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dopplerId
-                + " attribute in table SpectralWindow does not exist!"
+                + "'dopplerId' attribute in table SpectralWindow does not exist!"
             )
 
         return self._dopplerId
@@ -3664,8 +3633,7 @@ class SpectralWindowRow:
         if not self._imageSpectralWindowIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + imageSpectralWindowId
-                + " attribute in table SpectralWindow does not exist!"
+                + "'imageSpectralWindowId' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Tag

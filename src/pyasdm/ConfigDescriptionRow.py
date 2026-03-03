@@ -1028,8 +1028,7 @@ class ConfigDescriptionRow:
         if not self._phasedArrayListExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + phasedArrayList
-                + " attribute in table ConfigDescription does not exist!"
+                + "'phasedArrayList' attribute in table ConfigDescription does not exist!"
             )
 
         return copy.deepcopy(self._phasedArrayList)
@@ -1116,8 +1115,7 @@ class ConfigDescriptionRow:
         if not self._numAssocValuesExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numAssocValues
-                + " attribute in table ConfigDescription does not exist!"
+                + "'numAssocValues' attribute in table ConfigDescription does not exist!"
             )
 
         return self._numAssocValues
@@ -1161,8 +1159,7 @@ class ConfigDescriptionRow:
         if not self._assocNatureExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocNature
-                + " attribute in table ConfigDescription does not exist!"
+                + "'assocNature' attribute in table ConfigDescription does not exist!"
             )
 
         return copy.deepcopy(self._assocNature)
@@ -1272,8 +1269,7 @@ class ConfigDescriptionRow:
         if not self._assocConfigDescriptionIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocConfigDescriptionId
-                + " attribute in table ConfigDescription does not exist!"
+                + "'assocConfigDescriptionId' attribute in table ConfigDescription does not exist!"
             )
 
         return copy.deepcopy(self._assocConfigDescriptionId)

@@ -708,8 +708,7 @@ class CalDeviceRow:
         if not self._numReceptorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numReceptor
-                + " attribute in table CalDevice does not exist!"
+                + "'numReceptor' attribute in table CalDevice does not exist!"
             )
 
         return self._numReceptor
@@ -753,8 +752,7 @@ class CalDeviceRow:
         if not self._calEffExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + calEff
-                + " attribute in table CalDevice does not exist!"
+                + "'calEff' attribute in table CalDevice does not exist!"
             )
 
         return copy.deepcopy(self._calEff)
@@ -819,8 +817,7 @@ class CalDeviceRow:
         if not self._noiseCalExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + noiseCal
-                + " attribute in table CalDevice does not exist!"
+                + "'noiseCal' attribute in table CalDevice does not exist!"
             )
 
         return copy.deepcopy(self._noiseCal)
@@ -885,8 +882,7 @@ class CalDeviceRow:
         if not self._coupledNoiseCalExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + coupledNoiseCal
-                + " attribute in table CalDevice does not exist!"
+                + "'coupledNoiseCal' attribute in table CalDevice does not exist!"
             )
 
         return copy.deepcopy(self._coupledNoiseCal)
@@ -951,8 +947,7 @@ class CalDeviceRow:
         if not self._temperatureLoadExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + temperatureLoad
-                + " attribute in table CalDevice does not exist!"
+                + "'temperatureLoad' attribute in table CalDevice does not exist!"
             )
 
         return copy.deepcopy(self._temperatureLoad)

@@ -1129,8 +1129,7 @@ class SBSummaryRow:
         if not self._centerDirectionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + centerDirection
-                + " attribute in table SBSummary does not exist!"
+                + "'centerDirection' attribute in table SBSummary does not exist!"
             )
 
         return copy.deepcopy(self._centerDirection)
@@ -1195,8 +1194,7 @@ class SBSummaryRow:
         if not self._centerDirectionCodeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + centerDirectionCode
-                + " attribute in table SBSummary does not exist!"
+                + "'centerDirectionCode' attribute in table SBSummary does not exist!"
             )
 
         return self._centerDirectionCode
@@ -1240,8 +1238,7 @@ class SBSummaryRow:
         if not self._centerDirectionEquinoxExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + centerDirectionEquinox
-                + " attribute in table SBSummary does not exist!"
+                + "'centerDirectionEquinox' attribute in table SBSummary does not exist!"
             )
 
         # make sure it is a copy of ArrayTime
