@@ -123,6 +123,10 @@ class DelayModelVariableParametersRow:
 
         self._nutationInObliquityRate = AngularRate()
 
+        self._delayModelVersionExists = False
+
+        self._delayModelVersion = None
+
         # extrinsic attributes
 
         self._delayModelFixedParametersId = Tag()
@@ -200,6 +204,14 @@ class DelayModelVariableParametersRow:
 
                 self._nutationInObliquityRateExists = True
 
+            # by default set systematically delayModelVersion's value to something not None
+
+            if row._delayModelVersionExists:
+
+                self._delayModelVersion = row._delayModelVersion
+
+                self._delayModelVersionExists = True
+
     def isAdded(self):
         self._hasBeenAdded = True
 
@@ -266,6 +278,10 @@ class DelayModelVariableParametersRow:
             result += Parser.extendedValueToXML(
                 "nutationInObliquityRate", self._nutationInObliquityRate
             )
+
+        if self._delayModelVersionExists:
+
+            result += Parser.valueToXML("delayModelVersion", self._delayModelVersion)
 
         # extrinsic attributes
 
@@ -395,6 +411,15 @@ class DelayModelVariableParametersRow:
 
             self._nutationInObliquityRateExists = True
 
+        delayModelVersionNode = rowdom.getElementsByTagName("delayModelVersion")
+        if len(delayModelVersionNode) > 0:
+
+            self._delayModelVersion = str(
+                delayModelVersionNode[0].firstChild.data.strip()
+            )
+
+            self._delayModelVersionExists = True
+
         # extrinsic attribute values
 
         delayModelFixedParametersIdNode = rowdom.getElementsByTagName(
@@ -454,6 +479,11 @@ class DelayModelVariableParametersRow:
         if self._nutationInObliquityRateExists:
 
             self._nutationInObliquityRate.toBin(eos)
+
+        eos.writeBool(self._delayModelVersionExists)
+        if self._delayModelVersionExists:
+
+            eos.writeStr(self._delayModelVersion)
 
     @staticmethod
     def delayModelVariableParametersIdFromBin(row, eis):
@@ -581,6 +611,16 @@ class DelayModelVariableParametersRow:
             row._nutationInObliquityRate = AngularRate.fromBin(eis)
 
     @staticmethod
+    def delayModelVersionFromBin(row, eis):
+        """
+        Set the optional delayModelVersion in row from the EndianInput (eis) instance.
+        """
+        row._delayModelVersionExists = eis.readBool()
+        if row._delayModelVersionExists:
+
+            row._delayModelVersion = eis.readStr()
+
+    @staticmethod
     def initFromBinMethods():
         global _fromBinMethods
         if len(_fromBinMethods) > 0:
@@ -618,6 +658,9 @@ class DelayModelVariableParametersRow:
         )
         _fromBinMethods["nutationInObliquityRate"] = (
             DelayModelVariableParametersRow.nutationInObliquityRateFromBin
+        )
+        _fromBinMethods["delayModelVersion"] = (
+            DelayModelVariableParametersRow.delayModelVersionFromBin
         )
 
     @staticmethod
@@ -899,8 +942,7 @@ class DelayModelVariableParametersRow:
         if not self._nutationInLongitudeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + nutationInLongitude
-                + " attribute in table DelayModelVariableParameters does not exist!"
+                + "'nutationInLongitude' attribute in table DelayModelVariableParameters does not exist!"
             )
 
         # make sure it is a copy of Angle
@@ -945,8 +987,7 @@ class DelayModelVariableParametersRow:
         if not self._nutationInLongitudeRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + nutationInLongitudeRate
-                + " attribute in table DelayModelVariableParameters does not exist!"
+                + "'nutationInLongitudeRate' attribute in table DelayModelVariableParameters does not exist!"
             )
 
         # make sure it is a copy of AngularRate
@@ -991,8 +1032,7 @@ class DelayModelVariableParametersRow:
         if not self._nutationInObliquityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + nutationInObliquity
-                + " attribute in table DelayModelVariableParameters does not exist!"
+                + "'nutationInObliquity' attribute in table DelayModelVariableParameters does not exist!"
             )
 
         # make sure it is a copy of Angle
@@ -1037,8 +1077,7 @@ class DelayModelVariableParametersRow:
         if not self._nutationInObliquityRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + nutationInObliquityRate
-                + " attribute in table DelayModelVariableParameters does not exist!"
+                + "'nutationInObliquityRate' attribute in table DelayModelVariableParameters does not exist!"
             )
 
         # make sure it is a copy of AngularRate
@@ -1061,6 +1100,50 @@ class DelayModelVariableParametersRow:
         Mark nutationInObliquityRate, which is an optional field, as non-existent.
         """
         self._nutationInObliquityRateExists = False
+
+    # ===> Attribute delayModelVersion, which is optional
+    _delayModelVersionExists = False
+
+    _delayModelVersion = None
+
+    def isDelayModelVersionExists(self):
+        """
+        The attribute delayModelVersion is optional. Return True if this attribute exists.
+        return True if and only if the delayModelVersion attribute exists.
+        """
+        return self._delayModelVersionExists
+
+    def getDelayModelVersion(self):
+        """
+        Get delayModelVersion, which is optional.
+        return delayModelVersion as str
+        raises ValueError If delayModelVersion does not exist.
+        """
+        if not self._delayModelVersionExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'delayModelVersion' attribute in table DelayModelVariableParameters does not exist!"
+            )
+
+        return self._delayModelVersion
+
+    def setDelayModelVersion(self, delayModelVersion):
+        """
+        Set delayModelVersion with the specified str value.
+        delayModelVersion The str value to which delayModelVersion is to be set.
+
+
+        """
+
+        self._delayModelVersion = str(delayModelVersion)
+
+        self._delayModelVersionExists = True
+
+    def clearDelayModelVersion(self):
+        """
+        Mark delayModelVersion, which is an optional field, as non-existent.
+        """
+        self._delayModelVersionExists = False
 
     # Extrinsic Table Attributes
 

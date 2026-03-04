@@ -378,7 +378,7 @@ class MainTable:
             # Create and initialize an entry in the context dict for this combination....
             self._context[keystr] = []
 
-        result = insertByTime(x, self._context[keystr])
+        result = self.insertByTime(x, self._context[keystr])
         return result
 
     def newRow(

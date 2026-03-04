@@ -1208,8 +1208,7 @@ class CalFluxRow:
         if not self._directionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + direction
-                + " attribute in table CalFlux does not exist!"
+                + "'direction' attribute in table CalFlux does not exist!"
             )
 
         return copy.deepcopy(self._direction)
@@ -1274,8 +1273,7 @@ class CalFluxRow:
         if not self._directionCodeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + directionCode
-                + " attribute in table CalFlux does not exist!"
+                + "'directionCode' attribute in table CalFlux does not exist!"
             )
 
         return self._directionCode
@@ -1319,8 +1317,7 @@ class CalFluxRow:
         if not self._directionEquinoxExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + directionEquinox
-                + " attribute in table CalFlux does not exist!"
+                + "'directionEquinox' attribute in table CalFlux does not exist!"
             )
 
         # make sure it is a copy of Angle
@@ -1365,8 +1362,7 @@ class CalFluxRow:
         if not self._PAExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + PA
-                + " attribute in table CalFlux does not exist!"
+                + "'PA' attribute in table CalFlux does not exist!"
             )
 
         return copy.deepcopy(self._PA)
@@ -1431,8 +1427,7 @@ class CalFluxRow:
         if not self._PAErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + PAError
-                + " attribute in table CalFlux does not exist!"
+                + "'PAError' attribute in table CalFlux does not exist!"
             )
 
         return copy.deepcopy(self._PAError)
@@ -1497,8 +1492,7 @@ class CalFluxRow:
         if not self._sizeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + size
-                + " attribute in table CalFlux does not exist!"
+                + "'size' attribute in table CalFlux does not exist!"
             )
 
         return copy.deepcopy(self._size)
@@ -1563,8 +1557,7 @@ class CalFluxRow:
         if not self._sizeErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sizeError
-                + " attribute in table CalFlux does not exist!"
+                + "'sizeError' attribute in table CalFlux does not exist!"
             )
 
         return copy.deepcopy(self._sizeError)
@@ -1629,8 +1622,7 @@ class CalFluxRow:
         if not self._sourceModelExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sourceModel
-                + " attribute in table CalFlux does not exist!"
+                + "'sourceModel' attribute in table CalFlux does not exist!"
             )
 
         return self._sourceModel

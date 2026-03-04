@@ -303,7 +303,7 @@ class StationTable:
         # Autoincrement stationId
         x.setStationId(Tag(self.size(), TagType.Station))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

@@ -178,6 +178,9 @@ from .HistoryRow import HistoryRow
 from .HolographyTable import HolographyTable
 from .HolographyRow import HolographyRow
 
+from .ModulationTable import ModulationTable
+from .ModulationRow import ModulationRow
+
 from .ObservationTable import ObservationTable
 from .ObservationRow import ObservationRow
 
@@ -189,6 +192,9 @@ from .PointingModelRow import PointingModelRow
 
 from .PolarizationTable import PolarizationTable
 from .PolarizationRow import PolarizationRow
+
+from .PostProcessingTable import PostProcessingTable
+from .PostProcessingRow import PostProcessingRow
 
 from .ProcessorTable import ProcessorTable
 from .ProcessorRow import ProcessorRow

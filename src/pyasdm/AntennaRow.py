@@ -689,8 +689,7 @@ class AntennaRow:
         if not self._assocAntennaIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocAntennaId
-                + " attribute in table Antenna does not exist!"
+                + "'assocAntennaId' attribute in table Antenna does not exist!"
             )
 
         # make sure it is a copy of Tag

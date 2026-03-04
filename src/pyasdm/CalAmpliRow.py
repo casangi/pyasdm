@@ -964,8 +964,7 @@ class CalAmpliRow:
         if not self._correctionValidityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + correctionValidity
-                + " attribute in table CalAmpli does not exist!"
+                + "'correctionValidity' attribute in table CalAmpli does not exist!"
             )
 
         return self._correctionValidity

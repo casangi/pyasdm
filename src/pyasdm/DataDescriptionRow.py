@@ -370,8 +370,7 @@ class DataDescriptionRow:
         if not self._pulsarIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + pulsarId
-                + " attribute in table DataDescription does not exist!"
+                + "'pulsarId' attribute in table DataDescription does not exist!"
             )
 
         # make sure it is a copy of Tag

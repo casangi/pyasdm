@@ -779,22 +779,22 @@ class SourceTable:
 
         # print("Trying to add a new row with start time = "+str(startTime))
 
-        insertionId = self.name2id_dict.get[x.getSourceName()]
+        insertionId = self._name2id_dict.get[x.getSourceName()]
 
         # sourceId is now known from the dictionary
         # context is a vector of vectors, sourceId index to the outer vector and
         # timeInterval for the inner vector
 
-        kstr = self.Key(x.getSpectralWindowId())
+        keystr = self.Key(x.getSpectralWindowId())
 
         # Determine the insertion index for the row x, possibly returning a row identical to x.
         if keystr in self._context:
-            if len[self._context] > insertionId:
+            if len(self._context) > insertionId:
                 # this insertionId is known to _context, get the associated list of rows
                 idList = self._context[keystr][insertionId]
                 # search to see if that row is already known
                 for r in idList:
-                    if startTime.eq(r.getTimeInterval().getStart()):
+                    if startTime.equals(r.getTimeInterval().getStart()):
                         if r.compareRequiredValue(
                             x.getCode(),
                             x.getDirection(),

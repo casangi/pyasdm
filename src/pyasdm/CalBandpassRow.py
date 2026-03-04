@@ -1652,8 +1652,7 @@ class CalBandpassRow:
         if not self._numBaselineExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numBaseline
-                + " attribute in table CalBandpass does not exist!"
+                + "'numBaseline' attribute in table CalBandpass does not exist!"
             )
 
         return self._numBaseline
@@ -1697,8 +1696,7 @@ class CalBandpassRow:
         if not self._numFreqExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numFreq
-                + " attribute in table CalBandpass does not exist!"
+                + "'numFreq' attribute in table CalBandpass does not exist!"
             )
 
         return self._numFreq
@@ -1742,8 +1740,7 @@ class CalBandpassRow:
         if not self._rmsExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + rms
-                + " attribute in table CalBandpass does not exist!"
+                + "'rms' attribute in table CalBandpass does not exist!"
             )
 
         return copy.deepcopy(self._rms)
@@ -1808,8 +1805,7 @@ class CalBandpassRow:
         if not self._frequencyRangeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + frequencyRange
-                + " attribute in table CalBandpass does not exist!"
+                + "'frequencyRange' attribute in table CalBandpass does not exist!"
             )
 
         return copy.deepcopy(self._frequencyRange)
@@ -1874,8 +1870,7 @@ class CalBandpassRow:
         if not self._numSpectralWindowExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numSpectralWindow
-                + " attribute in table CalBandpass does not exist!"
+                + "'numSpectralWindow' attribute in table CalBandpass does not exist!"
             )
 
         return self._numSpectralWindow
@@ -1919,8 +1914,7 @@ class CalBandpassRow:
         if not self._chanFreqStartExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqStart
-                + " attribute in table CalBandpass does not exist!"
+                + "'chanFreqStart' attribute in table CalBandpass does not exist!"
             )
 
         return copy.deepcopy(self._chanFreqStart)
@@ -1985,8 +1979,7 @@ class CalBandpassRow:
         if not self._chanFreqStepExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqStep
-                + " attribute in table CalBandpass does not exist!"
+                + "'chanFreqStep' attribute in table CalBandpass does not exist!"
             )
 
         return copy.deepcopy(self._chanFreqStep)
@@ -2051,8 +2044,7 @@ class CalBandpassRow:
         if not self._numSpectralWindowChanExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numSpectralWindowChan
-                + " attribute in table CalBandpass does not exist!"
+                + "'numSpectralWindowChan' attribute in table CalBandpass does not exist!"
             )
 
         return copy.deepcopy(self._numSpectralWindowChan)
@@ -2117,8 +2109,7 @@ class CalBandpassRow:
         if not self._spectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + spectrum
-                + " attribute in table CalBandpass does not exist!"
+                + "'spectrum' attribute in table CalBandpass does not exist!"
             )
 
         return copy.deepcopy(self._spectrum)

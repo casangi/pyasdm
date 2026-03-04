@@ -873,8 +873,7 @@ class FieldRow:
         if not self._timeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + time
-                + " attribute in table Field does not exist!"
+                + "'time' attribute in table Field does not exist!"
             )
 
         # make sure it is a copy of ArrayTime
@@ -919,8 +918,7 @@ class FieldRow:
         if not self._codeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + code
-                + " attribute in table Field does not exist!"
+                + "'code' attribute in table Field does not exist!"
             )
 
         return self._code
@@ -964,8 +962,7 @@ class FieldRow:
         if not self._directionCodeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + directionCode
-                + " attribute in table Field does not exist!"
+                + "'directionCode' attribute in table Field does not exist!"
             )
 
         return self._directionCode
@@ -1009,8 +1006,7 @@ class FieldRow:
         if not self._directionEquinoxExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + directionEquinox
-                + " attribute in table Field does not exist!"
+                + "'directionEquinox' attribute in table Field does not exist!"
             )
 
         # make sure it is a copy of ArrayTime
@@ -1055,8 +1051,7 @@ class FieldRow:
         if not self._assocNatureExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocNature
-                + " attribute in table Field does not exist!"
+                + "'assocNature' attribute in table Field does not exist!"
             )
 
         return self._assocNature
@@ -1102,8 +1097,7 @@ class FieldRow:
         if not self._assocFieldIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocFieldId
-                + " attribute in table Field does not exist!"
+                + "'assocFieldId' attribute in table Field does not exist!"
             )
 
         # make sure it is a copy of Tag
@@ -1148,8 +1142,7 @@ class FieldRow:
         if not self._ephemerisIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + ephemerisId
-                + " attribute in table Field does not exist!"
+                + "'ephemerisId' attribute in table Field does not exist!"
             )
 
         return self._ephemerisId
@@ -1193,8 +1186,7 @@ class FieldRow:
         if not self._sourceIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sourceId
-                + " attribute in table Field does not exist!"
+                + "'sourceId' attribute in table Field does not exist!"
             )
 
         return self._sourceId

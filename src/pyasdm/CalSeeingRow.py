@@ -897,8 +897,7 @@ class CalSeeingRow:
         if not self._exponentExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + exponent
-                + " attribute in table CalSeeing does not exist!"
+                + "'exponent' attribute in table CalSeeing does not exist!"
             )
 
         return self._exponent
@@ -942,8 +941,7 @@ class CalSeeingRow:
         if not self._outerScaleExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + outerScale
-                + " attribute in table CalSeeing does not exist!"
+                + "'outerScale' attribute in table CalSeeing does not exist!"
             )
 
         # make sure it is a copy of Length
@@ -988,8 +986,7 @@ class CalSeeingRow:
         if not self._outerScaleRMSExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + outerScaleRMS
-                + " attribute in table CalSeeing does not exist!"
+                + "'outerScaleRMS' attribute in table CalSeeing does not exist!"
             )
 
         # make sure it is a copy of Angle

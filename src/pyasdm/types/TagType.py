@@ -159,6 +159,10 @@ PointingModel = TagType("PointingModel")
 Polarization = TagType("Polarization")
 
 
+# The TagType for a PostProcessing Tag.
+PostProcessing = TagType("PostProcessing")
+
+
 # The TagType for a Processor Tag.
 Processor = TagType("Processor")
 

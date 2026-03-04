@@ -1245,8 +1245,7 @@ class CalWVRRow:
         if not self._tauBaselineExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tauBaseline
-                + " attribute in table CalWVR does not exist!"
+                + "'tauBaseline' attribute in table CalWVR does not exist!"
             )
 
         return self._tauBaseline

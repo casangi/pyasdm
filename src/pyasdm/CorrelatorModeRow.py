@@ -118,6 +118,10 @@ class CorrelatorModeRow:
 
         self._correlatorName = CorrelatorName.from_int(0)
 
+        self._correlatorSoftwareVersionExists = False
+
+        self._correlatorSoftwareVersion = None
+
         if row is not None:
             if not isinstance(row, CorrelatorModeRow):
                 raise ValueError("row must be a CorrelatorModeRow")
@@ -155,6 +159,14 @@ class CorrelatorModeRow:
                 self._correlatorName = CorrelatorName.from_int(0)
             else:
                 self._correlatorName = CorrelatorName(row._correlatorName)
+
+            # by default set systematically correlatorSoftwareVersion's value to something not None
+
+            if row._correlatorSoftwareVersionExists:
+
+                self._correlatorSoftwareVersion = row._correlatorSoftwareVersion
+
+                self._correlatorSoftwareVersionExists = True
 
     def isAdded(self):
         self._hasBeenAdded = True
@@ -196,6 +208,12 @@ class CorrelatorModeRow:
         result += Parser.valueToXML(
             "correlatorName", CorrelatorName.name(self._correlatorName)
         )
+
+        if self._correlatorSoftwareVersionExists:
+
+            result += Parser.valueToXML(
+                "correlatorSoftwareVersion", self._correlatorSoftwareVersion
+            )
 
         # links, if any
 
@@ -283,6 +301,17 @@ class CorrelatorModeRow:
             correlatorNameNode.firstChild.data.strip()
         )
 
+        correlatorSoftwareVersionNode = rowdom.getElementsByTagName(
+            "correlatorSoftwareVersion"
+        )
+        if len(correlatorSoftwareVersionNode) > 0:
+
+            self._correlatorSoftwareVersion = str(
+                correlatorSoftwareVersionNode[0].firstChild.data.strip()
+            )
+
+            self._correlatorSoftwareVersionExists = True
+
         # from link values, if any
 
     def toBin(self, eos):
@@ -321,6 +350,11 @@ class CorrelatorModeRow:
             eos.writeString(str(self._filterMode[i]))
 
         eos.writeString(str(self._correlatorName))
+
+        eos.writeBool(self._correlatorSoftwareVersionExists)
+        if self._correlatorSoftwareVersionExists:
+
+            eos.writeStr(self._correlatorSoftwareVersion)
 
     @staticmethod
     def correlatorModeIdFromBin(row, eis):
@@ -423,6 +457,16 @@ class CorrelatorModeRow:
         row._correlatorName = CorrelatorName.literal(eis.readString())
 
     @staticmethod
+    def correlatorSoftwareVersionFromBin(row, eis):
+        """
+        Set the optional correlatorSoftwareVersion in row from the EndianInput (eis) instance.
+        """
+        row._correlatorSoftwareVersionExists = eis.readBool()
+        if row._correlatorSoftwareVersionExists:
+
+            row._correlatorSoftwareVersion = eis.readStr()
+
+    @staticmethod
     def initFromBinMethods():
         global _fromBinMethods
         if len(_fromBinMethods) > 0:
@@ -438,6 +482,10 @@ class CorrelatorModeRow:
         _fromBinMethods["axesOrderArray"] = CorrelatorModeRow.axesOrderArrayFromBin
         _fromBinMethods["filterMode"] = CorrelatorModeRow.filterModeFromBin
         _fromBinMethods["correlatorName"] = CorrelatorModeRow.correlatorNameFromBin
+
+        _fromBinMethods["correlatorSoftwareVersion"] = (
+            CorrelatorModeRow.correlatorSoftwareVersionFromBin
+        )
 
     @staticmethod
     def fromBin(eis, table, attributesSeq):
@@ -778,6 +826,50 @@ class CorrelatorModeRow:
         """
 
         self._correlatorName = CorrelatorName(correlatorName)
+
+    # ===> Attribute correlatorSoftwareVersion, which is optional
+    _correlatorSoftwareVersionExists = False
+
+    _correlatorSoftwareVersion = None
+
+    def isCorrelatorSoftwareVersionExists(self):
+        """
+        The attribute correlatorSoftwareVersion is optional. Return True if this attribute exists.
+        return True if and only if the correlatorSoftwareVersion attribute exists.
+        """
+        return self._correlatorSoftwareVersionExists
+
+    def getCorrelatorSoftwareVersion(self):
+        """
+        Get correlatorSoftwareVersion, which is optional.
+        return correlatorSoftwareVersion as str
+        raises ValueError If correlatorSoftwareVersion does not exist.
+        """
+        if not self._correlatorSoftwareVersionExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'correlatorSoftwareVersion' attribute in table CorrelatorMode does not exist!"
+            )
+
+        return self._correlatorSoftwareVersion
+
+    def setCorrelatorSoftwareVersion(self, correlatorSoftwareVersion):
+        """
+        Set correlatorSoftwareVersion with the specified str value.
+        correlatorSoftwareVersion The str value to which correlatorSoftwareVersion is to be set.
+
+
+        """
+
+        self._correlatorSoftwareVersion = str(correlatorSoftwareVersion)
+
+        self._correlatorSoftwareVersionExists = True
+
+    def clearCorrelatorSoftwareVersion(self):
+        """
+        Mark correlatorSoftwareVersion, which is an optional field, as non-existent.
+        """
+        self._correlatorSoftwareVersionExists = False
 
     # Extrinsic Table Attributes
 

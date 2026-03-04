@@ -132,6 +132,10 @@ class FeedTable:
 
         skyCouplingSpectrum (float [] ): Array(numChan) the sky coupling is the coupling efficiency to the sky of the WVR radiometer's. This column differs from the skyCoupling column because it contains one value for each of the individual channels of that spectralWindow. See the documentation of numChan for the size and the presence of this attribute. Note that in general one expects to see whether \b no sky coupling efficiency recorded or \b only \b one of the two forms  scalar (skyCoupling) or array (skyCouplingSpectrum, numChan). Optional.
 
+        receiverGeneration (int): the receiver generation. Optional.
+
+        digitizerOffset (Frequency): frequency offset in the digitizer clock. Optional.
+
 
     """
 
@@ -250,6 +254,25 @@ class FeedTable:
         Returns the tolerance as a  Length
         """
         return self._positionEqTolerance
+
+    # The tolerance which will be used on digitizerOffset during an add operation on the table
+    _digitizerOffsetEqTolerance = Frequency(0.0)
+
+    def setDigitizerOffsetEqTolerance(self, tolerance):
+        """
+        A setter for the tolerance on digitizerOffset
+        """
+        if not isinstance(tolerance, Frequency):
+            print("tolerance must be a  Frequency instance")
+
+        self._digitizerOffsetEqTolerance = Frequency(tolerance)
+
+    def getDigitizerOffsetEqTolerance(self):
+        """
+        A getter for the tolerance on digitizerOffset
+        Returns the tolerance as a  Frequency
+        """
+        return self._digitizerOffsetEqTolerance
 
     def getKeyName(self):
         """
@@ -502,7 +525,7 @@ class FeedTable:
             # row that matches this time and other required values
             for autoIncList in range(len(contextRows)):
                 for thisRow in autoIncList:
-                    if startTime.eq(thisRow.getTimeInterval().getStart()):
+                    if startTime.equals(thisRow.getTimeInterval().getStart()):
                         if thisRow.compareRequiredValue(
                             x.getNumReceptor(),
                             x.getBeamOffset(),
@@ -535,7 +558,7 @@ class FeedTable:
         # make sure there are enough rows in contextRows to hold insertionId
         # probably this just adds one list to contextRows
         while len(contextRows) <= insertionId:
-            contetRows.append([])
+            contextRows.append([])
 
         # and insert this row into the list at insertionId so that list remains ordered in time
         result = self.insertByStartTime(x, contextRows[insertionId])
@@ -950,6 +973,8 @@ class FeedTable:
         result += "<skyCoupling/>\n"
         result += "<numChan/>\n"
         result += "<skyCouplingSpectrum/>\n"
+        result += "<receiverGeneration/>\n"
+        result += "<digitizerOffset/>\n"
         result += "</Attributes>\n"
         result += "</FeedTable>\n"
 
@@ -1130,6 +1155,10 @@ class FeedTable:
             attributesSeq.append("numChan")
 
             attributesSeq.append("skyCouplingSpectrum")
+
+            attributesSeq.append("receiverGeneration")
+
+            attributesSeq.append("digitizerOffset")
 
             versionStr = "2"
 

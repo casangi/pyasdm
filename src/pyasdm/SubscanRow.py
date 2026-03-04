@@ -671,8 +671,7 @@ class SubscanRow:
         if not self._subscanModeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + subscanMode
-                + " attribute in table Subscan does not exist!"
+                + "'subscanMode' attribute in table Subscan does not exist!"
             )
 
         return self._subscanMode
@@ -781,8 +780,7 @@ class SubscanRow:
         if not self._correlatorCalibrationExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + correlatorCalibration
-                + " attribute in table Subscan does not exist!"
+                + "'correlatorCalibration' attribute in table Subscan does not exist!"
             )
 
         return self._correlatorCalibration

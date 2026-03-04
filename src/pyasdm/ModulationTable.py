@@ -26,12 +26,12 @@
 # | If you do, all changes will be lost when the file is re-generated. |
 #  --------------------------------------------------------------------
 #
-# File HolographyTable.py
+# File ModulationTable.py
 #
 
 import pyasdm.ASDM
 
-from .HolographyRow import HolographyRow
+from .ModulationRow import ModulationRow
 
 # All of the extended types are imported
 from pyasdm.types import *
@@ -51,11 +51,11 @@ import os
 import io
 
 
-class HolographyTable:
+class ModulationTable:
     """
-    The HolographyTable class is an Alma table.
+    The ModulationTable class is an Alma table.
 
-    Used for Single-Dish holography with a fixed transmitter.
+    A table to hold antenna dependent LO frequencies or their offsets and additional related parameters.
 
     Shown here are the fields found in each row.
 
@@ -85,20 +85,36 @@ class HolographyTable:
 
 
 
-        holographyId (Tag): identifies a unique row in the table. auto-incrementable, key.
+        antennaId (Tag): refers to a unique row in AntennaTable. key.
+
+
+
+        receiverId (int): receiver identifier. key.
+
+
+
+        spectralWindowId (Tag): spectral window identifier. key.
+
+
+
+        timeInterval (ArrayTimeInterval): time interval for which the row's content is valid. key.
 
 
 
 
 
-        distance (Length): the distance to transmitter.
+        localOscillatorOffset (Frequency): LO offset.
 
-        focus (Length): displacement of the feed from the primary nominal focus.
+        walsh180enabled (bool): is Walsh 180 enabled?
 
-        numCorr (int): the number of stored correlations.
+        walsh90enabled (bool): is Walsh 90 enabled?
 
-        type (HolographyChannelType [] ): Array(numCorr) identifies the types of the correlation signals.
 
+
+
+        walsh180index (int): index for the 180 degree Walsh function pattern. Optional.
+
+        walsh90index (int): index for the 90 degree Walsh function pattern. Optional.
 
 
     """
@@ -112,10 +128,10 @@ class HolographyTable:
     _loadInProgress = False
 
     # The name of this table.
-    _tableName = "Holography"
+    _tableName = "Modulation"
 
     # The list of field names that make up key 'key'.
-    _key = ["holographyId"]
+    _key = ["antennaId", "receiverId", "spectralWindowId", "timeInterval"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
@@ -124,11 +140,14 @@ class HolographyTable:
     # _archiveAsBin = False # If True archive binary else archive XML
     _fileAsBin = False  # If True file binary else file XML
 
-    # A data structure to store the HolographyRow s.
-    # In all cases we maintain a private list of HolographyRow s.
+    # A data structure to store the ModulationRow s.
+    # In all cases we maintain a private list of ModulationRow s.
     _privateRows = []
 
-    # non-temporal ASDM in Java had a private row element here to also hold  HolographyRow s. Not needed in python.
+    # this table has a temporal key with other key fields and no auto-incrementable key
+    # context is a dictionary where the key is the key without the temporal field
+    # and the value is a list of rows having those key values kept in temporal order
+    _context = {}
 
     # the Entity of this table
     _entity = None
@@ -136,43 +155,24 @@ class HolographyTable:
     # from the schemaVersion string found in the table, must be an integer
     _version = 0
 
-    # The tolerance which will be used on distance during an add operation on the table
-    _distanceEqTolerance = Length(0.0)
+    # The tolerance which will be used on localOscillatorOffset during an add operation on the table
+    _localOscillatorOffsetEqTolerance = Frequency(0.0)
 
-    def setDistanceEqTolerance(self, tolerance):
+    def setLocalOscillatorOffsetEqTolerance(self, tolerance):
         """
-        A setter for the tolerance on distance
+        A setter for the tolerance on localOscillatorOffset
         """
-        if not isinstance(tolerance, Length):
-            print("tolerance must be a  Length instance")
+        if not isinstance(tolerance, Frequency):
+            print("tolerance must be a  Frequency instance")
 
-        self._distanceEqTolerance = Length(tolerance)
+        self._localOscillatorOffsetEqTolerance = Frequency(tolerance)
 
-    def getDistanceEqTolerance(self):
+    def getLocalOscillatorOffsetEqTolerance(self):
         """
-        A getter for the tolerance on distance
-        Returns the tolerance as a  Length
+        A getter for the tolerance on localOscillatorOffset
+        Returns the tolerance as a  Frequency
         """
-        return self._distanceEqTolerance
-
-    # The tolerance which will be used on focus during an add operation on the table
-    _focusEqTolerance = Length(0.0)
-
-    def setFocusEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on focus
-        """
-        if not isinstance(tolerance, Length):
-            print("tolerance must be a  Length instance")
-
-        self._focusEqTolerance = Length(tolerance)
-
-    def getFocusEqTolerance(self):
-        """
-        A getter for the tolerance on focus
-        Returns the tolerance as a  Length
-        """
-        return self._focusEqTolerance
+        return self._localOscillatorOffsetEqTolerance
 
     def getKeyName(self):
         """
@@ -181,52 +181,154 @@ class HolographyTable:
         """
         return self._key
 
-    # a dictionary for the autoincrementation algorithm
-    # the key is the key, excluding that auto-incrementable
-    # the value is an integer that's the largest auto-incrementable for that key
-    _noAutoIncIds = {}
-
-    def autoIncrement(self, key, x):
+    def Key(self, antennaId, receiverId, spectralWindowId):
         """
-        For internal use.
-        key is a key string
-        x is a row.
+        Returns a string built by concatenating the ascii representation of the
+        parameters values suffixed with a "_" character.
         """
-        if key not in self._noAutoIncIds:
-            # There is not yet a combination of the non autoinc attributes values in the dict
+        result = ""
 
-            # Initialize  holographyId to Tag(0).
-            x.setHolographyId(Tag(0, TagType.Holography))
+        result += str(antennaId) + "_"
 
-            # Record it in the dict.
-            self._noAutoIncIds[key] = 0
+        result += str(receiverId) + "_"
+
+        result += str(spectralWindowId) + "_"
+
+        return result
+
+    def insertByStartTime(self, x, rowlist):
+        """
+        Insert a ModulationRow in a list of ModulationRow so that it's ordered by ascending start time.
+
+        x The ModulationRow to be inserted.
+        rowlist The list where x is to be inserted.
+
+        The inserted row is returned. If x already exists in rowlist then it is not added and
+        the row in rowlist is returned.
+
+        If a row matching the value of the start time of timeInterval is
+        found in rowlist but the other required parameters do not have the same value
+        then a DuplicateKey exception is raised.
+        """
+
+        # get the ArrayTime value at the start of the ArrayTimeInterval found in x
+        xTimeStart = x.getTimeInterval().getStart().get()
+
+        # work out where to add x to rowlist
+        if (len(rowlist) == 0) or (
+            xTimeStart > (rowlist[-1].getTimeInterval().getStart().get())
+        ):
+            # it belongs at the end
+            if len(rowlist) > 0:
+                lastRow = rowlist[-1]
+                # Modify the duration of lastRow if and only if the start time of x
+                # is located strictly before the end time of last.
+                if xTimeStart < (
+                    lastRow.getTimeInterval().getStart().get()
+                    + lastRow.getTimeInterval().getDuration().get()
+                ):
+                    lastRow.getTimeInterval().setDuration(
+                        xTimeStart - lastRow.getTimeInterval().getStart().get()
+                    )
+            rowlist.append(x)
+        elif xTimeStart < rowlist[0].getTimeInterval().getStart().get():
+            # it belongs at the start
+            firstRow = rowlist[0]
+            # Modify the duration of x if and only if the start time of firstRow
+            # is located strictly before the end time of x.
+            if firstRow.getTimeInterval().getStart().get() < (
+                xTimeStart + x.getTimeInterval().getDuration().get()
+            ):
+                x.getTimeInterval().setDuration(
+                    firstRow.getTimeInterval().getStart().get() - xTimeStart
+                )
+
+            rowlist.insert(0, x)
         else:
-            # There is already a combination of the non autoinc attributes values in the dict
-            nextInt = int(self._noAutoIncIds[key]) + 1
+            # x is inserted somewhere inside rowlist; let's use a dichotomoy
+            # method to find the insertion index.
 
-            # Initialize  holographyId to Tag(nextInt).
-            x.setHolographyId(Tag(nextInt, TagType.Holography))
+            k0 = 0
+            k1 = len(rowlist) - 1
 
-            # Record it in the hashtable.
-            self._noAutoIncIds[key] = nextInt
+            while k0 != (k1 - 1):
+                if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
+                    if rowlist[k0].equalByRequiredValue(x):
+                        # this row already exists at k0, nothing to insert or add, return that row
+                        return rowlist[k0]
+                    else:
+                        # the start time matches, but the rest of the required parameters do not
+                        raise DuplicateKey(
+                            "DuplicateKey exception in ", "ModulationTable"
+                        )
+                elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
+                    if rowlist[k1].equalByRequiredValue(x):
+                        # this row already exists at k1, nothing to insert or add, return that row
+                        return rowlist[k1]
+                    else:
+                        # the start time matches, but the rest of the required parameters do not
+                        raise DuplicateKey(
+                            "DuplicateKey exception in ", "ModulationTable"
+                        )
+                else:
+                    # make sure new index is an integer
+                    newIndex = int((k0 + k1) / 2)
+                    if (
+                        xTimeStart
+                        <= rowlist[newIndex].getTimeInterval().getStart().get()
+                    ):
+                        k1 = newIndex
+                    else:
+                        k0 = newIndex
+
+            if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
+                if rowlist[k0].equalByRequiredValue(x):
+                    # this row already exists at k0, nothing to insert or add, return that row
+                    return rowlist[k0]
+                else:
+                    # the start time matches, but the rest of the required paramters do not
+                    raise DuplicateKey("DuplicateKey exception in ", "ModulationTable")
+            elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
+                if rowlist[k1].equalByRequiredValue(x):
+                    # this row already exists at k1, nothing to insert or add, return that row
+                    return rowlist[k1]
+                else:
+                    # the start time matches, but the rest of the required parameters do not
+                    raise DuplicateKey("DuplicateKey exception in ", "ModulationTable")
+
+            # if it reaches here, it should be added, set the duration as appropriate for
+            # insertion at k1, after k0, adjust duration of k0 as appropriate
+            rowlist[k0].getTimeInterval().setDuration(
+                xTimeStart - rowlist[k0].getTimeInterval().getStart().get()
+            )
+            x.getTimeInterval().setDuration(
+                rowlist[k0 + 1].getTimeInterval().getStart().get() - xTimeStart
+            )
+            rowlist.insert(k1, x)
+
+        # if it reaches here then x has already been addded to rowlist and it needs to be
+        # appended to privateRows and marked as added internally before being returned
+        self._privateRows.append(x)
+        x.isAdded()
+        return x
 
     def __init__(self, container):
         """
-        Create a HolographyTable attached to container.
+        Create a ModulationTable attached to container.
 
         container must be a ASDM instance
         All tables must know the container
         """
 
         if not isinstance(container, pyasdm.ASDM):
-            raise (ValueError("HolographyTable constructor must use a ASDM instance"))
+            raise (ValueError("ModulationTable constructor must use a ASDM instance"))
 
         self._container = container
 
         self._entity = Entity()
         self._entity.setEntityId(EntityId("uid://X0/X0/X0"))
         self._entity.setEntityIdEncrypted("na")
-        self._entity.setEntityTypeName("HolographyTable")
+        self._entity.setEntityTypeName("ModulationTable")
         self._entity.setEntityVersion("1")
         self._entity.setInstanceVersion("1")
 
@@ -236,7 +338,7 @@ class HolographyTable:
 
         self._privateRows = []
 
-        self._noAutoIncIds = {}
+        self._context = {}
 
         self._version = 0
 
@@ -258,7 +360,7 @@ class HolographyTable:
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
-            # print("Holography is not present in memory, setting from file")
+            # print("Modulation is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -285,11 +387,11 @@ class HolographyTable:
 
     def __str__(self):
         """
-        Returns "HolographyTable" followed by the current size of the table
+        Returns "ModulationTable" followed by the current size of the table
         between parenthesis.
-        Example : HolographyTable(12)
+        Example : ModulationTable(12)
         """
-        return "HolographyTable(" + size() + ")"
+        return "ModulationTable(" + size() + ")"
 
     # ====> Row creation.
 
@@ -298,49 +400,73 @@ class HolographyTable:
         Create a new row with default values.
         The new row is not added to this table but it knows about it.
         """
-        thisRow = HolographyRow(self)
+        thisRow = ModulationRow(self)
         return thisRow
 
     def add(self, x):
         """
-        Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.holographyId,
-        add x to its table and returns x.
+        Add a row.
+        x the ModulationRow to be added.
 
-        returns a HolographyRow.
-        x. A row to be added.
+        return a ModulationRow. If the table contains a ModulationRow whose attributes (key and mandatory values) are equal to this in x
+        then this returns that previously added ModulationRow, otherwise x is returned.
+
+        raises  DuplicateKey when the table contains a ModulationRow with a key equal to the key in x but having
+         a value section different from the values in x.
+
+         note The row is inserted in the table in such a way that all the rows having the same value of
+         ( antennaId, receiverId, spectralWindowId ) are stored by ascending time.
         """
-        if not isinstance(x, HolographyRow):
-            raise ValueError("x must be a  HolographyRow instance.")
+        if not isinstance(x, ModulationRow):
+            raise ValueError("x must be a  ModulationRow instance.")
 
-        aRow = self.lookup(x.getDistance(), x.getFocus(), x.getNumCorr(), x.getType())
-        if aRow is not None:
-            return aRow
+        # get the key for x
+        keystr = self.Key(x.getAntennaId(), x.getReceiverId(), x.getSpectralWindowId())
 
-        # Autoincrement holographyId
-        x.setHolographyId(Tag(self.size(), TagType.Holography))
+        if keystr not in self._context:
+            # add a list to context for this key
+            self._context[keystr] = []
 
-        self._privateRows.append(x)
-        x.isAdded()
-        return x
+        result = None
+        try:
+            result = self.insertByStartTime(x, self._context[keystr])
+        except DuplicateKey as exc:
+            raise  # Simply reraise it
 
-    def newRow(self, distance, focus, numCorr, type):
+        return result
+
+    def newRow(
+        self,
+        antennaId,
+        receiverId,
+        spectralWindowId,
+        timeInterval,
+        localOscillatorOffset,
+        walsh180enabled,
+        walsh90enabled,
+    ):
         """
-        Create a new HolographyRow initialized to the specified values.
+        Create a new ModulationRow initialized to the specified values.
 
         The new row is not added to this table, but it does know about it.
         (the autoincrementable attribute, if any, is not in the parameter list)
         """
 
-        thisRow = HolographyRow(self)
+        thisRow = ModulationRow(self)
 
-        thisRow.setDistance(distance)
+        thisRow.setAntennaId(antennaId)
 
-        thisRow.setFocus(focus)
+        thisRow.setReceiverId(receiverId)
 
-        thisRow.setNumCorr(numCorr)
+        thisRow.setSpectralWindowId(spectralWindowId)
 
-        thisRow.setType(type)
+        thisRow.setTimeInterval(timeInterval)
+
+        thisRow.setLocalOscillatorOffset(localOscillatorOffset)
+
+        thisRow.setWalsh180enabled(walsh180enabled)
+
+        thisRow.setWalsh90enabled(walsh90enabled)
 
         return thisRow
 
@@ -348,95 +474,133 @@ class HolographyTable:
         """
         Create a new row using a copy constructor mechanism.
 
-        The method creates a new HolographyRow which knows about this table.
+        The method creates a new ModulationRow which knows about this table.
         Each attribute of the created row is a (deep) copy of the corresponding
         attribute of row. The method does not add the created row to this,
         it simply parents it to this, a call to the add method
         has to be done in order to get the row added (very likely after having modified
         some of its attributes.
-        If row is None then the method returns a new HolographyRow with default values for its attributes.
+        If row is None then the method returns a new ModulationRow with default values for its attributes.
         """
 
-        return HolographyRow(self, row)
+        return ModulationRow(self, row)
 
     # ====> Append a row to its table.
 
     def checkAndAdd(self, x):
         """
-        A method to append a row to it's table, used by input conversion methods.
+        A method to append a row to its table, used by input conversion methods.
         Not indended for external use.
 
         If this table has an autoincrementable attribute then check if
-        x verifies the rule of uniqueness and raise an exception if not.
+        x verifies the rule of uniqueness and throw exception if not.
+
+        This method is appropriate for the case with a ArrayTimeInterval temporal key,
+        no auto incrementable attribute, with other values in the key.
 
         Append x to its table.
-        x is the row to be appended.
-        returns x.
+        x The row to be appended.
+        returns  x.
         """
+        keystr = self.Key(x.getAntennaId(), x.getReceiverId(), x.getSpectralWindowId())
 
-        if (
-            self.lookup(x.getDistance(), x.getFocus(), x.getNumCorr(), x.getType())
-            is not None
-        ):
-            raise UniquenessViolationException(
-                "Uniqueness violation exception in table HolographyTable"
-            )
+        if keystr not in self._context:
+            self._context[keystr] = []
 
-        if self.getRowByKey(x.getHolographyId()) is not None:
-            raise DuplicateKey("Duplicate key exception in ", "HolographyTable")
-
-        self._privateRows.append(x)
-        x.isAdded()
-        return x
+        return self.insertByStartTime(x, self._context[keystr])
 
     # ====> methods returning rows.
 
     def get(self):
         """
         Get all rows.
-        return Alls rows as a list of HolographyRow
+        return all rows as a list of ModulationRow
         """
         return self._privateRows
 
-    def getRowByKey(self, holographyId):
+    def getByContext(self, antennaId, receiverId, spectralWindowId):
         """
-        Returns a HolographyRow given a key.
+        Returns all the rows sorted by ascending startTime for a given context.
+        The context is defined by a value of ( antennaId, receiverId, spectralWindowId ).
+
+        return a list  of ModulationRow. A None value is returned if the table contains
+        no ModulationRow for the given ( antennaId, receiverId, spectralWindowId ).
+        """
+
+        keystr = self.Key(antennaId, receiverId, spectralWindowId)
+
+        result = None
+        if keystr in self._context:
+            result = self._context[keystr]
+
+    def getRowByKey(self, antennaId, receiverId, spectralWindowId, timeInterval):
+        """
+        Returns a ModulationRow given a key.
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
-
-        param holographyId.
-
         """
-        for row in self._privateRows:
 
-            if not row.getHolographyId().equals(holographyId):
-                continue
+        keystr = self.Key(antennaId, receiverId, spectralWindowId)
 
-            return row
+        if keystr not in self._context:
+            return None
 
-        # no match found
-        return None
+        contextRows = self._context[keystr]
+        # Is the context list empty...impossible in principle !
+        if len(contextRowsrow) == 0:
+            return None
 
-    def lookup(self, distance, focus, numCorr, type):
-        """
-        Look up the table for a row whose all attributes  except the autoincrementable one
-        are equal to the corresponding parameters of the method.
-        return this row if any, None otherwise.
+        # Only one element in the context list
+        if len(contextRows) == 1:
+            r = contextRows[0]
+            if r.getTimeInterval().contains(timeInterval.getStart()):
+                return r
+            return None
 
+        # Optimizations
+        lastRow = contextRows[-1]
+        if timeInterval.getStart().get() >= (
+            lastRow.getTimeInterval().getStart().get()
+            + lastRow.getTimeInterval().getDuration().get()
+        ):
+            # the requested timeInterval is after the last row in this context, it does not exist here
+            return None
 
-        param distance.
+        firstRow = contextRows[0]
+        if timeInterval.getStart().get() < firstRow.getTimeInterval().getStart().get():
+            # the requested timeInterval is before the start of this context, it does not exist here
+            return None
 
-        param focus.
+        # the requested timeInterval falls within the range of this context, find the row
+        # if it exists in this context
+        # let's use dichotomy method
+        k0 = 0
+        k1 = len(contextRows) - 1
+        while k0 != k1:
+            # Is the start time contained in the time interval of row at k0
+            r = contextRows[k0]
+            if r.getTimeInterval().contains(timeInterval.getStart()):
+                return r
 
-        param numCorr.
+            # Is the start time contained in the time interval of row at k1
+            r = contextRows[k1]
+            if r.getTimeInterval().contains(timeInterval.getStart()):
+                return r
 
-        param type.
+            # Are the rows k0 and k1 consecutive
+            # Then we know for sure that there is no row containing the start of timeInterval.
+            if k1 == (k0 + 1):
+                return None
 
-        """
-        for row in self._privateRows:
-            if row.compareNoAutoInc(distance, focus, numCorr, type):
-                return row
+            # ensure that the next row is also an integer
+            nextRowIndx = int((k0 + k1) / 2)
+            r = contextRows[nextRowIndx]
+            if timeInterval.getStart().get() <= r.getTimeInterval().getStart().get():
+                k1 = nextRowIndx
+            else:
+                k0 = nextRowIndx
 
+        # not found
         return None
 
     def getRows(self):
@@ -450,13 +614,13 @@ class HolographyTable:
     def toXML(self):
         """
         Translate this table to an XML representation conforming
-        to the schema defined for Holography (HolographyTable.xsd).
+        to the schema defined for Modulation (ModulationTable.xsd).
 
         returns a string containing the XML representation.
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<HolographyTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:hologr="http://Alma/XASDM/HolographyTable" xsi:schemaLocation="http://Alma/XASDM/HolographyTable http://almaobservatory.org/XML/XASDM/4/HolographyTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
+        result += '<ModulationTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modlatn="http://Alma/XASDM/ModulationTable" xsi:schemaLocation="http://Alma/XASDM/ModulationTable http://almaobservatory.org/XML/XASDM/4/ModulationTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
         result += self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
@@ -464,25 +628,25 @@ class HolographyTable:
         for thisRow in self._privateRows:
             result += thisRow.toXML()
             result += " "
-        result += "</HolographyTable>"
+        result += "</ModulationTable>"
         return result
 
     def fromXML(self, xmlstr):
         """
         Populate this table from the content of a XML document that is required to
-        conform to the XML schema defined for a Holography (HolographyTable.xsd).
+        conform to the XML schema defined for a Modulation (ModulationTable.xsd).
         """
         if not isinstance(xmlstr, str):
             raise ConversionException("xmlstr must be a string")
 
         xmldom = minidom.parseString(xmlstr)
-        # this should have at least one child node with a name of "HolographyTable".
+        # this should have at least one child node with a name of "ModulationTable".
         if (
             not xmldom.hasChildNodes()
-            or xmldom.firstChild.nodeName != "HolographyTable"
+            or xmldom.firstChild.nodeName != "ModulationTable"
         ):
             raise ConversionException(
-                "XML is not from the expected table", "HolographyTable"
+                "XML is not from the expected table", "ModulationTable"
             )
 
         # ignore everything but the first child node
@@ -500,7 +664,7 @@ class HolographyTable:
         except Exception as ex:
             # reraise it as a ConversionException
             raise ConversionException(
-                "schemaVersion is not an integer", "HolographyTable"
+                "schemaVersion is not an integer", "ModulationTable"
             ) from None
 
         # go through the child nodes of tabdom
@@ -510,7 +674,7 @@ class HolographyTable:
 
         if not tabdom.hasChildNodes():
             raise ConversionException(
-                "XML is missing all of the expected elements", "HolographyTable"
+                "XML is missing all of the expected elements", "ModulationTable"
             )
 
         for thisNode in tabdom.childNodes:
@@ -518,19 +682,19 @@ class HolographyTable:
             if nodeName == "Entity":
                 if tabEntity is not None:
                     raise ConversionException(
-                        "More than one Entity found in XML", "HolographyTable"
+                        "More than one Entity found in XML", "ModulationTable"
                     )
                 tabEntity = Entity(thisNode.toxml())
-                if not (tabEntity.getEntityTypeName() == "HolographyTable"):
+                if not (tabEntity.getEntityTypeName() == "ModulationTable"):
                     raise ConversionException(
                         "Entity type name in XML is not the expected value of the table name",
-                        "HolographyTable",
+                        "ModulationTable",
                     )
             elif nodeName == "ContainerEntity":
                 # there must be one, but no more than one
                 if hasContainerEntity:
                     raise ConversionException(
-                        "More than one ContainerEntity found in XML", "HolographyTable"
+                        "More than one ContainerEntity found in XML", "ModulationTable"
                     )
                 hasContainerEntity = True
             elif nodeName == "row":
@@ -540,18 +704,12 @@ class HolographyTable:
                     self.checkAndAdd(row)
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
-                    raise ConversionException(str(exc), "HolographyTable") from None
-
-                except UniquenessViolationException as exc:
-                    msg = (
-                        "UniquenessViolationException in row in HolographyTable : %s"
-                        % str(exc)
-                    )
+                    raise ConversionException(str(exc), "ModulationTable") from None
 
         if tabEntity is None:
-            raise ConversionException("No Entity seen in XML", "HolographyTable")
+            raise ConversionException("No Entity seen in XML", "ModulationTable")
         if not hasContainerEntity:
-            raise ValueError("No Container Entity seen in XL", "HolographyTable")
+            raise ValueError("No Container Entity seen in XL", "ModulationTable")
 
         self.setEntity(tabEntity)
 
@@ -567,10 +725,10 @@ class HolographyTable:
         result = ""
         result += "<?xml version='1.0'  encoding='ISO-8859-1'?>"
         result += "\n"
-        result += '<HolographyTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:hologr="http://Alma/XASDM/HolographyTable" xsi:schemaLocation="http://Alma/XASDM/HolographyTable http://almaobservatory.org/XML/XASDM/4/HolographyTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
+        result += '<ModulationTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modlatn="http://Alma/XASDM/ModulationTable" xsi:schemaLocation="http://Alma/XASDM/ModulationTable http://almaobservatory.org/XML/XASDM/4/ModulationTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
         result += "<Entity entityId='"
         result += uidStr
-        result += "' entityIdEncrypted='na' entityTypeName='HolographyTable' schemaVersion='1' documentVersion='1'/>\n"
+        result += "' entityIdEncrypted='na' entityTypeName='ModulationTable' schemaVersion='1' documentVersion='1'/>\n"
         result += "<ContainerEntity entityId='"
         result += containerUID
         result += "' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n"
@@ -579,14 +737,18 @@ class HolographyTable:
         result += "' byteOrder='" + str(byteOrder) + "' />\n"
         result += "<Attributes>\n"
 
-        result += "<holographyId/>\n"
-        result += "<distance/>\n"
-        result += "<focus/>\n"
-        result += "<numCorr/>\n"
-        result += "<type/>\n"
+        result += "<antennaId/>\n"
+        result += "<receiverId/>\n"
+        result += "<spectralWindowId/>\n"
+        result += "<timeInterval/>\n"
+        result += "<localOscillatorOffset/>\n"
+        result += "<walsh180enabled/>\n"
+        result += "<walsh90enabled/>\n"
 
+        result += "<walsh180index/>\n"
+        result += "<walsh90index/>\n"
         result += "</Attributes>\n"
-        result += "</HolographyTable>\n"
+        result += "</ModulationTable>\n"
 
         return result
 
@@ -681,7 +843,7 @@ class HolographyTable:
             byteStream.close()
             raise ConversionException(
                 "opened byteStream is not the expected io.BufferedReader or it is not seekable, this should never happen.",
-                "Holography",
+                "Modulation",
             )
 
         xmlPartMIMEHeader = bytes(str("Content-ID: <header.xml>\n\n").encode())
@@ -701,7 +863,7 @@ class HolographyTable:
         if loc0 < 0:
             byteStream.close()
             raise ConversionException(
-                "Failed to detect the begining of the XML header.", "Holography"
+                "Failed to detect the begining of the XML header.", "Modulation"
             )
 
         loc0 += len(xmlPartMIMEHeader)
@@ -711,7 +873,7 @@ class HolographyTable:
         if loc1 < 0:
             byteStream.close()
             raise ConversionException(
-                "Failed to detect the begining of the binary part.", "Holography"
+                "Failed to detect the begining of the binary part.", "Modulation"
             )
 
         # extract the XML header as a string
@@ -720,7 +882,7 @@ class HolographyTable:
         xmldom = minidom.parseString(xmlHeader)
         if not xmldom.hasChildNodes():
             byteStream.close()
-            raise ConversionException("XML is not properly structured.", "Holography")
+            raise ConversionException("XML is not properly structured.", "Modulation")
 
         attributesSeq = []
         byteOrderStr = None
@@ -732,25 +894,33 @@ class HolographyTable:
             # assume Big_Endian and the default order of the elements
             byteOrderStr = "Big_Endian"
 
-            attributesSeq.append("holographyId")
+            attributesSeq.append("antennaId")
 
-            attributesSeq.append("distance")
+            attributesSeq.append("receiverId")
 
-            attributesSeq.append("focus")
+            attributesSeq.append("spectralWindowId")
 
-            attributesSeq.append("numCorr")
+            attributesSeq.append("timeInterval")
 
-            attributesSeq.append("type")
+            attributesSeq.append("localOscillatorOffset")
+
+            attributesSeq.append("walsh180enabled")
+
+            attributesSeq.append("walsh90enabled")
+
+            attributesSeq.append("walsh180index")
+
+            attributesSeq.append("walsh90index")
 
             versionStr = "2"
 
         else:
-            # c++ and Java just assume it then must be a Holography table
+            # c++ and Java just assume it then must be a Modulation table
             # this is more insistant, just in case
-            if hdrdom.nodeName != "HolographyTable":
+            if hdrdom.nodeName != "ModulationTable":
                 byteStream.close()
                 raise ConversionException(
-                    "XML Header is not from the expected table.", "Holography"
+                    "XML Header is not from the expected table.", "Modulation"
                 )
 
             # schemaVersion becomes versionStr
@@ -764,7 +934,7 @@ class HolographyTable:
                 byteStream.close()
                 raise ConversionException(
                     "THe XML header is missing all of the expected elements.",
-                    "Holography",
+                    "Modulation",
                 )
 
             # loop through the child nodes, looking for BulkStoreRef and Attributes
@@ -774,20 +944,20 @@ class HolographyTable:
                         byteStream.close()
                         raise ConversionException(
                             "More than one BulkStoreRef element seen. Invalid XML header.",
-                            "Holography",
+                            "Modulation",
                         )
                     if not hdrnode.hasAttributes():
                         byteStream.close()
                         raise ConversionException(
                             "BulkStoreRef does not contain any attributes. Invalid XML header.",
-                            "Holography",
+                            "Modulation",
                         )
                     byteOrderAttr = hdrnode.attributes.getNamedItem("byteOrder")
                     if byteOrderAttr is None:
                         byteStream.close()
                         raise ConversionException(
                             "byteOrder attribute not found in BulkStoreRef element. Invalid XML header.",
-                            "Holography",
+                            "Modulation",
                         )
                     byteOrderStr = byteOrderAttr.value
                 elif hdrnode.nodeName == "Attributes":
@@ -795,13 +965,13 @@ class HolographyTable:
                         byteStream.close()
                         raise ConversionException(
                             "More than one Attributes node seen. Invalid XML header.",
-                            "Holography",
+                            "Modulation",
                         )
                     if not hdrnode.hasChildNodes():
                         byteStream.close()
                         raise ConversionException(
                             "Attributes element has no child nodes. Invalid XML header.",
-                            "Holography",
+                            "Modulation",
                         )
                     for attrnode in hdrnode.childNodes:
                         if attrnode.nodeType == attrnode.ELEMENT_NODE:
@@ -811,14 +981,14 @@ class HolographyTable:
             byteStream.close()
             raise ConversionException(
                 "BulkStoreRef element not seen and this is not an older version 2 XML header. Invalid XML header.",
-                "Holography",
+                "Modulation",
             )
 
         if len(attributesSeq) == 0:
             byteStream.close()
             raise ConversionException(
                 "Attributes element not seen and this is not an older version 2 XML header. Invalid XML header.",
-                "Holography",
+                "Modulation",
             )
 
         byteOrder = ByteOrder(byteOrderStr)
@@ -840,14 +1010,14 @@ class HolographyTable:
         # c++ checks numRows against what is reported in the ASDM for this table, this is what Java does
         try:
             for i in range(numRows):
-                self.checkAndAdd(HolographyRow.fromBin(eis, self, attributesSeq))
+                self.checkAndAdd(ModulationRow.fromBin(eis, self, attributesSeq))
                 # print("row %s added, loc = %s" % (i, eis.tell()))
         except Exception as exc:
             byteStream.close()
             eis.close()
             raise ConversionException(
                 "Error while reading binary data, the exception was " + str(exc),
-                "Holography",
+                "Modulation",
             ) from None
 
         # there is no harm in closing both
@@ -860,7 +1030,7 @@ class HolographyTable:
 
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a HolographyTable as those produced  by the toFile method.
+        Reads and parses a file containing a representation of a ModulationTable as those produced  by the toFile method.
         This table is populated with the result of the parsing.
         param directory The name of the directory containing the file te be read and parsed.
         raises ConversionException If any error occurs while reading the
@@ -873,16 +1043,16 @@ class HolographyTable:
         if not os.path.isdir(directory):
             raise ConversionException(
                 "Directory " + directory + " must be a path to an existing directory",
-                "HolographyTable",
+                "ModulationTable",
             )
 
-        if os.path.exists(os.path.join(directory, "Holography.xml")):
+        if os.path.exists(os.path.join(directory, "Modulation.xml")):
             self.setFromXMLFile(directory)
-        elif os.path.exists(os.path.join(directory, "Holography.bin")):
+        elif os.path.exists(os.path.join(directory, "Modulation.bin")):
             self.setFromMIMEFile(directory)
         else:
             raise ConversionException(
-                "No file found for the Holography table", "HolographyTable"
+                "No file found for the Modulation table", "ModulationTable"
             )
 
     def setFromMIMEFile(self, directory):
@@ -894,14 +1064,14 @@ class HolographyTable:
         # This uses a buffered byte stream. Created here and then
         # handed off to the setFromMIME method, which is responsible for closing it.
 
-        filename = os.path.join(directory, "Holography.bin")
+        filename = os.path.join(directory, "Modulation.bin")
         byteStream = None
         try:
             byteStream = open(filename, "rb")
         except Exception as exc:
             raise ConversionException(
                 "Error while opening " + filename + ". The exception was " + str(exc),
-                "Holography",
+                "Modulation",
             )
 
         self.setFromMIME(byteStream)
@@ -916,11 +1086,11 @@ class HolographyTable:
         # read the entire file into a string
         xmlstr = None
         try:
-            with open(os.path.join(directory, "Holography.xml")) as f:
+            with open(os.path.join(directory, "Modulation.xml")) as f:
                 xmlstr = f.read()
         except Exception as exc:
             # reraise it as a ConversionException
-            raise ConversionException(str(exc), "HolographyTable") from None
+            raise ConversionException(str(exc), "ModulationTable") from None
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
@@ -933,8 +1103,8 @@ class HolographyTable:
         Stores a representation (binary or XML) of this table into a file.
 
         Depending on the boolean value of its _fileAsBin data member a binary serialization
-        of this (_fileAsBin==True) will be saved in a file "Holography.bin" or
-        an XML representation (_fileAsBin==False) will be saved in a file "Holography.xml".
+        of this (_fileAsBin==True) will be saved in a file "Modulation.bin" or
+        an XML representation (_fileAsBin==False) will be saved in a file "Modulation.xml".
         The file is always written in a directory whose name is passed as a parameter.
         param directory The name of directory where the file containing the table's
         representation will be saved.
@@ -945,9 +1115,9 @@ class HolographyTable:
 
         if os.path.exists(directory) and not os.path.isdir(directory):
             raise ConversionException(
-                "Cannot write into directory %s. This file already exists and is not a directory. (Holography)"
+                "Cannot write into directory %s. This file already exists and is not a directory. (Modulation)"
                 % directory,
-                "HolographyTable",
+                "ModulationTable",
             )
 
         # if not let's create it.
@@ -962,7 +1132,7 @@ class HolographyTable:
                 + directory
                 + " exception caught "
                 + str(exc),
-                "HolographyTable",
+                "ModulationTable",
             ) from None
 
         if self._fileAsBin:
@@ -974,7 +1144,7 @@ class HolographyTable:
             byteOrder = ByteOrder()
 
             # first, just the short XML file
-            xmlFilePath = os.path.join(directory, "Holography.xml")
+            xmlFilePath = os.path.join(directory, "Modulation.xml")
             if os.path.exists(xmlFilePath):
                 try:
                     os.remove(xmlFilePath)
@@ -984,7 +1154,7 @@ class HolographyTable:
                         + xmlFilePath
                         + ", exception caught "
                         + str(exc),
-                        "Holography",
+                        "Modulation",
                     ) from None
 
             # used in both files
@@ -995,7 +1165,7 @@ class HolographyTable:
                 xmlfile.write(mimeXMLpart)
 
             # now open the possibly much longer MIME file
-            mimeFilePath = os.path.join(directory, "Holography.bin")
+            mimeFilePath = os.path.join(directory, "Modulation.bin")
             if os.path.exists(mimeFilePath):
                 try:
                     os.remove(mimeFilePath)
@@ -1005,14 +1175,14 @@ class HolographyTable:
                         + mimeFilePath
                         + ", exception caught "
                         + str(exc),
-                        "Holography",
+                        "Modulation",
                     ) from None
 
             # the details are all handled in toMIME
             self.toMIME(mimeFilePath, mimeXMLpart, byteOrder)
         else:
             # The table is totally exported in a XML file.
-            filePath = os.path.join(directory, "Holography.xml")
+            filePath = os.path.join(directory, "Modulation.xml")
             if os.path.exists(filePath):
                 try:
                     # try to delete it, this will raise an exception if the user does not have permission to do that
@@ -1024,7 +1194,7 @@ class HolographyTable:
                         + filePath
                         + " exception caught "
                         + str(exc),
-                        "HolographyTable",
+                        "ModulationTable",
                     ) from None
 
             try:
@@ -1038,7 +1208,7 @@ class HolographyTable:
                 raise ConversionException(
                     "Problem while writing the XML representation, the message was : "
                     + str(exc),
-                    "Holography",
+                    "Modulation",
                 ) from None
 
     def getEntity(self):

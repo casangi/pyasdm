@@ -2388,8 +2388,7 @@ class CalAtmosphereRow:
         if not self._alphaSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + alphaSpectrum
-                + " attribute in table CalAtmosphere does not exist!"
+                + "'alphaSpectrum' attribute in table CalAtmosphere does not exist!"
             )
 
         return copy.deepcopy(self._alphaSpectrum)
@@ -2454,8 +2453,7 @@ class CalAtmosphereRow:
         if not self._forwardEfficiencyExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + forwardEfficiency
-                + " attribute in table CalAtmosphere does not exist!"
+                + "'forwardEfficiency' attribute in table CalAtmosphere does not exist!"
             )
 
         return copy.deepcopy(self._forwardEfficiency)
@@ -2520,8 +2518,7 @@ class CalAtmosphereRow:
         if not self._forwardEfficiencyErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + forwardEfficiencyError
-                + " attribute in table CalAtmosphere does not exist!"
+                + "'forwardEfficiencyError' attribute in table CalAtmosphere does not exist!"
             )
 
         return copy.deepcopy(self._forwardEfficiencyError)
@@ -2586,8 +2583,7 @@ class CalAtmosphereRow:
         if not self._sbGainExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sbGain
-                + " attribute in table CalAtmosphere does not exist!"
+                + "'sbGain' attribute in table CalAtmosphere does not exist!"
             )
 
         return copy.deepcopy(self._sbGain)
@@ -2652,8 +2648,7 @@ class CalAtmosphereRow:
         if not self._sbGainErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sbGainError
-                + " attribute in table CalAtmosphere does not exist!"
+                + "'sbGainError' attribute in table CalAtmosphere does not exist!"
             )
 
         return copy.deepcopy(self._sbGainError)
@@ -2718,8 +2713,7 @@ class CalAtmosphereRow:
         if not self._sbGainSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sbGainSpectrum
-                + " attribute in table CalAtmosphere does not exist!"
+                + "'sbGainSpectrum' attribute in table CalAtmosphere does not exist!"
             )
 
         return copy.deepcopy(self._sbGainSpectrum)

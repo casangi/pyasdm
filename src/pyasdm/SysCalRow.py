@@ -1052,8 +1052,7 @@ class SysCalRow:
         if not self._tcalFlagExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tcalFlag
-                + " attribute in table SysCal does not exist!"
+                + "'tcalFlag' attribute in table SysCal does not exist!"
             )
 
         return self._tcalFlag
@@ -1097,8 +1096,7 @@ class SysCalRow:
         if not self._tcalSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tcalSpectrum
-                + " attribute in table SysCal does not exist!"
+                + "'tcalSpectrum' attribute in table SysCal does not exist!"
             )
 
         return copy.deepcopy(self._tcalSpectrum)
@@ -1163,8 +1161,7 @@ class SysCalRow:
         if not self._trxFlagExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + trxFlag
-                + " attribute in table SysCal does not exist!"
+                + "'trxFlag' attribute in table SysCal does not exist!"
             )
 
         return self._trxFlag
@@ -1208,8 +1205,7 @@ class SysCalRow:
         if not self._trxSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + trxSpectrum
-                + " attribute in table SysCal does not exist!"
+                + "'trxSpectrum' attribute in table SysCal does not exist!"
             )
 
         return copy.deepcopy(self._trxSpectrum)
@@ -1274,8 +1270,7 @@ class SysCalRow:
         if not self._tskyFlagExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tskyFlag
-                + " attribute in table SysCal does not exist!"
+                + "'tskyFlag' attribute in table SysCal does not exist!"
             )
 
         return self._tskyFlag
@@ -1319,8 +1314,7 @@ class SysCalRow:
         if not self._tskySpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tskySpectrum
-                + " attribute in table SysCal does not exist!"
+                + "'tskySpectrum' attribute in table SysCal does not exist!"
             )
 
         return copy.deepcopy(self._tskySpectrum)
@@ -1385,8 +1379,7 @@ class SysCalRow:
         if not self._tsysFlagExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tsysFlag
-                + " attribute in table SysCal does not exist!"
+                + "'tsysFlag' attribute in table SysCal does not exist!"
             )
 
         return self._tsysFlag
@@ -1430,8 +1423,7 @@ class SysCalRow:
         if not self._tsysSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tsysSpectrum
-                + " attribute in table SysCal does not exist!"
+                + "'tsysSpectrum' attribute in table SysCal does not exist!"
             )
 
         return copy.deepcopy(self._tsysSpectrum)
@@ -1496,8 +1488,7 @@ class SysCalRow:
         if not self._tantFlagExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tantFlag
-                + " attribute in table SysCal does not exist!"
+                + "'tantFlag' attribute in table SysCal does not exist!"
             )
 
         return self._tantFlag
@@ -1541,8 +1532,7 @@ class SysCalRow:
         if not self._tantSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tantSpectrum
-                + " attribute in table SysCal does not exist!"
+                + "'tantSpectrum' attribute in table SysCal does not exist!"
             )
 
         return copy.deepcopy(self._tantSpectrum)
@@ -1607,8 +1597,7 @@ class SysCalRow:
         if not self._tantTsysFlagExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tantTsysFlag
-                + " attribute in table SysCal does not exist!"
+                + "'tantTsysFlag' attribute in table SysCal does not exist!"
             )
 
         return self._tantTsysFlag
@@ -1652,8 +1641,7 @@ class SysCalRow:
         if not self._tantTsysSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + tantTsysSpectrum
-                + " attribute in table SysCal does not exist!"
+                + "'tantTsysSpectrum' attribute in table SysCal does not exist!"
             )
 
         return copy.deepcopy(self._tantTsysSpectrum)
@@ -1718,8 +1706,7 @@ class SysCalRow:
         if not self._phaseDiffFlagExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + phaseDiffFlag
-                + " attribute in table SysCal does not exist!"
+                + "'phaseDiffFlag' attribute in table SysCal does not exist!"
             )
 
         return self._phaseDiffFlag
@@ -1763,8 +1750,7 @@ class SysCalRow:
         if not self._phaseDiffSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + phaseDiffSpectrum
-                + " attribute in table SysCal does not exist!"
+                + "'phaseDiffSpectrum' attribute in table SysCal does not exist!"
             )
 
         return copy.deepcopy(self._phaseDiffSpectrum)

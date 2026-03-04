@@ -204,6 +204,38 @@ class SpectralWindowRow:
 
         self._assocNature = []  # this is a list of SpectralResolutionType []
 
+        self._numFactorExists = False
+
+        self._numFactor = 0
+
+        self._numBinFactorsExists = False
+
+        self._numBinFactors = []  # this is a list of int []
+
+        self._numOrigFreqSliceExists = False
+
+        self._numOrigFreqSlice = 0
+
+        self._originatingFrequencySlicesExists = False
+
+        self._originatingFrequencySlices = []  # this is a list of int []
+
+        self._quantizationBitsExists = False
+
+        self._quantizationBits = 0
+
+        self._numRequantStageExists = False
+
+        self._numRequantStage = 0
+
+        self._requantizationExists = False
+
+        self._requantization = []  # this is a list of bool []
+
+        self._requantizationBitsExists = False
+
+        self._requantizationBits = []  # this is a list of int []
+
         # extrinsic attributes
 
         self._assocSpectralWindowIdExists = False
@@ -438,6 +470,76 @@ class SpectralWindowRow:
 
                 self._assocNatureExists = True
 
+            # by default set systematically numFactor's value to something not None
+
+            if row._numFactorExists:
+
+                self._numFactor = row._numFactor
+
+                self._numFactorExists = True
+
+            # by default set systematically numBinFactors's value to something not None
+
+            if row._numBinFactorsExists:
+
+                # numBinFactors is a list, make a deep copy
+                self._numBinFactors = copy.deepcopy(row._numBinFactors)
+
+                self._numBinFactorsExists = True
+
+            # by default set systematically numOrigFreqSlice's value to something not None
+
+            if row._numOrigFreqSliceExists:
+
+                self._numOrigFreqSlice = row._numOrigFreqSlice
+
+                self._numOrigFreqSliceExists = True
+
+            # by default set systematically originatingFrequencySlices's value to something not None
+
+            if row._originatingFrequencySlicesExists:
+
+                # originatingFrequencySlices is a list, make a deep copy
+                self._originatingFrequencySlices = copy.deepcopy(
+                    row._originatingFrequencySlices
+                )
+
+                self._originatingFrequencySlicesExists = True
+
+            # by default set systematically quantizationBits's value to something not None
+
+            if row._quantizationBitsExists:
+
+                self._quantizationBits = row._quantizationBits
+
+                self._quantizationBitsExists = True
+
+            # by default set systematically numRequantStage's value to something not None
+
+            if row._numRequantStageExists:
+
+                self._numRequantStage = row._numRequantStage
+
+                self._numRequantStageExists = True
+
+            # by default set systematically requantization's value to something not None
+
+            if row._requantizationExists:
+
+                # requantization is a list, make a deep copy
+                self._requantization = copy.deepcopy(row._requantization)
+
+                self._requantizationExists = True
+
+            # by default set systematically requantizationBits's value to something not None
+
+            if row._requantizationBitsExists:
+
+                # requantizationBits is a list, make a deep copy
+                self._requantizationBits = copy.deepcopy(row._requantizationBits)
+
+                self._requantizationBitsExists = True
+
             # by default set systematically assocSpectralWindowId's value to something not None
 
             if row._assocSpectralWindowIdExists:
@@ -606,6 +708,42 @@ class SpectralWindowRow:
         if self._assocNatureExists:
 
             result += Parser.listEnumValueToXML("assocNature", self._assocNature)
+
+        if self._numFactorExists:
+
+            result += Parser.valueToXML("numFactor", self._numFactor)
+
+        if self._numBinFactorsExists:
+
+            result += Parser.listValueToXML("numBinFactors", self._numBinFactors)
+
+        if self._numOrigFreqSliceExists:
+
+            result += Parser.valueToXML("numOrigFreqSlice", self._numOrigFreqSlice)
+
+        if self._originatingFrequencySlicesExists:
+
+            result += Parser.listValueToXML(
+                "originatingFrequencySlices", self._originatingFrequencySlices
+            )
+
+        if self._quantizationBitsExists:
+
+            result += Parser.valueToXML("quantizationBits", self._quantizationBits)
+
+        if self._numRequantStageExists:
+
+            result += Parser.valueToXML("numRequantStage", self._numRequantStage)
+
+        if self._requantizationExists:
+
+            result += Parser.listValueToXML("requantization", self._requantization)
+
+        if self._requantizationBitsExists:
+
+            result += Parser.listValueToXML(
+                "requantizationBits", self._requantizationBits
+            )
 
         # extrinsic attributes
 
@@ -874,6 +1012,86 @@ class SpectralWindowRow:
 
             self._assocNatureExists = True
 
+        numFactorNode = rowdom.getElementsByTagName("numFactor")
+        if len(numFactorNode) > 0:
+
+            self._numFactor = int(numFactorNode[0].firstChild.data.strip())
+
+            self._numFactorExists = True
+
+        numBinFactorsNode = rowdom.getElementsByTagName("numBinFactors")
+        if len(numBinFactorsNode) > 0:
+
+            numBinFactorsStr = numBinFactorsNode[0].firstChild.data.strip()
+
+            self._numBinFactors = Parser.stringListToLists(
+                numBinFactorsStr, int, "SpectralWindow", False
+            )
+
+            self._numBinFactorsExists = True
+
+        numOrigFreqSliceNode = rowdom.getElementsByTagName("numOrigFreqSlice")
+        if len(numOrigFreqSliceNode) > 0:
+
+            self._numOrigFreqSlice = int(
+                numOrigFreqSliceNode[0].firstChild.data.strip()
+            )
+
+            self._numOrigFreqSliceExists = True
+
+        originatingFrequencySlicesNode = rowdom.getElementsByTagName(
+            "originatingFrequencySlices"
+        )
+        if len(originatingFrequencySlicesNode) > 0:
+
+            originatingFrequencySlicesStr = originatingFrequencySlicesNode[
+                0
+            ].firstChild.data.strip()
+
+            self._originatingFrequencySlices = Parser.stringListToLists(
+                originatingFrequencySlicesStr, int, "SpectralWindow", False
+            )
+
+            self._originatingFrequencySlicesExists = True
+
+        quantizationBitsNode = rowdom.getElementsByTagName("quantizationBits")
+        if len(quantizationBitsNode) > 0:
+
+            self._quantizationBits = int(
+                quantizationBitsNode[0].firstChild.data.strip()
+            )
+
+            self._quantizationBitsExists = True
+
+        numRequantStageNode = rowdom.getElementsByTagName("numRequantStage")
+        if len(numRequantStageNode) > 0:
+
+            self._numRequantStage = int(numRequantStageNode[0].firstChild.data.strip())
+
+            self._numRequantStageExists = True
+
+        requantizationNode = rowdom.getElementsByTagName("requantization")
+        if len(requantizationNode) > 0:
+
+            requantizationStr = requantizationNode[0].firstChild.data.strip()
+
+            self._requantization = Parser.stringListToLists(
+                requantizationStr, bool, "SpectralWindow", False
+            )
+
+            self._requantizationExists = True
+
+        requantizationBitsNode = rowdom.getElementsByTagName("requantizationBits")
+        if len(requantizationBitsNode) > 0:
+
+            requantizationBitsStr = requantizationBitsNode[0].firstChild.data.strip()
+
+            self._requantizationBits = Parser.stringListToLists(
+                requantizationBitsStr, int, "SpectralWindow", False
+            )
+
+            self._requantizationBitsExists = True
+
         # extrinsic attribute values
 
         assocSpectralWindowIdNode = rowdom.getElementsByTagName("assocSpectralWindowId")
@@ -1038,6 +1256,58 @@ class SpectralWindowRow:
             for i in range(len(self._assocNature)):
 
                 eos.writeString(str(self._assocNature[i]))
+
+        eos.writeBool(self._numFactorExists)
+        if self._numFactorExists:
+
+            eos.writeInt(self._numFactor)
+
+        eos.writeBool(self._numBinFactorsExists)
+        if self._numBinFactorsExists:
+
+            eos.writeInt(len(self._numBinFactors))
+            for i in range(len(self._numBinFactors)):
+
+                eos.writeInt(self._numBinFactors[i])
+
+        eos.writeBool(self._numOrigFreqSliceExists)
+        if self._numOrigFreqSliceExists:
+
+            eos.writeInt(self._numOrigFreqSlice)
+
+        eos.writeBool(self._originatingFrequencySlicesExists)
+        if self._originatingFrequencySlicesExists:
+
+            eos.writeInt(len(self._originatingFrequencySlices))
+            for i in range(len(self._originatingFrequencySlices)):
+
+                eos.writeInt(self._originatingFrequencySlices[i])
+
+        eos.writeBool(self._quantizationBitsExists)
+        if self._quantizationBitsExists:
+
+            eos.writeInt(self._quantizationBits)
+
+        eos.writeBool(self._numRequantStageExists)
+        if self._numRequantStageExists:
+
+            eos.writeInt(self._numRequantStage)
+
+        eos.writeBool(self._requantizationExists)
+        if self._requantizationExists:
+
+            eos.writeInt(len(self._requantization))
+            for i in range(len(self._requantization)):
+
+                eos.writeBool(self._requantization[i])
+
+        eos.writeBool(self._requantizationBitsExists)
+        if self._requantizationBitsExists:
+
+            eos.writeInt(len(self._requantizationBits))
+            for i in range(len(self._requantizationBits)):
+
+                eos.writeInt(self._requantizationBits[i])
 
         eos.writeBool(self._assocSpectralWindowIdExists)
         if self._assocSpectralWindowIdExists:
@@ -1339,6 +1609,106 @@ class SpectralWindowRow:
             row._assocNature = thisList
 
     @staticmethod
+    def numFactorFromBin(row, eis):
+        """
+        Set the optional numFactor in row from the EndianInput (eis) instance.
+        """
+        row._numFactorExists = eis.readBool()
+        if row._numFactorExists:
+
+            row._numFactor = eis.readInt()
+
+    @staticmethod
+    def numBinFactorsFromBin(row, eis):
+        """
+        Set the optional numBinFactors in row from the EndianInput (eis) instance.
+        """
+        row._numBinFactorsExists = eis.readBool()
+        if row._numBinFactorsExists:
+
+            numBinFactorsDim1 = eis.readInt()
+            thisList = []
+            for i in range(numBinFactorsDim1):
+                thisValue = eis.readInt()
+                thisList.append(thisValue)
+            row._numBinFactors = thisList
+
+    @staticmethod
+    def numOrigFreqSliceFromBin(row, eis):
+        """
+        Set the optional numOrigFreqSlice in row from the EndianInput (eis) instance.
+        """
+        row._numOrigFreqSliceExists = eis.readBool()
+        if row._numOrigFreqSliceExists:
+
+            row._numOrigFreqSlice = eis.readInt()
+
+    @staticmethod
+    def originatingFrequencySlicesFromBin(row, eis):
+        """
+        Set the optional originatingFrequencySlices in row from the EndianInput (eis) instance.
+        """
+        row._originatingFrequencySlicesExists = eis.readBool()
+        if row._originatingFrequencySlicesExists:
+
+            originatingFrequencySlicesDim1 = eis.readInt()
+            thisList = []
+            for i in range(originatingFrequencySlicesDim1):
+                thisValue = eis.readInt()
+                thisList.append(thisValue)
+            row._originatingFrequencySlices = thisList
+
+    @staticmethod
+    def quantizationBitsFromBin(row, eis):
+        """
+        Set the optional quantizationBits in row from the EndianInput (eis) instance.
+        """
+        row._quantizationBitsExists = eis.readBool()
+        if row._quantizationBitsExists:
+
+            row._quantizationBits = eis.readInt()
+
+    @staticmethod
+    def numRequantStageFromBin(row, eis):
+        """
+        Set the optional numRequantStage in row from the EndianInput (eis) instance.
+        """
+        row._numRequantStageExists = eis.readBool()
+        if row._numRequantStageExists:
+
+            row._numRequantStage = eis.readInt()
+
+    @staticmethod
+    def requantizationFromBin(row, eis):
+        """
+        Set the optional requantization in row from the EndianInput (eis) instance.
+        """
+        row._requantizationExists = eis.readBool()
+        if row._requantizationExists:
+
+            requantizationDim1 = eis.readInt()
+            thisList = []
+            for i in range(requantizationDim1):
+                thisValue = eis.readBool()
+                thisList.append(thisValue)
+            row._requantization = thisList
+
+    @staticmethod
+    def requantizationBitsFromBin(row, eis):
+        """
+        Set the optional requantizationBits in row from the EndianInput (eis) instance.
+        """
+        row._requantizationBitsExists = eis.readBool()
+        if row._requantizationBitsExists:
+
+            requantizationBitsDim1 = eis.readInt()
+            thisList = []
+            for i in range(requantizationBitsDim1):
+                thisValue = eis.readInt()
+                thisList.append(thisValue)
+            row._requantizationBits = thisList
+
+    @staticmethod
     def assocSpectralWindowIdFromBin(row, eis):
         """
         Set the optional assocSpectralWindowId in row from the EndianInput (eis) instance.
@@ -1406,6 +1776,18 @@ class SpectralWindowRow:
         _fromBinMethods["resolutionArray"] = SpectralWindowRow.resolutionArrayFromBin
         _fromBinMethods["numAssocValues"] = SpectralWindowRow.numAssocValuesFromBin
         _fromBinMethods["assocNature"] = SpectralWindowRow.assocNatureFromBin
+        _fromBinMethods["numFactor"] = SpectralWindowRow.numFactorFromBin
+        _fromBinMethods["numBinFactors"] = SpectralWindowRow.numBinFactorsFromBin
+        _fromBinMethods["numOrigFreqSlice"] = SpectralWindowRow.numOrigFreqSliceFromBin
+        _fromBinMethods["originatingFrequencySlices"] = (
+            SpectralWindowRow.originatingFrequencySlicesFromBin
+        )
+        _fromBinMethods["quantizationBits"] = SpectralWindowRow.quantizationBitsFromBin
+        _fromBinMethods["numRequantStage"] = SpectralWindowRow.numRequantStageFromBin
+        _fromBinMethods["requantization"] = SpectralWindowRow.requantizationFromBin
+        _fromBinMethods["requantizationBits"] = (
+            SpectralWindowRow.requantizationBitsFromBin
+        )
         _fromBinMethods["assocSpectralWindowId"] = (
             SpectralWindowRow.assocSpectralWindowIdFromBin
         )
@@ -1559,8 +1941,7 @@ class SpectralWindowRow:
         if not self._numBinExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numBin
-                + " attribute in table SpectralWindow does not exist!"
+                + "'numBin' attribute in table SpectralWindow does not exist!"
             )
 
         return self._numBin
@@ -1694,8 +2075,7 @@ class SpectralWindowRow:
         if not self._chanFreqStartExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqStart
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanFreqStart' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -1740,8 +2120,7 @@ class SpectralWindowRow:
         if not self._chanFreqStepExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqStep
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanFreqStep' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -1786,8 +2165,7 @@ class SpectralWindowRow:
         if not self._chanFreqArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanFreqArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanFreqArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._chanFreqArray)
@@ -1852,8 +2230,7 @@ class SpectralWindowRow:
         if not self._chanWidthExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanWidth
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanWidth' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -1898,8 +2275,7 @@ class SpectralWindowRow:
         if not self._chanWidthArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + chanWidthArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'chanWidthArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._chanWidthArray)
@@ -1964,8 +2340,7 @@ class SpectralWindowRow:
         if not self._correlationBitExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + correlationBit
-                + " attribute in table SpectralWindow does not exist!"
+                + "'correlationBit' attribute in table SpectralWindow does not exist!"
             )
 
         return self._correlationBit
@@ -2009,8 +2384,7 @@ class SpectralWindowRow:
         if not self._effectiveBwExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + effectiveBw
-                + " attribute in table SpectralWindow does not exist!"
+                + "'effectiveBw' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -2055,8 +2429,7 @@ class SpectralWindowRow:
         if not self._effectiveBwArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + effectiveBwArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'effectiveBwArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._effectiveBwArray)
@@ -2121,8 +2494,7 @@ class SpectralWindowRow:
         if not self._freqGroupExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + freqGroup
-                + " attribute in table SpectralWindow does not exist!"
+                + "'freqGroup' attribute in table SpectralWindow does not exist!"
             )
 
         return self._freqGroup
@@ -2166,8 +2538,7 @@ class SpectralWindowRow:
         if not self._freqGroupNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + freqGroupName
-                + " attribute in table SpectralWindow does not exist!"
+                + "'freqGroupName' attribute in table SpectralWindow does not exist!"
             )
 
         return self._freqGroupName
@@ -2211,8 +2582,7 @@ class SpectralWindowRow:
         if not self._lineArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + lineArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'lineArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._lineArray)
@@ -2277,8 +2647,7 @@ class SpectralWindowRow:
         if not self._measFreqRefExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + measFreqRef
-                + " attribute in table SpectralWindow does not exist!"
+                + "'measFreqRef' attribute in table SpectralWindow does not exist!"
             )
 
         return self._measFreqRef
@@ -2322,8 +2691,7 @@ class SpectralWindowRow:
         if not self._nameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + name
-                + " attribute in table SpectralWindow does not exist!"
+                + "'name' attribute in table SpectralWindow does not exist!"
             )
 
         return self._name
@@ -2367,8 +2735,7 @@ class SpectralWindowRow:
         if not self._oversamplingExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + oversampling
-                + " attribute in table SpectralWindow does not exist!"
+                + "'oversampling' attribute in table SpectralWindow does not exist!"
             )
 
         return self._oversampling
@@ -2412,8 +2779,7 @@ class SpectralWindowRow:
         if not self._quantizationExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + quantization
-                + " attribute in table SpectralWindow does not exist!"
+                + "'quantization' attribute in table SpectralWindow does not exist!"
             )
 
         return self._quantization
@@ -2457,8 +2823,7 @@ class SpectralWindowRow:
         if not self._refChanExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + refChan
-                + " attribute in table SpectralWindow does not exist!"
+                + "'refChan' attribute in table SpectralWindow does not exist!"
             )
 
         return self._refChan
@@ -2502,8 +2867,7 @@ class SpectralWindowRow:
         if not self._resolutionExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + resolution
-                + " attribute in table SpectralWindow does not exist!"
+                + "'resolution' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Frequency
@@ -2548,8 +2912,7 @@ class SpectralWindowRow:
         if not self._resolutionArrayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + resolutionArray
-                + " attribute in table SpectralWindow does not exist!"
+                + "'resolutionArray' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._resolutionArray)
@@ -2614,8 +2977,7 @@ class SpectralWindowRow:
         if not self._numAssocValuesExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numAssocValues
-                + " attribute in table SpectralWindow does not exist!"
+                + "'numAssocValues' attribute in table SpectralWindow does not exist!"
             )
 
         return self._numAssocValues
@@ -2659,8 +3021,7 @@ class SpectralWindowRow:
         if not self._assocNatureExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocNature
-                + " attribute in table SpectralWindow does not exist!"
+                + "'assocNature' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._assocNature)
@@ -2704,6 +3065,442 @@ class SpectralWindowRow:
         """
         self._assocNatureExists = False
 
+    # ===> Attribute numFactor, which is optional
+    _numFactorExists = False
+
+    _numFactor = 0
+
+    def isNumFactorExists(self):
+        """
+        The attribute numFactor is optional. Return True if this attribute exists.
+        return True if and only if the numFactor attribute exists.
+        """
+        return self._numFactorExists
+
+    def getNumFactor(self):
+        """
+        Get numFactor, which is optional.
+        return numFactor as int
+        raises ValueError If numFactor does not exist.
+        """
+        if not self._numFactorExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'numFactor' attribute in table SpectralWindow does not exist!"
+            )
+
+        return self._numFactor
+
+    def setNumFactor(self, numFactor):
+        """
+        Set numFactor with the specified int value.
+        numFactor The int value to which numFactor is to be set.
+
+
+        """
+
+        self._numFactor = int(numFactor)
+
+        self._numFactorExists = True
+
+    def clearNumFactor(self):
+        """
+        Mark numFactor, which is an optional field, as non-existent.
+        """
+        self._numFactorExists = False
+
+    # ===> Attribute numBinFactors, which is optional
+    _numBinFactorsExists = False
+
+    _numBinFactors = None  # this is a 1D list of int
+
+    def isNumBinFactorsExists(self):
+        """
+        The attribute numBinFactors is optional. Return True if this attribute exists.
+        return True if and only if the numBinFactors attribute exists.
+        """
+        return self._numBinFactorsExists
+
+    def getNumBinFactors(self):
+        """
+        Get numBinFactors, which is optional.
+        return numBinFactors as int []
+        raises ValueError If numBinFactors does not exist.
+        """
+        if not self._numBinFactorsExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'numBinFactors' attribute in table SpectralWindow does not exist!"
+            )
+
+        return copy.deepcopy(self._numBinFactors)
+
+    def setNumBinFactors(self, numBinFactors):
+        """
+        Set numBinFactors with the specified int []  value.
+        numBinFactors The int []  value to which numBinFactors is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(numBinFactors, list):
+            raise ValueError("The value of numBinFactors must be a list")
+        # check the shape
+        try:
+            listDims = pyasdm.utils.getListDims(numBinFactors)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of numBinFactors is not correct")
+
+            # the type of the values in the list must be int
+            # note : this only checks the first value found
+            if not pyasdm.utils.checkListType(numBinFactors, int):
+                raise ValueError(
+                    "type of the first value in numBinFactors is not int as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._numBinFactors = copy.deepcopy(numBinFactors)
+        except Exception as exc:
+            raise ValueError("Invalid numBinFactors : " + str(exc))
+
+        self._numBinFactorsExists = True
+
+    def clearNumBinFactors(self):
+        """
+        Mark numBinFactors, which is an optional field, as non-existent.
+        """
+        self._numBinFactorsExists = False
+
+    # ===> Attribute numOrigFreqSlice, which is optional
+    _numOrigFreqSliceExists = False
+
+    _numOrigFreqSlice = 0
+
+    def isNumOrigFreqSliceExists(self):
+        """
+        The attribute numOrigFreqSlice is optional. Return True if this attribute exists.
+        return True if and only if the numOrigFreqSlice attribute exists.
+        """
+        return self._numOrigFreqSliceExists
+
+    def getNumOrigFreqSlice(self):
+        """
+        Get numOrigFreqSlice, which is optional.
+        return numOrigFreqSlice as int
+        raises ValueError If numOrigFreqSlice does not exist.
+        """
+        if not self._numOrigFreqSliceExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'numOrigFreqSlice' attribute in table SpectralWindow does not exist!"
+            )
+
+        return self._numOrigFreqSlice
+
+    def setNumOrigFreqSlice(self, numOrigFreqSlice):
+        """
+        Set numOrigFreqSlice with the specified int value.
+        numOrigFreqSlice The int value to which numOrigFreqSlice is to be set.
+
+
+        """
+
+        self._numOrigFreqSlice = int(numOrigFreqSlice)
+
+        self._numOrigFreqSliceExists = True
+
+    def clearNumOrigFreqSlice(self):
+        """
+        Mark numOrigFreqSlice, which is an optional field, as non-existent.
+        """
+        self._numOrigFreqSliceExists = False
+
+    # ===> Attribute originatingFrequencySlices, which is optional
+    _originatingFrequencySlicesExists = False
+
+    _originatingFrequencySlices = None  # this is a 1D list of int
+
+    def isOriginatingFrequencySlicesExists(self):
+        """
+        The attribute originatingFrequencySlices is optional. Return True if this attribute exists.
+        return True if and only if the originatingFrequencySlices attribute exists.
+        """
+        return self._originatingFrequencySlicesExists
+
+    def getOriginatingFrequencySlices(self):
+        """
+        Get originatingFrequencySlices, which is optional.
+        return originatingFrequencySlices as int []
+        raises ValueError If originatingFrequencySlices does not exist.
+        """
+        if not self._originatingFrequencySlicesExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'originatingFrequencySlices' attribute in table SpectralWindow does not exist!"
+            )
+
+        return copy.deepcopy(self._originatingFrequencySlices)
+
+    def setOriginatingFrequencySlices(self, originatingFrequencySlices):
+        """
+        Set originatingFrequencySlices with the specified int []  value.
+        originatingFrequencySlices The int []  value to which originatingFrequencySlices is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(originatingFrequencySlices, list):
+            raise ValueError("The value of originatingFrequencySlices must be a list")
+        # check the shape
+        try:
+            listDims = pyasdm.utils.getListDims(originatingFrequencySlices)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of originatingFrequencySlices is not correct")
+
+            # the type of the values in the list must be int
+            # note : this only checks the first value found
+            if not pyasdm.utils.checkListType(originatingFrequencySlices, int):
+                raise ValueError(
+                    "type of the first value in originatingFrequencySlices is not int as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._originatingFrequencySlices = copy.deepcopy(originatingFrequencySlices)
+        except Exception as exc:
+            raise ValueError("Invalid originatingFrequencySlices : " + str(exc))
+
+        self._originatingFrequencySlicesExists = True
+
+    def clearOriginatingFrequencySlices(self):
+        """
+        Mark originatingFrequencySlices, which is an optional field, as non-existent.
+        """
+        self._originatingFrequencySlicesExists = False
+
+    # ===> Attribute quantizationBits, which is optional
+    _quantizationBitsExists = False
+
+    _quantizationBits = 0
+
+    def isQuantizationBitsExists(self):
+        """
+        The attribute quantizationBits is optional. Return True if this attribute exists.
+        return True if and only if the quantizationBits attribute exists.
+        """
+        return self._quantizationBitsExists
+
+    def getQuantizationBits(self):
+        """
+        Get quantizationBits, which is optional.
+        return quantizationBits as int
+        raises ValueError If quantizationBits does not exist.
+        """
+        if not self._quantizationBitsExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'quantizationBits' attribute in table SpectralWindow does not exist!"
+            )
+
+        return self._quantizationBits
+
+    def setQuantizationBits(self, quantizationBits):
+        """
+        Set quantizationBits with the specified int value.
+        quantizationBits The int value to which quantizationBits is to be set.
+
+
+        """
+
+        self._quantizationBits = int(quantizationBits)
+
+        self._quantizationBitsExists = True
+
+    def clearQuantizationBits(self):
+        """
+        Mark quantizationBits, which is an optional field, as non-existent.
+        """
+        self._quantizationBitsExists = False
+
+    # ===> Attribute numRequantStage, which is optional
+    _numRequantStageExists = False
+
+    _numRequantStage = 0
+
+    def isNumRequantStageExists(self):
+        """
+        The attribute numRequantStage is optional. Return True if this attribute exists.
+        return True if and only if the numRequantStage attribute exists.
+        """
+        return self._numRequantStageExists
+
+    def getNumRequantStage(self):
+        """
+        Get numRequantStage, which is optional.
+        return numRequantStage as int
+        raises ValueError If numRequantStage does not exist.
+        """
+        if not self._numRequantStageExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'numRequantStage' attribute in table SpectralWindow does not exist!"
+            )
+
+        return self._numRequantStage
+
+    def setNumRequantStage(self, numRequantStage):
+        """
+        Set numRequantStage with the specified int value.
+        numRequantStage The int value to which numRequantStage is to be set.
+
+
+        """
+
+        self._numRequantStage = int(numRequantStage)
+
+        self._numRequantStageExists = True
+
+    def clearNumRequantStage(self):
+        """
+        Mark numRequantStage, which is an optional field, as non-existent.
+        """
+        self._numRequantStageExists = False
+
+    # ===> Attribute requantization, which is optional
+    _requantizationExists = False
+
+    _requantization = None  # this is a 1D list of bool
+
+    def isRequantizationExists(self):
+        """
+        The attribute requantization is optional. Return True if this attribute exists.
+        return True if and only if the requantization attribute exists.
+        """
+        return self._requantizationExists
+
+    def getRequantization(self):
+        """
+        Get requantization, which is optional.
+        return requantization as bool []
+        raises ValueError If requantization does not exist.
+        """
+        if not self._requantizationExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'requantization' attribute in table SpectralWindow does not exist!"
+            )
+
+        return copy.deepcopy(self._requantization)
+
+    def setRequantization(self, requantization):
+        """
+        Set requantization with the specified bool []  value.
+        requantization The bool []  value to which requantization is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(requantization, list):
+            raise ValueError("The value of requantization must be a list")
+        # check the shape
+        try:
+            listDims = pyasdm.utils.getListDims(requantization)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of requantization is not correct")
+
+            # the type of the values in the list must be bool
+            # note : this only checks the first value found
+            if not pyasdm.utils.checkListType(requantization, bool):
+                raise ValueError(
+                    "type of the first value in requantization is not bool as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._requantization = copy.deepcopy(requantization)
+        except Exception as exc:
+            raise ValueError("Invalid requantization : " + str(exc))
+
+        self._requantizationExists = True
+
+    def clearRequantization(self):
+        """
+        Mark requantization, which is an optional field, as non-existent.
+        """
+        self._requantizationExists = False
+
+    # ===> Attribute requantizationBits, which is optional
+    _requantizationBitsExists = False
+
+    _requantizationBits = None  # this is a 1D list of int
+
+    def isRequantizationBitsExists(self):
+        """
+        The attribute requantizationBits is optional. Return True if this attribute exists.
+        return True if and only if the requantizationBits attribute exists.
+        """
+        return self._requantizationBitsExists
+
+    def getRequantizationBits(self):
+        """
+        Get requantizationBits, which is optional.
+        return requantizationBits as int []
+        raises ValueError If requantizationBits does not exist.
+        """
+        if not self._requantizationBitsExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'requantizationBits' attribute in table SpectralWindow does not exist!"
+            )
+
+        return copy.deepcopy(self._requantizationBits)
+
+    def setRequantizationBits(self, requantizationBits):
+        """
+        Set requantizationBits with the specified int []  value.
+        requantizationBits The int []  value to which requantizationBits is to be set.
+
+
+        """
+
+        # value must be a list
+        if not isinstance(requantizationBits, list):
+            raise ValueError("The value of requantizationBits must be a list")
+        # check the shape
+        try:
+            listDims = pyasdm.utils.getListDims(requantizationBits)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of requantizationBits is not correct")
+
+            # the type of the values in the list must be int
+            # note : this only checks the first value found
+            if not pyasdm.utils.checkListType(requantizationBits, int):
+                raise ValueError(
+                    "type of the first value in requantizationBits is not int as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._requantizationBits = copy.deepcopy(requantizationBits)
+        except Exception as exc:
+            raise ValueError("Invalid requantizationBits : " + str(exc))
+
+        self._requantizationBitsExists = True
+
+    def clearRequantizationBits(self):
+        """
+        Mark requantizationBits, which is an optional field, as non-existent.
+        """
+        self._requantizationBitsExists = False
+
     # Extrinsic Table Attributes
 
     # ===> Attribute assocSpectralWindowId, which is optional
@@ -2727,8 +3524,7 @@ class SpectralWindowRow:
         if not self._assocSpectralWindowIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocSpectralWindowId
-                + " attribute in table SpectralWindow does not exist!"
+                + "'assocSpectralWindowId' attribute in table SpectralWindow does not exist!"
             )
 
         return copy.deepcopy(self._assocSpectralWindowId)
@@ -2793,8 +3589,7 @@ class SpectralWindowRow:
         if not self._dopplerIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dopplerId
-                + " attribute in table SpectralWindow does not exist!"
+                + "'dopplerId' attribute in table SpectralWindow does not exist!"
             )
 
         return self._dopplerId
@@ -2838,8 +3633,7 @@ class SpectralWindowRow:
         if not self._imageSpectralWindowIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + imageSpectralWindowId
-                + " attribute in table SpectralWindow does not exist!"
+                + "'imageSpectralWindowId' attribute in table SpectralWindow does not exist!"
             )
 
         # make sure it is a copy of Tag

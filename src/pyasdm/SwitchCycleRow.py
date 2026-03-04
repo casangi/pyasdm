@@ -675,8 +675,7 @@ class SwitchCycleRow:
         if not self._directionCodeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + directionCode
-                + " attribute in table SwitchCycle does not exist!"
+                + "'directionCode' attribute in table SwitchCycle does not exist!"
             )
 
         return self._directionCode
@@ -720,8 +719,7 @@ class SwitchCycleRow:
         if not self._directionEquinoxExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + directionEquinox
-                + " attribute in table SwitchCycle does not exist!"
+                + "'directionEquinox' attribute in table SwitchCycle does not exist!"
             )
 
         # make sure it is a copy of ArrayTime

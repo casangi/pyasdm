@@ -308,7 +308,7 @@ class FlagTable:
         # Autoincrement flagId
         x.setFlagId(Tag(self.size(), TagType.Flag))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

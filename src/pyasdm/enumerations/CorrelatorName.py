@@ -58,6 +58,10 @@ _NRAO_VLA = 9  # VLA correlator.
 
 _NRAO_WIDAR = 10  # EVLA correlator.
 
+_ALMA_ATAC = 11  # Advanced Technology ALMA Correlator
+
+_ALMA_TPGS = 12  # ALMA Total Power GPU Spectrometer
+
 
 # their names in a dictionary
 _correlatorNameNames = {}
@@ -83,6 +87,10 @@ _correlatorNameNames[_IRAM_WILMA] = "IRAM_WILMA"
 _correlatorNameNames[_NRAO_VLA] = "NRAO_VLA"
 
 _correlatorNameNames[_NRAO_WIDAR] = "NRAO_WIDAR"
+
+_correlatorNameNames[_ALMA_ATAC] = "ALMA_ATAC"
+
+_correlatorNameNames[_ALMA_TPGS] = "ALMA_TPGS"
 
 
 class CorrelatorName:
@@ -233,3 +241,7 @@ IRAM_WILMA = CorrelatorName(_IRAM_WILMA)
 NRAO_VLA = CorrelatorName(_NRAO_VLA)
 
 NRAO_WIDAR = CorrelatorName(_NRAO_WIDAR)
+
+ALMA_ATAC = CorrelatorName(_ALMA_ATAC)
+
+ALMA_TPGS = CorrelatorName(_ALMA_TPGS)

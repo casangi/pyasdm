@@ -349,8 +349,7 @@ class AlmaRadiometerRow:
         if not self._numAntennaExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numAntenna
-                + " attribute in table AlmaRadiometer does not exist!"
+                + "'numAntenna' attribute in table AlmaRadiometer does not exist!"
             )
 
         return self._numAntenna
@@ -396,8 +395,7 @@ class AlmaRadiometerRow:
         if not self._spectralWindowIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + spectralWindowId
-                + " attribute in table AlmaRadiometer does not exist!"
+                + "'spectralWindowId' attribute in table AlmaRadiometer does not exist!"
             )
 
         return copy.deepcopy(self._spectralWindowId)

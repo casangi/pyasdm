@@ -120,6 +120,8 @@ class DelayModelVariableParametersTable:
 
         nutationInObliquityRate (AngularRate): the rate of nutation in obliquity in  radian \ s^{-1} . Optional.
 
+        delayModelVersion (str): delay model version. Optional.
+
 
     """
 
@@ -436,7 +438,7 @@ class DelayModelVariableParametersTable:
             Tag(self.size(), TagType.DelayModelVariableParameters)
         )
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 
@@ -788,6 +790,7 @@ class DelayModelVariableParametersTable:
         result += "<nutationInLongitudeRate/>\n"
         result += "<nutationInObliquity/>\n"
         result += "<nutationInObliquityRate/>\n"
+        result += "<delayModelVersion/>\n"
         result += "</Attributes>\n"
         result += "</DelayModelVariableParametersTable>\n"
 
@@ -966,6 +969,8 @@ class DelayModelVariableParametersTable:
             attributesSeq.append("nutationInObliquity")
 
             attributesSeq.append("nutationInObliquityRate")
+
+            attributesSeq.append("delayModelVersion")
 
             versionStr = "2"
 

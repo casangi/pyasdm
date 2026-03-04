@@ -186,6 +186,18 @@ class DelayModelRow:
 
         self._crossPolarizationDelay = None
 
+        self._centerOfArrayExists = False
+
+        self._centerOfArray = []  # this is a list of Length []
+
+        self._delayModelVersionExists = False
+
+        self._delayModelVersion = None
+
+        self._ionosphericDelayExists = False
+
+        self._ionosphericDelay = Interval()
+
         # extrinsic attributes
 
         self._antennaId = Tag()
@@ -406,6 +418,31 @@ class DelayModelRow:
 
                 self._crossPolarizationDelayExists = True
 
+            # by default set systematically centerOfArray's value to something not None
+
+            if row._centerOfArrayExists:
+
+                # centerOfArray is a list, make a deep copy
+                self._centerOfArray = copy.deepcopy(row._centerOfArray)
+
+                self._centerOfArrayExists = True
+
+            # by default set systematically delayModelVersion's value to something not None
+
+            if row._delayModelVersionExists:
+
+                self._delayModelVersion = row._delayModelVersion
+
+                self._delayModelVersionExists = True
+
+            # by default set systematically ionosphericDelay's value to something not None
+
+            if row._ionosphericDelayExists:
+
+                self._ionosphericDelay = Interval(row._ionosphericDelay)
+
+                self._ionosphericDelayExists = True
+
     def isAdded(self):
         self._hasBeenAdded = True
 
@@ -539,6 +576,22 @@ class DelayModelRow:
 
             result += Parser.valueToXML(
                 "crossPolarizationDelay", self._crossPolarizationDelay
+            )
+
+        if self._centerOfArrayExists:
+
+            result += Parser.listExtendedValueToXML(
+                "centerOfArray", self._centerOfArray
+            )
+
+        if self._delayModelVersionExists:
+
+            result += Parser.valueToXML("delayModelVersion", self._delayModelVersion)
+
+        if self._ionosphericDelayExists:
+
+            result += Parser.extendedValueToXML(
+                "ionosphericDelay", self._ionosphericDelay
             )
 
         # extrinsic attributes
@@ -823,6 +876,35 @@ class DelayModelRow:
 
             self._crossPolarizationDelayExists = True
 
+        centerOfArrayNode = rowdom.getElementsByTagName("centerOfArray")
+        if len(centerOfArrayNode) > 0:
+
+            centerOfArrayStr = centerOfArrayNode[0].firstChild.data.strip()
+
+            self._centerOfArray = Parser.stringListToLists(
+                centerOfArrayStr, Length, "DelayModel", True
+            )
+
+            self._centerOfArrayExists = True
+
+        delayModelVersionNode = rowdom.getElementsByTagName("delayModelVersion")
+        if len(delayModelVersionNode) > 0:
+
+            self._delayModelVersion = str(
+                delayModelVersionNode[0].firstChild.data.strip()
+            )
+
+            self._delayModelVersionExists = True
+
+        ionosphericDelayNode = rowdom.getElementsByTagName("ionosphericDelay")
+        if len(ionosphericDelayNode) > 0:
+
+            self._ionosphericDelay = Interval(
+                ionosphericDelayNode[0].firstChild.data.strip()
+            )
+
+            self._ionosphericDelayExists = True
+
         # extrinsic attribute values
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
@@ -1001,6 +1083,21 @@ class DelayModelRow:
         if self._crossPolarizationDelayExists:
 
             eos.writeFloat(self._crossPolarizationDelay)
+
+        eos.writeBool(self._centerOfArrayExists)
+        if self._centerOfArrayExists:
+
+            Length.listToBin(self._centerOfArray, eos)
+
+        eos.writeBool(self._delayModelVersionExists)
+        if self._delayModelVersionExists:
+
+            eos.writeStr(self._delayModelVersion)
+
+        eos.writeBool(self._ionosphericDelayExists)
+        if self._ionosphericDelayExists:
+
+            self._ionosphericDelay.toBin(eos)
 
     @staticmethod
     def antennaIdFromBin(row, eis):
@@ -1345,6 +1442,36 @@ class DelayModelRow:
             row._crossPolarizationDelay = eis.readFloat()
 
     @staticmethod
+    def centerOfArrayFromBin(row, eis):
+        """
+        Set the optional centerOfArray in row from the EndianInput (eis) instance.
+        """
+        row._centerOfArrayExists = eis.readBool()
+        if row._centerOfArrayExists:
+
+            row._centerOfArray = Length.from1DBin(eis)
+
+    @staticmethod
+    def delayModelVersionFromBin(row, eis):
+        """
+        Set the optional delayModelVersion in row from the EndianInput (eis) instance.
+        """
+        row._delayModelVersionExists = eis.readBool()
+        if row._delayModelVersionExists:
+
+            row._delayModelVersion = eis.readStr()
+
+    @staticmethod
+    def ionosphericDelayFromBin(row, eis):
+        """
+        Set the optional ionosphericDelay in row from the EndianInput (eis) instance.
+        """
+        row._ionosphericDelayExists = eis.readBool()
+        if row._ionosphericDelayExists:
+
+            row._ionosphericDelay = Interval.fromBin(eis)
+
+    @staticmethod
     def initFromBinMethods():
         global _fromBinMethods
         if len(_fromBinMethods) > 0:
@@ -1396,6 +1523,9 @@ class DelayModelRow:
         _fromBinMethods["crossPolarizationDelay"] = (
             DelayModelRow.crossPolarizationDelayFromBin
         )
+        _fromBinMethods["centerOfArray"] = DelayModelRow.centerOfArrayFromBin
+        _fromBinMethods["delayModelVersion"] = DelayModelRow.delayModelVersionFromBin
+        _fromBinMethods["ionosphericDelay"] = DelayModelRow.ionosphericDelayFromBin
 
     @staticmethod
     def fromBin(eis, table, attributesSeq):
@@ -1670,8 +1800,7 @@ class DelayModelRow:
         if not self._timeOriginExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + timeOrigin
-                + " attribute in table DelayModel does not exist!"
+                + "'timeOrigin' attribute in table DelayModel does not exist!"
             )
 
         # make sure it is a copy of ArrayTime
@@ -1716,8 +1845,7 @@ class DelayModelRow:
         if not self._atmosphericGroupDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + atmosphericGroupDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'atmosphericGroupDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._atmosphericGroupDelay
@@ -1761,8 +1889,7 @@ class DelayModelRow:
         if not self._atmosphericGroupDelayRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + atmosphericGroupDelayRate
-                + " attribute in table DelayModel does not exist!"
+                + "'atmosphericGroupDelayRate' attribute in table DelayModel does not exist!"
             )
 
         return self._atmosphericGroupDelayRate
@@ -1806,8 +1933,7 @@ class DelayModelRow:
         if not self._geometricDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + geometricDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'geometricDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._geometricDelay
@@ -1851,8 +1977,7 @@ class DelayModelRow:
         if not self._geometricDelayRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + geometricDelayRate
-                + " attribute in table DelayModel does not exist!"
+                + "'geometricDelayRate' attribute in table DelayModel does not exist!"
             )
 
         return self._geometricDelayRate
@@ -1896,8 +2021,7 @@ class DelayModelRow:
         if not self._numLOExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numLO
-                + " attribute in table DelayModel does not exist!"
+                + "'numLO' attribute in table DelayModel does not exist!"
             )
 
         return self._numLO
@@ -1941,8 +2065,7 @@ class DelayModelRow:
         if not self._LOOffsetExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + LOOffset
-                + " attribute in table DelayModel does not exist!"
+                + "'LOOffset' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._LOOffset)
@@ -2007,8 +2130,7 @@ class DelayModelRow:
         if not self._LOOffsetRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + LOOffsetRate
-                + " attribute in table DelayModel does not exist!"
+                + "'LOOffsetRate' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._LOOffsetRate)
@@ -2073,8 +2195,7 @@ class DelayModelRow:
         if not self._dispersiveDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dispersiveDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'dispersiveDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._dispersiveDelay
@@ -2118,8 +2239,7 @@ class DelayModelRow:
         if not self._dispersiveDelayRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + dispersiveDelayRate
-                + " attribute in table DelayModel does not exist!"
+                + "'dispersiveDelayRate' attribute in table DelayModel does not exist!"
             )
 
         return self._dispersiveDelayRate
@@ -2163,8 +2283,7 @@ class DelayModelRow:
         if not self._atmosphericDryDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + atmosphericDryDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'atmosphericDryDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._atmosphericDryDelay
@@ -2208,8 +2327,7 @@ class DelayModelRow:
         if not self._atmosphericWetDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + atmosphericWetDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'atmosphericWetDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._atmosphericWetDelay
@@ -2253,8 +2371,7 @@ class DelayModelRow:
         if not self._padDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + padDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'padDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._padDelay
@@ -2298,8 +2415,7 @@ class DelayModelRow:
         if not self._antennaDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + antennaDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'antennaDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._antennaDelay
@@ -2343,8 +2459,7 @@ class DelayModelRow:
         if not self._numReceptorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numReceptor
-                + " attribute in table DelayModel does not exist!"
+                + "'numReceptor' attribute in table DelayModel does not exist!"
             )
 
         return self._numReceptor
@@ -2388,8 +2503,7 @@ class DelayModelRow:
         if not self._polarizationTypeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + polarizationType
-                + " attribute in table DelayModel does not exist!"
+                + "'polarizationType' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._polarizationType)
@@ -2454,8 +2568,7 @@ class DelayModelRow:
         if not self._electronicDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + electronicDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'electronicDelay' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._electronicDelay)
@@ -2520,8 +2633,7 @@ class DelayModelRow:
         if not self._electronicDelayRateExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + electronicDelayRate
-                + " attribute in table DelayModel does not exist!"
+                + "'electronicDelayRate' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._electronicDelayRate)
@@ -2586,8 +2698,7 @@ class DelayModelRow:
         if not self._receiverDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + receiverDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'receiverDelay' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._receiverDelay)
@@ -2652,8 +2763,7 @@ class DelayModelRow:
         if not self._IFDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + IFDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'IFDelay' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._IFDelay)
@@ -2718,8 +2828,7 @@ class DelayModelRow:
         if not self._LODelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + LODelay
-                + " attribute in table DelayModel does not exist!"
+                + "'LODelay' attribute in table DelayModel does not exist!"
             )
 
         return copy.deepcopy(self._LODelay)
@@ -2784,8 +2893,7 @@ class DelayModelRow:
         if not self._crossPolarizationDelayExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + crossPolarizationDelay
-                + " attribute in table DelayModel does not exist!"
+                + "'crossPolarizationDelay' attribute in table DelayModel does not exist!"
             )
 
         return self._crossPolarizationDelay
@@ -2807,6 +2915,160 @@ class DelayModelRow:
         Mark crossPolarizationDelay, which is an optional field, as non-existent.
         """
         self._crossPolarizationDelayExists = False
+
+    # ===> Attribute centerOfArray, which is optional
+    _centerOfArrayExists = False
+
+    _centerOfArray = None  # this is a 1D list of Length
+
+    def isCenterOfArrayExists(self):
+        """
+        The attribute centerOfArray is optional. Return True if this attribute exists.
+        return True if and only if the centerOfArray attribute exists.
+        """
+        return self._centerOfArrayExists
+
+    def getCenterOfArray(self):
+        """
+        Get centerOfArray, which is optional.
+        return centerOfArray as Length []
+        raises ValueError If centerOfArray does not exist.
+        """
+        if not self._centerOfArrayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'centerOfArray' attribute in table DelayModel does not exist!"
+            )
+
+        return copy.deepcopy(self._centerOfArray)
+
+    def setCenterOfArray(self, centerOfArray):
+        """
+        Set centerOfArray with the specified Length []  value.
+        centerOfArray The Length []  value to which centerOfArray is to be set.
+        The value of centerOfArray can be anything allowed by the Length []  constructor.
+
+        """
+
+        # value must be a list
+        if not isinstance(centerOfArray, list):
+            raise ValueError("The value of centerOfArray must be a list")
+        # check the shape
+        try:
+            listDims = pyasdm.utils.getListDims(centerOfArray)
+
+            shapeOK = len(listDims) == 1
+
+            if not shapeOK:
+                raise ValueError("shape of centerOfArray is not correct")
+
+            # the type of the values in the list must be Length
+            # note : this only checks the first value found
+            if not pyasdm.utils.checkListType(centerOfArray, Length):
+                raise ValueError(
+                    "type of the first value in centerOfArray is not Length as expected"
+                )
+            # finally, (reasonably) safe to just do a deepcopy
+            self._centerOfArray = copy.deepcopy(centerOfArray)
+        except Exception as exc:
+            raise ValueError("Invalid centerOfArray : " + str(exc))
+
+        self._centerOfArrayExists = True
+
+    def clearCenterOfArray(self):
+        """
+        Mark centerOfArray, which is an optional field, as non-existent.
+        """
+        self._centerOfArrayExists = False
+
+    # ===> Attribute delayModelVersion, which is optional
+    _delayModelVersionExists = False
+
+    _delayModelVersion = None
+
+    def isDelayModelVersionExists(self):
+        """
+        The attribute delayModelVersion is optional. Return True if this attribute exists.
+        return True if and only if the delayModelVersion attribute exists.
+        """
+        return self._delayModelVersionExists
+
+    def getDelayModelVersion(self):
+        """
+        Get delayModelVersion, which is optional.
+        return delayModelVersion as str
+        raises ValueError If delayModelVersion does not exist.
+        """
+        if not self._delayModelVersionExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'delayModelVersion' attribute in table DelayModel does not exist!"
+            )
+
+        return self._delayModelVersion
+
+    def setDelayModelVersion(self, delayModelVersion):
+        """
+        Set delayModelVersion with the specified str value.
+        delayModelVersion The str value to which delayModelVersion is to be set.
+
+
+        """
+
+        self._delayModelVersion = str(delayModelVersion)
+
+        self._delayModelVersionExists = True
+
+    def clearDelayModelVersion(self):
+        """
+        Mark delayModelVersion, which is an optional field, as non-existent.
+        """
+        self._delayModelVersionExists = False
+
+    # ===> Attribute ionosphericDelay, which is optional
+    _ionosphericDelayExists = False
+
+    _ionosphericDelay = Interval()
+
+    def isIonosphericDelayExists(self):
+        """
+        The attribute ionosphericDelay is optional. Return True if this attribute exists.
+        return True if and only if the ionosphericDelay attribute exists.
+        """
+        return self._ionosphericDelayExists
+
+    def getIonosphericDelay(self):
+        """
+        Get ionosphericDelay, which is optional.
+        return ionosphericDelay as Interval
+        raises ValueError If ionosphericDelay does not exist.
+        """
+        if not self._ionosphericDelayExists:
+            raise ValueError(
+                "Attempt to access a non-existent attribute.  The "
+                + "'ionosphericDelay' attribute in table DelayModel does not exist!"
+            )
+
+        # make sure it is a copy of Interval
+        return Interval(self._ionosphericDelay)
+
+    def setIonosphericDelay(self, ionosphericDelay):
+        """
+        Set ionosphericDelay with the specified Interval value.
+        ionosphericDelay The Interval value to which ionosphericDelay is to be set.
+        The value of ionosphericDelay can be anything allowed by the Interval constructor.
+
+        """
+
+        self._ionosphericDelay = Interval(ionosphericDelay)
+
+        self._ionosphericDelayExists = True
+
+    def clearIonosphericDelay(self):
+        """
+        Mark ionosphericDelay, which is an optional field, as non-existent.
+        """
+        self._ionosphericDelayExists = False
 
     # Extrinsic Table Attributes
 

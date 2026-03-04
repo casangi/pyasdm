@@ -119,6 +119,20 @@ class SysPowerTable:
 
         requantizerGain (float [] ): Array(numReceptor) refers to the gain inserted after the synchronous power detector. For WIDAR, it is the requantizer gain (G). Optional.
 
+        numChannels (int): the number of channels. Optional.
+
+        numPolarizationType (int): the number of polarization types. Optional.
+
+        chanFreqStart (Frequency): the frequency of the first channel. Optional.
+
+        chanFreqStep (Frequency): the channel frequency separation. Optional.
+
+        switchedPowerDifferenceSpectrum (float []  [] ): Array(numPolarizationType, numChannels) the switched power difference spectrum. Optional.
+
+        switchedPowerSumSpectrum (float []  [] ): Array(numPolarizationType, numChannels) the switched power sum spectrum. Optional.
+
+        requantizerGainSpectrum (float []  [] ): Array(numPolarizationType, numChannels) the requantizer gain spectrum. Optional.
+
 
     """
 
@@ -157,6 +171,44 @@ class SysPowerTable:
 
     # from the schemaVersion string found in the table, must be an integer
     _version = 0
+
+    # The tolerance which will be used on chanFreqStart during an add operation on the table
+    _chanFreqStartEqTolerance = Frequency(0.0)
+
+    def setChanFreqStartEqTolerance(self, tolerance):
+        """
+        A setter for the tolerance on chanFreqStart
+        """
+        if not isinstance(tolerance, Frequency):
+            print("tolerance must be a  Frequency instance")
+
+        self._chanFreqStartEqTolerance = Frequency(tolerance)
+
+    def getChanFreqStartEqTolerance(self):
+        """
+        A getter for the tolerance on chanFreqStart
+        Returns the tolerance as a  Frequency
+        """
+        return self._chanFreqStartEqTolerance
+
+    # The tolerance which will be used on chanFreqStep during an add operation on the table
+    _chanFreqStepEqTolerance = Frequency(0.0)
+
+    def setChanFreqStepEqTolerance(self, tolerance):
+        """
+        A setter for the tolerance on chanFreqStep
+        """
+        if not isinstance(tolerance, Frequency):
+            print("tolerance must be a  Frequency instance")
+
+        self._chanFreqStepEqTolerance = Frequency(tolerance)
+
+    def getChanFreqStepEqTolerance(self):
+        """
+        A getter for the tolerance on chanFreqStep
+        Returns the tolerance as a  Frequency
+        """
+        return self._chanFreqStepEqTolerance
 
     def getKeyName(self):
         """
@@ -714,6 +766,13 @@ class SysPowerTable:
         result += "<switchedPowerDifference/>\n"
         result += "<switchedPowerSum/>\n"
         result += "<requantizerGain/>\n"
+        result += "<numChannels/>\n"
+        result += "<numPolarizationType/>\n"
+        result += "<chanFreqStart/>\n"
+        result += "<chanFreqStep/>\n"
+        result += "<switchedPowerDifferenceSpectrum/>\n"
+        result += "<switchedPowerSumSpectrum/>\n"
+        result += "<requantizerGainSpectrum/>\n"
         result += "</Attributes>\n"
         result += "</SysPowerTable>\n"
 
@@ -876,6 +935,20 @@ class SysPowerTable:
             attributesSeq.append("switchedPowerSum")
 
             attributesSeq.append("requantizerGain")
+
+            attributesSeq.append("numChannels")
+
+            attributesSeq.append("numPolarizationType")
+
+            attributesSeq.append("chanFreqStart")
+
+            attributesSeq.append("chanFreqStep")
+
+            attributesSeq.append("switchedPowerDifferenceSpectrum")
+
+            attributesSeq.append("switchedPowerSumSpectrum")
+
+            attributesSeq.append("requantizerGainSpectrum")
 
             versionStr = "2"
 

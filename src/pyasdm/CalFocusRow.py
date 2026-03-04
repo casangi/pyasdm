@@ -2103,8 +2103,7 @@ class CalFocusRow:
         if not self._polarizationsAveragedExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + polarizationsAveraged
-                + " attribute in table CalFocus does not exist!"
+                + "'polarizationsAveraged' attribute in table CalFocus does not exist!"
             )
 
         return self._polarizationsAveraged
@@ -2148,8 +2147,7 @@ class CalFocusRow:
         if not self._focusCurveWidthExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + focusCurveWidth
-                + " attribute in table CalFocus does not exist!"
+                + "'focusCurveWidth' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._focusCurveWidth)
@@ -2214,8 +2212,7 @@ class CalFocusRow:
         if not self._focusCurveWidthErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + focusCurveWidthError
-                + " attribute in table CalFocus does not exist!"
+                + "'focusCurveWidthError' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._focusCurveWidthError)
@@ -2280,8 +2277,7 @@ class CalFocusRow:
         if not self._focusCurveWasFixedExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + focusCurveWasFixed
-                + " attribute in table CalFocus does not exist!"
+                + "'focusCurveWasFixed' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._focusCurveWasFixed)
@@ -2346,8 +2342,7 @@ class CalFocusRow:
         if not self._offIntensityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + offIntensity
-                + " attribute in table CalFocus does not exist!"
+                + "'offIntensity' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._offIntensity)
@@ -2412,8 +2407,7 @@ class CalFocusRow:
         if not self._offIntensityErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + offIntensityError
-                + " attribute in table CalFocus does not exist!"
+                + "'offIntensityError' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._offIntensityError)
@@ -2478,8 +2472,7 @@ class CalFocusRow:
         if not self._offIntensityWasFixedExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + offIntensityWasFixed
-                + " attribute in table CalFocus does not exist!"
+                + "'offIntensityWasFixed' attribute in table CalFocus does not exist!"
             )
 
         return self._offIntensityWasFixed
@@ -2523,8 +2516,7 @@ class CalFocusRow:
         if not self._peakIntensityExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + peakIntensity
-                + " attribute in table CalFocus does not exist!"
+                + "'peakIntensity' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._peakIntensity)
@@ -2589,8 +2581,7 @@ class CalFocusRow:
         if not self._peakIntensityErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + peakIntensityError
-                + " attribute in table CalFocus does not exist!"
+                + "'peakIntensityError' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._peakIntensityError)
@@ -2655,8 +2646,7 @@ class CalFocusRow:
         if not self._peakIntensityWasFixedExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + peakIntensityWasFixed
-                + " attribute in table CalFocus does not exist!"
+                + "'peakIntensityWasFixed' attribute in table CalFocus does not exist!"
             )
 
         return self._peakIntensityWasFixed
@@ -2700,8 +2690,7 @@ class CalFocusRow:
         if not self._astigmPlusExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + astigmPlus
-                + " attribute in table CalFocus does not exist!"
+                + "'astigmPlus' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._astigmPlus)
@@ -2766,8 +2755,7 @@ class CalFocusRow:
         if not self._astigmPlusErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + astigmPlusError
-                + " attribute in table CalFocus does not exist!"
+                + "'astigmPlusError' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._astigmPlusError)
@@ -2832,8 +2820,7 @@ class CalFocusRow:
         if not self._astigmMultExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + astigmMult
-                + " attribute in table CalFocus does not exist!"
+                + "'astigmMult' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._astigmMult)
@@ -2898,8 +2885,7 @@ class CalFocusRow:
         if not self._astigmMultErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + astigmMultError
-                + " attribute in table CalFocus does not exist!"
+                + "'astigmMultError' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._astigmMultError)
@@ -2964,8 +2950,7 @@ class CalFocusRow:
         if not self._illumOffsetExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + illumOffset
-                + " attribute in table CalFocus does not exist!"
+                + "'illumOffset' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._illumOffset)
@@ -3030,8 +3015,7 @@ class CalFocusRow:
         if not self._illumOffsetErrorExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + illumOffsetError
-                + " attribute in table CalFocus does not exist!"
+                + "'illumOffsetError' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._illumOffsetError)
@@ -3096,8 +3080,7 @@ class CalFocusRow:
         if not self._fitRMSExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + fitRMS
-                + " attribute in table CalFocus does not exist!"
+                + "'fitRMS' attribute in table CalFocus does not exist!"
             )
 
         return copy.deepcopy(self._fitRMS)

@@ -150,6 +150,22 @@ class SpectralWindowTable:
 
         assocNature (SpectralResolutionType [] ): Array(numAssocValues) the natures of the associations with the rows refered to by assocSpectralWindowId. Optional.
 
+        numFactor (int): the length of numBinFactors Optional.
+
+        numBinFactors (int [] ): Array(numFactor) the channel averaging factors applied online. Optional.
+
+        numOrigFreqSlice (int): the length of originatingFrequencySlices Optional.
+
+        originatingFrequencySlices (int [] ): Array(numOrigFreqSlice) originating frequency slices. Optional.
+
+        quantizationBits (int): the bit depth of the quantization correction. Optional.
+
+        numRequantStage (int): the number of requantization stages. Optional.
+
+        requantization (bool [] ): Array(numRequantStage) was requantization correction applied for this stage. Optional.
+
+        requantizationBits (int [] ): Array(numRequantStage) the bit depth of the requantization correction Optional.
+
         assocSpectralWindowId (Tag [] ): Array(numAssocValues) refers to a collection of associated rows in the table. Optional.
 
         imageSpectralWindowId (Tag): refers to a unique row in the table (image sideband description). Optional.
@@ -557,7 +573,7 @@ class SpectralWindowTable:
         # Autoincrement spectralWindowId
         x.setSpectralWindowId(Tag(self.size(), TagType.SpectralWindow))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 
@@ -893,6 +909,14 @@ class SpectralWindowTable:
         result += "<resolutionArray/>\n"
         result += "<numAssocValues/>\n"
         result += "<assocNature/>\n"
+        result += "<numFactor/>\n"
+        result += "<numBinFactors/>\n"
+        result += "<numOrigFreqSlice/>\n"
+        result += "<originatingFrequencySlices/>\n"
+        result += "<quantizationBits/>\n"
+        result += "<numRequantStage/>\n"
+        result += "<requantization/>\n"
+        result += "<requantizationBits/>\n"
         result += "<assocSpectralWindowId/>\n"
         result += "<imageSpectralWindowId/>\n"
         result += "<dopplerId/>\n"
@@ -1102,6 +1126,22 @@ class SpectralWindowTable:
             attributesSeq.append("numAssocValues")
 
             attributesSeq.append("assocNature")
+
+            attributesSeq.append("numFactor")
+
+            attributesSeq.append("numBinFactors")
+
+            attributesSeq.append("numOrigFreqSlice")
+
+            attributesSeq.append("originatingFrequencySlices")
+
+            attributesSeq.append("quantizationBits")
+
+            attributesSeq.append("numRequantStage")
+
+            attributesSeq.append("requantization")
+
+            attributesSeq.append("requantizationBits")
 
             attributesSeq.append("assocSpectralWindowId")
 

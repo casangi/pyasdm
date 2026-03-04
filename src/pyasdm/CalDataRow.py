@@ -908,8 +908,7 @@ class CalDataRow:
         if not self._assocCalDataIdExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocCalDataId
-                + " attribute in table CalData does not exist!"
+                + "'assocCalDataId' attribute in table CalData does not exist!"
             )
 
         # make sure it is a copy of Tag
@@ -954,8 +953,7 @@ class CalDataRow:
         if not self._assocCalNatureExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + assocCalNature
-                + " attribute in table CalData does not exist!"
+                + "'assocCalNature' attribute in table CalData does not exist!"
             )
 
         return self._assocCalNature
@@ -999,8 +997,7 @@ class CalDataRow:
         if not self._fieldNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + fieldName
-                + " attribute in table CalData does not exist!"
+                + "'fieldName' attribute in table CalData does not exist!"
             )
 
         return copy.deepcopy(self._fieldName)
@@ -1065,8 +1062,7 @@ class CalDataRow:
         if not self._sourceNameExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sourceName
-                + " attribute in table CalData does not exist!"
+                + "'sourceName' attribute in table CalData does not exist!"
             )
 
         return copy.deepcopy(self._sourceName)
@@ -1131,8 +1127,7 @@ class CalDataRow:
         if not self._sourceCodeExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + sourceCode
-                + " attribute in table CalData does not exist!"
+                + "'sourceCode' attribute in table CalData does not exist!"
             )
 
         return copy.deepcopy(self._sourceCode)
@@ -1197,8 +1192,7 @@ class CalDataRow:
         if not self._scanIntentExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + scanIntent
-                + " attribute in table CalData does not exist!"
+                + "'scanIntent' attribute in table CalData does not exist!"
             )
 
         return copy.deepcopy(self._scanIntent)

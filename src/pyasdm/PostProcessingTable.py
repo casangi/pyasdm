@@ -26,12 +26,12 @@
 # | If you do, all changes will be lost when the file is re-generated. |
 #  --------------------------------------------------------------------
 #
-# File HolographyTable.py
+# File PostProcessingTable.py
 #
 
 import pyasdm.ASDM
 
-from .HolographyRow import HolographyRow
+from .PostProcessingRow import PostProcessingRow
 
 # All of the extended types are imported
 from pyasdm.types import *
@@ -51,11 +51,11 @@ import os
 import io
 
 
-class HolographyTable:
+class PostProcessingTable:
     """
-    The HolographyTable class is an Alma table.
+    The PostProcessingTable class is an Alma table.
 
-    Used for Single-Dish holography with a fixed transmitter.
+    Captures post processing intent and related quantities.
 
     Shown here are the fields found in each row.
 
@@ -85,20 +85,30 @@ class HolographyTable:
 
 
 
-        holographyId (Tag): identifies a unique row in the table. auto-incrementable, key.
+        postProcessingId (Tag): post processing id auto-incrementable, key.
 
 
 
 
 
-        distance (Length): the distance to transmitter.
+        intent (PostProcessingIntent): post processing intent
 
-        focus (Length): displacement of the feed from the primary nominal focus.
 
-        numCorr (int): the number of stored correlations.
 
-        type (HolographyChannelType [] ): Array(numCorr) identifies the types of the correlation signals.
 
+        description (str): description Optional.
+
+        numSpectralWindow (int): the length of spectralWindowId Optional.
+
+        numScan (int): the length of scanNumber and execBlockId Optional.
+
+        scanNumber (int [] ): Array(numScan) list of scan numbers Optional.
+
+        calibrationStrategy (str): calibration strategy Optional.
+
+        spectralWindowId (Tag [] ): Array(numSpectralWindow) list of spectral window identifiers Optional.
+
+        execBlockId (Tag [] ): Array(numScan) list of execBlockIds Optional.
 
 
     """
@@ -112,10 +122,10 @@ class HolographyTable:
     _loadInProgress = False
 
     # The name of this table.
-    _tableName = "Holography"
+    _tableName = "PostProcessing"
 
     # The list of field names that make up key 'key'.
-    _key = ["holographyId"]
+    _key = ["postProcessingId"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
@@ -124,55 +134,17 @@ class HolographyTable:
     # _archiveAsBin = False # If True archive binary else archive XML
     _fileAsBin = False  # If True file binary else file XML
 
-    # A data structure to store the HolographyRow s.
-    # In all cases we maintain a private list of HolographyRow s.
+    # A data structure to store the PostProcessingRow s.
+    # In all cases we maintain a private list of PostProcessingRow s.
     _privateRows = []
 
-    # non-temporal ASDM in Java had a private row element here to also hold  HolographyRow s. Not needed in python.
+    # non-temporal ASDM in Java had a private row element here to also hold  PostProcessingRow s. Not needed in python.
 
     # the Entity of this table
     _entity = None
 
     # from the schemaVersion string found in the table, must be an integer
     _version = 0
-
-    # The tolerance which will be used on distance during an add operation on the table
-    _distanceEqTolerance = Length(0.0)
-
-    def setDistanceEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on distance
-        """
-        if not isinstance(tolerance, Length):
-            print("tolerance must be a  Length instance")
-
-        self._distanceEqTolerance = Length(tolerance)
-
-    def getDistanceEqTolerance(self):
-        """
-        A getter for the tolerance on distance
-        Returns the tolerance as a  Length
-        """
-        return self._distanceEqTolerance
-
-    # The tolerance which will be used on focus during an add operation on the table
-    _focusEqTolerance = Length(0.0)
-
-    def setFocusEqTolerance(self, tolerance):
-        """
-        A setter for the tolerance on focus
-        """
-        if not isinstance(tolerance, Length):
-            print("tolerance must be a  Length instance")
-
-        self._focusEqTolerance = Length(tolerance)
-
-    def getFocusEqTolerance(self):
-        """
-        A getter for the tolerance on focus
-        Returns the tolerance as a  Length
-        """
-        return self._focusEqTolerance
 
     def getKeyName(self):
         """
@@ -195,8 +167,8 @@ class HolographyTable:
         if key not in self._noAutoIncIds:
             # There is not yet a combination of the non autoinc attributes values in the dict
 
-            # Initialize  holographyId to Tag(0).
-            x.setHolographyId(Tag(0, TagType.Holography))
+            # Initialize  postProcessingId to Tag(0).
+            x.setPostProcessingId(Tag(0, TagType.PostProcessing))
 
             # Record it in the dict.
             self._noAutoIncIds[key] = 0
@@ -204,29 +176,31 @@ class HolographyTable:
             # There is already a combination of the non autoinc attributes values in the dict
             nextInt = int(self._noAutoIncIds[key]) + 1
 
-            # Initialize  holographyId to Tag(nextInt).
-            x.setHolographyId(Tag(nextInt, TagType.Holography))
+            # Initialize  postProcessingId to Tag(nextInt).
+            x.setPostProcessingId(Tag(nextInt, TagType.PostProcessing))
 
             # Record it in the hashtable.
             self._noAutoIncIds[key] = nextInt
 
     def __init__(self, container):
         """
-        Create a HolographyTable attached to container.
+        Create a PostProcessingTable attached to container.
 
         container must be a ASDM instance
         All tables must know the container
         """
 
         if not isinstance(container, pyasdm.ASDM):
-            raise (ValueError("HolographyTable constructor must use a ASDM instance"))
+            raise (
+                ValueError("PostProcessingTable constructor must use a ASDM instance")
+            )
 
         self._container = container
 
         self._entity = Entity()
         self._entity.setEntityId(EntityId("uid://X0/X0/X0"))
         self._entity.setEntityIdEncrypted("na")
-        self._entity.setEntityTypeName("HolographyTable")
+        self._entity.setEntityTypeName("PostProcessingTable")
         self._entity.setEntityVersion("1")
         self._entity.setInstanceVersion("1")
 
@@ -258,7 +232,7 @@ class HolographyTable:
         # more complex solutions are then necessary to read that file and it's not worth
         # complicating this code here to handle a need to eventually try again to reload that file
         if not self._presentInMemory and not self._loadInProgress:
-            # print("Holography is not present in memory, setting from file")
+            # print("PostProcessing is not present in memory, setting from file")
             self._loadInProgress = True
             self.setFromFile(self.getContainer().getDirectory())
             self._presentInMemory = True
@@ -285,11 +259,11 @@ class HolographyTable:
 
     def __str__(self):
         """
-        Returns "HolographyTable" followed by the current size of the table
+        Returns "PostProcessingTable" followed by the current size of the table
         between parenthesis.
-        Example : HolographyTable(12)
+        Example : PostProcessingTable(12)
         """
-        return "HolographyTable(" + size() + ")"
+        return "PostProcessingTable(" + size() + ")"
 
     # ====> Row creation.
 
@@ -298,49 +272,43 @@ class HolographyTable:
         Create a new row with default values.
         The new row is not added to this table but it knows about it.
         """
-        thisRow = HolographyRow(self)
+        thisRow = PostProcessingRow(self)
         return thisRow
 
     def add(self, x):
         """
         Look up the table for a row whose noautoincrementable attributes are matching their
-        homologues in x.  If a row is found that row else autoincrement x.holographyId,
+        homologues in x.  If a row is found that row else autoincrement x.postProcessingId,
         add x to its table and returns x.
 
-        returns a HolographyRow.
+        returns a PostProcessingRow.
         x. A row to be added.
         """
-        if not isinstance(x, HolographyRow):
-            raise ValueError("x must be a  HolographyRow instance.")
+        if not isinstance(x, PostProcessingRow):
+            raise ValueError("x must be a  PostProcessingRow instance.")
 
-        aRow = self.lookup(x.getDistance(), x.getFocus(), x.getNumCorr(), x.getType())
+        aRow = self.lookup(x.getIntent())
         if aRow is not None:
             return aRow
 
-        # Autoincrement holographyId
-        x.setHolographyId(Tag(self.size(), TagType.Holography))
+        # Autoincrement postProcessingId
+        x.setPostProcessingId(Tag(self.size(), TagType.PostProcessing))
 
         self._privateRows.append(x)
         x.isAdded()
         return x
 
-    def newRow(self, distance, focus, numCorr, type):
+    def newRow(self, intent):
         """
-        Create a new HolographyRow initialized to the specified values.
+        Create a new PostProcessingRow initialized to the specified values.
 
         The new row is not added to this table, but it does know about it.
         (the autoincrementable attribute, if any, is not in the parameter list)
         """
 
-        thisRow = HolographyRow(self)
+        thisRow = PostProcessingRow(self)
 
-        thisRow.setDistance(distance)
-
-        thisRow.setFocus(focus)
-
-        thisRow.setNumCorr(numCorr)
-
-        thisRow.setType(type)
+        thisRow.setIntent(intent)
 
         return thisRow
 
@@ -348,16 +316,16 @@ class HolographyTable:
         """
         Create a new row using a copy constructor mechanism.
 
-        The method creates a new HolographyRow which knows about this table.
+        The method creates a new PostProcessingRow which knows about this table.
         Each attribute of the created row is a (deep) copy of the corresponding
         attribute of row. The method does not add the created row to this,
         it simply parents it to this, a call to the add method
         has to be done in order to get the row added (very likely after having modified
         some of its attributes.
-        If row is None then the method returns a new HolographyRow with default values for its attributes.
+        If row is None then the method returns a new PostProcessingRow with default values for its attributes.
         """
 
-        return HolographyRow(self, row)
+        return PostProcessingRow(self, row)
 
     # ====> Append a row to its table.
 
@@ -374,16 +342,13 @@ class HolographyTable:
         returns x.
         """
 
-        if (
-            self.lookup(x.getDistance(), x.getFocus(), x.getNumCorr(), x.getType())
-            is not None
-        ):
+        if self.lookup(x.getIntent()) is not None:
             raise UniquenessViolationException(
-                "Uniqueness violation exception in table HolographyTable"
+                "Uniqueness violation exception in table PostProcessingTable"
             )
 
-        if self.getRowByKey(x.getHolographyId()) is not None:
-            raise DuplicateKey("Duplicate key exception in ", "HolographyTable")
+        if self.getRowByKey(x.getPostProcessingId()) is not None:
+            raise DuplicateKey("Duplicate key exception in ", "PostProcessingTable")
 
         self._privateRows.append(x)
         x.isAdded()
@@ -394,22 +359,22 @@ class HolographyTable:
     def get(self):
         """
         Get all rows.
-        return Alls rows as a list of HolographyRow
+        return Alls rows as a list of PostProcessingRow
         """
         return self._privateRows
 
-    def getRowByKey(self, holographyId):
+    def getRowByKey(self, postProcessingId):
         """
-        Returns a HolographyRow given a key.
+        Returns a PostProcessingRow given a key.
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
 
-        param holographyId.
+        param postProcessingId.
 
         """
         for row in self._privateRows:
 
-            if not row.getHolographyId().equals(holographyId):
+            if not row.getPostProcessingId().equals(postProcessingId):
                 continue
 
             return row
@@ -417,24 +382,18 @@ class HolographyTable:
         # no match found
         return None
 
-    def lookup(self, distance, focus, numCorr, type):
+    def lookup(self, intent):
         """
         Look up the table for a row whose all attributes  except the autoincrementable one
         are equal to the corresponding parameters of the method.
         return this row if any, None otherwise.
 
 
-        param distance.
-
-        param focus.
-
-        param numCorr.
-
-        param type.
+        param intent.
 
         """
         for row in self._privateRows:
-            if row.compareNoAutoInc(distance, focus, numCorr, type):
+            if row.compareNoAutoInc(intent):
                 return row
 
         return None
@@ -450,13 +409,13 @@ class HolographyTable:
     def toXML(self):
         """
         Translate this table to an XML representation conforming
-        to the schema defined for Holography (HolographyTable.xsd).
+        to the schema defined for PostProcessing (PostProcessingTable.xsd).
 
         returns a string containing the XML representation.
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<HolographyTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:hologr="http://Alma/XASDM/HolographyTable" xsi:schemaLocation="http://Alma/XASDM/HolographyTable http://almaobservatory.org/XML/XASDM/4/HolographyTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
+        result += '<PostProcessingTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:postproc="http://Alma/XASDM/PostProcessingTable" xsi:schemaLocation="http://Alma/XASDM/PostProcessingTable http://almaobservatory.org/XML/XASDM/4/PostProcessingTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
         result += self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
@@ -464,25 +423,25 @@ class HolographyTable:
         for thisRow in self._privateRows:
             result += thisRow.toXML()
             result += " "
-        result += "</HolographyTable>"
+        result += "</PostProcessingTable>"
         return result
 
     def fromXML(self, xmlstr):
         """
         Populate this table from the content of a XML document that is required to
-        conform to the XML schema defined for a Holography (HolographyTable.xsd).
+        conform to the XML schema defined for a PostProcessing (PostProcessingTable.xsd).
         """
         if not isinstance(xmlstr, str):
             raise ConversionException("xmlstr must be a string")
 
         xmldom = minidom.parseString(xmlstr)
-        # this should have at least one child node with a name of "HolographyTable".
+        # this should have at least one child node with a name of "PostProcessingTable".
         if (
             not xmldom.hasChildNodes()
-            or xmldom.firstChild.nodeName != "HolographyTable"
+            or xmldom.firstChild.nodeName != "PostProcessingTable"
         ):
             raise ConversionException(
-                "XML is not from the expected table", "HolographyTable"
+                "XML is not from the expected table", "PostProcessingTable"
             )
 
         # ignore everything but the first child node
@@ -500,7 +459,7 @@ class HolographyTable:
         except Exception as ex:
             # reraise it as a ConversionException
             raise ConversionException(
-                "schemaVersion is not an integer", "HolographyTable"
+                "schemaVersion is not an integer", "PostProcessingTable"
             ) from None
 
         # go through the child nodes of tabdom
@@ -510,7 +469,7 @@ class HolographyTable:
 
         if not tabdom.hasChildNodes():
             raise ConversionException(
-                "XML is missing all of the expected elements", "HolographyTable"
+                "XML is missing all of the expected elements", "PostProcessingTable"
             )
 
         for thisNode in tabdom.childNodes:
@@ -518,19 +477,20 @@ class HolographyTable:
             if nodeName == "Entity":
                 if tabEntity is not None:
                     raise ConversionException(
-                        "More than one Entity found in XML", "HolographyTable"
+                        "More than one Entity found in XML", "PostProcessingTable"
                     )
                 tabEntity = Entity(thisNode.toxml())
-                if not (tabEntity.getEntityTypeName() == "HolographyTable"):
+                if not (tabEntity.getEntityTypeName() == "PostProcessingTable"):
                     raise ConversionException(
                         "Entity type name in XML is not the expected value of the table name",
-                        "HolographyTable",
+                        "PostProcessingTable",
                     )
             elif nodeName == "ContainerEntity":
                 # there must be one, but no more than one
                 if hasContainerEntity:
                     raise ConversionException(
-                        "More than one ContainerEntity found in XML", "HolographyTable"
+                        "More than one ContainerEntity found in XML",
+                        "PostProcessingTable",
                     )
                 hasContainerEntity = True
             elif nodeName == "row":
@@ -540,18 +500,18 @@ class HolographyTable:
                     self.checkAndAdd(row)
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
-                    raise ConversionException(str(exc), "HolographyTable") from None
+                    raise ConversionException(str(exc), "PostProcessingTable") from None
 
                 except UniquenessViolationException as exc:
                     msg = (
-                        "UniquenessViolationException in row in HolographyTable : %s"
+                        "UniquenessViolationException in row in PostProcessingTable : %s"
                         % str(exc)
                     )
 
         if tabEntity is None:
-            raise ConversionException("No Entity seen in XML", "HolographyTable")
+            raise ConversionException("No Entity seen in XML", "PostProcessingTable")
         if not hasContainerEntity:
-            raise ValueError("No Container Entity seen in XL", "HolographyTable")
+            raise ValueError("No Container Entity seen in XL", "PostProcessingTable")
 
         self.setEntity(tabEntity)
 
@@ -567,10 +527,10 @@ class HolographyTable:
         result = ""
         result += "<?xml version='1.0'  encoding='ISO-8859-1'?>"
         result += "\n"
-        result += '<HolographyTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:hologr="http://Alma/XASDM/HolographyTable" xsi:schemaLocation="http://Alma/XASDM/HolographyTable http://almaobservatory.org/XML/XASDM/4/HolographyTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
+        result += '<PostProcessingTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:postproc="http://Alma/XASDM/PostProcessingTable" xsi:schemaLocation="http://Alma/XASDM/PostProcessingTable http://almaobservatory.org/XML/XASDM/4/PostProcessingTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
         result += "<Entity entityId='"
         result += uidStr
-        result += "' entityIdEncrypted='na' entityTypeName='HolographyTable' schemaVersion='1' documentVersion='1'/>\n"
+        result += "' entityIdEncrypted='na' entityTypeName='PostProcessingTable' schemaVersion='1' documentVersion='1'/>\n"
         result += "<ContainerEntity entityId='"
         result += containerUID
         result += "' entityIdEncrypted='na' entityTypeName='ASDM' schemaVersion='1' documentVersion='1'/>\n"
@@ -579,14 +539,18 @@ class HolographyTable:
         result += "' byteOrder='" + str(byteOrder) + "' />\n"
         result += "<Attributes>\n"
 
-        result += "<holographyId/>\n"
-        result += "<distance/>\n"
-        result += "<focus/>\n"
-        result += "<numCorr/>\n"
-        result += "<type/>\n"
+        result += "<postProcessingId/>\n"
+        result += "<intent/>\n"
 
+        result += "<description/>\n"
+        result += "<numSpectralWindow/>\n"
+        result += "<numScan/>\n"
+        result += "<scanNumber/>\n"
+        result += "<calibrationStrategy/>\n"
+        result += "<spectralWindowId/>\n"
+        result += "<execBlockId/>\n"
         result += "</Attributes>\n"
-        result += "</HolographyTable>\n"
+        result += "</PostProcessingTable>\n"
 
         return result
 
@@ -681,7 +645,7 @@ class HolographyTable:
             byteStream.close()
             raise ConversionException(
                 "opened byteStream is not the expected io.BufferedReader or it is not seekable, this should never happen.",
-                "Holography",
+                "PostProcessing",
             )
 
         xmlPartMIMEHeader = bytes(str("Content-ID: <header.xml>\n\n").encode())
@@ -701,7 +665,7 @@ class HolographyTable:
         if loc0 < 0:
             byteStream.close()
             raise ConversionException(
-                "Failed to detect the begining of the XML header.", "Holography"
+                "Failed to detect the begining of the XML header.", "PostProcessing"
             )
 
         loc0 += len(xmlPartMIMEHeader)
@@ -711,7 +675,7 @@ class HolographyTable:
         if loc1 < 0:
             byteStream.close()
             raise ConversionException(
-                "Failed to detect the begining of the binary part.", "Holography"
+                "Failed to detect the begining of the binary part.", "PostProcessing"
             )
 
         # extract the XML header as a string
@@ -720,7 +684,9 @@ class HolographyTable:
         xmldom = minidom.parseString(xmlHeader)
         if not xmldom.hasChildNodes():
             byteStream.close()
-            raise ConversionException("XML is not properly structured.", "Holography")
+            raise ConversionException(
+                "XML is not properly structured.", "PostProcessing"
+            )
 
         attributesSeq = []
         byteOrderStr = None
@@ -732,25 +698,33 @@ class HolographyTable:
             # assume Big_Endian and the default order of the elements
             byteOrderStr = "Big_Endian"
 
-            attributesSeq.append("holographyId")
+            attributesSeq.append("postProcessingId")
 
-            attributesSeq.append("distance")
+            attributesSeq.append("intent")
 
-            attributesSeq.append("focus")
+            attributesSeq.append("description")
 
-            attributesSeq.append("numCorr")
+            attributesSeq.append("numSpectralWindow")
 
-            attributesSeq.append("type")
+            attributesSeq.append("numScan")
+
+            attributesSeq.append("scanNumber")
+
+            attributesSeq.append("calibrationStrategy")
+
+            attributesSeq.append("spectralWindowId")
+
+            attributesSeq.append("execBlockId")
 
             versionStr = "2"
 
         else:
-            # c++ and Java just assume it then must be a Holography table
+            # c++ and Java just assume it then must be a PostProcessing table
             # this is more insistant, just in case
-            if hdrdom.nodeName != "HolographyTable":
+            if hdrdom.nodeName != "PostProcessingTable":
                 byteStream.close()
                 raise ConversionException(
-                    "XML Header is not from the expected table.", "Holography"
+                    "XML Header is not from the expected table.", "PostProcessing"
                 )
 
             # schemaVersion becomes versionStr
@@ -764,7 +738,7 @@ class HolographyTable:
                 byteStream.close()
                 raise ConversionException(
                     "THe XML header is missing all of the expected elements.",
-                    "Holography",
+                    "PostProcessing",
                 )
 
             # loop through the child nodes, looking for BulkStoreRef and Attributes
@@ -774,20 +748,20 @@ class HolographyTable:
                         byteStream.close()
                         raise ConversionException(
                             "More than one BulkStoreRef element seen. Invalid XML header.",
-                            "Holography",
+                            "PostProcessing",
                         )
                     if not hdrnode.hasAttributes():
                         byteStream.close()
                         raise ConversionException(
                             "BulkStoreRef does not contain any attributes. Invalid XML header.",
-                            "Holography",
+                            "PostProcessing",
                         )
                     byteOrderAttr = hdrnode.attributes.getNamedItem("byteOrder")
                     if byteOrderAttr is None:
                         byteStream.close()
                         raise ConversionException(
                             "byteOrder attribute not found in BulkStoreRef element. Invalid XML header.",
-                            "Holography",
+                            "PostProcessing",
                         )
                     byteOrderStr = byteOrderAttr.value
                 elif hdrnode.nodeName == "Attributes":
@@ -795,13 +769,13 @@ class HolographyTable:
                         byteStream.close()
                         raise ConversionException(
                             "More than one Attributes node seen. Invalid XML header.",
-                            "Holography",
+                            "PostProcessing",
                         )
                     if not hdrnode.hasChildNodes():
                         byteStream.close()
                         raise ConversionException(
                             "Attributes element has no child nodes. Invalid XML header.",
-                            "Holography",
+                            "PostProcessing",
                         )
                     for attrnode in hdrnode.childNodes:
                         if attrnode.nodeType == attrnode.ELEMENT_NODE:
@@ -811,14 +785,14 @@ class HolographyTable:
             byteStream.close()
             raise ConversionException(
                 "BulkStoreRef element not seen and this is not an older version 2 XML header. Invalid XML header.",
-                "Holography",
+                "PostProcessing",
             )
 
         if len(attributesSeq) == 0:
             byteStream.close()
             raise ConversionException(
                 "Attributes element not seen and this is not an older version 2 XML header. Invalid XML header.",
-                "Holography",
+                "PostProcessing",
             )
 
         byteOrder = ByteOrder(byteOrderStr)
@@ -840,14 +814,14 @@ class HolographyTable:
         # c++ checks numRows against what is reported in the ASDM for this table, this is what Java does
         try:
             for i in range(numRows):
-                self.checkAndAdd(HolographyRow.fromBin(eis, self, attributesSeq))
+                self.checkAndAdd(PostProcessingRow.fromBin(eis, self, attributesSeq))
                 # print("row %s added, loc = %s" % (i, eis.tell()))
         except Exception as exc:
             byteStream.close()
             eis.close()
             raise ConversionException(
                 "Error while reading binary data, the exception was " + str(exc),
-                "Holography",
+                "PostProcessing",
             ) from None
 
         # there is no harm in closing both
@@ -860,7 +834,7 @@ class HolographyTable:
 
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a HolographyTable as those produced  by the toFile method.
+        Reads and parses a file containing a representation of a PostProcessingTable as those produced  by the toFile method.
         This table is populated with the result of the parsing.
         param directory The name of the directory containing the file te be read and parsed.
         raises ConversionException If any error occurs while reading the
@@ -873,16 +847,16 @@ class HolographyTable:
         if not os.path.isdir(directory):
             raise ConversionException(
                 "Directory " + directory + " must be a path to an existing directory",
-                "HolographyTable",
+                "PostProcessingTable",
             )
 
-        if os.path.exists(os.path.join(directory, "Holography.xml")):
+        if os.path.exists(os.path.join(directory, "PostProcessing.xml")):
             self.setFromXMLFile(directory)
-        elif os.path.exists(os.path.join(directory, "Holography.bin")):
+        elif os.path.exists(os.path.join(directory, "PostProcessing.bin")):
             self.setFromMIMEFile(directory)
         else:
             raise ConversionException(
-                "No file found for the Holography table", "HolographyTable"
+                "No file found for the PostProcessing table", "PostProcessingTable"
             )
 
     def setFromMIMEFile(self, directory):
@@ -894,14 +868,14 @@ class HolographyTable:
         # This uses a buffered byte stream. Created here and then
         # handed off to the setFromMIME method, which is responsible for closing it.
 
-        filename = os.path.join(directory, "Holography.bin")
+        filename = os.path.join(directory, "PostProcessing.bin")
         byteStream = None
         try:
             byteStream = open(filename, "rb")
         except Exception as exc:
             raise ConversionException(
                 "Error while opening " + filename + ". The exception was " + str(exc),
-                "Holography",
+                "PostProcessing",
             )
 
         self.setFromMIME(byteStream)
@@ -916,11 +890,11 @@ class HolographyTable:
         # read the entire file into a string
         xmlstr = None
         try:
-            with open(os.path.join(directory, "Holography.xml")) as f:
+            with open(os.path.join(directory, "PostProcessing.xml")) as f:
                 xmlstr = f.read()
         except Exception as exc:
             # reraise it as a ConversionException
-            raise ConversionException(str(exc), "HolographyTable") from None
+            raise ConversionException(str(exc), "PostProcessingTable") from None
 
         # if the string contains '<BulkStoreRef' then this is stored in a bin file
         if xmlstr.find("<BulkStoreRef") != -1:
@@ -933,8 +907,8 @@ class HolographyTable:
         Stores a representation (binary or XML) of this table into a file.
 
         Depending on the boolean value of its _fileAsBin data member a binary serialization
-        of this (_fileAsBin==True) will be saved in a file "Holography.bin" or
-        an XML representation (_fileAsBin==False) will be saved in a file "Holography.xml".
+        of this (_fileAsBin==True) will be saved in a file "PostProcessing.bin" or
+        an XML representation (_fileAsBin==False) will be saved in a file "PostProcessing.xml".
         The file is always written in a directory whose name is passed as a parameter.
         param directory The name of directory where the file containing the table's
         representation will be saved.
@@ -945,9 +919,9 @@ class HolographyTable:
 
         if os.path.exists(directory) and not os.path.isdir(directory):
             raise ConversionException(
-                "Cannot write into directory %s. This file already exists and is not a directory. (Holography)"
+                "Cannot write into directory %s. This file already exists and is not a directory. (PostProcessing)"
                 % directory,
-                "HolographyTable",
+                "PostProcessingTable",
             )
 
         # if not let's create it.
@@ -962,7 +936,7 @@ class HolographyTable:
                 + directory
                 + " exception caught "
                 + str(exc),
-                "HolographyTable",
+                "PostProcessingTable",
             ) from None
 
         if self._fileAsBin:
@@ -974,7 +948,7 @@ class HolographyTable:
             byteOrder = ByteOrder()
 
             # first, just the short XML file
-            xmlFilePath = os.path.join(directory, "Holography.xml")
+            xmlFilePath = os.path.join(directory, "PostProcessing.xml")
             if os.path.exists(xmlFilePath):
                 try:
                     os.remove(xmlFilePath)
@@ -984,7 +958,7 @@ class HolographyTable:
                         + xmlFilePath
                         + ", exception caught "
                         + str(exc),
-                        "Holography",
+                        "PostProcessing",
                     ) from None
 
             # used in both files
@@ -995,7 +969,7 @@ class HolographyTable:
                 xmlfile.write(mimeXMLpart)
 
             # now open the possibly much longer MIME file
-            mimeFilePath = os.path.join(directory, "Holography.bin")
+            mimeFilePath = os.path.join(directory, "PostProcessing.bin")
             if os.path.exists(mimeFilePath):
                 try:
                     os.remove(mimeFilePath)
@@ -1005,14 +979,14 @@ class HolographyTable:
                         + mimeFilePath
                         + ", exception caught "
                         + str(exc),
-                        "Holography",
+                        "PostProcessing",
                     ) from None
 
             # the details are all handled in toMIME
             self.toMIME(mimeFilePath, mimeXMLpart, byteOrder)
         else:
             # The table is totally exported in a XML file.
-            filePath = os.path.join(directory, "Holography.xml")
+            filePath = os.path.join(directory, "PostProcessing.xml")
             if os.path.exists(filePath):
                 try:
                     # try to delete it, this will raise an exception if the user does not have permission to do that
@@ -1024,7 +998,7 @@ class HolographyTable:
                         + filePath
                         + " exception caught "
                         + str(exc),
-                        "HolographyTable",
+                        "PostProcessingTable",
                     ) from None
 
             try:
@@ -1038,7 +1012,7 @@ class HolographyTable:
                 raise ConversionException(
                     "Problem while writing the XML representation, the message was : "
                     + str(exc),
-                    "Holography",
+                    "PostProcessing",
                 ) from None
 
     def getEntity(self):

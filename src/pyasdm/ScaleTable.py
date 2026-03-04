@@ -287,7 +287,7 @@ class ScaleTable:
         # Autoincrement scaleId
         x.setScaleId(Tag(self.size(), TagType.Scale))
 
-        self._privateRows.add(x)
+        self._privateRows.append(x)
         x.isAdded()
         return x
 

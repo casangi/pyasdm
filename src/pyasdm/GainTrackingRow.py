@@ -694,8 +694,7 @@ class GainTrackingRow:
         if not self._samplingLevelExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + samplingLevel
-                + " attribute in table GainTracking does not exist!"
+                + "'samplingLevel' attribute in table GainTracking does not exist!"
             )
 
         return self._samplingLevel
@@ -739,8 +738,7 @@ class GainTrackingRow:
         if not self._numAttFreqExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + numAttFreq
-                + " attribute in table GainTracking does not exist!"
+                + "'numAttFreq' attribute in table GainTracking does not exist!"
             )
 
         return self._numAttFreq
@@ -784,8 +782,7 @@ class GainTrackingRow:
         if not self._attFreqExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + attFreq
-                + " attribute in table GainTracking does not exist!"
+                + "'attFreq' attribute in table GainTracking does not exist!"
             )
 
         return copy.deepcopy(self._attFreq)
@@ -850,8 +847,7 @@ class GainTrackingRow:
         if not self._attSpectrumExists:
             raise ValueError(
                 "Attempt to access a non-existent attribute.  The "
-                + attSpectrum
-                + " attribute in table GainTracking does not exist!"
+                + "'attSpectrum' attribute in table GainTracking does not exist!"
             )
 
         return copy.deepcopy(self._attSpectrum)
