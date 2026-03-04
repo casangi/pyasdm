@@ -1731,7 +1731,7 @@ class ASDM:
                     raise ConversionError(
                         "More than one startTimeDurationInXML found", "ASDM"
                     )
-                ArrayTimeInterval.setStartTimeDurationInXML(True)
+                ArrayTimeInterval.setReadStartTimeDurationInXML(True)
                 hasStartTimeDurationInXML = True
             elif nodeName == "startTimeDurationInBin":
                 if hasStartTimeDurationInBin:
@@ -1739,7 +1739,7 @@ class ASDM:
                     raise ConversionError(
                         "More than one startTimeDurationInBin found", "ASDM"
                     )
-                ArrayTimeInterval.setStartTimeDurationInBin(True)
+                ArrayTimeInterval.setReadStartTimeDurationInBin(True)
                 hasStartTimeDurationInBin = True
             elif nodeName == "Table":
                 # each table must have one of Name, NumberRows, and Entity
