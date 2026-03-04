@@ -23,10 +23,11 @@
 # File BDFReader.py
 #
 
-import sys
-import re
-import os
 from enum import Enum, auto
+import os
+import re
+import sys
+from typing import Callable
 import codecs
 from xml.dom import minidom
 import numpy as np
@@ -481,11 +482,14 @@ class BDFReader:
             self._currentState = self._States.S_AT_END
         return not atEnd
 
-    def getSubset(self, loadOnlyComponents: set[str] | None = None):
+    def getSubset(self, loadOnlyComponents: set[str] | None = None) -> dict:
         """
         Returns an SDM Data Subset (one integration) as a dictionary.
 
         This reads the next subset found at the current location in the file.
+
+        As an alternative, getNDArrays() can be used to get a specific subset of
+        binary components as ndarrays with shapes appropriate for XRADIO / MSV4 format.
 
         Parameters
         ----------
@@ -506,11 +510,74 @@ class BDFReader:
         """
         self._checkState(self._Transitions.T_READ, "getSubset")
         self._integrationIndex += 1
+
         sdmSubset = self._requireSDMDataSubsetMIMEPart(loadOnlyComponents)
+
         # this line isn't used, but the file should be advanced to the next line
         line = self._nextLine()
         self._currentState = self._States.S_READING
+
         return sdmSubset
+
+    def getNDArrays(
+        self,
+        arrayNames: list[str],
+        spwId: int,
+        loadOneSPWFunction: Callable,
+        loadOneSPWFunctionParams: tuple,
+    ) -> dict:
+        """
+        Returns some of the binary components from an SDM Data Subset as ndarrays in a
+        dictionary. It takes the data for only one SPW, and the shape of the output ndarray
+        is prepared for XRADIO / MSv4 format (time, baseline, frequency, polarization).
+
+        This reads the next subset found at the current location in the file (equivalent
+        to calling getSubset()). The function that turns the binary component data (data
+        tree given as a 1D array) into an ndarray must be passed (from for example XRADIO),
+        as well as its parameters.
+
+        As an alternative, getSubset() can be used to get the whole subset (and all binary
+        components/arrays without dimensions).
+
+        Parameters
+        ----------
+        arrayNames: list[str]
+            Names of the arrays requested. Currently supported: "visibilities". These
+            same names will be used as keys for the returned dict.
+        spwId: int
+            The binary data/flags will be loaded only for this spw ID. The binary data
+            for other SPWs, if present, is skipped.
+        loadOneSPWFunction: Callable
+            Function that takes care of loading the data for that SPW.
+        loadOneSPWFunctionParams: tuple
+            Parameters to pass to the function.
+
+        Returns
+        -------
+        ndarrays: dict
+            A dict containing entries for every of the arrays requested. The keys
+            are their names (for example 'visibilities'). The values are ndarrays
+            corresponding to the data for the SPW requested. Their shapes are as expected
+            in the MSv4 format (for example (time, baseline, frequency, polarization) for
+            visibilities).
+        """
+        self._checkState(self._Transitions.T_READ, "getNDArrays")
+        self._integrationIndex += 1
+
+        supportedArrayNames = ["visibilities"]
+        if arrayNames != supportedArrayNames:
+            raise ValueError(
+                f"The only array names currrently supported are: {supportedArrayNames}"
+            )
+        ndarrays = self._requireSDMDataSubsetMIMEPartForNDArrays(
+            spwId, loadOneSPWFunction, loadOneSPWFunctionParams
+        )
+
+        # this line isn't used, but the file should be advanced to the next line
+        line = self._nextLine()
+        self._currentState = self._States.S_READING
+
+        return ndarrays
 
     # the c++ code offers nextSubsets and allRemainingSubsets methods that return
     # a reference to a vector of subsets. Here, that would be implemented by
@@ -1022,7 +1089,13 @@ class BDFReader:
         return binaryComponentsDesc
 
     def _readBinaryParts(
-        self, binaryComponentsDesc, sdmDataSubsetHeaderDOM, loadOnlyComponents
+        self,
+        binaryComponentsDesc: dict,
+        sdmDataSubsetHeaderDOM: minidom.Element,
+        loadOnlyComponents: set[str] | None = None,
+        spwId: int | None = None,
+        loadOneSPWFunction: Callable = None,
+        loadOneSPWFunctionParams: tuple = None,
     ):
         """
         Read all binary parts for the current integration.
@@ -1039,7 +1112,7 @@ class BDFReader:
         ----------
         binaryComponentsDesc : dict
             Binary component descriptors to populate with data
-        sdmDataSubsetHeaderDOM : DOM element
+        sdmDataSubsetHeaderDOM : xml.dom.minidom.Element (DOM element)
             XML DOM containing metadata including crossData type info
         loadOnlyComponents : set of str or None
             Component names to load; if None, load all
@@ -1173,10 +1246,29 @@ class BDFReader:
                 componentDesc["startsAt"] = self.position()
                 dt = componentDesc["np_type"]
                 if not loadOnlyComponents or componentName in loadOnlyComponents:
-                    componentDesc["arr"] = np.fromfile(
-                        self._f, dtype=dt, count=numberOfElementsToRead
-                    )
-                    nReadBytes = componentDesc["arr"].size * numberOfBytesPerValue
+                    if spwId is None:
+                        componentDesc["arr"] = np.fromfile(
+                            self._f, dtype=dt, count=numberOfElementsToRead
+                        )
+                        nReadBytes = componentDesc["arr"].size * numberOfBytesPerValue
+                    else:
+                        prevPosition = self._f.tell()
+                        componentDesc["arr"] = loadOneSPWFunction(
+                            componentName,
+                            spwId,
+                            self._f,
+                            dt,
+                            numberOfElementsToRead,
+                            *loadOneSPWFunctionParams,
+                        )
+                        if componentDesc["arr"].size > numberOfElementsToRead:
+                            raise RuntimeError(
+                                f"Inconsistency when loading one SPW, {componentDesc['arr'].size=}"
+                                f", {numberOfElementsToRead=}"
+                            )
+                        nReadBytes = numberOfBytesToRead
+                        self._f.seek(prevPosition + numberOfBytesToRead, os.SEEK_SET)
+
                 else:
                     componentDesc["arr"] = None
                     actualReadSkipped = True
@@ -1279,6 +1371,36 @@ class BDFReader:
             "zeroLags": binaryComponentsDesc["zeroLags"],
         }
 
+    def _assembleNDArraysResult(self, binaryComponentsDesc: dict) -> dict:
+        """
+        Assemble the final result dictionary for a subset when loading
+        it using getNDArrays() (visibilities).
+
+        binaryComponentsDesc : dict
+            Binary component descriptors with data
+
+        Returns
+        -------
+        dict
+            Dictionary with ndarray(s) made from the data in the binary components
+
+        This method is only for internal use.
+        """
+        if not binaryComponentsDesc["crossData"]["present"]:
+            ndarrays = {"visibilities": binaryComponentsDesc["autoData"]["arr"]}
+        else:
+            ndarrays = {
+                "visibilities": np.concatenate(
+                    [
+                        binaryComponentsDesc["crossData"]["arr"],
+                        binaryComponentsDesc["autoData"]["arr"],
+                    ],
+                    axis=1,
+                )
+            }
+
+        return ndarrays
+
     def _requireSDMDataSubsetMIMEPart(self, loadOnlyComponents: set["str"] | None):
         """
         Read and parse a single SDM Data Subset MIME part from the BDF file.
@@ -1341,6 +1463,50 @@ class BDFReader:
             abortReason=abortInfo["abortReason"],
             binaryComponentsDesc=binaryComponentsDesc,
         )
+
+    def _requireSDMDataSubsetMIMEPartForNDArrays(
+        self, spwId, loadOneSPWFunction, loadOneSPWFunctionParams
+    ) -> dict:
+        """
+        Equivalent to _requireSDMDataSubsetMIMEPart but specific to getNDArrays() calls.
+
+        Parameters
+        ----------
+        spwId: int
+            The binary data/flags will be loaded only for this spw ID. The binary data
+            for other SPWs, if present, is skipped.
+        loadOneSPWFunction: Callable
+            Function that takes care of loading the data for that SPW.
+        loadOneSPWFunctionParams: tuple
+            Parameters to pass to the function.
+
+        Returns
+        -------
+        ndarrays: dict
+            Dictionary of ndarray(s) (for exmaple "visibilities" derived from the
+            "autoData" and the "crossData" binary components)
+        """
+        self._integrationStartsAt = self.position()
+
+        self._parseMIMEHeadersForSubset()
+
+        headerInfo = self._parseSDMDataSubsetHeaderXML()
+        sdmDataSubsetHeaderDOM = headerInfo["sdmDataSubsetHeaderDOM"]
+
+        binaryComponentsDesc = self._initializeBinaryComponentDescriptors()
+
+        # Read all binary parts into binaryCompoentsDesc dict
+        self._readBinaryParts(
+            binaryComponentsDesc,
+            sdmDataSubsetHeaderDOM,
+            {"autoData", "crossData"},
+            spwId,
+            loadOneSPWFunction,
+            loadOneSPWFunctionParams,
+        )
+
+        ndarrays = self._assembleNDArraysResult(binaryComponentsDesc)
+        return ndarrays
 
     def _setPosition(self, newpos):
         """
