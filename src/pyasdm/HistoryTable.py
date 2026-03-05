@@ -324,7 +324,7 @@ class HistoryTable:
         between parenthesis.
         Example : HistoryTable(12)
         """
-        return "HistoryTable(" + size() + ")"
+        return "HistoryTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

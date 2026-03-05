@@ -402,7 +402,7 @@ class CalFluxTable:
         between parenthesis.
         Example : CalFluxTable(12)
         """
-        return "CalFluxTable(" + size() + ")"
+        return "CalFluxTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

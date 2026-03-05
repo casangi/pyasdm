@@ -249,7 +249,7 @@ class AlmaRadiometerTable:
         between parenthesis.
         Example : AlmaRadiometerTable(12)
         """
-        return "AlmaRadiometerTable(" + size() + ")"
+        return "AlmaRadiometerTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

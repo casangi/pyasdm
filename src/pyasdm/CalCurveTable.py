@@ -296,7 +296,7 @@ class CalCurveTable:
         between parenthesis.
         Example : CalCurveTable(12)
         """
-        return "CalCurveTable(" + size() + ")"
+        return "CalCurveTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

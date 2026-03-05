@@ -563,7 +563,7 @@ class CalPointingTable:
         between parenthesis.
         Example : CalPointingTable(12)
         """
-        return "CalPointingTable(" + size() + ")"
+        return "CalPointingTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

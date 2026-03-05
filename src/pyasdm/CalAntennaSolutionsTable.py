@@ -336,7 +336,7 @@ class CalAntennaSolutionsTable:
         between parenthesis.
         Example : CalAntennaSolutionsTable(12)
         """
-        return "CalAntennaSolutionsTable(" + size() + ")"
+        return "CalAntennaSolutionsTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

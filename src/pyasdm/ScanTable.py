@@ -257,7 +257,7 @@ class ScanTable:
         between parenthesis.
         Example : ScanTable(12)
         """
-        return "ScanTable(" + size() + ")"
+        return "ScanTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

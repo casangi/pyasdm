@@ -748,7 +748,7 @@ class SourceTable:
         between parenthesis.
         Example : SourceTable(12)
         """
-        return "SourceTable(" + size() + ")"
+        return "SourceTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 
@@ -779,7 +779,7 @@ class SourceTable:
 
         # print("Trying to add a new row with start time = "+str(startTime))
 
-        insertionId = self._name2id_dict.get[x.getSourceName()]
+        insertionId = self._name2id_dict[x.getSourceName()]
 
         # sourceId is now known from the dictionary
         # context is a vector of vectors, sourceId index to the outer vector and

@@ -320,7 +320,7 @@ class AntennaTable:
         between parenthesis.
         Example : AntennaTable(12)
         """
-        return "AntennaTable(" + size() + ")"
+        return "AntennaTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

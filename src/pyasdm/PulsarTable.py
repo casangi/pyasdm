@@ -305,7 +305,7 @@ class PulsarTable:
         between parenthesis.
         Example : PulsarTable(12)
         """
-        return "PulsarTable(" + size() + ")"
+        return "PulsarTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

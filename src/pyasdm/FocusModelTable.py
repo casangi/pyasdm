@@ -274,7 +274,7 @@ class FocusModelTable:
         between parenthesis.
         Example : FocusModelTable(12)
         """
-        return "FocusModelTable(" + size() + ")"
+        return "FocusModelTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

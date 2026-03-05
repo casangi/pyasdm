@@ -241,7 +241,7 @@ class ObservationTable:
         between parenthesis.
         Example : ObservationTable(12)
         """
-        return "ObservationTable(" + size() + ")"
+        return "ObservationTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

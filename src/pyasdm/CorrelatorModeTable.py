@@ -267,7 +267,7 @@ class CorrelatorModeTable:
         between parenthesis.
         Example : CorrelatorModeTable(12)
         """
-        return "CorrelatorModeTable(" + size() + ")"
+        return "CorrelatorModeTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

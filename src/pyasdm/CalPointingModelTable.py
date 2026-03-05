@@ -330,7 +330,7 @@ class CalPointingModelTable:
         between parenthesis.
         Example : CalPointingModelTable(12)
         """
-        return "CalPointingModelTable(" + size() + ")"
+        return "CalPointingModelTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

@@ -328,7 +328,7 @@ class FieldTable:
         between parenthesis.
         Example : FieldTable(12)
         """
-        return "FieldTable(" + size() + ")"
+        return "FieldTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

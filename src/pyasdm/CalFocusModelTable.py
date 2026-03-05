@@ -296,7 +296,7 @@ class CalFocusModelTable:
         between parenthesis.
         Example : CalFocusModelTable(12)
         """
-        return "CalFocusModelTable(" + size() + ")"
+        return "CalFocusModelTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

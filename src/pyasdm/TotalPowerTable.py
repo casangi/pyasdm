@@ -367,7 +367,7 @@ class TotalPowerTable:
         between parenthesis.
         Example : TotalPowerTable(12)
         """
-        return "TotalPowerTable(" + size() + ")"
+        return "TotalPowerTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

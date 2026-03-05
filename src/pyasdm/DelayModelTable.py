@@ -475,7 +475,7 @@ class DelayModelTable:
         between parenthesis.
         Example : DelayModelTable(12)
         """
-        return "DelayModelTable(" + size() + ")"
+        return "DelayModelTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

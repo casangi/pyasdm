@@ -664,7 +664,7 @@ class CalFocusTable:
         between parenthesis.
         Example : CalFocusTable(12)
         """
-        return "CalFocusTable(" + size() + ")"
+        return "CalFocusTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

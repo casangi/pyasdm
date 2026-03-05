@@ -396,7 +396,7 @@ class VLAWVRTable:
         between parenthesis.
         Example : VLAWVRTable(12)
         """
-        return "VLAWVRTable(" + size() + ")"
+        return "VLAWVRTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

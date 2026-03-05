@@ -283,7 +283,7 @@ class ConfigDescriptionTable:
         between parenthesis.
         Example : ConfigDescriptionTable(12)
         """
-        return "ConfigDescriptionTable(" + size() + ")"
+        return "ConfigDescriptionTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

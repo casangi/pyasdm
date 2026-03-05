@@ -271,7 +271,7 @@ class CalDataTable:
         between parenthesis.
         Example : CalDataTable(12)
         """
-        return "CalDataTable(" + size() + ")"
+        return "CalDataTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

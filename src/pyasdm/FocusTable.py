@@ -434,7 +434,7 @@ class FocusTable:
         between parenthesis.
         Example : FocusTable(12)
         """
-        return "FocusTable(" + size() + ")"
+        return "FocusTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

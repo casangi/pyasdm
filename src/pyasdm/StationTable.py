@@ -272,7 +272,7 @@ class StationTable:
         between parenthesis.
         Example : StationTable(12)
         """
-        return "StationTable(" + size() + ")"
+        return "StationTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

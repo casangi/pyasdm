@@ -362,7 +362,7 @@ class CalWVRTable:
         between parenthesis.
         Example : CalWVRTable(12)
         """
-        return "CalWVRTable(" + size() + ")"
+        return "CalWVRTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

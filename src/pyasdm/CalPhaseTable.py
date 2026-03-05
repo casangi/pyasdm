@@ -350,7 +350,7 @@ class CalPhaseTable:
         between parenthesis.
         Example : CalPhaseTable(12)
         """
-        return "CalPhaseTable(" + size() + ")"
+        return "CalPhaseTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

@@ -263,7 +263,7 @@ class PostProcessingTable:
         between parenthesis.
         Example : PostProcessingTable(12)
         """
-        return "PostProcessingTable(" + size() + ")"
+        return "PostProcessingTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

@@ -263,7 +263,7 @@ class CalReductionTable:
         between parenthesis.
         Example : CalReductionTable(12)
         """
-        return "CalReductionTable(" + size() + ")"
+        return "CalReductionTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

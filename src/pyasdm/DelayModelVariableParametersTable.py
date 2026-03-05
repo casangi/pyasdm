@@ -395,7 +395,7 @@ class DelayModelVariableParametersTable:
         between parenthesis.
         Example : DelayModelVariableParametersTable(12)
         """
-        return "DelayModelVariableParametersTable(" + size() + ")"
+        return "DelayModelVariableParametersTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

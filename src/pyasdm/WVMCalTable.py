@@ -404,7 +404,7 @@ class WVMCalTable:
         between parenthesis.
         Example : WVMCalTable(12)
         """
-        return "WVMCalTable(" + size() + ")"
+        return "WVMCalTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

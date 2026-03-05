@@ -384,7 +384,7 @@ class CalBandpassTable:
         between parenthesis.
         Example : CalBandpassTable(12)
         """
-        return "CalBandpassTable(" + size() + ")"
+        return "CalBandpassTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

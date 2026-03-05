@@ -370,7 +370,7 @@ class EphemerisTable:
         between parenthesis.
         Example : EphemerisTable(12)
         """
-        return "EphemerisTable(" + size() + ")"
+        return "EphemerisTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

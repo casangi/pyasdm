@@ -391,7 +391,7 @@ class ModulationTable:
         between parenthesis.
         Example : ModulationTable(12)
         """
-        return "ModulationTable(" + size() + ")"
+        return "ModulationTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

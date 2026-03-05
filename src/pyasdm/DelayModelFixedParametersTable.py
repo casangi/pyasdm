@@ -365,7 +365,7 @@ class DelayModelFixedParametersTable:
         between parenthesis.
         Example : DelayModelFixedParametersTable(12)
         """
-        return "DelayModelFixedParametersTable(" + size() + ")"
+        return "DelayModelFixedParametersTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

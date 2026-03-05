@@ -251,7 +251,7 @@ class ScaleTable:
         between parenthesis.
         Example : ScaleTable(12)
         """
-        return "ScaleTable(" + size() + ")"
+        return "ScaleTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

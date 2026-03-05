@@ -427,7 +427,7 @@ class SysPowerTable:
         between parenthesis.
         Example : SysPowerTable(12)
         """
-        return "SysPowerTable(" + size() + ")"
+        return "SysPowerTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

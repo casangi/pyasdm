@@ -289,7 +289,7 @@ class HolographyTable:
         between parenthesis.
         Example : HolographyTable(12)
         """
-        return "HolographyTable(" + size() + ")"
+        return "HolographyTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 
