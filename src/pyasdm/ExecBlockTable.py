@@ -455,7 +455,7 @@ class ExecBlockTable:
         between parenthesis.
         Example : ExecBlockTable(12)
         """
-        return "ExecBlockTable(" + size() + ")"
+        return "ExecBlockTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

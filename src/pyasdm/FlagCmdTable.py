@@ -339,7 +339,7 @@ class FlagCmdTable:
         between parenthesis.
         Example : FlagCmdTable(12)
         """
-        return "FlagCmdTable(" + size() + ")"
+        return "FlagCmdTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

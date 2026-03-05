@@ -247,7 +247,7 @@ class CalGainTable:
         between parenthesis.
         Example : CalGainTable(12)
         """
-        return "CalGainTable(" + size() + ")"
+        return "CalGainTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

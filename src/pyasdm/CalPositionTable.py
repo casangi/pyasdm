@@ -406,7 +406,7 @@ class CalPositionTable:
         between parenthesis.
         Example : CalPositionTable(12)
         """
-        return "CalPositionTable(" + size() + ")"
+        return "CalPositionTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

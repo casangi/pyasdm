@@ -298,7 +298,7 @@ class SBSummaryTable:
         between parenthesis.
         Example : SBSummaryTable(12)
         """
-        return "SBSummaryTable(" + size() + ")"
+        return "SBSummaryTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

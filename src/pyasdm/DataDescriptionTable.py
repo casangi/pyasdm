@@ -253,7 +253,7 @@ class DataDescriptionTable:
         between parenthesis.
         Example : DataDescriptionTable(12)
         """
-        return "DataDescriptionTable(" + size() + ")"
+        return "DataDescriptionTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

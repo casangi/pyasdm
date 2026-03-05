@@ -475,7 +475,7 @@ class CalHolographyTable:
         between parenthesis.
         Example : CalHolographyTable(12)
         """
-        return "CalHolographyTable(" + size() + ")"
+        return "CalHolographyTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

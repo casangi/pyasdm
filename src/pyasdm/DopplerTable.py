@@ -262,7 +262,7 @@ class DopplerTable:
         between parenthesis.
         Example : DopplerTable(12)
         """
-        return "DopplerTable(" + size() + ")"
+        return "DopplerTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

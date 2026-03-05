@@ -392,7 +392,7 @@ class CalSeeingTable:
         between parenthesis.
         Example : CalSeeingTable(12)
         """
-        return "CalSeeingTable(" + size() + ")"
+        return "CalSeeingTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

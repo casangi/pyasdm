@@ -380,7 +380,7 @@ class GainTrackingTable:
         between parenthesis.
         Example : GainTrackingTable(12)
         """
-        return "GainTrackingTable(" + size() + ")"
+        return "GainTrackingTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

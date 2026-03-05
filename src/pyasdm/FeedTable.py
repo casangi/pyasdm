@@ -485,7 +485,7 @@ class FeedTable:
         between parenthesis.
         Example : FeedTable(12)
         """
-        return "FeedTable(" + size() + ")"
+        return "FeedTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

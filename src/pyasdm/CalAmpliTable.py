@@ -297,7 +297,7 @@ class CalAmpliTable:
         between parenthesis.
         Example : CalAmpliTable(12)
         """
-        return "CalAmpliTable(" + size() + ")"
+        return "CalAmpliTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

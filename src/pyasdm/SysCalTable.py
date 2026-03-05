@@ -466,7 +466,7 @@ class SysCalTable:
         between parenthesis.
         Example : SysCalTable(12)
         """
-        return "SysCalTable(" + size() + ")"
+        return "SysCalTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

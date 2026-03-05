@@ -366,7 +366,7 @@ class CalPrimaryBeamTable:
         between parenthesis.
         Example : CalPrimaryBeamTable(12)
         """
-        return "CalPrimaryBeamTable(" + size() + ")"
+        return "CalPrimaryBeamTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

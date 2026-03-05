@@ -387,7 +387,7 @@ class ReceiverTable:
         between parenthesis.
         Example : ReceiverTable(12)
         """
-        return "ReceiverTable(" + size() + ")"
+        return "ReceiverTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

@@ -278,7 +278,7 @@ class PointingModelTable:
         between parenthesis.
         Example : PointingModelTable(12)
         """
-        return "PointingModelTable(" + size() + ")"
+        return "PointingModelTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

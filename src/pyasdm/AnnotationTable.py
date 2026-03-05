@@ -275,7 +275,7 @@ class AnnotationTable:
         between parenthesis.
         Example : AnnotationTable(12)
         """
-        return "AnnotationTable(" + size() + ")"
+        return "AnnotationTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

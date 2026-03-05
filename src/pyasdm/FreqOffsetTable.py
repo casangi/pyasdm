@@ -381,7 +381,7 @@ class FreqOffsetTable:
         between parenthesis.
         Example : FreqOffsetTable(12)
         """
-        return "FreqOffsetTable(" + size() + ")"
+        return "FreqOffsetTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

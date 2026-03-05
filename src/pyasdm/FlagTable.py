@@ -271,7 +271,7 @@ class FlagTable:
         between parenthesis.
         Example : FlagTable(12)
         """
-        return "FlagTable(" + size() + ")"
+        return "FlagTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

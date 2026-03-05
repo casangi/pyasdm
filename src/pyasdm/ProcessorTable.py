@@ -249,7 +249,7 @@ class ProcessorTable:
         between parenthesis.
         Example : ProcessorTable(12)
         """
-        return "ProcessorTable(" + size() + ")"
+        return "ProcessorTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

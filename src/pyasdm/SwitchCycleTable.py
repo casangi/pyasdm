@@ -297,7 +297,7 @@ class SwitchCycleTable:
         between parenthesis.
         Example : SwitchCycleTable(12)
         """
-        return "SwitchCycleTable(" + size() + ")"
+        return "SwitchCycleTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

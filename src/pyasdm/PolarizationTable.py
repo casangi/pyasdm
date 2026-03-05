@@ -249,7 +249,7 @@ class PolarizationTable:
         between parenthesis.
         Example : PolarizationTable(12)
         """
-        return "PolarizationTable(" + size() + ")"
+        return "PolarizationTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

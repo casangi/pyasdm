@@ -534,7 +534,7 @@ class SpectralWindowTable:
         between parenthesis.
         Example : SpectralWindowTable(12)
         """
-        return "SpectralWindowTable(" + size() + ")"
+        return "SpectralWindowTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

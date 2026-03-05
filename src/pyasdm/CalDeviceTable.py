@@ -395,7 +395,7 @@ class CalDeviceTable:
         between parenthesis.
         Example : CalDeviceTable(12)
         """
-        return "CalDeviceTable(" + size() + ")"
+        return "CalDeviceTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

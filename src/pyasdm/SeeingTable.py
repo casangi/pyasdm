@@ -375,7 +375,7 @@ class SeeingTable:
         between parenthesis.
         Example : SeeingTable(12)
         """
-        return "SeeingTable(" + size() + ")"
+        return "SeeingTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

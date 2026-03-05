@@ -289,7 +289,7 @@ class CalAppPhaseTable:
         between parenthesis.
         Example : CalAppPhaseTable(12)
         """
-        return "CalAppPhaseTable(" + size() + ")"
+        return "CalAppPhaseTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

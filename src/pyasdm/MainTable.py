@@ -337,7 +337,7 @@ class MainTable:
         between parenthesis.
         Example : MainTable(12)
         """
-        return "MainTable(" + size() + ")"
+        return "MainTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

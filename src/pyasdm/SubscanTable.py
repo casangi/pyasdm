@@ -253,7 +253,7 @@ class SubscanTable:
         between parenthesis.
         Example : SubscanTable(12)
         """
-        return "SubscanTable(" + size() + ")"
+        return "SubscanTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

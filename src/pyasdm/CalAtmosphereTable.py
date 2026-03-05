@@ -560,7 +560,7 @@ class CalAtmosphereTable:
         between parenthesis.
         Example : CalAtmosphereTable(12)
         """
-        return "CalAtmosphereTable(" + size() + ")"
+        return "CalAtmosphereTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

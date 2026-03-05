@@ -518,7 +518,7 @@ class PointingTable:
         between parenthesis.
         Example : PointingTable(12)
         """
-        return "PointingTable(" + size() + ")"
+        return "PointingTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

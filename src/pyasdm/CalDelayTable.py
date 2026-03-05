@@ -330,7 +330,7 @@ class CalDelayTable:
         between parenthesis.
         Example : CalDelayTable(12)
         """
-        return "CalDelayTable(" + size() + ")"
+        return "CalDelayTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

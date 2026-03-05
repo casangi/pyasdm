@@ -255,7 +255,7 @@ class StateTable:
         between parenthesis.
         Example : StateTable(12)
         """
-        return "StateTable(" + size() + ")"
+        return "StateTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

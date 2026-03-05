@@ -581,7 +581,7 @@ class WeatherTable:
         between parenthesis.
         Example : WeatherTable(12)
         """
-        return "WeatherTable(" + size() + ")"
+        return "WeatherTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 

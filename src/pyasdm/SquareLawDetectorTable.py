@@ -251,7 +251,7 @@ class SquareLawDetectorTable:
         between parenthesis.
         Example : SquareLawDetectorTable(12)
         """
-        return "SquareLawDetectorTable(" + size() + ")"
+        return "SquareLawDetectorTable(" + str(self.size()) + ")"
 
     # ====> Row creation.
 
