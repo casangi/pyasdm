@@ -1261,7 +1261,10 @@ class BDFReader:
                             numberOfElementsToRead,
                             *loadOneSPWFunctionParams,
                         )
-                        if componentDesc["arr"].size > numberOfElementsToRead:
+                        if (
+                            isinstance(componentDesc["arr"], np.ndarray)
+                            and componentDesc["arr"].size > numberOfElementsToRead
+                        ):
                             raise RuntimeError(
                                 f"Inconsistency when loading one SPW, {componentDesc['arr'].size=}"
                                 f", {numberOfElementsToRead=}"
@@ -1389,15 +1392,20 @@ class BDFReader:
         if not binaryComponentsDesc["crossData"]["present"]:
             ndarrays = {"visibilities": binaryComponentsDesc["autoData"]["arr"]}
         else:
-            ndarrays = {
-                "visibilities": np.concatenate(
-                    [
-                        binaryComponentsDesc["crossData"]["arr"],
-                        binaryComponentsDesc["autoData"]["arr"],
-                    ],
-                    axis=1,
-                )
-            }
+            if binaryComponentsDesc["crossData"]["arr"] is None:
+                ndarrays = {"visibilities": binaryComponentsDesc["autoData"]["arr"]}
+            elif binaryComponentsDesc["autoData"]["arr"] is None:
+                ndarrays = {"visibilities": binaryComponentsDesc["crossData"]["arr"]}
+            else:
+                ndarrays = {
+                    "visibilities": np.concatenate(
+                        [
+                            binaryComponentsDesc["crossData"]["arr"],
+                            binaryComponentsDesc["autoData"]["arr"],
+                        ],
+                        axis=1,
+                    )
+                }
 
         return ndarrays
 
@@ -1483,7 +1491,7 @@ class BDFReader:
         Returns
         -------
         ndarrays: dict
-            Dictionary of ndarray(s) (for exmaple "visibilities" derived from the
+            Dictionary of ndarray(s) (for example "visibilities" derived from the
             "autoData" and the "crossData" binary components)
         """
         self._integrationStartsAt = self.position()
