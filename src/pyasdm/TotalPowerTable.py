@@ -533,6 +533,8 @@ class TotalPowerTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, time, configDescriptionId, fieldId):
         """
         Returns a TotalPowerRow given a key.

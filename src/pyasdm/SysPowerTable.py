@@ -556,6 +556,8 @@ class SysPowerTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, antennaId, spectralWindowId, feedId, timeInterval):
         """
         Returns a SysPowerRow given a key.

@@ -675,6 +675,8 @@ class PointingTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, antennaId, timeInterval):
         """
         Returns a PointingRow given a key.

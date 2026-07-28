@@ -533,6 +533,8 @@ class ModulationTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, antennaId, receiverId, spectralWindowId, timeInterval):
         """
         Returns a ModulationRow given a key.

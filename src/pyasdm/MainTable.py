@@ -497,6 +497,8 @@ class MainTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, time, configDescriptionId, fieldId):
         """
         Returns a MainRow given a key.
