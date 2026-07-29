@@ -623,6 +623,8 @@ class DelayModelTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, antennaId, spectralWindowId, timeInterval):
         """
         Returns a DelayModelRow given a key.

@@ -599,6 +599,8 @@ class SysCalTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, antennaId, spectralWindowId, timeInterval, feedId):
         """
         Returns a SysCalRow given a key.

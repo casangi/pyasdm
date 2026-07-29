@@ -704,6 +704,8 @@ class WeatherTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, stationId, timeInterval):
         """
         Returns a WeatherRow given a key.

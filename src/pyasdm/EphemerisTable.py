@@ -521,6 +521,8 @@ class EphemerisTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, timeInterval, ephemerisId):
         """
         Returns a EphemerisRow given a key.

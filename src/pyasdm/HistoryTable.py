@@ -472,6 +472,8 @@ class HistoryTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, execBlockId, time):
         """
         Returns a HistoryRow given a key.

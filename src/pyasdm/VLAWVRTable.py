@@ -525,6 +525,8 @@ class VLAWVRTable:
         if keystr in self._context:
             result = self._context[keystr]
 
+        return result
+
     def getRowByKey(self, antennaId, timeInterval):
         """
         Returns a VLAWVRRow given a key.
