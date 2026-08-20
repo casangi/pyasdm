@@ -221,6 +221,12 @@ class ASDM:
     # return an empty table.
     _tableEntity = {}
 
+    # the expected size for each of the tables in _tableEntity, tables
+    # that are know and an ASDM is read from disk. These are the sizes given
+    # in the ASDM file and may not be the actual numbner of rows found in the
+    # file storing the contents of that table
+    _tableEntitySize = {}
+
     # table getter map, the value for a given name is the getter function for that table
     _tableGetters = {}
 
@@ -368,14 +374,37 @@ class ASDM:
 
     # defer on getTables() unless necessary, would return a list of all of the tables
 
-    def __init__(self):
+    # set this to True to turn on uniqueness checking when an existing table is read from a file (XML
+    # or bin). The default of False is appropriate in most cases since the ASDM already exists and
+    # the appropriate uniqueness can be assumed if the ASDM comes from the online system at the
+    # telescope. Checking for uniqueness as each row is read from the existing table can be time
+    # consuming for large tables.
+    _checkRowUniqueness = False
+
+    def __init__(self, checkRowUniqueness=False):
         """
         Create an empty ASDM with empty instances
         of the tables that belong to that container.
+
+        The uniqueness check is off by default. Turn that on by setting
+        checkRowUniqueness to True. When this is true the the uniquess check
+        that normally happens with a row is added to a table is skipped when
+        the full table is read from an existing copy (e.g. and XML or bin file).
+        Checking that each row is unique can take a significant time for large
+        tables. This check should be unnecessary for ASDMs created by the telescope.
+
+        The checkRowUniqueness value has no effect when adding individual rows
+        to a table using the add* methods.
+
+        The checkRowUniqueness value can be changed after this object is
+        created but it has no effect on a table once that table has been read
+        from a file.
         """
 
         self._directory = None
+        self._checkRowUniqueness = checkRowUniqueness
         self._tableEntity = {}
+        self._tableEntitySize = {}
         self._tableGetters = {}
 
         # initialize the attribute values
@@ -407,147 +436,478 @@ class ASDM:
 
         # initialize the tables as empty but attached to this container
 
-        self._main = MainTable(self)
+        self._main = MainTable(self, self._checkRowUniqueness)
 
-        self._almaRadiometer = AlmaRadiometerTable(self)
+        self._almaRadiometer = AlmaRadiometerTable(self, self._checkRowUniqueness)
 
-        self._annotation = AnnotationTable(self)
+        self._annotation = AnnotationTable(self, self._checkRowUniqueness)
 
-        self._antenna = AntennaTable(self)
+        self._antenna = AntennaTable(self, self._checkRowUniqueness)
 
-        self._calAmpli = CalAmpliTable(self)
+        self._calAmpli = CalAmpliTable(self, self._checkRowUniqueness)
 
-        self._calAntennaSolutions = CalAntennaSolutionsTable(self)
+        self._calAntennaSolutions = CalAntennaSolutionsTable(
+            self, self._checkRowUniqueness
+        )
 
-        self._calAppPhase = CalAppPhaseTable(self)
+        self._calAppPhase = CalAppPhaseTable(self, self._checkRowUniqueness)
 
-        self._calAtmosphere = CalAtmosphereTable(self)
+        self._calAtmosphere = CalAtmosphereTable(self, self._checkRowUniqueness)
 
-        self._calBandpass = CalBandpassTable(self)
+        self._calBandpass = CalBandpassTable(self, self._checkRowUniqueness)
 
-        self._calCurve = CalCurveTable(self)
+        self._calCurve = CalCurveTable(self, self._checkRowUniqueness)
 
-        self._calData = CalDataTable(self)
+        self._calData = CalDataTable(self, self._checkRowUniqueness)
 
-        self._calDelay = CalDelayTable(self)
+        self._calDelay = CalDelayTable(self, self._checkRowUniqueness)
 
-        self._calDevice = CalDeviceTable(self)
+        self._calDevice = CalDeviceTable(self, self._checkRowUniqueness)
 
-        self._calFlux = CalFluxTable(self)
+        self._calFlux = CalFluxTable(self, self._checkRowUniqueness)
 
-        self._calFocus = CalFocusTable(self)
+        self._calFocus = CalFocusTable(self, self._checkRowUniqueness)
 
-        self._calFocusModel = CalFocusModelTable(self)
+        self._calFocusModel = CalFocusModelTable(self, self._checkRowUniqueness)
 
-        self._calGain = CalGainTable(self)
+        self._calGain = CalGainTable(self, self._checkRowUniqueness)
 
-        self._calHolography = CalHolographyTable(self)
+        self._calHolography = CalHolographyTable(self, self._checkRowUniqueness)
 
-        self._calPhase = CalPhaseTable(self)
+        self._calPhase = CalPhaseTable(self, self._checkRowUniqueness)
 
-        self._calPointing = CalPointingTable(self)
+        self._calPointing = CalPointingTable(self, self._checkRowUniqueness)
 
-        self._calPointingModel = CalPointingModelTable(self)
+        self._calPointingModel = CalPointingModelTable(self, self._checkRowUniqueness)
 
-        self._calPosition = CalPositionTable(self)
+        self._calPosition = CalPositionTable(self, self._checkRowUniqueness)
 
-        self._calPrimaryBeam = CalPrimaryBeamTable(self)
+        self._calPrimaryBeam = CalPrimaryBeamTable(self, self._checkRowUniqueness)
 
-        self._calReduction = CalReductionTable(self)
+        self._calReduction = CalReductionTable(self, self._checkRowUniqueness)
 
-        self._calSeeing = CalSeeingTable(self)
+        self._calSeeing = CalSeeingTable(self, self._checkRowUniqueness)
 
-        self._calWVR = CalWVRTable(self)
+        self._calWVR = CalWVRTable(self, self._checkRowUniqueness)
 
-        self._configDescription = ConfigDescriptionTable(self)
+        self._configDescription = ConfigDescriptionTable(self, self._checkRowUniqueness)
 
-        self._correlatorMode = CorrelatorModeTable(self)
+        self._correlatorMode = CorrelatorModeTable(self, self._checkRowUniqueness)
 
-        self._dataDescription = DataDescriptionTable(self)
+        self._dataDescription = DataDescriptionTable(self, self._checkRowUniqueness)
 
-        self._delayModel = DelayModelTable(self)
+        self._delayModel = DelayModelTable(self, self._checkRowUniqueness)
 
-        self._delayModelFixedParameters = DelayModelFixedParametersTable(self)
+        self._delayModelFixedParameters = DelayModelFixedParametersTable(
+            self, self._checkRowUniqueness
+        )
 
-        self._delayModelVariableParameters = DelayModelVariableParametersTable(self)
+        self._delayModelVariableParameters = DelayModelVariableParametersTable(
+            self, self._checkRowUniqueness
+        )
 
-        self._doppler = DopplerTable(self)
+        self._doppler = DopplerTable(self, self._checkRowUniqueness)
 
-        self._ephemeris = EphemerisTable(self)
+        self._ephemeris = EphemerisTable(self, self._checkRowUniqueness)
 
-        self._execBlock = ExecBlockTable(self)
+        self._execBlock = ExecBlockTable(self, self._checkRowUniqueness)
 
-        self._feed = FeedTable(self)
+        self._feed = FeedTable(self, self._checkRowUniqueness)
 
-        self._field = FieldTable(self)
+        self._field = FieldTable(self, self._checkRowUniqueness)
 
-        self._flag = FlagTable(self)
+        self._flag = FlagTable(self, self._checkRowUniqueness)
 
-        self._flagCmd = FlagCmdTable(self)
+        self._flagCmd = FlagCmdTable(self, self._checkRowUniqueness)
 
-        self._focus = FocusTable(self)
+        self._focus = FocusTable(self, self._checkRowUniqueness)
 
-        self._focusModel = FocusModelTable(self)
+        self._focusModel = FocusModelTable(self, self._checkRowUniqueness)
 
-        self._freqOffset = FreqOffsetTable(self)
+        self._freqOffset = FreqOffsetTable(self, self._checkRowUniqueness)
 
-        self._gainTracking = GainTrackingTable(self)
+        self._gainTracking = GainTrackingTable(self, self._checkRowUniqueness)
 
-        self._history = HistoryTable(self)
+        self._history = HistoryTable(self, self._checkRowUniqueness)
 
-        self._holography = HolographyTable(self)
+        self._holography = HolographyTable(self, self._checkRowUniqueness)
 
-        self._modulation = ModulationTable(self)
+        self._modulation = ModulationTable(self, self._checkRowUniqueness)
 
-        self._observation = ObservationTable(self)
+        self._observation = ObservationTable(self, self._checkRowUniqueness)
 
-        self._pointing = PointingTable(self)
+        self._pointing = PointingTable(self, self._checkRowUniqueness)
 
-        self._pointingModel = PointingModelTable(self)
+        self._pointingModel = PointingModelTable(self, self._checkRowUniqueness)
 
-        self._polarization = PolarizationTable(self)
+        self._polarization = PolarizationTable(self, self._checkRowUniqueness)
 
-        self._postProcessing = PostProcessingTable(self)
+        self._postProcessing = PostProcessingTable(self, self._checkRowUniqueness)
 
-        self._processor = ProcessorTable(self)
+        self._processor = ProcessorTable(self, self._checkRowUniqueness)
 
-        self._pulsar = PulsarTable(self)
+        self._pulsar = PulsarTable(self, self._checkRowUniqueness)
 
-        self._receiver = ReceiverTable(self)
+        self._receiver = ReceiverTable(self, self._checkRowUniqueness)
 
-        self._sBSummary = SBSummaryTable(self)
+        self._sBSummary = SBSummaryTable(self, self._checkRowUniqueness)
 
-        self._scale = ScaleTable(self)
+        self._scale = ScaleTable(self, self._checkRowUniqueness)
 
-        self._scan = ScanTable(self)
+        self._scan = ScanTable(self, self._checkRowUniqueness)
 
-        self._seeing = SeeingTable(self)
+        self._seeing = SeeingTable(self, self._checkRowUniqueness)
 
-        self._source = SourceTable(self)
+        self._source = SourceTable(self, self._checkRowUniqueness)
 
-        self._spectralWindow = SpectralWindowTable(self)
+        self._spectralWindow = SpectralWindowTable(self, self._checkRowUniqueness)
 
-        self._squareLawDetector = SquareLawDetectorTable(self)
+        self._squareLawDetector = SquareLawDetectorTable(self, self._checkRowUniqueness)
 
-        self._state = StateTable(self)
+        self._state = StateTable(self, self._checkRowUniqueness)
 
-        self._station = StationTable(self)
+        self._station = StationTable(self, self._checkRowUniqueness)
 
-        self._subscan = SubscanTable(self)
+        self._subscan = SubscanTable(self, self._checkRowUniqueness)
 
-        self._switchCycle = SwitchCycleTable(self)
+        self._switchCycle = SwitchCycleTable(self, self._checkRowUniqueness)
 
-        self._sysCal = SysCalTable(self)
+        self._sysCal = SysCalTable(self, self._checkRowUniqueness)
 
-        self._sysPower = SysPowerTable(self)
+        self._sysPower = SysPowerTable(self, self._checkRowUniqueness)
 
-        self._totalPower = TotalPowerTable(self)
+        self._totalPower = TotalPowerTable(self, self._checkRowUniqueness)
 
-        self._vLAWVR = VLAWVRTable(self)
+        self._vLAWVR = VLAWVRTable(self, self._checkRowUniqueness)
 
-        self._wVMCal = WVMCalTable(self)
+        self._wVMCal = WVMCalTable(self, self._checkRowUniqueness)
 
-        self._weather = WeatherTable(self)
+        self._weather = WeatherTable(self, self._checkRowUniqueness)
+
+        # collect the table getters in a dict to be used by getTable
+
+        self._tableGetters["Main"] = self.getMain
+
+        self._tableGetters["AlmaRadiometer"] = self.getAlmaRadiometer
+
+        self._tableGetters["Annotation"] = self.getAnnotation
+
+        self._tableGetters["Antenna"] = self.getAntenna
+
+        self._tableGetters["CalAmpli"] = self.getCalAmpli
+
+        self._tableGetters["CalAntennaSolutions"] = self.getCalAntennaSolutions
+
+        self._tableGetters["CalAppPhase"] = self.getCalAppPhase
+
+        self._tableGetters["CalAtmosphere"] = self.getCalAtmosphere
+
+        self._tableGetters["CalBandpass"] = self.getCalBandpass
+
+        self._tableGetters["CalCurve"] = self.getCalCurve
+
+        self._tableGetters["CalData"] = self.getCalData
+
+        self._tableGetters["CalDelay"] = self.getCalDelay
+
+        self._tableGetters["CalDevice"] = self.getCalDevice
+
+        self._tableGetters["CalFlux"] = self.getCalFlux
+
+        self._tableGetters["CalFocus"] = self.getCalFocus
+
+        self._tableGetters["CalFocusModel"] = self.getCalFocusModel
+
+        self._tableGetters["CalGain"] = self.getCalGain
+
+        self._tableGetters["CalHolography"] = self.getCalHolography
+
+        self._tableGetters["CalPhase"] = self.getCalPhase
+
+        self._tableGetters["CalPointing"] = self.getCalPointing
+
+        self._tableGetters["CalPointingModel"] = self.getCalPointingModel
+
+        self._tableGetters["CalPosition"] = self.getCalPosition
+
+        self._tableGetters["CalPrimaryBeam"] = self.getCalPrimaryBeam
+
+        self._tableGetters["CalReduction"] = self.getCalReduction
+
+        self._tableGetters["CalSeeing"] = self.getCalSeeing
+
+        self._tableGetters["CalWVR"] = self.getCalWVR
+
+        self._tableGetters["ConfigDescription"] = self.getConfigDescription
+
+        self._tableGetters["CorrelatorMode"] = self.getCorrelatorMode
+
+        self._tableGetters["DataDescription"] = self.getDataDescription
+
+        self._tableGetters["DelayModel"] = self.getDelayModel
+
+        self._tableGetters["DelayModelFixedParameters"] = (
+            self.getDelayModelFixedParameters
+        )
+
+        self._tableGetters["DelayModelVariableParameters"] = (
+            self.getDelayModelVariableParameters
+        )
+
+        self._tableGetters["Doppler"] = self.getDoppler
+
+        self._tableGetters["Ephemeris"] = self.getEphemeris
+
+        self._tableGetters["ExecBlock"] = self.getExecBlock
+
+        self._tableGetters["Feed"] = self.getFeed
+
+        self._tableGetters["Field"] = self.getField
+
+        self._tableGetters["Flag"] = self.getFlag
+
+        self._tableGetters["FlagCmd"] = self.getFlagCmd
+
+        self._tableGetters["Focus"] = self.getFocus
+
+        self._tableGetters["FocusModel"] = self.getFocusModel
+
+        self._tableGetters["FreqOffset"] = self.getFreqOffset
+
+        self._tableGetters["GainTracking"] = self.getGainTracking
+
+        self._tableGetters["History"] = self.getHistory
+
+        self._tableGetters["Holography"] = self.getHolography
+
+        self._tableGetters["Modulation"] = self.getModulation
+
+        self._tableGetters["Observation"] = self.getObservation
+
+        self._tableGetters["Pointing"] = self.getPointing
+
+        self._tableGetters["PointingModel"] = self.getPointingModel
+
+        self._tableGetters["Polarization"] = self.getPolarization
+
+        self._tableGetters["PostProcessing"] = self.getPostProcessing
+
+        self._tableGetters["Processor"] = self.getProcessor
+
+        self._tableGetters["Pulsar"] = self.getPulsar
+
+        self._tableGetters["Receiver"] = self.getReceiver
+
+        self._tableGetters["SBSummary"] = self.getSBSummary
+
+        self._tableGetters["Scale"] = self.getScale
+
+        self._tableGetters["Scan"] = self.getScan
+
+        self._tableGetters["Seeing"] = self.getSeeing
+
+        self._tableGetters["Source"] = self.getSource
+
+        self._tableGetters["SpectralWindow"] = self.getSpectralWindow
+
+        self._tableGetters["SquareLawDetector"] = self.getSquareLawDetector
+
+        self._tableGetters["State"] = self.getState
+
+        self._tableGetters["Station"] = self.getStation
+
+        self._tableGetters["Subscan"] = self.getSubscan
+
+        self._tableGetters["SwitchCycle"] = self.getSwitchCycle
+
+        self._tableGetters["SysCal"] = self.getSysCal
+
+        self._tableGetters["SysPower"] = self.getSysPower
+
+        self._tableGetters["TotalPower"] = self.getTotalPower
+
+        self._tableGetters["VLAWVR"] = self.getVLAWVR
+
+        self._tableGetters["WVMCal"] = self.getWVMCal
+
+        self._tableGetters["Weather"] = self.getWeather
+
+    def setCheckRowUniqueness(self, checkRowUniqueness):
+        """
+        Set the checkRowUniqueness state;
+
+        checkRowUniqueness is a boolean that sets the state. False turns off
+        the uniqueness check and True turns it on.
+
+        The checkRowUniqueness value is only used when a table is read
+        from disk (XML or bin). The single row add methods always check for
+        the expected uniqueness.
+
+        This sets the checkRowUniqueness state in each table. That will
+        only have an affect on that table if that table has not already been
+        loaded from a file.
+
+        returns the value of the uniqueness check state (checkRowUniqueness)
+        """
+        self._checkRowUniqueness = checkRowUniqueness
+
+        # set this in each table instance
+
+        dummy = self._main.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._almaRadiometer.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._annotation.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._antenna.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calAmpli.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calAntennaSolutions.setCheckRowUniqueness(
+            self._checkRowUniqueness
+        )
+
+        dummy = self._calAppPhase.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calAtmosphere.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calBandpass.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calCurve.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calData.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calDelay.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calDevice.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calFlux.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calFocus.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calFocusModel.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calGain.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calHolography.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calPhase.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calPointing.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calPointingModel.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calPosition.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calPrimaryBeam.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calReduction.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calSeeing.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._calWVR.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._configDescription.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._correlatorMode.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._dataDescription.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._delayModel.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._delayModelFixedParameters.setCheckRowUniqueness(
+            self._checkRowUniqueness
+        )
+
+        dummy = self._delayModelVariableParameters.setCheckRowUniqueness(
+            self._checkRowUniqueness
+        )
+
+        dummy = self._doppler.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._ephemeris.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._execBlock.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._feed.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._field.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._flag.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._flagCmd.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._focus.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._focusModel.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._freqOffset.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._gainTracking.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._history.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._holography.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._modulation.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._observation.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._pointing.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._pointingModel.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._polarization.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._postProcessing.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._processor.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._pulsar.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._receiver.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._sBSummary.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._scale.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._scan.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._seeing.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._source.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._spectralWindow.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._squareLawDetector.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._state.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._station.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._subscan.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._switchCycle.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._sysCal.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._sysPower.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._totalPower.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._vLAWVR.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._wVMCal.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        dummy = self._weather.setCheckRowUniqueness(self._checkRowUniqueness)
+
+        return self._checkRowUniqueness
+
+    def getCheckRowUniqueness(self):
+        """
+        return the current uniqueness check state
+        """
+        return self._checkRowUniqueness
 
     def getDirectory(self):
         """
@@ -556,6 +916,31 @@ class ASDM:
         This returns None if the directory has not yet been set.
         """
         return self._directory
+
+    def getOnDemandTables(self):
+        """
+        returns the list of tables that are loaded on demand.
+        These are the tables indicated in the ASDM file when the ASDM instance is set from a file.
+        Those tables are only loaded on demand when the get<Table> is called (or getTable(TableName))
+        All tables exist in this object but will have zero rows unless explicitly added to through that
+        table interface.
+        """
+        return self._tableEntity.keys()
+
+    def getExpectedTableSize(self, tableName):
+        """
+        Return the the expected size for the named on-demand table.
+        This is the size given in the ASDM file for that named table. If the table is not named
+        then this returned zero. Only tables named in the list returned by getOnDemandTables will
+        have a non-zero size here.
+        This is not guaranteed to be the number of rows in that table when it is read from disk.
+        Rows may also be added to tables after they are read from disk and this value will not reflect
+        the size of that table.
+        """
+        result = 0
+        if tableName in self._tableEntitySize:
+            result = self._tableEntitySize[tableName]
+        return result
 
     # the table getters
 
@@ -567,9 +952,6 @@ class ASDM:
         self._main.checkPresenceInMemory()
         return self._main
 
-    # associate the function with the table name in a map
-    _tableGetters["Main"] = getMain
-
     def getAlmaRadiometer(self):
         """
         Get the AlmaRadiometer table.
@@ -577,9 +959,6 @@ class ASDM:
         """
         self._almaRadiometer.checkPresenceInMemory()
         return self._almaRadiometer
-
-    # associate the function with the table name in a map
-    _tableGetters["AlmaRadiometer"] = getAlmaRadiometer
 
     def getAnnotation(self):
         """
@@ -589,9 +968,6 @@ class ASDM:
         self._annotation.checkPresenceInMemory()
         return self._annotation
 
-    # associate the function with the table name in a map
-    _tableGetters["Annotation"] = getAnnotation
-
     def getAntenna(self):
         """
         Get the Antenna table.
@@ -599,9 +975,6 @@ class ASDM:
         """
         self._antenna.checkPresenceInMemory()
         return self._antenna
-
-    # associate the function with the table name in a map
-    _tableGetters["Antenna"] = getAntenna
 
     def getCalAmpli(self):
         """
@@ -611,9 +984,6 @@ class ASDM:
         self._calAmpli.checkPresenceInMemory()
         return self._calAmpli
 
-    # associate the function with the table name in a map
-    _tableGetters["CalAmpli"] = getCalAmpli
-
     def getCalAntennaSolutions(self):
         """
         Get the CalAntennaSolutions table.
@@ -621,9 +991,6 @@ class ASDM:
         """
         self._calAntennaSolutions.checkPresenceInMemory()
         return self._calAntennaSolutions
-
-    # associate the function with the table name in a map
-    _tableGetters["CalAntennaSolutions"] = getCalAntennaSolutions
 
     def getCalAppPhase(self):
         """
@@ -633,9 +1000,6 @@ class ASDM:
         self._calAppPhase.checkPresenceInMemory()
         return self._calAppPhase
 
-    # associate the function with the table name in a map
-    _tableGetters["CalAppPhase"] = getCalAppPhase
-
     def getCalAtmosphere(self):
         """
         Get the CalAtmosphere table.
@@ -643,9 +1007,6 @@ class ASDM:
         """
         self._calAtmosphere.checkPresenceInMemory()
         return self._calAtmosphere
-
-    # associate the function with the table name in a map
-    _tableGetters["CalAtmosphere"] = getCalAtmosphere
 
     def getCalBandpass(self):
         """
@@ -655,9 +1016,6 @@ class ASDM:
         self._calBandpass.checkPresenceInMemory()
         return self._calBandpass
 
-    # associate the function with the table name in a map
-    _tableGetters["CalBandpass"] = getCalBandpass
-
     def getCalCurve(self):
         """
         Get the CalCurve table.
@@ -665,9 +1023,6 @@ class ASDM:
         """
         self._calCurve.checkPresenceInMemory()
         return self._calCurve
-
-    # associate the function with the table name in a map
-    _tableGetters["CalCurve"] = getCalCurve
 
     def getCalData(self):
         """
@@ -677,9 +1032,6 @@ class ASDM:
         self._calData.checkPresenceInMemory()
         return self._calData
 
-    # associate the function with the table name in a map
-    _tableGetters["CalData"] = getCalData
-
     def getCalDelay(self):
         """
         Get the CalDelay table.
@@ -687,9 +1039,6 @@ class ASDM:
         """
         self._calDelay.checkPresenceInMemory()
         return self._calDelay
-
-    # associate the function with the table name in a map
-    _tableGetters["CalDelay"] = getCalDelay
 
     def getCalDevice(self):
         """
@@ -699,9 +1048,6 @@ class ASDM:
         self._calDevice.checkPresenceInMemory()
         return self._calDevice
 
-    # associate the function with the table name in a map
-    _tableGetters["CalDevice"] = getCalDevice
-
     def getCalFlux(self):
         """
         Get the CalFlux table.
@@ -709,9 +1055,6 @@ class ASDM:
         """
         self._calFlux.checkPresenceInMemory()
         return self._calFlux
-
-    # associate the function with the table name in a map
-    _tableGetters["CalFlux"] = getCalFlux
 
     def getCalFocus(self):
         """
@@ -721,9 +1064,6 @@ class ASDM:
         self._calFocus.checkPresenceInMemory()
         return self._calFocus
 
-    # associate the function with the table name in a map
-    _tableGetters["CalFocus"] = getCalFocus
-
     def getCalFocusModel(self):
         """
         Get the CalFocusModel table.
@@ -731,9 +1071,6 @@ class ASDM:
         """
         self._calFocusModel.checkPresenceInMemory()
         return self._calFocusModel
-
-    # associate the function with the table name in a map
-    _tableGetters["CalFocusModel"] = getCalFocusModel
 
     def getCalGain(self):
         """
@@ -743,9 +1080,6 @@ class ASDM:
         self._calGain.checkPresenceInMemory()
         return self._calGain
 
-    # associate the function with the table name in a map
-    _tableGetters["CalGain"] = getCalGain
-
     def getCalHolography(self):
         """
         Get the CalHolography table.
@@ -753,9 +1087,6 @@ class ASDM:
         """
         self._calHolography.checkPresenceInMemory()
         return self._calHolography
-
-    # associate the function with the table name in a map
-    _tableGetters["CalHolography"] = getCalHolography
 
     def getCalPhase(self):
         """
@@ -765,9 +1096,6 @@ class ASDM:
         self._calPhase.checkPresenceInMemory()
         return self._calPhase
 
-    # associate the function with the table name in a map
-    _tableGetters["CalPhase"] = getCalPhase
-
     def getCalPointing(self):
         """
         Get the CalPointing table.
@@ -775,9 +1103,6 @@ class ASDM:
         """
         self._calPointing.checkPresenceInMemory()
         return self._calPointing
-
-    # associate the function with the table name in a map
-    _tableGetters["CalPointing"] = getCalPointing
 
     def getCalPointingModel(self):
         """
@@ -787,9 +1112,6 @@ class ASDM:
         self._calPointingModel.checkPresenceInMemory()
         return self._calPointingModel
 
-    # associate the function with the table name in a map
-    _tableGetters["CalPointingModel"] = getCalPointingModel
-
     def getCalPosition(self):
         """
         Get the CalPosition table.
@@ -797,9 +1119,6 @@ class ASDM:
         """
         self._calPosition.checkPresenceInMemory()
         return self._calPosition
-
-    # associate the function with the table name in a map
-    _tableGetters["CalPosition"] = getCalPosition
 
     def getCalPrimaryBeam(self):
         """
@@ -809,9 +1128,6 @@ class ASDM:
         self._calPrimaryBeam.checkPresenceInMemory()
         return self._calPrimaryBeam
 
-    # associate the function with the table name in a map
-    _tableGetters["CalPrimaryBeam"] = getCalPrimaryBeam
-
     def getCalReduction(self):
         """
         Get the CalReduction table.
@@ -819,9 +1135,6 @@ class ASDM:
         """
         self._calReduction.checkPresenceInMemory()
         return self._calReduction
-
-    # associate the function with the table name in a map
-    _tableGetters["CalReduction"] = getCalReduction
 
     def getCalSeeing(self):
         """
@@ -831,9 +1144,6 @@ class ASDM:
         self._calSeeing.checkPresenceInMemory()
         return self._calSeeing
 
-    # associate the function with the table name in a map
-    _tableGetters["CalSeeing"] = getCalSeeing
-
     def getCalWVR(self):
         """
         Get the CalWVR table.
@@ -841,9 +1151,6 @@ class ASDM:
         """
         self._calWVR.checkPresenceInMemory()
         return self._calWVR
-
-    # associate the function with the table name in a map
-    _tableGetters["CalWVR"] = getCalWVR
 
     def getConfigDescription(self):
         """
@@ -853,9 +1160,6 @@ class ASDM:
         self._configDescription.checkPresenceInMemory()
         return self._configDescription
 
-    # associate the function with the table name in a map
-    _tableGetters["ConfigDescription"] = getConfigDescription
-
     def getCorrelatorMode(self):
         """
         Get the CorrelatorMode table.
@@ -863,9 +1167,6 @@ class ASDM:
         """
         self._correlatorMode.checkPresenceInMemory()
         return self._correlatorMode
-
-    # associate the function with the table name in a map
-    _tableGetters["CorrelatorMode"] = getCorrelatorMode
 
     def getDataDescription(self):
         """
@@ -875,9 +1176,6 @@ class ASDM:
         self._dataDescription.checkPresenceInMemory()
         return self._dataDescription
 
-    # associate the function with the table name in a map
-    _tableGetters["DataDescription"] = getDataDescription
-
     def getDelayModel(self):
         """
         Get the DelayModel table.
@@ -885,9 +1183,6 @@ class ASDM:
         """
         self._delayModel.checkPresenceInMemory()
         return self._delayModel
-
-    # associate the function with the table name in a map
-    _tableGetters["DelayModel"] = getDelayModel
 
     def getDelayModelFixedParameters(self):
         """
@@ -897,9 +1192,6 @@ class ASDM:
         self._delayModelFixedParameters.checkPresenceInMemory()
         return self._delayModelFixedParameters
 
-    # associate the function with the table name in a map
-    _tableGetters["DelayModelFixedParameters"] = getDelayModelFixedParameters
-
     def getDelayModelVariableParameters(self):
         """
         Get the DelayModelVariableParameters table.
@@ -907,9 +1199,6 @@ class ASDM:
         """
         self._delayModelVariableParameters.checkPresenceInMemory()
         return self._delayModelVariableParameters
-
-    # associate the function with the table name in a map
-    _tableGetters["DelayModelVariableParameters"] = getDelayModelVariableParameters
 
     def getDoppler(self):
         """
@@ -919,9 +1208,6 @@ class ASDM:
         self._doppler.checkPresenceInMemory()
         return self._doppler
 
-    # associate the function with the table name in a map
-    _tableGetters["Doppler"] = getDoppler
-
     def getEphemeris(self):
         """
         Get the Ephemeris table.
@@ -929,9 +1215,6 @@ class ASDM:
         """
         self._ephemeris.checkPresenceInMemory()
         return self._ephemeris
-
-    # associate the function with the table name in a map
-    _tableGetters["Ephemeris"] = getEphemeris
 
     def getExecBlock(self):
         """
@@ -941,9 +1224,6 @@ class ASDM:
         self._execBlock.checkPresenceInMemory()
         return self._execBlock
 
-    # associate the function with the table name in a map
-    _tableGetters["ExecBlock"] = getExecBlock
-
     def getFeed(self):
         """
         Get the Feed table.
@@ -951,9 +1231,6 @@ class ASDM:
         """
         self._feed.checkPresenceInMemory()
         return self._feed
-
-    # associate the function with the table name in a map
-    _tableGetters["Feed"] = getFeed
 
     def getField(self):
         """
@@ -963,9 +1240,6 @@ class ASDM:
         self._field.checkPresenceInMemory()
         return self._field
 
-    # associate the function with the table name in a map
-    _tableGetters["Field"] = getField
-
     def getFlag(self):
         """
         Get the Flag table.
@@ -973,9 +1247,6 @@ class ASDM:
         """
         self._flag.checkPresenceInMemory()
         return self._flag
-
-    # associate the function with the table name in a map
-    _tableGetters["Flag"] = getFlag
 
     def getFlagCmd(self):
         """
@@ -985,9 +1256,6 @@ class ASDM:
         self._flagCmd.checkPresenceInMemory()
         return self._flagCmd
 
-    # associate the function with the table name in a map
-    _tableGetters["FlagCmd"] = getFlagCmd
-
     def getFocus(self):
         """
         Get the Focus table.
@@ -995,9 +1263,6 @@ class ASDM:
         """
         self._focus.checkPresenceInMemory()
         return self._focus
-
-    # associate the function with the table name in a map
-    _tableGetters["Focus"] = getFocus
 
     def getFocusModel(self):
         """
@@ -1007,9 +1272,6 @@ class ASDM:
         self._focusModel.checkPresenceInMemory()
         return self._focusModel
 
-    # associate the function with the table name in a map
-    _tableGetters["FocusModel"] = getFocusModel
-
     def getFreqOffset(self):
         """
         Get the FreqOffset table.
@@ -1017,9 +1279,6 @@ class ASDM:
         """
         self._freqOffset.checkPresenceInMemory()
         return self._freqOffset
-
-    # associate the function with the table name in a map
-    _tableGetters["FreqOffset"] = getFreqOffset
 
     def getGainTracking(self):
         """
@@ -1029,9 +1288,6 @@ class ASDM:
         self._gainTracking.checkPresenceInMemory()
         return self._gainTracking
 
-    # associate the function with the table name in a map
-    _tableGetters["GainTracking"] = getGainTracking
-
     def getHistory(self):
         """
         Get the History table.
@@ -1039,9 +1295,6 @@ class ASDM:
         """
         self._history.checkPresenceInMemory()
         return self._history
-
-    # associate the function with the table name in a map
-    _tableGetters["History"] = getHistory
 
     def getHolography(self):
         """
@@ -1051,9 +1304,6 @@ class ASDM:
         self._holography.checkPresenceInMemory()
         return self._holography
 
-    # associate the function with the table name in a map
-    _tableGetters["Holography"] = getHolography
-
     def getModulation(self):
         """
         Get the Modulation table.
@@ -1061,9 +1311,6 @@ class ASDM:
         """
         self._modulation.checkPresenceInMemory()
         return self._modulation
-
-    # associate the function with the table name in a map
-    _tableGetters["Modulation"] = getModulation
 
     def getObservation(self):
         """
@@ -1073,9 +1320,6 @@ class ASDM:
         self._observation.checkPresenceInMemory()
         return self._observation
 
-    # associate the function with the table name in a map
-    _tableGetters["Observation"] = getObservation
-
     def getPointing(self):
         """
         Get the Pointing table.
@@ -1083,9 +1327,6 @@ class ASDM:
         """
         self._pointing.checkPresenceInMemory()
         return self._pointing
-
-    # associate the function with the table name in a map
-    _tableGetters["Pointing"] = getPointing
 
     def getPointingModel(self):
         """
@@ -1095,9 +1336,6 @@ class ASDM:
         self._pointingModel.checkPresenceInMemory()
         return self._pointingModel
 
-    # associate the function with the table name in a map
-    _tableGetters["PointingModel"] = getPointingModel
-
     def getPolarization(self):
         """
         Get the Polarization table.
@@ -1105,9 +1343,6 @@ class ASDM:
         """
         self._polarization.checkPresenceInMemory()
         return self._polarization
-
-    # associate the function with the table name in a map
-    _tableGetters["Polarization"] = getPolarization
 
     def getPostProcessing(self):
         """
@@ -1117,9 +1352,6 @@ class ASDM:
         self._postProcessing.checkPresenceInMemory()
         return self._postProcessing
 
-    # associate the function with the table name in a map
-    _tableGetters["PostProcessing"] = getPostProcessing
-
     def getProcessor(self):
         """
         Get the Processor table.
@@ -1127,9 +1359,6 @@ class ASDM:
         """
         self._processor.checkPresenceInMemory()
         return self._processor
-
-    # associate the function with the table name in a map
-    _tableGetters["Processor"] = getProcessor
 
     def getPulsar(self):
         """
@@ -1139,9 +1368,6 @@ class ASDM:
         self._pulsar.checkPresenceInMemory()
         return self._pulsar
 
-    # associate the function with the table name in a map
-    _tableGetters["Pulsar"] = getPulsar
-
     def getReceiver(self):
         """
         Get the Receiver table.
@@ -1149,9 +1375,6 @@ class ASDM:
         """
         self._receiver.checkPresenceInMemory()
         return self._receiver
-
-    # associate the function with the table name in a map
-    _tableGetters["Receiver"] = getReceiver
 
     def getSBSummary(self):
         """
@@ -1161,9 +1384,6 @@ class ASDM:
         self._sBSummary.checkPresenceInMemory()
         return self._sBSummary
 
-    # associate the function with the table name in a map
-    _tableGetters["SBSummary"] = getSBSummary
-
     def getScale(self):
         """
         Get the Scale table.
@@ -1171,9 +1391,6 @@ class ASDM:
         """
         self._scale.checkPresenceInMemory()
         return self._scale
-
-    # associate the function with the table name in a map
-    _tableGetters["Scale"] = getScale
 
     def getScan(self):
         """
@@ -1183,9 +1400,6 @@ class ASDM:
         self._scan.checkPresenceInMemory()
         return self._scan
 
-    # associate the function with the table name in a map
-    _tableGetters["Scan"] = getScan
-
     def getSeeing(self):
         """
         Get the Seeing table.
@@ -1193,9 +1407,6 @@ class ASDM:
         """
         self._seeing.checkPresenceInMemory()
         return self._seeing
-
-    # associate the function with the table name in a map
-    _tableGetters["Seeing"] = getSeeing
 
     def getSource(self):
         """
@@ -1205,9 +1416,6 @@ class ASDM:
         self._source.checkPresenceInMemory()
         return self._source
 
-    # associate the function with the table name in a map
-    _tableGetters["Source"] = getSource
-
     def getSpectralWindow(self):
         """
         Get the SpectralWindow table.
@@ -1215,9 +1423,6 @@ class ASDM:
         """
         self._spectralWindow.checkPresenceInMemory()
         return self._spectralWindow
-
-    # associate the function with the table name in a map
-    _tableGetters["SpectralWindow"] = getSpectralWindow
 
     def getSquareLawDetector(self):
         """
@@ -1227,9 +1432,6 @@ class ASDM:
         self._squareLawDetector.checkPresenceInMemory()
         return self._squareLawDetector
 
-    # associate the function with the table name in a map
-    _tableGetters["SquareLawDetector"] = getSquareLawDetector
-
     def getState(self):
         """
         Get the State table.
@@ -1237,9 +1439,6 @@ class ASDM:
         """
         self._state.checkPresenceInMemory()
         return self._state
-
-    # associate the function with the table name in a map
-    _tableGetters["State"] = getState
 
     def getStation(self):
         """
@@ -1249,9 +1448,6 @@ class ASDM:
         self._station.checkPresenceInMemory()
         return self._station
 
-    # associate the function with the table name in a map
-    _tableGetters["Station"] = getStation
-
     def getSubscan(self):
         """
         Get the Subscan table.
@@ -1259,9 +1455,6 @@ class ASDM:
         """
         self._subscan.checkPresenceInMemory()
         return self._subscan
-
-    # associate the function with the table name in a map
-    _tableGetters["Subscan"] = getSubscan
 
     def getSwitchCycle(self):
         """
@@ -1271,9 +1464,6 @@ class ASDM:
         self._switchCycle.checkPresenceInMemory()
         return self._switchCycle
 
-    # associate the function with the table name in a map
-    _tableGetters["SwitchCycle"] = getSwitchCycle
-
     def getSysCal(self):
         """
         Get the SysCal table.
@@ -1281,9 +1471,6 @@ class ASDM:
         """
         self._sysCal.checkPresenceInMemory()
         return self._sysCal
-
-    # associate the function with the table name in a map
-    _tableGetters["SysCal"] = getSysCal
 
     def getSysPower(self):
         """
@@ -1293,9 +1480,6 @@ class ASDM:
         self._sysPower.checkPresenceInMemory()
         return self._sysPower
 
-    # associate the function with the table name in a map
-    _tableGetters["SysPower"] = getSysPower
-
     def getTotalPower(self):
         """
         Get the TotalPower table.
@@ -1303,9 +1487,6 @@ class ASDM:
         """
         self._totalPower.checkPresenceInMemory()
         return self._totalPower
-
-    # associate the function with the table name in a map
-    _tableGetters["TotalPower"] = getTotalPower
 
     def getVLAWVR(self):
         """
@@ -1315,9 +1496,6 @@ class ASDM:
         self._vLAWVR.checkPresenceInMemory()
         return self._vLAWVR
 
-    # associate the function with the table name in a map
-    _tableGetters["VLAWVR"] = getVLAWVR
-
     def getWVMCal(self):
         """
         Get the WVMCal table.
@@ -1326,9 +1504,6 @@ class ASDM:
         self._wVMCal.checkPresenceInMemory()
         return self._wVMCal
 
-    # associate the function with the table name in a map
-    _tableGetters["WVMCal"] = getWVMCal
-
     def getWeather(self):
         """
         Get the Weather table.
@@ -1336,9 +1511,6 @@ class ASDM:
         """
         self._weather.checkPresenceInMemory()
         return self._weather
-
-    # associate the function with the table name in a map
-    _tableGetters["Weather"] = getWeather
 
     # attribute getters and setters
 
@@ -1676,7 +1848,7 @@ class ASDM:
         # this should have a single child node with a name of ASDM
         # ignore everything but the first child node
         if not xmldom.hasChildNodes() or xmldom.firstChild.nodeName != "ASDM":
-            raise ConversionError("XML is not from an ASDM", "ASDM")
+            raise ConversionException("XML is not from an ASDM", "ASDM")
         asdmdom = xmldom.firstChild
 
         # get the version from the schemaVersion attribute, which must be there
@@ -1699,10 +1871,35 @@ class ASDM:
         # can not continue if version is < 3
         # eventually an earlier version should be possible, but not yet
         if self.getVersion() < 3:
-            raise ConversionException(
-                "Only ASDM versions >=3 can be processed. Older versions require a pre-processing step that is not yet available.",
-                "ASDM",
-            )
+
+            # the c++ code does this last attempt at assuming a version
+            # look in the Main.xml associated with this container and
+            # see if it has a dataUID element. If it does then assume it's
+            # version 3, if dataOid is seen then assume it's version 2 and
+            # if neither are seen assume it's version 1. Only version >= 3
+            # can be processed in pyasdm although the c++ translates the version 2
+            # XML to version 3 depending on the telescope before processing that XML
+            # That may happen in the future if there's a need for it.
+
+            thisVersion = 1
+
+            mainPath = os.path.join(self._directory, "Main.xml")
+            if os.path.exists(mainPath):
+                with open(mainPath) as f:
+                    main_xmlstr = f.read()
+                if len(main_xmlstr) > 0:
+                    # this could be done by parsing the XML to be pedantic but this is
+                    # is already a long shot so just look for the expepcted strings
+                    # and leave any additional checking for downstream processing
+                    if main_xmlstr.find("dataUID") >= 0:
+                        thisVersion = 3
+                    elif main_xmlstr.find("dataOid") >= 0:
+                        thisVersion = 2
+            if thisVersion < 3:
+                raise ConversionException(
+                    "Only ASDM versions >=3 can be processed. Older versions require a pre-processing step that is not yet available.",
+                    "ASDM",
+                )
 
         # go through the child nodes of asdmdom
         # only Table nodes should appear more than once
@@ -1712,23 +1909,27 @@ class ASDM:
         hasStartTimeDurationInBin = False
 
         if not asdmdom.hasChildNodes():
-            raise ConversionError("XML is missing all of the expected elements", "ASDM")
+            raise ConversionException(
+                "XML is missing all of the expected elements", "ASDM"
+            )
 
         for thisNode in asdmdom.childNodes:
             nodeName = thisNode.nodeName
             if nodeName == "Entity":
                 if asdmEntity is not None:
-                    raise ConversionError("More than one Entity found", "ASDM")
+                    raise ConversionException("More than one Entity found", "ASDM")
                 asdmEntity = Entity(thisNode.toxml())
             elif nodeName == "TimeOfCreation":
                 if asdmToC is not None:
-                    raise ConversionError("More than one TimeOfCreation found", "ASDM")
+                    raise ConversionException(
+                        "More than one TimeOfCreation found", "ASDM"
+                    )
                 # strip off any leading and trailing whitespace
                 asdmToC = ArrayTime(thisNode.firstChild.data.strip())
             elif nodeName == "startTimeDurationInXML":
                 if hasStartTimeDurationInXML:
                     # it's already been seen
-                    raise ConversionError(
+                    raise ConversionException(
                         "More than one startTimeDurationInXML found", "ASDM"
                     )
                 ArrayTimeInterval.setReadStartTimeDurationInXML(True)
@@ -1736,7 +1937,7 @@ class ASDM:
             elif nodeName == "startTimeDurationInBin":
                 if hasStartTimeDurationInBin:
                     # it's already been seen
-                    raise ConversionError(
+                    raise ConversionException(
                         "More than one startTimeDurationInBin found", "ASDM"
                     )
                 ArrayTimeInterval.setReadStartTimeDurationInBin(True)
@@ -1752,14 +1953,14 @@ class ASDM:
                     tabNodeName = thisTabNode.nodeName
                     if tabNodeName == "Name":
                         if tabName is not None:
-                            raise ConversionError(
+                            raise ConversionException(
                                 "More than one Name seen for the same Table", "ASDM"
                             )
                         # strip off any leading and trailing whitespace
                         tabName = thisTabNode.firstChild.data.strip()
                     elif tabNodeName == "NumberRows":
                         if tabSize is not None:
-                            raise ConversionError(
+                            raise ConversionException(
                                 "More than one NumberOfRows seen for the same Table",
                                 "ASDM",
                             )
@@ -1767,14 +1968,14 @@ class ASDM:
                         tabSize = int(thisTabNode.firstChild.data)
                     elif tabNodeName == "Entity":
                         if tabEntity is not None:
-                            raise ConversionError(
+                            raise ConversionException(
                                 "More than one Entity seen for the same Table", "ASDM"
                             )
                         tabEntity = Entity(thisTabNode.toxml())
 
                 # name and size must be there
                 if tabName is None or tabSize is None:
-                    raise ConversionError(
+                    raise ConversionException(
                         "A table is not named or the number of rows is not given",
                         "ASDM",
                     )
@@ -1784,14 +1985,15 @@ class ASDM:
                             tabName,
                             tabSize,
                         )
-                        raise ConversionError(msg, "ASDM")
-                    # remember all non-zero tables in _tableEntity
+                        raise ConversionException(msg, "ASDM")
+                    # remember all non-zero tables in _tableEntity and sizes in _tableEntitySize
                     self._tableEntity[tabName] = tabEntity
+                    self._tableEntitySize[tabName] = tabSize
 
         if asdmEntity is None:
-            raise ConversionError("No Entity seen for ASDM element", "ASDM")
+            raise ConversionException("No Entity seen for ASDM element", "ASDM")
         if asdmToC is None:
-            raise ConversionError("No Entity seen for ASDM element", "ASDM")
+            raise ConversionException("No Entity seen for ASDM element", "ASDM")
 
         # mark the tables that were found having a non-zero size as not present in memory
         # so that they can be loaded on demand as necessary
@@ -2484,6 +2686,8 @@ class ASDM:
                 + str(self._main._presentInMemory)
                 + " size = "
                 + str(self._main.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Main"])
             )
         else:
             print(
@@ -2499,6 +2703,8 @@ class ASDM:
                 + str(self._almaRadiometer._presentInMemory)
                 + " size = "
                 + str(self._almaRadiometer.size())
+                + " expected size = "
+                + str(self._tableEntitySize["AlmaRadiometer"])
             )
         else:
             print(
@@ -2514,6 +2720,8 @@ class ASDM:
                 + str(self._annotation._presentInMemory)
                 + " size = "
                 + str(self._annotation.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Annotation"])
             )
         else:
             print(
@@ -2529,6 +2737,8 @@ class ASDM:
                 + str(self._antenna._presentInMemory)
                 + " size = "
                 + str(self._antenna.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Antenna"])
             )
         else:
             print(
@@ -2544,6 +2754,8 @@ class ASDM:
                 + str(self._calAmpli._presentInMemory)
                 + " size = "
                 + str(self._calAmpli.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalAmpli"])
             )
         else:
             print(
@@ -2559,6 +2771,8 @@ class ASDM:
                 + str(self._calAntennaSolutions._presentInMemory)
                 + " size = "
                 + str(self._calAntennaSolutions.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalAntennaSolutions"])
             )
         else:
             print(
@@ -2574,6 +2788,8 @@ class ASDM:
                 + str(self._calAppPhase._presentInMemory)
                 + " size = "
                 + str(self._calAppPhase.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalAppPhase"])
             )
         else:
             print(
@@ -2589,6 +2805,8 @@ class ASDM:
                 + str(self._calAtmosphere._presentInMemory)
                 + " size = "
                 + str(self._calAtmosphere.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalAtmosphere"])
             )
         else:
             print(
@@ -2604,6 +2822,8 @@ class ASDM:
                 + str(self._calBandpass._presentInMemory)
                 + " size = "
                 + str(self._calBandpass.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalBandpass"])
             )
         else:
             print(
@@ -2619,6 +2839,8 @@ class ASDM:
                 + str(self._calCurve._presentInMemory)
                 + " size = "
                 + str(self._calCurve.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalCurve"])
             )
         else:
             print(
@@ -2634,6 +2856,8 @@ class ASDM:
                 + str(self._calData._presentInMemory)
                 + " size = "
                 + str(self._calData.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalData"])
             )
         else:
             print(
@@ -2649,6 +2873,8 @@ class ASDM:
                 + str(self._calDelay._presentInMemory)
                 + " size = "
                 + str(self._calDelay.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalDelay"])
             )
         else:
             print(
@@ -2664,6 +2890,8 @@ class ASDM:
                 + str(self._calDevice._presentInMemory)
                 + " size = "
                 + str(self._calDevice.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalDevice"])
             )
         else:
             print(
@@ -2679,6 +2907,8 @@ class ASDM:
                 + str(self._calFlux._presentInMemory)
                 + " size = "
                 + str(self._calFlux.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalFlux"])
             )
         else:
             print(
@@ -2694,6 +2924,8 @@ class ASDM:
                 + str(self._calFocus._presentInMemory)
                 + " size = "
                 + str(self._calFocus.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalFocus"])
             )
         else:
             print(
@@ -2709,6 +2941,8 @@ class ASDM:
                 + str(self._calFocusModel._presentInMemory)
                 + " size = "
                 + str(self._calFocusModel.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalFocusModel"])
             )
         else:
             print(
@@ -2724,6 +2958,8 @@ class ASDM:
                 + str(self._calGain._presentInMemory)
                 + " size = "
                 + str(self._calGain.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalGain"])
             )
         else:
             print(
@@ -2739,6 +2975,8 @@ class ASDM:
                 + str(self._calHolography._presentInMemory)
                 + " size = "
                 + str(self._calHolography.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalHolography"])
             )
         else:
             print(
@@ -2754,6 +2992,8 @@ class ASDM:
                 + str(self._calPhase._presentInMemory)
                 + " size = "
                 + str(self._calPhase.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalPhase"])
             )
         else:
             print(
@@ -2769,6 +3009,8 @@ class ASDM:
                 + str(self._calPointing._presentInMemory)
                 + " size = "
                 + str(self._calPointing.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalPointing"])
             )
         else:
             print(
@@ -2784,6 +3026,8 @@ class ASDM:
                 + str(self._calPointingModel._presentInMemory)
                 + " size = "
                 + str(self._calPointingModel.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalPointingModel"])
             )
         else:
             print(
@@ -2799,6 +3043,8 @@ class ASDM:
                 + str(self._calPosition._presentInMemory)
                 + " size = "
                 + str(self._calPosition.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalPosition"])
             )
         else:
             print(
@@ -2814,6 +3060,8 @@ class ASDM:
                 + str(self._calPrimaryBeam._presentInMemory)
                 + " size = "
                 + str(self._calPrimaryBeam.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalPrimaryBeam"])
             )
         else:
             print(
@@ -2829,6 +3077,8 @@ class ASDM:
                 + str(self._calReduction._presentInMemory)
                 + " size = "
                 + str(self._calReduction.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalReduction"])
             )
         else:
             print(
@@ -2844,6 +3094,8 @@ class ASDM:
                 + str(self._calSeeing._presentInMemory)
                 + " size = "
                 + str(self._calSeeing.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalSeeing"])
             )
         else:
             print(
@@ -2859,6 +3111,8 @@ class ASDM:
                 + str(self._calWVR._presentInMemory)
                 + " size = "
                 + str(self._calWVR.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CalWVR"])
             )
         else:
             print(
@@ -2874,6 +3128,8 @@ class ASDM:
                 + str(self._configDescription._presentInMemory)
                 + " size = "
                 + str(self._configDescription.size())
+                + " expected size = "
+                + str(self._tableEntitySize["ConfigDescription"])
             )
         else:
             print(
@@ -2889,6 +3145,8 @@ class ASDM:
                 + str(self._correlatorMode._presentInMemory)
                 + " size = "
                 + str(self._correlatorMode.size())
+                + " expected size = "
+                + str(self._tableEntitySize["CorrelatorMode"])
             )
         else:
             print(
@@ -2904,6 +3162,8 @@ class ASDM:
                 + str(self._dataDescription._presentInMemory)
                 + " size = "
                 + str(self._dataDescription.size())
+                + " expected size = "
+                + str(self._tableEntitySize["DataDescription"])
             )
         else:
             print(
@@ -2919,6 +3179,8 @@ class ASDM:
                 + str(self._delayModel._presentInMemory)
                 + " size = "
                 + str(self._delayModel.size())
+                + " expected size = "
+                + str(self._tableEntitySize["DelayModel"])
             )
         else:
             print(
@@ -2934,6 +3196,8 @@ class ASDM:
                 + str(self._delayModelFixedParameters._presentInMemory)
                 + " size = "
                 + str(self._delayModelFixedParameters.size())
+                + " expected size = "
+                + str(self._tableEntitySize["DelayModelFixedParameters"])
             )
         else:
             print(
@@ -2949,6 +3213,8 @@ class ASDM:
                 + str(self._delayModelVariableParameters._presentInMemory)
                 + " size = "
                 + str(self._delayModelVariableParameters.size())
+                + " expected size = "
+                + str(self._tableEntitySize["DelayModelVariableParameters"])
             )
         else:
             print(
@@ -2964,6 +3230,8 @@ class ASDM:
                 + str(self._doppler._presentInMemory)
                 + " size = "
                 + str(self._doppler.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Doppler"])
             )
         else:
             print(
@@ -2979,6 +3247,8 @@ class ASDM:
                 + str(self._ephemeris._presentInMemory)
                 + " size = "
                 + str(self._ephemeris.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Ephemeris"])
             )
         else:
             print(
@@ -2994,6 +3264,8 @@ class ASDM:
                 + str(self._execBlock._presentInMemory)
                 + " size = "
                 + str(self._execBlock.size())
+                + " expected size = "
+                + str(self._tableEntitySize["ExecBlock"])
             )
         else:
             print(
@@ -3009,6 +3281,8 @@ class ASDM:
                 + str(self._feed._presentInMemory)
                 + " size = "
                 + str(self._feed.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Feed"])
             )
         else:
             print(
@@ -3024,6 +3298,8 @@ class ASDM:
                 + str(self._field._presentInMemory)
                 + " size = "
                 + str(self._field.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Field"])
             )
         else:
             print(
@@ -3039,6 +3315,8 @@ class ASDM:
                 + str(self._flag._presentInMemory)
                 + " size = "
                 + str(self._flag.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Flag"])
             )
         else:
             print(
@@ -3054,6 +3332,8 @@ class ASDM:
                 + str(self._flagCmd._presentInMemory)
                 + " size = "
                 + str(self._flagCmd.size())
+                + " expected size = "
+                + str(self._tableEntitySize["FlagCmd"])
             )
         else:
             print(
@@ -3069,6 +3349,8 @@ class ASDM:
                 + str(self._focus._presentInMemory)
                 + " size = "
                 + str(self._focus.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Focus"])
             )
         else:
             print(
@@ -3084,6 +3366,8 @@ class ASDM:
                 + str(self._focusModel._presentInMemory)
                 + " size = "
                 + str(self._focusModel.size())
+                + " expected size = "
+                + str(self._tableEntitySize["FocusModel"])
             )
         else:
             print(
@@ -3099,6 +3383,8 @@ class ASDM:
                 + str(self._freqOffset._presentInMemory)
                 + " size = "
                 + str(self._freqOffset.size())
+                + " expected size = "
+                + str(self._tableEntitySize["FreqOffset"])
             )
         else:
             print(
@@ -3114,6 +3400,8 @@ class ASDM:
                 + str(self._gainTracking._presentInMemory)
                 + " size = "
                 + str(self._gainTracking.size())
+                + " expected size = "
+                + str(self._tableEntitySize["GainTracking"])
             )
         else:
             print(
@@ -3129,6 +3417,8 @@ class ASDM:
                 + str(self._history._presentInMemory)
                 + " size = "
                 + str(self._history.size())
+                + " expected size = "
+                + str(self._tableEntitySize["History"])
             )
         else:
             print(
@@ -3144,6 +3434,8 @@ class ASDM:
                 + str(self._holography._presentInMemory)
                 + " size = "
                 + str(self._holography.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Holography"])
             )
         else:
             print(
@@ -3159,6 +3451,8 @@ class ASDM:
                 + str(self._modulation._presentInMemory)
                 + " size = "
                 + str(self._modulation.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Modulation"])
             )
         else:
             print(
@@ -3174,6 +3468,8 @@ class ASDM:
                 + str(self._observation._presentInMemory)
                 + " size = "
                 + str(self._observation.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Observation"])
             )
         else:
             print(
@@ -3189,6 +3485,8 @@ class ASDM:
                 + str(self._pointing._presentInMemory)
                 + " size = "
                 + str(self._pointing.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Pointing"])
             )
         else:
             print(
@@ -3204,6 +3502,8 @@ class ASDM:
                 + str(self._pointingModel._presentInMemory)
                 + " size = "
                 + str(self._pointingModel.size())
+                + " expected size = "
+                + str(self._tableEntitySize["PointingModel"])
             )
         else:
             print(
@@ -3219,6 +3519,8 @@ class ASDM:
                 + str(self._polarization._presentInMemory)
                 + " size = "
                 + str(self._polarization.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Polarization"])
             )
         else:
             print(
@@ -3234,6 +3536,8 @@ class ASDM:
                 + str(self._postProcessing._presentInMemory)
                 + " size = "
                 + str(self._postProcessing.size())
+                + " expected size = "
+                + str(self._tableEntitySize["PostProcessing"])
             )
         else:
             print(
@@ -3249,6 +3553,8 @@ class ASDM:
                 + str(self._processor._presentInMemory)
                 + " size = "
                 + str(self._processor.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Processor"])
             )
         else:
             print(
@@ -3264,6 +3570,8 @@ class ASDM:
                 + str(self._pulsar._presentInMemory)
                 + " size = "
                 + str(self._pulsar.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Pulsar"])
             )
         else:
             print(
@@ -3279,6 +3587,8 @@ class ASDM:
                 + str(self._receiver._presentInMemory)
                 + " size = "
                 + str(self._receiver.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Receiver"])
             )
         else:
             print(
@@ -3294,6 +3604,8 @@ class ASDM:
                 + str(self._sBSummary._presentInMemory)
                 + " size = "
                 + str(self._sBSummary.size())
+                + " expected size = "
+                + str(self._tableEntitySize["SBSummary"])
             )
         else:
             print(
@@ -3309,6 +3621,8 @@ class ASDM:
                 + str(self._scale._presentInMemory)
                 + " size = "
                 + str(self._scale.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Scale"])
             )
         else:
             print(
@@ -3324,6 +3638,8 @@ class ASDM:
                 + str(self._scan._presentInMemory)
                 + " size = "
                 + str(self._scan.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Scan"])
             )
         else:
             print(
@@ -3339,6 +3655,8 @@ class ASDM:
                 + str(self._seeing._presentInMemory)
                 + " size = "
                 + str(self._seeing.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Seeing"])
             )
         else:
             print(
@@ -3354,6 +3672,8 @@ class ASDM:
                 + str(self._source._presentInMemory)
                 + " size = "
                 + str(self._source.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Source"])
             )
         else:
             print(
@@ -3369,6 +3689,8 @@ class ASDM:
                 + str(self._spectralWindow._presentInMemory)
                 + " size = "
                 + str(self._spectralWindow.size())
+                + " expected size = "
+                + str(self._tableEntitySize["SpectralWindow"])
             )
         else:
             print(
@@ -3384,6 +3706,8 @@ class ASDM:
                 + str(self._squareLawDetector._presentInMemory)
                 + " size = "
                 + str(self._squareLawDetector.size())
+                + " expected size = "
+                + str(self._tableEntitySize["SquareLawDetector"])
             )
         else:
             print(
@@ -3399,6 +3723,8 @@ class ASDM:
                 + str(self._state._presentInMemory)
                 + " size = "
                 + str(self._state.size())
+                + " expected size = "
+                + str(self._tableEntitySize["State"])
             )
         else:
             print(
@@ -3414,6 +3740,8 @@ class ASDM:
                 + str(self._station._presentInMemory)
                 + " size = "
                 + str(self._station.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Station"])
             )
         else:
             print(
@@ -3429,6 +3757,8 @@ class ASDM:
                 + str(self._subscan._presentInMemory)
                 + " size = "
                 + str(self._subscan.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Subscan"])
             )
         else:
             print(
@@ -3444,6 +3774,8 @@ class ASDM:
                 + str(self._switchCycle._presentInMemory)
                 + " size = "
                 + str(self._switchCycle.size())
+                + " expected size = "
+                + str(self._tableEntitySize["SwitchCycle"])
             )
         else:
             print(
@@ -3459,6 +3791,8 @@ class ASDM:
                 + str(self._sysCal._presentInMemory)
                 + " size = "
                 + str(self._sysCal.size())
+                + " expected size = "
+                + str(self._tableEntitySize["SysCal"])
             )
         else:
             print(
@@ -3474,6 +3808,8 @@ class ASDM:
                 + str(self._sysPower._presentInMemory)
                 + " size = "
                 + str(self._sysPower.size())
+                + " expected size = "
+                + str(self._tableEntitySize["SysPower"])
             )
         else:
             print(
@@ -3489,6 +3825,8 @@ class ASDM:
                 + str(self._totalPower._presentInMemory)
                 + " size = "
                 + str(self._totalPower.size())
+                + " expected size = "
+                + str(self._tableEntitySize["TotalPower"])
             )
         else:
             print(
@@ -3504,6 +3842,8 @@ class ASDM:
                 + str(self._vLAWVR._presentInMemory)
                 + " size = "
                 + str(self._vLAWVR.size())
+                + " expected size = "
+                + str(self._tableEntitySize["VLAWVR"])
             )
         else:
             print(
@@ -3519,6 +3859,8 @@ class ASDM:
                 + str(self._wVMCal._presentInMemory)
                 + " size = "
                 + str(self._wVMCal.size())
+                + " expected size = "
+                + str(self._tableEntitySize["WVMCal"])
             )
         else:
             print(
@@ -3534,6 +3876,8 @@ class ASDM:
                 + str(self._weather._presentInMemory)
                 + " size = "
                 + str(self._weather.size())
+                + " expected size = "
+                + str(self._tableEntitySize["Weather"])
             )
         else:
             print(
