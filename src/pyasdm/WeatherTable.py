@@ -135,6 +135,14 @@ class WeatherTable:
     # set to True while the file is loading, just in case
     _loadInProgress = False
 
+    # set to True to turn on uniqueness checking when an existing table is read from a file (XML
+    # or bin). The default of False is appropriate in most cases since the ASDM already exists and
+    # the appropriate uniqueness can be assumed if the ASDM comes from the online system at the
+    # telescope. Checking for uniqueness as each row is read from the existing table can be time
+    # consuming for large tables. When new rows are added using the add methods then the full
+    # uniqueness check is always done.
+    _checkRowUniqueness = False
+
     # The name of this table.
     _tableName = "Weather"
 
@@ -502,18 +510,30 @@ class WeatherTable:
         x.isAdded()
         return x
 
-    def __init__(self, container):
+    def __init__(self, container, checkRowUniqueness=False):
         """
         Create a WeatherTable attached to container.
 
         container must be a ASDM instance
         All tables must know the container
+
+        The uniqueness check is off by default. Turn that on by setting
+        checkRowUniqueness to True. When this is true the the uniquess check
+        that normally happens with a row is added to the table is skipped when
+        the full table is read from an existing copy (e.g. and XML or bin file).
+        Checking that each row is unique can take a significant time for large
+        tables. This check should be unnecessary for ASDMs created by the telescope.
+
+        The checkRowUniqueness value has no effect when adding individual rows
+        to a table using the add* methods.
         """
 
         if not isinstance(container, pyasdm.ASDM):
             raise (ValueError("WeatherTable constructor must use a ASDM instance"))
 
         self._container = container
+
+        self._checkRowUniqueness = checkRowUniqueness
 
         self._entity = Entity()
         self._entity.setEntityId(EntityId("uid://X0/X0/X0"))
@@ -562,6 +582,28 @@ class WeatherTable:
         return a ASDM.
         """
         return self._container
+
+    def setCheckRowUniqueness(self, checkRowUniqueness):
+        """
+        Set the checkRowUniqueness state;
+
+        checkRowUniqueness is a boolean that sets the state. False turns off
+        the uniqueness check and True turns it on.
+
+        The checkRowUniqueness value is only used when a table is read
+        from disk (XML or bin). The single row add methods always check for
+        the expected uniqueness.
+
+        returns the value of the uniqueness check state (checkRowUniqueness)
+        """
+        self._checkRowUniqueness = checkRowUniqueness
+        return self._checkRowUniqueness
+
+    def getCheckRowUniqueness(self):
+        """
+        return the current uniqueness check state
+        """
+        return self._checkRowUniqueness
 
     def size(self):
         """
@@ -658,7 +700,7 @@ class WeatherTable:
 
     # ====> Append a row to its table.
 
-    def checkAndAdd(self, x):
+    def checkAndAdd(self, x, skipUniquenessCheck=False):
         """
         A method to append a row to its table, used by input conversion methods.
         Not indended for external use.
@@ -668,6 +710,8 @@ class WeatherTable:
 
         This method is appropriate for the case with a ArrayTimeInterval temporal key,
         no auto incrementable attribute, with other values in the key.
+
+        The value of skipUniquenessCheck is not used in this version of checkAndAdd.
 
         Append x to its table.
         x The row to be appended.
@@ -871,7 +915,7 @@ class WeatherTable:
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
-                    self.checkAndAdd(row)
+                    self.checkAndAdd(row, (not self._checkRowUniqueness))
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
                     raise ConversionException(str(exc), "WeatherTable") from None
@@ -1200,8 +1244,22 @@ class WeatherTable:
         # c++ checks numRows against what is reported in the ASDM for this table, this is what Java does
         try:
             for i in range(numRows):
-                self.checkAndAdd(WeatherRow.fromBin(eis, self, attributesSeq))
+                self.checkAndAdd(
+                    WeatherRow.fromBin(eis, self, attributesSeq),
+                    self._checkRowUniqueness,
+                )
                 # print("row %s added, loc = %s" % (i, eis.tell()))
+        except DuplicateKey as exc:
+            byteStream.close()
+            eis.close()
+            # reraise it as a ConversionException
+            raise ConversionException(str(exc), "WeatherTable") from None
+        except UniquenessViolationException as exc:
+            byteStream.close()
+            eis.close()
+            msg = "UniquenessViolationException while adding row : %s" % str(exc)
+            # raise a ConversionException using this msg
+            raise ConversionException(msg, "WeatherTable") from None
         except Exception as exc:
             byteStream.close()
             eis.close()
