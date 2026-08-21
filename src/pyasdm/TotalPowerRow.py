@@ -63,6 +63,16 @@ class TotalPowerRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -265,29 +275,29 @@ class TotalPowerRow:
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data.strip())
+        self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
         scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
 
-        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
+        self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
         subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
 
-        self._subscanNumber = int(subscanNumberNode.firstChild.data.strip())
+        self._subscanNumber = int(self._getXMLNodeChildText(subscanNumberNode))
 
         integrationNumberNode = rowdom.getElementsByTagName("integrationNumber")[0]
 
-        self._integrationNumber = int(integrationNumberNode.firstChild.data.strip())
+        self._integrationNumber = int(self._getXMLNodeChildText(integrationNumberNode))
 
         uvwNode = rowdom.getElementsByTagName("uvw")[0]
 
-        uvwStr = uvwNode.firstChild.data.strip()
+        uvwStr = self._getXMLNodeChildText(uvwNode)
 
         self._uvw = Parser.stringListToLists(uvwStr, Length, "TotalPower", True)
 
         exposureNode = rowdom.getElementsByTagName("exposure")[0]
 
-        exposureStr = exposureNode.firstChild.data.strip()
+        exposureStr = self._getXMLNodeChildText(exposureNode)
 
         self._exposure = Parser.stringListToLists(
             exposureStr, Interval, "TotalPower", True
@@ -295,7 +305,7 @@ class TotalPowerRow:
 
         timeCentroidNode = rowdom.getElementsByTagName("timeCentroid")[0]
 
-        timeCentroidStr = timeCentroidNode.firstChild.data.strip()
+        timeCentroidStr = self._getXMLNodeChildText(timeCentroidNode)
 
         self._timeCentroid = Parser.stringListToLists(
             timeCentroidStr, ArrayTime, "TotalPower", True
@@ -303,7 +313,7 @@ class TotalPowerRow:
 
         floatDataNode = rowdom.getElementsByTagName("floatData")[0]
 
-        floatDataStr = floatDataNode.firstChild.data.strip()
+        floatDataStr = self._getXMLNodeChildText(floatDataNode)
 
         self._floatData = Parser.stringListToLists(
             floatDataStr, float, "TotalPower", False
@@ -311,25 +321,25 @@ class TotalPowerRow:
 
         flagAntNode = rowdom.getElementsByTagName("flagAnt")[0]
 
-        flagAntStr = flagAntNode.firstChild.data.strip()
+        flagAntStr = self._getXMLNodeChildText(flagAntNode)
 
         self._flagAnt = Parser.stringListToLists(flagAntStr, int, "TotalPower", False)
 
         flagPolNode = rowdom.getElementsByTagName("flagPol")[0]
 
-        flagPolStr = flagPolNode.firstChild.data.strip()
+        flagPolStr = self._getXMLNodeChildText(flagPolNode)
 
         self._flagPol = Parser.stringListToLists(flagPolStr, int, "TotalPower", False)
 
         intervalNode = rowdom.getElementsByTagName("interval")[0]
 
-        self._interval = Interval(intervalNode.firstChild.data.strip())
+        self._interval = Interval(self._getXMLNodeChildText(intervalNode))
 
         subintegrationNumberNode = rowdom.getElementsByTagName("subintegrationNumber")
         if len(subintegrationNumberNode) > 0:
 
             self._subintegrationNumber = int(
-                subintegrationNumberNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(subintegrationNumberNode[0])
             )
 
             self._subintegrationNumberExists = True
@@ -338,19 +348,21 @@ class TotalPowerRow:
 
         configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
 
-        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data.strip())
+        self._configDescriptionId = Tag(
+            self._getXMLNodeChildText(configDescriptionIdNode)
+        )
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
         fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
 
-        self._fieldId = Tag(fieldIdNode.firstChild.data.strip())
+        self._fieldId = Tag(self._getXMLNodeChildText(fieldIdNode))
 
         stateIdNode = rowdom.getElementsByTagName("stateId")[0]
 
-        stateIdStr = stateIdNode.firstChild.data.strip()
+        stateIdStr = self._getXMLNodeChildText(stateIdNode)
 
         self._stateId = Parser.stringListToLists(stateIdStr, Tag, "TotalPower", True)
 

@@ -69,6 +69,16 @@ class ProcessorRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -181,22 +191,22 @@ class ProcessorRow:
 
         processorIdNode = rowdom.getElementsByTagName("processorId")[0]
 
-        self._processorId = Tag(processorIdNode.firstChild.data.strip())
+        self._processorId = Tag(self._getXMLNodeChildText(processorIdNode))
 
         modeIdNode = rowdom.getElementsByTagName("modeId")[0]
 
-        self._modeId = Tag(modeIdNode.firstChild.data.strip())
+        self._modeId = Tag(self._getXMLNodeChildText(modeIdNode))
 
         processorTypeNode = rowdom.getElementsByTagName("processorType")[0]
 
         self._processorType = ProcessorType.newProcessorType(
-            processorTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(processorTypeNode)
         )
 
         processorSubTypeNode = rowdom.getElementsByTagName("processorSubType")[0]
 
         self._processorSubType = ProcessorSubType.newProcessorSubType(
-            processorSubTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(processorSubTypeNode)
         )
 
         # from link values, if any

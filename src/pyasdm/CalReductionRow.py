@@ -66,6 +66,16 @@ class CalReductionRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -215,15 +225,15 @@ class CalReductionRow:
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         numAppliedNode = rowdom.getElementsByTagName("numApplied")[0]
 
-        self._numApplied = int(numAppliedNode.firstChild.data.strip())
+        self._numApplied = int(self._getXMLNodeChildText(numAppliedNode))
 
         appliedCalibrationsNode = rowdom.getElementsByTagName("appliedCalibrations")[0]
 
-        appliedCalibrationsStr = appliedCalibrationsNode.firstChild.data.strip()
+        appliedCalibrationsStr = self._getXMLNodeChildText(appliedCalibrationsNode)
 
         self._appliedCalibrations = Parser.stringListToLists(
             appliedCalibrationsStr, str, "CalReduction", False
@@ -231,11 +241,11 @@ class CalReductionRow:
 
         numParamNode = rowdom.getElementsByTagName("numParam")[0]
 
-        self._numParam = int(numParamNode.firstChild.data.strip())
+        self._numParam = int(self._getXMLNodeChildText(numParamNode))
 
         paramSetNode = rowdom.getElementsByTagName("paramSet")[0]
 
-        paramSetStr = paramSetNode.firstChild.data.strip()
+        paramSetStr = self._getXMLNodeChildText(paramSetNode)
 
         self._paramSet = Parser.stringListToLists(
             paramSetStr, str, "CalReduction", False
@@ -246,31 +256,31 @@ class CalReductionRow:
         ]
 
         self._numInvalidConditions = int(
-            numInvalidConditionsNode.firstChild.data.strip()
+            self._getXMLNodeChildText(numInvalidConditionsNode)
         )
 
         invalidConditionsNode = rowdom.getElementsByTagName("invalidConditions")[0]
 
-        invalidConditionsStr = invalidConditionsNode.firstChild.data.strip()
+        invalidConditionsStr = self._getXMLNodeChildText(invalidConditionsNode)
         self._invalidConditions = Parser.stringListToLists(
             invalidConditionsStr, InvalidatingCondition, "CalReduction", False
         )
 
         timeReducedNode = rowdom.getElementsByTagName("timeReduced")[0]
 
-        self._timeReduced = ArrayTime(timeReducedNode.firstChild.data.strip())
+        self._timeReduced = ArrayTime(self._getXMLNodeChildText(timeReducedNode))
 
         messagesNode = rowdom.getElementsByTagName("messages")[0]
 
-        self._messages = str(messagesNode.firstChild.data.strip())
+        self._messages = str(self._getXMLNodeChildText(messagesNode))
 
         softwareNode = rowdom.getElementsByTagName("software")[0]
 
-        self._software = str(softwareNode.firstChild.data.strip())
+        self._software = str(self._getXMLNodeChildText(softwareNode))
 
         softwareVersionNode = rowdom.getElementsByTagName("softwareVersion")[0]
 
-        self._softwareVersion = str(softwareVersionNode.firstChild.data.strip())
+        self._softwareVersion = str(self._getXMLNodeChildText(softwareVersionNode))
 
         # from link values, if any
 

@@ -66,6 +66,16 @@ class FeedRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -360,25 +370,27 @@ class FeedRow:
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data.strip())
+        self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
         beamOffsetNode = rowdom.getElementsByTagName("beamOffset")[0]
 
-        beamOffsetStr = beamOffsetNode.firstChild.data.strip()
+        beamOffsetStr = self._getXMLNodeChildText(beamOffsetNode)
 
         self._beamOffset = Parser.stringListToLists(beamOffsetStr, float, "Feed", False)
 
         focusReferenceNode = rowdom.getElementsByTagName("focusReference")[0]
 
-        focusReferenceStr = focusReferenceNode.firstChild.data.strip()
+        focusReferenceStr = self._getXMLNodeChildText(focusReferenceNode)
 
         self._focusReference = Parser.stringListToLists(
             focusReferenceStr, Length, "Feed", True
@@ -386,14 +398,14 @@ class FeedRow:
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "Feed", False
         )
 
         polResponseNode = rowdom.getElementsByTagName("polResponse")[0]
 
-        polResponseStr = polResponseNode.firstChild.data.strip()
+        polResponseStr = self._getXMLNodeChildText(polResponseNode)
 
         self._polResponse = Parser.stringListToLists(
             polResponseStr, Complex, "Feed", True
@@ -401,7 +413,7 @@ class FeedRow:
 
         receptorAngleNode = rowdom.getElementsByTagName("receptorAngle")[0]
 
-        receptorAngleStr = receptorAngleNode.firstChild.data.strip()
+        receptorAngleStr = self._getXMLNodeChildText(receptorAngleNode)
 
         self._receptorAngle = Parser.stringListToLists(
             receptorAngleStr, Angle, "Feed", True
@@ -410,14 +422,14 @@ class FeedRow:
         feedNumNode = rowdom.getElementsByTagName("feedNum")
         if len(feedNumNode) > 0:
 
-            self._feedNum = int(feedNumNode[0].firstChild.data.strip())
+            self._feedNum = int(self._getXMLNodeChildText(feedNumNode[0]))
 
             self._feedNumExists = True
 
         illumOffsetNode = rowdom.getElementsByTagName("illumOffset")
         if len(illumOffsetNode) > 0:
 
-            illumOffsetStr = illumOffsetNode[0].firstChild.data.strip()
+            illumOffsetStr = self._getXMLNodeChildText(illumOffsetNode[0])
 
             self._illumOffset = Parser.stringListToLists(
                 illumOffsetStr, Length, "Feed", True
@@ -428,7 +440,7 @@ class FeedRow:
         positionNode = rowdom.getElementsByTagName("position")
         if len(positionNode) > 0:
 
-            positionStr = positionNode[0].firstChild.data.strip()
+            positionStr = self._getXMLNodeChildText(positionNode[0])
 
             self._position = Parser.stringListToLists(positionStr, Length, "Feed", True)
 
@@ -437,21 +449,23 @@ class FeedRow:
         skyCouplingNode = rowdom.getElementsByTagName("skyCoupling")
         if len(skyCouplingNode) > 0:
 
-            self._skyCoupling = float(skyCouplingNode[0].firstChild.data.strip())
+            self._skyCoupling = float(self._getXMLNodeChildText(skyCouplingNode[0]))
 
             self._skyCouplingExists = True
 
         numChanNode = rowdom.getElementsByTagName("numChan")
         if len(numChanNode) > 0:
 
-            self._numChan = int(numChanNode[0].firstChild.data.strip())
+            self._numChan = int(self._getXMLNodeChildText(numChanNode[0]))
 
             self._numChanExists = True
 
         skyCouplingSpectrumNode = rowdom.getElementsByTagName("skyCouplingSpectrum")
         if len(skyCouplingSpectrumNode) > 0:
 
-            skyCouplingSpectrumStr = skyCouplingSpectrumNode[0].firstChild.data.strip()
+            skyCouplingSpectrumStr = self._getXMLNodeChildText(
+                skyCouplingSpectrumNode[0]
+            )
 
             self._skyCouplingSpectrum = Parser.stringListToLists(
                 skyCouplingSpectrumStr, float, "Feed", False
@@ -463,7 +477,7 @@ class FeedRow:
         if len(receiverGenerationNode) > 0:
 
             self._receiverGeneration = int(
-                receiverGenerationNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(receiverGenerationNode[0])
             )
 
             self._receiverGenerationExists = True
@@ -472,7 +486,7 @@ class FeedRow:
         if len(digitizerOffsetNode) > 0:
 
             self._digitizerOffset = Frequency(
-                digitizerOffsetNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(digitizerOffsetNode[0])
             )
 
             self._digitizerOffsetExists = True
@@ -481,17 +495,17 @@ class FeedRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
 
-        receiverIdStr = receiverIdNode.firstChild.data.strip()
+        receiverIdStr = self._getXMLNodeChildText(receiverIdNode)
 
         self._receiverId = Parser.stringListToLists(receiverIdStr, int, "Feed", False)
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

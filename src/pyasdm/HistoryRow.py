@@ -63,6 +63,16 @@ class HistoryRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -197,41 +207,41 @@ class HistoryRow:
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data.strip())
+        self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
         messageNode = rowdom.getElementsByTagName("message")[0]
 
-        self._message = str(messageNode.firstChild.data.strip())
+        self._message = str(self._getXMLNodeChildText(messageNode))
 
         priorityNode = rowdom.getElementsByTagName("priority")[0]
 
-        self._priority = str(priorityNode.firstChild.data.strip())
+        self._priority = str(self._getXMLNodeChildText(priorityNode))
 
         originNode = rowdom.getElementsByTagName("origin")[0]
 
-        self._origin = str(originNode.firstChild.data.strip())
+        self._origin = str(self._getXMLNodeChildText(originNode))
 
         objectIdNode = rowdom.getElementsByTagName("objectId")[0]
 
-        self._objectId = str(objectIdNode.firstChild.data.strip())
+        self._objectId = str(self._getXMLNodeChildText(objectIdNode))
 
         applicationNode = rowdom.getElementsByTagName("application")[0]
 
-        self._application = str(applicationNode.firstChild.data.strip())
+        self._application = str(self._getXMLNodeChildText(applicationNode))
 
         cliCommandNode = rowdom.getElementsByTagName("cliCommand")[0]
 
-        self._cliCommand = str(cliCommandNode.firstChild.data.strip())
+        self._cliCommand = str(self._getXMLNodeChildText(cliCommandNode))
 
         appParmsNode = rowdom.getElementsByTagName("appParms")[0]
 
-        self._appParms = str(appParmsNode.firstChild.data.strip())
+        self._appParms = str(self._getXMLNodeChildText(appParmsNode))
 
         # extrinsic attribute values
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
         # from link values, if any
 

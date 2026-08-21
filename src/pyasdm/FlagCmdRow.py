@@ -63,6 +63,16 @@ class FlagCmdRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -181,31 +191,33 @@ class FlagCmdRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         typeNode = rowdom.getElementsByTagName("type")[0]
 
-        self._type = str(typeNode.firstChild.data.strip())
+        self._type = str(self._getXMLNodeChildText(typeNode))
 
         reasonNode = rowdom.getElementsByTagName("reason")[0]
 
-        self._reason = str(reasonNode.firstChild.data.strip())
+        self._reason = str(self._getXMLNodeChildText(reasonNode))
 
         levelNode = rowdom.getElementsByTagName("level")[0]
 
-        self._level = int(levelNode.firstChild.data.strip())
+        self._level = int(self._getXMLNodeChildText(levelNode))
 
         severityNode = rowdom.getElementsByTagName("severity")[0]
 
-        self._severity = int(severityNode.firstChild.data.strip())
+        self._severity = int(self._getXMLNodeChildText(severityNode))
 
         appliedNode = rowdom.getElementsByTagName("applied")[0]
 
-        self._applied = bool(appliedNode.firstChild.data.strip())
+        self._applied = bool(self._getXMLNodeChildText(appliedNode))
 
         commandNode = rowdom.getElementsByTagName("command")[0]
 
-        self._command = str(commandNode.firstChild.data.strip())
+        self._command = str(self._getXMLNodeChildText(commandNode))
 
         # from link values, if any
 

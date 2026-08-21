@@ -66,6 +66,16 @@ class CalDeviceRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -269,15 +279,17 @@ class CalDeviceRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         numCalloadNode = rowdom.getElementsByTagName("numCalload")[0]
 
-        self._numCalload = int(numCalloadNode.firstChild.data.strip())
+        self._numCalload = int(self._getXMLNodeChildText(numCalloadNode))
 
         calLoadNamesNode = rowdom.getElementsByTagName("calLoadNames")[0]
 
-        calLoadNamesStr = calLoadNamesNode.firstChild.data.strip()
+        calLoadNamesStr = self._getXMLNodeChildText(calLoadNamesNode)
         self._calLoadNames = Parser.stringListToLists(
             calLoadNamesStr, CalibrationDevice, "CalDevice", False
         )
@@ -285,14 +297,14 @@ class CalDeviceRow:
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")
         if len(numReceptorNode) > 0:
 
-            self._numReceptor = int(numReceptorNode[0].firstChild.data.strip())
+            self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode[0]))
 
             self._numReceptorExists = True
 
         calEffNode = rowdom.getElementsByTagName("calEff")
         if len(calEffNode) > 0:
 
-            calEffStr = calEffNode[0].firstChild.data.strip()
+            calEffStr = self._getXMLNodeChildText(calEffNode[0])
 
             self._calEff = Parser.stringListToLists(
                 calEffStr, float, "CalDevice", False
@@ -303,7 +315,7 @@ class CalDeviceRow:
         noiseCalNode = rowdom.getElementsByTagName("noiseCal")
         if len(noiseCalNode) > 0:
 
-            noiseCalStr = noiseCalNode[0].firstChild.data.strip()
+            noiseCalStr = self._getXMLNodeChildText(noiseCalNode[0])
 
             self._noiseCal = Parser.stringListToLists(
                 noiseCalStr, float, "CalDevice", False
@@ -314,7 +326,7 @@ class CalDeviceRow:
         coupledNoiseCalNode = rowdom.getElementsByTagName("coupledNoiseCal")
         if len(coupledNoiseCalNode) > 0:
 
-            coupledNoiseCalStr = coupledNoiseCalNode[0].firstChild.data.strip()
+            coupledNoiseCalStr = self._getXMLNodeChildText(coupledNoiseCalNode[0])
 
             self._coupledNoiseCal = Parser.stringListToLists(
                 coupledNoiseCalStr, float, "CalDevice", False
@@ -325,7 +337,7 @@ class CalDeviceRow:
         temperatureLoadNode = rowdom.getElementsByTagName("temperatureLoad")
         if len(temperatureLoadNode) > 0:
 
-            temperatureLoadStr = temperatureLoadNode[0].firstChild.data.strip()
+            temperatureLoadStr = self._getXMLNodeChildText(temperatureLoadNode[0])
 
             self._temperatureLoad = Parser.stringListToLists(
                 temperatureLoadStr, Temperature, "CalDevice", True
@@ -337,15 +349,15 @@ class CalDeviceRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data.strip())
+        self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

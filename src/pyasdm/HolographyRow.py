@@ -66,6 +66,16 @@ class HolographyRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -173,23 +183,23 @@ class HolographyRow:
 
         holographyIdNode = rowdom.getElementsByTagName("holographyId")[0]
 
-        self._holographyId = Tag(holographyIdNode.firstChild.data.strip())
+        self._holographyId = Tag(self._getXMLNodeChildText(holographyIdNode))
 
         distanceNode = rowdom.getElementsByTagName("distance")[0]
 
-        self._distance = Length(distanceNode.firstChild.data.strip())
+        self._distance = Length(self._getXMLNodeChildText(distanceNode))
 
         focusNode = rowdom.getElementsByTagName("focus")[0]
 
-        self._focus = Length(focusNode.firstChild.data.strip())
+        self._focus = Length(self._getXMLNodeChildText(focusNode))
 
         numCorrNode = rowdom.getElementsByTagName("numCorr")[0]
 
-        self._numCorr = int(numCorrNode.firstChild.data.strip())
+        self._numCorr = int(self._getXMLNodeChildText(numCorrNode))
 
         typeNode = rowdom.getElementsByTagName("type")[0]
 
-        typeStr = typeNode.firstChild.data.strip()
+        typeStr = self._getXMLNodeChildText(typeNode)
         self._type = Parser.stringListToLists(
             typeStr, HolographyChannelType, "Holography", False
         )

@@ -63,6 +63,16 @@ class AlmaRadiometerRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -190,12 +200,12 @@ class AlmaRadiometerRow:
 
         almaRadiometerIdNode = rowdom.getElementsByTagName("almaRadiometerId")[0]
 
-        self._almaRadiometerId = Tag(almaRadiometerIdNode.firstChild.data.strip())
+        self._almaRadiometerId = Tag(self._getXMLNodeChildText(almaRadiometerIdNode))
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")
         if len(numAntennaNode) > 0:
 
-            self._numAntenna = int(numAntennaNode[0].firstChild.data.strip())
+            self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode[0]))
 
             self._numAntennaExists = True
 
@@ -204,7 +214,7 @@ class AlmaRadiometerRow:
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")
         if len(spectralWindowIdNode) > 0:
 
-            spectralWindowIdStr = spectralWindowIdNode[0].firstChild.data.strip()
+            spectralWindowIdStr = self._getXMLNodeChildText(spectralWindowIdNode[0])
 
             self._spectralWindowId = Parser.stringListToLists(
                 spectralWindowIdStr, Tag, "AlmaRadiometer", True

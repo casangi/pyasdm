@@ -69,6 +69,16 @@ class AntennaRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -229,56 +239,56 @@ class AntennaRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         nameNode = rowdom.getElementsByTagName("name")[0]
 
-        self._name = str(nameNode.firstChild.data.strip())
+        self._name = str(self._getXMLNodeChildText(nameNode))
 
         antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
 
         self._antennaMake = AntennaMake.newAntennaMake(
-            antennaMakeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaMakeNode)
         )
 
         antennaTypeNode = rowdom.getElementsByTagName("antennaType")[0]
 
         self._antennaType = AntennaType.newAntennaType(
-            antennaTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaTypeNode)
         )
 
         dishDiameterNode = rowdom.getElementsByTagName("dishDiameter")[0]
 
-        self._dishDiameter = Length(dishDiameterNode.firstChild.data.strip())
+        self._dishDiameter = Length(self._getXMLNodeChildText(dishDiameterNode))
 
         positionNode = rowdom.getElementsByTagName("position")[0]
 
-        positionStr = positionNode.firstChild.data.strip()
+        positionStr = self._getXMLNodeChildText(positionNode)
 
         self._position = Parser.stringListToLists(positionStr, Length, "Antenna", True)
 
         offsetNode = rowdom.getElementsByTagName("offset")[0]
 
-        offsetStr = offsetNode.firstChild.data.strip()
+        offsetStr = self._getXMLNodeChildText(offsetNode)
 
         self._offset = Parser.stringListToLists(offsetStr, Length, "Antenna", True)
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data.strip())
+        self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
         # extrinsic attribute values
 
         assocAntennaIdNode = rowdom.getElementsByTagName("assocAntennaId")
         if len(assocAntennaIdNode) > 0:
 
-            self._assocAntennaId = Tag(assocAntennaIdNode[0].firstChild.data.strip())
+            self._assocAntennaId = Tag(self._getXMLNodeChildText(assocAntennaIdNode[0]))
 
             self._assocAntennaIdExists = True
 
         stationIdNode = rowdom.getElementsByTagName("stationId")[0]
 
-        self._stationId = Tag(stationIdNode.firstChild.data.strip())
+        self._stationId = Tag(self._getXMLNodeChildText(stationIdNode))
 
         # from link values, if any
 

@@ -75,6 +75,16 @@ class CalCurveRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -308,32 +318,32 @@ class CalCurveRow:
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
         typeCurveNode = rowdom.getElementsByTagName("typeCurve")[0]
 
         self._typeCurve = CalCurveType.newCalCurveType(
-            typeCurveNode.firstChild.data.strip()
+            self._getXMLNodeChildText(typeCurveNode)
         )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalCurve", True
@@ -341,19 +351,19 @@ class CalCurveRow:
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
         antennaNamesNode = rowdom.getElementsByTagName("antennaNames")[0]
 
-        antennaNamesStr = antennaNamesNode.firstChild.data.strip()
+        antennaNamesStr = self._getXMLNodeChildText(antennaNamesNode)
 
         self._antennaNames = Parser.stringListToLists(
             antennaNamesStr, str, "CalCurve", False
@@ -361,24 +371,24 @@ class CalCurveRow:
 
         refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
 
-        self._refAntennaName = str(refAntennaNameNode.firstChild.data.strip())
+        self._refAntennaName = str(self._getXMLNodeChildText(refAntennaNameNode))
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalCurve", False
         )
 
         curveNode = rowdom.getElementsByTagName("curve")[0]
 
-        curveStr = curveNode.firstChild.data.strip()
+        curveStr = self._getXMLNodeChildText(curveNode)
 
         self._curve = Parser.stringListToLists(curveStr, float, "CalCurve", False)
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+        reducedChiSquaredStr = self._getXMLNodeChildText(reducedChiSquaredNode)
 
         self._reducedChiSquared = Parser.stringListToLists(
             reducedChiSquaredStr, float, "CalCurve", False
@@ -387,14 +397,14 @@ class CalCurveRow:
         numBaselineNode = rowdom.getElementsByTagName("numBaseline")
         if len(numBaselineNode) > 0:
 
-            self._numBaseline = int(numBaselineNode[0].firstChild.data.strip())
+            self._numBaseline = int(self._getXMLNodeChildText(numBaselineNode[0]))
 
             self._numBaselineExists = True
 
         rmsNode = rowdom.getElementsByTagName("rms")
         if len(rmsNode) > 0:
 
-            rmsStr = rmsNode[0].firstChild.data.strip()
+            rmsStr = self._getXMLNodeChildText(rmsNode[0])
 
             self._rms = Parser.stringListToLists(rmsStr, float, "CalCurve", False)
 
@@ -404,11 +414,11 @@ class CalCurveRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 

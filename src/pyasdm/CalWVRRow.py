@@ -66,6 +66,16 @@ class CalWVRRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -282,27 +292,29 @@ class CalWVRRow:
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         wvrMethodNode = rowdom.getElementsByTagName("wvrMethod")[0]
 
-        self._wvrMethod = WVRMethod.newWVRMethod(wvrMethodNode.firstChild.data.strip())
+        self._wvrMethod = WVRMethod.newWVRMethod(
+            self._getXMLNodeChildText(wvrMethodNode)
+        )
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
         numInputAntennasNode = rowdom.getElementsByTagName("numInputAntennas")[0]
 
-        self._numInputAntennas = int(numInputAntennasNode.firstChild.data.strip())
+        self._numInputAntennas = int(self._getXMLNodeChildText(numInputAntennasNode))
 
         inputAntennaNamesNode = rowdom.getElementsByTagName("inputAntennaNames")[0]
 
-        inputAntennaNamesStr = inputAntennaNamesNode.firstChild.data.strip()
+        inputAntennaNamesStr = self._getXMLNodeChildText(inputAntennaNamesNode)
 
         self._inputAntennaNames = Parser.stringListToLists(
             inputAntennaNamesStr, str, "CalWVR", False
@@ -310,11 +322,11 @@ class CalWVRRow:
 
         numChanNode = rowdom.getElementsByTagName("numChan")[0]
 
-        self._numChan = int(numChanNode.firstChild.data.strip())
+        self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
         chanFreqNode = rowdom.getElementsByTagName("chanFreq")[0]
 
-        chanFreqStr = chanFreqNode.firstChild.data.strip()
+        chanFreqStr = self._getXMLNodeChildText(chanFreqNode)
 
         self._chanFreq = Parser.stringListToLists(
             chanFreqStr, Frequency, "CalWVR", True
@@ -322,7 +334,7 @@ class CalWVRRow:
 
         chanWidthNode = rowdom.getElementsByTagName("chanWidth")[0]
 
-        chanWidthStr = chanWidthNode.firstChild.data.strip()
+        chanWidthStr = self._getXMLNodeChildText(chanWidthNode)
 
         self._chanWidth = Parser.stringListToLists(
             chanWidthStr, Frequency, "CalWVR", True
@@ -330,7 +342,7 @@ class CalWVRRow:
 
         refTempNode = rowdom.getElementsByTagName("refTemp")[0]
 
-        refTempStr = refTempNode.firstChild.data.strip()
+        refTempStr = self._getXMLNodeChildText(refTempNode)
 
         self._refTemp = Parser.stringListToLists(
             refTempStr, Temperature, "CalWVR", True
@@ -338,17 +350,17 @@ class CalWVRRow:
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
         pathCoeffNode = rowdom.getElementsByTagName("pathCoeff")[0]
 
-        pathCoeffStr = pathCoeffNode.firstChild.data.strip()
+        pathCoeffStr = self._getXMLNodeChildText(pathCoeffNode)
 
         self._pathCoeff = Parser.stringListToLists(pathCoeffStr, float, "CalWVR", False)
 
         polyFreqLimitsNode = rowdom.getElementsByTagName("polyFreqLimits")[0]
 
-        polyFreqLimitsStr = polyFreqLimitsNode.firstChild.data.strip()
+        polyFreqLimitsStr = self._getXMLNodeChildText(polyFreqLimitsNode)
 
         self._polyFreqLimits = Parser.stringListToLists(
             polyFreqLimitsStr, Frequency, "CalWVR", True
@@ -356,24 +368,24 @@ class CalWVRRow:
 
         wetPathNode = rowdom.getElementsByTagName("wetPath")[0]
 
-        wetPathStr = wetPathNode.firstChild.data.strip()
+        wetPathStr = self._getXMLNodeChildText(wetPathNode)
 
         self._wetPath = Parser.stringListToLists(wetPathStr, float, "CalWVR", False)
 
         dryPathNode = rowdom.getElementsByTagName("dryPath")[0]
 
-        dryPathStr = dryPathNode.firstChild.data.strip()
+        dryPathStr = self._getXMLNodeChildText(dryPathNode)
 
         self._dryPath = Parser.stringListToLists(dryPathStr, float, "CalWVR", False)
 
         waterNode = rowdom.getElementsByTagName("water")[0]
 
-        self._water = Length(waterNode.firstChild.data.strip())
+        self._water = Length(self._getXMLNodeChildText(waterNode))
 
         tauBaselineNode = rowdom.getElementsByTagName("tauBaseline")
         if len(tauBaselineNode) > 0:
 
-            self._tauBaseline = float(tauBaselineNode[0].firstChild.data.strip())
+            self._tauBaseline = float(self._getXMLNodeChildText(tauBaselineNode[0]))
 
             self._tauBaselineExists = True
 
@@ -381,11 +393,11 @@ class CalWVRRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 

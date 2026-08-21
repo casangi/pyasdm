@@ -72,6 +72,16 @@ class SubscanRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -256,46 +266,46 @@ class SubscanRow:
 
         scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
 
-        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
+        self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
         subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
 
-        self._subscanNumber = int(subscanNumberNode.firstChild.data.strip())
+        self._subscanNumber = int(self._getXMLNodeChildText(subscanNumberNode))
 
         startTimeNode = rowdom.getElementsByTagName("startTime")[0]
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
+        self._startTime = ArrayTime(self._getXMLNodeChildText(startTimeNode))
 
         endTimeNode = rowdom.getElementsByTagName("endTime")[0]
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
+        self._endTime = ArrayTime(self._getXMLNodeChildText(endTimeNode))
 
         fieldNameNode = rowdom.getElementsByTagName("fieldName")[0]
 
-        self._fieldName = str(fieldNameNode.firstChild.data.strip())
+        self._fieldName = str(self._getXMLNodeChildText(fieldNameNode))
 
         subscanIntentNode = rowdom.getElementsByTagName("subscanIntent")[0]
 
         self._subscanIntent = SubscanIntent.newSubscanIntent(
-            subscanIntentNode.firstChild.data.strip()
+            self._getXMLNodeChildText(subscanIntentNode)
         )
 
         subscanModeNode = rowdom.getElementsByTagName("subscanMode")
         if len(subscanModeNode) > 0:
 
             self._subscanMode = SwitchingMode.newSwitchingMode(
-                subscanModeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(subscanModeNode[0])
             )
 
             self._subscanModeExists = True
 
         numIntegrationNode = rowdom.getElementsByTagName("numIntegration")[0]
 
-        self._numIntegration = int(numIntegrationNode.firstChild.data.strip())
+        self._numIntegration = int(self._getXMLNodeChildText(numIntegrationNode))
 
         numSubintegrationNode = rowdom.getElementsByTagName("numSubintegration")[0]
 
-        numSubintegrationStr = numSubintegrationNode.firstChild.data.strip()
+        numSubintegrationStr = self._getXMLNodeChildText(numSubintegrationNode)
 
         self._numSubintegration = Parser.stringListToLists(
             numSubintegrationStr, int, "Subscan", False
@@ -306,7 +316,7 @@ class SubscanRow:
 
             self._correlatorCalibration = (
                 CorrelatorCalibration.newCorrelatorCalibration(
-                    correlatorCalibrationNode[0].firstChild.data.strip()
+                    self._getXMLNodeChildText(correlatorCalibrationNode[0])
                 )
             )
 
@@ -316,7 +326,7 @@ class SubscanRow:
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
         # from link values, if any
 

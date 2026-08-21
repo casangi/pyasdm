@@ -72,6 +72,16 @@ class ReceiverRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -220,41 +230,43 @@ class ReceiverRow:
 
         receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
 
-        self._receiverId = int(receiverIdNode.firstChild.data.strip())
+        self._receiverId = int(self._getXMLNodeChildText(receiverIdNode))
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         nameNode = rowdom.getElementsByTagName("name")[0]
 
-        self._name = str(nameNode.firstChild.data.strip())
+        self._name = str(self._getXMLNodeChildText(nameNode))
 
         numLONode = rowdom.getElementsByTagName("numLO")[0]
 
-        self._numLO = int(numLONode.firstChild.data.strip())
+        self._numLO = int(self._getXMLNodeChildText(numLONode))
 
         frequencyBandNode = rowdom.getElementsByTagName("frequencyBand")[0]
 
         self._frequencyBand = ReceiverBand.newReceiverBand(
-            frequencyBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(frequencyBandNode)
         )
 
         freqLONode = rowdom.getElementsByTagName("freqLO")[0]
 
-        freqLOStr = freqLONode.firstChild.data.strip()
+        freqLOStr = self._getXMLNodeChildText(freqLONode)
 
         self._freqLO = Parser.stringListToLists(freqLOStr, Frequency, "Receiver", True)
 
         receiverSidebandNode = rowdom.getElementsByTagName("receiverSideband")[0]
 
         self._receiverSideband = ReceiverSideband.newReceiverSideband(
-            receiverSidebandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverSidebandNode)
         )
 
         sidebandLONode = rowdom.getElementsByTagName("sidebandLO")[0]
 
-        sidebandLOStr = sidebandLONode.firstChild.data.strip()
+        sidebandLOStr = self._getXMLNodeChildText(sidebandLONode)
         self._sidebandLO = Parser.stringListToLists(
             sidebandLOStr, NetSideband, "Receiver", False
         )
@@ -263,7 +275,7 @@ class ReceiverRow:
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

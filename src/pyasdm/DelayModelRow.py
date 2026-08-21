@@ -66,6 +66,16 @@ class DelayModelRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -633,15 +643,17 @@ class DelayModelRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
         phaseDelayNode = rowdom.getElementsByTagName("phaseDelay")[0]
 
-        phaseDelayStr = phaseDelayNode.firstChild.data.strip()
+        phaseDelayStr = self._getXMLNodeChildText(phaseDelayNode)
 
         self._phaseDelay = Parser.stringListToLists(
             phaseDelayStr, float, "DelayModel", False
@@ -649,7 +661,7 @@ class DelayModelRow:
 
         phaseDelayRateNode = rowdom.getElementsByTagName("phaseDelayRate")[0]
 
-        phaseDelayRateStr = phaseDelayRateNode.firstChild.data.strip()
+        phaseDelayRateStr = self._getXMLNodeChildText(phaseDelayRateNode)
 
         self._phaseDelayRate = Parser.stringListToLists(
             phaseDelayRateStr, float, "DelayModel", False
@@ -657,7 +669,7 @@ class DelayModelRow:
 
         groupDelayNode = rowdom.getElementsByTagName("groupDelay")[0]
 
-        groupDelayStr = groupDelayNode.firstChild.data.strip()
+        groupDelayStr = self._getXMLNodeChildText(groupDelayNode)
 
         self._groupDelay = Parser.stringListToLists(
             groupDelayStr, float, "DelayModel", False
@@ -665,7 +677,7 @@ class DelayModelRow:
 
         groupDelayRateNode = rowdom.getElementsByTagName("groupDelayRate")[0]
 
-        groupDelayRateStr = groupDelayRateNode.firstChild.data.strip()
+        groupDelayRateStr = self._getXMLNodeChildText(groupDelayRateNode)
 
         self._groupDelayRate = Parser.stringListToLists(
             groupDelayRateStr, float, "DelayModel", False
@@ -674,7 +686,7 @@ class DelayModelRow:
         timeOriginNode = rowdom.getElementsByTagName("timeOrigin")
         if len(timeOriginNode) > 0:
 
-            self._timeOrigin = ArrayTime(timeOriginNode[0].firstChild.data.strip())
+            self._timeOrigin = ArrayTime(self._getXMLNodeChildText(timeOriginNode[0]))
 
             self._timeOriginExists = True
 
@@ -682,7 +694,7 @@ class DelayModelRow:
         if len(atmosphericGroupDelayNode) > 0:
 
             self._atmosphericGroupDelay = float(
-                atmosphericGroupDelayNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(atmosphericGroupDelayNode[0])
             )
 
             self._atmosphericGroupDelayExists = True
@@ -693,7 +705,7 @@ class DelayModelRow:
         if len(atmosphericGroupDelayRateNode) > 0:
 
             self._atmosphericGroupDelayRate = float(
-                atmosphericGroupDelayRateNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(atmosphericGroupDelayRateNode[0])
             )
 
             self._atmosphericGroupDelayRateExists = True
@@ -701,7 +713,9 @@ class DelayModelRow:
         geometricDelayNode = rowdom.getElementsByTagName("geometricDelay")
         if len(geometricDelayNode) > 0:
 
-            self._geometricDelay = float(geometricDelayNode[0].firstChild.data.strip())
+            self._geometricDelay = float(
+                self._getXMLNodeChildText(geometricDelayNode[0])
+            )
 
             self._geometricDelayExists = True
 
@@ -709,7 +723,7 @@ class DelayModelRow:
         if len(geometricDelayRateNode) > 0:
 
             self._geometricDelayRate = float(
-                geometricDelayRateNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(geometricDelayRateNode[0])
             )
 
             self._geometricDelayRateExists = True
@@ -717,14 +731,14 @@ class DelayModelRow:
         numLONode = rowdom.getElementsByTagName("numLO")
         if len(numLONode) > 0:
 
-            self._numLO = int(numLONode[0].firstChild.data.strip())
+            self._numLO = int(self._getXMLNodeChildText(numLONode[0]))
 
             self._numLOExists = True
 
         LOOffsetNode = rowdom.getElementsByTagName("LOOffset")
         if len(LOOffsetNode) > 0:
 
-            LOOffsetStr = LOOffsetNode[0].firstChild.data.strip()
+            LOOffsetStr = self._getXMLNodeChildText(LOOffsetNode[0])
 
             self._LOOffset = Parser.stringListToLists(
                 LOOffsetStr, Frequency, "DelayModel", True
@@ -735,7 +749,7 @@ class DelayModelRow:
         LOOffsetRateNode = rowdom.getElementsByTagName("LOOffsetRate")
         if len(LOOffsetRateNode) > 0:
 
-            LOOffsetRateStr = LOOffsetRateNode[0].firstChild.data.strip()
+            LOOffsetRateStr = self._getXMLNodeChildText(LOOffsetRateNode[0])
 
             self._LOOffsetRate = Parser.stringListToLists(
                 LOOffsetRateStr, Frequency, "DelayModel", True
@@ -747,7 +761,7 @@ class DelayModelRow:
         if len(dispersiveDelayNode) > 0:
 
             self._dispersiveDelay = float(
-                dispersiveDelayNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(dispersiveDelayNode[0])
             )
 
             self._dispersiveDelayExists = True
@@ -756,7 +770,7 @@ class DelayModelRow:
         if len(dispersiveDelayRateNode) > 0:
 
             self._dispersiveDelayRate = float(
-                dispersiveDelayRateNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(dispersiveDelayRateNode[0])
             )
 
             self._dispersiveDelayRateExists = True
@@ -765,7 +779,7 @@ class DelayModelRow:
         if len(atmosphericDryDelayNode) > 0:
 
             self._atmosphericDryDelay = float(
-                atmosphericDryDelayNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(atmosphericDryDelayNode[0])
             )
 
             self._atmosphericDryDelayExists = True
@@ -774,7 +788,7 @@ class DelayModelRow:
         if len(atmosphericWetDelayNode) > 0:
 
             self._atmosphericWetDelay = float(
-                atmosphericWetDelayNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(atmosphericWetDelayNode[0])
             )
 
             self._atmosphericWetDelayExists = True
@@ -782,28 +796,28 @@ class DelayModelRow:
         padDelayNode = rowdom.getElementsByTagName("padDelay")
         if len(padDelayNode) > 0:
 
-            self._padDelay = float(padDelayNode[0].firstChild.data.strip())
+            self._padDelay = float(self._getXMLNodeChildText(padDelayNode[0]))
 
             self._padDelayExists = True
 
         antennaDelayNode = rowdom.getElementsByTagName("antennaDelay")
         if len(antennaDelayNode) > 0:
 
-            self._antennaDelay = float(antennaDelayNode[0].firstChild.data.strip())
+            self._antennaDelay = float(self._getXMLNodeChildText(antennaDelayNode[0]))
 
             self._antennaDelayExists = True
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")
         if len(numReceptorNode) > 0:
 
-            self._numReceptor = int(numReceptorNode[0].firstChild.data.strip())
+            self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode[0]))
 
             self._numReceptorExists = True
 
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")
         if len(polarizationTypeNode) > 0:
 
-            polarizationTypeStr = polarizationTypeNode[0].firstChild.data.strip()
+            polarizationTypeStr = self._getXMLNodeChildText(polarizationTypeNode[0])
             self._polarizationType = Parser.stringListToLists(
                 polarizationTypeStr, PolarizationType, "DelayModel", False
             )
@@ -813,7 +827,7 @@ class DelayModelRow:
         electronicDelayNode = rowdom.getElementsByTagName("electronicDelay")
         if len(electronicDelayNode) > 0:
 
-            electronicDelayStr = electronicDelayNode[0].firstChild.data.strip()
+            electronicDelayStr = self._getXMLNodeChildText(electronicDelayNode[0])
 
             self._electronicDelay = Parser.stringListToLists(
                 electronicDelayStr, float, "DelayModel", False
@@ -824,7 +838,9 @@ class DelayModelRow:
         electronicDelayRateNode = rowdom.getElementsByTagName("electronicDelayRate")
         if len(electronicDelayRateNode) > 0:
 
-            electronicDelayRateStr = electronicDelayRateNode[0].firstChild.data.strip()
+            electronicDelayRateStr = self._getXMLNodeChildText(
+                electronicDelayRateNode[0]
+            )
 
             self._electronicDelayRate = Parser.stringListToLists(
                 electronicDelayRateStr, float, "DelayModel", False
@@ -835,7 +851,7 @@ class DelayModelRow:
         receiverDelayNode = rowdom.getElementsByTagName("receiverDelay")
         if len(receiverDelayNode) > 0:
 
-            receiverDelayStr = receiverDelayNode[0].firstChild.data.strip()
+            receiverDelayStr = self._getXMLNodeChildText(receiverDelayNode[0])
 
             self._receiverDelay = Parser.stringListToLists(
                 receiverDelayStr, float, "DelayModel", False
@@ -846,7 +862,7 @@ class DelayModelRow:
         IFDelayNode = rowdom.getElementsByTagName("IFDelay")
         if len(IFDelayNode) > 0:
 
-            IFDelayStr = IFDelayNode[0].firstChild.data.strip()
+            IFDelayStr = self._getXMLNodeChildText(IFDelayNode[0])
 
             self._IFDelay = Parser.stringListToLists(
                 IFDelayStr, float, "DelayModel", False
@@ -857,7 +873,7 @@ class DelayModelRow:
         LODelayNode = rowdom.getElementsByTagName("LODelay")
         if len(LODelayNode) > 0:
 
-            LODelayStr = LODelayNode[0].firstChild.data.strip()
+            LODelayStr = self._getXMLNodeChildText(LODelayNode[0])
 
             self._LODelay = Parser.stringListToLists(
                 LODelayStr, float, "DelayModel", False
@@ -871,7 +887,7 @@ class DelayModelRow:
         if len(crossPolarizationDelayNode) > 0:
 
             self._crossPolarizationDelay = float(
-                crossPolarizationDelayNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(crossPolarizationDelayNode[0])
             )
 
             self._crossPolarizationDelayExists = True
@@ -879,7 +895,7 @@ class DelayModelRow:
         centerOfArrayNode = rowdom.getElementsByTagName("centerOfArray")
         if len(centerOfArrayNode) > 0:
 
-            centerOfArrayStr = centerOfArrayNode[0].firstChild.data.strip()
+            centerOfArrayStr = self._getXMLNodeChildText(centerOfArrayNode[0])
 
             self._centerOfArray = Parser.stringListToLists(
                 centerOfArrayStr, Length, "DelayModel", True
@@ -891,7 +907,7 @@ class DelayModelRow:
         if len(delayModelVersionNode) > 0:
 
             self._delayModelVersion = str(
-                delayModelVersionNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(delayModelVersionNode[0])
             )
 
             self._delayModelVersionExists = True
@@ -900,7 +916,7 @@ class DelayModelRow:
         if len(ionosphericDelayNode) > 0:
 
             self._ionosphericDelay = Interval(
-                ionosphericDelayNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(ionosphericDelayNode[0])
             )
 
             self._ionosphericDelayExists = True
@@ -909,15 +925,15 @@ class DelayModelRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
 
-        self._fieldId = Tag(fieldIdNode.firstChild.data.strip())
+        self._fieldId = Tag(self._getXMLNodeChildText(fieldIdNode))
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

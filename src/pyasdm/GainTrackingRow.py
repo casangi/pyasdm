@@ -66,6 +66,16 @@ class GainTrackingRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -256,15 +266,17 @@ class GainTrackingRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
         attenuatorNode = rowdom.getElementsByTagName("attenuator")[0]
 
-        attenuatorStr = attenuatorNode.firstChild.data.strip()
+        attenuatorStr = self._getXMLNodeChildText(attenuatorNode)
 
         self._attenuator = Parser.stringListToLists(
             attenuatorStr, float, "GainTracking", False
@@ -272,7 +284,7 @@ class GainTrackingRow:
 
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
 
-        polarizationTypeStr = polarizationTypeNode.firstChild.data.strip()
+        polarizationTypeStr = self._getXMLNodeChildText(polarizationTypeNode)
         self._polarizationType = Parser.stringListToLists(
             polarizationTypeStr, PolarizationType, "GainTracking", False
         )
@@ -280,21 +292,21 @@ class GainTrackingRow:
         samplingLevelNode = rowdom.getElementsByTagName("samplingLevel")
         if len(samplingLevelNode) > 0:
 
-            self._samplingLevel = float(samplingLevelNode[0].firstChild.data.strip())
+            self._samplingLevel = float(self._getXMLNodeChildText(samplingLevelNode[0]))
 
             self._samplingLevelExists = True
 
         numAttFreqNode = rowdom.getElementsByTagName("numAttFreq")
         if len(numAttFreqNode) > 0:
 
-            self._numAttFreq = int(numAttFreqNode[0].firstChild.data.strip())
+            self._numAttFreq = int(self._getXMLNodeChildText(numAttFreqNode[0]))
 
             self._numAttFreqExists = True
 
         attFreqNode = rowdom.getElementsByTagName("attFreq")
         if len(attFreqNode) > 0:
 
-            attFreqStr = attFreqNode[0].firstChild.data.strip()
+            attFreqStr = self._getXMLNodeChildText(attFreqNode[0])
 
             self._attFreq = Parser.stringListToLists(
                 attFreqStr, float, "GainTracking", False
@@ -305,7 +317,7 @@ class GainTrackingRow:
         attSpectrumNode = rowdom.getElementsByTagName("attSpectrum")
         if len(attSpectrumNode) > 0:
 
-            attSpectrumStr = attSpectrumNode[0].firstChild.data.strip()
+            attSpectrumStr = self._getXMLNodeChildText(attSpectrumNode[0])
 
             self._attSpectrum = Parser.stringListToLists(
                 attSpectrumStr, Complex, "GainTracking", True
@@ -317,15 +329,15 @@ class GainTrackingRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data.strip())
+        self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

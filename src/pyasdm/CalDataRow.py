@@ -75,6 +75,16 @@ class CalDataRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -317,17 +327,19 @@ class CalDataRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         startTimeObservedNode = rowdom.getElementsByTagName("startTimeObserved")[0]
 
         self._startTimeObserved = ArrayTime(
-            startTimeObservedNode.firstChild.data.strip()
+            self._getXMLNodeChildText(startTimeObservedNode)
         )
 
         endTimeObservedNode = rowdom.getElementsByTagName("endTimeObserved")[0]
 
-        self._endTimeObserved = ArrayTime(endTimeObservedNode.firstChild.data.strip())
+        self._endTimeObserved = ArrayTime(
+            self._getXMLNodeChildText(endTimeObservedNode)
+        )
 
         execBlockUIDNode = rowdom.getElementsByTagName("execBlockUID")[0]
 
@@ -336,27 +348,27 @@ class CalDataRow:
         calDataTypeNode = rowdom.getElementsByTagName("calDataType")[0]
 
         self._calDataType = CalDataOrigin.newCalDataOrigin(
-            calDataTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(calDataTypeNode)
         )
 
         calTypeNode = rowdom.getElementsByTagName("calType")[0]
 
-        self._calType = CalType.newCalType(calTypeNode.firstChild.data.strip())
+        self._calType = CalType.newCalType(self._getXMLNodeChildText(calTypeNode))
 
         numScanNode = rowdom.getElementsByTagName("numScan")[0]
 
-        self._numScan = int(numScanNode.firstChild.data.strip())
+        self._numScan = int(self._getXMLNodeChildText(numScanNode))
 
         scanSetNode = rowdom.getElementsByTagName("scanSet")[0]
 
-        scanSetStr = scanSetNode.firstChild.data.strip()
+        scanSetStr = self._getXMLNodeChildText(scanSetNode)
 
         self._scanSet = Parser.stringListToLists(scanSetStr, int, "CalData", False)
 
         assocCalDataIdNode = rowdom.getElementsByTagName("assocCalDataId")
         if len(assocCalDataIdNode) > 0:
 
-            self._assocCalDataId = Tag(assocCalDataIdNode[0].firstChild.data.strip())
+            self._assocCalDataId = Tag(self._getXMLNodeChildText(assocCalDataIdNode[0]))
 
             self._assocCalDataIdExists = True
 
@@ -364,7 +376,7 @@ class CalDataRow:
         if len(assocCalNatureNode) > 0:
 
             self._assocCalNature = AssociatedCalNature.newAssociatedCalNature(
-                assocCalNatureNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(assocCalNatureNode[0])
             )
 
             self._assocCalNatureExists = True
@@ -372,7 +384,7 @@ class CalDataRow:
         fieldNameNode = rowdom.getElementsByTagName("fieldName")
         if len(fieldNameNode) > 0:
 
-            fieldNameStr = fieldNameNode[0].firstChild.data.strip()
+            fieldNameStr = self._getXMLNodeChildText(fieldNameNode[0])
 
             self._fieldName = Parser.stringListToLists(
                 fieldNameStr, str, "CalData", False
@@ -383,7 +395,7 @@ class CalDataRow:
         sourceNameNode = rowdom.getElementsByTagName("sourceName")
         if len(sourceNameNode) > 0:
 
-            sourceNameStr = sourceNameNode[0].firstChild.data.strip()
+            sourceNameStr = self._getXMLNodeChildText(sourceNameNode[0])
 
             self._sourceName = Parser.stringListToLists(
                 sourceNameStr, str, "CalData", False
@@ -394,7 +406,7 @@ class CalDataRow:
         sourceCodeNode = rowdom.getElementsByTagName("sourceCode")
         if len(sourceCodeNode) > 0:
 
-            sourceCodeStr = sourceCodeNode[0].firstChild.data.strip()
+            sourceCodeStr = self._getXMLNodeChildText(sourceCodeNode[0])
 
             self._sourceCode = Parser.stringListToLists(
                 sourceCodeStr, str, "CalData", False
@@ -405,7 +417,7 @@ class CalDataRow:
         scanIntentNode = rowdom.getElementsByTagName("scanIntent")
         if len(scanIntentNode) > 0:
 
-            scanIntentStr = scanIntentNode[0].firstChild.data.strip()
+            scanIntentStr = self._getXMLNodeChildText(scanIntentNode[0])
             self._scanIntent = Parser.stringListToLists(
                 scanIntentStr, ScanIntent, "CalData", False
             )

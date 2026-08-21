@@ -63,6 +63,16 @@ class ModulationRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -219,39 +229,41 @@ class ModulationRow:
 
         receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
 
-        self._receiverId = int(receiverIdNode.firstChild.data.strip())
+        self._receiverId = int(self._getXMLNodeChildText(receiverIdNode))
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         localOscillatorOffsetNode = rowdom.getElementsByTagName(
             "localOscillatorOffset"
         )[0]
 
         self._localOscillatorOffset = Frequency(
-            localOscillatorOffsetNode.firstChild.data.strip()
+            self._getXMLNodeChildText(localOscillatorOffsetNode)
         )
 
         walsh180enabledNode = rowdom.getElementsByTagName("walsh180enabled")[0]
 
-        self._walsh180enabled = bool(walsh180enabledNode.firstChild.data.strip())
+        self._walsh180enabled = bool(self._getXMLNodeChildText(walsh180enabledNode))
 
         walsh90enabledNode = rowdom.getElementsByTagName("walsh90enabled")[0]
 
-        self._walsh90enabled = bool(walsh90enabledNode.firstChild.data.strip())
+        self._walsh90enabled = bool(self._getXMLNodeChildText(walsh90enabledNode))
 
         walsh180indexNode = rowdom.getElementsByTagName("walsh180index")
         if len(walsh180indexNode) > 0:
 
-            self._walsh180index = int(walsh180indexNode[0].firstChild.data.strip())
+            self._walsh180index = int(self._getXMLNodeChildText(walsh180indexNode[0]))
 
             self._walsh180indexExists = True
 
         walsh90indexNode = rowdom.getElementsByTagName("walsh90index")
         if len(walsh90indexNode) > 0:
 
-            self._walsh90index = int(walsh90indexNode[0].firstChild.data.strip())
+            self._walsh90index = int(self._getXMLNodeChildText(walsh90indexNode[0]))
 
             self._walsh90indexExists = True
 
@@ -259,11 +271,11 @@ class ModulationRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

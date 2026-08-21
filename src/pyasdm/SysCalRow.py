@@ -63,6 +63,16 @@ class SysCalRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -412,27 +422,29 @@ class SysCalRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
         numChanNode = rowdom.getElementsByTagName("numChan")[0]
 
-        self._numChan = int(numChanNode.firstChild.data.strip())
+        self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
         tcalFlagNode = rowdom.getElementsByTagName("tcalFlag")
         if len(tcalFlagNode) > 0:
 
-            self._tcalFlag = bool(tcalFlagNode[0].firstChild.data.strip())
+            self._tcalFlag = bool(self._getXMLNodeChildText(tcalFlagNode[0]))
 
             self._tcalFlagExists = True
 
         tcalSpectrumNode = rowdom.getElementsByTagName("tcalSpectrum")
         if len(tcalSpectrumNode) > 0:
 
-            tcalSpectrumStr = tcalSpectrumNode[0].firstChild.data.strip()
+            tcalSpectrumStr = self._getXMLNodeChildText(tcalSpectrumNode[0])
 
             self._tcalSpectrum = Parser.stringListToLists(
                 tcalSpectrumStr, Temperature, "SysCal", True
@@ -443,14 +455,14 @@ class SysCalRow:
         trxFlagNode = rowdom.getElementsByTagName("trxFlag")
         if len(trxFlagNode) > 0:
 
-            self._trxFlag = bool(trxFlagNode[0].firstChild.data.strip())
+            self._trxFlag = bool(self._getXMLNodeChildText(trxFlagNode[0]))
 
             self._trxFlagExists = True
 
         trxSpectrumNode = rowdom.getElementsByTagName("trxSpectrum")
         if len(trxSpectrumNode) > 0:
 
-            trxSpectrumStr = trxSpectrumNode[0].firstChild.data.strip()
+            trxSpectrumStr = self._getXMLNodeChildText(trxSpectrumNode[0])
 
             self._trxSpectrum = Parser.stringListToLists(
                 trxSpectrumStr, Temperature, "SysCal", True
@@ -461,14 +473,14 @@ class SysCalRow:
         tskyFlagNode = rowdom.getElementsByTagName("tskyFlag")
         if len(tskyFlagNode) > 0:
 
-            self._tskyFlag = bool(tskyFlagNode[0].firstChild.data.strip())
+            self._tskyFlag = bool(self._getXMLNodeChildText(tskyFlagNode[0]))
 
             self._tskyFlagExists = True
 
         tskySpectrumNode = rowdom.getElementsByTagName("tskySpectrum")
         if len(tskySpectrumNode) > 0:
 
-            tskySpectrumStr = tskySpectrumNode[0].firstChild.data.strip()
+            tskySpectrumStr = self._getXMLNodeChildText(tskySpectrumNode[0])
 
             self._tskySpectrum = Parser.stringListToLists(
                 tskySpectrumStr, Temperature, "SysCal", True
@@ -479,14 +491,14 @@ class SysCalRow:
         tsysFlagNode = rowdom.getElementsByTagName("tsysFlag")
         if len(tsysFlagNode) > 0:
 
-            self._tsysFlag = bool(tsysFlagNode[0].firstChild.data.strip())
+            self._tsysFlag = bool(self._getXMLNodeChildText(tsysFlagNode[0]))
 
             self._tsysFlagExists = True
 
         tsysSpectrumNode = rowdom.getElementsByTagName("tsysSpectrum")
         if len(tsysSpectrumNode) > 0:
 
-            tsysSpectrumStr = tsysSpectrumNode[0].firstChild.data.strip()
+            tsysSpectrumStr = self._getXMLNodeChildText(tsysSpectrumNode[0])
 
             self._tsysSpectrum = Parser.stringListToLists(
                 tsysSpectrumStr, Temperature, "SysCal", True
@@ -497,14 +509,14 @@ class SysCalRow:
         tantFlagNode = rowdom.getElementsByTagName("tantFlag")
         if len(tantFlagNode) > 0:
 
-            self._tantFlag = bool(tantFlagNode[0].firstChild.data.strip())
+            self._tantFlag = bool(self._getXMLNodeChildText(tantFlagNode[0]))
 
             self._tantFlagExists = True
 
         tantSpectrumNode = rowdom.getElementsByTagName("tantSpectrum")
         if len(tantSpectrumNode) > 0:
 
-            tantSpectrumStr = tantSpectrumNode[0].firstChild.data.strip()
+            tantSpectrumStr = self._getXMLNodeChildText(tantSpectrumNode[0])
 
             self._tantSpectrum = Parser.stringListToLists(
                 tantSpectrumStr, float, "SysCal", False
@@ -515,14 +527,14 @@ class SysCalRow:
         tantTsysFlagNode = rowdom.getElementsByTagName("tantTsysFlag")
         if len(tantTsysFlagNode) > 0:
 
-            self._tantTsysFlag = bool(tantTsysFlagNode[0].firstChild.data.strip())
+            self._tantTsysFlag = bool(self._getXMLNodeChildText(tantTsysFlagNode[0]))
 
             self._tantTsysFlagExists = True
 
         tantTsysSpectrumNode = rowdom.getElementsByTagName("tantTsysSpectrum")
         if len(tantTsysSpectrumNode) > 0:
 
-            tantTsysSpectrumStr = tantTsysSpectrumNode[0].firstChild.data.strip()
+            tantTsysSpectrumStr = self._getXMLNodeChildText(tantTsysSpectrumNode[0])
 
             self._tantTsysSpectrum = Parser.stringListToLists(
                 tantTsysSpectrumStr, float, "SysCal", False
@@ -533,14 +545,14 @@ class SysCalRow:
         phaseDiffFlagNode = rowdom.getElementsByTagName("phaseDiffFlag")
         if len(phaseDiffFlagNode) > 0:
 
-            self._phaseDiffFlag = bool(phaseDiffFlagNode[0].firstChild.data.strip())
+            self._phaseDiffFlag = bool(self._getXMLNodeChildText(phaseDiffFlagNode[0]))
 
             self._phaseDiffFlagExists = True
 
         phaseDiffSpectrumNode = rowdom.getElementsByTagName("phaseDiffSpectrum")
         if len(phaseDiffSpectrumNode) > 0:
 
-            phaseDiffSpectrumStr = phaseDiffSpectrumNode[0].firstChild.data.strip()
+            phaseDiffSpectrumStr = self._getXMLNodeChildText(phaseDiffSpectrumNode[0])
 
             self._phaseDiffSpectrum = Parser.stringListToLists(
                 phaseDiffSpectrumStr, float, "SysCal", False
@@ -552,15 +564,15 @@ class SysCalRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data.strip())
+        self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

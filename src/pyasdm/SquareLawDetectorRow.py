@@ -66,6 +66,16 @@ class SquareLawDetectorRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -168,16 +178,18 @@ class SquareLawDetectorRow:
 
         squareLawDetectorIdNode = rowdom.getElementsByTagName("squareLawDetectorId")[0]
 
-        self._squareLawDetectorId = Tag(squareLawDetectorIdNode.firstChild.data.strip())
+        self._squareLawDetectorId = Tag(
+            self._getXMLNodeChildText(squareLawDetectorIdNode)
+        )
 
         numBandNode = rowdom.getElementsByTagName("numBand")[0]
 
-        self._numBand = int(numBandNode.firstChild.data.strip())
+        self._numBand = int(self._getXMLNodeChildText(numBandNode))
 
         bandTypeNode = rowdom.getElementsByTagName("bandType")[0]
 
         self._bandType = DetectorBandType.newDetectorBandType(
-            bandTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(bandTypeNode)
         )
 
         # from link values, if any

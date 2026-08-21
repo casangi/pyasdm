@@ -66,6 +66,16 @@ class StateRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -194,30 +204,30 @@ class StateRow:
 
         stateIdNode = rowdom.getElementsByTagName("stateId")[0]
 
-        self._stateId = Tag(stateIdNode.firstChild.data.strip())
+        self._stateId = Tag(self._getXMLNodeChildText(stateIdNode))
 
         calDeviceNameNode = rowdom.getElementsByTagName("calDeviceName")[0]
 
         self._calDeviceName = CalibrationDevice.newCalibrationDevice(
-            calDeviceNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(calDeviceNameNode)
         )
 
         sigNode = rowdom.getElementsByTagName("sig")[0]
 
-        self._sig = bool(sigNode.firstChild.data.strip())
+        self._sig = bool(self._getXMLNodeChildText(sigNode))
 
         refNode = rowdom.getElementsByTagName("ref")[0]
 
-        self._ref = bool(refNode.firstChild.data.strip())
+        self._ref = bool(self._getXMLNodeChildText(refNode))
 
         onSkyNode = rowdom.getElementsByTagName("onSky")[0]
 
-        self._onSky = bool(onSkyNode.firstChild.data.strip())
+        self._onSky = bool(self._getXMLNodeChildText(onSkyNode))
 
         weightNode = rowdom.getElementsByTagName("weight")
         if len(weightNode) > 0:
 
-            self._weight = float(weightNode[0].firstChild.data.strip())
+            self._weight = float(self._getXMLNodeChildText(weightNode[0]))
 
             self._weightExists = True
 

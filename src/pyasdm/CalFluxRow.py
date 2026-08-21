@@ -75,6 +75,16 @@ class CalFluxRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -384,27 +394,29 @@ class CalFluxRow:
 
         sourceNameNode = rowdom.getElementsByTagName("sourceName")[0]
 
-        self._sourceName = str(sourceNameNode.firstChild.data.strip())
+        self._sourceName = str(self._getXMLNodeChildText(sourceNameNode))
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         numFrequencyRangesNode = rowdom.getElementsByTagName("numFrequencyRanges")[0]
 
-        self._numFrequencyRanges = int(numFrequencyRangesNode.firstChild.data.strip())
+        self._numFrequencyRanges = int(
+            self._getXMLNodeChildText(numFrequencyRangesNode)
+        )
 
         numStokesNode = rowdom.getElementsByTagName("numStokes")[0]
 
-        self._numStokes = int(numStokesNode.firstChild.data.strip())
+        self._numStokes = int(self._getXMLNodeChildText(numStokesNode))
 
         frequencyRangesNode = rowdom.getElementsByTagName("frequencyRanges")[0]
 
-        frequencyRangesStr = frequencyRangesNode.firstChild.data.strip()
+        frequencyRangesStr = self._getXMLNodeChildText(frequencyRangesNode)
 
         self._frequencyRanges = Parser.stringListToLists(
             frequencyRangesStr, Frequency, "CalFlux", True
@@ -413,18 +425,18 @@ class CalFluxRow:
         fluxMethodNode = rowdom.getElementsByTagName("fluxMethod")[0]
 
         self._fluxMethod = FluxCalibrationMethod.newFluxCalibrationMethod(
-            fluxMethodNode.firstChild.data.strip()
+            self._getXMLNodeChildText(fluxMethodNode)
         )
 
         fluxNode = rowdom.getElementsByTagName("flux")[0]
 
-        fluxStr = fluxNode.firstChild.data.strip()
+        fluxStr = self._getXMLNodeChildText(fluxNode)
 
         self._flux = Parser.stringListToLists(fluxStr, float, "CalFlux", False)
 
         fluxErrorNode = rowdom.getElementsByTagName("fluxError")[0]
 
-        fluxErrorStr = fluxErrorNode.firstChild.data.strip()
+        fluxErrorStr = self._getXMLNodeChildText(fluxErrorNode)
 
         self._fluxError = Parser.stringListToLists(
             fluxErrorStr, float, "CalFlux", False
@@ -432,7 +444,7 @@ class CalFluxRow:
 
         stokesNode = rowdom.getElementsByTagName("stokes")[0]
 
-        stokesStr = stokesNode.firstChild.data.strip()
+        stokesStr = self._getXMLNodeChildText(stokesNode)
         self._stokes = Parser.stringListToLists(
             stokesStr, StokesParameter, "CalFlux", False
         )
@@ -440,7 +452,7 @@ class CalFluxRow:
         directionNode = rowdom.getElementsByTagName("direction")
         if len(directionNode) > 0:
 
-            directionStr = directionNode[0].firstChild.data.strip()
+            directionStr = self._getXMLNodeChildText(directionNode[0])
 
             self._direction = Parser.stringListToLists(
                 directionStr, Angle, "CalFlux", True
@@ -452,7 +464,7 @@ class CalFluxRow:
         if len(directionCodeNode) > 0:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionCodeNode[0])
             )
 
             self._directionCodeExists = True
@@ -461,7 +473,7 @@ class CalFluxRow:
         if len(directionEquinoxNode) > 0:
 
             self._directionEquinox = Angle(
-                directionEquinoxNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionEquinoxNode[0])
             )
 
             self._directionEquinoxExists = True
@@ -469,7 +481,7 @@ class CalFluxRow:
         PANode = rowdom.getElementsByTagName("PA")
         if len(PANode) > 0:
 
-            PAStr = PANode[0].firstChild.data.strip()
+            PAStr = self._getXMLNodeChildText(PANode[0])
 
             self._PA = Parser.stringListToLists(PAStr, Angle, "CalFlux", True)
 
@@ -478,7 +490,7 @@ class CalFluxRow:
         PAErrorNode = rowdom.getElementsByTagName("PAError")
         if len(PAErrorNode) > 0:
 
-            PAErrorStr = PAErrorNode[0].firstChild.data.strip()
+            PAErrorStr = self._getXMLNodeChildText(PAErrorNode[0])
 
             self._PAError = Parser.stringListToLists(PAErrorStr, Angle, "CalFlux", True)
 
@@ -487,7 +499,7 @@ class CalFluxRow:
         sizeNode = rowdom.getElementsByTagName("size")
         if len(sizeNode) > 0:
 
-            sizeStr = sizeNode[0].firstChild.data.strip()
+            sizeStr = self._getXMLNodeChildText(sizeNode[0])
 
             self._size = Parser.stringListToLists(sizeStr, Angle, "CalFlux", True)
 
@@ -496,7 +508,7 @@ class CalFluxRow:
         sizeErrorNode = rowdom.getElementsByTagName("sizeError")
         if len(sizeErrorNode) > 0:
 
-            sizeErrorStr = sizeErrorNode[0].firstChild.data.strip()
+            sizeErrorStr = self._getXMLNodeChildText(sizeErrorNode[0])
 
             self._sizeError = Parser.stringListToLists(
                 sizeErrorStr, Angle, "CalFlux", True
@@ -508,7 +520,7 @@ class CalFluxRow:
         if len(sourceModelNode) > 0:
 
             self._sourceModel = SourceModel.newSourceModel(
-                sourceModelNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(sourceModelNode[0])
             )
 
             self._sourceModelExists = True
@@ -517,11 +529,11 @@ class CalFluxRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 

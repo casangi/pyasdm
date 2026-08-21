@@ -66,6 +66,16 @@ class StationRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -187,26 +197,26 @@ class StationRow:
 
         stationIdNode = rowdom.getElementsByTagName("stationId")[0]
 
-        self._stationId = Tag(stationIdNode.firstChild.data.strip())
+        self._stationId = Tag(self._getXMLNodeChildText(stationIdNode))
 
         nameNode = rowdom.getElementsByTagName("name")[0]
 
-        self._name = str(nameNode.firstChild.data.strip())
+        self._name = str(self._getXMLNodeChildText(nameNode))
 
         positionNode = rowdom.getElementsByTagName("position")[0]
 
-        positionStr = positionNode.firstChild.data.strip()
+        positionStr = self._getXMLNodeChildText(positionNode)
 
         self._position = Parser.stringListToLists(positionStr, Length, "Station", True)
 
         typeNode = rowdom.getElementsByTagName("type")[0]
 
-        self._type = StationType.newStationType(typeNode.firstChild.data.strip())
+        self._type = StationType.newStationType(self._getXMLNodeChildText(typeNode))
 
         timeNode = rowdom.getElementsByTagName("time")
         if len(timeNode) > 0:
 
-            self._time = ArrayTime(timeNode[0].firstChild.data.strip())
+            self._time = ArrayTime(self._getXMLNodeChildText(timeNode[0]))
 
             self._timeExists = True
 

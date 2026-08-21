@@ -75,6 +75,16 @@ class ScaleRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -201,28 +211,30 @@ class ScaleRow:
 
         scaleIdNode = rowdom.getElementsByTagName("scaleId")[0]
 
-        self._scaleId = Tag(scaleIdNode.firstChild.data.strip())
+        self._scaleId = Tag(self._getXMLNodeChildText(scaleIdNode))
 
         timeScaleNode = rowdom.getElementsByTagName("timeScale")[0]
 
-        self._timeScale = TimeScale.newTimeScale(timeScaleNode.firstChild.data.strip())
+        self._timeScale = TimeScale.newTimeScale(
+            self._getXMLNodeChildText(timeScaleNode)
+        )
 
         crossDataScaleNode = rowdom.getElementsByTagName("crossDataScale")[0]
 
         self._crossDataScale = DataScale.newDataScale(
-            crossDataScaleNode.firstChild.data.strip()
+            self._getXMLNodeChildText(crossDataScaleNode)
         )
 
         autoDataScaleNode = rowdom.getElementsByTagName("autoDataScale")[0]
 
         self._autoDataScale = DataScale.newDataScale(
-            autoDataScaleNode.firstChild.data.strip()
+            self._getXMLNodeChildText(autoDataScaleNode)
         )
 
         weightTypeNode = rowdom.getElementsByTagName("weightType")[0]
 
         self._weightType = WeightType.newWeightType(
-            weightTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(weightTypeNode)
         )
 
         # from link values, if any

@@ -66,6 +66,16 @@ class DopplerRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -174,23 +184,23 @@ class DopplerRow:
 
         dopplerIdNode = rowdom.getElementsByTagName("dopplerId")[0]
 
-        self._dopplerId = int(dopplerIdNode.firstChild.data.strip())
+        self._dopplerId = int(self._getXMLNodeChildText(dopplerIdNode))
 
         transitionIndexNode = rowdom.getElementsByTagName("transitionIndex")[0]
 
-        self._transitionIndex = int(transitionIndexNode.firstChild.data.strip())
+        self._transitionIndex = int(self._getXMLNodeChildText(transitionIndexNode))
 
         velDefNode = rowdom.getElementsByTagName("velDef")[0]
 
         self._velDef = DopplerReferenceCode.newDopplerReferenceCode(
-            velDefNode.firstChild.data.strip()
+            self._getXMLNodeChildText(velDefNode)
         )
 
         # extrinsic attribute values
 
         sourceIdNode = rowdom.getElementsByTagName("sourceId")[0]
 
-        self._sourceId = int(sourceIdNode.firstChild.data.strip())
+        self._sourceId = int(self._getXMLNodeChildText(sourceIdNode))
 
         # from link values, if any
 

@@ -69,6 +69,16 @@ class PointingModelRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -234,15 +244,15 @@ class PointingModelRow:
 
         pointingModelIdNode = rowdom.getElementsByTagName("pointingModelId")[0]
 
-        self._pointingModelId = int(pointingModelIdNode.firstChild.data.strip())
+        self._pointingModelId = int(self._getXMLNodeChildText(pointingModelIdNode))
 
         numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
 
-        self._numCoeff = int(numCoeffNode.firstChild.data.strip())
+        self._numCoeff = int(self._getXMLNodeChildText(numCoeffNode))
 
         coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
 
-        coeffNameStr = coeffNameNode.firstChild.data.strip()
+        coeffNameStr = self._getXMLNodeChildText(coeffNameNode)
 
         self._coeffName = Parser.stringListToLists(
             coeffNameStr, str, "PointingModel", False
@@ -250,7 +260,7 @@ class PointingModelRow:
 
         coeffValNode = rowdom.getElementsByTagName("coeffVal")[0]
 
-        coeffValStr = coeffValNode.firstChild.data.strip()
+        coeffValStr = self._getXMLNodeChildText(coeffValNode)
 
         self._coeffVal = Parser.stringListToLists(
             coeffValStr, float, "PointingModel", False
@@ -259,23 +269,23 @@ class PointingModelRow:
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
 
         self._polarizationType = PolarizationType.newPolarizationType(
-            polarizationTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(polarizationTypeNode)
         )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
         assocNatureNode = rowdom.getElementsByTagName("assocNature")[0]
 
-        self._assocNature = str(assocNatureNode.firstChild.data.strip())
+        self._assocNature = str(self._getXMLNodeChildText(assocNatureNode))
 
         coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")
         if len(coeffFormulaNode) > 0:
 
-            coeffFormulaStr = coeffFormulaNode[0].firstChild.data.strip()
+            coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode[0])
 
             self._coeffFormula = Parser.stringListToLists(
                 coeffFormulaStr, str, "PointingModel", False
@@ -287,14 +297,14 @@ class PointingModelRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         assocPointingModelIdNode = rowdom.getElementsByTagName("assocPointingModelId")[
             0
         ]
 
         self._assocPointingModelId = int(
-            assocPointingModelIdNode.firstChild.data.strip()
+            self._getXMLNodeChildText(assocPointingModelIdNode)
         )
 
         # from link values, if any

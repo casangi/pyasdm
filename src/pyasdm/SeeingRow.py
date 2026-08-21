@@ -63,6 +63,16 @@ class SeeingRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -177,15 +187,17 @@ class SeeingRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         numBaseLengthNode = rowdom.getElementsByTagName("numBaseLength")[0]
 
-        self._numBaseLength = int(numBaseLengthNode.firstChild.data.strip())
+        self._numBaseLength = int(self._getXMLNodeChildText(numBaseLengthNode))
 
         baseLengthNode = rowdom.getElementsByTagName("baseLength")[0]
 
-        baseLengthStr = baseLengthNode.firstChild.data.strip()
+        baseLengthStr = self._getXMLNodeChildText(baseLengthNode)
 
         self._baseLength = Parser.stringListToLists(
             baseLengthStr, Length, "Seeing", True
@@ -193,17 +205,17 @@ class SeeingRow:
 
         phaseRmsNode = rowdom.getElementsByTagName("phaseRms")[0]
 
-        phaseRmsStr = phaseRmsNode.firstChild.data.strip()
+        phaseRmsStr = self._getXMLNodeChildText(phaseRmsNode)
 
         self._phaseRms = Parser.stringListToLists(phaseRmsStr, Angle, "Seeing", True)
 
         seeingNode = rowdom.getElementsByTagName("seeing")[0]
 
-        self._seeing = float(seeingNode.firstChild.data.strip())
+        self._seeing = float(self._getXMLNodeChildText(seeingNode))
 
         exponentNode = rowdom.getElementsByTagName("exponent")[0]
 
-        self._exponent = float(exponentNode.firstChild.data.strip())
+        self._exponent = float(self._getXMLNodeChildText(exponentNode))
 
         # from link values, if any
 

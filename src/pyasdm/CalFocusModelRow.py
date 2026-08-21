@@ -72,6 +72,16 @@ class CalFocusModelRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -282,45 +292,45 @@ class CalFocusModelRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
 
         self._polarizationType = PolarizationType.newPolarizationType(
-            polarizationTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(polarizationTypeNode)
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
 
         self._antennaMake = AntennaMake.newAntennaMake(
-            antennaMakeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaMakeNode)
         )
 
         numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
 
-        self._numCoeff = int(numCoeffNode.firstChild.data.strip())
+        self._numCoeff = int(self._getXMLNodeChildText(numCoeffNode))
 
         numSourceObsNode = rowdom.getElementsByTagName("numSourceObs")[0]
 
-        self._numSourceObs = int(numSourceObsNode.firstChild.data.strip())
+        self._numSourceObs = int(self._getXMLNodeChildText(numSourceObsNode))
 
         coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
 
-        coeffNameStr = coeffNameNode.firstChild.data.strip()
+        coeffNameStr = self._getXMLNodeChildText(coeffNameNode)
 
         self._coeffName = Parser.stringListToLists(
             coeffNameStr, str, "CalFocusModel", False
@@ -328,7 +338,7 @@ class CalFocusModelRow:
 
         coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")[0]
 
-        coeffFormulaStr = coeffFormulaNode.firstChild.data.strip()
+        coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode)
 
         self._coeffFormula = Parser.stringListToLists(
             coeffFormulaStr, str, "CalFocusModel", False
@@ -336,7 +346,7 @@ class CalFocusModelRow:
 
         coeffValueNode = rowdom.getElementsByTagName("coeffValue")[0]
 
-        coeffValueStr = coeffValueNode.firstChild.data.strip()
+        coeffValueStr = self._getXMLNodeChildText(coeffValueNode)
 
         self._coeffValue = Parser.stringListToLists(
             coeffValueStr, float, "CalFocusModel", False
@@ -344,7 +354,7 @@ class CalFocusModelRow:
 
         coeffErrorNode = rowdom.getElementsByTagName("coeffError")[0]
 
-        coeffErrorStr = coeffErrorNode.firstChild.data.strip()
+        coeffErrorStr = self._getXMLNodeChildText(coeffErrorNode)
 
         self._coeffError = Parser.stringListToLists(
             coeffErrorStr, float, "CalFocusModel", False
@@ -352,7 +362,7 @@ class CalFocusModelRow:
 
         coeffFixedNode = rowdom.getElementsByTagName("coeffFixed")[0]
 
-        coeffFixedStr = coeffFixedNode.firstChild.data.strip()
+        coeffFixedStr = self._getXMLNodeChildText(coeffFixedNode)
 
         self._coeffFixed = Parser.stringListToLists(
             coeffFixedStr, bool, "CalFocusModel", False
@@ -360,11 +370,11 @@ class CalFocusModelRow:
 
         focusModelNode = rowdom.getElementsByTagName("focusModel")[0]
 
-        self._focusModel = str(focusModelNode.firstChild.data.strip())
+        self._focusModel = str(self._getXMLNodeChildText(focusModelNode))
 
         focusRMSNode = rowdom.getElementsByTagName("focusRMS")[0]
 
-        focusRMSStr = focusRMSNode.firstChild.data.strip()
+        focusRMSStr = self._getXMLNodeChildText(focusRMSNode)
 
         self._focusRMS = Parser.stringListToLists(
             focusRMSStr, Length, "CalFocusModel", True
@@ -372,17 +382,19 @@ class CalFocusModelRow:
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        self._reducedChiSquared = float(reducedChiSquaredNode.firstChild.data.strip())
+        self._reducedChiSquared = float(
+            self._getXMLNodeChildText(reducedChiSquaredNode)
+        )
 
         # extrinsic attribute values
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 

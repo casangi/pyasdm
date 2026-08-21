@@ -75,6 +75,16 @@ class CalFocusRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -610,43 +620,43 @@ class CalFocusRow:
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
         ambientTemperatureNode = rowdom.getElementsByTagName("ambientTemperature")[0]
 
         self._ambientTemperature = Temperature(
-            ambientTemperatureNode.firstChild.data.strip()
+            self._getXMLNodeChildText(ambientTemperatureNode)
         )
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
         focusMethodNode = rowdom.getElementsByTagName("focusMethod")[0]
 
         self._focusMethod = FocusMethod.newFocusMethod(
-            focusMethodNode.firstChild.data.strip()
+            self._getXMLNodeChildText(focusMethodNode)
         )
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalFocus", True
@@ -654,7 +664,7 @@ class CalFocusRow:
 
         pointingDirectionNode = rowdom.getElementsByTagName("pointingDirection")[0]
 
-        pointingDirectionStr = pointingDirectionNode.firstChild.data.strip()
+        pointingDirectionStr = self._getXMLNodeChildText(pointingDirectionNode)
 
         self._pointingDirection = Parser.stringListToLists(
             pointingDirectionStr, Angle, "CalFocus", True
@@ -662,18 +672,18 @@ class CalFocusRow:
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalFocus", False
         )
 
         wereFixedNode = rowdom.getElementsByTagName("wereFixed")[0]
 
-        wereFixedStr = wereFixedNode.firstChild.data.strip()
+        wereFixedStr = self._getXMLNodeChildText(wereFixedNode)
 
         self._wereFixed = Parser.stringListToLists(
             wereFixedStr, bool, "CalFocus", False
@@ -681,13 +691,13 @@ class CalFocusRow:
 
         offsetNode = rowdom.getElementsByTagName("offset")[0]
 
-        offsetStr = offsetNode.firstChild.data.strip()
+        offsetStr = self._getXMLNodeChildText(offsetNode)
 
         self._offset = Parser.stringListToLists(offsetStr, Length, "CalFocus", True)
 
         offsetErrorNode = rowdom.getElementsByTagName("offsetError")[0]
 
-        offsetErrorStr = offsetErrorNode.firstChild.data.strip()
+        offsetErrorStr = self._getXMLNodeChildText(offsetErrorNode)
 
         self._offsetError = Parser.stringListToLists(
             offsetErrorStr, Length, "CalFocus", True
@@ -695,7 +705,7 @@ class CalFocusRow:
 
         offsetWasTiedNode = rowdom.getElementsByTagName("offsetWasTied")[0]
 
-        offsetWasTiedStr = offsetWasTiedNode.firstChild.data.strip()
+        offsetWasTiedStr = self._getXMLNodeChildText(offsetWasTiedNode)
 
         self._offsetWasTied = Parser.stringListToLists(
             offsetWasTiedStr, bool, "CalFocus", False
@@ -703,7 +713,7 @@ class CalFocusRow:
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+        reducedChiSquaredStr = self._getXMLNodeChildText(reducedChiSquaredNode)
 
         self._reducedChiSquared = Parser.stringListToLists(
             reducedChiSquaredStr, float, "CalFocus", False
@@ -711,7 +721,7 @@ class CalFocusRow:
 
         positionNode = rowdom.getElementsByTagName("position")[0]
 
-        positionStr = positionNode.firstChild.data.strip()
+        positionStr = self._getXMLNodeChildText(positionNode)
 
         self._position = Parser.stringListToLists(positionStr, Length, "CalFocus", True)
 
@@ -719,7 +729,7 @@ class CalFocusRow:
         if len(polarizationsAveragedNode) > 0:
 
             self._polarizationsAveraged = bool(
-                polarizationsAveragedNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(polarizationsAveragedNode[0])
             )
 
             self._polarizationsAveragedExists = True
@@ -727,7 +737,7 @@ class CalFocusRow:
         focusCurveWidthNode = rowdom.getElementsByTagName("focusCurveWidth")
         if len(focusCurveWidthNode) > 0:
 
-            focusCurveWidthStr = focusCurveWidthNode[0].firstChild.data.strip()
+            focusCurveWidthStr = self._getXMLNodeChildText(focusCurveWidthNode[0])
 
             self._focusCurveWidth = Parser.stringListToLists(
                 focusCurveWidthStr, Length, "CalFocus", True
@@ -738,9 +748,9 @@ class CalFocusRow:
         focusCurveWidthErrorNode = rowdom.getElementsByTagName("focusCurveWidthError")
         if len(focusCurveWidthErrorNode) > 0:
 
-            focusCurveWidthErrorStr = focusCurveWidthErrorNode[
-                0
-            ].firstChild.data.strip()
+            focusCurveWidthErrorStr = self._getXMLNodeChildText(
+                focusCurveWidthErrorNode[0]
+            )
 
             self._focusCurveWidthError = Parser.stringListToLists(
                 focusCurveWidthErrorStr, Length, "CalFocus", True
@@ -751,7 +761,7 @@ class CalFocusRow:
         focusCurveWasFixedNode = rowdom.getElementsByTagName("focusCurveWasFixed")
         if len(focusCurveWasFixedNode) > 0:
 
-            focusCurveWasFixedStr = focusCurveWasFixedNode[0].firstChild.data.strip()
+            focusCurveWasFixedStr = self._getXMLNodeChildText(focusCurveWasFixedNode[0])
 
             self._focusCurveWasFixed = Parser.stringListToLists(
                 focusCurveWasFixedStr, bool, "CalFocus", False
@@ -762,7 +772,7 @@ class CalFocusRow:
         offIntensityNode = rowdom.getElementsByTagName("offIntensity")
         if len(offIntensityNode) > 0:
 
-            offIntensityStr = offIntensityNode[0].firstChild.data.strip()
+            offIntensityStr = self._getXMLNodeChildText(offIntensityNode[0])
 
             self._offIntensity = Parser.stringListToLists(
                 offIntensityStr, Temperature, "CalFocus", True
@@ -773,7 +783,7 @@ class CalFocusRow:
         offIntensityErrorNode = rowdom.getElementsByTagName("offIntensityError")
         if len(offIntensityErrorNode) > 0:
 
-            offIntensityErrorStr = offIntensityErrorNode[0].firstChild.data.strip()
+            offIntensityErrorStr = self._getXMLNodeChildText(offIntensityErrorNode[0])
 
             self._offIntensityError = Parser.stringListToLists(
                 offIntensityErrorStr, Temperature, "CalFocus", True
@@ -785,7 +795,7 @@ class CalFocusRow:
         if len(offIntensityWasFixedNode) > 0:
 
             self._offIntensityWasFixed = bool(
-                offIntensityWasFixedNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(offIntensityWasFixedNode[0])
             )
 
             self._offIntensityWasFixedExists = True
@@ -793,7 +803,7 @@ class CalFocusRow:
         peakIntensityNode = rowdom.getElementsByTagName("peakIntensity")
         if len(peakIntensityNode) > 0:
 
-            peakIntensityStr = peakIntensityNode[0].firstChild.data.strip()
+            peakIntensityStr = self._getXMLNodeChildText(peakIntensityNode[0])
 
             self._peakIntensity = Parser.stringListToLists(
                 peakIntensityStr, Temperature, "CalFocus", True
@@ -804,7 +814,7 @@ class CalFocusRow:
         peakIntensityErrorNode = rowdom.getElementsByTagName("peakIntensityError")
         if len(peakIntensityErrorNode) > 0:
 
-            peakIntensityErrorStr = peakIntensityErrorNode[0].firstChild.data.strip()
+            peakIntensityErrorStr = self._getXMLNodeChildText(peakIntensityErrorNode[0])
 
             self._peakIntensityError = Parser.stringListToLists(
                 peakIntensityErrorStr, Temperature, "CalFocus", True
@@ -816,7 +826,7 @@ class CalFocusRow:
         if len(peakIntensityWasFixedNode) > 0:
 
             self._peakIntensityWasFixed = bool(
-                peakIntensityWasFixedNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(peakIntensityWasFixedNode[0])
             )
 
             self._peakIntensityWasFixedExists = True
@@ -824,7 +834,7 @@ class CalFocusRow:
         astigmPlusNode = rowdom.getElementsByTagName("astigmPlus")
         if len(astigmPlusNode) > 0:
 
-            astigmPlusStr = astigmPlusNode[0].firstChild.data.strip()
+            astigmPlusStr = self._getXMLNodeChildText(astigmPlusNode[0])
 
             self._astigmPlus = Parser.stringListToLists(
                 astigmPlusStr, Length, "CalFocus", True
@@ -835,7 +845,7 @@ class CalFocusRow:
         astigmPlusErrorNode = rowdom.getElementsByTagName("astigmPlusError")
         if len(astigmPlusErrorNode) > 0:
 
-            astigmPlusErrorStr = astigmPlusErrorNode[0].firstChild.data.strip()
+            astigmPlusErrorStr = self._getXMLNodeChildText(astigmPlusErrorNode[0])
 
             self._astigmPlusError = Parser.stringListToLists(
                 astigmPlusErrorStr, Length, "CalFocus", True
@@ -846,7 +856,7 @@ class CalFocusRow:
         astigmMultNode = rowdom.getElementsByTagName("astigmMult")
         if len(astigmMultNode) > 0:
 
-            astigmMultStr = astigmMultNode[0].firstChild.data.strip()
+            astigmMultStr = self._getXMLNodeChildText(astigmMultNode[0])
 
             self._astigmMult = Parser.stringListToLists(
                 astigmMultStr, Length, "CalFocus", True
@@ -857,7 +867,7 @@ class CalFocusRow:
         astigmMultErrorNode = rowdom.getElementsByTagName("astigmMultError")
         if len(astigmMultErrorNode) > 0:
 
-            astigmMultErrorStr = astigmMultErrorNode[0].firstChild.data.strip()
+            astigmMultErrorStr = self._getXMLNodeChildText(astigmMultErrorNode[0])
 
             self._astigmMultError = Parser.stringListToLists(
                 astigmMultErrorStr, Length, "CalFocus", True
@@ -868,7 +878,7 @@ class CalFocusRow:
         illumOffsetNode = rowdom.getElementsByTagName("illumOffset")
         if len(illumOffsetNode) > 0:
 
-            illumOffsetStr = illumOffsetNode[0].firstChild.data.strip()
+            illumOffsetStr = self._getXMLNodeChildText(illumOffsetNode[0])
 
             self._illumOffset = Parser.stringListToLists(
                 illumOffsetStr, Length, "CalFocus", True
@@ -879,7 +889,7 @@ class CalFocusRow:
         illumOffsetErrorNode = rowdom.getElementsByTagName("illumOffsetError")
         if len(illumOffsetErrorNode) > 0:
 
-            illumOffsetErrorStr = illumOffsetErrorNode[0].firstChild.data.strip()
+            illumOffsetErrorStr = self._getXMLNodeChildText(illumOffsetErrorNode[0])
 
             self._illumOffsetError = Parser.stringListToLists(
                 illumOffsetErrorStr, Length, "CalFocus", True
@@ -890,7 +900,7 @@ class CalFocusRow:
         fitRMSNode = rowdom.getElementsByTagName("fitRMS")
         if len(fitRMSNode) > 0:
 
-            fitRMSStr = fitRMSNode[0].firstChild.data.strip()
+            fitRMSStr = self._getXMLNodeChildText(fitRMSNode[0])
 
             self._fitRMS = Parser.stringListToLists(fitRMSStr, Length, "CalFocus", True)
 
@@ -900,11 +910,11 @@ class CalFocusRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 

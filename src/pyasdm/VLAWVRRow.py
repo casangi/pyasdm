@@ -63,6 +63,16 @@ class VLAWVRRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -227,28 +237,30 @@ class VLAWVRRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         numChanNode = rowdom.getElementsByTagName("numChan")[0]
 
-        self._numChan = int(numChanNode.firstChild.data.strip())
+        self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
         hiValuesNode = rowdom.getElementsByTagName("hiValues")[0]
 
-        hiValuesStr = hiValuesNode.firstChild.data.strip()
+        hiValuesStr = self._getXMLNodeChildText(hiValuesNode)
 
         self._hiValues = Parser.stringListToLists(hiValuesStr, float, "VLAWVR", False)
 
         loValuesNode = rowdom.getElementsByTagName("loValues")[0]
 
-        loValuesStr = loValuesNode.firstChild.data.strip()
+        loValuesStr = self._getXMLNodeChildText(loValuesNode)
 
         self._loValues = Parser.stringListToLists(loValuesStr, float, "VLAWVR", False)
 
         chanFreqCenterNode = rowdom.getElementsByTagName("chanFreqCenter")
         if len(chanFreqCenterNode) > 0:
 
-            chanFreqCenterStr = chanFreqCenterNode[0].firstChild.data.strip()
+            chanFreqCenterStr = self._getXMLNodeChildText(chanFreqCenterNode[0])
 
             self._chanFreqCenter = Parser.stringListToLists(
                 chanFreqCenterStr, Frequency, "VLAWVR", True
@@ -259,7 +271,7 @@ class VLAWVRRow:
         chanWidthNode = rowdom.getElementsByTagName("chanWidth")
         if len(chanWidthNode) > 0:
 
-            chanWidthStr = chanWidthNode[0].firstChild.data.strip()
+            chanWidthStr = self._getXMLNodeChildText(chanWidthNode[0])
 
             self._chanWidth = Parser.stringListToLists(
                 chanWidthStr, Frequency, "VLAWVR", True
@@ -270,7 +282,7 @@ class VLAWVRRow:
         wvrIdNode = rowdom.getElementsByTagName("wvrId")
         if len(wvrIdNode) > 0:
 
-            self._wvrId = str(wvrIdNode[0].firstChild.data.strip())
+            self._wvrId = str(self._getXMLNodeChildText(wvrIdNode[0]))
 
             self._wvrIdExists = True
 
@@ -278,7 +290,7 @@ class VLAWVRRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         # from link values, if any
 

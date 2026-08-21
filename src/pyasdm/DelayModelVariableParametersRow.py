@@ -69,6 +69,16 @@ class DelayModelVariableParametersRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -326,40 +336,40 @@ class DelayModelVariableParametersRow:
         )[0]
 
         self._delayModelVariableParametersId = Tag(
-            delayModelVariableParametersIdNode.firstChild.data.strip()
+            self._getXMLNodeChildText(delayModelVariableParametersIdNode)
         )
 
         timeNode = rowdom.getElementsByTagName("time")[0]
 
-        self._time = ArrayTime(timeNode.firstChild.data.strip())
+        self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
         ut1_utcNode = rowdom.getElementsByTagName("ut1_utc")[0]
 
-        self._ut1_utc = float(ut1_utcNode.firstChild.data.strip())
+        self._ut1_utc = float(self._getXMLNodeChildText(ut1_utcNode))
 
         iat_utcNode = rowdom.getElementsByTagName("iat_utc")[0]
 
-        self._iat_utc = float(iat_utcNode.firstChild.data.strip())
+        self._iat_utc = float(self._getXMLNodeChildText(iat_utcNode))
 
         timeTypeNode = rowdom.getElementsByTagName("timeType")[0]
 
         self._timeType = DifferenceType.newDifferenceType(
-            timeTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(timeTypeNode)
         )
 
         gstAtUt0Node = rowdom.getElementsByTagName("gstAtUt0")[0]
 
-        self._gstAtUt0 = Angle(gstAtUt0Node.firstChild.data.strip())
+        self._gstAtUt0 = Angle(self._getXMLNodeChildText(gstAtUt0Node))
 
         earthRotationRateNode = rowdom.getElementsByTagName("earthRotationRate")[0]
 
         self._earthRotationRate = AngularRate(
-            earthRotationRateNode.firstChild.data.strip()
+            self._getXMLNodeChildText(earthRotationRateNode)
         )
 
         polarOffsetsNode = rowdom.getElementsByTagName("polarOffsets")[0]
 
-        polarOffsetsStr = polarOffsetsNode.firstChild.data.strip()
+        polarOffsetsStr = self._getXMLNodeChildText(polarOffsetsNode)
 
         self._polarOffsets = Parser.stringListToLists(
             polarOffsetsStr, float, "DelayModelVariableParameters", False
@@ -368,14 +378,14 @@ class DelayModelVariableParametersRow:
         polarOffsetsTypeNode = rowdom.getElementsByTagName("polarOffsetsType")[0]
 
         self._polarOffsetsType = DifferenceType.newDifferenceType(
-            polarOffsetsTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(polarOffsetsTypeNode)
         )
 
         nutationInLongitudeNode = rowdom.getElementsByTagName("nutationInLongitude")
         if len(nutationInLongitudeNode) > 0:
 
             self._nutationInLongitude = Angle(
-                nutationInLongitudeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(nutationInLongitudeNode[0])
             )
 
             self._nutationInLongitudeExists = True
@@ -386,7 +396,7 @@ class DelayModelVariableParametersRow:
         if len(nutationInLongitudeRateNode) > 0:
 
             self._nutationInLongitudeRate = AngularRate(
-                nutationInLongitudeRateNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(nutationInLongitudeRateNode[0])
             )
 
             self._nutationInLongitudeRateExists = True
@@ -395,7 +405,7 @@ class DelayModelVariableParametersRow:
         if len(nutationInObliquityNode) > 0:
 
             self._nutationInObliquity = Angle(
-                nutationInObliquityNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(nutationInObliquityNode[0])
             )
 
             self._nutationInObliquityExists = True
@@ -406,7 +416,7 @@ class DelayModelVariableParametersRow:
         if len(nutationInObliquityRateNode) > 0:
 
             self._nutationInObliquityRate = AngularRate(
-                nutationInObliquityRateNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(nutationInObliquityRateNode[0])
             )
 
             self._nutationInObliquityRateExists = True
@@ -415,7 +425,7 @@ class DelayModelVariableParametersRow:
         if len(delayModelVersionNode) > 0:
 
             self._delayModelVersion = str(
-                delayModelVersionNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(delayModelVersionNode[0])
             )
 
             self._delayModelVersionExists = True
@@ -427,7 +437,7 @@ class DelayModelVariableParametersRow:
         )[0]
 
         self._delayModelFixedParametersId = Tag(
-            delayModelFixedParametersIdNode.firstChild.data.strip()
+            self._getXMLNodeChildText(delayModelFixedParametersIdNode)
         )
 
         # from link values, if any

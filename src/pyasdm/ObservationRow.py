@@ -63,6 +63,16 @@ class ObservationRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -145,7 +155,7 @@ class ObservationRow:
 
         observationIdNode = rowdom.getElementsByTagName("observationId")[0]
 
-        self._observationId = Tag(observationIdNode.firstChild.data.strip())
+        self._observationId = Tag(self._getXMLNodeChildText(observationIdNode))
 
         # from link values, if any
 

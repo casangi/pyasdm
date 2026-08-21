@@ -63,6 +63,16 @@ class DelayModelFixedParametersRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -443,18 +453,18 @@ class DelayModelFixedParametersRow:
         )[0]
 
         self._delayModelFixedParametersId = Tag(
-            delayModelFixedParametersIdNode.firstChild.data.strip()
+            self._getXMLNodeChildText(delayModelFixedParametersIdNode)
         )
 
         delayModelVersionNode = rowdom.getElementsByTagName("delayModelVersion")[0]
 
-        self._delayModelVersion = str(delayModelVersionNode.firstChild.data.strip())
+        self._delayModelVersion = str(self._getXMLNodeChildText(delayModelVersionNode))
 
         gaussConstantNode = rowdom.getElementsByTagName("gaussConstant")
         if len(gaussConstantNode) > 0:
 
             self._gaussConstant = AngularRate(
-                gaussConstantNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(gaussConstantNode[0])
             )
 
             self._gaussConstantExists = True
@@ -463,7 +473,7 @@ class DelayModelFixedParametersRow:
         if len(newtonianConstantNode) > 0:
 
             self._newtonianConstant = float(
-                newtonianConstantNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(newtonianConstantNode[0])
             )
 
             self._newtonianConstantExists = True
@@ -471,7 +481,7 @@ class DelayModelFixedParametersRow:
         gravityNode = rowdom.getElementsByTagName("gravity")
         if len(gravityNode) > 0:
 
-            self._gravity = float(gravityNode[0].firstChild.data.strip())
+            self._gravity = float(self._getXMLNodeChildText(gravityNode[0]))
 
             self._gravityExists = True
 
@@ -479,7 +489,7 @@ class DelayModelFixedParametersRow:
         if len(earthFlatteningNode) > 0:
 
             self._earthFlattening = float(
-                earthFlatteningNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(earthFlatteningNode[0])
             )
 
             self._earthFlatteningExists = True
@@ -487,7 +497,7 @@ class DelayModelFixedParametersRow:
         earthRadiusNode = rowdom.getElementsByTagName("earthRadius")
         if len(earthRadiusNode) > 0:
 
-            self._earthRadius = Length(earthRadiusNode[0].firstChild.data.strip())
+            self._earthRadius = Length(self._getXMLNodeChildText(earthRadiusNode[0]))
 
             self._earthRadiusExists = True
 
@@ -495,7 +505,7 @@ class DelayModelFixedParametersRow:
         if len(moonEarthMassRatioNode) > 0:
 
             self._moonEarthMassRatio = float(
-                moonEarthMassRatioNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(moonEarthMassRatioNode[0])
             )
 
             self._moonEarthMassRatioExists = True
@@ -503,49 +513,49 @@ class DelayModelFixedParametersRow:
         ephemerisEpochNode = rowdom.getElementsByTagName("ephemerisEpoch")
         if len(ephemerisEpochNode) > 0:
 
-            self._ephemerisEpoch = str(ephemerisEpochNode[0].firstChild.data.strip())
+            self._ephemerisEpoch = str(self._getXMLNodeChildText(ephemerisEpochNode[0]))
 
             self._ephemerisEpochExists = True
 
         earthTideLagNode = rowdom.getElementsByTagName("earthTideLag")
         if len(earthTideLagNode) > 0:
 
-            self._earthTideLag = float(earthTideLagNode[0].firstChild.data.strip())
+            self._earthTideLag = float(self._getXMLNodeChildText(earthTideLagNode[0]))
 
             self._earthTideLagExists = True
 
         earthGMNode = rowdom.getElementsByTagName("earthGM")
         if len(earthGMNode) > 0:
 
-            self._earthGM = float(earthGMNode[0].firstChild.data.strip())
+            self._earthGM = float(self._getXMLNodeChildText(earthGMNode[0]))
 
             self._earthGMExists = True
 
         moonGMNode = rowdom.getElementsByTagName("moonGM")
         if len(moonGMNode) > 0:
 
-            self._moonGM = float(moonGMNode[0].firstChild.data.strip())
+            self._moonGM = float(self._getXMLNodeChildText(moonGMNode[0]))
 
             self._moonGMExists = True
 
         sunGMNode = rowdom.getElementsByTagName("sunGM")
         if len(sunGMNode) > 0:
 
-            self._sunGM = float(sunGMNode[0].firstChild.data.strip())
+            self._sunGM = float(self._getXMLNodeChildText(sunGMNode[0]))
 
             self._sunGMExists = True
 
         loveNumberHNode = rowdom.getElementsByTagName("loveNumberH")
         if len(loveNumberHNode) > 0:
 
-            self._loveNumberH = float(loveNumberHNode[0].firstChild.data.strip())
+            self._loveNumberH = float(self._getXMLNodeChildText(loveNumberHNode[0]))
 
             self._loveNumberHExists = True
 
         loveNumberLNode = rowdom.getElementsByTagName("loveNumberL")
         if len(loveNumberLNode) > 0:
 
-            self._loveNumberL = float(loveNumberLNode[0].firstChild.data.strip())
+            self._loveNumberL = float(self._getXMLNodeChildText(loveNumberLNode[0]))
 
             self._loveNumberLExists = True
 
@@ -553,7 +563,7 @@ class DelayModelFixedParametersRow:
         if len(precessionConstantNode) > 0:
 
             self._precessionConstant = AngularRate(
-                precessionConstantNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(precessionConstantNode[0])
             )
 
             self._precessionConstantExists = True
@@ -561,21 +571,23 @@ class DelayModelFixedParametersRow:
         lightTime1AUNode = rowdom.getElementsByTagName("lightTime1AU")
         if len(lightTime1AUNode) > 0:
 
-            self._lightTime1AU = float(lightTime1AUNode[0].firstChild.data.strip())
+            self._lightTime1AU = float(self._getXMLNodeChildText(lightTime1AUNode[0]))
 
             self._lightTime1AUExists = True
 
         speedOfLightNode = rowdom.getElementsByTagName("speedOfLight")
         if len(speedOfLightNode) > 0:
 
-            self._speedOfLight = Speed(speedOfLightNode[0].firstChild.data.strip())
+            self._speedOfLight = Speed(self._getXMLNodeChildText(speedOfLightNode[0]))
 
             self._speedOfLightExists = True
 
         delayModelFlagsNode = rowdom.getElementsByTagName("delayModelFlags")
         if len(delayModelFlagsNode) > 0:
 
-            self._delayModelFlags = str(delayModelFlagsNode[0].firstChild.data.strip())
+            self._delayModelFlags = str(
+                self._getXMLNodeChildText(delayModelFlagsNode[0])
+            )
 
             self._delayModelFlagsExists = True
 
@@ -583,7 +595,7 @@ class DelayModelFixedParametersRow:
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
         # from link values, if any
 

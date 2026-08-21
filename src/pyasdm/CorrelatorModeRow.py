@@ -78,6 +78,16 @@ class CorrelatorModeRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -248,22 +258,22 @@ class CorrelatorModeRow:
 
         correlatorModeIdNode = rowdom.getElementsByTagName("correlatorModeId")[0]
 
-        self._correlatorModeId = Tag(correlatorModeIdNode.firstChild.data.strip())
+        self._correlatorModeId = Tag(self._getXMLNodeChildText(correlatorModeIdNode))
 
         numBasebandNode = rowdom.getElementsByTagName("numBaseband")[0]
 
-        self._numBaseband = int(numBasebandNode.firstChild.data.strip())
+        self._numBaseband = int(self._getXMLNodeChildText(numBasebandNode))
 
         basebandNamesNode = rowdom.getElementsByTagName("basebandNames")[0]
 
-        basebandNamesStr = basebandNamesNode.firstChild.data.strip()
+        basebandNamesStr = self._getXMLNodeChildText(basebandNamesNode)
         self._basebandNames = Parser.stringListToLists(
             basebandNamesStr, BasebandName, "CorrelatorMode", False
         )
 
         basebandConfigNode = rowdom.getElementsByTagName("basebandConfig")[0]
 
-        basebandConfigStr = basebandConfigNode.firstChild.data.strip()
+        basebandConfigStr = self._getXMLNodeChildText(basebandConfigNode)
 
         self._basebandConfig = Parser.stringListToLists(
             basebandConfigStr, int, "CorrelatorMode", False
@@ -271,26 +281,28 @@ class CorrelatorModeRow:
 
         accumModeNode = rowdom.getElementsByTagName("accumMode")[0]
 
-        self._accumMode = AccumMode.newAccumMode(accumModeNode.firstChild.data.strip())
+        self._accumMode = AccumMode.newAccumMode(
+            self._getXMLNodeChildText(accumModeNode)
+        )
 
         binModeNode = rowdom.getElementsByTagName("binMode")[0]
 
-        self._binMode = int(binModeNode.firstChild.data.strip())
+        self._binMode = int(self._getXMLNodeChildText(binModeNode))
 
         numAxesNode = rowdom.getElementsByTagName("numAxes")[0]
 
-        self._numAxes = int(numAxesNode.firstChild.data.strip())
+        self._numAxes = int(self._getXMLNodeChildText(numAxesNode))
 
         axesOrderArrayNode = rowdom.getElementsByTagName("axesOrderArray")[0]
 
-        axesOrderArrayStr = axesOrderArrayNode.firstChild.data.strip()
+        axesOrderArrayStr = self._getXMLNodeChildText(axesOrderArrayNode)
         self._axesOrderArray = Parser.stringListToLists(
             axesOrderArrayStr, AxisName, "CorrelatorMode", False
         )
 
         filterModeNode = rowdom.getElementsByTagName("filterMode")[0]
 
-        filterModeStr = filterModeNode.firstChild.data.strip()
+        filterModeStr = self._getXMLNodeChildText(filterModeNode)
         self._filterMode = Parser.stringListToLists(
             filterModeStr, FilterMode, "CorrelatorMode", False
         )
@@ -298,7 +310,7 @@ class CorrelatorModeRow:
         correlatorNameNode = rowdom.getElementsByTagName("correlatorName")[0]
 
         self._correlatorName = CorrelatorName.newCorrelatorName(
-            correlatorNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(correlatorNameNode)
         )
 
         correlatorSoftwareVersionNode = rowdom.getElementsByTagName(
@@ -307,7 +319,7 @@ class CorrelatorModeRow:
         if len(correlatorSoftwareVersionNode) > 0:
 
             self._correlatorSoftwareVersion = str(
-                correlatorSoftwareVersionNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(correlatorSoftwareVersionNode[0])
             )
 
             self._correlatorSoftwareVersionExists = True

@@ -75,6 +75,16 @@ class CalAtmosphereRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -484,42 +494,42 @@ class CalAtmosphereRow:
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
         basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         numFreqNode = rowdom.getElementsByTagName("numFreq")[0]
 
-        self._numFreq = int(numFreqNode.firstChild.data.strip())
+        self._numFreq = int(self._getXMLNodeChildText(numFreqNode))
 
         numLoadNode = rowdom.getElementsByTagName("numLoad")[0]
 
-        self._numLoad = int(numLoadNode.firstChild.data.strip())
+        self._numLoad = int(self._getXMLNodeChildText(numLoadNode))
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
         forwardEffSpectrumNode = rowdom.getElementsByTagName("forwardEffSpectrum")[0]
 
-        forwardEffSpectrumStr = forwardEffSpectrumNode.firstChild.data.strip()
+        forwardEffSpectrumStr = self._getXMLNodeChildText(forwardEffSpectrumNode)
 
         self._forwardEffSpectrum = Parser.stringListToLists(
             forwardEffSpectrumStr, float, "CalAtmosphere", False
@@ -527,7 +537,7 @@ class CalAtmosphereRow:
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalAtmosphere", True
@@ -535,17 +545,17 @@ class CalAtmosphereRow:
 
         groundPressureNode = rowdom.getElementsByTagName("groundPressure")[0]
 
-        self._groundPressure = Pressure(groundPressureNode.firstChild.data.strip())
+        self._groundPressure = Pressure(self._getXMLNodeChildText(groundPressureNode))
 
         groundRelHumidityNode = rowdom.getElementsByTagName("groundRelHumidity")[0]
 
         self._groundRelHumidity = Humidity(
-            groundRelHumidityNode.firstChild.data.strip()
+            self._getXMLNodeChildText(groundRelHumidityNode)
         )
 
         frequencySpectrumNode = rowdom.getElementsByTagName("frequencySpectrum")[0]
 
-        frequencySpectrumStr = frequencySpectrumNode.firstChild.data.strip()
+        frequencySpectrumStr = self._getXMLNodeChildText(frequencySpectrumNode)
 
         self._frequencySpectrum = Parser.stringListToLists(
             frequencySpectrumStr, Frequency, "CalAtmosphere", True
@@ -554,19 +564,19 @@ class CalAtmosphereRow:
         groundTemperatureNode = rowdom.getElementsByTagName("groundTemperature")[0]
 
         self._groundTemperature = Temperature(
-            groundTemperatureNode.firstChild.data.strip()
+            self._getXMLNodeChildText(groundTemperatureNode)
         )
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalAtmosphere", False
         )
 
         powerSkySpectrumNode = rowdom.getElementsByTagName("powerSkySpectrum")[0]
 
-        powerSkySpectrumStr = powerSkySpectrumNode.firstChild.data.strip()
+        powerSkySpectrumStr = self._getXMLNodeChildText(powerSkySpectrumNode)
 
         self._powerSkySpectrum = Parser.stringListToLists(
             powerSkySpectrumStr, float, "CalAtmosphere", False
@@ -574,7 +584,7 @@ class CalAtmosphereRow:
 
         powerLoadSpectrumNode = rowdom.getElementsByTagName("powerLoadSpectrum")[0]
 
-        powerLoadSpectrumStr = powerLoadSpectrumNode.firstChild.data.strip()
+        powerLoadSpectrumStr = self._getXMLNodeChildText(powerLoadSpectrumNode)
 
         self._powerLoadSpectrum = Parser.stringListToLists(
             powerLoadSpectrumStr, float, "CalAtmosphere", False
@@ -583,12 +593,12 @@ class CalAtmosphereRow:
         syscalTypeNode = rowdom.getElementsByTagName("syscalType")[0]
 
         self._syscalType = SyscalMethod.newSyscalMethod(
-            syscalTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(syscalTypeNode)
         )
 
         tAtmSpectrumNode = rowdom.getElementsByTagName("tAtmSpectrum")[0]
 
-        tAtmSpectrumStr = tAtmSpectrumNode.firstChild.data.strip()
+        tAtmSpectrumStr = self._getXMLNodeChildText(tAtmSpectrumNode)
 
         self._tAtmSpectrum = Parser.stringListToLists(
             tAtmSpectrumStr, Temperature, "CalAtmosphere", True
@@ -596,7 +606,7 @@ class CalAtmosphereRow:
 
         tRecSpectrumNode = rowdom.getElementsByTagName("tRecSpectrum")[0]
 
-        tRecSpectrumStr = tRecSpectrumNode.firstChild.data.strip()
+        tRecSpectrumStr = self._getXMLNodeChildText(tRecSpectrumNode)
 
         self._tRecSpectrum = Parser.stringListToLists(
             tRecSpectrumStr, Temperature, "CalAtmosphere", True
@@ -604,7 +614,7 @@ class CalAtmosphereRow:
 
         tSysSpectrumNode = rowdom.getElementsByTagName("tSysSpectrum")[0]
 
-        tSysSpectrumStr = tSysSpectrumNode.firstChild.data.strip()
+        tSysSpectrumStr = self._getXMLNodeChildText(tSysSpectrumNode)
 
         self._tSysSpectrum = Parser.stringListToLists(
             tSysSpectrumStr, Temperature, "CalAtmosphere", True
@@ -612,7 +622,7 @@ class CalAtmosphereRow:
 
         tauSpectrumNode = rowdom.getElementsByTagName("tauSpectrum")[0]
 
-        tauSpectrumStr = tauSpectrumNode.firstChild.data.strip()
+        tauSpectrumStr = self._getXMLNodeChildText(tauSpectrumNode)
 
         self._tauSpectrum = Parser.stringListToLists(
             tauSpectrumStr, float, "CalAtmosphere", False
@@ -620,7 +630,7 @@ class CalAtmosphereRow:
 
         tAtmNode = rowdom.getElementsByTagName("tAtm")[0]
 
-        tAtmStr = tAtmNode.firstChild.data.strip()
+        tAtmStr = self._getXMLNodeChildText(tAtmNode)
 
         self._tAtm = Parser.stringListToLists(
             tAtmStr, Temperature, "CalAtmosphere", True
@@ -628,7 +638,7 @@ class CalAtmosphereRow:
 
         tRecNode = rowdom.getElementsByTagName("tRec")[0]
 
-        tRecStr = tRecNode.firstChild.data.strip()
+        tRecStr = self._getXMLNodeChildText(tRecNode)
 
         self._tRec = Parser.stringListToLists(
             tRecStr, Temperature, "CalAtmosphere", True
@@ -636,7 +646,7 @@ class CalAtmosphereRow:
 
         tSysNode = rowdom.getElementsByTagName("tSys")[0]
 
-        tSysStr = tSysNode.firstChild.data.strip()
+        tSysStr = self._getXMLNodeChildText(tSysNode)
 
         self._tSys = Parser.stringListToLists(
             tSysStr, Temperature, "CalAtmosphere", True
@@ -644,19 +654,19 @@ class CalAtmosphereRow:
 
         tauNode = rowdom.getElementsByTagName("tau")[0]
 
-        tauStr = tauNode.firstChild.data.strip()
+        tauStr = self._getXMLNodeChildText(tauNode)
 
         self._tau = Parser.stringListToLists(tauStr, float, "CalAtmosphere", False)
 
         waterNode = rowdom.getElementsByTagName("water")[0]
 
-        waterStr = waterNode.firstChild.data.strip()
+        waterStr = self._getXMLNodeChildText(waterNode)
 
         self._water = Parser.stringListToLists(waterStr, Length, "CalAtmosphere", True)
 
         waterErrorNode = rowdom.getElementsByTagName("waterError")[0]
 
-        waterErrorStr = waterErrorNode.firstChild.data.strip()
+        waterErrorStr = self._getXMLNodeChildText(waterErrorNode)
 
         self._waterError = Parser.stringListToLists(
             waterErrorStr, Length, "CalAtmosphere", True
@@ -665,7 +675,7 @@ class CalAtmosphereRow:
         alphaSpectrumNode = rowdom.getElementsByTagName("alphaSpectrum")
         if len(alphaSpectrumNode) > 0:
 
-            alphaSpectrumStr = alphaSpectrumNode[0].firstChild.data.strip()
+            alphaSpectrumStr = self._getXMLNodeChildText(alphaSpectrumNode[0])
 
             self._alphaSpectrum = Parser.stringListToLists(
                 alphaSpectrumStr, float, "CalAtmosphere", False
@@ -676,7 +686,7 @@ class CalAtmosphereRow:
         forwardEfficiencyNode = rowdom.getElementsByTagName("forwardEfficiency")
         if len(forwardEfficiencyNode) > 0:
 
-            forwardEfficiencyStr = forwardEfficiencyNode[0].firstChild.data.strip()
+            forwardEfficiencyStr = self._getXMLNodeChildText(forwardEfficiencyNode[0])
 
             self._forwardEfficiency = Parser.stringListToLists(
                 forwardEfficiencyStr, float, "CalAtmosphere", False
@@ -689,9 +699,9 @@ class CalAtmosphereRow:
         )
         if len(forwardEfficiencyErrorNode) > 0:
 
-            forwardEfficiencyErrorStr = forwardEfficiencyErrorNode[
-                0
-            ].firstChild.data.strip()
+            forwardEfficiencyErrorStr = self._getXMLNodeChildText(
+                forwardEfficiencyErrorNode[0]
+            )
 
             self._forwardEfficiencyError = Parser.stringListToLists(
                 forwardEfficiencyErrorStr, float, "CalAtmosphere", False
@@ -702,7 +712,7 @@ class CalAtmosphereRow:
         sbGainNode = rowdom.getElementsByTagName("sbGain")
         if len(sbGainNode) > 0:
 
-            sbGainStr = sbGainNode[0].firstChild.data.strip()
+            sbGainStr = self._getXMLNodeChildText(sbGainNode[0])
 
             self._sbGain = Parser.stringListToLists(
                 sbGainStr, float, "CalAtmosphere", False
@@ -713,7 +723,7 @@ class CalAtmosphereRow:
         sbGainErrorNode = rowdom.getElementsByTagName("sbGainError")
         if len(sbGainErrorNode) > 0:
 
-            sbGainErrorStr = sbGainErrorNode[0].firstChild.data.strip()
+            sbGainErrorStr = self._getXMLNodeChildText(sbGainErrorNode[0])
 
             self._sbGainError = Parser.stringListToLists(
                 sbGainErrorStr, float, "CalAtmosphere", False
@@ -724,7 +734,7 @@ class CalAtmosphereRow:
         sbGainSpectrumNode = rowdom.getElementsByTagName("sbGainSpectrum")
         if len(sbGainSpectrumNode) > 0:
 
-            sbGainSpectrumStr = sbGainSpectrumNode[0].firstChild.data.strip()
+            sbGainSpectrumStr = self._getXMLNodeChildText(sbGainSpectrumNode[0])
 
             self._sbGainSpectrum = Parser.stringListToLists(
                 sbGainSpectrumStr, float, "CalAtmosphere", False
@@ -736,11 +746,11 @@ class CalAtmosphereRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 

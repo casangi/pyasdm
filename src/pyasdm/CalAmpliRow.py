@@ -75,6 +75,16 @@ class CalAmpliRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -275,48 +285,48 @@ class CalAmpliRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
         basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalAmpli", False
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalAmpli", True
@@ -324,7 +334,7 @@ class CalAmpliRow:
 
         apertureEfficiencyNode = rowdom.getElementsByTagName("apertureEfficiency")[0]
 
-        apertureEfficiencyStr = apertureEfficiencyNode.firstChild.data.strip()
+        apertureEfficiencyStr = self._getXMLNodeChildText(apertureEfficiencyNode)
 
         self._apertureEfficiency = Parser.stringListToLists(
             apertureEfficiencyStr, float, "CalAmpli", False
@@ -334,7 +344,9 @@ class CalAmpliRow:
             "apertureEfficiencyError"
         )[0]
 
-        apertureEfficiencyErrorStr = apertureEfficiencyErrorNode.firstChild.data.strip()
+        apertureEfficiencyErrorStr = self._getXMLNodeChildText(
+            apertureEfficiencyErrorNode
+        )
 
         self._apertureEfficiencyError = Parser.stringListToLists(
             apertureEfficiencyErrorStr, float, "CalAmpli", False
@@ -344,7 +356,7 @@ class CalAmpliRow:
         if len(correctionValidityNode) > 0:
 
             self._correctionValidity = bool(
-                correctionValidityNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(correctionValidityNode[0])
             )
 
             self._correctionValidityExists = True
@@ -353,11 +365,11 @@ class CalAmpliRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 

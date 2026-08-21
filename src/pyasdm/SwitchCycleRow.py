@@ -66,6 +66,16 @@ class SwitchCycleRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -225,15 +235,15 @@ class SwitchCycleRow:
 
         switchCycleIdNode = rowdom.getElementsByTagName("switchCycleId")[0]
 
-        self._switchCycleId = Tag(switchCycleIdNode.firstChild.data.strip())
+        self._switchCycleId = Tag(self._getXMLNodeChildText(switchCycleIdNode))
 
         numStepNode = rowdom.getElementsByTagName("numStep")[0]
 
-        self._numStep = int(numStepNode.firstChild.data.strip())
+        self._numStep = int(self._getXMLNodeChildText(numStepNode))
 
         weightArrayNode = rowdom.getElementsByTagName("weightArray")[0]
 
-        weightArrayStr = weightArrayNode.firstChild.data.strip()
+        weightArrayStr = self._getXMLNodeChildText(weightArrayNode)
 
         self._weightArray = Parser.stringListToLists(
             weightArrayStr, float, "SwitchCycle", False
@@ -241,7 +251,7 @@ class SwitchCycleRow:
 
         dirOffsetArrayNode = rowdom.getElementsByTagName("dirOffsetArray")[0]
 
-        dirOffsetArrayStr = dirOffsetArrayNode.firstChild.data.strip()
+        dirOffsetArrayStr = self._getXMLNodeChildText(dirOffsetArrayNode)
 
         self._dirOffsetArray = Parser.stringListToLists(
             dirOffsetArrayStr, Angle, "SwitchCycle", True
@@ -249,7 +259,7 @@ class SwitchCycleRow:
 
         freqOffsetArrayNode = rowdom.getElementsByTagName("freqOffsetArray")[0]
 
-        freqOffsetArrayStr = freqOffsetArrayNode.firstChild.data.strip()
+        freqOffsetArrayStr = self._getXMLNodeChildText(freqOffsetArrayNode)
 
         self._freqOffsetArray = Parser.stringListToLists(
             freqOffsetArrayStr, Frequency, "SwitchCycle", True
@@ -257,7 +267,7 @@ class SwitchCycleRow:
 
         stepDurationArrayNode = rowdom.getElementsByTagName("stepDurationArray")[0]
 
-        stepDurationArrayStr = stepDurationArrayNode.firstChild.data.strip()
+        stepDurationArrayStr = self._getXMLNodeChildText(stepDurationArrayNode)
 
         self._stepDurationArray = Parser.stringListToLists(
             stepDurationArrayStr, Interval, "SwitchCycle", True
@@ -267,7 +277,7 @@ class SwitchCycleRow:
         if len(directionCodeNode) > 0:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionCodeNode[0])
             )
 
             self._directionCodeExists = True
@@ -276,7 +286,7 @@ class SwitchCycleRow:
         if len(directionEquinoxNode) > 0:
 
             self._directionEquinox = ArrayTime(
-                directionEquinoxNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionEquinoxNode[0])
             )
 
             self._directionEquinoxExists = True

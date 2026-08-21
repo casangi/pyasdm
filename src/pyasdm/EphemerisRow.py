@@ -63,6 +63,16 @@ class EphemerisRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -235,15 +245,17 @@ class EphemerisRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         ephemerisIdNode = rowdom.getElementsByTagName("ephemerisId")[0]
 
-        self._ephemerisId = int(ephemerisIdNode.firstChild.data.strip())
+        self._ephemerisId = int(self._getXMLNodeChildText(ephemerisIdNode))
 
         observerLocationNode = rowdom.getElementsByTagName("observerLocation")[0]
 
-        observerLocationStr = observerLocationNode.firstChild.data.strip()
+        observerLocationStr = self._getXMLNodeChildText(observerLocationNode)
 
         self._observerLocation = Parser.stringListToLists(
             observerLocationStr, float, "Ephemeris", False
@@ -251,25 +263,25 @@ class EphemerisRow:
 
         equinoxEquatorNode = rowdom.getElementsByTagName("equinoxEquator")[0]
 
-        self._equinoxEquator = float(equinoxEquatorNode.firstChild.data.strip())
+        self._equinoxEquator = float(self._getXMLNodeChildText(equinoxEquatorNode))
 
         numPolyDirNode = rowdom.getElementsByTagName("numPolyDir")[0]
 
-        self._numPolyDir = int(numPolyDirNode.firstChild.data.strip())
+        self._numPolyDir = int(self._getXMLNodeChildText(numPolyDirNode))
 
         dirNode = rowdom.getElementsByTagName("dir")[0]
 
-        dirStr = dirNode.firstChild.data.strip()
+        dirStr = self._getXMLNodeChildText(dirNode)
 
         self._dir = Parser.stringListToLists(dirStr, float, "Ephemeris", False)
 
         numPolyDistNode = rowdom.getElementsByTagName("numPolyDist")[0]
 
-        self._numPolyDist = int(numPolyDistNode.firstChild.data.strip())
+        self._numPolyDist = int(self._getXMLNodeChildText(numPolyDistNode))
 
         distanceNode = rowdom.getElementsByTagName("distance")[0]
 
-        distanceStr = distanceNode.firstChild.data.strip()
+        distanceStr = self._getXMLNodeChildText(distanceNode)
 
         self._distance = Parser.stringListToLists(
             distanceStr, float, "Ephemeris", False
@@ -277,23 +289,23 @@ class EphemerisRow:
 
         timeOriginNode = rowdom.getElementsByTagName("timeOrigin")[0]
 
-        self._timeOrigin = ArrayTime(timeOriginNode.firstChild.data.strip())
+        self._timeOrigin = ArrayTime(self._getXMLNodeChildText(timeOriginNode))
 
         originNode = rowdom.getElementsByTagName("origin")[0]
 
-        self._origin = str(originNode.firstChild.data.strip())
+        self._origin = str(self._getXMLNodeChildText(originNode))
 
         numPolyRadVelNode = rowdom.getElementsByTagName("numPolyRadVel")
         if len(numPolyRadVelNode) > 0:
 
-            self._numPolyRadVel = int(numPolyRadVelNode[0].firstChild.data.strip())
+            self._numPolyRadVel = int(self._getXMLNodeChildText(numPolyRadVelNode[0]))
 
             self._numPolyRadVelExists = True
 
         radVelNode = rowdom.getElementsByTagName("radVel")
         if len(radVelNode) > 0:
 
-            radVelStr = radVelNode[0].firstChild.data.strip()
+            radVelStr = self._getXMLNodeChildText(radVelNode[0])
 
             self._radVel = Parser.stringListToLists(
                 radVelStr, float, "Ephemeris", False

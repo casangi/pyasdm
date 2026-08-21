@@ -66,6 +66,16 @@ class PointingRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -335,37 +345,39 @@ class PointingRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         numSampleNode = rowdom.getElementsByTagName("numSample")[0]
 
-        self._numSample = int(numSampleNode.firstChild.data.strip())
+        self._numSample = int(self._getXMLNodeChildText(numSampleNode))
 
         encoderNode = rowdom.getElementsByTagName("encoder")[0]
 
-        encoderStr = encoderNode.firstChild.data.strip()
+        encoderStr = self._getXMLNodeChildText(encoderNode)
 
         self._encoder = Parser.stringListToLists(encoderStr, Angle, "Pointing", True)
 
         pointingTrackingNode = rowdom.getElementsByTagName("pointingTracking")[0]
 
-        self._pointingTracking = bool(pointingTrackingNode.firstChild.data.strip())
+        self._pointingTracking = bool(self._getXMLNodeChildText(pointingTrackingNode))
 
         usePolynomialsNode = rowdom.getElementsByTagName("usePolynomials")[0]
 
-        self._usePolynomials = bool(usePolynomialsNode.firstChild.data.strip())
+        self._usePolynomials = bool(self._getXMLNodeChildText(usePolynomialsNode))
 
         timeOriginNode = rowdom.getElementsByTagName("timeOrigin")[0]
 
-        self._timeOrigin = ArrayTime(timeOriginNode.firstChild.data.strip())
+        self._timeOrigin = ArrayTime(self._getXMLNodeChildText(timeOriginNode))
 
         numTermNode = rowdom.getElementsByTagName("numTerm")[0]
 
-        self._numTerm = int(numTermNode.firstChild.data.strip())
+        self._numTerm = int(self._getXMLNodeChildText(numTermNode))
 
         pointingDirectionNode = rowdom.getElementsByTagName("pointingDirection")[0]
 
-        pointingDirectionStr = pointingDirectionNode.firstChild.data.strip()
+        pointingDirectionStr = self._getXMLNodeChildText(pointingDirectionNode)
 
         self._pointingDirection = Parser.stringListToLists(
             pointingDirectionStr, Angle, "Pointing", True
@@ -373,27 +385,27 @@ class PointingRow:
 
         targetNode = rowdom.getElementsByTagName("target")[0]
 
-        targetStr = targetNode.firstChild.data.strip()
+        targetStr = self._getXMLNodeChildText(targetNode)
 
         self._target = Parser.stringListToLists(targetStr, Angle, "Pointing", True)
 
         offsetNode = rowdom.getElementsByTagName("offset")[0]
 
-        offsetStr = offsetNode.firstChild.data.strip()
+        offsetStr = self._getXMLNodeChildText(offsetNode)
 
         self._offset = Parser.stringListToLists(offsetStr, Angle, "Pointing", True)
 
         overTheTopNode = rowdom.getElementsByTagName("overTheTop")
         if len(overTheTopNode) > 0:
 
-            self._overTheTop = bool(overTheTopNode[0].firstChild.data.strip())
+            self._overTheTop = bool(self._getXMLNodeChildText(overTheTopNode[0]))
 
             self._overTheTopExists = True
 
         sourceOffsetNode = rowdom.getElementsByTagName("sourceOffset")
         if len(sourceOffsetNode) > 0:
 
-            sourceOffsetStr = sourceOffsetNode[0].firstChild.data.strip()
+            sourceOffsetStr = self._getXMLNodeChildText(sourceOffsetNode[0])
 
             self._sourceOffset = Parser.stringListToLists(
                 sourceOffsetStr, Angle, "Pointing", True
@@ -408,7 +420,7 @@ class PointingRow:
 
             self._sourceOffsetReferenceCode = (
                 DirectionReferenceCode.newDirectionReferenceCode(
-                    sourceOffsetReferenceCodeNode[0].firstChild.data.strip()
+                    self._getXMLNodeChildText(sourceOffsetReferenceCodeNode[0])
                 )
             )
 
@@ -418,7 +430,7 @@ class PointingRow:
         if len(sourceOffsetEquinoxNode) > 0:
 
             self._sourceOffsetEquinox = ArrayTime(
-                sourceOffsetEquinoxNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(sourceOffsetEquinoxNode[0])
             )
 
             self._sourceOffsetEquinoxExists = True
@@ -426,7 +438,9 @@ class PointingRow:
         sampledTimeIntervalNode = rowdom.getElementsByTagName("sampledTimeInterval")
         if len(sampledTimeIntervalNode) > 0:
 
-            sampledTimeIntervalStr = sampledTimeIntervalNode[0].firstChild.data.strip()
+            sampledTimeIntervalStr = self._getXMLNodeChildText(
+                sampledTimeIntervalNode[0]
+            )
 
             self._sampledTimeInterval = Parser.stringListToLists(
                 sampledTimeIntervalStr, ArrayTimeInterval, "Pointing", True
@@ -437,9 +451,9 @@ class PointingRow:
         atmosphericCorrectionNode = rowdom.getElementsByTagName("atmosphericCorrection")
         if len(atmosphericCorrectionNode) > 0:
 
-            atmosphericCorrectionStr = atmosphericCorrectionNode[
-                0
-            ].firstChild.data.strip()
+            atmosphericCorrectionStr = self._getXMLNodeChildText(
+                atmosphericCorrectionNode[0]
+            )
 
             self._atmosphericCorrection = Parser.stringListToLists(
                 atmosphericCorrectionStr, Angle, "Pointing", True
@@ -451,11 +465,11 @@ class PointingRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         pointingModelIdNode = rowdom.getElementsByTagName("pointingModelId")[0]
 
-        self._pointingModelId = int(pointingModelIdNode.firstChild.data.strip())
+        self._pointingModelId = int(self._getXMLNodeChildText(pointingModelIdNode))
 
         # from link values, if any
 

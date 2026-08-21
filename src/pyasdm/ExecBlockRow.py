@@ -63,6 +63,16 @@ class ExecBlockRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -422,19 +432,19 @@ class ExecBlockRow:
 
         execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
         startTimeNode = rowdom.getElementsByTagName("startTime")[0]
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
+        self._startTime = ArrayTime(self._getXMLNodeChildText(startTimeNode))
 
         endTimeNode = rowdom.getElementsByTagName("endTime")[0]
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
+        self._endTime = ArrayTime(self._getXMLNodeChildText(endTimeNode))
 
         execBlockNumNode = rowdom.getElementsByTagName("execBlockNum")[0]
 
-        self._execBlockNum = int(execBlockNumNode.firstChild.data.strip())
+        self._execBlockNum = int(self._getXMLNodeChildText(execBlockNumNode))
 
         execBlockUIDNode = rowdom.getElementsByTagName("execBlockUID")[0]
 
@@ -446,23 +456,23 @@ class ExecBlockRow:
 
         configNameNode = rowdom.getElementsByTagName("configName")[0]
 
-        self._configName = str(configNameNode.firstChild.data.strip())
+        self._configName = str(self._getXMLNodeChildText(configNameNode))
 
         telescopeNameNode = rowdom.getElementsByTagName("telescopeName")[0]
 
-        self._telescopeName = str(telescopeNameNode.firstChild.data.strip())
+        self._telescopeName = str(self._getXMLNodeChildText(telescopeNameNode))
 
         observerNameNode = rowdom.getElementsByTagName("observerName")[0]
 
-        self._observerName = str(observerNameNode.firstChild.data.strip())
+        self._observerName = str(self._getXMLNodeChildText(observerNameNode))
 
         numObservingLogNode = rowdom.getElementsByTagName("numObservingLog")[0]
 
-        self._numObservingLog = int(numObservingLogNode.firstChild.data.strip())
+        self._numObservingLog = int(self._getXMLNodeChildText(numObservingLogNode))
 
         observingLogNode = rowdom.getElementsByTagName("observingLog")[0]
 
-        observingLogStr = observingLogNode.firstChild.data.strip()
+        observingLogStr = self._getXMLNodeChildText(observingLogNode)
 
         self._observingLog = Parser.stringListToLists(
             observingLogStr, str, "ExecBlock", False
@@ -474,71 +484,73 @@ class ExecBlockRow:
 
         baseRangeMinNode = rowdom.getElementsByTagName("baseRangeMin")[0]
 
-        self._baseRangeMin = Length(baseRangeMinNode.firstChild.data.strip())
+        self._baseRangeMin = Length(self._getXMLNodeChildText(baseRangeMinNode))
 
         baseRangeMaxNode = rowdom.getElementsByTagName("baseRangeMax")[0]
 
-        self._baseRangeMax = Length(baseRangeMaxNode.firstChild.data.strip())
+        self._baseRangeMax = Length(self._getXMLNodeChildText(baseRangeMaxNode))
 
         baseRmsMinorNode = rowdom.getElementsByTagName("baseRmsMinor")[0]
 
-        self._baseRmsMinor = Length(baseRmsMinorNode.firstChild.data.strip())
+        self._baseRmsMinor = Length(self._getXMLNodeChildText(baseRmsMinorNode))
 
         baseRmsMajorNode = rowdom.getElementsByTagName("baseRmsMajor")[0]
 
-        self._baseRmsMajor = Length(baseRmsMajorNode.firstChild.data.strip())
+        self._baseRmsMajor = Length(self._getXMLNodeChildText(baseRmsMajorNode))
 
         basePaNode = rowdom.getElementsByTagName("basePa")[0]
 
-        self._basePa = Angle(basePaNode.firstChild.data.strip())
+        self._basePa = Angle(self._getXMLNodeChildText(basePaNode))
 
         abortedNode = rowdom.getElementsByTagName("aborted")[0]
 
-        self._aborted = bool(abortedNode.firstChild.data.strip())
+        self._aborted = bool(self._getXMLNodeChildText(abortedNode))
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
         releaseDateNode = rowdom.getElementsByTagName("releaseDate")
         if len(releaseDateNode) > 0:
 
-            self._releaseDate = ArrayTime(releaseDateNode[0].firstChild.data.strip())
+            self._releaseDate = ArrayTime(self._getXMLNodeChildText(releaseDateNode[0]))
 
             self._releaseDateExists = True
 
         schedulerModeNode = rowdom.getElementsByTagName("schedulerMode")
         if len(schedulerModeNode) > 0:
 
-            self._schedulerMode = str(schedulerModeNode[0].firstChild.data.strip())
+            self._schedulerMode = str(self._getXMLNodeChildText(schedulerModeNode[0]))
 
             self._schedulerModeExists = True
 
         siteAltitudeNode = rowdom.getElementsByTagName("siteAltitude")
         if len(siteAltitudeNode) > 0:
 
-            self._siteAltitude = Length(siteAltitudeNode[0].firstChild.data.strip())
+            self._siteAltitude = Length(self._getXMLNodeChildText(siteAltitudeNode[0]))
 
             self._siteAltitudeExists = True
 
         siteLongitudeNode = rowdom.getElementsByTagName("siteLongitude")
         if len(siteLongitudeNode) > 0:
 
-            self._siteLongitude = Angle(siteLongitudeNode[0].firstChild.data.strip())
+            self._siteLongitude = Angle(self._getXMLNodeChildText(siteLongitudeNode[0]))
 
             self._siteLongitudeExists = True
 
         siteLatitudeNode = rowdom.getElementsByTagName("siteLatitude")
         if len(siteLatitudeNode) > 0:
 
-            self._siteLatitude = Angle(siteLatitudeNode[0].firstChild.data.strip())
+            self._siteLatitude = Angle(self._getXMLNodeChildText(siteLatitudeNode[0]))
 
             self._siteLatitudeExists = True
 
         observingScriptNode = rowdom.getElementsByTagName("observingScript")
         if len(observingScriptNode) > 0:
 
-            self._observingScript = str(observingScriptNode[0].firstChild.data.strip())
+            self._observingScript = str(
+                self._getXMLNodeChildText(observingScriptNode[0])
+            )
 
             self._observingScriptExists = True
 
@@ -546,7 +558,7 @@ class ExecBlockRow:
         if len(observingScriptUIDNode) > 0:
 
             self._observingScriptUID = EntityRef(
-                observingScriptUIDNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(observingScriptUIDNode[0])
             )
 
             self._observingScriptUIDExists = True
@@ -554,7 +566,7 @@ class ExecBlockRow:
         arrayNameNode = rowdom.getElementsByTagName("arrayName")
         if len(arrayNameNode) > 0:
 
-            self._arrayName = str(arrayNameNode[0].firstChild.data.strip())
+            self._arrayName = str(self._getXMLNodeChildText(arrayNameNode[0]))
 
             self._arrayNameExists = True
 
@@ -562,18 +574,18 @@ class ExecBlockRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        antennaIdStr = antennaIdNode.firstChild.data.strip()
+        antennaIdStr = self._getXMLNodeChildText(antennaIdNode)
 
         self._antennaId = Parser.stringListToLists(antennaIdStr, Tag, "ExecBlock", True)
 
         sBSummaryIdNode = rowdom.getElementsByTagName("sBSummaryId")[0]
 
-        self._sBSummaryId = Tag(sBSummaryIdNode.firstChild.data.strip())
+        self._sBSummaryId = Tag(self._getXMLNodeChildText(sBSummaryIdNode))
 
         scaleIdNode = rowdom.getElementsByTagName("scaleId")
         if len(scaleIdNode) > 0:
 
-            self._scaleId = Tag(scaleIdNode[0].firstChild.data.strip())
+            self._scaleId = Tag(self._getXMLNodeChildText(scaleIdNode[0]))
 
             self._scaleIdExists = True
 

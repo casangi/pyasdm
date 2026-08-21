@@ -75,6 +75,16 @@ class CalPointingModelRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -324,47 +334,47 @@ class CalPointingModelRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
 
         self._antennaMake = AntennaMake.newAntennaMake(
-            antennaMakeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaMakeNode)
         )
 
         pointingModelModeNode = rowdom.getElementsByTagName("pointingModelMode")[0]
 
         self._pointingModelMode = PointingModelMode.newPointingModelMode(
-            pointingModelModeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(pointingModelModeNode)
         )
 
         polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
 
         self._polarizationType = PolarizationType.newPolarizationType(
-            polarizationTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(polarizationTypeNode)
         )
 
         numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
 
-        self._numCoeff = int(numCoeffNode.firstChild.data.strip())
+        self._numCoeff = int(self._getXMLNodeChildText(numCoeffNode))
 
         coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
 
-        coeffNameStr = coeffNameNode.firstChild.data.strip()
+        coeffNameStr = self._getXMLNodeChildText(coeffNameNode)
 
         self._coeffName = Parser.stringListToLists(
             coeffNameStr, str, "CalPointingModel", False
@@ -372,7 +382,7 @@ class CalPointingModelRow:
 
         coeffValNode = rowdom.getElementsByTagName("coeffVal")[0]
 
-        coeffValStr = coeffValNode.firstChild.data.strip()
+        coeffValStr = self._getXMLNodeChildText(coeffValNode)
 
         self._coeffVal = Parser.stringListToLists(
             coeffValStr, float, "CalPointingModel", False
@@ -380,7 +390,7 @@ class CalPointingModelRow:
 
         coeffErrorNode = rowdom.getElementsByTagName("coeffError")[0]
 
-        coeffErrorStr = coeffErrorNode.firstChild.data.strip()
+        coeffErrorStr = self._getXMLNodeChildText(coeffErrorNode)
 
         self._coeffError = Parser.stringListToLists(
             coeffErrorStr, float, "CalPointingModel", False
@@ -388,7 +398,7 @@ class CalPointingModelRow:
 
         coeffFixedNode = rowdom.getElementsByTagName("coeffFixed")[0]
 
-        coeffFixedStr = coeffFixedNode.firstChild.data.strip()
+        coeffFixedStr = self._getXMLNodeChildText(coeffFixedNode)
 
         self._coeffFixed = Parser.stringListToLists(
             coeffFixedStr, bool, "CalPointingModel", False
@@ -396,31 +406,33 @@ class CalPointingModelRow:
 
         azimuthRMSNode = rowdom.getElementsByTagName("azimuthRMS")[0]
 
-        self._azimuthRMS = Angle(azimuthRMSNode.firstChild.data.strip())
+        self._azimuthRMS = Angle(self._getXMLNodeChildText(azimuthRMSNode))
 
         elevationRmsNode = rowdom.getElementsByTagName("elevationRms")[0]
 
-        self._elevationRms = Angle(elevationRmsNode.firstChild.data.strip())
+        self._elevationRms = Angle(self._getXMLNodeChildText(elevationRmsNode))
 
         skyRMSNode = rowdom.getElementsByTagName("skyRMS")[0]
 
-        self._skyRMS = Angle(skyRMSNode.firstChild.data.strip())
+        self._skyRMS = Angle(self._getXMLNodeChildText(skyRMSNode))
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        self._reducedChiSquared = float(reducedChiSquaredNode.firstChild.data.strip())
+        self._reducedChiSquared = float(
+            self._getXMLNodeChildText(reducedChiSquaredNode)
+        )
 
         numObsNode = rowdom.getElementsByTagName("numObs")
         if len(numObsNode) > 0:
 
-            self._numObs = int(numObsNode[0].firstChild.data.strip())
+            self._numObs = int(self._getXMLNodeChildText(numObsNode[0]))
 
             self._numObsExists = True
 
         coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")
         if len(coeffFormulaNode) > 0:
 
-            coeffFormulaStr = coeffFormulaNode[0].firstChild.data.strip()
+            coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode[0])
 
             self._coeffFormula = Parser.stringListToLists(
                 coeffFormulaStr, str, "CalPointingModel", False
@@ -432,11 +444,11 @@ class CalPointingModelRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 

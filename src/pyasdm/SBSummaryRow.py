@@ -72,6 +72,16 @@ class SBSummaryRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -310,7 +320,7 @@ class SBSummaryRow:
 
         sBSummaryIdNode = rowdom.getElementsByTagName("sBSummaryId")[0]
 
-        self._sBSummaryId = Tag(sBSummaryIdNode.firstChild.data.strip())
+        self._sBSummaryId = Tag(self._getXMLNodeChildText(sBSummaryIdNode))
 
         sbSummaryUIDNode = rowdom.getElementsByTagName("sbSummaryUID")[0]
 
@@ -326,29 +336,29 @@ class SBSummaryRow:
 
         frequencyNode = rowdom.getElementsByTagName("frequency")[0]
 
-        self._frequency = float(frequencyNode.firstChild.data.strip())
+        self._frequency = float(self._getXMLNodeChildText(frequencyNode))
 
         frequencyBandNode = rowdom.getElementsByTagName("frequencyBand")[0]
 
         self._frequencyBand = ReceiverBand.newReceiverBand(
-            frequencyBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(frequencyBandNode)
         )
 
         sbTypeNode = rowdom.getElementsByTagName("sbType")[0]
 
-        self._sbType = SBType.newSBType(sbTypeNode.firstChild.data.strip())
+        self._sbType = SBType.newSBType(self._getXMLNodeChildText(sbTypeNode))
 
         sbDurationNode = rowdom.getElementsByTagName("sbDuration")[0]
 
-        self._sbDuration = Interval(sbDurationNode.firstChild.data.strip())
+        self._sbDuration = Interval(self._getXMLNodeChildText(sbDurationNode))
 
         numObservingModeNode = rowdom.getElementsByTagName("numObservingMode")[0]
 
-        self._numObservingMode = int(numObservingModeNode.firstChild.data.strip())
+        self._numObservingMode = int(self._getXMLNodeChildText(numObservingModeNode))
 
         observingModeNode = rowdom.getElementsByTagName("observingMode")[0]
 
-        observingModeStr = observingModeNode.firstChild.data.strip()
+        observingModeStr = self._getXMLNodeChildText(observingModeNode)
 
         self._observingMode = Parser.stringListToLists(
             observingModeStr, str, "SBSummary", False
@@ -356,15 +366,15 @@ class SBSummaryRow:
 
         numberRepeatsNode = rowdom.getElementsByTagName("numberRepeats")[0]
 
-        self._numberRepeats = int(numberRepeatsNode.firstChild.data.strip())
+        self._numberRepeats = int(self._getXMLNodeChildText(numberRepeatsNode))
 
         numScienceGoalNode = rowdom.getElementsByTagName("numScienceGoal")[0]
 
-        self._numScienceGoal = int(numScienceGoalNode.firstChild.data.strip())
+        self._numScienceGoal = int(self._getXMLNodeChildText(numScienceGoalNode))
 
         scienceGoalNode = rowdom.getElementsByTagName("scienceGoal")[0]
 
-        scienceGoalStr = scienceGoalNode.firstChild.data.strip()
+        scienceGoalStr = self._getXMLNodeChildText(scienceGoalNode)
 
         self._scienceGoal = Parser.stringListToLists(
             scienceGoalStr, str, "SBSummary", False
@@ -375,12 +385,12 @@ class SBSummaryRow:
         ]
 
         self._numWeatherConstraint = int(
-            numWeatherConstraintNode.firstChild.data.strip()
+            self._getXMLNodeChildText(numWeatherConstraintNode)
         )
 
         weatherConstraintNode = rowdom.getElementsByTagName("weatherConstraint")[0]
 
-        weatherConstraintStr = weatherConstraintNode.firstChild.data.strip()
+        weatherConstraintStr = self._getXMLNodeChildText(weatherConstraintNode)
 
         self._weatherConstraint = Parser.stringListToLists(
             weatherConstraintStr, str, "SBSummary", False
@@ -389,7 +399,7 @@ class SBSummaryRow:
         centerDirectionNode = rowdom.getElementsByTagName("centerDirection")
         if len(centerDirectionNode) > 0:
 
-            centerDirectionStr = centerDirectionNode[0].firstChild.data.strip()
+            centerDirectionStr = self._getXMLNodeChildText(centerDirectionNode[0])
 
             self._centerDirection = Parser.stringListToLists(
                 centerDirectionStr, Angle, "SBSummary", True
@@ -402,7 +412,7 @@ class SBSummaryRow:
 
             self._centerDirectionCode = (
                 DirectionReferenceCode.newDirectionReferenceCode(
-                    centerDirectionCodeNode[0].firstChild.data.strip()
+                    self._getXMLNodeChildText(centerDirectionCodeNode[0])
                 )
             )
 
@@ -414,7 +424,7 @@ class SBSummaryRow:
         if len(centerDirectionEquinoxNode) > 0:
 
             self._centerDirectionEquinox = ArrayTime(
-                centerDirectionEquinoxNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(centerDirectionEquinoxNode[0])
             )
 
             self._centerDirectionEquinoxExists = True

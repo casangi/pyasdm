@@ -84,6 +84,16 @@ class SpectralWindowRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -796,58 +806,58 @@ class SpectralWindowRow:
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
         netSidebandNode = rowdom.getElementsByTagName("netSideband")[0]
 
         self._netSideband = NetSideband.newNetSideband(
-            netSidebandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(netSidebandNode)
         )
 
         numChanNode = rowdom.getElementsByTagName("numChan")[0]
 
-        self._numChan = int(numChanNode.firstChild.data.strip())
+        self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
         numBinNode = rowdom.getElementsByTagName("numBin")
         if len(numBinNode) > 0:
 
-            self._numBin = int(numBinNode[0].firstChild.data.strip())
+            self._numBin = int(self._getXMLNodeChildText(numBinNode[0]))
 
             self._numBinExists = True
 
         refFreqNode = rowdom.getElementsByTagName("refFreq")[0]
 
-        self._refFreq = Frequency(refFreqNode.firstChild.data.strip())
+        self._refFreq = Frequency(self._getXMLNodeChildText(refFreqNode))
 
         sidebandProcessingModeNode = rowdom.getElementsByTagName(
             "sidebandProcessingMode"
         )[0]
 
         self._sidebandProcessingMode = SidebandProcessingMode.newSidebandProcessingMode(
-            sidebandProcessingModeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(sidebandProcessingModeNode)
         )
 
         totBandwidthNode = rowdom.getElementsByTagName("totBandwidth")[0]
 
-        self._totBandwidth = Frequency(totBandwidthNode.firstChild.data.strip())
+        self._totBandwidth = Frequency(self._getXMLNodeChildText(totBandwidthNode))
 
         windowFunctionNode = rowdom.getElementsByTagName("windowFunction")[0]
 
         self._windowFunction = WindowFunction.newWindowFunction(
-            windowFunctionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(windowFunctionNode)
         )
 
         chanFreqStartNode = rowdom.getElementsByTagName("chanFreqStart")
         if len(chanFreqStartNode) > 0:
 
             self._chanFreqStart = Frequency(
-                chanFreqStartNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(chanFreqStartNode[0])
             )
 
             self._chanFreqStartExists = True
@@ -855,14 +865,16 @@ class SpectralWindowRow:
         chanFreqStepNode = rowdom.getElementsByTagName("chanFreqStep")
         if len(chanFreqStepNode) > 0:
 
-            self._chanFreqStep = Frequency(chanFreqStepNode[0].firstChild.data.strip())
+            self._chanFreqStep = Frequency(
+                self._getXMLNodeChildText(chanFreqStepNode[0])
+            )
 
             self._chanFreqStepExists = True
 
         chanFreqArrayNode = rowdom.getElementsByTagName("chanFreqArray")
         if len(chanFreqArrayNode) > 0:
 
-            chanFreqArrayStr = chanFreqArrayNode[0].firstChild.data.strip()
+            chanFreqArrayStr = self._getXMLNodeChildText(chanFreqArrayNode[0])
 
             self._chanFreqArray = Parser.stringListToLists(
                 chanFreqArrayStr, Frequency, "SpectralWindow", True
@@ -873,14 +885,14 @@ class SpectralWindowRow:
         chanWidthNode = rowdom.getElementsByTagName("chanWidth")
         if len(chanWidthNode) > 0:
 
-            self._chanWidth = Frequency(chanWidthNode[0].firstChild.data.strip())
+            self._chanWidth = Frequency(self._getXMLNodeChildText(chanWidthNode[0]))
 
             self._chanWidthExists = True
 
         chanWidthArrayNode = rowdom.getElementsByTagName("chanWidthArray")
         if len(chanWidthArrayNode) > 0:
 
-            chanWidthArrayStr = chanWidthArrayNode[0].firstChild.data.strip()
+            chanWidthArrayStr = self._getXMLNodeChildText(chanWidthArrayNode[0])
 
             self._chanWidthArray = Parser.stringListToLists(
                 chanWidthArrayStr, Frequency, "SpectralWindow", True
@@ -892,7 +904,7 @@ class SpectralWindowRow:
         if len(correlationBitNode) > 0:
 
             self._correlationBit = CorrelationBit.newCorrelationBit(
-                correlationBitNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(correlationBitNode[0])
             )
 
             self._correlationBitExists = True
@@ -900,14 +912,14 @@ class SpectralWindowRow:
         effectiveBwNode = rowdom.getElementsByTagName("effectiveBw")
         if len(effectiveBwNode) > 0:
 
-            self._effectiveBw = Frequency(effectiveBwNode[0].firstChild.data.strip())
+            self._effectiveBw = Frequency(self._getXMLNodeChildText(effectiveBwNode[0]))
 
             self._effectiveBwExists = True
 
         effectiveBwArrayNode = rowdom.getElementsByTagName("effectiveBwArray")
         if len(effectiveBwArrayNode) > 0:
 
-            effectiveBwArrayStr = effectiveBwArrayNode[0].firstChild.data.strip()
+            effectiveBwArrayStr = self._getXMLNodeChildText(effectiveBwArrayNode[0])
 
             self._effectiveBwArray = Parser.stringListToLists(
                 effectiveBwArrayStr, Frequency, "SpectralWindow", True
@@ -918,21 +930,21 @@ class SpectralWindowRow:
         freqGroupNode = rowdom.getElementsByTagName("freqGroup")
         if len(freqGroupNode) > 0:
 
-            self._freqGroup = int(freqGroupNode[0].firstChild.data.strip())
+            self._freqGroup = int(self._getXMLNodeChildText(freqGroupNode[0]))
 
             self._freqGroupExists = True
 
         freqGroupNameNode = rowdom.getElementsByTagName("freqGroupName")
         if len(freqGroupNameNode) > 0:
 
-            self._freqGroupName = str(freqGroupNameNode[0].firstChild.data.strip())
+            self._freqGroupName = str(self._getXMLNodeChildText(freqGroupNameNode[0]))
 
             self._freqGroupNameExists = True
 
         lineArrayNode = rowdom.getElementsByTagName("lineArray")
         if len(lineArrayNode) > 0:
 
-            lineArrayStr = lineArrayNode[0].firstChild.data.strip()
+            lineArrayStr = self._getXMLNodeChildText(lineArrayNode[0])
 
             self._lineArray = Parser.stringListToLists(
                 lineArrayStr, bool, "SpectralWindow", False
@@ -944,7 +956,7 @@ class SpectralWindowRow:
         if len(measFreqRefNode) > 0:
 
             self._measFreqRef = FrequencyReferenceCode.newFrequencyReferenceCode(
-                measFreqRefNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(measFreqRefNode[0])
             )
 
             self._measFreqRefExists = True
@@ -952,42 +964,42 @@ class SpectralWindowRow:
         nameNode = rowdom.getElementsByTagName("name")
         if len(nameNode) > 0:
 
-            self._name = str(nameNode[0].firstChild.data.strip())
+            self._name = str(self._getXMLNodeChildText(nameNode[0]))
 
             self._nameExists = True
 
         oversamplingNode = rowdom.getElementsByTagName("oversampling")
         if len(oversamplingNode) > 0:
 
-            self._oversampling = bool(oversamplingNode[0].firstChild.data.strip())
+            self._oversampling = bool(self._getXMLNodeChildText(oversamplingNode[0]))
 
             self._oversamplingExists = True
 
         quantizationNode = rowdom.getElementsByTagName("quantization")
         if len(quantizationNode) > 0:
 
-            self._quantization = bool(quantizationNode[0].firstChild.data.strip())
+            self._quantization = bool(self._getXMLNodeChildText(quantizationNode[0]))
 
             self._quantizationExists = True
 
         refChanNode = rowdom.getElementsByTagName("refChan")
         if len(refChanNode) > 0:
 
-            self._refChan = float(refChanNode[0].firstChild.data.strip())
+            self._refChan = float(self._getXMLNodeChildText(refChanNode[0]))
 
             self._refChanExists = True
 
         resolutionNode = rowdom.getElementsByTagName("resolution")
         if len(resolutionNode) > 0:
 
-            self._resolution = Frequency(resolutionNode[0].firstChild.data.strip())
+            self._resolution = Frequency(self._getXMLNodeChildText(resolutionNode[0]))
 
             self._resolutionExists = True
 
         resolutionArrayNode = rowdom.getElementsByTagName("resolutionArray")
         if len(resolutionArrayNode) > 0:
 
-            resolutionArrayStr = resolutionArrayNode[0].firstChild.data.strip()
+            resolutionArrayStr = self._getXMLNodeChildText(resolutionArrayNode[0])
 
             self._resolutionArray = Parser.stringListToLists(
                 resolutionArrayStr, Frequency, "SpectralWindow", True
@@ -998,14 +1010,14 @@ class SpectralWindowRow:
         numAssocValuesNode = rowdom.getElementsByTagName("numAssocValues")
         if len(numAssocValuesNode) > 0:
 
-            self._numAssocValues = int(numAssocValuesNode[0].firstChild.data.strip())
+            self._numAssocValues = int(self._getXMLNodeChildText(numAssocValuesNode[0]))
 
             self._numAssocValuesExists = True
 
         assocNatureNode = rowdom.getElementsByTagName("assocNature")
         if len(assocNatureNode) > 0:
 
-            assocNatureStr = assocNatureNode[0].firstChild.data.strip()
+            assocNatureStr = self._getXMLNodeChildText(assocNatureNode[0])
             self._assocNature = Parser.stringListToLists(
                 assocNatureStr, SpectralResolutionType, "SpectralWindow", False
             )
@@ -1015,14 +1027,14 @@ class SpectralWindowRow:
         numFactorNode = rowdom.getElementsByTagName("numFactor")
         if len(numFactorNode) > 0:
 
-            self._numFactor = int(numFactorNode[0].firstChild.data.strip())
+            self._numFactor = int(self._getXMLNodeChildText(numFactorNode[0]))
 
             self._numFactorExists = True
 
         numBinFactorsNode = rowdom.getElementsByTagName("numBinFactors")
         if len(numBinFactorsNode) > 0:
 
-            numBinFactorsStr = numBinFactorsNode[0].firstChild.data.strip()
+            numBinFactorsStr = self._getXMLNodeChildText(numBinFactorsNode[0])
 
             self._numBinFactors = Parser.stringListToLists(
                 numBinFactorsStr, int, "SpectralWindow", False
@@ -1034,7 +1046,7 @@ class SpectralWindowRow:
         if len(numOrigFreqSliceNode) > 0:
 
             self._numOrigFreqSlice = int(
-                numOrigFreqSliceNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(numOrigFreqSliceNode[0])
             )
 
             self._numOrigFreqSliceExists = True
@@ -1044,9 +1056,9 @@ class SpectralWindowRow:
         )
         if len(originatingFrequencySlicesNode) > 0:
 
-            originatingFrequencySlicesStr = originatingFrequencySlicesNode[
-                0
-            ].firstChild.data.strip()
+            originatingFrequencySlicesStr = self._getXMLNodeChildText(
+                originatingFrequencySlicesNode[0]
+            )
 
             self._originatingFrequencySlices = Parser.stringListToLists(
                 originatingFrequencySlicesStr, int, "SpectralWindow", False
@@ -1058,7 +1070,7 @@ class SpectralWindowRow:
         if len(quantizationBitsNode) > 0:
 
             self._quantizationBits = int(
-                quantizationBitsNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(quantizationBitsNode[0])
             )
 
             self._quantizationBitsExists = True
@@ -1066,14 +1078,16 @@ class SpectralWindowRow:
         numRequantStageNode = rowdom.getElementsByTagName("numRequantStage")
         if len(numRequantStageNode) > 0:
 
-            self._numRequantStage = int(numRequantStageNode[0].firstChild.data.strip())
+            self._numRequantStage = int(
+                self._getXMLNodeChildText(numRequantStageNode[0])
+            )
 
             self._numRequantStageExists = True
 
         requantizationNode = rowdom.getElementsByTagName("requantization")
         if len(requantizationNode) > 0:
 
-            requantizationStr = requantizationNode[0].firstChild.data.strip()
+            requantizationStr = self._getXMLNodeChildText(requantizationNode[0])
 
             self._requantization = Parser.stringListToLists(
                 requantizationStr, bool, "SpectralWindow", False
@@ -1084,7 +1098,7 @@ class SpectralWindowRow:
         requantizationBitsNode = rowdom.getElementsByTagName("requantizationBits")
         if len(requantizationBitsNode) > 0:
 
-            requantizationBitsStr = requantizationBitsNode[0].firstChild.data.strip()
+            requantizationBitsStr = self._getXMLNodeChildText(requantizationBitsNode[0])
 
             self._requantizationBits = Parser.stringListToLists(
                 requantizationBitsStr, int, "SpectralWindow", False
@@ -1097,9 +1111,9 @@ class SpectralWindowRow:
         assocSpectralWindowIdNode = rowdom.getElementsByTagName("assocSpectralWindowId")
         if len(assocSpectralWindowIdNode) > 0:
 
-            assocSpectralWindowIdStr = assocSpectralWindowIdNode[
-                0
-            ].firstChild.data.strip()
+            assocSpectralWindowIdStr = self._getXMLNodeChildText(
+                assocSpectralWindowIdNode[0]
+            )
 
             self._assocSpectralWindowId = Parser.stringListToLists(
                 assocSpectralWindowIdStr, Tag, "SpectralWindow", True
@@ -1110,7 +1124,7 @@ class SpectralWindowRow:
         dopplerIdNode = rowdom.getElementsByTagName("dopplerId")
         if len(dopplerIdNode) > 0:
 
-            self._dopplerId = int(dopplerIdNode[0].firstChild.data.strip())
+            self._dopplerId = int(self._getXMLNodeChildText(dopplerIdNode[0]))
 
             self._dopplerIdExists = True
 
@@ -1118,7 +1132,7 @@ class SpectralWindowRow:
         if len(imageSpectralWindowIdNode) > 0:
 
             self._imageSpectralWindowId = Tag(
-                imageSpectralWindowIdNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(imageSpectralWindowIdNode[0])
             )
 
             self._imageSpectralWindowIdExists = True

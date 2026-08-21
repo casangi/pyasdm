@@ -72,6 +72,16 @@ class CalPositionRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -325,25 +335,25 @@ class CalPositionRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         antennaPositionNode = rowdom.getElementsByTagName("antennaPosition")[0]
 
-        antennaPositionStr = antennaPositionNode.firstChild.data.strip()
+        antennaPositionStr = self._getXMLNodeChildText(antennaPositionNode)
 
         self._antennaPosition = Parser.stringListToLists(
             antennaPositionStr, Length, "CalPosition", True
@@ -351,11 +361,11 @@ class CalPositionRow:
 
         stationNameNode = rowdom.getElementsByTagName("stationName")[0]
 
-        self._stationName = str(stationNameNode.firstChild.data.strip())
+        self._stationName = str(self._getXMLNodeChildText(stationNameNode))
 
         stationPositionNode = rowdom.getElementsByTagName("stationPosition")[0]
 
-        stationPositionStr = stationPositionNode.firstChild.data.strip()
+        stationPositionStr = self._getXMLNodeChildText(stationPositionNode)
 
         self._stationPosition = Parser.stringListToLists(
             stationPositionStr, Length, "CalPosition", True
@@ -364,22 +374,22 @@ class CalPositionRow:
         positionMethodNode = rowdom.getElementsByTagName("positionMethod")[0]
 
         self._positionMethod = PositionMethod.newPositionMethod(
-            positionMethodNode.firstChild.data.strip()
+            self._getXMLNodeChildText(positionMethodNode)
         )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
         refAntennaNamesNode = rowdom.getElementsByTagName("refAntennaNames")[0]
 
-        refAntennaNamesStr = refAntennaNamesNode.firstChild.data.strip()
+        refAntennaNamesStr = self._getXMLNodeChildText(refAntennaNamesNode)
 
         self._refAntennaNames = Parser.stringListToLists(
             refAntennaNamesStr, str, "CalPosition", False
@@ -387,19 +397,19 @@ class CalPositionRow:
 
         axesOffsetNode = rowdom.getElementsByTagName("axesOffset")[0]
 
-        self._axesOffset = Length(axesOffsetNode.firstChild.data.strip())
+        self._axesOffset = Length(self._getXMLNodeChildText(axesOffsetNode))
 
         axesOffsetErrNode = rowdom.getElementsByTagName("axesOffsetErr")[0]
 
-        self._axesOffsetErr = Length(axesOffsetErrNode.firstChild.data.strip())
+        self._axesOffsetErr = Length(self._getXMLNodeChildText(axesOffsetErrNode))
 
         axesOffsetFixedNode = rowdom.getElementsByTagName("axesOffsetFixed")[0]
 
-        self._axesOffsetFixed = bool(axesOffsetFixedNode.firstChild.data.strip())
+        self._axesOffsetFixed = bool(self._getXMLNodeChildText(axesOffsetFixedNode))
 
         positionOffsetNode = rowdom.getElementsByTagName("positionOffset")[0]
 
-        positionOffsetStr = positionOffsetNode.firstChild.data.strip()
+        positionOffsetStr = self._getXMLNodeChildText(positionOffsetNode)
 
         self._positionOffset = Parser.stringListToLists(
             positionOffsetStr, Length, "CalPosition", True
@@ -407,7 +417,7 @@ class CalPositionRow:
 
         positionErrNode = rowdom.getElementsByTagName("positionErr")[0]
 
-        positionErrStr = positionErrNode.firstChild.data.strip()
+        positionErrStr = self._getXMLNodeChildText(positionErrNode)
 
         self._positionErr = Parser.stringListToLists(
             positionErrStr, Length, "CalPosition", True
@@ -415,19 +425,21 @@ class CalPositionRow:
 
         reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
 
-        self._reducedChiSquared = float(reducedChiSquaredNode.firstChild.data.strip())
+        self._reducedChiSquared = float(
+            self._getXMLNodeChildText(reducedChiSquaredNode)
+        )
 
         delayRmsNode = rowdom.getElementsByTagName("delayRms")
         if len(delayRmsNode) > 0:
 
-            self._delayRms = float(delayRmsNode[0].firstChild.data.strip())
+            self._delayRms = float(self._getXMLNodeChildText(delayRmsNode[0]))
 
             self._delayRmsExists = True
 
         phaseRmsNode = rowdom.getElementsByTagName("phaseRms")
         if len(phaseRmsNode) > 0:
 
-            self._phaseRms = Angle(phaseRmsNode[0].firstChild.data.strip())
+            self._phaseRms = Angle(self._getXMLNodeChildText(phaseRmsNode[0]))
 
             self._phaseRmsExists = True
 
@@ -435,11 +447,11 @@ class CalPositionRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 

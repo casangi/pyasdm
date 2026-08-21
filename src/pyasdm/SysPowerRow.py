@@ -63,6 +63,16 @@ class SysPowerRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -357,20 +367,22 @@ class SysPowerRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
         switchedPowerDifferenceNode = rowdom.getElementsByTagName(
             "switchedPowerDifference"
         )
         if len(switchedPowerDifferenceNode) > 0:
 
-            switchedPowerDifferenceStr = switchedPowerDifferenceNode[
-                0
-            ].firstChild.data.strip()
+            switchedPowerDifferenceStr = self._getXMLNodeChildText(
+                switchedPowerDifferenceNode[0]
+            )
 
             self._switchedPowerDifference = Parser.stringListToLists(
                 switchedPowerDifferenceStr, float, "SysPower", False
@@ -381,7 +393,7 @@ class SysPowerRow:
         switchedPowerSumNode = rowdom.getElementsByTagName("switchedPowerSum")
         if len(switchedPowerSumNode) > 0:
 
-            switchedPowerSumStr = switchedPowerSumNode[0].firstChild.data.strip()
+            switchedPowerSumStr = self._getXMLNodeChildText(switchedPowerSumNode[0])
 
             self._switchedPowerSum = Parser.stringListToLists(
                 switchedPowerSumStr, float, "SysPower", False
@@ -392,7 +404,7 @@ class SysPowerRow:
         requantizerGainNode = rowdom.getElementsByTagName("requantizerGain")
         if len(requantizerGainNode) > 0:
 
-            requantizerGainStr = requantizerGainNode[0].firstChild.data.strip()
+            requantizerGainStr = self._getXMLNodeChildText(requantizerGainNode[0])
 
             self._requantizerGain = Parser.stringListToLists(
                 requantizerGainStr, float, "SysPower", False
@@ -403,7 +415,7 @@ class SysPowerRow:
         numChannelsNode = rowdom.getElementsByTagName("numChannels")
         if len(numChannelsNode) > 0:
 
-            self._numChannels = int(numChannelsNode[0].firstChild.data.strip())
+            self._numChannels = int(self._getXMLNodeChildText(numChannelsNode[0]))
 
             self._numChannelsExists = True
 
@@ -411,7 +423,7 @@ class SysPowerRow:
         if len(numPolarizationTypeNode) > 0:
 
             self._numPolarizationType = int(
-                numPolarizationTypeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(numPolarizationTypeNode[0])
             )
 
             self._numPolarizationTypeExists = True
@@ -420,7 +432,7 @@ class SysPowerRow:
         if len(chanFreqStartNode) > 0:
 
             self._chanFreqStart = Frequency(
-                chanFreqStartNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(chanFreqStartNode[0])
             )
 
             self._chanFreqStartExists = True
@@ -428,7 +440,9 @@ class SysPowerRow:
         chanFreqStepNode = rowdom.getElementsByTagName("chanFreqStep")
         if len(chanFreqStepNode) > 0:
 
-            self._chanFreqStep = Frequency(chanFreqStepNode[0].firstChild.data.strip())
+            self._chanFreqStep = Frequency(
+                self._getXMLNodeChildText(chanFreqStepNode[0])
+            )
 
             self._chanFreqStepExists = True
 
@@ -437,9 +451,9 @@ class SysPowerRow:
         )
         if len(switchedPowerDifferenceSpectrumNode) > 0:
 
-            switchedPowerDifferenceSpectrumStr = switchedPowerDifferenceSpectrumNode[
-                0
-            ].firstChild.data.strip()
+            switchedPowerDifferenceSpectrumStr = self._getXMLNodeChildText(
+                switchedPowerDifferenceSpectrumNode[0]
+            )
 
             self._switchedPowerDifferenceSpectrum = Parser.stringListToLists(
                 switchedPowerDifferenceSpectrumStr, float, "SysPower", False
@@ -452,9 +466,9 @@ class SysPowerRow:
         )
         if len(switchedPowerSumSpectrumNode) > 0:
 
-            switchedPowerSumSpectrumStr = switchedPowerSumSpectrumNode[
-                0
-            ].firstChild.data.strip()
+            switchedPowerSumSpectrumStr = self._getXMLNodeChildText(
+                switchedPowerSumSpectrumNode[0]
+            )
 
             self._switchedPowerSumSpectrum = Parser.stringListToLists(
                 switchedPowerSumSpectrumStr, float, "SysPower", False
@@ -467,9 +481,9 @@ class SysPowerRow:
         )
         if len(requantizerGainSpectrumNode) > 0:
 
-            requantizerGainSpectrumStr = requantizerGainSpectrumNode[
-                0
-            ].firstChild.data.strip()
+            requantizerGainSpectrumStr = self._getXMLNodeChildText(
+                requantizerGainSpectrumNode[0]
+            )
 
             self._requantizerGainSpectrum = Parser.stringListToLists(
                 requantizerGainSpectrumStr, float, "SysPower", False
@@ -481,15 +495,15 @@ class SysPowerRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        self._feedId = int(feedIdNode.firstChild.data.strip())
+        self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

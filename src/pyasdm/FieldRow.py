@@ -66,6 +66,16 @@ class FieldRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -320,31 +330,31 @@ class FieldRow:
 
         fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
 
-        self._fieldId = Tag(fieldIdNode.firstChild.data.strip())
+        self._fieldId = Tag(self._getXMLNodeChildText(fieldIdNode))
 
         fieldNameNode = rowdom.getElementsByTagName("fieldName")[0]
 
-        self._fieldName = str(fieldNameNode.firstChild.data.strip())
+        self._fieldName = str(self._getXMLNodeChildText(fieldNameNode))
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
         delayDirNode = rowdom.getElementsByTagName("delayDir")[0]
 
-        delayDirStr = delayDirNode.firstChild.data.strip()
+        delayDirStr = self._getXMLNodeChildText(delayDirNode)
 
         self._delayDir = Parser.stringListToLists(delayDirStr, Angle, "Field", True)
 
         phaseDirNode = rowdom.getElementsByTagName("phaseDir")[0]
 
-        phaseDirStr = phaseDirNode.firstChild.data.strip()
+        phaseDirStr = self._getXMLNodeChildText(phaseDirNode)
 
         self._phaseDir = Parser.stringListToLists(phaseDirStr, Angle, "Field", True)
 
         referenceDirNode = rowdom.getElementsByTagName("referenceDir")[0]
 
-        referenceDirStr = referenceDirNode.firstChild.data.strip()
+        referenceDirStr = self._getXMLNodeChildText(referenceDirNode)
 
         self._referenceDir = Parser.stringListToLists(
             referenceDirStr, Angle, "Field", True
@@ -353,14 +363,14 @@ class FieldRow:
         timeNode = rowdom.getElementsByTagName("time")
         if len(timeNode) > 0:
 
-            self._time = ArrayTime(timeNode[0].firstChild.data.strip())
+            self._time = ArrayTime(self._getXMLNodeChildText(timeNode[0]))
 
             self._timeExists = True
 
         codeNode = rowdom.getElementsByTagName("code")
         if len(codeNode) > 0:
 
-            self._code = str(codeNode[0].firstChild.data.strip())
+            self._code = str(self._getXMLNodeChildText(codeNode[0]))
 
             self._codeExists = True
 
@@ -368,7 +378,7 @@ class FieldRow:
         if len(directionCodeNode) > 0:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionCodeNode[0])
             )
 
             self._directionCodeExists = True
@@ -377,7 +387,7 @@ class FieldRow:
         if len(directionEquinoxNode) > 0:
 
             self._directionEquinox = ArrayTime(
-                directionEquinoxNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionEquinoxNode[0])
             )
 
             self._directionEquinoxExists = True
@@ -385,7 +395,7 @@ class FieldRow:
         assocNatureNode = rowdom.getElementsByTagName("assocNature")
         if len(assocNatureNode) > 0:
 
-            self._assocNature = str(assocNatureNode[0].firstChild.data.strip())
+            self._assocNature = str(self._getXMLNodeChildText(assocNatureNode[0]))
 
             self._assocNatureExists = True
 
@@ -394,21 +404,21 @@ class FieldRow:
         assocFieldIdNode = rowdom.getElementsByTagName("assocFieldId")
         if len(assocFieldIdNode) > 0:
 
-            self._assocFieldId = Tag(assocFieldIdNode[0].firstChild.data.strip())
+            self._assocFieldId = Tag(self._getXMLNodeChildText(assocFieldIdNode[0]))
 
             self._assocFieldIdExists = True
 
         ephemerisIdNode = rowdom.getElementsByTagName("ephemerisId")
         if len(ephemerisIdNode) > 0:
 
-            self._ephemerisId = int(ephemerisIdNode[0].firstChild.data.strip())
+            self._ephemerisId = int(self._getXMLNodeChildText(ephemerisIdNode[0]))
 
             self._ephemerisIdExists = True
 
         sourceIdNode = rowdom.getElementsByTagName("sourceId")
         if len(sourceIdNode) > 0:
 
-            self._sourceId = int(sourceIdNode[0].firstChild.data.strip())
+            self._sourceId = int(self._getXMLNodeChildText(sourceIdNode[0]))
 
             self._sourceIdExists = True
 

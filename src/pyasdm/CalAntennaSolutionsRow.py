@@ -75,6 +75,16 @@ class CalAntennaSolutionsRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -305,45 +315,45 @@ class CalAntennaSolutionsRow:
 
         antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
         basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
         receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
         startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
         endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
         numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
         refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
 
-        self._refAntennaName = str(refAntennaNameNode.firstChild.data.strip())
+        self._refAntennaName = str(self._getXMLNodeChildText(refAntennaNameNode))
 
         directionNode = rowdom.getElementsByTagName("direction")[0]
 
-        directionStr = directionNode.firstChild.data.strip()
+        directionStr = self._getXMLNodeChildText(directionNode)
 
         self._direction = Parser.stringListToLists(
             directionStr, Angle, "CalAntennaSolutions", True
@@ -351,7 +361,7 @@ class CalAntennaSolutionsRow:
 
         frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalAntennaSolutions", True
@@ -359,22 +369,24 @@ class CalAntennaSolutionsRow:
 
         integrationTimeNode = rowdom.getElementsByTagName("integrationTime")[0]
 
-        self._integrationTime = Interval(integrationTimeNode.firstChild.data.strip())
+        self._integrationTime = Interval(self._getXMLNodeChildText(integrationTimeNode))
 
         polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalAntennaSolutions", False
         )
 
         correctionValidityNode = rowdom.getElementsByTagName("correctionValidity")[0]
 
-        self._correctionValidity = bool(correctionValidityNode.firstChild.data.strip())
+        self._correctionValidity = bool(
+            self._getXMLNodeChildText(correctionValidityNode)
+        )
 
         phaseAntNode = rowdom.getElementsByTagName("phaseAnt")[0]
 
-        phaseAntStr = phaseAntNode.firstChild.data.strip()
+        phaseAntStr = self._getXMLNodeChildText(phaseAntNode)
 
         self._phaseAnt = Parser.stringListToLists(
             phaseAntStr, float, "CalAntennaSolutions", False
@@ -382,7 +394,7 @@ class CalAntennaSolutionsRow:
 
         phaseAntRMSNode = rowdom.getElementsByTagName("phaseAntRMS")[0]
 
-        phaseAntRMSStr = phaseAntRMSNode.firstChild.data.strip()
+        phaseAntRMSStr = self._getXMLNodeChildText(phaseAntRMSNode)
 
         self._phaseAntRMS = Parser.stringListToLists(
             phaseAntRMSStr, float, "CalAntennaSolutions", False
@@ -390,7 +402,7 @@ class CalAntennaSolutionsRow:
 
         amplitudeAntNode = rowdom.getElementsByTagName("amplitudeAnt")[0]
 
-        amplitudeAntStr = amplitudeAntNode.firstChild.data.strip()
+        amplitudeAntStr = self._getXMLNodeChildText(amplitudeAntNode)
 
         self._amplitudeAnt = Parser.stringListToLists(
             amplitudeAntStr, float, "CalAntennaSolutions", False
@@ -398,7 +410,7 @@ class CalAntennaSolutionsRow:
 
         amplitudeAntRMSNode = rowdom.getElementsByTagName("amplitudeAntRMS")[0]
 
-        amplitudeAntRMSStr = amplitudeAntRMSNode.firstChild.data.strip()
+        amplitudeAntRMSStr = self._getXMLNodeChildText(amplitudeAntRMSNode)
 
         self._amplitudeAntRMS = Parser.stringListToLists(
             amplitudeAntRMSStr, float, "CalAntennaSolutions", False
@@ -408,15 +420,15 @@ class CalAntennaSolutionsRow:
 
         calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
         calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

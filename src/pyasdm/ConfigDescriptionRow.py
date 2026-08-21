@@ -78,6 +78,16 @@ class ConfigDescriptionRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -370,37 +380,41 @@ class ConfigDescriptionRow:
 
         numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
         numDataDescriptionNode = rowdom.getElementsByTagName("numDataDescription")[0]
 
-        self._numDataDescription = int(numDataDescriptionNode.firstChild.data.strip())
+        self._numDataDescription = int(
+            self._getXMLNodeChildText(numDataDescriptionNode)
+        )
 
         numFeedNode = rowdom.getElementsByTagName("numFeed")[0]
 
-        self._numFeed = int(numFeedNode.firstChild.data.strip())
+        self._numFeed = int(self._getXMLNodeChildText(numFeedNode))
 
         correlationModeNode = rowdom.getElementsByTagName("correlationMode")[0]
 
         self._correlationMode = CorrelationMode.newCorrelationMode(
-            correlationModeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(correlationModeNode)
         )
 
         configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
 
-        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data.strip())
+        self._configDescriptionId = Tag(
+            self._getXMLNodeChildText(configDescriptionIdNode)
+        )
 
         numAtmPhaseCorrectionNode = rowdom.getElementsByTagName(
             "numAtmPhaseCorrection"
         )[0]
 
         self._numAtmPhaseCorrection = int(
-            numAtmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(numAtmPhaseCorrectionNode)
         )
 
         atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
 
-        atmPhaseCorrectionStr = atmPhaseCorrectionNode.firstChild.data.strip()
+        atmPhaseCorrectionStr = self._getXMLNodeChildText(atmPhaseCorrectionNode)
         self._atmPhaseCorrection = Parser.stringListToLists(
             atmPhaseCorrectionStr, AtmPhaseCorrection, "ConfigDescription", False
         )
@@ -408,13 +422,13 @@ class ConfigDescriptionRow:
         processorTypeNode = rowdom.getElementsByTagName("processorType")[0]
 
         self._processorType = ProcessorType.newProcessorType(
-            processorTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(processorTypeNode)
         )
 
         phasedArrayListNode = rowdom.getElementsByTagName("phasedArrayList")
         if len(phasedArrayListNode) > 0:
 
-            phasedArrayListStr = phasedArrayListNode[0].firstChild.data.strip()
+            phasedArrayListStr = self._getXMLNodeChildText(phasedArrayListNode[0])
 
             self._phasedArrayList = Parser.stringListToLists(
                 phasedArrayListStr, int, "ConfigDescription", False
@@ -425,20 +439,20 @@ class ConfigDescriptionRow:
         spectralTypeNode = rowdom.getElementsByTagName("spectralType")[0]
 
         self._spectralType = SpectralResolutionType.newSpectralResolutionType(
-            spectralTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(spectralTypeNode)
         )
 
         numAssocValuesNode = rowdom.getElementsByTagName("numAssocValues")
         if len(numAssocValuesNode) > 0:
 
-            self._numAssocValues = int(numAssocValuesNode[0].firstChild.data.strip())
+            self._numAssocValues = int(self._getXMLNodeChildText(numAssocValuesNode[0]))
 
             self._numAssocValuesExists = True
 
         assocNatureNode = rowdom.getElementsByTagName("assocNature")
         if len(assocNatureNode) > 0:
 
-            assocNatureStr = assocNatureNode[0].firstChild.data.strip()
+            assocNatureStr = self._getXMLNodeChildText(assocNatureNode[0])
             self._assocNature = Parser.stringListToLists(
                 assocNatureStr, SpectralResolutionType, "ConfigDescription", False
             )
@@ -449,7 +463,7 @@ class ConfigDescriptionRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        antennaIdStr = antennaIdNode.firstChild.data.strip()
+        antennaIdStr = self._getXMLNodeChildText(antennaIdNode)
 
         self._antennaId = Parser.stringListToLists(
             antennaIdStr, Tag, "ConfigDescription", True
@@ -460,9 +474,9 @@ class ConfigDescriptionRow:
         )
         if len(assocConfigDescriptionIdNode) > 0:
 
-            assocConfigDescriptionIdStr = assocConfigDescriptionIdNode[
-                0
-            ].firstChild.data.strip()
+            assocConfigDescriptionIdStr = self._getXMLNodeChildText(
+                assocConfigDescriptionIdNode[0]
+            )
 
             self._assocConfigDescriptionId = Parser.stringListToLists(
                 assocConfigDescriptionIdStr, Tag, "ConfigDescription", True
@@ -472,7 +486,7 @@ class ConfigDescriptionRow:
 
         dataDescriptionIdNode = rowdom.getElementsByTagName("dataDescriptionId")[0]
 
-        dataDescriptionIdStr = dataDescriptionIdNode.firstChild.data.strip()
+        dataDescriptionIdStr = self._getXMLNodeChildText(dataDescriptionIdNode)
 
         self._dataDescriptionId = Parser.stringListToLists(
             dataDescriptionIdStr, Tag, "ConfigDescription", True
@@ -480,7 +494,7 @@ class ConfigDescriptionRow:
 
         feedIdNode = rowdom.getElementsByTagName("feedId")[0]
 
-        feedIdStr = feedIdNode.firstChild.data.strip()
+        feedIdStr = self._getXMLNodeChildText(feedIdNode)
 
         self._feedId = Parser.stringListToLists(
             feedIdStr, int, "ConfigDescription", False
@@ -488,11 +502,11 @@ class ConfigDescriptionRow:
 
         processorIdNode = rowdom.getElementsByTagName("processorId")[0]
 
-        self._processorId = Tag(processorIdNode.firstChild.data.strip())
+        self._processorId = Tag(self._getXMLNodeChildText(processorIdNode))
 
         switchCycleIdNode = rowdom.getElementsByTagName("switchCycleId")[0]
 
-        switchCycleIdStr = switchCycleIdNode.firstChild.data.strip()
+        switchCycleIdStr = self._getXMLNodeChildText(switchCycleIdNode)
 
         self._switchCycleId = Parser.stringListToLists(
             switchCycleIdStr, Tag, "ConfigDescription", True

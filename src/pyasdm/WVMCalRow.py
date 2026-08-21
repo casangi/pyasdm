@@ -66,6 +66,16 @@ class WVMCalRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -225,15 +235,19 @@ class WVMCalRow:
 
         timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
         wvrMethodNode = rowdom.getElementsByTagName("wvrMethod")[0]
 
-        self._wvrMethod = WVRMethod.newWVRMethod(wvrMethodNode.firstChild.data.strip())
+        self._wvrMethod = WVRMethod.newWVRMethod(
+            self._getXMLNodeChildText(wvrMethodNode)
+        )
 
         polyFreqLimitsNode = rowdom.getElementsByTagName("polyFreqLimits")[0]
 
-        polyFreqLimitsStr = polyFreqLimitsNode.firstChild.data.strip()
+        polyFreqLimitsStr = self._getXMLNodeChildText(polyFreqLimitsNode)
 
         self._polyFreqLimits = Parser.stringListToLists(
             polyFreqLimitsStr, Frequency, "WVMCal", True
@@ -241,25 +255,25 @@ class WVMCalRow:
 
         numInputAntennaNode = rowdom.getElementsByTagName("numInputAntenna")[0]
 
-        self._numInputAntenna = int(numInputAntennaNode.firstChild.data.strip())
+        self._numInputAntenna = int(self._getXMLNodeChildText(numInputAntennaNode))
 
         numChanNode = rowdom.getElementsByTagName("numChan")[0]
 
-        self._numChan = int(numChanNode.firstChild.data.strip())
+        self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
         numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
         pathCoeffNode = rowdom.getElementsByTagName("pathCoeff")[0]
 
-        pathCoeffStr = pathCoeffNode.firstChild.data.strip()
+        pathCoeffStr = self._getXMLNodeChildText(pathCoeffNode)
 
         self._pathCoeff = Parser.stringListToLists(pathCoeffStr, float, "WVMCal", False)
 
         refTempNode = rowdom.getElementsByTagName("refTemp")[0]
 
-        refTempStr = refTempNode.firstChild.data.strip()
+        refTempStr = self._getXMLNodeChildText(refTempNode)
 
         self._refTemp = Parser.stringListToLists(
             refTempStr, Temperature, "WVMCal", True
@@ -269,11 +283,11 @@ class WVMCalRow:
 
         antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         inputAntennaIdNode = rowdom.getElementsByTagName("inputAntennaId")[0]
 
-        inputAntennaIdStr = inputAntennaIdNode.firstChild.data.strip()
+        inputAntennaIdStr = self._getXMLNodeChildText(inputAntennaIdNode)
 
         self._inputAntennaId = Parser.stringListToLists(
             inputAntennaIdStr, Tag, "WVMCal", True
@@ -281,7 +295,7 @@ class WVMCalRow:
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 

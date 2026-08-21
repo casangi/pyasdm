@@ -63,6 +63,16 @@ class DataDescriptionRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -181,24 +191,24 @@ class DataDescriptionRow:
 
         dataDescriptionIdNode = rowdom.getElementsByTagName("dataDescriptionId")[0]
 
-        self._dataDescriptionId = Tag(dataDescriptionIdNode.firstChild.data.strip())
+        self._dataDescriptionId = Tag(self._getXMLNodeChildText(dataDescriptionIdNode))
 
         # extrinsic attribute values
 
         polOrHoloIdNode = rowdom.getElementsByTagName("polOrHoloId")[0]
 
-        self._polOrHoloId = Tag(polOrHoloIdNode.firstChild.data.strip())
+        self._polOrHoloId = Tag(self._getXMLNodeChildText(polOrHoloIdNode))
 
         pulsarIdNode = rowdom.getElementsByTagName("pulsarId")
         if len(pulsarIdNode) > 0:
 
-            self._pulsarId = Tag(pulsarIdNode[0].firstChild.data.strip())
+            self._pulsarId = Tag(self._getXMLNodeChildText(pulsarIdNode[0]))
 
             self._pulsarIdExists = True
 
         spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
