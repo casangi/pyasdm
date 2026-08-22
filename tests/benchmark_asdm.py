@@ -36,9 +36,13 @@ def benchmarkTable(container, tableName, tableNameWidth, checkRowUniqueness):
     # this breaks the table for some uses but it keeps asizeof from going
     # through the container and finding all of the other tables
     thisTable._container = None
-    
-    sizeTable = asizeof.asizeof(thisTable)
-    sizeRows = asizeof.asizeof(rows)
+
+    sizeTable = None
+    # for now, skip asizeof for SysPower and Pointing, instead, use getsizeof on rows, otherwise this dies
+    if tableName in ["SysPower","Pointing"]:
+        sizeTable = sys.getsizeof(rows)
+    else:
+        sizeTable = asizeof.asizeof(thisTable)
 
     tablePath = os.path.join(container.getDirectory(),tableName)
     tableType = "xxx"
@@ -54,7 +58,7 @@ def benchmarkTable(container, tableName, tableNameWidth, checkRowUniqueness):
         fileSize = os.path.getsize(tablePath)
         strFileSize = str(fileSize)
 
-    print(f"{tableName:^{tableNameWidth}} {tableType:>4} {thisTable.size():>6} {container.getExpectedTableSize(tableName):>6} {strFileSize:>10} {sizeRows:>11} {sizeTable:>11} {deltaGetTableTime:08.4f} {timePerRow_in_ms:07.3f}")
+    print(f"{tableName:^{tableNameWidth}} {tableType:>4} {thisTable.size():>6} {container.getExpectedTableSize(tableName):>6} {strFileSize:>10} {sizeTable:>11} {deltaGetTableTime:08.4f} {timePerRow_in_ms:07.3f}")
 
     return (deltaGetTableTime, fileSize, sizeTable)
 
