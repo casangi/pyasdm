@@ -183,45 +183,71 @@ class MainRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("time", self._time)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAntenna", self._numAntenna)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "timeSampling", TimeSampling.name(self._timeSampling)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("interval", self._interval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numIntegration", self._numIntegration)
 
+        result += "\n   "
+
         result += Parser.valueToXML("scanNumber", self._scanNumber)
+
+        result += "\n   "
 
         result += Parser.valueToXML("subscanNumber", self._subscanNumber)
 
+        result += "\n   "
+
         result += Parser.valueToXML("dataSize", self._dataSize)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("dataUID", self._dataUID)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML(
             "configDescriptionId", self._configDescriptionId
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("fieldId", self._fieldId)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("stateId", self._stateId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -510,6 +536,7 @@ class MainRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -541,6 +568,7 @@ class MainRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -561,6 +589,7 @@ class MainRow:
         """
         Set timeSampling with the specified TimeSampling value.
         timeSampling The TimeSampling value to which timeSampling is to be set.
+
 
 
         """
@@ -584,6 +613,7 @@ class MainRow:
         """
         Set interval with the specified Interval value.
         interval The Interval value to which interval is to be set.
+
         The value of interval can be anything allowed by the Interval constructor.
 
         """
@@ -608,6 +638,7 @@ class MainRow:
         numIntegration The int value to which numIntegration is to be set.
 
 
+
         """
 
         self._numIntegration = int(numIntegration)
@@ -628,6 +659,7 @@ class MainRow:
         """
         Set scanNumber with the specified int value.
         scanNumber The int value to which scanNumber is to be set.
+
 
 
         """
@@ -652,6 +684,7 @@ class MainRow:
         subscanNumber The int value to which subscanNumber is to be set.
 
 
+
         """
 
         self._subscanNumber = int(subscanNumber)
@@ -672,6 +705,7 @@ class MainRow:
         """
         Set dataSize with the specified int value.
         dataSize The int value to which dataSize is to be set.
+
 
 
         """
@@ -695,6 +729,7 @@ class MainRow:
         """
         Set dataUID with the specified EntityRef value.
         dataUID The EntityRef value to which dataUID is to be set.
+
         The value of dataUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -738,6 +773,7 @@ class MainRow:
         """
         Set configDescriptionId with the specified Tag value.
         configDescriptionId The Tag value to which configDescriptionId is to be set.
+
         The value of configDescriptionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -768,6 +804,7 @@ class MainRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         """
@@ -791,6 +828,7 @@ class MainRow:
         """
         Set fieldId with the specified Tag value.
         fieldId The Tag value to which fieldId is to be set.
+
         The value of fieldId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -820,6 +858,7 @@ class MainRow:
         """
         Set stateId with the specified Tag []  value.
         stateId The Tag []  value to which stateId is to be set.
+
         The value of stateId can be anything allowed by the Tag []  constructor.
 
         """

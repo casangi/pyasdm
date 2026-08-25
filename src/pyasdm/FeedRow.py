@@ -102,7 +102,9 @@ class FeedRow:
 
         self._numReceptor = 0
 
-        self._beamOffset = []  # this is a list of float []  []
+        self._beamOffset = (
+            []
+        )  # this is a list of float []  []  saved as double precision
 
         self._focusReference = []  # this is a list of Length []  []
 
@@ -134,7 +136,9 @@ class FeedRow:
 
         self._skyCouplingSpectrumExists = False
 
-        self._skyCouplingSpectrum = []  # this is a list of float []
+        self._skyCouplingSpectrum = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._receiverGenerationExists = False
 
@@ -273,59 +277,83 @@ class FeedRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("feedId", self._feedId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
-        result += Parser.listValueToXML("beamOffset", self._beamOffset)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("beamOffset", self._beamOffset)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("focusReference", self._focusReference)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("polResponse", self._polResponse)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("receptorAngle", self._receptorAngle)
 
         if self._feedNumExists:
+            result += "\n   "
 
             result += Parser.valueToXML("feedNum", self._feedNum)
 
         if self._illumOffsetExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("illumOffset", self._illumOffset)
 
         if self._positionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("position", self._position)
 
         if self._skyCouplingExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("skyCoupling", self._skyCoupling)
+            result += Parser.floatValueToXML("skyCoupling", self._skyCoupling)
 
         if self._numChanExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numChan", self._numChan)
 
         if self._skyCouplingSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "skyCouplingSpectrum", self._skyCouplingSpectrum
             )
 
         if self._receiverGenerationExists:
+            result += "\n   "
 
             result += Parser.valueToXML("receiverGeneration", self._receiverGeneration)
 
         if self._digitizerOffsetExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "digitizerOffset", self._digitizerOffset
@@ -333,15 +361,21 @@ class FeedRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("receiverId", self._receiverId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -535,7 +569,7 @@ class FeedRow:
         eos.writeInt(beamOffset_dims[1])
         for i in range(beamOffset_dims[0]):
             for j in range(beamOffset_dims[1]):
-                eos.writeFloat(self._beamOffset[i][j])
+                eos.writeDouble(self._beamOffset[i][j])
 
         Length.listToBin(self._focusReference, eos)
 
@@ -648,7 +682,7 @@ class FeedRow:
         for i in range(beamOffsetDim1):
             thisList_j = []
             for j in range(beamOffsetDim2):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
         row._beamOffset = thisList
@@ -860,6 +894,7 @@ class FeedRow:
         feedId The int value to which feedId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -888,6 +923,7 @@ class FeedRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -919,6 +955,7 @@ class FeedRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -939,6 +976,9 @@ class FeedRow:
         """
         Set beamOffset with the specified float []  []  value.
         beamOffset The float []  []  value to which beamOffset is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -982,6 +1022,7 @@ class FeedRow:
         """
         Set focusReference with the specified Length []  []  value.
         focusReference The Length []  []  value to which focusReference is to be set.
+
         The value of focusReference can be anything allowed by the Length []  []  constructor.
 
         """
@@ -1027,6 +1068,7 @@ class FeedRow:
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1068,6 +1110,7 @@ class FeedRow:
         """
         Set polResponse with the specified Complex []  []  value.
         polResponse The Complex []  []  value to which polResponse is to be set.
+
         The value of polResponse can be anything allowed by the Complex []  []  constructor.
 
         """
@@ -1111,6 +1154,7 @@ class FeedRow:
         """
         Set receptorAngle with the specified Angle []  value.
         receptorAngle The Angle []  value to which receptorAngle is to be set.
+
         The value of receptorAngle can be anything allowed by the Angle []  constructor.
 
         """
@@ -1170,6 +1214,7 @@ class FeedRow:
         feedNum The int value to which feedNum is to be set.
 
 
+
         """
 
         self._feedNum = int(feedNum)
@@ -1212,6 +1257,7 @@ class FeedRow:
         """
         Set illumOffset with the specified Length []  value.
         illumOffset The Length []  value to which illumOffset is to be set.
+
         The value of illumOffset can be anything allowed by the Length []  constructor.
 
         """
@@ -1277,6 +1323,7 @@ class FeedRow:
         """
         Set position with the specified Length []  value.
         position The Length []  value to which position is to be set.
+
         The value of position can be anything allowed by the Length []  constructor.
 
         """
@@ -1343,6 +1390,9 @@ class FeedRow:
         Set skyCoupling with the specified float value.
         skyCoupling The float value to which skyCoupling is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1388,6 +1438,7 @@ class FeedRow:
         numChan The int value to which numChan is to be set.
 
 
+
         """
 
         self._numChan = int(numChan)
@@ -1430,6 +1481,9 @@ class FeedRow:
         """
         Set skyCouplingSpectrum with the specified float []  value.
         skyCouplingSpectrum The float []  value to which skyCouplingSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1497,6 +1551,7 @@ class FeedRow:
         receiverGeneration The int value to which receiverGeneration is to be set.
 
 
+
         """
 
         self._receiverGeneration = int(receiverGeneration)
@@ -1540,6 +1595,7 @@ class FeedRow:
         """
         Set digitizerOffset with the specified Frequency value.
         digitizerOffset The Frequency value to which digitizerOffset is to be set.
+
         The value of digitizerOffset can be anything allowed by the Frequency constructor.
 
         """
@@ -1573,6 +1629,7 @@ class FeedRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1602,6 +1659,7 @@ class FeedRow:
         """
         Set receiverId with the specified int []  value.
         receiverId The int []  value to which receiverId is to be set.
+
 
 
         """
@@ -1646,6 +1704,7 @@ class FeedRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

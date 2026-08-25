@@ -257,59 +257,79 @@ class FlagRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("flagId", self._flagId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startTime", self._startTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endTime", self._endTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("reason", self._reason)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numAntenna", self._numAntenna)
 
         if self._numPolarizationTypeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "numPolarizationType", self._numPolarizationType
             )
 
         if self._numSpectralWindowExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numSpectralWindow", self._numSpectralWindow)
 
         if self._numPairedAntennaExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numPairedAntenna", self._numPairedAntenna)
 
         if self._numChanExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numChan", self._numChan)
 
         if self._polarizationTypeExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML(
                 "polarizationType", self._polarizationType
             )
 
         if self._channelExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("channel", self._channel)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("antennaId", self._antennaId)
 
         if self._pairedAntennaIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "pairedAntennaId", self._pairedAntennaId
             )
 
         if self._spectralWindowIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "spectralWindowId", self._spectralWindowId
@@ -317,7 +337,7 @@ class FlagRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -729,6 +749,7 @@ class FlagRow:
         """
         Set flagId with the specified Tag value.
         flagId The Tag value to which flagId is to be set.
+
         The value of flagId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -759,6 +780,7 @@ class FlagRow:
         """
         Set startTime with the specified ArrayTime value.
         startTime The ArrayTime value to which startTime is to be set.
+
         The value of startTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -782,6 +804,7 @@ class FlagRow:
         """
         Set endTime with the specified ArrayTime value.
         endTime The ArrayTime value to which endTime is to be set.
+
         The value of endTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -806,6 +829,7 @@ class FlagRow:
         reason The str value to which reason is to be set.
 
 
+
         """
 
         self._reason = str(reason)
@@ -826,6 +850,7 @@ class FlagRow:
         """
         Set numAntenna with the specified int value.
         numAntenna The int value to which numAntenna is to be set.
+
 
 
         """
@@ -862,6 +887,7 @@ class FlagRow:
         """
         Set numPolarizationType with the specified int value.
         numPolarizationType The int value to which numPolarizationType is to be set.
+
 
 
         """
@@ -908,6 +934,7 @@ class FlagRow:
         numSpectralWindow The int value to which numSpectralWindow is to be set.
 
 
+
         """
 
         self._numSpectralWindow = int(numSpectralWindow)
@@ -950,6 +977,7 @@ class FlagRow:
         """
         Set numPairedAntenna with the specified int value.
         numPairedAntenna The int value to which numPairedAntenna is to be set.
+
 
 
         """
@@ -996,6 +1024,7 @@ class FlagRow:
         numChan The int value to which numChan is to be set.
 
 
+
         """
 
         self._numChan = int(numChan)
@@ -1038,6 +1067,7 @@ class FlagRow:
         """
         Set polarizationType with the specified PolarizationType []  value.
         polarizationType The PolarizationType []  value to which polarizationType is to be set.
+
 
 
         """
@@ -1105,6 +1135,7 @@ class FlagRow:
         channel The int []  []  value to which channel is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1156,6 +1187,7 @@ class FlagRow:
         """
         Set antennaId with the specified Tag []  value.
         antennaId The Tag []  value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1213,6 +1245,7 @@ class FlagRow:
         """
         Set pairedAntennaId with the specified Tag []  value.
         pairedAntennaId The Tag []  value to which pairedAntennaId is to be set.
+
         The value of pairedAntennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1278,6 +1311,7 @@ class FlagRow:
         """
         Set spectralWindowId with the specified Tag []  value.
         spectralWindowId The Tag []  value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag []  constructor.
 
         """

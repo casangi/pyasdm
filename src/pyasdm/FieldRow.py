@@ -245,63 +245,83 @@ class FieldRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("fieldId", self._fieldId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("fieldName", self._fieldName)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numPoly", self._numPoly)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("delayDir", self._delayDir)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("phaseDir", self._phaseDir)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("referenceDir", self._referenceDir)
 
         if self._timeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("time", self._time)
 
         if self._codeExists:
+            result += "\n   "
 
             result += Parser.valueToXML("code", self._code)
 
         if self._directionCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "directionCode", DirectionReferenceCode.name(self._directionCode)
             )
 
         if self._directionEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "directionEquinox", self._directionEquinox
             )
 
         if self._assocNatureExists:
+            result += "\n   "
 
             result += Parser.valueToXML("assocNature", self._assocNature)
 
         # extrinsic attributes
 
         if self._assocFieldIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("assocFieldId", self._assocFieldId)
 
         if self._ephemerisIdExists:
+            result += "\n   "
 
             result += Parser.valueToXML("ephemerisId", self._ephemerisId)
 
         if self._sourceIdExists:
+            result += "\n   "
 
             result += Parser.valueToXML("sourceId", self._sourceId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -676,6 +696,7 @@ class FieldRow:
         """
         Set fieldId with the specified Tag value.
         fieldId The Tag value to which fieldId is to be set.
+
         The value of fieldId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -707,6 +728,7 @@ class FieldRow:
         fieldName The str value to which fieldName is to be set.
 
 
+
         """
 
         self._fieldName = str(fieldName)
@@ -729,6 +751,7 @@ class FieldRow:
         numPoly The int value to which numPoly is to be set.
 
 
+
         """
 
         self._numPoly = int(numPoly)
@@ -749,6 +772,7 @@ class FieldRow:
         """
         Set delayDir with the specified Angle []  []  value.
         delayDir The Angle []  []  value to which delayDir is to be set.
+
         The value of delayDir can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -792,6 +816,7 @@ class FieldRow:
         """
         Set phaseDir with the specified Angle []  []  value.
         phaseDir The Angle []  []  value to which phaseDir is to be set.
+
         The value of phaseDir can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -835,6 +860,7 @@ class FieldRow:
         """
         Set referenceDir with the specified Angle []  []  value.
         referenceDir The Angle []  []  value to which referenceDir is to be set.
+
         The value of referenceDir can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -893,6 +919,7 @@ class FieldRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """
@@ -939,6 +966,7 @@ class FieldRow:
         code The str value to which code is to be set.
 
 
+
         """
 
         self._code = str(code)
@@ -981,6 +1009,7 @@ class FieldRow:
         """
         Set directionCode with the specified DirectionReferenceCode value.
         directionCode The DirectionReferenceCode value to which directionCode is to be set.
+
 
 
         """
@@ -1026,6 +1055,7 @@ class FieldRow:
         """
         Set directionEquinox with the specified ArrayTime value.
         directionEquinox The ArrayTime value to which directionEquinox is to be set.
+
         The value of directionEquinox can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1070,6 +1100,7 @@ class FieldRow:
         """
         Set assocNature with the specified str value.
         assocNature The str value to which assocNature is to be set.
+
 
 
         """
@@ -1117,6 +1148,7 @@ class FieldRow:
         """
         Set assocFieldId with the specified Tag value.
         assocFieldId The Tag value to which assocFieldId is to be set.
+
         The value of assocFieldId can be anything allowed by the Tag constructor.
 
         """
@@ -1163,6 +1195,7 @@ class FieldRow:
         ephemerisId The int value to which ephemerisId is to be set.
 
 
+
         """
 
         self._ephemerisId = int(ephemerisId)
@@ -1205,6 +1238,7 @@ class FieldRow:
         """
         Set sourceId with the specified int value.
         sourceId The int value to which sourceId is to be set.
+
 
 
         """

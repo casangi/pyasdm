@@ -108,7 +108,9 @@ class WVMCalRow:
 
         self._numPoly = 0
 
-        self._pathCoeff = []  # this is a list of float []  []  []
+        self._pathCoeff = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
         self._refTemp = []  # this is a list of Temperature []  []
 
@@ -176,37 +178,59 @@ class WVMCalRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("wvrMethod", WVRMethod.name(self._wvrMethod))
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("polyFreqLimits", self._polyFreqLimits)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numInputAntenna", self._numInputAntenna)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numChan", self._numChan)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPoly", self._numPoly)
 
-        result += Parser.listValueToXML("pathCoeff", self._pathCoeff)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("pathCoeff", self._pathCoeff)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("refTemp", self._refTemp)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("inputAntennaId", self._inputAntennaId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -503,6 +527,7 @@ class WVMCalRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -534,6 +559,7 @@ class WVMCalRow:
         wvrMethod The WVRMethod value to which wvrMethod is to be set.
 
 
+
         """
 
         self._wvrMethod = WVRMethod(wvrMethod)
@@ -554,6 +580,7 @@ class WVMCalRow:
         """
         Set polyFreqLimits with the specified Frequency []  value.
         polyFreqLimits The Frequency []  value to which polyFreqLimits is to be set.
+
         The value of polyFreqLimits can be anything allowed by the Frequency []  constructor.
 
         """
@@ -599,6 +626,7 @@ class WVMCalRow:
         numInputAntenna The int value to which numInputAntenna is to be set.
 
 
+
         """
 
         self._numInputAntenna = int(numInputAntenna)
@@ -619,6 +647,7 @@ class WVMCalRow:
         """
         Set numChan with the specified int value.
         numChan The int value to which numChan is to be set.
+
 
 
         """
@@ -643,6 +672,7 @@ class WVMCalRow:
         numPoly The int value to which numPoly is to be set.
 
 
+
         """
 
         self._numPoly = int(numPoly)
@@ -663,6 +693,9 @@ class WVMCalRow:
         """
         Set pathCoeff with the specified float []  []  []  value.
         pathCoeff The float []  []  []  value to which pathCoeff is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -706,6 +739,7 @@ class WVMCalRow:
         """
         Set refTemp with the specified Temperature []  []  value.
         refTemp The Temperature []  []  value to which refTemp is to be set.
+
         The value of refTemp can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -752,6 +786,7 @@ class WVMCalRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -781,6 +816,7 @@ class WVMCalRow:
         """
         Set inputAntennaId with the specified Tag []  value.
         inputAntennaId The Tag []  value to which inputAntennaId is to be set.
+
         The value of inputAntennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -825,6 +861,7 @@ class WVMCalRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

@@ -139,9 +139,13 @@ class CalBandpassRow:
 
         self._polarizationTypes = []  # this is a list of PolarizationType []
 
-        self._curve = []  # this is a list of float []  []  []
+        self._curve = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
-        self._reducedChiSquared = []  # this is a list of float []
+        self._reducedChiSquared = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._numBaselineExists = False
 
@@ -153,7 +157,7 @@ class CalBandpassRow:
 
         self._rmsExists = False
 
-        self._rms = []  # this is a list of float []  []
+        self._rms = []  # this is a list of float []  []  saved as single precision
 
         self._frequencyRangeExists = False
 
@@ -177,7 +181,9 @@ class CalBandpassRow:
 
         self._spectrumExists = False
 
-        self._spectrum = []  # this is a list of float []  []  []
+        self._spectrum = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
         # extrinsic attributes
 
@@ -345,101 +351,148 @@ class CalBandpassRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("sideband", NetSideband.name(self._sideband))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("typeCurve", CalCurveType.name(self._typeCurve))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAntenna", self._numAntenna)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPoly", self._numPoly)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("antennaNames", self._antennaNames)
 
+        result += "\n   "
+
         result += Parser.valueToXML("refAntennaName", self._refAntennaName)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("freqLimits", self._freqLimits)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
-        result += Parser.listValueToXML("curve", self._curve)
+        result += "\n   "
 
-        result += Parser.listValueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += Parser.floatListValueToXML("curve", self._curve)
+
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML(
+            "reducedChiSquared", self._reducedChiSquared
+        )
 
         if self._numBaselineExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numBaseline", self._numBaseline)
 
         if self._numFreqExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numFreq", self._numFreq)
 
         if self._rmsExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("rms", self._rms)
+            result += Parser.floatListValueToXML("rms", self._rms)
 
         if self._frequencyRangeExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "frequencyRange", self._frequencyRange
             )
 
         if self._numSpectralWindowExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numSpectralWindow", self._numSpectralWindow)
 
         if self._chanFreqStartExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "chanFreqStart", self._chanFreqStart
             )
 
         if self._chanFreqStepExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("chanFreqStep", self._chanFreqStep)
 
         if self._numSpectralWindowChanExists:
+            result += "\n   "
 
             result += Parser.listValueToXML(
                 "numSpectralWindowChan", self._numSpectralWindowChan
             )
 
         if self._spectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("spectrum", self._spectrum)
+            result += Parser.floatListValueToXML("spectrum", self._spectrum)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -719,7 +772,7 @@ class CalBandpassRow:
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
 
-            eos.writeFloat(self._reducedChiSquared[i])
+            eos.writeDouble(self._reducedChiSquared[i])
 
         eos.writeBool(self._numBaselineExists)
         if self._numBaselineExists:
@@ -961,7 +1014,7 @@ class CalBandpassRow:
         reducedChiSquaredDim1 = eis.readInt()
         thisList = []
         for i in range(reducedChiSquaredDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._reducedChiSquared = thisList
 
@@ -1165,6 +1218,7 @@ class CalBandpassRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1192,6 +1246,7 @@ class CalBandpassRow:
         """
         Set sideband with the specified NetSideband value.
         sideband The NetSideband value to which sideband is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1223,6 +1278,7 @@ class CalBandpassRow:
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1250,6 +1306,7 @@ class CalBandpassRow:
         """
         Set typeCurve with the specified CalCurveType value.
         typeCurve The CalCurveType value to which typeCurve is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1281,6 +1338,7 @@ class CalBandpassRow:
         receiverBand The ReceiverBand value to which receiverBand is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1309,6 +1367,7 @@ class CalBandpassRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1332,6 +1391,7 @@ class CalBandpassRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1356,6 +1416,7 @@ class CalBandpassRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -1376,6 +1437,7 @@ class CalBandpassRow:
         """
         Set numPoly with the specified int value.
         numPoly The int value to which numPoly is to be set.
+
 
 
         """
@@ -1400,6 +1462,7 @@ class CalBandpassRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1420,6 +1483,7 @@ class CalBandpassRow:
         """
         Set antennaNames with the specified str []  value.
         antennaNames The str []  value to which antennaNames is to be set.
+
 
 
         """
@@ -1465,6 +1529,7 @@ class CalBandpassRow:
         refAntennaName The str value to which refAntennaName is to be set.
 
 
+
         """
 
         self._refAntennaName = str(refAntennaName)
@@ -1485,6 +1550,7 @@ class CalBandpassRow:
         """
         Set freqLimits with the specified Frequency []  value.
         freqLimits The Frequency []  value to which freqLimits is to be set.
+
         The value of freqLimits can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1530,6 +1596,7 @@ class CalBandpassRow:
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1571,6 +1638,9 @@ class CalBandpassRow:
         """
         Set curve with the specified float []  []  []  value.
         curve The float []  []  []  value to which curve is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1614,6 +1684,9 @@ class CalBandpassRow:
         """
         Set reducedChiSquared with the specified float []  value.
         reducedChiSquared The float []  value to which reducedChiSquared is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1673,6 +1746,7 @@ class CalBandpassRow:
         numBaseline The int value to which numBaseline is to be set.
 
 
+
         """
 
         self._numBaseline = int(numBaseline)
@@ -1717,6 +1791,7 @@ class CalBandpassRow:
         numFreq The int value to which numFreq is to be set.
 
 
+
         """
 
         self._numFreq = int(numFreq)
@@ -1759,6 +1834,9 @@ class CalBandpassRow:
         """
         Set rms with the specified float []  []  value.
         rms The float []  []  value to which rms is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1824,6 +1902,7 @@ class CalBandpassRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1891,6 +1970,7 @@ class CalBandpassRow:
         numSpectralWindow The int value to which numSpectralWindow is to be set.
 
 
+
         """
 
         self._numSpectralWindow = int(numSpectralWindow)
@@ -1933,6 +2013,7 @@ class CalBandpassRow:
         """
         Set chanFreqStart with the specified Frequency []  value.
         chanFreqStart The Frequency []  value to which chanFreqStart is to be set.
+
         The value of chanFreqStart can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1998,6 +2079,7 @@ class CalBandpassRow:
         """
         Set chanFreqStep with the specified Frequency []  value.
         chanFreqStep The Frequency []  value to which chanFreqStep is to be set.
+
         The value of chanFreqStep can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2065,6 +2147,7 @@ class CalBandpassRow:
         numSpectralWindowChan The int []  value to which numSpectralWindowChan is to be set.
 
 
+
         """
 
         # value must be a list
@@ -2129,6 +2212,9 @@ class CalBandpassRow:
         Set spectrum with the specified float []  []  []  value.
         spectrum The float []  []  []  value to which spectrum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -2182,6 +2268,7 @@ class CalBandpassRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -2212,6 +2299,7 @@ class CalBandpassRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

@@ -153,29 +153,40 @@ class StateRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("stateId", self._stateId)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "calDeviceName", CalibrationDevice.name(self._calDeviceName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("sig", self._sig)
 
+        result += "\n   "
+
         result += Parser.valueToXML("ref", self._ref)
+
+        result += "\n   "
 
         result += Parser.valueToXML("onSky", self._onSky)
 
         if self._weightExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("weight", self._weight)
+            result += Parser.floatValueToXML("weight", self._weight)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -362,6 +373,7 @@ class StateRow:
         """
         Set stateId with the specified Tag value.
         stateId The Tag value to which stateId is to be set.
+
         The value of stateId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -393,6 +405,7 @@ class StateRow:
         calDeviceName The CalibrationDevice value to which calDeviceName is to be set.
 
 
+
         """
 
         self._calDeviceName = CalibrationDevice(calDeviceName)
@@ -413,6 +426,7 @@ class StateRow:
         """
         Set sig with the specified bool value.
         sig The bool value to which sig is to be set.
+
 
 
         """
@@ -437,6 +451,7 @@ class StateRow:
         ref The bool value to which ref is to be set.
 
 
+
         """
 
         self._ref = bool(ref)
@@ -457,6 +472,7 @@ class StateRow:
         """
         Set onSky with the specified bool value.
         onSky The bool value to which onSky is to be set.
+
 
 
         """
@@ -493,6 +509,9 @@ class StateRow:
         """
         Set weight with the specified float value.
         weight The float value to which weight is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """

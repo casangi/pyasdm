@@ -149,19 +149,23 @@ class AlmaRadiometerRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("almaRadiometerId", self._almaRadiometerId)
 
         if self._numAntennaExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAntenna", self._numAntenna)
 
         # extrinsic attributes
 
         if self._spectralWindowIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "spectralWindowId", self._spectralWindowId
@@ -169,7 +173,7 @@ class AlmaRadiometerRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -325,6 +329,7 @@ class AlmaRadiometerRow:
         """
         Set almaRadiometerId with the specified Tag value.
         almaRadiometerId The Tag value to which almaRadiometerId is to be set.
+
         The value of almaRadiometerId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -368,6 +373,7 @@ class AlmaRadiometerRow:
         """
         Set numAntenna with the specified int value.
         numAntenna The int value to which numAntenna is to be set.
+
 
 
         """
@@ -414,6 +420,7 @@ class AlmaRadiometerRow:
         """
         Set spectralWindowId with the specified Tag []  value.
         spectralWindowId The Tag []  value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag []  constructor.
 
         """

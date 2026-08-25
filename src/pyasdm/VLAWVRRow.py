@@ -97,9 +97,9 @@ class VLAWVRRow:
 
         self._numChan = 0
 
-        self._hiValues = []  # this is a list of float []
+        self._hiValues = []  # this is a list of float []  saved as single precision
 
-        self._loValues = []  # this is a list of float []
+        self._loValues = []  # this is a list of float []  saved as single precision
 
         self._chanFreqCenterExists = False
 
@@ -176,39 +176,52 @@ class VLAWVRRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numChan", self._numChan)
 
-        result += Parser.listValueToXML("hiValues", self._hiValues)
+        result += "\n   "
 
-        result += Parser.listValueToXML("loValues", self._loValues)
+        result += Parser.floatListValueToXML("hiValues", self._hiValues)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("loValues", self._loValues)
 
         if self._chanFreqCenterExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "chanFreqCenter", self._chanFreqCenter
             )
 
         if self._chanWidthExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("chanWidth", self._chanWidth)
 
         if self._wvrIdExists:
+            result += "\n   "
 
             result += Parser.valueToXML("wvrId", self._wvrId)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -471,6 +484,7 @@ class VLAWVRRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -502,6 +516,7 @@ class VLAWVRRow:
         numChan The int value to which numChan is to be set.
 
 
+
         """
 
         self._numChan = int(numChan)
@@ -522,6 +537,9 @@ class VLAWVRRow:
         """
         Set hiValues with the specified float []  value.
         hiValues The float []  value to which hiValues is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -565,6 +583,9 @@ class VLAWVRRow:
         """
         Set loValues with the specified float []  value.
         loValues The float []  value to which loValues is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -622,6 +643,7 @@ class VLAWVRRow:
         """
         Set chanFreqCenter with the specified Frequency []  value.
         chanFreqCenter The Frequency []  value to which chanFreqCenter is to be set.
+
         The value of chanFreqCenter can be anything allowed by the Frequency []  constructor.
 
         """
@@ -687,6 +709,7 @@ class VLAWVRRow:
         """
         Set chanWidth with the specified Frequency []  value.
         chanWidth The Frequency []  value to which chanWidth is to be set.
+
         The value of chanWidth can be anything allowed by the Frequency []  constructor.
 
         """
@@ -754,6 +777,7 @@ class VLAWVRRow:
         wvrId The str value to which wvrId is to be set.
 
 
+
         """
 
         self._wvrId = str(wvrId)
@@ -785,6 +809,7 @@ class VLAWVRRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

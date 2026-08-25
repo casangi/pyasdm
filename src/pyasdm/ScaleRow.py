@@ -162,27 +162,37 @@ class ScaleRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("scaleId", self._scaleId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("timeScale", TimeScale.name(self._timeScale))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "crossDataScale", DataScale.name(self._crossDataScale)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "autoDataScale", DataScale.name(self._autoDataScale)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML("weightType", WeightType.name(self._weightType))
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -351,6 +361,7 @@ class ScaleRow:
         """
         Set scaleId with the specified Tag value.
         scaleId The Tag value to which scaleId is to be set.
+
         The value of scaleId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -382,6 +393,7 @@ class ScaleRow:
         timeScale The TimeScale value to which timeScale is to be set.
 
 
+
         """
 
         self._timeScale = TimeScale(timeScale)
@@ -402,6 +414,7 @@ class ScaleRow:
         """
         Set crossDataScale with the specified DataScale value.
         crossDataScale The DataScale value to which crossDataScale is to be set.
+
 
 
         """
@@ -426,6 +439,7 @@ class ScaleRow:
         autoDataScale The DataScale value to which autoDataScale is to be set.
 
 
+
         """
 
         self._autoDataScale = DataScale(autoDataScale)
@@ -446,6 +460,7 @@ class ScaleRow:
         """
         Set weightType with the specified WeightType value.
         weightType The WeightType value to which weightType is to be set.
+
 
 
         """

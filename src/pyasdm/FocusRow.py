@@ -168,27 +168,37 @@ class FocusRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("focusTracking", self._focusTracking)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("focusOffset", self._focusOffset)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "focusRotationOffset", self._focusRotationOffset
         )
 
         if self._measuredFocusPositionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "measuredFocusPosition", self._measuredFocusPosition
             )
 
         if self._measuredFocusRotationExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "measuredFocusRotation", self._measuredFocusRotation
@@ -196,13 +206,17 @@ class FocusRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("focusModelId", self._focusModelId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -449,6 +463,7 @@ class FocusRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -480,6 +495,7 @@ class FocusRow:
         focusTracking The bool value to which focusTracking is to be set.
 
 
+
         """
 
         self._focusTracking = bool(focusTracking)
@@ -500,6 +516,7 @@ class FocusRow:
         """
         Set focusOffset with the specified Length []  value.
         focusOffset The Length []  value to which focusOffset is to be set.
+
         The value of focusOffset can be anything allowed by the Length []  constructor.
 
         """
@@ -543,6 +560,7 @@ class FocusRow:
         """
         Set focusRotationOffset with the specified Angle []  value.
         focusRotationOffset The Angle []  value to which focusRotationOffset is to be set.
+
         The value of focusRotationOffset can be anything allowed by the Angle []  constructor.
 
         """
@@ -600,6 +618,7 @@ class FocusRow:
         """
         Set measuredFocusPosition with the specified Length []  value.
         measuredFocusPosition The Length []  value to which measuredFocusPosition is to be set.
+
         The value of measuredFocusPosition can be anything allowed by the Length []  constructor.
 
         """
@@ -665,6 +684,7 @@ class FocusRow:
         """
         Set measuredFocusRotation with the specified Angle []  value.
         measuredFocusRotation The Angle []  value to which measuredFocusRotation is to be set.
+
         The value of measuredFocusRotation can be anything allowed by the Angle []  constructor.
 
         """
@@ -719,6 +739,7 @@ class FocusRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -748,6 +769,7 @@ class FocusRow:
         """
         Set focusModelId with the specified int value.
         focusModelId The int value to which focusModelId is to be set.
+
 
 
         """

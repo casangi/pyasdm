@@ -246,59 +246,81 @@ class CalDataRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "startTimeObserved", self._startTimeObserved
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endTimeObserved", self._endTimeObserved)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockUID", self._execBlockUID)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "calDataType", CalDataOrigin.name(self._calDataType)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("calType", CalType.name(self._calType))
 
+        result += "\n   "
+
         result += Parser.valueToXML("numScan", self._numScan)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("scanSet", self._scanSet)
 
         if self._assocCalDataIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("assocCalDataId", self._assocCalDataId)
 
         if self._assocCalNatureExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "assocCalNature", AssociatedCalNature.name(self._assocCalNature)
             )
 
         if self._fieldNameExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("fieldName", self._fieldName)
 
         if self._sourceNameExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("sourceName", self._sourceName)
 
         if self._sourceCodeExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("sourceCode", self._sourceCode)
 
         if self._scanIntentExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("scanIntent", self._scanIntent)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -708,6 +730,7 @@ class CalDataRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -738,6 +761,7 @@ class CalDataRow:
         """
         Set startTimeObserved with the specified ArrayTime value.
         startTimeObserved The ArrayTime value to which startTimeObserved is to be set.
+
         The value of startTimeObserved can be anything allowed by the ArrayTime constructor.
 
         """
@@ -761,6 +785,7 @@ class CalDataRow:
         """
         Set endTimeObserved with the specified ArrayTime value.
         endTimeObserved The ArrayTime value to which endTimeObserved is to be set.
+
         The value of endTimeObserved can be anything allowed by the ArrayTime constructor.
 
         """
@@ -784,6 +809,7 @@ class CalDataRow:
         """
         Set execBlockUID with the specified EntityRef value.
         execBlockUID The EntityRef value to which execBlockUID is to be set.
+
         The value of execBlockUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -808,6 +834,7 @@ class CalDataRow:
         calDataType The CalDataOrigin value to which calDataType is to be set.
 
 
+
         """
 
         self._calDataType = CalDataOrigin(calDataType)
@@ -828,6 +855,7 @@ class CalDataRow:
         """
         Set calType with the specified CalType value.
         calType The CalType value to which calType is to be set.
+
 
 
         """
@@ -852,6 +880,7 @@ class CalDataRow:
         numScan The int value to which numScan is to be set.
 
 
+
         """
 
         self._numScan = int(numScan)
@@ -872,6 +901,7 @@ class CalDataRow:
         """
         Set scanSet with the specified int []  value.
         scanSet The int []  value to which scanSet is to be set.
+
 
 
         """
@@ -930,6 +960,7 @@ class CalDataRow:
         """
         Set assocCalDataId with the specified Tag value.
         assocCalDataId The Tag value to which assocCalDataId is to be set.
+
         The value of assocCalDataId can be anything allowed by the Tag constructor.
 
         """
@@ -976,6 +1007,7 @@ class CalDataRow:
         assocCalNature The AssociatedCalNature value to which assocCalNature is to be set.
 
 
+
         """
 
         self._assocCalNature = AssociatedCalNature(assocCalNature)
@@ -1018,6 +1050,7 @@ class CalDataRow:
         """
         Set fieldName with the specified str []  value.
         fieldName The str []  value to which fieldName is to be set.
+
 
 
         """
@@ -1085,6 +1118,7 @@ class CalDataRow:
         sourceName The str []  value to which sourceName is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1150,6 +1184,7 @@ class CalDataRow:
         sourceCode The str []  value to which sourceCode is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1213,6 +1248,7 @@ class CalDataRow:
         """
         Set scanIntent with the specified ScanIntent []  value.
         scanIntent The ScanIntent []  value to which scanIntent is to be set.
+
 
 
         """

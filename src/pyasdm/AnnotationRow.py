@@ -126,11 +126,13 @@ class AnnotationRow:
 
         self._vdValueExists = False
 
-        self._vdValue = []  # this is a list of float []
+        self._vdValue = []  # this is a list of float []  saved as double precision
 
         self._vvdValuesExists = False
 
-        self._vvdValues = []  # this is a list of float []  []
+        self._vvdValues = (
+            []
+        )  # this is a list of float []  []  saved as double precision
 
         self._llValueExists = False
 
@@ -289,71 +291,91 @@ class AnnotationRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("annotationId", self._annotationId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("time", self._time)
 
+        result += "\n   "
+
         result += Parser.valueToXML("issue", self._issue)
+
+        result += "\n   "
 
         result += Parser.valueToXML("details", self._details)
 
         if self._numAntennaExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAntenna", self._numAntenna)
 
         if self._basebandNameExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("basebandName", self._basebandName)
 
         if self._numBasebandExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numBaseband", self._numBaseband)
 
         if self._intervalExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("interval", self._interval)
 
         if self._dValueExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("dValue", self._dValue)
+            result += Parser.doubleValueToXML("dValue", self._dValue)
 
         if self._vdValueExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("vdValue", self._vdValue)
+            result += Parser.doubleListValueToXML("vdValue", self._vdValue)
 
         if self._vvdValuesExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("vvdValues", self._vvdValues)
+            result += Parser.doubleListValueToXML("vvdValues", self._vvdValues)
 
         if self._llValueExists:
+            result += "\n   "
 
             result += Parser.valueToXML("llValue", self._llValue)
 
         if self._vllValueExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("vllValue", self._vllValue)
 
         if self._vvllValueExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("vvllValue", self._vvllValue)
 
         if self._sValueExists:
+            result += "\n   "
 
             result += Parser.valueToXML("sValue", self._sValue)
 
         # extrinsic attributes
 
         if self._antennaIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("antennaId", self._antennaId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -546,7 +568,7 @@ class AnnotationRow:
         eos.writeBool(self._dValueExists)
         if self._dValueExists:
 
-            eos.writeFloat(self._dValue)
+            eos.writeDouble(self._dValue)
 
         eos.writeBool(self._vdValueExists)
         if self._vdValueExists:
@@ -554,7 +576,7 @@ class AnnotationRow:
             eos.writeInt(len(self._vdValue))
             for i in range(len(self._vdValue)):
 
-                eos.writeFloat(self._vdValue[i])
+                eos.writeDouble(self._vdValue[i])
 
         eos.writeBool(self._vvdValuesExists)
         if self._vvdValuesExists:
@@ -570,7 +592,7 @@ class AnnotationRow:
             eos.writeInt(vvdValues_dims[1])
             for i in range(vvdValues_dims[0]):
                 for j in range(vvdValues_dims[1]):
-                    eos.writeFloat(self._vvdValues[i][j])
+                    eos.writeDouble(self._vvdValues[i][j])
 
         eos.writeBool(self._llValueExists)
         if self._llValueExists:
@@ -696,7 +718,7 @@ class AnnotationRow:
         row._dValueExists = eis.readBool()
         if row._dValueExists:
 
-            row._dValue = eis.readFloat()
+            row._dValue = eis.readDouble()
 
     @staticmethod
     def vdValueFromBin(row, eis):
@@ -709,7 +731,7 @@ class AnnotationRow:
             vdValueDim1 = eis.readInt()
             thisList = []
             for i in range(vdValueDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._vdValue = thisList
 
@@ -727,7 +749,7 @@ class AnnotationRow:
             for i in range(vvdValuesDim1):
                 thisList_j = []
                 for j in range(vvdValuesDim2):
-                    thisValue = eis.readFloat()
+                    thisValue = eis.readDouble()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
             row._vvdValues = thisList
@@ -865,6 +887,7 @@ class AnnotationRow:
         """
         Set annotationId with the specified Tag value.
         annotationId The Tag value to which annotationId is to be set.
+
         The value of annotationId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -895,6 +918,7 @@ class AnnotationRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """
@@ -919,6 +943,7 @@ class AnnotationRow:
         issue The str value to which issue is to be set.
 
 
+
         """
 
         self._issue = str(issue)
@@ -939,6 +964,7 @@ class AnnotationRow:
         """
         Set details with the specified str value.
         details The str value to which details is to be set.
+
 
 
         """
@@ -975,6 +1001,7 @@ class AnnotationRow:
         """
         Set numAntenna with the specified int value.
         numAntenna The int value to which numAntenna is to be set.
+
 
 
         """
@@ -1019,6 +1046,7 @@ class AnnotationRow:
         """
         Set basebandName with the specified BasebandName []  value.
         basebandName The BasebandName []  value to which basebandName is to be set.
+
 
 
         """
@@ -1086,6 +1114,7 @@ class AnnotationRow:
         numBaseband The int value to which numBaseband is to be set.
 
 
+
         """
 
         self._numBaseband = int(numBaseband)
@@ -1129,6 +1158,7 @@ class AnnotationRow:
         """
         Set interval with the specified Interval value.
         interval The Interval value to which interval is to be set.
+
         The value of interval can be anything allowed by the Interval constructor.
 
         """
@@ -1174,6 +1204,9 @@ class AnnotationRow:
         Set dValue with the specified float value.
         dValue The float value to which dValue is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1217,6 +1250,9 @@ class AnnotationRow:
         """
         Set vdValue with the specified float []  value.
         vdValue The float []  value to which vdValue is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1282,6 +1318,9 @@ class AnnotationRow:
         """
         Set vvdValues with the specified float []  []  value.
         vvdValues The float []  []  value to which vvdValues is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1349,6 +1388,7 @@ class AnnotationRow:
         llValue The int value to which llValue is to be set.
 
 
+
         """
 
         self._llValue = int(llValue)
@@ -1391,6 +1431,7 @@ class AnnotationRow:
         """
         Set vllValue with the specified int []  value.
         vllValue The int []  value to which vllValue is to be set.
+
 
 
         """
@@ -1458,6 +1499,7 @@ class AnnotationRow:
         vvllValue The int []  []  value to which vvllValue is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1523,6 +1565,7 @@ class AnnotationRow:
         sValue The str value to which sValue is to be set.
 
 
+
         """
 
         self._sValue = str(sValue)
@@ -1567,6 +1610,7 @@ class AnnotationRow:
         """
         Set antennaId with the specified Tag []  value.
         antennaId The Tag []  value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag []  constructor.
 
         """

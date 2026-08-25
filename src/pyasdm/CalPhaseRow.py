@@ -119,13 +119,15 @@ class CalPhaseRow:
 
         self._numReceptor = 0
 
-        self._ampli = []  # this is a list of float []  []
+        self._ampli = []  # this is a list of float []  []  saved as single precision
 
         self._antennaNames = []  # this is a list of str []  []
 
         self._baselineLengths = []  # this is a list of Length []
 
-        self._decorrelationFactor = []  # this is a list of float []  []
+        self._decorrelationFactor = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._direction = []  # this is a list of Angle []
 
@@ -133,13 +135,15 @@ class CalPhaseRow:
 
         self._integrationTime = Interval()
 
-        self._phase = []  # this is a list of float []  []
+        self._phase = []  # this is a list of float []  []  saved as single precision
 
         self._polarizationTypes = []  # this is a list of PolarizationType []
 
-        self._phaseRMS = []  # this is a list of float []  []
+        self._phaseRMS = []  # this is a list of float []  []  saved as single precision
 
-        self._statPhaseRMS = []  # this is a list of float []  []
+        self._statPhaseRMS = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._correctionValidityExists = False
 
@@ -159,11 +163,13 @@ class CalPhaseRow:
 
         self._phaseAntExists = False
 
-        self._phaseAnt = []  # this is a list of float []  []
+        self._phaseAnt = []  # this is a list of float []  []  saved as single precision
 
         self._phaseAntRMSExists = False
 
-        self._phaseAntRMS = []  # this is a list of float []  []
+        self._phaseAntRMS = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         # extrinsic attributes
 
@@ -306,95 +312,141 @@ class CalPhaseRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numBaseline", self._numBaseline)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
-        result += Parser.listValueToXML("ampli", self._ampli)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("ampli", self._ampli)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("antennaNames", self._antennaNames)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "baselineLengths", self._baselineLengths
         )
 
-        result += Parser.listValueToXML(
+        result += "\n   "
+
+        result += Parser.floatListValueToXML(
             "decorrelationFactor", self._decorrelationFactor
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("direction", self._direction)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("integrationTime", self._integrationTime)
 
-        result += Parser.listValueToXML("phase", self._phase)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("phase", self._phase)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
-        result += Parser.listValueToXML("phaseRMS", self._phaseRMS)
+        result += "\n   "
 
-        result += Parser.listValueToXML("statPhaseRMS", self._statPhaseRMS)
+        result += Parser.floatListValueToXML("phaseRMS", self._phaseRMS)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("statPhaseRMS", self._statPhaseRMS)
 
         if self._correctionValidityExists:
+            result += "\n   "
 
             result += Parser.listValueToXML(
                 "correctionValidity", self._correctionValidity
             )
 
         if self._numAntennaExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAntenna", self._numAntenna)
 
         if self._singleAntennaNameExists:
+            result += "\n   "
 
             result += Parser.listValueToXML(
                 "singleAntennaName", self._singleAntennaName
             )
 
         if self._refAntennaNameExists:
+            result += "\n   "
 
             result += Parser.valueToXML("refAntennaName", self._refAntennaName)
 
         if self._phaseAntExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("phaseAnt", self._phaseAnt)
+            result += Parser.floatListValueToXML("phaseAnt", self._phaseAnt)
 
         if self._phaseAntRMSExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("phaseAntRMS", self._phaseAntRMS)
+            result += Parser.floatListValueToXML("phaseAntRMS", self._phaseAntRMS)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -1163,6 +1215,7 @@ class CalPhaseRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1190,6 +1243,7 @@ class CalPhaseRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1221,6 +1275,7 @@ class CalPhaseRow:
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1249,6 +1304,7 @@ class CalPhaseRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1272,6 +1328,7 @@ class CalPhaseRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1296,6 +1353,7 @@ class CalPhaseRow:
         numBaseline The int value to which numBaseline is to be set.
 
 
+
         """
 
         self._numBaseline = int(numBaseline)
@@ -1318,6 +1376,7 @@ class CalPhaseRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1338,6 +1397,9 @@ class CalPhaseRow:
         """
         Set ampli with the specified float []  []  value.
         ampli The float []  []  value to which ampli is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1383,6 +1445,7 @@ class CalPhaseRow:
         antennaNames The str []  []  value to which antennaNames is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1424,6 +1487,7 @@ class CalPhaseRow:
         """
         Set baselineLengths with the specified Length []  value.
         baselineLengths The Length []  value to which baselineLengths is to be set.
+
         The value of baselineLengths can be anything allowed by the Length []  constructor.
 
         """
@@ -1468,6 +1532,9 @@ class CalPhaseRow:
         Set decorrelationFactor with the specified float []  []  value.
         decorrelationFactor The float []  []  value to which decorrelationFactor is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1510,6 +1577,7 @@ class CalPhaseRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1553,6 +1621,7 @@ class CalPhaseRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1597,6 +1666,7 @@ class CalPhaseRow:
         """
         Set integrationTime with the specified Interval value.
         integrationTime The Interval value to which integrationTime is to be set.
+
         The value of integrationTime can be anything allowed by the Interval constructor.
 
         """
@@ -1619,6 +1689,9 @@ class CalPhaseRow:
         """
         Set phase with the specified float []  []  value.
         phase The float []  []  value to which phase is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1664,6 +1737,7 @@ class CalPhaseRow:
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1705,6 +1779,9 @@ class CalPhaseRow:
         """
         Set phaseRMS with the specified float []  []  value.
         phaseRMS The float []  []  value to which phaseRMS is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1748,6 +1825,9 @@ class CalPhaseRow:
         """
         Set statPhaseRMS with the specified float []  []  value.
         statPhaseRMS The float []  []  value to which statPhaseRMS is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1805,6 +1885,7 @@ class CalPhaseRow:
         """
         Set correctionValidity with the specified bool []  value.
         correctionValidity The bool []  value to which correctionValidity is to be set.
+
 
 
         """
@@ -1872,6 +1953,7 @@ class CalPhaseRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -1914,6 +1996,7 @@ class CalPhaseRow:
         """
         Set singleAntennaName with the specified str []  value.
         singleAntennaName The str []  value to which singleAntennaName is to be set.
+
 
 
         """
@@ -1981,6 +2064,7 @@ class CalPhaseRow:
         refAntennaName The str value to which refAntennaName is to be set.
 
 
+
         """
 
         self._refAntennaName = str(refAntennaName)
@@ -2023,6 +2107,9 @@ class CalPhaseRow:
         """
         Set phaseAnt with the specified float []  []  value.
         phaseAnt The float []  []  value to which phaseAnt is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -2089,6 +2176,9 @@ class CalPhaseRow:
         Set phaseAntRMS with the specified float []  []  value.
         phaseAntRMS The float []  []  value to which phaseAntRMS is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -2142,6 +2232,7 @@ class CalPhaseRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -2172,6 +2263,7 @@ class CalPhaseRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

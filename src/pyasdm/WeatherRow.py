@@ -295,77 +295,95 @@ class WeatherRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
         if self._pressureExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("pressure", self._pressure)
 
         if self._relHumidityExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("relHumidity", self._relHumidity)
 
         if self._temperatureExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("temperature", self._temperature)
 
         if self._windDirectionExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("windDirection", self._windDirection)
 
         if self._windSpeedExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("windSpeed", self._windSpeed)
 
         if self._windMaxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("windMax", self._windMax)
 
         if self._dewPointExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("dewPoint", self._dewPoint)
 
         if self._numLayerExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numLayer", self._numLayer)
 
         if self._layerHeightExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("layerHeight", self._layerHeight)
 
         if self._temperatureProfileExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "temperatureProfile", self._temperatureProfile
             )
 
         if self._cloudMonitorExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("cloudMonitor", self._cloudMonitor)
 
         if self._numWVRExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numWVR", self._numWVR)
 
         if self._wvrTempExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("wvrTemp", self._wvrTemp)
 
         if self._waterExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("water", self._water)
+            result += Parser.doubleValueToXML("water", self._water)
 
         # extrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("stationId", self._stationId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -597,7 +615,7 @@ class WeatherRow:
         eos.writeBool(self._waterExists)
         if self._waterExists:
 
-            eos.writeFloat(self._water)
+            eos.writeDouble(self._water)
 
     @staticmethod
     def stationIdFromBin(row, eis):
@@ -753,7 +771,7 @@ class WeatherRow:
         row._waterExists = eis.readBool()
         if row._waterExists:
 
-            row._water = eis.readFloat()
+            row._water = eis.readDouble()
 
     @staticmethod
     def initFromBinMethods():
@@ -824,6 +842,7 @@ class WeatherRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -868,6 +887,7 @@ class WeatherRow:
         """
         Set pressure with the specified Pressure value.
         pressure The Pressure value to which pressure is to be set.
+
         The value of pressure can be anything allowed by the Pressure constructor.
 
         """
@@ -913,6 +933,7 @@ class WeatherRow:
         """
         Set relHumidity with the specified Humidity value.
         relHumidity The Humidity value to which relHumidity is to be set.
+
         The value of relHumidity can be anything allowed by the Humidity constructor.
 
         """
@@ -958,6 +979,7 @@ class WeatherRow:
         """
         Set temperature with the specified Temperature value.
         temperature The Temperature value to which temperature is to be set.
+
         The value of temperature can be anything allowed by the Temperature constructor.
 
         """
@@ -1003,6 +1025,7 @@ class WeatherRow:
         """
         Set windDirection with the specified Angle value.
         windDirection The Angle value to which windDirection is to be set.
+
         The value of windDirection can be anything allowed by the Angle constructor.
 
         """
@@ -1048,6 +1071,7 @@ class WeatherRow:
         """
         Set windSpeed with the specified Speed value.
         windSpeed The Speed value to which windSpeed is to be set.
+
         The value of windSpeed can be anything allowed by the Speed constructor.
 
         """
@@ -1093,6 +1117,7 @@ class WeatherRow:
         """
         Set windMax with the specified Speed value.
         windMax The Speed value to which windMax is to be set.
+
         The value of windMax can be anything allowed by the Speed constructor.
 
         """
@@ -1138,6 +1163,7 @@ class WeatherRow:
         """
         Set dewPoint with the specified Temperature value.
         dewPoint The Temperature value to which dewPoint is to be set.
+
         The value of dewPoint can be anything allowed by the Temperature constructor.
 
         """
@@ -1184,6 +1210,7 @@ class WeatherRow:
         numLayer The int value to which numLayer is to be set.
 
 
+
         """
 
         self._numLayer = int(numLayer)
@@ -1226,6 +1253,7 @@ class WeatherRow:
         """
         Set layerHeight with the specified Length []  value.
         layerHeight The Length []  value to which layerHeight is to be set.
+
         The value of layerHeight can be anything allowed by the Length []  constructor.
 
         """
@@ -1291,6 +1319,7 @@ class WeatherRow:
         """
         Set temperatureProfile with the specified Temperature []  value.
         temperatureProfile The Temperature []  value to which temperatureProfile is to be set.
+
         The value of temperatureProfile can be anything allowed by the Temperature []  constructor.
 
         """
@@ -1357,6 +1386,7 @@ class WeatherRow:
         """
         Set cloudMonitor with the specified Temperature value.
         cloudMonitor The Temperature value to which cloudMonitor is to be set.
+
         The value of cloudMonitor can be anything allowed by the Temperature constructor.
 
         """
@@ -1403,6 +1433,7 @@ class WeatherRow:
         numWVR The int value to which numWVR is to be set.
 
 
+
         """
 
         self._numWVR = int(numWVR)
@@ -1445,6 +1476,7 @@ class WeatherRow:
         """
         Set wvrTemp with the specified Temperature []  value.
         wvrTemp The Temperature []  value to which wvrTemp is to be set.
+
         The value of wvrTemp can be anything allowed by the Temperature []  constructor.
 
         """
@@ -1511,6 +1543,9 @@ class WeatherRow:
         Set water with the specified float value.
         water The float value to which water is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1543,6 +1578,7 @@ class WeatherRow:
         """
         Set stationId with the specified Tag value.
         stationId The Tag value to which stationId is to be set.
+
         The value of stationId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

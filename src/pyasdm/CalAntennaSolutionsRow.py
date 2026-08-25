@@ -131,13 +131,15 @@ class CalAntennaSolutionsRow:
 
         self._correctionValidity = None
 
-        self._phaseAnt = []  # this is a list of float []
+        self._phaseAnt = []  # this is a list of float []  saved as single precision
 
-        self._phaseAntRMS = []  # this is a list of float []
+        self._phaseAntRMS = []  # this is a list of float []  saved as single precision
 
-        self._amplitudeAnt = []  # this is a list of float []
+        self._amplitudeAnt = []  # this is a list of float []  saved as single precision
 
-        self._amplitudeAntRMS = []  # this is a list of float []
+        self._amplitudeAntRMS = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         # extrinsic attributes
 
@@ -227,63 +229,103 @@ class CalAntennaSolutionsRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.valueToXML("refAntennaName", self._refAntennaName)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("direction", self._direction)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("integrationTime", self._integrationTime)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("correctionValidity", self._correctionValidity)
 
-        result += Parser.listValueToXML("phaseAnt", self._phaseAnt)
+        result += "\n   "
 
-        result += Parser.listValueToXML("phaseAntRMS", self._phaseAntRMS)
+        result += Parser.floatListValueToXML("phaseAnt", self._phaseAnt)
 
-        result += Parser.listValueToXML("amplitudeAnt", self._amplitudeAnt)
+        result += "\n   "
 
-        result += Parser.listValueToXML("amplitudeAntRMS", self._amplitudeAntRMS)
+        result += Parser.floatListValueToXML("phaseAntRMS", self._phaseAntRMS)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("amplitudeAnt", self._amplitudeAnt)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("amplitudeAntRMS", self._amplitudeAntRMS)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -762,6 +804,7 @@ class CalAntennaSolutionsRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -789,6 +832,7 @@ class CalAntennaSolutionsRow:
         """
         Set atmPhaseCorrection with the specified AtmPhaseCorrection value.
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -820,6 +864,7 @@ class CalAntennaSolutionsRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -847,6 +892,7 @@ class CalAntennaSolutionsRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -877,6 +923,7 @@ class CalAntennaSolutionsRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -900,6 +947,7 @@ class CalAntennaSolutionsRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -924,6 +972,7 @@ class CalAntennaSolutionsRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -946,6 +995,7 @@ class CalAntennaSolutionsRow:
         refAntennaName The str value to which refAntennaName is to be set.
 
 
+
         """
 
         self._refAntennaName = str(refAntennaName)
@@ -966,6 +1016,7 @@ class CalAntennaSolutionsRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1009,6 +1060,7 @@ class CalAntennaSolutionsRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1053,6 +1105,7 @@ class CalAntennaSolutionsRow:
         """
         Set integrationTime with the specified Interval value.
         integrationTime The Interval value to which integrationTime is to be set.
+
         The value of integrationTime can be anything allowed by the Interval constructor.
 
         """
@@ -1075,6 +1128,7 @@ class CalAntennaSolutionsRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1120,6 +1174,7 @@ class CalAntennaSolutionsRow:
         correctionValidity The bool value to which correctionValidity is to be set.
 
 
+
         """
 
         self._correctionValidity = bool(correctionValidity)
@@ -1140,6 +1195,9 @@ class CalAntennaSolutionsRow:
         """
         Set phaseAnt with the specified float []  value.
         phaseAnt The float []  value to which phaseAnt is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1184,6 +1242,9 @@ class CalAntennaSolutionsRow:
         Set phaseAntRMS with the specified float []  value.
         phaseAntRMS The float []  value to which phaseAntRMS is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1227,6 +1288,9 @@ class CalAntennaSolutionsRow:
         Set amplitudeAnt with the specified float []  value.
         amplitudeAnt The float []  value to which amplitudeAnt is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1269,6 +1333,9 @@ class CalAntennaSolutionsRow:
         """
         Set amplitudeAntRMS with the specified float []  value.
         amplitudeAntRMS The float []  value to which amplitudeAntRMS is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1315,6 +1382,7 @@ class CalAntennaSolutionsRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1345,6 +1413,7 @@ class CalAntennaSolutionsRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1375,6 +1444,7 @@ class CalAntennaSolutionsRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

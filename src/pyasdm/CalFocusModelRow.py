@@ -122,9 +122,9 @@ class CalFocusModelRow:
 
         self._coeffFormula = []  # this is a list of str []
 
-        self._coeffValue = []  # this is a list of float []
+        self._coeffValue = []  # this is a list of float []  saved as single precision
 
-        self._coeffError = []  # this is a list of float []
+        self._coeffError = []  # this is a list of float []  saved as single precision
 
         self._coeffFixed = []  # this is a list of bool []
 
@@ -215,55 +215,91 @@ class CalFocusModelRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "polarizationType", PolarizationType.name(self._polarizationType)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += "\n   "
 
         result += Parser.valueToXML("numCoeff", self._numCoeff)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numSourceObs", self._numSourceObs)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("coeffName", self._coeffName)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("coeffFormula", self._coeffFormula)
 
-        result += Parser.listValueToXML("coeffValue", self._coeffValue)
+        result += "\n   "
 
-        result += Parser.listValueToXML("coeffError", self._coeffError)
+        result += Parser.floatListValueToXML("coeffValue", self._coeffValue)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("coeffError", self._coeffError)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("coeffFixed", self._coeffFixed)
 
+        result += "\n   "
+
         result += Parser.valueToXML("focusModel", self._focusModel)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("focusRMS", self._focusRMS)
 
-        result += Parser.valueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("reducedChiSquared", self._reducedChiSquared)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -452,7 +488,7 @@ class CalFocusModelRow:
 
         Length.listToBin(self._focusRMS, eos)
 
-        eos.writeFloat(self._reducedChiSquared)
+        eos.writeDouble(self._reducedChiSquared)
 
     @staticmethod
     def antennaNameFromBin(row, eis):
@@ -621,7 +657,7 @@ class CalFocusModelRow:
         Set the reducedChiSquared in row from the EndianInput (eis) instance.
         """
 
-        row._reducedChiSquared = eis.readFloat()
+        row._reducedChiSquared = eis.readDouble()
 
     @staticmethod
     def initFromBinMethods():
@@ -694,6 +730,7 @@ class CalFocusModelRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -721,6 +758,7 @@ class CalFocusModelRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -752,6 +790,7 @@ class CalFocusModelRow:
         polarizationType The PolarizationType value to which polarizationType is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -780,6 +819,7 @@ class CalFocusModelRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -803,6 +843,7 @@ class CalFocusModelRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -827,6 +868,7 @@ class CalFocusModelRow:
         antennaMake The AntennaMake value to which antennaMake is to be set.
 
 
+
         """
 
         self._antennaMake = AntennaMake(antennaMake)
@@ -847,6 +889,7 @@ class CalFocusModelRow:
         """
         Set numCoeff with the specified int value.
         numCoeff The int value to which numCoeff is to be set.
+
 
 
         """
@@ -871,6 +914,7 @@ class CalFocusModelRow:
         numSourceObs The int value to which numSourceObs is to be set.
 
 
+
         """
 
         self._numSourceObs = int(numSourceObs)
@@ -891,6 +935,7 @@ class CalFocusModelRow:
         """
         Set coeffName with the specified str []  value.
         coeffName The str []  value to which coeffName is to be set.
+
 
 
         """
@@ -936,6 +981,7 @@ class CalFocusModelRow:
         coeffFormula The str []  value to which coeffFormula is to be set.
 
 
+
         """
 
         # value must be a list
@@ -977,6 +1023,9 @@ class CalFocusModelRow:
         """
         Set coeffValue with the specified float []  value.
         coeffValue The float []  value to which coeffValue is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1020,6 +1069,9 @@ class CalFocusModelRow:
         """
         Set coeffError with the specified float []  value.
         coeffError The float []  value to which coeffError is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1065,6 +1117,7 @@ class CalFocusModelRow:
         coeffFixed The bool []  value to which coeffFixed is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1108,6 +1161,7 @@ class CalFocusModelRow:
         focusModel The str value to which focusModel is to be set.
 
 
+
         """
 
         self._focusModel = str(focusModel)
@@ -1128,6 +1182,7 @@ class CalFocusModelRow:
         """
         Set focusRMS with the specified Length []  value.
         focusRMS The Length []  value to which focusRMS is to be set.
+
         The value of focusRMS can be anything allowed by the Length []  constructor.
 
         """
@@ -1172,6 +1227,9 @@ class CalFocusModelRow:
         Set reducedChiSquared with the specified float value.
         reducedChiSquared The float value to which reducedChiSquared is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1196,6 +1254,7 @@ class CalFocusModelRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1226,6 +1285,7 @@ class CalFocusModelRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

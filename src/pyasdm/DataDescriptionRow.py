@@ -140,9 +140,11 @@ class DataDescriptionRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "dataDescriptionId", self._dataDescriptionId
@@ -150,17 +152,22 @@ class DataDescriptionRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("polOrHoloId", self._polOrHoloId)
 
         if self._pulsarIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("pulsarId", self._pulsarId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -321,6 +328,7 @@ class DataDescriptionRow:
         """
         Set dataDescriptionId with the specified Tag value.
         dataDescriptionId The Tag value to which dataDescriptionId is to be set.
+
         The value of dataDescriptionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -353,6 +361,7 @@ class DataDescriptionRow:
         """
         Set polOrHoloId with the specified Tag value.
         polOrHoloId The Tag value to which polOrHoloId is to be set.
+
         The value of polOrHoloId can be anything allowed by the Tag constructor.
 
         """
@@ -390,6 +399,7 @@ class DataDescriptionRow:
         """
         Set pulsarId with the specified Tag value.
         pulsarId The Tag value to which pulsarId is to be set.
+
         The value of pulsarId can be anything allowed by the Tag constructor.
 
         """
@@ -421,6 +431,7 @@ class DataDescriptionRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         """

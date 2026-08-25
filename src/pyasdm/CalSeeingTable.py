@@ -702,15 +702,14 @@ class CalSeeingTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<CalSeeingTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:clsng="http://Alma/XASDM/CalSeeingTable" xsi:schemaLocation="http://Alma/XASDM/CalSeeingTable http://almaobservatory.org/XML/XASDM/4/CalSeeingTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<CalSeeingTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:clsng="http://Alma/XASDM/CalSeeingTable" xsi:schemaLocation="http://Alma/XASDM/CalSeeingTable http://almaobservatory.org/XML/XASDM/4/CalSeeingTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</CalSeeingTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</CalSeeingTable>"
         return result
 
     def fromXML(self, xmlstr):

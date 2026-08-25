@@ -138,23 +138,33 @@ class HolographyRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("holographyId", self._holographyId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("distance", self._distance)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("focus", self._focus)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numCorr", self._numCorr)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("type", self._type)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -326,6 +336,7 @@ class HolographyRow:
         """
         Set holographyId with the specified Tag value.
         holographyId The Tag value to which holographyId is to be set.
+
         The value of holographyId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -356,6 +367,7 @@ class HolographyRow:
         """
         Set distance with the specified Length value.
         distance The Length value to which distance is to be set.
+
         The value of distance can be anything allowed by the Length constructor.
 
         """
@@ -379,6 +391,7 @@ class HolographyRow:
         """
         Set focus with the specified Length value.
         focus The Length value to which focus is to be set.
+
         The value of focus can be anything allowed by the Length constructor.
 
         """
@@ -403,6 +416,7 @@ class HolographyRow:
         numCorr The int value to which numCorr is to be set.
 
 
+
         """
 
         self._numCorr = int(numCorr)
@@ -423,6 +437,7 @@ class HolographyRow:
         """
         Set type with the specified HolographyChannelType []  value.
         type The HolographyChannelType []  value to which type is to be set.
+
 
 
         """

@@ -315,95 +315,146 @@ class ExecBlockRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startTime", self._startTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endTime", self._endTime)
+
+        result += "\n   "
 
         result += Parser.valueToXML("execBlockNum", self._execBlockNum)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockUID", self._execBlockUID)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("projectUID", self._projectUID)
 
+        result += "\n   "
+
         result += Parser.valueToXML("configName", self._configName)
+
+        result += "\n   "
 
         result += Parser.valueToXML("telescopeName", self._telescopeName)
 
+        result += "\n   "
+
         result += Parser.valueToXML("observerName", self._observerName)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numObservingLog", self._numObservingLog)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("observingLog", self._observingLog)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("sessionReference", self._sessionReference)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("baseRangeMin", self._baseRangeMin)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("baseRangeMax", self._baseRangeMax)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("baseRmsMinor", self._baseRmsMinor)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("baseRmsMajor", self._baseRmsMajor)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("basePa", self._basePa)
 
+        result += "\n   "
+
         result += Parser.valueToXML("aborted", self._aborted)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numAntenna", self._numAntenna)
 
         if self._releaseDateExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("releaseDate", self._releaseDate)
 
         if self._schedulerModeExists:
+            result += "\n   "
 
             result += Parser.valueToXML("schedulerMode", self._schedulerMode)
 
         if self._siteAltitudeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("siteAltitude", self._siteAltitude)
 
         if self._siteLongitudeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("siteLongitude", self._siteLongitude)
 
         if self._siteLatitudeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("siteLatitude", self._siteLatitude)
 
         if self._observingScriptExists:
+            result += "\n   "
 
             result += Parser.valueToXML("observingScript", self._observingScript)
 
         if self._observingScriptUIDExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "observingScriptUID", self._observingScriptUID
             )
 
         if self._arrayNameExists:
+            result += "\n   "
 
             result += Parser.valueToXML("arrayName", self._arrayName)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("sBSummaryId", self._sBSummaryId)
 
         if self._scaleIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("scaleId", self._scaleId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -1032,6 +1083,7 @@ class ExecBlockRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1062,6 +1114,7 @@ class ExecBlockRow:
         """
         Set startTime with the specified ArrayTime value.
         startTime The ArrayTime value to which startTime is to be set.
+
         The value of startTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1085,6 +1138,7 @@ class ExecBlockRow:
         """
         Set endTime with the specified ArrayTime value.
         endTime The ArrayTime value to which endTime is to be set.
+
         The value of endTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1109,6 +1163,7 @@ class ExecBlockRow:
         execBlockNum The int value to which execBlockNum is to be set.
 
 
+
         """
 
         self._execBlockNum = int(execBlockNum)
@@ -1130,6 +1185,7 @@ class ExecBlockRow:
         """
         Set execBlockUID with the specified EntityRef value.
         execBlockUID The EntityRef value to which execBlockUID is to be set.
+
         The value of execBlockUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1153,6 +1209,7 @@ class ExecBlockRow:
         """
         Set projectUID with the specified EntityRef value.
         projectUID The EntityRef value to which projectUID is to be set.
+
         The value of projectUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1177,6 +1234,7 @@ class ExecBlockRow:
         configName The str value to which configName is to be set.
 
 
+
         """
 
         self._configName = str(configName)
@@ -1197,6 +1255,7 @@ class ExecBlockRow:
         """
         Set telescopeName with the specified str value.
         telescopeName The str value to which telescopeName is to be set.
+
 
 
         """
@@ -1221,6 +1280,7 @@ class ExecBlockRow:
         observerName The str value to which observerName is to be set.
 
 
+
         """
 
         self._observerName = str(observerName)
@@ -1243,6 +1303,7 @@ class ExecBlockRow:
         numObservingLog The int value to which numObservingLog is to be set.
 
 
+
         """
 
         self._numObservingLog = int(numObservingLog)
@@ -1263,6 +1324,7 @@ class ExecBlockRow:
         """
         Set observingLog with the specified str []  value.
         observingLog The str []  value to which observingLog is to be set.
+
 
 
         """
@@ -1307,6 +1369,7 @@ class ExecBlockRow:
         """
         Set sessionReference with the specified EntityRef value.
         sessionReference The EntityRef value to which sessionReference is to be set.
+
         The value of sessionReference can be anything allowed by the EntityRef constructor.
 
         """
@@ -1330,6 +1393,7 @@ class ExecBlockRow:
         """
         Set baseRangeMin with the specified Length value.
         baseRangeMin The Length value to which baseRangeMin is to be set.
+
         The value of baseRangeMin can be anything allowed by the Length constructor.
 
         """
@@ -1353,6 +1417,7 @@ class ExecBlockRow:
         """
         Set baseRangeMax with the specified Length value.
         baseRangeMax The Length value to which baseRangeMax is to be set.
+
         The value of baseRangeMax can be anything allowed by the Length constructor.
 
         """
@@ -1376,6 +1441,7 @@ class ExecBlockRow:
         """
         Set baseRmsMinor with the specified Length value.
         baseRmsMinor The Length value to which baseRmsMinor is to be set.
+
         The value of baseRmsMinor can be anything allowed by the Length constructor.
 
         """
@@ -1399,6 +1465,7 @@ class ExecBlockRow:
         """
         Set baseRmsMajor with the specified Length value.
         baseRmsMajor The Length value to which baseRmsMajor is to be set.
+
         The value of baseRmsMajor can be anything allowed by the Length constructor.
 
         """
@@ -1422,6 +1489,7 @@ class ExecBlockRow:
         """
         Set basePa with the specified Angle value.
         basePa The Angle value to which basePa is to be set.
+
         The value of basePa can be anything allowed by the Angle constructor.
 
         """
@@ -1446,6 +1514,7 @@ class ExecBlockRow:
         aborted The bool value to which aborted is to be set.
 
 
+
         """
 
         self._aborted = bool(aborted)
@@ -1466,6 +1535,7 @@ class ExecBlockRow:
         """
         Set numAntenna with the specified int value.
         numAntenna The int value to which numAntenna is to be set.
+
 
 
         """
@@ -1503,6 +1573,7 @@ class ExecBlockRow:
         """
         Set releaseDate with the specified ArrayTime value.
         releaseDate The ArrayTime value to which releaseDate is to be set.
+
         The value of releaseDate can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1549,6 +1620,7 @@ class ExecBlockRow:
         schedulerMode The str value to which schedulerMode is to be set.
 
 
+
         """
 
         self._schedulerMode = str(schedulerMode)
@@ -1592,6 +1664,7 @@ class ExecBlockRow:
         """
         Set siteAltitude with the specified Length value.
         siteAltitude The Length value to which siteAltitude is to be set.
+
         The value of siteAltitude can be anything allowed by the Length constructor.
 
         """
@@ -1637,6 +1710,7 @@ class ExecBlockRow:
         """
         Set siteLongitude with the specified Angle value.
         siteLongitude The Angle value to which siteLongitude is to be set.
+
         The value of siteLongitude can be anything allowed by the Angle constructor.
 
         """
@@ -1682,6 +1756,7 @@ class ExecBlockRow:
         """
         Set siteLatitude with the specified Angle value.
         siteLatitude The Angle value to which siteLatitude is to be set.
+
         The value of siteLatitude can be anything allowed by the Angle constructor.
 
         """
@@ -1728,6 +1803,7 @@ class ExecBlockRow:
         observingScript The str value to which observingScript is to be set.
 
 
+
         """
 
         self._observingScript = str(observingScript)
@@ -1771,6 +1847,7 @@ class ExecBlockRow:
         """
         Set observingScriptUID with the specified EntityRef value.
         observingScriptUID The EntityRef value to which observingScriptUID is to be set.
+
         The value of observingScriptUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1817,6 +1894,7 @@ class ExecBlockRow:
         arrayName The str value to which arrayName is to be set.
 
 
+
         """
 
         self._arrayName = str(arrayName)
@@ -1847,6 +1925,7 @@ class ExecBlockRow:
         """
         Set antennaId with the specified Tag []  value.
         antennaId The Tag []  value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1891,6 +1970,7 @@ class ExecBlockRow:
         """
         Set sBSummaryId with the specified Tag value.
         sBSummaryId The Tag value to which sBSummaryId is to be set.
+
         The value of sBSummaryId can be anything allowed by the Tag constructor.
 
         """
@@ -1928,6 +2008,7 @@ class ExecBlockRow:
         """
         Set scaleId with the specified Tag value.
         scaleId The Tag value to which scaleId is to be set.
+
         The value of scaleId can be anything allowed by the Tag constructor.
 
         """

@@ -40,6 +40,24 @@ class Parser:
         raise RuntimeError("A Parser instance makes no sense")
 
     @staticmethod
+    def floatToString(floatval):
+        """
+        Returns a floating point value as a string using a format equivalent
+        to what the c++ code does for single precision floats.
+        Leading and trailing whitespace are stripped on return.
+        """
+        return f"{floatval:>20.12g}".strip()
+
+    @staticmethod
+    def doubleToString(floatval):
+        """
+        Returns a floating point value as a string using a format equivalent
+        to what the c++ code does for double precision floats.
+        Leading and trailing whitespace are stripped on return.
+        """
+        return f"{floatval:>30.20g}".strip()
+
+    @staticmethod
     def nameStringToXML(name, strval):
         """
         A method to produce XML using the name and a string value.
@@ -47,12 +65,12 @@ class Parser:
         The returned value has a trailing space so that it can be used to add
         these strings together without worrying about spacing.
         """
-        return "<%s> %s </%s> " % (name, strval, name)
+        return "<%s>%s</%s> " % (name, strval.strip(), name)
 
     @staticmethod
     def valueToXML(name, value):
         """
-        Return a string of the form '<name> value </name>' to be used in the XML output.
+        Return a string of the form '<name>value</name>' to be used in the XML output.
         The value must be convertable to a string using the simple str(value) method.
         A value that is an instance of a class with a __str__ method should use
         the extendedValuetoXML method.
@@ -60,9 +78,27 @@ class Parser:
         return Parser.nameStringToXML(name, str(value))
 
     @staticmethod
+    def floatValueToXML(name, value):
+        """
+        Return a string of the form '<name>value</name>' to be used in the XML output.
+        The value must be a floating point value and it is converted to a string using
+        the floatToString method here.
+        """
+        return Parser.nameStringToXML(name, Parser.floatToString(value))
+
+    @staticmethod
+    def doubleValueToXML(name, value):
+        """
+        Return a string of the form '<name>value</name>' to be used in the XML output.
+        The value must be a floating point value and it is converted to a string using
+        the doubleToString method here.
+        """
+        return Parser.nameStringToXML(name, Parser.doubleToString(value))
+
+    @staticmethod
     def extendedValueToXML(name, value):
         """
-        Return a string of the form '<name> value </name>' to be used in the XML output.
+        Return a string of the form '<name>value</name>' to be used in the XML output.
         The value must have a __str__ member used to convert that value to a string
         representation. Extended type values all have that function.
 
@@ -103,8 +139,54 @@ class Parser:
                 result += Parser.listValuesAsString(theList[kk], dims[1:])
         else:
             # these are actual values
+            isStr = dims[0] > 0 and isinstance(theList[0], str)
             for jj in range(dims[0]):
-                result += str(theList[jj]) + " "
+                # strings need to be surrounded by double quotes
+                if isStr:
+                    result += '"'
+                result += str(theList[jj])
+                if isStr:
+                    result += '"'
+                # and elements are separated by spaces
+                result += " "
+        return result
+
+    @staticmethod
+    def floatListValuesAsString(theList, dims):
+        """
+        Turns a list (including a list of lists as used here) of single precision floats
+        (which are stored internally as doubles) into a string for use in an XML output.
+        Values in the list are turned into a string by use of floatToString here.
+        """
+        result = ""
+        if len(dims) > 1:
+            for kk in range(dims[0]):
+                result += Parser.floatListValuesAsString(theList[kk], dims[1:])
+        else:
+            # these are actual values
+            for jj in range(dims[0]):
+                result += Parser.floatToString(theList[jj])
+                # and elements are separated by spaces
+                result += " "
+        return result
+
+    @staticmethod
+    def doubleListValuesAsString(theList, dims):
+        """
+        Turns a list (including a list of lists as used here) of double precision floats
+        into a string for use in an XML output.
+        Values in the list are turned into a string by use of doubleToString here.
+        """
+        result = ""
+        if len(dims) > 1:
+            for kk in range(dims[0]):
+                result += Parser.doubleListValuesAsString(theList[kk], dims[1:])
+        else:
+            # these are actual values
+            for jj in range(dims[0]):
+                result += Parser.doubleToString(theList[jj])
+                # and elements are separated by spaces
+                result += " "
         return result
 
     @staticmethod
@@ -147,55 +229,98 @@ class Parser:
     @staticmethod
     def listValueToXML(name, value):
         """
-        Return a string of the form '<name> list values </name>' to be used in the XML
+        Return a string of the form '<name>list values</name>' to be used in the XML
         output. The list values are encoded such that they can be read and the list
         (which may be a list of lists, i.e. an ND array of values) be fully reconstructed
         from that XML.
         For use with standard types which can be expressed as a string using str(value).
-        Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
+        Arrays are encoded here as <name>ndim dim1 dim2 dim... dimn value value value ...</name>
         and the most rapidly varying dimension among the values is the last dimension.
         """
         listDims = pyasdm.utils.getListDims(value)
-        result = "<%s> " % name
-        result += Parser.listXMLPrefix(listDims)
-        result += Parser.listValuesAsString(value, listDims)
-        result += "</%s> " % name
+        result = "<%s>" % name
+        xmlString = Parser.listXMLPrefix(listDims)
+        xmlString += Parser.listValuesAsString(value, listDims)
+        result += xmlString.strip()
+        result += "</%s>" % name
+        return result
+
+    @staticmethod
+    def floatListValueToXML(name, value):
+        """
+        Return a string of the form '<name>list values</name>' to be used in the XML
+        output. The list values are encoded such that they can be read and the list
+        (which may be a list of lists, i.e. an ND array of values) be fully reconstructed
+        from that XML.
+        For use with float point values to be written matching the c++ output for single
+        precision floats.
+        Arrays are encoded here as <name>ndim dim1 dim2 dim... dimn value value value ...</name>
+        and the most rapidly varying dimension among the values is the last dimension.
+        """
+        listDims = pyasdm.utils.getListDims(value)
+        result = "<%s>" % name
+        xmlString = Parser.listXMLPrefix(listDims)
+        xmlString += Parser.floatListValuesAsString(value, listDims)
+        result += xmlString.strip()
+        result += "</%s>" % name
+        return result
+
+    @staticmethod
+    def doubleListValueToXML(name, value):
+        """
+        Return a string of the form '<name>list values</name>' to be used in the XML
+        output. The list values are encoded such that they can be read and the list
+        (which may be a list of lists, i.e. an ND array of values) be fully reconstructed
+        from that XML.
+        For use with float point values to be written matching the c++ output for double
+        precision floats.
+        Arrays are encoded here as <name>ndim dim1 dim2 dim... dimn value value value ...</name>
+        and the most rapidly varying dimension among the values is the last dimension.
+        """
+        listDims = pyasdm.utils.getListDims(value)
+        result = "<%s>" % name
+        xmlString = Parser.listXMLPrefix(listDims)
+        xmlString += Parser.doubleListValuesAsString(value, listDims)
+        result += xmlString.strip()
+        result += "</%s>" % name
         return result
 
     @staticmethod
     def listExtendedValueToXML(name, value):
         """
-        Return a string of the form '<name> list values </name>' to be used in the XML
+        Return a string of the form '<name>list values</name>' to be used in the XML
         output. The list values are encoded such that they can be read and the list
         (which may be a list of lists, i.e. an ND array of values) be fully reconstructed
         from that XML.
         For use with extended types which can be expressed as a string using their __str__ member function.
-        Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
+        Arrays are encoded here as <name>ndim dim1 dim2 dim... dimn value value value ...</name>
         and the most rapidly varying dimension among the values is the last dimension.
         """
         listDims = pyasdm.utils.getListDims(value)
-        result = "<%s> " % name
-        result += Parser.listXMLPrefix(listDims)
-        result += Parser.listExtendedValuesAsString(value, listDims)
-        result += "</%s> " % name
+        result = "<%s>" % name
+        xmlString = Parser.listXMLPrefix(listDims)
+        xmlString += Parser.listExtendedValuesAsString(value, listDims)
+        result += xmlString.strip()
+        result += "</%s>" % name
         return result
 
     @staticmethod
     def listEnumValueToXML(name, value):
         """
-        Return a string of the form '<name> list values </name>' to be used in the XML
+        Return a string of the form '<name>list values</name>' to be used in the XML
         output. The list values are encoded such that they can be read and the list
         (which may be a list of lists, i.e. an ND array of values) be fully reconstructed
         from that XML.
         For use with enumeration which can be expressed as a string using their name() member function.
-        Arrays are encoded here as <name> ndim dim1 dim2 dim... dimn value value value ... </name>
+        Arrays are encoded here as <name>ndim dim1 dim2 dim... dimn value value value ...</name>
         and the most rapidly varying dimension among the values is the last dimension.
         """
         listDims = pyasdm.utils.getListDims(value)
-        result = "<%s> " % name
-        result += Parser.listXMLPrefix(listDims)
-        result += Parser.listEnumValuesAsString(value, listDims)
-        result += "</%s> " % name
+        result = "<%s>" % name
+        xmlString = Parser.listXMLPrefix(listDims)
+        xmlString += Parser.listEnumValuesAsString(value, listDims)
+        result += xmlString.strip()
+        result += "</%s>" % name
         return result
 
     @staticmethod

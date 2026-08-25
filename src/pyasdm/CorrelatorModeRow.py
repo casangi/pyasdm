@@ -193,33 +193,54 @@ class CorrelatorModeRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("correlatorModeId", self._correlatorModeId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numBaseband", self._numBaseband)
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("basebandNames", self._basebandNames)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("basebandConfig", self._basebandConfig)
 
+        result += "\n   "
+
         result += Parser.valueToXML("accumMode", AccumMode.name(self._accumMode))
+
+        result += "\n   "
 
         result += Parser.valueToXML("binMode", self._binMode)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAxes", self._numAxes)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("axesOrderArray", self._axesOrderArray)
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("filterMode", self._filterMode)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "correlatorName", CorrelatorName.name(self._correlatorName)
         )
 
         if self._correlatorSoftwareVersionExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "correlatorSoftwareVersion", self._correlatorSoftwareVersion
@@ -227,7 +248,7 @@ class CorrelatorModeRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -544,6 +565,7 @@ class CorrelatorModeRow:
         """
         Set correlatorModeId with the specified Tag value.
         correlatorModeId The Tag value to which correlatorModeId is to be set.
+
         The value of correlatorModeId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -575,6 +597,7 @@ class CorrelatorModeRow:
         numBaseband The int value to which numBaseband is to be set.
 
 
+
         """
 
         self._numBaseband = int(numBaseband)
@@ -595,6 +618,7 @@ class CorrelatorModeRow:
         """
         Set basebandNames with the specified BasebandName []  value.
         basebandNames The BasebandName []  value to which basebandNames is to be set.
+
 
 
         """
@@ -640,6 +664,7 @@ class CorrelatorModeRow:
         basebandConfig The int []  value to which basebandConfig is to be set.
 
 
+
         """
 
         # value must be a list
@@ -683,6 +708,7 @@ class CorrelatorModeRow:
         accumMode The AccumMode value to which accumMode is to be set.
 
 
+
         """
 
         self._accumMode = AccumMode(accumMode)
@@ -703,6 +729,7 @@ class CorrelatorModeRow:
         """
         Set binMode with the specified int value.
         binMode The int value to which binMode is to be set.
+
 
 
         """
@@ -727,6 +754,7 @@ class CorrelatorModeRow:
         numAxes The int value to which numAxes is to be set.
 
 
+
         """
 
         self._numAxes = int(numAxes)
@@ -747,6 +775,7 @@ class CorrelatorModeRow:
         """
         Set axesOrderArray with the specified AxisName []  value.
         axesOrderArray The AxisName []  value to which axesOrderArray is to be set.
+
 
 
         """
@@ -792,6 +821,7 @@ class CorrelatorModeRow:
         filterMode The FilterMode []  value to which filterMode is to be set.
 
 
+
         """
 
         # value must be a list
@@ -835,6 +865,7 @@ class CorrelatorModeRow:
         correlatorName The CorrelatorName value to which correlatorName is to be set.
 
 
+
         """
 
         self._correlatorName = CorrelatorName(correlatorName)
@@ -869,6 +900,7 @@ class CorrelatorModeRow:
         """
         Set correlatorSoftwareVersion with the specified str value.
         correlatorSoftwareVersion The str value to which correlatorSoftwareVersion is to be set.
+
 
 
         """

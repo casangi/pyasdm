@@ -24,6 +24,7 @@
 #
 
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class Speed:
@@ -147,7 +148,7 @@ class Speed:
         """
         Return the value of this speed as a String in units of meters per second.
         """
-        return str(self.get())
+        return pyasdm.Parser.doubleToString(self.get())
 
     @staticmethod
     def values(items):

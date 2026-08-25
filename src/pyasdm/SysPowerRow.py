@@ -99,15 +99,21 @@ class SysPowerRow:
 
         self._switchedPowerDifferenceExists = False
 
-        self._switchedPowerDifference = []  # this is a list of float []
+        self._switchedPowerDifference = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._switchedPowerSumExists = False
 
-        self._switchedPowerSum = []  # this is a list of float []
+        self._switchedPowerSum = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._requantizerGainExists = False
 
-        self._requantizerGain = []  # this is a list of float []
+        self._requantizerGain = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._numChannelsExists = False
 
@@ -127,15 +133,21 @@ class SysPowerRow:
 
         self._switchedPowerDifferenceSpectrumExists = False
 
-        self._switchedPowerDifferenceSpectrum = []  # this is a list of float []  []
+        self._switchedPowerDifferenceSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._switchedPowerSumSpectrumExists = False
 
-        self._switchedPowerSumSpectrum = []  # this is a list of float []  []
+        self._switchedPowerSumSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._requantizerGainSpectrumExists = False
 
-        self._requantizerGainSpectrum = []  # this is a list of float []  []
+        self._requantizerGainSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         # extrinsic attributes
 
@@ -270,75 +282,99 @@ class SysPowerRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
         if self._switchedPowerDifferenceExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "switchedPowerDifference", self._switchedPowerDifference
             )
 
         if self._switchedPowerSumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("switchedPowerSum", self._switchedPowerSum)
+            result += Parser.floatListValueToXML(
+                "switchedPowerSum", self._switchedPowerSum
+            )
 
         if self._requantizerGainExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("requantizerGain", self._requantizerGain)
+            result += Parser.floatListValueToXML(
+                "requantizerGain", self._requantizerGain
+            )
 
         if self._numChannelsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numChannels", self._numChannels)
 
         if self._numPolarizationTypeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "numPolarizationType", self._numPolarizationType
             )
 
         if self._chanFreqStartExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("chanFreqStart", self._chanFreqStart)
 
         if self._chanFreqStepExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("chanFreqStep", self._chanFreqStep)
 
         if self._switchedPowerDifferenceSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "switchedPowerDifferenceSpectrum", self._switchedPowerDifferenceSpectrum
             )
 
         if self._switchedPowerSumSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "switchedPowerSumSpectrum", self._switchedPowerSumSpectrum
             )
 
         if self._requantizerGainSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "requantizerGainSpectrum", self._requantizerGainSpectrum
             )
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("feedId", self._feedId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -878,6 +914,7 @@ class SysPowerRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -907,6 +944,7 @@ class SysPowerRow:
         """
         Set numReceptor with the specified int value.
         numReceptor The int value to which numReceptor is to be set.
+
 
 
         """
@@ -943,6 +981,9 @@ class SysPowerRow:
         """
         Set switchedPowerDifference with the specified float []  value.
         switchedPowerDifference The float []  value to which switchedPowerDifference is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1009,6 +1050,9 @@ class SysPowerRow:
         Set switchedPowerSum with the specified float []  value.
         switchedPowerSum The float []  value to which switchedPowerSum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1073,6 +1117,9 @@ class SysPowerRow:
         """
         Set requantizerGain with the specified float []  value.
         requantizerGain The float []  value to which requantizerGain is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1140,6 +1187,7 @@ class SysPowerRow:
         numChannels The int value to which numChannels is to be set.
 
 
+
         """
 
         self._numChannels = int(numChannels)
@@ -1182,6 +1230,7 @@ class SysPowerRow:
         """
         Set numPolarizationType with the specified int value.
         numPolarizationType The int value to which numPolarizationType is to be set.
+
 
 
         """
@@ -1227,6 +1276,7 @@ class SysPowerRow:
         """
         Set chanFreqStart with the specified Frequency value.
         chanFreqStart The Frequency value to which chanFreqStart is to be set.
+
         The value of chanFreqStart can be anything allowed by the Frequency constructor.
 
         """
@@ -1272,6 +1322,7 @@ class SysPowerRow:
         """
         Set chanFreqStep with the specified Frequency value.
         chanFreqStep The Frequency value to which chanFreqStep is to be set.
+
         The value of chanFreqStep can be anything allowed by the Frequency constructor.
 
         """
@@ -1316,6 +1367,9 @@ class SysPowerRow:
         """
         Set switchedPowerDifferenceSpectrum with the specified float []  []  value.
         switchedPowerDifferenceSpectrum The float []  []  value to which switchedPowerDifferenceSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1388,6 +1442,9 @@ class SysPowerRow:
         Set switchedPowerSumSpectrum with the specified float []  []  value.
         switchedPowerSumSpectrum The float []  []  value to which switchedPowerSumSpectrum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1453,6 +1510,9 @@ class SysPowerRow:
         Set requantizerGainSpectrum with the specified float []  []  value.
         requantizerGainSpectrum The float []  []  value to which requantizerGainSpectrum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1506,6 +1566,7 @@ class SysPowerRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1537,6 +1598,7 @@ class SysPowerRow:
         feedId The int value to which feedId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1565,6 +1627,7 @@ class SysPowerRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

@@ -108,15 +108,17 @@ class CalDeviceRow:
 
         self._calEffExists = False
 
-        self._calEff = []  # this is a list of float []  []
+        self._calEff = []  # this is a list of float []  []  saved as single precision
 
         self._noiseCalExists = False
 
-        self._noiseCal = []  # this is a list of float []
+        self._noiseCal = []  # this is a list of float []  saved as double precision
 
         self._coupledNoiseCalExists = False
 
-        self._coupledNoiseCal = []  # this is a list of float []  []
+        self._coupledNoiseCal = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._temperatureLoadExists = False
 
@@ -208,33 +210,46 @@ class CalDeviceRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numCalload", self._numCalload)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("calLoadNames", self._calLoadNames)
 
         if self._numReceptorExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numReceptor", self._numReceptor)
 
         if self._calEffExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("calEff", self._calEff)
+            result += Parser.floatListValueToXML("calEff", self._calEff)
 
         if self._noiseCalExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("noiseCal", self._noiseCal)
+            result += Parser.doubleListValueToXML("noiseCal", self._noiseCal)
 
         if self._coupledNoiseCalExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("coupledNoiseCal", self._coupledNoiseCal)
+            result += Parser.floatListValueToXML(
+                "coupledNoiseCal", self._coupledNoiseCal
+            )
 
         if self._temperatureLoadExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "temperatureLoad", self._temperatureLoad
@@ -242,15 +257,21 @@ class CalDeviceRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("feedId", self._feedId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -408,7 +429,7 @@ class CalDeviceRow:
             eos.writeInt(len(self._noiseCal))
             for i in range(len(self._noiseCal)):
 
-                eos.writeFloat(self._noiseCal[i])
+                eos.writeDouble(self._noiseCal[i])
 
         eos.writeBool(self._coupledNoiseCalExists)
         if self._coupledNoiseCalExists:
@@ -524,7 +545,7 @@ class CalDeviceRow:
             noiseCalDim1 = eis.readInt()
             thisList = []
             for i in range(noiseCalDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._noiseCal = thisList
 
@@ -621,6 +642,7 @@ class CalDeviceRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -652,6 +674,7 @@ class CalDeviceRow:
         numCalload The int value to which numCalload is to be set.
 
 
+
         """
 
         self._numCalload = int(numCalload)
@@ -672,6 +695,7 @@ class CalDeviceRow:
         """
         Set calLoadNames with the specified CalibrationDevice []  value.
         calLoadNames The CalibrationDevice []  value to which calLoadNames is to be set.
+
 
 
         """
@@ -731,6 +755,7 @@ class CalDeviceRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -773,6 +798,9 @@ class CalDeviceRow:
         """
         Set calEff with the specified float []  []  value.
         calEff The float []  []  value to which calEff is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -839,6 +867,9 @@ class CalDeviceRow:
         Set noiseCal with the specified float []  value.
         noiseCal The float []  value to which noiseCal is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -904,6 +935,9 @@ class CalDeviceRow:
         Set coupledNoiseCal with the specified float []  []  value.
         coupledNoiseCal The float []  []  value to which coupledNoiseCal is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -968,6 +1002,7 @@ class CalDeviceRow:
         """
         Set temperatureLoad with the specified Temperature []  value.
         temperatureLoad The Temperature []  value to which temperatureLoad is to be set.
+
         The value of temperatureLoad can be anything allowed by the Temperature []  constructor.
 
         """
@@ -1022,6 +1057,7 @@ class CalDeviceRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1053,6 +1089,7 @@ class CalDeviceRow:
         feedId The int value to which feedId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1081,6 +1118,7 @@ class CalDeviceRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

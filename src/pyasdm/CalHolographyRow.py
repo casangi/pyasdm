@@ -314,93 +314,139 @@ class CalHolographyRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "ambientTemperature", self._ambientTemperature
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("focusPosition", self._focusPosition)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
-        result += Parser.valueToXML("illuminationTaper", self._illuminationTaper)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("illuminationTaper", self._illuminationTaper)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numPanelModes", self._numPanelModes)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("beamMapUID", self._beamMapUID)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("rawRMS", self._rawRMS)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("weightedRMS", self._weightedRMS)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("surfaceMapUID", self._surfaceMapUID)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("direction", self._direction)
 
         if self._numScrewExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numScrew", self._numScrew)
 
         if self._screwNameExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("screwName", self._screwName)
 
         if self._screwMotionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("screwMotion", self._screwMotion)
 
         if self._screwMotionErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "screwMotionError", self._screwMotionError
             )
 
         if self._gravCorrectionExists:
+            result += "\n   "
 
             result += Parser.valueToXML("gravCorrection", self._gravCorrection)
 
         if self._gravOptRangeExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("gravOptRange", self._gravOptRange)
 
         if self._tempCorrectionExists:
+            result += "\n   "
 
             result += Parser.valueToXML("tempCorrection", self._tempCorrection)
 
         if self._tempOptRangeExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("tempOptRange", self._tempOptRange)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -633,7 +679,7 @@ class CalHolographyRow:
 
         Frequency.listToBin(self._frequencyRange, eos)
 
-        eos.writeFloat(self._illuminationTaper)
+        eos.writeDouble(self._illuminationTaper)
 
         eos.writeInt(self._numReceptor)
 
@@ -777,7 +823,7 @@ class CalHolographyRow:
         Set the illuminationTaper in row from the EndianInput (eis) instance.
         """
 
-        row._illuminationTaper = eis.readFloat()
+        row._illuminationTaper = eis.readDouble()
 
     @staticmethod
     def numReceptorFromBin(row, eis):
@@ -1024,6 +1070,7 @@ class CalHolographyRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1053,6 +1100,7 @@ class CalHolographyRow:
         antennaMake The AntennaMake value to which antennaMake is to be set.
 
 
+
         """
 
         self._antennaMake = AntennaMake(antennaMake)
@@ -1074,6 +1122,7 @@ class CalHolographyRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1097,6 +1146,7 @@ class CalHolographyRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1120,6 +1170,7 @@ class CalHolographyRow:
         """
         Set ambientTemperature with the specified Temperature value.
         ambientTemperature The Temperature value to which ambientTemperature is to be set.
+
         The value of ambientTemperature can be anything allowed by the Temperature constructor.
 
         """
@@ -1142,6 +1193,7 @@ class CalHolographyRow:
         """
         Set focusPosition with the specified Length []  value.
         focusPosition The Length []  value to which focusPosition is to be set.
+
         The value of focusPosition can be anything allowed by the Length []  constructor.
 
         """
@@ -1185,6 +1237,7 @@ class CalHolographyRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1229,6 +1282,9 @@ class CalHolographyRow:
         Set illuminationTaper with the specified float value.
         illuminationTaper The float value to which illuminationTaper is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1252,6 +1308,7 @@ class CalHolographyRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1272,6 +1329,7 @@ class CalHolographyRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1317,6 +1375,7 @@ class CalHolographyRow:
         numPanelModes The int value to which numPanelModes is to be set.
 
 
+
         """
 
         self._numPanelModes = int(numPanelModes)
@@ -1337,6 +1396,7 @@ class CalHolographyRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         """
@@ -1360,6 +1420,7 @@ class CalHolographyRow:
         """
         Set beamMapUID with the specified EntityRef value.
         beamMapUID The EntityRef value to which beamMapUID is to be set.
+
         The value of beamMapUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1383,6 +1444,7 @@ class CalHolographyRow:
         """
         Set rawRMS with the specified Length value.
         rawRMS The Length value to which rawRMS is to be set.
+
         The value of rawRMS can be anything allowed by the Length constructor.
 
         """
@@ -1406,6 +1468,7 @@ class CalHolographyRow:
         """
         Set weightedRMS with the specified Length value.
         weightedRMS The Length value to which weightedRMS is to be set.
+
         The value of weightedRMS can be anything allowed by the Length constructor.
 
         """
@@ -1429,6 +1492,7 @@ class CalHolographyRow:
         """
         Set surfaceMapUID with the specified EntityRef value.
         surfaceMapUID The EntityRef value to which surfaceMapUID is to be set.
+
         The value of surfaceMapUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1451,6 +1515,7 @@ class CalHolographyRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1510,6 +1575,7 @@ class CalHolographyRow:
         numScrew The int value to which numScrew is to be set.
 
 
+
         """
 
         self._numScrew = int(numScrew)
@@ -1552,6 +1618,7 @@ class CalHolographyRow:
         """
         Set screwName with the specified str []  value.
         screwName The str []  value to which screwName is to be set.
+
 
 
         """
@@ -1617,6 +1684,7 @@ class CalHolographyRow:
         """
         Set screwMotion with the specified Length []  value.
         screwMotion The Length []  value to which screwMotion is to be set.
+
         The value of screwMotion can be anything allowed by the Length []  constructor.
 
         """
@@ -1682,6 +1750,7 @@ class CalHolographyRow:
         """
         Set screwMotionError with the specified Length []  value.
         screwMotionError The Length []  value to which screwMotionError is to be set.
+
         The value of screwMotionError can be anything allowed by the Length []  constructor.
 
         """
@@ -1749,6 +1818,7 @@ class CalHolographyRow:
         gravCorrection The bool value to which gravCorrection is to be set.
 
 
+
         """
 
         self._gravCorrection = bool(gravCorrection)
@@ -1791,6 +1861,7 @@ class CalHolographyRow:
         """
         Set gravOptRange with the specified Angle []  value.
         gravOptRange The Angle []  value to which gravOptRange is to be set.
+
         The value of gravOptRange can be anything allowed by the Angle []  constructor.
 
         """
@@ -1858,6 +1929,7 @@ class CalHolographyRow:
         tempCorrection The bool value to which tempCorrection is to be set.
 
 
+
         """
 
         self._tempCorrection = bool(tempCorrection)
@@ -1900,6 +1972,7 @@ class CalHolographyRow:
         """
         Set tempOptRange with the specified Temperature []  value.
         tempOptRange The Temperature []  value to which tempOptRange is to be set.
+
         The value of tempOptRange can be anything allowed by the Temperature []  constructor.
 
         """
@@ -1954,6 +2027,7 @@ class CalHolographyRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1984,6 +2058,7 @@ class CalHolographyRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

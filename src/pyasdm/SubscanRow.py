@@ -196,35 +196,53 @@ class SubscanRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("scanNumber", self._scanNumber)
+
+        result += "\n   "
 
         result += Parser.valueToXML("subscanNumber", self._subscanNumber)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startTime", self._startTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endTime", self._endTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("fieldName", self._fieldName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "subscanIntent", SubscanIntent.name(self._subscanIntent)
         )
 
         if self._subscanModeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "subscanMode", SwitchingMode.name(self._subscanMode)
             )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numIntegration", self._numIntegration)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("numSubintegration", self._numSubintegration)
 
         if self._correlatorCalibrationExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "correlatorCalibration",
@@ -233,11 +251,13 @@ class SubscanRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -530,6 +550,7 @@ class SubscanRow:
         scanNumber The int value to which scanNumber is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -557,6 +578,7 @@ class SubscanRow:
         """
         Set subscanNumber with the specified int value.
         subscanNumber The int value to which subscanNumber is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -587,6 +609,7 @@ class SubscanRow:
         """
         Set startTime with the specified ArrayTime value.
         startTime The ArrayTime value to which startTime is to be set.
+
         The value of startTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -610,6 +633,7 @@ class SubscanRow:
         """
         Set endTime with the specified ArrayTime value.
         endTime The ArrayTime value to which endTime is to be set.
+
         The value of endTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -634,6 +658,7 @@ class SubscanRow:
         fieldName The str value to which fieldName is to be set.
 
 
+
         """
 
         self._fieldName = str(fieldName)
@@ -654,6 +679,7 @@ class SubscanRow:
         """
         Set subscanIntent with the specified SubscanIntent value.
         subscanIntent The SubscanIntent value to which subscanIntent is to be set.
+
 
 
         """
@@ -692,6 +718,7 @@ class SubscanRow:
         subscanMode The SwitchingMode value to which subscanMode is to be set.
 
 
+
         """
 
         self._subscanMode = SwitchingMode(subscanMode)
@@ -722,6 +749,7 @@ class SubscanRow:
         numIntegration The int value to which numIntegration is to be set.
 
 
+
         """
 
         self._numIntegration = int(numIntegration)
@@ -742,6 +770,7 @@ class SubscanRow:
         """
         Set numSubintegration with the specified int []  value.
         numSubintegration The int []  value to which numSubintegration is to be set.
+
 
 
         """
@@ -801,6 +830,7 @@ class SubscanRow:
         correlatorCalibration The CorrelatorCalibration value to which correlatorCalibration is to be set.
 
 
+
         """
 
         self._correlatorCalibration = CorrelatorCalibration(correlatorCalibration)
@@ -832,6 +862,7 @@ class SubscanRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

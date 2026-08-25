@@ -884,15 +884,14 @@ class FeedTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<FeedTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:feed="http://Alma/XASDM/FeedTable" xsi:schemaLocation="http://Alma/XASDM/FeedTable http://almaobservatory.org/XML/XASDM/4/FeedTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<FeedTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:feed="http://Alma/XASDM/FeedTable" xsi:schemaLocation="http://Alma/XASDM/FeedTable http://almaobservatory.org/XML/XASDM/4/FeedTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</FeedTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</FeedTable>"
         return result
 
     def fromXML(self, xmlstr):

@@ -180,37 +180,56 @@ class AntennaRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("name", self._name)
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += "\n   "
 
         result += Parser.valueToXML("antennaType", AntennaType.name(self._antennaType))
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("dishDiameter", self._dishDiameter)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("position", self._position)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("offset", self._offset)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("time", self._time)
 
         # extrinsic attributes
 
         if self._assocAntennaIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("assocAntennaId", self._assocAntennaId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("stationId", self._stationId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -465,6 +484,7 @@ class AntennaRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -496,6 +516,7 @@ class AntennaRow:
         name The str value to which name is to be set.
 
 
+
         """
 
         self._name = str(name)
@@ -516,6 +537,7 @@ class AntennaRow:
         """
         Set antennaMake with the specified AntennaMake value.
         antennaMake The AntennaMake value to which antennaMake is to be set.
+
 
 
         """
@@ -540,6 +562,7 @@ class AntennaRow:
         antennaType The AntennaType value to which antennaType is to be set.
 
 
+
         """
 
         self._antennaType = AntennaType(antennaType)
@@ -561,6 +584,7 @@ class AntennaRow:
         """
         Set dishDiameter with the specified Length value.
         dishDiameter The Length value to which dishDiameter is to be set.
+
         The value of dishDiameter can be anything allowed by the Length constructor.
 
         """
@@ -583,6 +607,7 @@ class AntennaRow:
         """
         Set position with the specified Length []  value.
         position The Length []  value to which position is to be set.
+
         The value of position can be anything allowed by the Length []  constructor.
 
         """
@@ -626,6 +651,7 @@ class AntennaRow:
         """
         Set offset with the specified Length []  value.
         offset The Length []  value to which offset is to be set.
+
         The value of offset can be anything allowed by the Length []  constructor.
 
         """
@@ -670,6 +696,7 @@ class AntennaRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """
@@ -709,6 +736,7 @@ class AntennaRow:
         """
         Set assocAntennaId with the specified Tag value.
         assocAntennaId The Tag value to which assocAntennaId is to be set.
+
         The value of assocAntennaId can be anything allowed by the Tag constructor.
 
         """
@@ -740,6 +768,7 @@ class AntennaRow:
         """
         Set stationId with the specified Tag value.
         stationId The Tag value to which stationId is to be set.
+
         The value of stationId can be anything allowed by the Tag constructor.
 
         """

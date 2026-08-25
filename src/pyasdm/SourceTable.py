@@ -1093,15 +1093,14 @@ class SourceTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<SourceTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:src="http://Alma/XASDM/SourceTable" xsi:schemaLocation="http://Alma/XASDM/SourceTable http://almaobservatory.org/XML/XASDM/4/SourceTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<SourceTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:src="http://Alma/XASDM/SourceTable" xsi:schemaLocation="http://Alma/XASDM/SourceTable http://almaobservatory.org/XML/XASDM/4/SourceTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</SourceTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</SourceTable>"
         return result
 
     def fromXML(self, xmlstr):

@@ -171,37 +171,55 @@ class ReceiverRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("receiverId", self._receiverId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
+        result += "\n   "
+
         result += Parser.valueToXML("name", self._name)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numLO", self._numLO)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "frequencyBand", ReceiverBand.name(self._frequencyBand)
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("freqLO", self._freqLO)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverSideband", ReceiverSideband.name(self._receiverSideband)
         )
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("sidebandLO", self._sidebandLO)
 
         # extrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -444,6 +462,7 @@ class ReceiverRow:
         receiverId The int value to which receiverId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -472,6 +491,7 @@ class ReceiverRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -503,6 +523,7 @@ class ReceiverRow:
         name The str value to which name is to be set.
 
 
+
         """
 
         self._name = str(name)
@@ -523,6 +544,7 @@ class ReceiverRow:
         """
         Set numLO with the specified int value.
         numLO The int value to which numLO is to be set.
+
 
 
         """
@@ -547,6 +569,7 @@ class ReceiverRow:
         frequencyBand The ReceiverBand value to which frequencyBand is to be set.
 
 
+
         """
 
         self._frequencyBand = ReceiverBand(frequencyBand)
@@ -567,6 +590,7 @@ class ReceiverRow:
         """
         Set freqLO with the specified Frequency []  value.
         freqLO The Frequency []  value to which freqLO is to be set.
+
         The value of freqLO can be anything allowed by the Frequency []  constructor.
 
         """
@@ -612,6 +636,7 @@ class ReceiverRow:
         receiverSideband The ReceiverSideband value to which receiverSideband is to be set.
 
 
+
         """
 
         self._receiverSideband = ReceiverSideband(receiverSideband)
@@ -632,6 +657,7 @@ class ReceiverRow:
         """
         Set sidebandLO with the specified NetSideband []  value.
         sidebandLO The NetSideband []  value to which sidebandLO is to be set.
+
 
 
         """
@@ -678,6 +704,7 @@ class ReceiverRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

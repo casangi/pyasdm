@@ -140,25 +140,37 @@ class SeeingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numBaseLength", self._numBaseLength)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("baseLength", self._baseLength)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("phaseRms", self._phaseRms)
 
-        result += Parser.valueToXML("seeing", self._seeing)
+        result += "\n   "
 
-        result += Parser.valueToXML("exponent", self._exponent)
+        result += Parser.floatValueToXML("seeing", self._seeing)
+
+        result += "\n   "
+
+        result += Parser.floatValueToXML("exponent", self._exponent)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -342,6 +354,7 @@ class SeeingRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -373,6 +386,7 @@ class SeeingRow:
         numBaseLength The int value to which numBaseLength is to be set.
 
 
+
         """
 
         self._numBaseLength = int(numBaseLength)
@@ -393,6 +407,7 @@ class SeeingRow:
         """
         Set baseLength with the specified Length []  value.
         baseLength The Length []  value to which baseLength is to be set.
+
         The value of baseLength can be anything allowed by the Length []  constructor.
 
         """
@@ -436,6 +451,7 @@ class SeeingRow:
         """
         Set phaseRms with the specified Angle []  value.
         phaseRms The Angle []  value to which phaseRms is to be set.
+
         The value of phaseRms can be anything allowed by the Angle []  constructor.
 
         """
@@ -480,6 +496,9 @@ class SeeingRow:
         Set seeing with the specified float value.
         seeing The float value to which seeing is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -501,6 +520,9 @@ class SeeingRow:
         """
         Set exponent with the specified float value.
         exponent The float value to which exponent is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """

@@ -107,7 +107,9 @@ class TotalPowerRow:
 
         self._timeCentroid = []  # this is a list of ArrayTime []  []
 
-        self._floatData = []  # this is a list of float []  []  []
+        self._floatData = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
         self._flagAnt = []  # this is a list of int []
 
@@ -200,33 +202,56 @@ class TotalPowerRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("time", self._time)
+
+        result += "\n   "
 
         result += Parser.valueToXML("scanNumber", self._scanNumber)
 
+        result += "\n   "
+
         result += Parser.valueToXML("subscanNumber", self._subscanNumber)
+
+        result += "\n   "
 
         result += Parser.valueToXML("integrationNumber", self._integrationNumber)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("uvw", self._uvw)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("exposure", self._exposure)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("timeCentroid", self._timeCentroid)
 
-        result += Parser.listValueToXML("floatData", self._floatData)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("floatData", self._floatData)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("flagAnt", self._flagAnt)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("flagPol", self._flagPol)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("interval", self._interval)
 
         if self._subintegrationNumberExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "subintegrationNumber", self._subintegrationNumber
@@ -234,19 +259,27 @@ class TotalPowerRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML(
             "configDescriptionId", self._configDescriptionId
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("fieldId", self._fieldId)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("stateId", self._stateId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -665,6 +698,7 @@ class TotalPowerRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -696,6 +730,7 @@ class TotalPowerRow:
         scanNumber The int value to which scanNumber is to be set.
 
 
+
         """
 
         self._scanNumber = int(scanNumber)
@@ -716,6 +751,7 @@ class TotalPowerRow:
         """
         Set subscanNumber with the specified int value.
         subscanNumber The int value to which subscanNumber is to be set.
+
 
 
         """
@@ -740,6 +776,7 @@ class TotalPowerRow:
         integrationNumber The int value to which integrationNumber is to be set.
 
 
+
         """
 
         self._integrationNumber = int(integrationNumber)
@@ -760,6 +797,7 @@ class TotalPowerRow:
         """
         Set uvw with the specified Length []  []  value.
         uvw The Length []  []  value to which uvw is to be set.
+
         The value of uvw can be anything allowed by the Length []  []  constructor.
 
         """
@@ -803,6 +841,7 @@ class TotalPowerRow:
         """
         Set exposure with the specified Interval []  []  value.
         exposure The Interval []  []  value to which exposure is to be set.
+
         The value of exposure can be anything allowed by the Interval []  []  constructor.
 
         """
@@ -846,6 +885,7 @@ class TotalPowerRow:
         """
         Set timeCentroid with the specified ArrayTime []  []  value.
         timeCentroid The ArrayTime []  []  value to which timeCentroid is to be set.
+
         The value of timeCentroid can be anything allowed by the ArrayTime []  []  constructor.
 
         """
@@ -889,6 +929,9 @@ class TotalPowerRow:
         """
         Set floatData with the specified float []  []  []  value.
         floatData The float []  []  []  value to which floatData is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -934,6 +977,7 @@ class TotalPowerRow:
         flagAnt The int []  value to which flagAnt is to be set.
 
 
+
         """
 
         # value must be a list
@@ -975,6 +1019,7 @@ class TotalPowerRow:
         """
         Set flagPol with the specified int []  []  value.
         flagPol The int []  []  value to which flagPol is to be set.
+
 
 
         """
@@ -1019,6 +1064,7 @@ class TotalPowerRow:
         """
         Set interval with the specified Interval value.
         interval The Interval value to which interval is to be set.
+
         The value of interval can be anything allowed by the Interval constructor.
 
         """
@@ -1057,6 +1103,7 @@ class TotalPowerRow:
         subintegrationNumber The int value to which subintegrationNumber is to be set.
 
 
+
         """
 
         self._subintegrationNumber = int(subintegrationNumber)
@@ -1088,6 +1135,7 @@ class TotalPowerRow:
         """
         Set configDescriptionId with the specified Tag value.
         configDescriptionId The Tag value to which configDescriptionId is to be set.
+
         The value of configDescriptionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1118,6 +1166,7 @@ class TotalPowerRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         """
@@ -1141,6 +1190,7 @@ class TotalPowerRow:
         """
         Set fieldId with the specified Tag value.
         fieldId The Tag value to which fieldId is to be set.
+
         The value of fieldId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1170,6 +1220,7 @@ class TotalPowerRow:
         """
         Set stateId with the specified Tag []  value.
         stateId The Tag []  value to which stateId is to be set.
+
         The value of stateId can be anything allowed by the Tag []  constructor.
 
         """

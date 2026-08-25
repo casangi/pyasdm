@@ -145,7 +145,9 @@ class CalPointingRow:
 
         self._collOffsetTied = []  # this is a list of bool []  []
 
-        self._reducedChiSquared = []  # this is a list of float []
+        self._reducedChiSquared = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._averagedPolarizationsExists = False
 
@@ -407,125 +409,176 @@ class CalPointingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "ambientTemperature", self._ambientTemperature
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("direction", self._direction)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "pointingModelMode", PointingModelMode.name(self._pointingModelMode)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "pointingMethod", PointingMethod.name(self._pointingMethod)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML(
             "collOffsetRelative", self._collOffsetRelative
         )
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "collOffsetAbsolute", self._collOffsetAbsolute
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("collError", self._collError)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("collOffsetTied", self._collOffsetTied)
 
-        result += Parser.listValueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML(
+            "reducedChiSquared", self._reducedChiSquared
+        )
 
         if self._averagedPolarizationsExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "averagedPolarizations", self._averagedPolarizations
             )
 
         if self._beamPAExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("beamPA", self._beamPA)
 
         if self._beamPAErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("beamPAError", self._beamPAError)
 
         if self._beamPAWasFixedExists:
+            result += "\n   "
 
             result += Parser.valueToXML("beamPAWasFixed", self._beamPAWasFixed)
 
         if self._beamWidthExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("beamWidth", self._beamWidth)
 
         if self._beamWidthErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "beamWidthError", self._beamWidthError
             )
 
         if self._beamWidthWasFixedExists:
+            result += "\n   "
 
             result += Parser.listValueToXML(
                 "beamWidthWasFixed", self._beamWidthWasFixed
             )
 
         if self._offIntensityExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("offIntensity", self._offIntensity)
 
         if self._offIntensityErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "offIntensityError", self._offIntensityError
             )
 
         if self._offIntensityWasFixedExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "offIntensityWasFixed", self._offIntensityWasFixed
             )
 
         if self._peakIntensityExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "peakIntensity", self._peakIntensity
             )
 
         if self._peakIntensityErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "peakIntensityError", self._peakIntensityError
             )
 
         if self._peakIntensityWasFixedExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "peakIntensityWasFixed", self._peakIntensityWasFixed
@@ -533,13 +586,17 @@ class CalPointingRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -888,7 +945,7 @@ class CalPointingRow:
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
 
-            eos.writeFloat(self._reducedChiSquared[i])
+            eos.writeDouble(self._reducedChiSquared[i])
 
         eos.writeBool(self._averagedPolarizationsExists)
         if self._averagedPolarizationsExists:
@@ -1133,7 +1190,7 @@ class CalPointingRow:
         reducedChiSquaredDim1 = eis.readInt()
         thisList = []
         for i in range(reducedChiSquaredDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._reducedChiSquared = thisList
 
@@ -1365,6 +1422,7 @@ class CalPointingRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1392,6 +1450,7 @@ class CalPointingRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1422,6 +1481,7 @@ class CalPointingRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1445,6 +1505,7 @@ class CalPointingRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1468,6 +1529,7 @@ class CalPointingRow:
         """
         Set ambientTemperature with the specified Temperature value.
         ambientTemperature The Temperature value to which ambientTemperature is to be set.
+
         The value of ambientTemperature can be anything allowed by the Temperature constructor.
 
         """
@@ -1492,6 +1554,7 @@ class CalPointingRow:
         antennaMake The AntennaMake value to which antennaMake is to be set.
 
 
+
         """
 
         self._antennaMake = AntennaMake(antennaMake)
@@ -1514,6 +1577,7 @@ class CalPointingRow:
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
 
 
+
         """
 
         self._atmPhaseCorrection = AtmPhaseCorrection(atmPhaseCorrection)
@@ -1534,6 +1598,7 @@ class CalPointingRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1577,6 +1642,7 @@ class CalPointingRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1622,6 +1688,7 @@ class CalPointingRow:
         pointingModelMode The PointingModelMode value to which pointingModelMode is to be set.
 
 
+
         """
 
         self._pointingModelMode = PointingModelMode(pointingModelMode)
@@ -1642,6 +1709,7 @@ class CalPointingRow:
         """
         Set pointingMethod with the specified PointingMethod value.
         pointingMethod The PointingMethod value to which pointingMethod is to be set.
+
 
 
         """
@@ -1666,6 +1734,7 @@ class CalPointingRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1686,6 +1755,7 @@ class CalPointingRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1729,6 +1799,7 @@ class CalPointingRow:
         """
         Set collOffsetRelative with the specified Angle []  []  value.
         collOffsetRelative The Angle []  []  value to which collOffsetRelative is to be set.
+
         The value of collOffsetRelative can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1772,6 +1843,7 @@ class CalPointingRow:
         """
         Set collOffsetAbsolute with the specified Angle []  []  value.
         collOffsetAbsolute The Angle []  []  value to which collOffsetAbsolute is to be set.
+
         The value of collOffsetAbsolute can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1815,6 +1887,7 @@ class CalPointingRow:
         """
         Set collError with the specified Angle []  []  value.
         collError The Angle []  []  value to which collError is to be set.
+
         The value of collError can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1860,6 +1933,7 @@ class CalPointingRow:
         collOffsetTied The bool []  []  value to which collOffsetTied is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1901,6 +1975,9 @@ class CalPointingRow:
         """
         Set reducedChiSquared with the specified float []  value.
         reducedChiSquared The float []  value to which reducedChiSquared is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1960,6 +2037,7 @@ class CalPointingRow:
         averagedPolarizations The bool value to which averagedPolarizations is to be set.
 
 
+
         """
 
         self._averagedPolarizations = bool(averagedPolarizations)
@@ -2002,6 +2080,7 @@ class CalPointingRow:
         """
         Set beamPA with the specified Angle []  value.
         beamPA The Angle []  value to which beamPA is to be set.
+
         The value of beamPA can be anything allowed by the Angle []  constructor.
 
         """
@@ -2067,6 +2146,7 @@ class CalPointingRow:
         """
         Set beamPAError with the specified Angle []  value.
         beamPAError The Angle []  value to which beamPAError is to be set.
+
         The value of beamPAError can be anything allowed by the Angle []  constructor.
 
         """
@@ -2134,6 +2214,7 @@ class CalPointingRow:
         beamPAWasFixed The bool value to which beamPAWasFixed is to be set.
 
 
+
         """
 
         self._beamPAWasFixed = bool(beamPAWasFixed)
@@ -2176,6 +2257,7 @@ class CalPointingRow:
         """
         Set beamWidth with the specified Angle []  []  value.
         beamWidth The Angle []  []  value to which beamWidth is to be set.
+
         The value of beamWidth can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -2241,6 +2323,7 @@ class CalPointingRow:
         """
         Set beamWidthError with the specified Angle []  []  value.
         beamWidthError The Angle []  []  value to which beamWidthError is to be set.
+
         The value of beamWidthError can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -2308,6 +2391,7 @@ class CalPointingRow:
         beamWidthWasFixed The bool []  value to which beamWidthWasFixed is to be set.
 
 
+
         """
 
         # value must be a list
@@ -2371,6 +2455,7 @@ class CalPointingRow:
         """
         Set offIntensity with the specified Temperature []  value.
         offIntensity The Temperature []  value to which offIntensity is to be set.
+
         The value of offIntensity can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2436,6 +2521,7 @@ class CalPointingRow:
         """
         Set offIntensityError with the specified Temperature []  value.
         offIntensityError The Temperature []  value to which offIntensityError is to be set.
+
         The value of offIntensityError can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2503,6 +2589,7 @@ class CalPointingRow:
         offIntensityWasFixed The bool value to which offIntensityWasFixed is to be set.
 
 
+
         """
 
         self._offIntensityWasFixed = bool(offIntensityWasFixed)
@@ -2545,6 +2632,7 @@ class CalPointingRow:
         """
         Set peakIntensity with the specified Temperature []  value.
         peakIntensity The Temperature []  value to which peakIntensity is to be set.
+
         The value of peakIntensity can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2610,6 +2698,7 @@ class CalPointingRow:
         """
         Set peakIntensityError with the specified Temperature []  value.
         peakIntensityError The Temperature []  value to which peakIntensityError is to be set.
+
         The value of peakIntensityError can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2677,6 +2766,7 @@ class CalPointingRow:
         peakIntensityWasFixed The bool value to which peakIntensityWasFixed is to be set.
 
 
+
         """
 
         self._peakIntensityWasFixed = bool(peakIntensityWasFixed)
@@ -2708,6 +2798,7 @@ class CalPointingRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -2738,6 +2829,7 @@ class CalPointingRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

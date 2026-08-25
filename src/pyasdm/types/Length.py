@@ -24,6 +24,7 @@
 #
 
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class Length:
@@ -201,7 +202,7 @@ class Length:
         """
         Return the value of this length as a string in the default units of METER.
         """
-        return str(self.get())
+        return pyasdm.Parser.doubleToString(self.get())
 
     @staticmethod
     def values(items):

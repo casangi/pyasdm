@@ -745,15 +745,14 @@ class CalPrimaryBeamTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<CalPrimaryBeamTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:clprbm="http://Alma/XASDM/CalPrimaryBeamTable" xsi:schemaLocation="http://Alma/XASDM/CalPrimaryBeamTable http://almaobservatory.org/XML/XASDM/4/CalPrimaryBeamTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<CalPrimaryBeamTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:clprbm="http://Alma/XASDM/CalPrimaryBeamTable" xsi:schemaLocation="http://Alma/XASDM/CalPrimaryBeamTable http://almaobservatory.org/XML/XASDM/4/CalPrimaryBeamTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</CalPrimaryBeamTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</CalPrimaryBeamTable>"
         return result
 
     def fromXML(self, xmlstr):

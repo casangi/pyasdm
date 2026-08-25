@@ -281,75 +281,107 @@ class ConfigDescriptionRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAntenna", self._numAntenna)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numDataDescription", self._numDataDescription)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numFeed", self._numFeed)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "correlationMode", CorrelationMode.name(self._correlationMode)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML(
             "configDescriptionId", self._configDescriptionId
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "numAtmPhaseCorrection", self._numAtmPhaseCorrection
         )
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML(
             "atmPhaseCorrection", self._atmPhaseCorrection
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "processorType", ProcessorType.name(self._processorType)
         )
 
         if self._phasedArrayListExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("phasedArrayList", self._phasedArrayList)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "spectralType", SpectralResolutionType.name(self._spectralType)
         )
 
         if self._numAssocValuesExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAssocValues", self._numAssocValues)
 
         if self._assocNatureExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("assocNature", self._assocNature)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("antennaId", self._antennaId)
 
         if self._assocConfigDescriptionIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "assocConfigDescriptionId", self._assocConfigDescriptionId
             )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML(
             "dataDescriptionId", self._dataDescriptionId
         )
 
+        result += "\n   "
+
         result += Parser.listValueToXML("feedId", self._feedId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("processorId", self._processorId)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("switchCycleId", self._switchCycleId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -834,6 +866,7 @@ class ConfigDescriptionRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -854,6 +887,7 @@ class ConfigDescriptionRow:
         """
         Set numDataDescription with the specified int value.
         numDataDescription The int value to which numDataDescription is to be set.
+
 
 
         """
@@ -878,6 +912,7 @@ class ConfigDescriptionRow:
         numFeed The int value to which numFeed is to be set.
 
 
+
         """
 
         self._numFeed = int(numFeed)
@@ -898,6 +933,7 @@ class ConfigDescriptionRow:
         """
         Set correlationMode with the specified CorrelationMode value.
         correlationMode The CorrelationMode value to which correlationMode is to be set.
+
 
 
         """
@@ -921,6 +957,7 @@ class ConfigDescriptionRow:
         """
         Set configDescriptionId with the specified Tag value.
         configDescriptionId The Tag value to which configDescriptionId is to be set.
+
         The value of configDescriptionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -952,6 +989,7 @@ class ConfigDescriptionRow:
         numAtmPhaseCorrection The int value to which numAtmPhaseCorrection is to be set.
 
 
+
         """
 
         self._numAtmPhaseCorrection = int(numAtmPhaseCorrection)
@@ -972,6 +1010,7 @@ class ConfigDescriptionRow:
         """
         Set atmPhaseCorrection with the specified AtmPhaseCorrection []  value.
         atmPhaseCorrection The AtmPhaseCorrection []  value to which atmPhaseCorrection is to be set.
+
 
 
         """
@@ -1017,6 +1056,7 @@ class ConfigDescriptionRow:
         processorType The ProcessorType value to which processorType is to be set.
 
 
+
         """
 
         self._processorType = ProcessorType(processorType)
@@ -1051,6 +1091,7 @@ class ConfigDescriptionRow:
         """
         Set phasedArrayList with the specified int []  value.
         phasedArrayList The int []  value to which phasedArrayList is to be set.
+
 
 
         """
@@ -1104,6 +1145,7 @@ class ConfigDescriptionRow:
         spectralType The SpectralResolutionType value to which spectralType is to be set.
 
 
+
         """
 
         self._spectralType = SpectralResolutionType(spectralType)
@@ -1138,6 +1180,7 @@ class ConfigDescriptionRow:
         """
         Set numAssocValues with the specified int value.
         numAssocValues The int value to which numAssocValues is to be set.
+
 
 
         """
@@ -1182,6 +1225,7 @@ class ConfigDescriptionRow:
         """
         Set assocNature with the specified SpectralResolutionType []  value.
         assocNature The SpectralResolutionType []  value to which assocNature is to be set.
+
 
 
         """
@@ -1235,6 +1279,7 @@ class ConfigDescriptionRow:
         """
         Set antennaId with the specified Tag []  value.
         antennaId The Tag []  value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1292,6 +1337,7 @@ class ConfigDescriptionRow:
         """
         Set assocConfigDescriptionId with the specified Tag []  value.
         assocConfigDescriptionId The Tag []  value to which assocConfigDescriptionId is to be set.
+
         The value of assocConfigDescriptionId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1343,6 +1389,7 @@ class ConfigDescriptionRow:
         """
         Set dataDescriptionId with the specified Tag []  value.
         dataDescriptionId The Tag []  value to which dataDescriptionId is to be set.
+
         The value of dataDescriptionId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1388,6 +1435,7 @@ class ConfigDescriptionRow:
         feedId The int []  value to which feedId is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1430,6 +1478,7 @@ class ConfigDescriptionRow:
         """
         Set processorId with the specified Tag value.
         processorId The Tag value to which processorId is to be set.
+
         The value of processorId can be anything allowed by the Tag constructor.
 
         """
@@ -1452,6 +1501,7 @@ class ConfigDescriptionRow:
         """
         Set switchCycleId with the specified Tag []  value.
         switchCycleId The Tag []  value to which switchCycleId is to be set.
+
         The value of switchCycleId can be anything allowed by the Tag []  constructor.
 
         """

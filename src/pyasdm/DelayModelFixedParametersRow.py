@@ -332,93 +332,120 @@ class DelayModelFixedParametersRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "delayModelFixedParametersId", self._delayModelFixedParametersId
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("delayModelVersion", self._delayModelVersion)
 
         if self._gaussConstantExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("gaussConstant", self._gaussConstant)
 
         if self._newtonianConstantExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("newtonianConstant", self._newtonianConstant)
+            result += Parser.doubleValueToXML(
+                "newtonianConstant", self._newtonianConstant
+            )
 
         if self._gravityExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("gravity", self._gravity)
+            result += Parser.doubleValueToXML("gravity", self._gravity)
 
         if self._earthFlatteningExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("earthFlattening", self._earthFlattening)
+            result += Parser.doubleValueToXML("earthFlattening", self._earthFlattening)
 
         if self._earthRadiusExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("earthRadius", self._earthRadius)
 
         if self._moonEarthMassRatioExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("moonEarthMassRatio", self._moonEarthMassRatio)
+            result += Parser.doubleValueToXML(
+                "moonEarthMassRatio", self._moonEarthMassRatio
+            )
 
         if self._ephemerisEpochExists:
+            result += "\n   "
 
             result += Parser.valueToXML("ephemerisEpoch", self._ephemerisEpoch)
 
         if self._earthTideLagExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("earthTideLag", self._earthTideLag)
+            result += Parser.doubleValueToXML("earthTideLag", self._earthTideLag)
 
         if self._earthGMExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("earthGM", self._earthGM)
+            result += Parser.doubleValueToXML("earthGM", self._earthGM)
 
         if self._moonGMExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("moonGM", self._moonGM)
+            result += Parser.doubleValueToXML("moonGM", self._moonGM)
 
         if self._sunGMExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("sunGM", self._sunGM)
+            result += Parser.doubleValueToXML("sunGM", self._sunGM)
 
         if self._loveNumberHExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("loveNumberH", self._loveNumberH)
+            result += Parser.doubleValueToXML("loveNumberH", self._loveNumberH)
 
         if self._loveNumberLExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("loveNumberL", self._loveNumberL)
+            result += Parser.doubleValueToXML("loveNumberL", self._loveNumberL)
 
         if self._precessionConstantExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "precessionConstant", self._precessionConstant
             )
 
         if self._lightTime1AUExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("lightTime1AU", self._lightTime1AU)
+            result += Parser.doubleValueToXML("lightTime1AU", self._lightTime1AU)
 
         if self._speedOfLightExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("speedOfLight", self._speedOfLight)
 
         if self._delayModelFlagsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("delayModelFlags", self._delayModelFlags)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -618,17 +645,17 @@ class DelayModelFixedParametersRow:
         eos.writeBool(self._newtonianConstantExists)
         if self._newtonianConstantExists:
 
-            eos.writeFloat(self._newtonianConstant)
+            eos.writeDouble(self._newtonianConstant)
 
         eos.writeBool(self._gravityExists)
         if self._gravityExists:
 
-            eos.writeFloat(self._gravity)
+            eos.writeDouble(self._gravity)
 
         eos.writeBool(self._earthFlatteningExists)
         if self._earthFlatteningExists:
 
-            eos.writeFloat(self._earthFlattening)
+            eos.writeDouble(self._earthFlattening)
 
         eos.writeBool(self._earthRadiusExists)
         if self._earthRadiusExists:
@@ -638,7 +665,7 @@ class DelayModelFixedParametersRow:
         eos.writeBool(self._moonEarthMassRatioExists)
         if self._moonEarthMassRatioExists:
 
-            eos.writeFloat(self._moonEarthMassRatio)
+            eos.writeDouble(self._moonEarthMassRatio)
 
         eos.writeBool(self._ephemerisEpochExists)
         if self._ephemerisEpochExists:
@@ -648,32 +675,32 @@ class DelayModelFixedParametersRow:
         eos.writeBool(self._earthTideLagExists)
         if self._earthTideLagExists:
 
-            eos.writeFloat(self._earthTideLag)
+            eos.writeDouble(self._earthTideLag)
 
         eos.writeBool(self._earthGMExists)
         if self._earthGMExists:
 
-            eos.writeFloat(self._earthGM)
+            eos.writeDouble(self._earthGM)
 
         eos.writeBool(self._moonGMExists)
         if self._moonGMExists:
 
-            eos.writeFloat(self._moonGM)
+            eos.writeDouble(self._moonGM)
 
         eos.writeBool(self._sunGMExists)
         if self._sunGMExists:
 
-            eos.writeFloat(self._sunGM)
+            eos.writeDouble(self._sunGM)
 
         eos.writeBool(self._loveNumberHExists)
         if self._loveNumberHExists:
 
-            eos.writeFloat(self._loveNumberH)
+            eos.writeDouble(self._loveNumberH)
 
         eos.writeBool(self._loveNumberLExists)
         if self._loveNumberLExists:
 
-            eos.writeFloat(self._loveNumberL)
+            eos.writeDouble(self._loveNumberL)
 
         eos.writeBool(self._precessionConstantExists)
         if self._precessionConstantExists:
@@ -683,7 +710,7 @@ class DelayModelFixedParametersRow:
         eos.writeBool(self._lightTime1AUExists)
         if self._lightTime1AUExists:
 
-            eos.writeFloat(self._lightTime1AU)
+            eos.writeDouble(self._lightTime1AU)
 
         eos.writeBool(self._speedOfLightExists)
         if self._speedOfLightExists:
@@ -737,7 +764,7 @@ class DelayModelFixedParametersRow:
         row._newtonianConstantExists = eis.readBool()
         if row._newtonianConstantExists:
 
-            row._newtonianConstant = eis.readFloat()
+            row._newtonianConstant = eis.readDouble()
 
     @staticmethod
     def gravityFromBin(row, eis):
@@ -747,7 +774,7 @@ class DelayModelFixedParametersRow:
         row._gravityExists = eis.readBool()
         if row._gravityExists:
 
-            row._gravity = eis.readFloat()
+            row._gravity = eis.readDouble()
 
     @staticmethod
     def earthFlatteningFromBin(row, eis):
@@ -757,7 +784,7 @@ class DelayModelFixedParametersRow:
         row._earthFlatteningExists = eis.readBool()
         if row._earthFlatteningExists:
 
-            row._earthFlattening = eis.readFloat()
+            row._earthFlattening = eis.readDouble()
 
     @staticmethod
     def earthRadiusFromBin(row, eis):
@@ -777,7 +804,7 @@ class DelayModelFixedParametersRow:
         row._moonEarthMassRatioExists = eis.readBool()
         if row._moonEarthMassRatioExists:
 
-            row._moonEarthMassRatio = eis.readFloat()
+            row._moonEarthMassRatio = eis.readDouble()
 
     @staticmethod
     def ephemerisEpochFromBin(row, eis):
@@ -797,7 +824,7 @@ class DelayModelFixedParametersRow:
         row._earthTideLagExists = eis.readBool()
         if row._earthTideLagExists:
 
-            row._earthTideLag = eis.readFloat()
+            row._earthTideLag = eis.readDouble()
 
     @staticmethod
     def earthGMFromBin(row, eis):
@@ -807,7 +834,7 @@ class DelayModelFixedParametersRow:
         row._earthGMExists = eis.readBool()
         if row._earthGMExists:
 
-            row._earthGM = eis.readFloat()
+            row._earthGM = eis.readDouble()
 
     @staticmethod
     def moonGMFromBin(row, eis):
@@ -817,7 +844,7 @@ class DelayModelFixedParametersRow:
         row._moonGMExists = eis.readBool()
         if row._moonGMExists:
 
-            row._moonGM = eis.readFloat()
+            row._moonGM = eis.readDouble()
 
     @staticmethod
     def sunGMFromBin(row, eis):
@@ -827,7 +854,7 @@ class DelayModelFixedParametersRow:
         row._sunGMExists = eis.readBool()
         if row._sunGMExists:
 
-            row._sunGM = eis.readFloat()
+            row._sunGM = eis.readDouble()
 
     @staticmethod
     def loveNumberHFromBin(row, eis):
@@ -837,7 +864,7 @@ class DelayModelFixedParametersRow:
         row._loveNumberHExists = eis.readBool()
         if row._loveNumberHExists:
 
-            row._loveNumberH = eis.readFloat()
+            row._loveNumberH = eis.readDouble()
 
     @staticmethod
     def loveNumberLFromBin(row, eis):
@@ -847,7 +874,7 @@ class DelayModelFixedParametersRow:
         row._loveNumberLExists = eis.readBool()
         if row._loveNumberLExists:
 
-            row._loveNumberL = eis.readFloat()
+            row._loveNumberL = eis.readDouble()
 
     @staticmethod
     def precessionConstantFromBin(row, eis):
@@ -867,7 +894,7 @@ class DelayModelFixedParametersRow:
         row._lightTime1AUExists = eis.readBool()
         if row._lightTime1AUExists:
 
-            row._lightTime1AU = eis.readFloat()
+            row._lightTime1AU = eis.readDouble()
 
     @staticmethod
     def speedOfLightFromBin(row, eis):
@@ -986,6 +1013,7 @@ class DelayModelFixedParametersRow:
         """
         Set delayModelFixedParametersId with the specified Tag value.
         delayModelFixedParametersId The Tag value to which delayModelFixedParametersId is to be set.
+
         The value of delayModelFixedParametersId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1015,6 +1043,7 @@ class DelayModelFixedParametersRow:
         """
         Set delayModelVersion with the specified str value.
         delayModelVersion The str value to which delayModelVersion is to be set.
+
 
 
         """
@@ -1052,6 +1081,7 @@ class DelayModelFixedParametersRow:
         """
         Set gaussConstant with the specified AngularRate value.
         gaussConstant The AngularRate value to which gaussConstant is to be set.
+
         The value of gaussConstant can be anything allowed by the AngularRate constructor.
 
         """
@@ -1097,6 +1127,9 @@ class DelayModelFixedParametersRow:
         Set newtonianConstant with the specified float value.
         newtonianConstant The float value to which newtonianConstant is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1140,6 +1173,9 @@ class DelayModelFixedParametersRow:
         """
         Set gravity with the specified float value.
         gravity The float value to which gravity is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1185,6 +1221,9 @@ class DelayModelFixedParametersRow:
         Set earthFlattening with the specified float value.
         earthFlattening The float value to which earthFlattening is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1229,6 +1268,7 @@ class DelayModelFixedParametersRow:
         """
         Set earthRadius with the specified Length value.
         earthRadius The Length value to which earthRadius is to be set.
+
         The value of earthRadius can be anything allowed by the Length constructor.
 
         """
@@ -1273,6 +1313,9 @@ class DelayModelFixedParametersRow:
         """
         Set moonEarthMassRatio with the specified float value.
         moonEarthMassRatio The float value to which moonEarthMassRatio is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1319,6 +1362,7 @@ class DelayModelFixedParametersRow:
         ephemerisEpoch The str value to which ephemerisEpoch is to be set.
 
 
+
         """
 
         self._ephemerisEpoch = str(ephemerisEpoch)
@@ -1361,6 +1405,9 @@ class DelayModelFixedParametersRow:
         """
         Set earthTideLag with the specified float value.
         earthTideLag The float value to which earthTideLag is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1406,6 +1453,9 @@ class DelayModelFixedParametersRow:
         Set earthGM with the specified float value.
         earthGM The float value to which earthGM is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1449,6 +1499,9 @@ class DelayModelFixedParametersRow:
         """
         Set moonGM with the specified float value.
         moonGM The float value to which moonGM is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1494,6 +1547,9 @@ class DelayModelFixedParametersRow:
         Set sunGM with the specified float value.
         sunGM The float value to which sunGM is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1537,6 +1593,9 @@ class DelayModelFixedParametersRow:
         """
         Set loveNumberH with the specified float value.
         loveNumberH The float value to which loveNumberH is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1582,6 +1641,9 @@ class DelayModelFixedParametersRow:
         Set loveNumberL with the specified float value.
         loveNumberL The float value to which loveNumberL is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1626,6 +1688,7 @@ class DelayModelFixedParametersRow:
         """
         Set precessionConstant with the specified AngularRate value.
         precessionConstant The AngularRate value to which precessionConstant is to be set.
+
         The value of precessionConstant can be anything allowed by the AngularRate constructor.
 
         """
@@ -1671,6 +1734,9 @@ class DelayModelFixedParametersRow:
         Set lightTime1AU with the specified float value.
         lightTime1AU The float value to which lightTime1AU is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1715,6 +1781,7 @@ class DelayModelFixedParametersRow:
         """
         Set speedOfLight with the specified Speed value.
         speedOfLight The Speed value to which speedOfLight is to be set.
+
         The value of speedOfLight can be anything allowed by the Speed constructor.
 
         """
@@ -1761,6 +1828,7 @@ class DelayModelFixedParametersRow:
         delayModelFlags The str value to which delayModelFlags is to be set.
 
 
+
         """
 
         self._delayModelFlags = str(delayModelFlags)
@@ -1792,6 +1860,7 @@ class DelayModelFixedParametersRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         """

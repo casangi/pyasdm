@@ -105,7 +105,7 @@ class PointingModelRow:
 
         self._coeffName = []  # this is a list of str []
 
-        self._coeffVal = []  # this is a list of float []
+        self._coeffVal = []  # this is a list of float []  saved as single precision
 
         self._polarizationType = PolarizationType.from_int(0)
 
@@ -181,41 +181,60 @@ class PointingModelRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("pointingModelId", self._pointingModelId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numCoeff", self._numCoeff)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("coeffName", self._coeffName)
 
-        result += Parser.listValueToXML("coeffVal", self._coeffVal)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("coeffVal", self._coeffVal)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "polarizationType", PolarizationType.name(self._polarizationType)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("assocNature", self._assocNature)
 
         if self._coeffFormulaExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("coeffFormula", self._coeffFormula)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("assocPointingModelId", self._assocPointingModelId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -509,6 +528,7 @@ class PointingModelRow:
         pointingModelId The int value to which pointingModelId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -538,6 +558,7 @@ class PointingModelRow:
         numCoeff The int value to which numCoeff is to be set.
 
 
+
         """
 
         self._numCoeff = int(numCoeff)
@@ -558,6 +579,7 @@ class PointingModelRow:
         """
         Set coeffName with the specified str []  value.
         coeffName The str []  value to which coeffName is to be set.
+
 
 
         """
@@ -601,6 +623,9 @@ class PointingModelRow:
         """
         Set coeffVal with the specified float []  value.
         coeffVal The float []  value to which coeffVal is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -646,6 +671,7 @@ class PointingModelRow:
         polarizationType The PolarizationType value to which polarizationType is to be set.
 
 
+
         """
 
         self._polarizationType = PolarizationType(polarizationType)
@@ -668,6 +694,7 @@ class PointingModelRow:
         receiverBand The ReceiverBand value to which receiverBand is to be set.
 
 
+
         """
 
         self._receiverBand = ReceiverBand(receiverBand)
@@ -688,6 +715,7 @@ class PointingModelRow:
         """
         Set assocNature with the specified str value.
         assocNature The str value to which assocNature is to be set.
+
 
 
         """
@@ -724,6 +752,7 @@ class PointingModelRow:
         """
         Set coeffFormula with the specified str []  value.
         coeffFormula The str []  value to which coeffFormula is to be set.
+
 
 
         """
@@ -778,6 +807,7 @@ class PointingModelRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -807,6 +837,7 @@ class PointingModelRow:
         """
         Set assocPointingModelId with the specified int value.
         assocPointingModelId The int value to which assocPointingModelId is to be set.
+
 
 
         """

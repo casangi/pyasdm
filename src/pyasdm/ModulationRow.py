@@ -168,39 +168,55 @@ class ModulationRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("receiverId", self._receiverId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "localOscillatorOffset", self._localOscillatorOffset
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("walsh180enabled", self._walsh180enabled)
+
+        result += "\n   "
 
         result += Parser.valueToXML("walsh90enabled", self._walsh90enabled)
 
         if self._walsh180indexExists:
+            result += "\n   "
 
             result += Parser.valueToXML("walsh180index", self._walsh180index)
 
         if self._walsh90indexExists:
+            result += "\n   "
 
             result += Parser.valueToXML("walsh90index", self._walsh90index)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -449,6 +465,7 @@ class ModulationRow:
         receiverId The int value to which receiverId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -477,6 +494,7 @@ class ModulationRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -507,6 +525,7 @@ class ModulationRow:
         """
         Set localOscillatorOffset with the specified Frequency value.
         localOscillatorOffset The Frequency value to which localOscillatorOffset is to be set.
+
         The value of localOscillatorOffset can be anything allowed by the Frequency constructor.
 
         """
@@ -531,6 +550,7 @@ class ModulationRow:
         walsh180enabled The bool value to which walsh180enabled is to be set.
 
 
+
         """
 
         self._walsh180enabled = bool(walsh180enabled)
@@ -551,6 +571,7 @@ class ModulationRow:
         """
         Set walsh90enabled with the specified bool value.
         walsh90enabled The bool value to which walsh90enabled is to be set.
+
 
 
         """
@@ -587,6 +608,7 @@ class ModulationRow:
         """
         Set walsh180index with the specified int value.
         walsh180index The int value to which walsh180index is to be set.
+
 
 
         """
@@ -633,6 +655,7 @@ class ModulationRow:
         walsh90index The int value to which walsh90index is to be set.
 
 
+
         """
 
         self._walsh90index = int(walsh90index)
@@ -664,6 +687,7 @@ class ModulationRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -694,6 +718,7 @@ class ModulationRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

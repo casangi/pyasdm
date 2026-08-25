@@ -553,15 +553,14 @@ class CorrelatorModeTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<CorrelatorModeTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cormod="http://Alma/XASDM/CorrelatorModeTable" xsi:schemaLocation="http://Alma/XASDM/CorrelatorModeTable http://almaobservatory.org/XML/XASDM/4/CorrelatorModeTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<CorrelatorModeTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cormod="http://Alma/XASDM/CorrelatorModeTable" xsi:schemaLocation="http://Alma/XASDM/CorrelatorModeTable http://almaobservatory.org/XML/XASDM/4/CorrelatorModeTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</CorrelatorModeTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</CorrelatorModeTable>"
         return result
 
     def fromXML(self, xmlstr):

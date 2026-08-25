@@ -123,9 +123,13 @@ class CalAmpliRow:
 
         self._frequencyRange = []  # this is a list of Frequency []
 
-        self._apertureEfficiency = []  # this is a list of float []
+        self._apertureEfficiency = (
+            []
+        )  # this is a list of float []  saved as single precision
 
-        self._apertureEfficiencyError = []  # this is a list of float []
+        self._apertureEfficiencyError = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._correctionValidityExists = False
 
@@ -208,55 +212,84 @@ class CalAmpliRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
-        result += Parser.listValueToXML("apertureEfficiency", self._apertureEfficiency)
+        result += "\n   "
 
-        result += Parser.listValueToXML(
+        result += Parser.floatListValueToXML(
+            "apertureEfficiency", self._apertureEfficiency
+        )
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML(
             "apertureEfficiencyError", self._apertureEfficiencyError
         )
 
         if self._correctionValidityExists:
+            result += "\n   "
 
             result += Parser.valueToXML("correctionValidity", self._correctionValidity)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -617,6 +650,7 @@ class CalAmpliRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -644,6 +678,7 @@ class CalAmpliRow:
         """
         Set atmPhaseCorrection with the specified AtmPhaseCorrection value.
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -675,6 +710,7 @@ class CalAmpliRow:
         receiverBand The ReceiverBand value to which receiverBand is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -702,6 +738,7 @@ class CalAmpliRow:
         """
         Set basebandName with the specified BasebandName value.
         basebandName The BasebandName value to which basebandName is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -733,6 +770,7 @@ class CalAmpliRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -753,6 +791,7 @@ class CalAmpliRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -797,6 +836,7 @@ class CalAmpliRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -820,6 +860,7 @@ class CalAmpliRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -842,6 +883,7 @@ class CalAmpliRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -886,6 +928,9 @@ class CalAmpliRow:
         Set apertureEfficiency with the specified float []  value.
         apertureEfficiency The float []  value to which apertureEfficiency is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -928,6 +973,9 @@ class CalAmpliRow:
         """
         Set apertureEfficiencyError with the specified float []  value.
         apertureEfficiencyError The float []  value to which apertureEfficiencyError is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -987,6 +1035,7 @@ class CalAmpliRow:
         correctionValidity The bool value to which correctionValidity is to be set.
 
 
+
         """
 
         self._correctionValidity = bool(correctionValidity)
@@ -1018,6 +1067,7 @@ class CalAmpliRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1048,6 +1098,7 @@ class CalAmpliRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

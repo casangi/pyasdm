@@ -109,7 +109,7 @@ class PulsarRow:
 
         self._phasePolyExists = False
 
-        self._phasePoly = []  # this is a list of float []
+        self._phasePoly = []  # this is a list of float []  saved as double precision
 
         self._timeSpanExists = False
 
@@ -117,11 +117,13 @@ class PulsarRow:
 
         self._startPhaseBinExists = False
 
-        self._startPhaseBin = []  # this is a list of float []
+        self._startPhaseBin = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._endPhaseBinExists = False
 
-        self._endPhaseBin = []  # this is a list of float []
+        self._endPhaseBin = []  # this is a list of float []  saved as single precision
 
         self._dispersionMeasureExists = False
 
@@ -221,51 +223,70 @@ class PulsarRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("pulsarId", self._pulsarId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("refTime", self._refTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("refPulseFreq", self._refPulseFreq)
 
-        result += Parser.valueToXML("refPhase", self._refPhase)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("refPhase", self._refPhase)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numBin", self._numBin)
 
         if self._numPolyExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numPoly", self._numPoly)
 
         if self._phasePolyExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("phasePoly", self._phasePoly)
+            result += Parser.doubleListValueToXML("phasePoly", self._phasePoly)
 
         if self._timeSpanExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("timeSpan", self._timeSpan)
 
         if self._startPhaseBinExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("startPhaseBin", self._startPhaseBin)
+            result += Parser.floatListValueToXML("startPhaseBin", self._startPhaseBin)
 
         if self._endPhaseBinExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("endPhaseBin", self._endPhaseBin)
+            result += Parser.floatListValueToXML("endPhaseBin", self._endPhaseBin)
 
         if self._dispersionMeasureExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("dispersionMeasure", self._dispersionMeasure)
+            result += Parser.doubleValueToXML(
+                "dispersionMeasure", self._dispersionMeasure
+            )
 
         if self._refFrequencyExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("refFrequency", self._refFrequency)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -390,7 +411,7 @@ class PulsarRow:
 
         self._refPulseFreq.toBin(eos)
 
-        eos.writeFloat(self._refPhase)
+        eos.writeDouble(self._refPhase)
 
         eos.writeInt(self._numBin)
 
@@ -405,7 +426,7 @@ class PulsarRow:
             eos.writeInt(len(self._phasePoly))
             for i in range(len(self._phasePoly)):
 
-                eos.writeFloat(self._phasePoly[i])
+                eos.writeDouble(self._phasePoly[i])
 
         eos.writeBool(self._timeSpanExists)
         if self._timeSpanExists:
@@ -431,7 +452,7 @@ class PulsarRow:
         eos.writeBool(self._dispersionMeasureExists)
         if self._dispersionMeasureExists:
 
-            eos.writeFloat(self._dispersionMeasure)
+            eos.writeDouble(self._dispersionMeasure)
 
         eos.writeBool(self._refFrequencyExists)
         if self._refFrequencyExists:
@@ -468,7 +489,7 @@ class PulsarRow:
         Set the refPhase in row from the EndianInput (eis) instance.
         """
 
-        row._refPhase = eis.readFloat()
+        row._refPhase = eis.readDouble()
 
     @staticmethod
     def numBinFromBin(row, eis):
@@ -499,7 +520,7 @@ class PulsarRow:
             phasePolyDim1 = eis.readInt()
             thisList = []
             for i in range(phasePolyDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._phasePoly = thisList
 
@@ -551,7 +572,7 @@ class PulsarRow:
         row._dispersionMeasureExists = eis.readBool()
         if row._dispersionMeasureExists:
 
-            row._dispersionMeasure = eis.readFloat()
+            row._dispersionMeasure = eis.readDouble()
 
     @staticmethod
     def refFrequencyFromBin(row, eis):
@@ -628,6 +649,7 @@ class PulsarRow:
         """
         Set pulsarId with the specified Tag value.
         pulsarId The Tag value to which pulsarId is to be set.
+
         The value of pulsarId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -658,6 +680,7 @@ class PulsarRow:
         """
         Set refTime with the specified ArrayTime value.
         refTime The ArrayTime value to which refTime is to be set.
+
         The value of refTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -681,6 +704,7 @@ class PulsarRow:
         """
         Set refPulseFreq with the specified Frequency value.
         refPulseFreq The Frequency value to which refPulseFreq is to be set.
+
         The value of refPulseFreq can be anything allowed by the Frequency constructor.
 
         """
@@ -704,6 +728,9 @@ class PulsarRow:
         Set refPhase with the specified float value.
         refPhase The float value to which refPhase is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -725,6 +752,7 @@ class PulsarRow:
         """
         Set numBin with the specified int value.
         numBin The int value to which numBin is to be set.
+
 
 
         """
@@ -761,6 +789,7 @@ class PulsarRow:
         """
         Set numPoly with the specified int value.
         numPoly The int value to which numPoly is to be set.
+
 
 
         """
@@ -805,6 +834,9 @@ class PulsarRow:
         """
         Set phasePoly with the specified float []  value.
         phasePoly The float []  value to which phasePoly is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -871,6 +903,7 @@ class PulsarRow:
         """
         Set timeSpan with the specified Interval value.
         timeSpan The Interval value to which timeSpan is to be set.
+
         The value of timeSpan can be anything allowed by the Interval constructor.
 
         """
@@ -915,6 +948,9 @@ class PulsarRow:
         """
         Set startPhaseBin with the specified float []  value.
         startPhaseBin The float []  value to which startPhaseBin is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -981,6 +1017,9 @@ class PulsarRow:
         Set endPhaseBin with the specified float []  value.
         endPhaseBin The float []  value to which endPhaseBin is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1046,6 +1085,9 @@ class PulsarRow:
         Set dispersionMeasure with the specified float value.
         dispersionMeasure The float value to which dispersionMeasure is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1090,6 +1132,7 @@ class PulsarRow:
         """
         Set refFrequency with the specified Frequency value.
         refFrequency The Frequency value to which refFrequency is to be set.
+
         The value of refFrequency can be anything allowed by the Frequency constructor.
 
         """

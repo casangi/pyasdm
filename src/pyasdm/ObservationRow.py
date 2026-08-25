@@ -118,15 +118,17 @@ class ObservationRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("observationId", self._observationId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -227,6 +229,7 @@ class ObservationRow:
         """
         Set observationId with the specified Tag value.
         observationId The Tag value to which observationId is to be set.
+
         The value of observationId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

@@ -100,7 +100,7 @@ class GainTrackingRow:
 
         self._numReceptor = 0
 
-        self._attenuator = []  # this is a list of float []
+        self._attenuator = []  # this is a list of float []  saved as single precision
 
         self._polarizationType = []  # this is a list of PolarizationType []
 
@@ -114,7 +114,7 @@ class GainTrackingRow:
 
         self._attFreqExists = False
 
-        self._attFreq = []  # this is a list of float []
+        self._attFreq = []  # this is a list of float []  saved as double precision
 
         self._attSpectrumExists = False
 
@@ -199,45 +199,63 @@ class GainTrackingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
-        result += Parser.listValueToXML("attenuator", self._attenuator)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("attenuator", self._attenuator)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("polarizationType", self._polarizationType)
 
         if self._samplingLevelExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("samplingLevel", self._samplingLevel)
+            result += Parser.floatValueToXML("samplingLevel", self._samplingLevel)
 
         if self._numAttFreqExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAttFreq", self._numAttFreq)
 
         if self._attFreqExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("attFreq", self._attFreq)
+            result += Parser.doubleListValueToXML("attFreq", self._attFreq)
 
         if self._attSpectrumExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("attSpectrum", self._attSpectrum)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("feedId", self._feedId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -382,7 +400,7 @@ class GainTrackingRow:
             eos.writeInt(len(self._attFreq))
             for i in range(len(self._attFreq)):
 
-                eos.writeFloat(self._attFreq[i])
+                eos.writeDouble(self._attFreq[i])
 
         eos.writeBool(self._attSpectrumExists)
         if self._attSpectrumExists:
@@ -486,7 +504,7 @@ class GainTrackingRow:
             attFreqDim1 = eis.readInt()
             thisList = []
             for i in range(attFreqDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._attFreq = thisList
 
@@ -564,6 +582,7 @@ class GainTrackingRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -595,6 +614,7 @@ class GainTrackingRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -615,6 +635,9 @@ class GainTrackingRow:
         """
         Set attenuator with the specified float []  value.
         attenuator The float []  value to which attenuator is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -658,6 +681,7 @@ class GainTrackingRow:
         """
         Set polarizationType with the specified PolarizationType []  value.
         polarizationType The PolarizationType []  value to which polarizationType is to be set.
+
 
 
         """
@@ -716,6 +740,9 @@ class GainTrackingRow:
         Set samplingLevel with the specified float value.
         samplingLevel The float value to which samplingLevel is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -761,6 +788,7 @@ class GainTrackingRow:
         numAttFreq The int value to which numAttFreq is to be set.
 
 
+
         """
 
         self._numAttFreq = int(numAttFreq)
@@ -803,6 +831,9 @@ class GainTrackingRow:
         """
         Set attFreq with the specified float []  value.
         attFreq The float []  value to which attFreq is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -868,6 +899,7 @@ class GainTrackingRow:
         """
         Set attSpectrum with the specified Complex []  value.
         attSpectrum The Complex []  value to which attSpectrum is to be set.
+
         The value of attSpectrum can be anything allowed by the Complex []  constructor.
 
         """
@@ -922,6 +954,7 @@ class GainTrackingRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -953,6 +986,7 @@ class GainTrackingRow:
         feedId The int value to which feedId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -981,6 +1015,7 @@ class GainTrackingRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

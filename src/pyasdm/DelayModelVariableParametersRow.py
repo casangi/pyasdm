@@ -113,7 +113,7 @@ class DelayModelVariableParametersRow:
 
         self._earthRotationRate = AngularRate()
 
-        self._polarOffsets = []  # this is a list of float []
+        self._polarOffsets = []  # this is a list of float []  saved as double precision
 
         self._polarOffsetsType = DifferenceType.from_int(0)
 
@@ -237,63 +237,88 @@ class DelayModelVariableParametersRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "delayModelVariableParametersId", self._delayModelVariableParametersId
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("time", self._time)
 
-        result += Parser.valueToXML("ut1_utc", self._ut1_utc)
+        result += "\n   "
 
-        result += Parser.valueToXML("iat_utc", self._iat_utc)
+        result += Parser.doubleValueToXML("ut1_utc", self._ut1_utc)
+
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("iat_utc", self._iat_utc)
+
+        result += "\n   "
 
         result += Parser.valueToXML("timeType", DifferenceType.name(self._timeType))
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("gstAtUt0", self._gstAtUt0)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "earthRotationRate", self._earthRotationRate
         )
 
-        result += Parser.listValueToXML("polarOffsets", self._polarOffsets)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("polarOffsets", self._polarOffsets)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "polarOffsetsType", DifferenceType.name(self._polarOffsetsType)
         )
 
         if self._nutationInLongitudeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "nutationInLongitude", self._nutationInLongitude
             )
 
         if self._nutationInLongitudeRateExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "nutationInLongitudeRate", self._nutationInLongitudeRate
             )
 
         if self._nutationInObliquityExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "nutationInObliquity", self._nutationInObliquity
             )
 
         if self._nutationInObliquityRateExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "nutationInObliquityRate", self._nutationInObliquityRate
             )
 
         if self._delayModelVersionExists:
+            result += "\n   "
 
             result += Parser.valueToXML("delayModelVersion", self._delayModelVersion)
 
         # extrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "delayModelFixedParametersId", self._delayModelFixedParametersId
@@ -301,7 +326,7 @@ class DelayModelVariableParametersRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -451,9 +476,9 @@ class DelayModelVariableParametersRow:
 
         self._time.toBin(eos)
 
-        eos.writeFloat(self._ut1_utc)
+        eos.writeDouble(self._ut1_utc)
 
-        eos.writeFloat(self._iat_utc)
+        eos.writeDouble(self._iat_utc)
 
         eos.writeString(str(self._timeType))
 
@@ -464,7 +489,7 @@ class DelayModelVariableParametersRow:
         eos.writeInt(len(self._polarOffsets))
         for i in range(len(self._polarOffsets)):
 
-            eos.writeFloat(self._polarOffsets[i])
+            eos.writeDouble(self._polarOffsets[i])
 
         eos.writeString(str(self._polarOffsetsType))
 
@@ -517,7 +542,7 @@ class DelayModelVariableParametersRow:
         Set the ut1_utc in row from the EndianInput (eis) instance.
         """
 
-        row._ut1_utc = eis.readFloat()
+        row._ut1_utc = eis.readDouble()
 
     @staticmethod
     def iat_utcFromBin(row, eis):
@@ -525,7 +550,7 @@ class DelayModelVariableParametersRow:
         Set the iat_utc in row from the EndianInput (eis) instance.
         """
 
-        row._iat_utc = eis.readFloat()
+        row._iat_utc = eis.readDouble()
 
     @staticmethod
     def timeTypeFromBin(row, eis):
@@ -560,7 +585,7 @@ class DelayModelVariableParametersRow:
         polarOffsetsDim1 = eis.readInt()
         thisList = []
         for i in range(polarOffsetsDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._polarOffsets = thisList
 
@@ -718,6 +743,7 @@ class DelayModelVariableParametersRow:
         """
         Set delayModelVariableParametersId with the specified Tag value.
         delayModelVariableParametersId The Tag value to which delayModelVariableParametersId is to be set.
+
         The value of delayModelVariableParametersId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -748,6 +774,7 @@ class DelayModelVariableParametersRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """
@@ -771,6 +798,9 @@ class DelayModelVariableParametersRow:
         Set ut1_utc with the specified float value.
         ut1_utc The float value to which ut1_utc is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -792,6 +822,9 @@ class DelayModelVariableParametersRow:
         """
         Set iat_utc with the specified float value.
         iat_utc The float value to which iat_utc is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -816,6 +849,7 @@ class DelayModelVariableParametersRow:
         timeType The DifferenceType value to which timeType is to be set.
 
 
+
         """
 
         self._timeType = DifferenceType(timeType)
@@ -837,6 +871,7 @@ class DelayModelVariableParametersRow:
         """
         Set gstAtUt0 with the specified Angle value.
         gstAtUt0 The Angle value to which gstAtUt0 is to be set.
+
         The value of gstAtUt0 can be anything allowed by the Angle constructor.
 
         """
@@ -860,6 +895,7 @@ class DelayModelVariableParametersRow:
         """
         Set earthRotationRate with the specified AngularRate value.
         earthRotationRate The AngularRate value to which earthRotationRate is to be set.
+
         The value of earthRotationRate can be anything allowed by the AngularRate constructor.
 
         """
@@ -882,6 +918,9 @@ class DelayModelVariableParametersRow:
         """
         Set polarOffsets with the specified float []  value.
         polarOffsets The float []  value to which polarOffsets is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -927,6 +966,7 @@ class DelayModelVariableParametersRow:
         polarOffsetsType The DifferenceType value to which polarOffsetsType is to be set.
 
 
+
         """
 
         self._polarOffsetsType = DifferenceType(polarOffsetsType)
@@ -962,6 +1002,7 @@ class DelayModelVariableParametersRow:
         """
         Set nutationInLongitude with the specified Angle value.
         nutationInLongitude The Angle value to which nutationInLongitude is to be set.
+
         The value of nutationInLongitude can be anything allowed by the Angle constructor.
 
         """
@@ -1007,6 +1048,7 @@ class DelayModelVariableParametersRow:
         """
         Set nutationInLongitudeRate with the specified AngularRate value.
         nutationInLongitudeRate The AngularRate value to which nutationInLongitudeRate is to be set.
+
         The value of nutationInLongitudeRate can be anything allowed by the AngularRate constructor.
 
         """
@@ -1052,6 +1094,7 @@ class DelayModelVariableParametersRow:
         """
         Set nutationInObliquity with the specified Angle value.
         nutationInObliquity The Angle value to which nutationInObliquity is to be set.
+
         The value of nutationInObliquity can be anything allowed by the Angle constructor.
 
         """
@@ -1097,6 +1140,7 @@ class DelayModelVariableParametersRow:
         """
         Set nutationInObliquityRate with the specified AngularRate value.
         nutationInObliquityRate The AngularRate value to which nutationInObliquityRate is to be set.
+
         The value of nutationInObliquityRate can be anything allowed by the AngularRate constructor.
 
         """
@@ -1143,6 +1187,7 @@ class DelayModelVariableParametersRow:
         delayModelVersion The str value to which delayModelVersion is to be set.
 
 
+
         """
 
         self._delayModelVersion = str(delayModelVersion)
@@ -1174,6 +1219,7 @@ class DelayModelVariableParametersRow:
         """
         Set delayModelFixedParametersId with the specified Tag value.
         delayModelFixedParametersId The Tag value to which delayModelFixedParametersId is to be set.
+
         The value of delayModelFixedParametersId can be anything allowed by the Tag constructor.
 
         """

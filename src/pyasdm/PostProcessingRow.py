@@ -226,31 +226,40 @@ class PostProcessingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("postProcessingId", self._postProcessingId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("intent", PostProcessingIntent.name(self._intent))
 
         if self._descriptionExists:
+            result += "\n   "
 
             result += Parser.valueToXML("description", self._description)
 
         if self._numSpectralWindowExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numSpectralWindow", self._numSpectralWindow)
 
         if self._numScanExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numScan", self._numScan)
 
         if self._scanNumberExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("scanNumber", self._scanNumber)
 
         if self._calibrationStrategyExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "calibrationStrategy", self._calibrationStrategy
@@ -259,10 +268,12 @@ class PostProcessingRow:
         # extrinsic attributes
 
         if self._execBlockIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("execBlockId", self._execBlockId)
 
         if self._spectralWindowIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "spectralWindowId", self._spectralWindowId
@@ -270,7 +281,7 @@ class PostProcessingRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -582,6 +593,7 @@ class PostProcessingRow:
         """
         Set postProcessingId with the specified Tag value.
         postProcessingId The Tag value to which postProcessingId is to be set.
+
         The value of postProcessingId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -611,6 +623,7 @@ class PostProcessingRow:
         """
         Set intent with the specified PostProcessingIntent value.
         intent The PostProcessingIntent value to which intent is to be set.
+
 
 
         """
@@ -647,6 +660,7 @@ class PostProcessingRow:
         """
         Set description with the specified str value.
         description The str value to which description is to be set.
+
 
 
         """
@@ -693,6 +707,7 @@ class PostProcessingRow:
         numSpectralWindow The int value to which numSpectralWindow is to be set.
 
 
+
         """
 
         self._numSpectralWindow = int(numSpectralWindow)
@@ -737,6 +752,7 @@ class PostProcessingRow:
         numScan The int value to which numScan is to be set.
 
 
+
         """
 
         self._numScan = int(numScan)
@@ -779,6 +795,7 @@ class PostProcessingRow:
         """
         Set scanNumber with the specified int []  value.
         scanNumber The int []  value to which scanNumber is to be set.
+
 
 
         """
@@ -846,6 +863,7 @@ class PostProcessingRow:
         calibrationStrategy The str value to which calibrationStrategy is to be set.
 
 
+
         """
 
         self._calibrationStrategy = str(calibrationStrategy)
@@ -890,6 +908,7 @@ class PostProcessingRow:
         """
         Set execBlockId with the specified Tag []  value.
         execBlockId The Tag []  value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag []  constructor.
 
         """
@@ -955,6 +974,7 @@ class PostProcessingRow:
         """
         Set spectralWindowId with the specified Tag []  value.
         spectralWindowId The Tag []  value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag []  constructor.
 
         """

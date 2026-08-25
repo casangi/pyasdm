@@ -549,149 +549,188 @@ class SourceRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("sourceId", self._sourceId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
+        result += "\n   "
+
         result += Parser.valueToXML("code", self._code)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("direction", self._direction)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("properMotion", self._properMotion)
+
+        result += "\n   "
 
         result += Parser.valueToXML("sourceName", self._sourceName)
 
         if self._directionCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "directionCode", DirectionReferenceCode.name(self._directionCode)
             )
 
         if self._directionEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "directionEquinox", self._directionEquinox
             )
 
         if self._calibrationGroupExists:
+            result += "\n   "
 
             result += Parser.valueToXML("calibrationGroup", self._calibrationGroup)
 
         if self._catalogExists:
+            result += "\n   "
 
             result += Parser.valueToXML("catalog", self._catalog)
 
         if self._deltaVelExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("deltaVel", self._deltaVel)
 
         if self._positionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("position", self._position)
 
         if self._numLinesExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numLines", self._numLines)
 
         if self._transitionExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("transition", self._transition)
 
         if self._restFrequencyExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "restFrequency", self._restFrequency
             )
 
         if self._sysVelExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("sysVel", self._sysVel)
 
         if self._rangeVelExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("rangeVel", self._rangeVel)
 
         if self._sourceModelExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "sourceModel", SourceModel.name(self._sourceModel)
             )
 
         if self._frequencyRefCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "frequencyRefCode", FrequencyReferenceCode.name(self._frequencyRefCode)
             )
 
         if self._numFreqExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numFreq", self._numFreq)
 
         if self._numStokesExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numStokes", self._numStokes)
 
         if self._frequencyExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("frequency", self._frequency)
 
         if self._frequencyIntervalExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "frequencyInterval", self._frequencyInterval
             )
 
         if self._stokesParameterExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML(
                 "stokesParameter", self._stokesParameter
             )
 
         if self._fluxExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("flux", self._flux)
 
         if self._fluxErrExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("fluxErr", self._fluxErr)
 
         if self._positionAngleExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "positionAngle", self._positionAngle
             )
 
         if self._positionAngleErrExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "positionAngleErr", self._positionAngleErr
             )
 
         if self._sizeExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("size", self._size)
 
         if self._sizeErrExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("sizeErr", self._sizeErr)
 
         if self._velRefCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "velRefCode", RadialVelocityReferenceCode.name(self._velRefCode)
             )
 
         if self._dopplerVelocityExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "dopplerVelocity", self._dopplerVelocity
             )
 
         if self._dopplerReferenceSystemExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "dopplerReferenceSystem",
@@ -699,22 +738,26 @@ class SourceRow:
             )
 
         if self._dopplerCalcTypeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "dopplerCalcType", DopplerReferenceCode.name(self._dopplerCalcType)
             )
 
         if self._parallaxExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("parallax", self._parallax)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -1679,6 +1722,7 @@ class SourceRow:
         sourceId The int value to which sourceId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1707,6 +1751,7 @@ class SourceRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1738,6 +1783,7 @@ class SourceRow:
         code The str value to which code is to be set.
 
 
+
         """
 
         self._code = str(code)
@@ -1758,6 +1804,7 @@ class SourceRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1801,6 +1848,7 @@ class SourceRow:
         """
         Set properMotion with the specified AngularRate []  value.
         properMotion The AngularRate []  value to which properMotion is to be set.
+
         The value of properMotion can be anything allowed by the AngularRate []  constructor.
 
         """
@@ -1846,6 +1894,7 @@ class SourceRow:
         sourceName The str value to which sourceName is to be set.
 
 
+
         """
 
         self._sourceName = str(sourceName)
@@ -1880,6 +1929,7 @@ class SourceRow:
         """
         Set directionCode with the specified DirectionReferenceCode value.
         directionCode The DirectionReferenceCode value to which directionCode is to be set.
+
 
 
         """
@@ -1925,6 +1975,7 @@ class SourceRow:
         """
         Set directionEquinox with the specified ArrayTime value.
         directionEquinox The ArrayTime value to which directionEquinox is to be set.
+
         The value of directionEquinox can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1971,6 +2022,7 @@ class SourceRow:
         calibrationGroup The int value to which calibrationGroup is to be set.
 
 
+
         """
 
         self._calibrationGroup = int(calibrationGroup)
@@ -2013,6 +2065,7 @@ class SourceRow:
         """
         Set catalog with the specified str value.
         catalog The str value to which catalog is to be set.
+
 
 
         """
@@ -2058,6 +2111,7 @@ class SourceRow:
         """
         Set deltaVel with the specified Speed value.
         deltaVel The Speed value to which deltaVel is to be set.
+
         The value of deltaVel can be anything allowed by the Speed constructor.
 
         """
@@ -2102,6 +2156,7 @@ class SourceRow:
         """
         Set position with the specified Length []  value.
         position The Length []  value to which position is to be set.
+
         The value of position can be anything allowed by the Length []  constructor.
 
         """
@@ -2169,6 +2224,7 @@ class SourceRow:
         numLines The int value to which numLines is to be set.
 
 
+
         """
 
         self._numLines = int(numLines)
@@ -2211,6 +2267,7 @@ class SourceRow:
         """
         Set transition with the specified str []  value.
         transition The str []  value to which transition is to be set.
+
 
 
         """
@@ -2276,6 +2333,7 @@ class SourceRow:
         """
         Set restFrequency with the specified Frequency []  value.
         restFrequency The Frequency []  value to which restFrequency is to be set.
+
         The value of restFrequency can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2341,6 +2399,7 @@ class SourceRow:
         """
         Set sysVel with the specified Speed []  value.
         sysVel The Speed []  value to which sysVel is to be set.
+
         The value of sysVel can be anything allowed by the Speed []  constructor.
 
         """
@@ -2406,6 +2465,7 @@ class SourceRow:
         """
         Set rangeVel with the specified Speed []  value.
         rangeVel The Speed []  value to which rangeVel is to be set.
+
         The value of rangeVel can be anything allowed by the Speed []  constructor.
 
         """
@@ -2473,6 +2533,7 @@ class SourceRow:
         sourceModel The SourceModel value to which sourceModel is to be set.
 
 
+
         """
 
         self._sourceModel = SourceModel(sourceModel)
@@ -2515,6 +2576,7 @@ class SourceRow:
         """
         Set frequencyRefCode with the specified FrequencyReferenceCode value.
         frequencyRefCode The FrequencyReferenceCode value to which frequencyRefCode is to be set.
+
 
 
         """
@@ -2561,6 +2623,7 @@ class SourceRow:
         numFreq The int value to which numFreq is to be set.
 
 
+
         """
 
         self._numFreq = int(numFreq)
@@ -2605,6 +2668,7 @@ class SourceRow:
         numStokes The int value to which numStokes is to be set.
 
 
+
         """
 
         self._numStokes = int(numStokes)
@@ -2647,6 +2711,7 @@ class SourceRow:
         """
         Set frequency with the specified Frequency []  value.
         frequency The Frequency []  value to which frequency is to be set.
+
         The value of frequency can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2712,6 +2777,7 @@ class SourceRow:
         """
         Set frequencyInterval with the specified Frequency []  value.
         frequencyInterval The Frequency []  value to which frequencyInterval is to be set.
+
         The value of frequencyInterval can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2779,6 +2845,7 @@ class SourceRow:
         stokesParameter The StokesParameter []  value to which stokesParameter is to be set.
 
 
+
         """
 
         # value must be a list
@@ -2842,6 +2909,7 @@ class SourceRow:
         """
         Set flux with the specified Flux []  []  value.
         flux The Flux []  []  value to which flux is to be set.
+
         The value of flux can be anything allowed by the Flux []  []  constructor.
 
         """
@@ -2907,6 +2975,7 @@ class SourceRow:
         """
         Set fluxErr with the specified Flux []  []  value.
         fluxErr The Flux []  []  value to which fluxErr is to be set.
+
         The value of fluxErr can be anything allowed by the Flux []  []  constructor.
 
         """
@@ -2972,6 +3041,7 @@ class SourceRow:
         """
         Set positionAngle with the specified Angle []  value.
         positionAngle The Angle []  value to which positionAngle is to be set.
+
         The value of positionAngle can be anything allowed by the Angle []  constructor.
 
         """
@@ -3037,6 +3107,7 @@ class SourceRow:
         """
         Set positionAngleErr with the specified Angle []  value.
         positionAngleErr The Angle []  value to which positionAngleErr is to be set.
+
         The value of positionAngleErr can be anything allowed by the Angle []  constructor.
 
         """
@@ -3102,6 +3173,7 @@ class SourceRow:
         """
         Set size with the specified Angle []  []  value.
         size The Angle []  []  value to which size is to be set.
+
         The value of size can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -3167,6 +3239,7 @@ class SourceRow:
         """
         Set sizeErr with the specified Angle []  []  value.
         sizeErr The Angle []  []  value to which sizeErr is to be set.
+
         The value of sizeErr can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -3234,6 +3307,7 @@ class SourceRow:
         velRefCode The RadialVelocityReferenceCode value to which velRefCode is to be set.
 
 
+
         """
 
         self._velRefCode = RadialVelocityReferenceCode(velRefCode)
@@ -3276,6 +3350,7 @@ class SourceRow:
         """
         Set dopplerVelocity with the specified Speed []  value.
         dopplerVelocity The Speed []  value to which dopplerVelocity is to be set.
+
         The value of dopplerVelocity can be anything allowed by the Speed []  constructor.
 
         """
@@ -3343,6 +3418,7 @@ class SourceRow:
         dopplerReferenceSystem The RadialVelocityReferenceCode value to which dopplerReferenceSystem is to be set.
 
 
+
         """
 
         self._dopplerReferenceSystem = RadialVelocityReferenceCode(
@@ -3389,6 +3465,7 @@ class SourceRow:
         dopplerCalcType The DopplerReferenceCode value to which dopplerCalcType is to be set.
 
 
+
         """
 
         self._dopplerCalcType = DopplerReferenceCode(dopplerCalcType)
@@ -3431,6 +3508,7 @@ class SourceRow:
         """
         Set parallax with the specified Angle []  value.
         parallax The Angle []  value to which parallax is to be set.
+
         The value of parallax can be anything allowed by the Angle []  constructor.
 
         """
@@ -3485,6 +3563,7 @@ class SourceRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

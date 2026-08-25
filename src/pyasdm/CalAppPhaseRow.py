@@ -126,7 +126,7 @@ class CalAppPhaseRow:
 
         self._numPhaseValues = 0
 
-        self._phaseValues = []  # this is a list of float []
+        self._phaseValues = []  # this is a list of float []  saved as single precision
 
         self._numCompare = 0
 
@@ -136,9 +136,11 @@ class CalAppPhaseRow:
 
         self._efficiencyIndices = []  # this is a list of int []
 
-        self._efficiencies = []  # this is a list of float []  []
+        self._efficiencies = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
-        self._quality = []  # this is a list of float []
+        self._quality = []  # this is a list of float []  saved as single precision
 
         self._phasedSumAntenna = None
 
@@ -152,7 +154,9 @@ class CalAppPhaseRow:
 
         self._phaseSupportsExists = False
 
-        self._phaseSupports = []  # this is a list of float []
+        self._phaseSupports = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         # extrinsic attributes
 
@@ -266,79 +270,132 @@ class CalAppPhaseRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("scanNumber", self._scanNumber)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("adjustTime", self._adjustTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("adjustToken", self._adjustToken)
+
+        result += "\n   "
 
         result += Parser.valueToXML("phasingMode", self._phasingMode)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numPhasedAntennas", self._numPhasedAntennas)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("phasedAntennas", self._phasedAntennas)
 
+        result += "\n   "
+
         result += Parser.valueToXML("refAntennaIndex", self._refAntennaIndex)
+
+        result += "\n   "
 
         result += Parser.valueToXML("candRefAntennaIndex", self._candRefAntennaIndex)
 
+        result += "\n   "
+
         result += Parser.valueToXML("phasePacking", self._phasePacking)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptors", self._numReceptors)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numChannels", self._numChannels)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPhaseValues", self._numPhaseValues)
 
-        result += Parser.listValueToXML("phaseValues", self._phaseValues)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("phaseValues", self._phaseValues)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numCompare", self._numCompare)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numEfficiencies", self._numEfficiencies)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("compareArray", self._compareArray)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("efficiencyIndices", self._efficiencyIndices)
 
-        result += Parser.listValueToXML("efficiencies", self._efficiencies)
+        result += "\n   "
 
-        result += Parser.listValueToXML("quality", self._quality)
+        result += Parser.floatListValueToXML("efficiencies", self._efficiencies)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("quality", self._quality)
+
+        result += "\n   "
 
         result += Parser.valueToXML("phasedSumAntenna", self._phasedSumAntenna)
 
         if self._typeSupportsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("typeSupports", self._typeSupports)
 
         if self._numSupportsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numSupports", self._numSupports)
 
         if self._phaseSupportsExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("phaseSupports", self._phaseSupports)
+            result += Parser.floatListValueToXML("phaseSupports", self._phaseSupports)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -974,6 +1031,7 @@ class CalAppPhaseRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1001,6 +1059,7 @@ class CalAppPhaseRow:
         """
         Set scanNumber with the specified int value.
         scanNumber The int value to which scanNumber is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1031,6 +1090,7 @@ class CalAppPhaseRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1054,6 +1114,7 @@ class CalAppPhaseRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1077,6 +1138,7 @@ class CalAppPhaseRow:
         """
         Set adjustTime with the specified ArrayTime value.
         adjustTime The ArrayTime value to which adjustTime is to be set.
+
         The value of adjustTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1101,6 +1163,7 @@ class CalAppPhaseRow:
         adjustToken The str value to which adjustToken is to be set.
 
 
+
         """
 
         self._adjustToken = str(adjustToken)
@@ -1121,6 +1184,7 @@ class CalAppPhaseRow:
         """
         Set phasingMode with the specified str value.
         phasingMode The str value to which phasingMode is to be set.
+
 
 
         """
@@ -1145,6 +1209,7 @@ class CalAppPhaseRow:
         numPhasedAntennas The int value to which numPhasedAntennas is to be set.
 
 
+
         """
 
         self._numPhasedAntennas = int(numPhasedAntennas)
@@ -1165,6 +1230,7 @@ class CalAppPhaseRow:
         """
         Set phasedAntennas with the specified str []  value.
         phasedAntennas The str []  value to which phasedAntennas is to be set.
+
 
 
         """
@@ -1210,6 +1276,7 @@ class CalAppPhaseRow:
         refAntennaIndex The int value to which refAntennaIndex is to be set.
 
 
+
         """
 
         self._refAntennaIndex = int(refAntennaIndex)
@@ -1230,6 +1297,7 @@ class CalAppPhaseRow:
         """
         Set candRefAntennaIndex with the specified int value.
         candRefAntennaIndex The int value to which candRefAntennaIndex is to be set.
+
 
 
         """
@@ -1254,6 +1322,7 @@ class CalAppPhaseRow:
         phasePacking The str value to which phasePacking is to be set.
 
 
+
         """
 
         self._phasePacking = str(phasePacking)
@@ -1274,6 +1343,7 @@ class CalAppPhaseRow:
         """
         Set numReceptors with the specified int value.
         numReceptors The int value to which numReceptors is to be set.
+
 
 
         """
@@ -1298,6 +1368,7 @@ class CalAppPhaseRow:
         numChannels The int value to which numChannels is to be set.
 
 
+
         """
 
         self._numChannels = int(numChannels)
@@ -1320,6 +1391,7 @@ class CalAppPhaseRow:
         numPhaseValues The int value to which numPhaseValues is to be set.
 
 
+
         """
 
         self._numPhaseValues = int(numPhaseValues)
@@ -1340,6 +1412,9 @@ class CalAppPhaseRow:
         """
         Set phaseValues with the specified float []  value.
         phaseValues The float []  value to which phaseValues is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1385,6 +1460,7 @@ class CalAppPhaseRow:
         numCompare The int value to which numCompare is to be set.
 
 
+
         """
 
         self._numCompare = int(numCompare)
@@ -1407,6 +1483,7 @@ class CalAppPhaseRow:
         numEfficiencies The int value to which numEfficiencies is to be set.
 
 
+
         """
 
         self._numEfficiencies = int(numEfficiencies)
@@ -1427,6 +1504,7 @@ class CalAppPhaseRow:
         """
         Set compareArray with the specified str []  value.
         compareArray The str []  value to which compareArray is to be set.
+
 
 
         """
@@ -1472,6 +1550,7 @@ class CalAppPhaseRow:
         efficiencyIndices The int []  value to which efficiencyIndices is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1513,6 +1592,9 @@ class CalAppPhaseRow:
         """
         Set efficiencies with the specified float []  []  value.
         efficiencies The float []  []  value to which efficiencies is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1556,6 +1638,9 @@ class CalAppPhaseRow:
         """
         Set quality with the specified float []  value.
         quality The float []  value to which quality is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1601,6 +1686,7 @@ class CalAppPhaseRow:
         phasedSumAntenna The str value to which phasedSumAntenna is to be set.
 
 
+
         """
 
         self._phasedSumAntenna = str(phasedSumAntenna)
@@ -1635,6 +1721,7 @@ class CalAppPhaseRow:
         """
         Set typeSupports with the specified str value.
         typeSupports The str value to which typeSupports is to be set.
+
 
 
         """
@@ -1681,6 +1768,7 @@ class CalAppPhaseRow:
         numSupports The int value to which numSupports is to be set.
 
 
+
         """
 
         self._numSupports = int(numSupports)
@@ -1723,6 +1811,9 @@ class CalAppPhaseRow:
         """
         Set phaseSupports with the specified float []  value.
         phaseSupports The float []  value to which phaseSupports is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1777,6 +1868,7 @@ class CalAppPhaseRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1807,6 +1899,7 @@ class CalAppPhaseRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

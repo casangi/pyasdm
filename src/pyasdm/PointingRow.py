@@ -249,41 +249,64 @@ class PointingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numSample", self._numSample)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("encoder", self._encoder)
+
+        result += "\n   "
 
         result += Parser.valueToXML("pointingTracking", self._pointingTracking)
 
+        result += "\n   "
+
         result += Parser.valueToXML("usePolynomials", self._usePolynomials)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeOrigin", self._timeOrigin)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numTerm", self._numTerm)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "pointingDirection", self._pointingDirection
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("target", self._target)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("offset", self._offset)
 
         if self._overTheTopExists:
+            result += "\n   "
 
             result += Parser.valueToXML("overTheTop", self._overTheTop)
 
         if self._sourceOffsetExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("sourceOffset", self._sourceOffset)
 
         if self._sourceOffsetReferenceCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "sourceOffsetReferenceCode",
@@ -291,18 +314,21 @@ class PointingRow:
             )
 
         if self._sourceOffsetEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "sourceOffsetEquinox", self._sourceOffsetEquinox
             )
 
         if self._sampledTimeIntervalExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "sampledTimeInterval", self._sampledTimeInterval
             )
 
         if self._atmosphericCorrectionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "atmosphericCorrection", self._atmosphericCorrection
@@ -310,13 +336,17 @@ class PointingRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("pointingModelId", self._pointingModelId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -765,6 +795,7 @@ class PointingRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -796,6 +827,7 @@ class PointingRow:
         numSample The int value to which numSample is to be set.
 
 
+
         """
 
         self._numSample = int(numSample)
@@ -816,6 +848,7 @@ class PointingRow:
         """
         Set encoder with the specified Angle []  []  value.
         encoder The Angle []  []  value to which encoder is to be set.
+
         The value of encoder can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -861,6 +894,7 @@ class PointingRow:
         pointingTracking The bool value to which pointingTracking is to be set.
 
 
+
         """
 
         self._pointingTracking = bool(pointingTracking)
@@ -881,6 +915,7 @@ class PointingRow:
         """
         Set usePolynomials with the specified bool value.
         usePolynomials The bool value to which usePolynomials is to be set.
+
 
 
         """
@@ -904,6 +939,7 @@ class PointingRow:
         """
         Set timeOrigin with the specified ArrayTime value.
         timeOrigin The ArrayTime value to which timeOrigin is to be set.
+
         The value of timeOrigin can be anything allowed by the ArrayTime constructor.
 
         """
@@ -928,6 +964,7 @@ class PointingRow:
         numTerm The int value to which numTerm is to be set.
 
 
+
         """
 
         self._numTerm = int(numTerm)
@@ -948,6 +985,7 @@ class PointingRow:
         """
         Set pointingDirection with the specified Angle []  []  value.
         pointingDirection The Angle []  []  value to which pointingDirection is to be set.
+
         The value of pointingDirection can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -991,6 +1029,7 @@ class PointingRow:
         """
         Set target with the specified Angle []  []  value.
         target The Angle []  []  value to which target is to be set.
+
         The value of target can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1034,6 +1073,7 @@ class PointingRow:
         """
         Set offset with the specified Angle []  []  value.
         offset The Angle []  []  value to which offset is to be set.
+
         The value of offset can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1093,6 +1133,7 @@ class PointingRow:
         overTheTop The bool value to which overTheTop is to be set.
 
 
+
         """
 
         self._overTheTop = bool(overTheTop)
@@ -1135,6 +1176,7 @@ class PointingRow:
         """
         Set sourceOffset with the specified Angle []  []  value.
         sourceOffset The Angle []  []  value to which sourceOffset is to be set.
+
         The value of sourceOffset can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1202,6 +1244,7 @@ class PointingRow:
         sourceOffsetReferenceCode The DirectionReferenceCode value to which sourceOffsetReferenceCode is to be set.
 
 
+
         """
 
         self._sourceOffsetReferenceCode = DirectionReferenceCode(
@@ -1247,6 +1290,7 @@ class PointingRow:
         """
         Set sourceOffsetEquinox with the specified ArrayTime value.
         sourceOffsetEquinox The ArrayTime value to which sourceOffsetEquinox is to be set.
+
         The value of sourceOffsetEquinox can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1291,6 +1335,7 @@ class PointingRow:
         """
         Set sampledTimeInterval with the specified ArrayTimeInterval []  value.
         sampledTimeInterval The ArrayTimeInterval []  value to which sampledTimeInterval is to be set.
+
         The value of sampledTimeInterval can be anything allowed by the ArrayTimeInterval []  constructor.
 
         """
@@ -1356,6 +1401,7 @@ class PointingRow:
         """
         Set atmosphericCorrection with the specified Angle []  []  value.
         atmosphericCorrection The Angle []  []  value to which atmosphericCorrection is to be set.
+
         The value of atmosphericCorrection can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1410,6 +1456,7 @@ class PointingRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1439,6 +1486,7 @@ class PointingRow:
         """
         Set pointingModelId with the specified int value.
         pointingModelId The int value to which pointingModelId is to be set.
+
 
 
         """

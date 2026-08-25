@@ -24,6 +24,7 @@
 #
 
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class Humidity:
@@ -147,7 +148,7 @@ class Humidity:
         """
         Return the value of this humidity as a String in units of percents.
         """
-        return str(self.get())
+        return pyasdm.Parser.doubleToString(self.get())
 
     @staticmethod
     def values(items):

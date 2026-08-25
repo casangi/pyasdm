@@ -144,17 +144,25 @@ class ProcessorRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("processorId", self._processorId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("modeId", self._modeId)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "processorType", ProcessorType.name(self._processorType)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "processorSubType", ProcessorSubType.name(self._processorSubType)
@@ -162,7 +170,7 @@ class ProcessorRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -312,6 +320,7 @@ class ProcessorRow:
         """
         Set processorId with the specified Tag value.
         processorId The Tag value to which processorId is to be set.
+
         The value of processorId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -342,6 +351,7 @@ class ProcessorRow:
         """
         Set modeId with the specified Tag value.
         modeId The Tag value to which modeId is to be set.
+
         The value of modeId can be anything allowed by the Tag constructor.
 
         """
@@ -366,6 +376,7 @@ class ProcessorRow:
         processorType The ProcessorType value to which processorType is to be set.
 
 
+
         """
 
         self._processorType = ProcessorType(processorType)
@@ -386,6 +397,7 @@ class ProcessorRow:
         """
         Set processorSubType with the specified ProcessorSubType value.
         processorSubType The ProcessorSubType value to which processorSubType is to be set.
+
 
 
         """

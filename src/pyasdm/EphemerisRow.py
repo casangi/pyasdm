@@ -97,17 +97,19 @@ class EphemerisRow:
 
         self._ephemerisId = 0
 
-        self._observerLocation = []  # this is a list of float []
+        self._observerLocation = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._equinoxEquator = None
 
         self._numPolyDir = 0
 
-        self._dir = []  # this is a list of float []  []
+        self._dir = []  # this is a list of float []  []  saved as double precision
 
         self._numPolyDist = 0
 
-        self._distance = []  # this is a list of float []
+        self._distance = []  # this is a list of float []  saved as double precision
 
         self._timeOrigin = ArrayTime()
 
@@ -119,7 +121,7 @@ class EphemerisRow:
 
         self._radVelExists = False
 
-        self._radVel = []  # this is a list of float []
+        self._radVel = []  # this is a list of float []  saved as double precision
 
         if row is not None:
             if not isinstance(row, EphemerisRow):
@@ -182,41 +184,65 @@ class EphemerisRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("ephemerisId", self._ephemerisId)
 
-        result += Parser.listValueToXML("observerLocation", self._observerLocation)
+        result += "\n   "
 
-        result += Parser.valueToXML("equinoxEquator", self._equinoxEquator)
+        result += Parser.doubleListValueToXML(
+            "observerLocation", self._observerLocation
+        )
+
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("equinoxEquator", self._equinoxEquator)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPolyDir", self._numPolyDir)
 
-        result += Parser.listValueToXML("dir", self._dir)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("dir", self._dir)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPolyDist", self._numPolyDist)
 
-        result += Parser.listValueToXML("distance", self._distance)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("distance", self._distance)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeOrigin", self._timeOrigin)
+
+        result += "\n   "
 
         result += Parser.valueToXML("origin", self._origin)
 
         if self._numPolyRadVelExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numPolyRadVel", self._numPolyRadVel)
 
         if self._radVelExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("radVel", self._radVel)
+            result += Parser.doubleListValueToXML("radVel", self._radVel)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -327,9 +353,9 @@ class EphemerisRow:
         eos.writeInt(len(self._observerLocation))
         for i in range(len(self._observerLocation)):
 
-            eos.writeFloat(self._observerLocation[i])
+            eos.writeDouble(self._observerLocation[i])
 
-        eos.writeFloat(self._equinoxEquator)
+        eos.writeDouble(self._equinoxEquator)
 
         eos.writeInt(self._numPolyDir)
 
@@ -344,14 +370,14 @@ class EphemerisRow:
         eos.writeInt(dir_dims[1])
         for i in range(dir_dims[0]):
             for j in range(dir_dims[1]):
-                eos.writeFloat(self._dir[i][j])
+                eos.writeDouble(self._dir[i][j])
 
         eos.writeInt(self._numPolyDist)
 
         eos.writeInt(len(self._distance))
         for i in range(len(self._distance)):
 
-            eos.writeFloat(self._distance[i])
+            eos.writeDouble(self._distance[i])
 
         self._timeOrigin.toBin(eos)
 
@@ -368,7 +394,7 @@ class EphemerisRow:
             eos.writeInt(len(self._radVel))
             for i in range(len(self._radVel)):
 
-                eos.writeFloat(self._radVel[i])
+                eos.writeDouble(self._radVel[i])
 
     @staticmethod
     def timeIntervalFromBin(row, eis):
@@ -395,7 +421,7 @@ class EphemerisRow:
         observerLocationDim1 = eis.readInt()
         thisList = []
         for i in range(observerLocationDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._observerLocation = thisList
 
@@ -405,7 +431,7 @@ class EphemerisRow:
         Set the equinoxEquator in row from the EndianInput (eis) instance.
         """
 
-        row._equinoxEquator = eis.readFloat()
+        row._equinoxEquator = eis.readDouble()
 
     @staticmethod
     def numPolyDirFromBin(row, eis):
@@ -427,7 +453,7 @@ class EphemerisRow:
         for i in range(dirDim1):
             thisList_j = []
             for j in range(dirDim2):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
         row._dir = thisList
@@ -449,7 +475,7 @@ class EphemerisRow:
         distanceDim1 = eis.readInt()
         thisList = []
         for i in range(distanceDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._distance = thisList
 
@@ -490,7 +516,7 @@ class EphemerisRow:
             radVelDim1 = eis.readInt()
             thisList = []
             for i in range(radVelDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._radVel = thisList
 
@@ -559,6 +585,7 @@ class EphemerisRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -590,6 +617,7 @@ class EphemerisRow:
         ephemerisId The int value to which ephemerisId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -617,6 +645,9 @@ class EphemerisRow:
         """
         Set observerLocation with the specified float []  value.
         observerLocation The float []  value to which observerLocation is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -661,6 +692,9 @@ class EphemerisRow:
         Set equinoxEquator with the specified float value.
         equinoxEquator The float value to which equinoxEquator is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -684,6 +718,7 @@ class EphemerisRow:
         numPolyDir The int value to which numPolyDir is to be set.
 
 
+
         """
 
         self._numPolyDir = int(numPolyDir)
@@ -704,6 +739,9 @@ class EphemerisRow:
         """
         Set dir with the specified float []  []  value.
         dir The float []  []  value to which dir is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -749,6 +787,7 @@ class EphemerisRow:
         numPolyDist The int value to which numPolyDist is to be set.
 
 
+
         """
 
         self._numPolyDist = int(numPolyDist)
@@ -769,6 +808,9 @@ class EphemerisRow:
         """
         Set distance with the specified float []  value.
         distance The float []  value to which distance is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -813,6 +855,7 @@ class EphemerisRow:
         """
         Set timeOrigin with the specified ArrayTime value.
         timeOrigin The ArrayTime value to which timeOrigin is to be set.
+
         The value of timeOrigin can be anything allowed by the ArrayTime constructor.
 
         """
@@ -835,6 +878,7 @@ class EphemerisRow:
         """
         Set origin with the specified str value.
         origin The str value to which origin is to be set.
+
 
 
         """
@@ -871,6 +915,7 @@ class EphemerisRow:
         """
         Set numPolyRadVel with the specified int value.
         numPolyRadVel The int value to which numPolyRadVel is to be set.
+
 
 
         """
@@ -915,6 +960,9 @@ class EphemerisRow:
         """
         Set radVel with the specified float []  value.
         radVel The float []  value to which radVel is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """

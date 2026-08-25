@@ -24,6 +24,7 @@
 #
 
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class Temperature:
@@ -147,7 +148,7 @@ class Temperature:
         """
         Return the value of this temperature as a String in units of degrees Centigrade.
         """
-        return str(self.get())
+        return pyasdm.Parser.doubleToString(self.get())
 
     @staticmethod
     def values(items):

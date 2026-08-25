@@ -135,7 +135,9 @@ class CalFocusRow:
 
         self._offsetWasTied = []  # this is a list of bool []  []
 
-        self._reducedChiSquared = []  # this is a list of float []  []
+        self._reducedChiSquared = (
+            []
+        )  # this is a list of float []  []  saved as double precision
 
         self._position = []  # this is a list of Length []  []
 
@@ -443,155 +445,212 @@ class CalFocusRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML(
             "ambientTemperature", self._ambientTemperature
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("focusMethod", FocusMethod.name(self._focusMethod))
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "pointingDirection", self._pointingDirection
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.listValueToXML("wereFixed", self._wereFixed)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("offset", self._offset)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("offsetError", self._offsetError)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("offsetWasTied", self._offsetWasTied)
 
-        result += Parser.listValueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML(
+            "reducedChiSquared", self._reducedChiSquared
+        )
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("position", self._position)
 
         if self._polarizationsAveragedExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "polarizationsAveraged", self._polarizationsAveraged
             )
 
         if self._focusCurveWidthExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "focusCurveWidth", self._focusCurveWidth
             )
 
         if self._focusCurveWidthErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "focusCurveWidthError", self._focusCurveWidthError
             )
 
         if self._focusCurveWasFixedExists:
+            result += "\n   "
 
             result += Parser.listValueToXML(
                 "focusCurveWasFixed", self._focusCurveWasFixed
             )
 
         if self._offIntensityExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("offIntensity", self._offIntensity)
 
         if self._offIntensityErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "offIntensityError", self._offIntensityError
             )
 
         if self._offIntensityWasFixedExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "offIntensityWasFixed", self._offIntensityWasFixed
             )
 
         if self._peakIntensityExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "peakIntensity", self._peakIntensity
             )
 
         if self._peakIntensityErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "peakIntensityError", self._peakIntensityError
             )
 
         if self._peakIntensityWasFixedExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "peakIntensityWasFixed", self._peakIntensityWasFixed
             )
 
         if self._astigmPlusExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("astigmPlus", self._astigmPlus)
 
         if self._astigmPlusErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "astigmPlusError", self._astigmPlusError
             )
 
         if self._astigmMultExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("astigmMult", self._astigmMult)
 
         if self._astigmMultErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "astigmMultError", self._astigmMultError
             )
 
         if self._illumOffsetExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("illumOffset", self._illumOffset)
 
         if self._illumOffsetErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "illumOffsetError", self._illumOffsetError
             )
 
         if self._fitRMSExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("fitRMS", self._fitRMS)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -985,7 +1044,7 @@ class CalFocusRow:
         eos.writeInt(reducedChiSquared_dims[1])
         for i in range(reducedChiSquared_dims[0]):
             for j in range(reducedChiSquared_dims[1]):
-                eos.writeFloat(self._reducedChiSquared[i][j])
+                eos.writeDouble(self._reducedChiSquared[i][j])
 
         Length.listToBin(self._position, eos)
 
@@ -1244,7 +1303,7 @@ class CalFocusRow:
         for i in range(reducedChiSquaredDim1):
             thisList_j = []
             for j in range(reducedChiSquaredDim2):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
         row._reducedChiSquared = thisList
@@ -1529,6 +1588,7 @@ class CalFocusRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1552,6 +1612,7 @@ class CalFocusRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1574,6 +1635,7 @@ class CalFocusRow:
         """
         Set antennaName with the specified str value.
         antennaName The str value to which antennaName is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1605,6 +1667,7 @@ class CalFocusRow:
         receiverBand The ReceiverBand value to which receiverBand is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1633,6 +1696,7 @@ class CalFocusRow:
         """
         Set ambientTemperature with the specified Temperature value.
         ambientTemperature The Temperature value to which ambientTemperature is to be set.
+
         The value of ambientTemperature can be anything allowed by the Temperature constructor.
 
         """
@@ -1657,6 +1721,7 @@ class CalFocusRow:
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
 
 
+
         """
 
         self._atmPhaseCorrection = AtmPhaseCorrection(atmPhaseCorrection)
@@ -1679,6 +1744,7 @@ class CalFocusRow:
         focusMethod The FocusMethod value to which focusMethod is to be set.
 
 
+
         """
 
         self._focusMethod = FocusMethod(focusMethod)
@@ -1699,6 +1765,7 @@ class CalFocusRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1742,6 +1809,7 @@ class CalFocusRow:
         """
         Set pointingDirection with the specified Angle []  value.
         pointingDirection The Angle []  value to which pointingDirection is to be set.
+
         The value of pointingDirection can be anything allowed by the Angle []  constructor.
 
         """
@@ -1787,6 +1855,7 @@ class CalFocusRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1807,6 +1876,7 @@ class CalFocusRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1852,6 +1922,7 @@ class CalFocusRow:
         wereFixed The bool []  value to which wereFixed is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1893,6 +1964,7 @@ class CalFocusRow:
         """
         Set offset with the specified Length []  []  value.
         offset The Length []  []  value to which offset is to be set.
+
         The value of offset can be anything allowed by the Length []  []  constructor.
 
         """
@@ -1936,6 +2008,7 @@ class CalFocusRow:
         """
         Set offsetError with the specified Length []  []  value.
         offsetError The Length []  []  value to which offsetError is to be set.
+
         The value of offsetError can be anything allowed by the Length []  []  constructor.
 
         """
@@ -1981,6 +2054,7 @@ class CalFocusRow:
         offsetWasTied The bool []  []  value to which offsetWasTied is to be set.
 
 
+
         """
 
         # value must be a list
@@ -2022,6 +2096,9 @@ class CalFocusRow:
         """
         Set reducedChiSquared with the specified float []  []  value.
         reducedChiSquared The float []  []  value to which reducedChiSquared is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -2065,6 +2142,7 @@ class CalFocusRow:
         """
         Set position with the specified Length []  []  value.
         position The Length []  []  value to which position is to be set.
+
         The value of position can be anything allowed by the Length []  []  constructor.
 
         """
@@ -2124,6 +2202,7 @@ class CalFocusRow:
         polarizationsAveraged The bool value to which polarizationsAveraged is to be set.
 
 
+
         """
 
         self._polarizationsAveraged = bool(polarizationsAveraged)
@@ -2166,6 +2245,7 @@ class CalFocusRow:
         """
         Set focusCurveWidth with the specified Length []  []  value.
         focusCurveWidth The Length []  []  value to which focusCurveWidth is to be set.
+
         The value of focusCurveWidth can be anything allowed by the Length []  []  constructor.
 
         """
@@ -2231,6 +2311,7 @@ class CalFocusRow:
         """
         Set focusCurveWidthError with the specified Length []  []  value.
         focusCurveWidthError The Length []  []  value to which focusCurveWidthError is to be set.
+
         The value of focusCurveWidthError can be anything allowed by the Length []  []  constructor.
 
         """
@@ -2298,6 +2379,7 @@ class CalFocusRow:
         focusCurveWasFixed The bool []  value to which focusCurveWasFixed is to be set.
 
 
+
         """
 
         # value must be a list
@@ -2361,6 +2443,7 @@ class CalFocusRow:
         """
         Set offIntensity with the specified Temperature []  value.
         offIntensity The Temperature []  value to which offIntensity is to be set.
+
         The value of offIntensity can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2426,6 +2509,7 @@ class CalFocusRow:
         """
         Set offIntensityError with the specified Temperature []  value.
         offIntensityError The Temperature []  value to which offIntensityError is to be set.
+
         The value of offIntensityError can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2493,6 +2577,7 @@ class CalFocusRow:
         offIntensityWasFixed The bool value to which offIntensityWasFixed is to be set.
 
 
+
         """
 
         self._offIntensityWasFixed = bool(offIntensityWasFixed)
@@ -2535,6 +2620,7 @@ class CalFocusRow:
         """
         Set peakIntensity with the specified Temperature []  value.
         peakIntensity The Temperature []  value to which peakIntensity is to be set.
+
         The value of peakIntensity can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2600,6 +2686,7 @@ class CalFocusRow:
         """
         Set peakIntensityError with the specified Temperature []  value.
         peakIntensityError The Temperature []  value to which peakIntensityError is to be set.
+
         The value of peakIntensityError can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2667,6 +2754,7 @@ class CalFocusRow:
         peakIntensityWasFixed The bool value to which peakIntensityWasFixed is to be set.
 
 
+
         """
 
         self._peakIntensityWasFixed = bool(peakIntensityWasFixed)
@@ -2709,6 +2797,7 @@ class CalFocusRow:
         """
         Set astigmPlus with the specified Length []  value.
         astigmPlus The Length []  value to which astigmPlus is to be set.
+
         The value of astigmPlus can be anything allowed by the Length []  constructor.
 
         """
@@ -2774,6 +2863,7 @@ class CalFocusRow:
         """
         Set astigmPlusError with the specified Length []  value.
         astigmPlusError The Length []  value to which astigmPlusError is to be set.
+
         The value of astigmPlusError can be anything allowed by the Length []  constructor.
 
         """
@@ -2839,6 +2929,7 @@ class CalFocusRow:
         """
         Set astigmMult with the specified Length []  value.
         astigmMult The Length []  value to which astigmMult is to be set.
+
         The value of astigmMult can be anything allowed by the Length []  constructor.
 
         """
@@ -2904,6 +2995,7 @@ class CalFocusRow:
         """
         Set astigmMultError with the specified Length []  value.
         astigmMultError The Length []  value to which astigmMultError is to be set.
+
         The value of astigmMultError can be anything allowed by the Length []  constructor.
 
         """
@@ -2969,6 +3061,7 @@ class CalFocusRow:
         """
         Set illumOffset with the specified Length []  []  value.
         illumOffset The Length []  []  value to which illumOffset is to be set.
+
         The value of illumOffset can be anything allowed by the Length []  []  constructor.
 
         """
@@ -3034,6 +3127,7 @@ class CalFocusRow:
         """
         Set illumOffsetError with the specified Length []  []  value.
         illumOffsetError The Length []  []  value to which illumOffsetError is to be set.
+
         The value of illumOffsetError can be anything allowed by the Length []  []  constructor.
 
         """
@@ -3099,6 +3193,7 @@ class CalFocusRow:
         """
         Set fitRMS with the specified Length []  value.
         fitRMS The Length []  value to which fitRMS is to be set.
+
         The value of fitRMS can be anything allowed by the Length []  constructor.
 
         """
@@ -3153,6 +3248,7 @@ class CalFocusRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -3183,6 +3279,7 @@ class CalFocusRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

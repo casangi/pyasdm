@@ -118,13 +118,15 @@ class CalWVRRow:
 
         self._numPoly = 0
 
-        self._pathCoeff = []  # this is a list of float []  []  []
+        self._pathCoeff = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
         self._polyFreqLimits = []  # this is a list of Frequency []
 
-        self._wetPath = []  # this is a list of float []
+        self._wetPath = []  # this is a list of float []  saved as single precision
 
-        self._dryPath = []  # this is a list of float []
+        self._dryPath = []  # this is a list of float []  saved as single precision
 
         self._water = Length()
 
@@ -215,55 +217,92 @@ class CalWVRRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("wvrMethod", WVRMethod.name(self._wvrMethod))
+
+        result += "\n   "
 
         result += Parser.valueToXML("antennaName", self._antennaName)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numInputAntennas", self._numInputAntennas)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("inputAntennaNames", self._inputAntennaNames)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numChan", self._numChan)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("chanFreq", self._chanFreq)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("chanWidth", self._chanWidth)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("refTemp", self._refTemp)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numPoly", self._numPoly)
 
-        result += Parser.listValueToXML("pathCoeff", self._pathCoeff)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("pathCoeff", self._pathCoeff)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("polyFreqLimits", self._polyFreqLimits)
 
-        result += Parser.listValueToXML("wetPath", self._wetPath)
+        result += "\n   "
 
-        result += Parser.listValueToXML("dryPath", self._dryPath)
+        result += Parser.floatListValueToXML("wetPath", self._wetPath)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("dryPath", self._dryPath)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("water", self._water)
 
         if self._tauBaselineExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("tauBaseline", self._tauBaseline)
+            result += Parser.floatValueToXML("tauBaseline", self._tauBaseline)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -723,6 +762,7 @@ class CalWVRRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -746,6 +786,7 @@ class CalWVRRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -770,6 +811,7 @@ class CalWVRRow:
         wvrMethod The WVRMethod value to which wvrMethod is to be set.
 
 
+
         """
 
         self._wvrMethod = WVRMethod(wvrMethod)
@@ -790,6 +832,7 @@ class CalWVRRow:
         """
         Set antennaName with the specified str value.
         antennaName The str value to which antennaName is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -821,6 +864,7 @@ class CalWVRRow:
         numInputAntennas The int value to which numInputAntennas is to be set.
 
 
+
         """
 
         self._numInputAntennas = int(numInputAntennas)
@@ -841,6 +885,7 @@ class CalWVRRow:
         """
         Set inputAntennaNames with the specified str []  value.
         inputAntennaNames The str []  value to which inputAntennaNames is to be set.
+
 
 
         """
@@ -886,6 +931,7 @@ class CalWVRRow:
         numChan The int value to which numChan is to be set.
 
 
+
         """
 
         self._numChan = int(numChan)
@@ -906,6 +952,7 @@ class CalWVRRow:
         """
         Set chanFreq with the specified Frequency []  value.
         chanFreq The Frequency []  value to which chanFreq is to be set.
+
         The value of chanFreq can be anything allowed by the Frequency []  constructor.
 
         """
@@ -949,6 +996,7 @@ class CalWVRRow:
         """
         Set chanWidth with the specified Frequency []  value.
         chanWidth The Frequency []  value to which chanWidth is to be set.
+
         The value of chanWidth can be anything allowed by the Frequency []  constructor.
 
         """
@@ -992,6 +1040,7 @@ class CalWVRRow:
         """
         Set refTemp with the specified Temperature []  []  value.
         refTemp The Temperature []  []  value to which refTemp is to be set.
+
         The value of refTemp can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -1037,6 +1086,7 @@ class CalWVRRow:
         numPoly The int value to which numPoly is to be set.
 
 
+
         """
 
         self._numPoly = int(numPoly)
@@ -1057,6 +1107,9 @@ class CalWVRRow:
         """
         Set pathCoeff with the specified float []  []  []  value.
         pathCoeff The float []  []  []  value to which pathCoeff is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1100,6 +1153,7 @@ class CalWVRRow:
         """
         Set polyFreqLimits with the specified Frequency []  value.
         polyFreqLimits The Frequency []  value to which polyFreqLimits is to be set.
+
         The value of polyFreqLimits can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1144,6 +1198,9 @@ class CalWVRRow:
         Set wetPath with the specified float []  value.
         wetPath The float []  value to which wetPath is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1186,6 +1243,9 @@ class CalWVRRow:
         """
         Set dryPath with the specified float []  value.
         dryPath The float []  value to which dryPath is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1230,6 +1290,7 @@ class CalWVRRow:
         """
         Set water with the specified Length value.
         water The Length value to which water is to be set.
+
         The value of water can be anything allowed by the Length constructor.
 
         """
@@ -1267,6 +1328,9 @@ class CalWVRRow:
         Set tauBaseline with the specified float value.
         tauBaseline The float value to which tauBaseline is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1299,6 +1363,7 @@ class CalWVRRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1329,6 +1394,7 @@ class CalWVRRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

@@ -164,39 +164,61 @@ class CalReductionRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numApplied", self._numApplied)
+
+        result += "\n   "
 
         result += Parser.listValueToXML(
             "appliedCalibrations", self._appliedCalibrations
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numParam", self._numParam)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("paramSet", self._paramSet)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numInvalidConditions", self._numInvalidConditions)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "invalidConditions", self._invalidConditions
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeReduced", self._timeReduced)
+
+        result += "\n   "
 
         result += Parser.valueToXML("messages", self._messages)
 
+        result += "\n   "
+
         result += Parser.valueToXML("software", self._software)
+
+        result += "\n   "
 
         result += Parser.valueToXML("softwareVersion", self._softwareVersion)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -490,6 +512,7 @@ class CalReductionRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -521,6 +544,7 @@ class CalReductionRow:
         numApplied The int value to which numApplied is to be set.
 
 
+
         """
 
         self._numApplied = int(numApplied)
@@ -541,6 +565,7 @@ class CalReductionRow:
         """
         Set appliedCalibrations with the specified str []  value.
         appliedCalibrations The str []  value to which appliedCalibrations is to be set.
+
 
 
         """
@@ -586,6 +611,7 @@ class CalReductionRow:
         numParam The int value to which numParam is to be set.
 
 
+
         """
 
         self._numParam = int(numParam)
@@ -606,6 +632,7 @@ class CalReductionRow:
         """
         Set paramSet with the specified str []  value.
         paramSet The str []  value to which paramSet is to be set.
+
 
 
         """
@@ -651,6 +678,7 @@ class CalReductionRow:
         numInvalidConditions The int value to which numInvalidConditions is to be set.
 
 
+
         """
 
         self._numInvalidConditions = int(numInvalidConditions)
@@ -671,6 +699,7 @@ class CalReductionRow:
         """
         Set invalidConditions with the specified InvalidatingCondition []  value.
         invalidConditions The InvalidatingCondition []  value to which invalidConditions is to be set.
+
 
 
         """
@@ -715,6 +744,7 @@ class CalReductionRow:
         """
         Set timeReduced with the specified ArrayTime value.
         timeReduced The ArrayTime value to which timeReduced is to be set.
+
         The value of timeReduced can be anything allowed by the ArrayTime constructor.
 
         """
@@ -739,6 +769,7 @@ class CalReductionRow:
         messages The str value to which messages is to be set.
 
 
+
         """
 
         self._messages = str(messages)
@@ -761,6 +792,7 @@ class CalReductionRow:
         software The str value to which software is to be set.
 
 
+
         """
 
         self._software = str(software)
@@ -781,6 +813,7 @@ class CalReductionRow:
         """
         Set softwareVersion with the specified str value.
         softwareVersion The str value to which softwareVersion is to be set.
+
 
 
         """

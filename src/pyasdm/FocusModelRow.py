@@ -111,7 +111,7 @@ class FocusModelRow:
 
         self._coeffFormula = []  # this is a list of str []
 
-        self._coeffVal = []  # this is a list of float []
+        self._coeffVal = []  # this is a list of float []  saved as single precision
 
         self._assocNature = None
 
@@ -173,39 +173,59 @@ class FocusModelRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("focusModelId", self._focusModelId)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "polarizationType", PolarizationType.name(self._polarizationType)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numCoeff", self._numCoeff)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("coeffName", self._coeffName)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("coeffFormula", self._coeffFormula)
 
-        result += Parser.listValueToXML("coeffVal", self._coeffVal)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("coeffVal", self._coeffVal)
+
+        result += "\n   "
 
         result += Parser.valueToXML("assocNature", self._assocNature)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("assocFocusModelId", self._assocFocusModelId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -484,6 +504,7 @@ class FocusModelRow:
         focusModelId The int value to which focusModelId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -513,6 +534,7 @@ class FocusModelRow:
         polarizationType The PolarizationType value to which polarizationType is to be set.
 
 
+
         """
 
         self._polarizationType = PolarizationType(polarizationType)
@@ -533,6 +555,7 @@ class FocusModelRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         """
@@ -557,6 +580,7 @@ class FocusModelRow:
         numCoeff The int value to which numCoeff is to be set.
 
 
+
         """
 
         self._numCoeff = int(numCoeff)
@@ -577,6 +601,7 @@ class FocusModelRow:
         """
         Set coeffName with the specified str []  value.
         coeffName The str []  value to which coeffName is to be set.
+
 
 
         """
@@ -622,6 +647,7 @@ class FocusModelRow:
         coeffFormula The str []  value to which coeffFormula is to be set.
 
 
+
         """
 
         # value must be a list
@@ -663,6 +689,9 @@ class FocusModelRow:
         """
         Set coeffVal with the specified float []  value.
         coeffVal The float []  value to which coeffVal is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -708,6 +737,7 @@ class FocusModelRow:
         assocNature The str value to which assocNature is to be set.
 
 
+
         """
 
         self._assocNature = str(assocNature)
@@ -731,6 +761,7 @@ class FocusModelRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -760,6 +791,7 @@ class FocusModelRow:
         """
         Set assocFocusModelId with the specified int value.
         assocFocusModelId The int value to which assocFocusModelId is to be set.
+
 
 
         """

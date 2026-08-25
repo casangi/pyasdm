@@ -778,15 +778,14 @@ class CalPositionTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<CalPositionTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:clposn="http://Alma/XASDM/CalPositionTable" xsi:schemaLocation="http://Alma/XASDM/CalPositionTable http://almaobservatory.org/XML/XASDM/4/CalPositionTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<CalPositionTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:clposn="http://Alma/XASDM/CalPositionTable" xsi:schemaLocation="http://Alma/XASDM/CalPositionTable http://almaobservatory.org/XML/XASDM/4/CalPositionTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</CalPositionTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</CalPositionTable>"
         return result
 
     def fromXML(self, xmlstr):

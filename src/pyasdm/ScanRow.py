@@ -246,59 +246,83 @@ class ScanRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("scanNumber", self._scanNumber)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startTime", self._startTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endTime", self._endTime)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numIntent", self._numIntent)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numSubscan", self._numSubscan)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("scanIntent", self._scanIntent)
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("calDataType", self._calDataType)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("calibrationOnLine", self._calibrationOnLine)
 
         if self._calibrationFunctionExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML(
                 "calibrationFunction", self._calibrationFunction
             )
 
         if self._calibrationSetExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("calibrationSet", self._calibrationSet)
 
         if self._calPatternExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("calPattern", self._calPattern)
 
         if self._numFieldExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numField", self._numField)
 
         if self._fieldNameExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("fieldName", self._fieldName)
 
         if self._sourceNameExists:
+            result += "\n   "
 
             result += Parser.valueToXML("sourceName", self._sourceName)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -740,6 +764,7 @@ class ScanRow:
         scanNumber The int value to which scanNumber is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -768,6 +793,7 @@ class ScanRow:
         """
         Set startTime with the specified ArrayTime value.
         startTime The ArrayTime value to which startTime is to be set.
+
         The value of startTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -791,6 +817,7 @@ class ScanRow:
         """
         Set endTime with the specified ArrayTime value.
         endTime The ArrayTime value to which endTime is to be set.
+
         The value of endTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -815,6 +842,7 @@ class ScanRow:
         numIntent The int value to which numIntent is to be set.
 
 
+
         """
 
         self._numIntent = int(numIntent)
@@ -837,6 +865,7 @@ class ScanRow:
         numSubscan The int value to which numSubscan is to be set.
 
 
+
         """
 
         self._numSubscan = int(numSubscan)
@@ -857,6 +886,7 @@ class ScanRow:
         """
         Set scanIntent with the specified ScanIntent []  value.
         scanIntent The ScanIntent []  value to which scanIntent is to be set.
+
 
 
         """
@@ -902,6 +932,7 @@ class ScanRow:
         calDataType The CalDataOrigin []  value to which calDataType is to be set.
 
 
+
         """
 
         # value must be a list
@@ -943,6 +974,7 @@ class ScanRow:
         """
         Set calibrationOnLine with the specified bool []  value.
         calibrationOnLine The bool []  value to which calibrationOnLine is to be set.
+
 
 
         """
@@ -1000,6 +1032,7 @@ class ScanRow:
         """
         Set calibrationFunction with the specified CalibrationFunction []  value.
         calibrationFunction The CalibrationFunction []  value to which calibrationFunction is to be set.
+
 
 
         """
@@ -1067,6 +1100,7 @@ class ScanRow:
         calibrationSet The CalibrationSet []  value to which calibrationSet is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1130,6 +1164,7 @@ class ScanRow:
         """
         Set calPattern with the specified AntennaMotionPattern []  value.
         calPattern The AntennaMotionPattern []  value to which calPattern is to be set.
+
 
 
         """
@@ -1197,6 +1232,7 @@ class ScanRow:
         numField The int value to which numField is to be set.
 
 
+
         """
 
         self._numField = int(numField)
@@ -1239,6 +1275,7 @@ class ScanRow:
         """
         Set fieldName with the specified str []  value.
         fieldName The str []  value to which fieldName is to be set.
+
 
 
         """
@@ -1306,6 +1343,7 @@ class ScanRow:
         sourceName The str value to which sourceName is to be set.
 
 
+
         """
 
         self._sourceName = str(sourceName)
@@ -1337,6 +1375,7 @@ class ScanRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

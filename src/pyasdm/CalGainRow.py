@@ -160,37 +160,59 @@ class CalGainRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
-        result += Parser.valueToXML("gain", self._gain)
+        result += "\n   "
+
+        result += Parser.floatValueToXML("gain", self._gain)
+
+        result += "\n   "
 
         result += Parser.valueToXML("gainValid", self._gainValid)
 
-        result += Parser.valueToXML("fit", self._fit)
+        result += "\n   "
 
-        result += Parser.valueToXML("fitWeight", self._fitWeight)
+        result += Parser.floatValueToXML("fit", self._fit)
+
+        result += "\n   "
+
+        result += Parser.floatValueToXML("fitWeight", self._fitWeight)
+
+        result += "\n   "
 
         result += Parser.valueToXML("totalGainValid", self._totalGainValid)
 
-        result += Parser.valueToXML("totalFit", self._totalFit)
+        result += "\n   "
 
-        result += Parser.valueToXML("totalFitWeight", self._totalFitWeight)
+        result += Parser.floatValueToXML("totalFit", self._totalFit)
+
+        result += "\n   "
+
+        result += Parser.floatValueToXML("totalFitWeight", self._totalFitWeight)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -443,6 +465,7 @@ class CalGainRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -466,6 +489,7 @@ class CalGainRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -488,6 +512,9 @@ class CalGainRow:
         """
         Set gain with the specified float value.
         gain The float value to which gain is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -512,6 +539,7 @@ class CalGainRow:
         gainValid The bool value to which gainValid is to be set.
 
 
+
         """
 
         self._gainValid = bool(gainValid)
@@ -532,6 +560,9 @@ class CalGainRow:
         """
         Set fit with the specified float value.
         fit The float value to which fit is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -554,6 +585,9 @@ class CalGainRow:
         """
         Set fitWeight with the specified float value.
         fitWeight The float value to which fitWeight is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -578,6 +612,7 @@ class CalGainRow:
         totalGainValid The bool value to which totalGainValid is to be set.
 
 
+
         """
 
         self._totalGainValid = bool(totalGainValid)
@@ -598,6 +633,9 @@ class CalGainRow:
         """
         Set totalFit with the specified float value.
         totalFit The float value to which totalFit is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -620,6 +658,9 @@ class CalGainRow:
         """
         Set totalFitWeight with the specified float value.
         totalFitWeight The float value to which totalFitWeight is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -645,6 +686,7 @@ class CalGainRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -675,6 +717,7 @@ class CalGainRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

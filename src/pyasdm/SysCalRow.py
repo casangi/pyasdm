@@ -137,7 +137,9 @@ class SysCalRow:
 
         self._tantSpectrumExists = False
 
-        self._tantSpectrum = []  # this is a list of float []  []
+        self._tantSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._tantTsysFlagExists = False
 
@@ -145,7 +147,9 @@ class SysCalRow:
 
         self._tantTsysSpectrumExists = False
 
-        self._tantTsysSpectrum = []  # this is a list of float []  []
+        self._tantTsysSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._phaseDiffFlagExists = False
 
@@ -153,7 +157,9 @@ class SysCalRow:
 
         self._phaseDiffSpectrumExists = False
 
-        self._phaseDiffSpectrum = []  # this is a list of float []  []
+        self._phaseDiffSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         # extrinsic attributes
 
@@ -315,85 +321,113 @@ class SysCalRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numChan", self._numChan)
 
         if self._tcalFlagExists:
+            result += "\n   "
 
             result += Parser.valueToXML("tcalFlag", self._tcalFlag)
 
         if self._tcalSpectrumExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("tcalSpectrum", self._tcalSpectrum)
 
         if self._trxFlagExists:
+            result += "\n   "
 
             result += Parser.valueToXML("trxFlag", self._trxFlag)
 
         if self._trxSpectrumExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("trxSpectrum", self._trxSpectrum)
 
         if self._tskyFlagExists:
+            result += "\n   "
 
             result += Parser.valueToXML("tskyFlag", self._tskyFlag)
 
         if self._tskySpectrumExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("tskySpectrum", self._tskySpectrum)
 
         if self._tsysFlagExists:
+            result += "\n   "
 
             result += Parser.valueToXML("tsysFlag", self._tsysFlag)
 
         if self._tsysSpectrumExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("tsysSpectrum", self._tsysSpectrum)
 
         if self._tantFlagExists:
+            result += "\n   "
 
             result += Parser.valueToXML("tantFlag", self._tantFlag)
 
         if self._tantSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("tantSpectrum", self._tantSpectrum)
+            result += Parser.floatListValueToXML("tantSpectrum", self._tantSpectrum)
 
         if self._tantTsysFlagExists:
+            result += "\n   "
 
             result += Parser.valueToXML("tantTsysFlag", self._tantTsysFlag)
 
         if self._tantTsysSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("tantTsysSpectrum", self._tantTsysSpectrum)
+            result += Parser.floatListValueToXML(
+                "tantTsysSpectrum", self._tantTsysSpectrum
+            )
 
         if self._phaseDiffFlagExists:
+            result += "\n   "
 
             result += Parser.valueToXML("phaseDiffFlag", self._phaseDiffFlag)
 
         if self._phaseDiffSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "phaseDiffSpectrum", self._phaseDiffSpectrum
             )
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("feedId", self._feedId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -986,6 +1020,7 @@ class SysCalRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1017,6 +1052,7 @@ class SysCalRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1037,6 +1073,7 @@ class SysCalRow:
         """
         Set numChan with the specified int value.
         numChan The int value to which numChan is to be set.
+
 
 
         """
@@ -1073,6 +1110,7 @@ class SysCalRow:
         """
         Set tcalFlag with the specified bool value.
         tcalFlag The bool value to which tcalFlag is to be set.
+
 
 
         """
@@ -1117,6 +1155,7 @@ class SysCalRow:
         """
         Set tcalSpectrum with the specified Temperature []  []  value.
         tcalSpectrum The Temperature []  []  value to which tcalSpectrum is to be set.
+
         The value of tcalSpectrum can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -1184,6 +1223,7 @@ class SysCalRow:
         trxFlag The bool value to which trxFlag is to be set.
 
 
+
         """
 
         self._trxFlag = bool(trxFlag)
@@ -1226,6 +1266,7 @@ class SysCalRow:
         """
         Set trxSpectrum with the specified Temperature []  []  value.
         trxSpectrum The Temperature []  []  value to which trxSpectrum is to be set.
+
         The value of trxSpectrum can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -1293,6 +1334,7 @@ class SysCalRow:
         tskyFlag The bool value to which tskyFlag is to be set.
 
 
+
         """
 
         self._tskyFlag = bool(tskyFlag)
@@ -1335,6 +1377,7 @@ class SysCalRow:
         """
         Set tskySpectrum with the specified Temperature []  []  value.
         tskySpectrum The Temperature []  []  value to which tskySpectrum is to be set.
+
         The value of tskySpectrum can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -1402,6 +1445,7 @@ class SysCalRow:
         tsysFlag The bool value to which tsysFlag is to be set.
 
 
+
         """
 
         self._tsysFlag = bool(tsysFlag)
@@ -1444,6 +1488,7 @@ class SysCalRow:
         """
         Set tsysSpectrum with the specified Temperature []  []  value.
         tsysSpectrum The Temperature []  []  value to which tsysSpectrum is to be set.
+
         The value of tsysSpectrum can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -1511,6 +1556,7 @@ class SysCalRow:
         tantFlag The bool value to which tantFlag is to be set.
 
 
+
         """
 
         self._tantFlag = bool(tantFlag)
@@ -1553,6 +1599,9 @@ class SysCalRow:
         """
         Set tantSpectrum with the specified float []  []  value.
         tantSpectrum The float []  []  value to which tantSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1620,6 +1669,7 @@ class SysCalRow:
         tantTsysFlag The bool value to which tantTsysFlag is to be set.
 
 
+
         """
 
         self._tantTsysFlag = bool(tantTsysFlag)
@@ -1662,6 +1712,9 @@ class SysCalRow:
         """
         Set tantTsysSpectrum with the specified float []  []  value.
         tantTsysSpectrum The float []  []  value to which tantTsysSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1729,6 +1782,7 @@ class SysCalRow:
         phaseDiffFlag The bool value to which phaseDiffFlag is to be set.
 
 
+
         """
 
         self._phaseDiffFlag = bool(phaseDiffFlag)
@@ -1771,6 +1825,9 @@ class SysCalRow:
         """
         Set phaseDiffSpectrum with the specified float []  []  value.
         phaseDiffSpectrum The float []  []  value to which phaseDiffSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1825,6 +1882,7 @@ class SysCalRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1856,6 +1914,7 @@ class SysCalRow:
         feedId The int value to which feedId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1884,6 +1943,7 @@ class SysCalRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

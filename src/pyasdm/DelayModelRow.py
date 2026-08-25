@@ -100,13 +100,17 @@ class DelayModelRow:
 
         self._numPoly = 0
 
-        self._phaseDelay = []  # this is a list of float []
+        self._phaseDelay = []  # this is a list of float []  saved as double precision
 
-        self._phaseDelayRate = []  # this is a list of float []
+        self._phaseDelayRate = (
+            []
+        )  # this is a list of float []  saved as double precision
 
-        self._groupDelay = []  # this is a list of float []
+        self._groupDelay = []  # this is a list of float []  saved as double precision
 
-        self._groupDelayRate = []  # this is a list of float []
+        self._groupDelayRate = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._timeOriginExists = False
 
@@ -174,23 +178,29 @@ class DelayModelRow:
 
         self._electronicDelayExists = False
 
-        self._electronicDelay = []  # this is a list of float []
+        self._electronicDelay = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._electronicDelayRateExists = False
 
-        self._electronicDelayRate = []  # this is a list of float []
+        self._electronicDelayRate = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._receiverDelayExists = False
 
-        self._receiverDelay = []  # this is a list of float []
+        self._receiverDelay = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._IFDelayExists = False
 
-        self._IFDelay = []  # this is a list of float []
+        self._IFDelay = []  # this is a list of float []  saved as double precision
 
         self._LODelayExists = False
 
-        self._LODelay = []  # this is a list of float []
+        self._LODelay = []  # this is a list of float []  saved as double precision
 
         self._crossPolarizationDelayExists = False
 
@@ -468,137 +478,178 @@ class DelayModelRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPoly", self._numPoly)
 
-        result += Parser.listValueToXML("phaseDelay", self._phaseDelay)
+        result += "\n   "
 
-        result += Parser.listValueToXML("phaseDelayRate", self._phaseDelayRate)
+        result += Parser.doubleListValueToXML("phaseDelay", self._phaseDelay)
 
-        result += Parser.listValueToXML("groupDelay", self._groupDelay)
+        result += "\n   "
 
-        result += Parser.listValueToXML("groupDelayRate", self._groupDelayRate)
+        result += Parser.doubleListValueToXML("phaseDelayRate", self._phaseDelayRate)
+
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("groupDelay", self._groupDelay)
+
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("groupDelayRate", self._groupDelayRate)
 
         if self._timeOriginExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("timeOrigin", self._timeOrigin)
 
         if self._atmosphericGroupDelayExists:
+            result += "\n   "
 
-            result += Parser.valueToXML(
+            result += Parser.doubleValueToXML(
                 "atmosphericGroupDelay", self._atmosphericGroupDelay
             )
 
         if self._atmosphericGroupDelayRateExists:
+            result += "\n   "
 
-            result += Parser.valueToXML(
+            result += Parser.doubleValueToXML(
                 "atmosphericGroupDelayRate", self._atmosphericGroupDelayRate
             )
 
         if self._geometricDelayExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("geometricDelay", self._geometricDelay)
+            result += Parser.doubleValueToXML("geometricDelay", self._geometricDelay)
 
         if self._geometricDelayRateExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("geometricDelayRate", self._geometricDelayRate)
+            result += Parser.doubleValueToXML(
+                "geometricDelayRate", self._geometricDelayRate
+            )
 
         if self._numLOExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numLO", self._numLO)
 
         if self._LOOffsetExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("LOOffset", self._LOOffset)
 
         if self._LOOffsetRateExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("LOOffsetRate", self._LOOffsetRate)
 
         if self._dispersiveDelayExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("dispersiveDelay", self._dispersiveDelay)
+            result += Parser.doubleValueToXML("dispersiveDelay", self._dispersiveDelay)
 
         if self._dispersiveDelayRateExists:
+            result += "\n   "
 
-            result += Parser.valueToXML(
+            result += Parser.doubleValueToXML(
                 "dispersiveDelayRate", self._dispersiveDelayRate
             )
 
         if self._atmosphericDryDelayExists:
+            result += "\n   "
 
-            result += Parser.valueToXML(
+            result += Parser.doubleValueToXML(
                 "atmosphericDryDelay", self._atmosphericDryDelay
             )
 
         if self._atmosphericWetDelayExists:
+            result += "\n   "
 
-            result += Parser.valueToXML(
+            result += Parser.doubleValueToXML(
                 "atmosphericWetDelay", self._atmosphericWetDelay
             )
 
         if self._padDelayExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("padDelay", self._padDelay)
+            result += Parser.doubleValueToXML("padDelay", self._padDelay)
 
         if self._antennaDelayExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("antennaDelay", self._antennaDelay)
+            result += Parser.doubleValueToXML("antennaDelay", self._antennaDelay)
 
         if self._numReceptorExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numReceptor", self._numReceptor)
 
         if self._polarizationTypeExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML(
                 "polarizationType", self._polarizationType
             )
 
         if self._electronicDelayExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("electronicDelay", self._electronicDelay)
+            result += Parser.doubleListValueToXML(
+                "electronicDelay", self._electronicDelay
+            )
 
         if self._electronicDelayRateExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.doubleListValueToXML(
                 "electronicDelayRate", self._electronicDelayRate
             )
 
         if self._receiverDelayExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("receiverDelay", self._receiverDelay)
+            result += Parser.doubleListValueToXML("receiverDelay", self._receiverDelay)
 
         if self._IFDelayExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("IFDelay", self._IFDelay)
+            result += Parser.doubleListValueToXML("IFDelay", self._IFDelay)
 
         if self._LODelayExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("LODelay", self._LODelay)
+            result += Parser.doubleListValueToXML("LODelay", self._LODelay)
 
         if self._crossPolarizationDelayExists:
+            result += "\n   "
 
-            result += Parser.valueToXML(
+            result += Parser.doubleValueToXML(
                 "crossPolarizationDelay", self._crossPolarizationDelay
             )
 
         if self._centerOfArrayExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "centerOfArray", self._centerOfArray
             )
 
         if self._delayModelVersionExists:
+            result += "\n   "
 
             result += Parser.valueToXML("delayModelVersion", self._delayModelVersion)
 
         if self._ionosphericDelayExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "ionosphericDelay", self._ionosphericDelay
@@ -606,15 +657,21 @@ class DelayModelRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("fieldId", self._fieldId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -953,22 +1010,22 @@ class DelayModelRow:
         eos.writeInt(len(self._phaseDelay))
         for i in range(len(self._phaseDelay)):
 
-            eos.writeFloat(self._phaseDelay[i])
+            eos.writeDouble(self._phaseDelay[i])
 
         eos.writeInt(len(self._phaseDelayRate))
         for i in range(len(self._phaseDelayRate)):
 
-            eos.writeFloat(self._phaseDelayRate[i])
+            eos.writeDouble(self._phaseDelayRate[i])
 
         eos.writeInt(len(self._groupDelay))
         for i in range(len(self._groupDelay)):
 
-            eos.writeFloat(self._groupDelay[i])
+            eos.writeDouble(self._groupDelay[i])
 
         eos.writeInt(len(self._groupDelayRate))
         for i in range(len(self._groupDelayRate)):
 
-            eos.writeFloat(self._groupDelayRate[i])
+            eos.writeDouble(self._groupDelayRate[i])
 
         self._fieldId.toBin(eos)
 
@@ -980,22 +1037,22 @@ class DelayModelRow:
         eos.writeBool(self._atmosphericGroupDelayExists)
         if self._atmosphericGroupDelayExists:
 
-            eos.writeFloat(self._atmosphericGroupDelay)
+            eos.writeDouble(self._atmosphericGroupDelay)
 
         eos.writeBool(self._atmosphericGroupDelayRateExists)
         if self._atmosphericGroupDelayRateExists:
 
-            eos.writeFloat(self._atmosphericGroupDelayRate)
+            eos.writeDouble(self._atmosphericGroupDelayRate)
 
         eos.writeBool(self._geometricDelayExists)
         if self._geometricDelayExists:
 
-            eos.writeFloat(self._geometricDelay)
+            eos.writeDouble(self._geometricDelay)
 
         eos.writeBool(self._geometricDelayRateExists)
         if self._geometricDelayRateExists:
 
-            eos.writeFloat(self._geometricDelayRate)
+            eos.writeDouble(self._geometricDelayRate)
 
         eos.writeBool(self._numLOExists)
         if self._numLOExists:
@@ -1015,32 +1072,32 @@ class DelayModelRow:
         eos.writeBool(self._dispersiveDelayExists)
         if self._dispersiveDelayExists:
 
-            eos.writeFloat(self._dispersiveDelay)
+            eos.writeDouble(self._dispersiveDelay)
 
         eos.writeBool(self._dispersiveDelayRateExists)
         if self._dispersiveDelayRateExists:
 
-            eos.writeFloat(self._dispersiveDelayRate)
+            eos.writeDouble(self._dispersiveDelayRate)
 
         eos.writeBool(self._atmosphericDryDelayExists)
         if self._atmosphericDryDelayExists:
 
-            eos.writeFloat(self._atmosphericDryDelay)
+            eos.writeDouble(self._atmosphericDryDelay)
 
         eos.writeBool(self._atmosphericWetDelayExists)
         if self._atmosphericWetDelayExists:
 
-            eos.writeFloat(self._atmosphericWetDelay)
+            eos.writeDouble(self._atmosphericWetDelay)
 
         eos.writeBool(self._padDelayExists)
         if self._padDelayExists:
 
-            eos.writeFloat(self._padDelay)
+            eos.writeDouble(self._padDelay)
 
         eos.writeBool(self._antennaDelayExists)
         if self._antennaDelayExists:
 
-            eos.writeFloat(self._antennaDelay)
+            eos.writeDouble(self._antennaDelay)
 
         eos.writeBool(self._numReceptorExists)
         if self._numReceptorExists:
@@ -1061,7 +1118,7 @@ class DelayModelRow:
             eos.writeInt(len(self._electronicDelay))
             for i in range(len(self._electronicDelay)):
 
-                eos.writeFloat(self._electronicDelay[i])
+                eos.writeDouble(self._electronicDelay[i])
 
         eos.writeBool(self._electronicDelayRateExists)
         if self._electronicDelayRateExists:
@@ -1069,7 +1126,7 @@ class DelayModelRow:
             eos.writeInt(len(self._electronicDelayRate))
             for i in range(len(self._electronicDelayRate)):
 
-                eos.writeFloat(self._electronicDelayRate[i])
+                eos.writeDouble(self._electronicDelayRate[i])
 
         eos.writeBool(self._receiverDelayExists)
         if self._receiverDelayExists:
@@ -1077,7 +1134,7 @@ class DelayModelRow:
             eos.writeInt(len(self._receiverDelay))
             for i in range(len(self._receiverDelay)):
 
-                eos.writeFloat(self._receiverDelay[i])
+                eos.writeDouble(self._receiverDelay[i])
 
         eos.writeBool(self._IFDelayExists)
         if self._IFDelayExists:
@@ -1085,7 +1142,7 @@ class DelayModelRow:
             eos.writeInt(len(self._IFDelay))
             for i in range(len(self._IFDelay)):
 
-                eos.writeFloat(self._IFDelay[i])
+                eos.writeDouble(self._IFDelay[i])
 
         eos.writeBool(self._LODelayExists)
         if self._LODelayExists:
@@ -1093,12 +1150,12 @@ class DelayModelRow:
             eos.writeInt(len(self._LODelay))
             for i in range(len(self._LODelay)):
 
-                eos.writeFloat(self._LODelay[i])
+                eos.writeDouble(self._LODelay[i])
 
         eos.writeBool(self._crossPolarizationDelayExists)
         if self._crossPolarizationDelayExists:
 
-            eos.writeFloat(self._crossPolarizationDelay)
+            eos.writeDouble(self._crossPolarizationDelay)
 
         eos.writeBool(self._centerOfArrayExists)
         if self._centerOfArrayExists:
@@ -1156,7 +1213,7 @@ class DelayModelRow:
         phaseDelayDim1 = eis.readInt()
         thisList = []
         for i in range(phaseDelayDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._phaseDelay = thisList
 
@@ -1169,7 +1226,7 @@ class DelayModelRow:
         phaseDelayRateDim1 = eis.readInt()
         thisList = []
         for i in range(phaseDelayRateDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._phaseDelayRate = thisList
 
@@ -1182,7 +1239,7 @@ class DelayModelRow:
         groupDelayDim1 = eis.readInt()
         thisList = []
         for i in range(groupDelayDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._groupDelay = thisList
 
@@ -1195,7 +1252,7 @@ class DelayModelRow:
         groupDelayRateDim1 = eis.readInt()
         thisList = []
         for i in range(groupDelayRateDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._groupDelayRate = thisList
 
@@ -1225,7 +1282,7 @@ class DelayModelRow:
         row._atmosphericGroupDelayExists = eis.readBool()
         if row._atmosphericGroupDelayExists:
 
-            row._atmosphericGroupDelay = eis.readFloat()
+            row._atmosphericGroupDelay = eis.readDouble()
 
     @staticmethod
     def atmosphericGroupDelayRateFromBin(row, eis):
@@ -1235,7 +1292,7 @@ class DelayModelRow:
         row._atmosphericGroupDelayRateExists = eis.readBool()
         if row._atmosphericGroupDelayRateExists:
 
-            row._atmosphericGroupDelayRate = eis.readFloat()
+            row._atmosphericGroupDelayRate = eis.readDouble()
 
     @staticmethod
     def geometricDelayFromBin(row, eis):
@@ -1245,7 +1302,7 @@ class DelayModelRow:
         row._geometricDelayExists = eis.readBool()
         if row._geometricDelayExists:
 
-            row._geometricDelay = eis.readFloat()
+            row._geometricDelay = eis.readDouble()
 
     @staticmethod
     def geometricDelayRateFromBin(row, eis):
@@ -1255,7 +1312,7 @@ class DelayModelRow:
         row._geometricDelayRateExists = eis.readBool()
         if row._geometricDelayRateExists:
 
-            row._geometricDelayRate = eis.readFloat()
+            row._geometricDelayRate = eis.readDouble()
 
     @staticmethod
     def numLOFromBin(row, eis):
@@ -1295,7 +1352,7 @@ class DelayModelRow:
         row._dispersiveDelayExists = eis.readBool()
         if row._dispersiveDelayExists:
 
-            row._dispersiveDelay = eis.readFloat()
+            row._dispersiveDelay = eis.readDouble()
 
     @staticmethod
     def dispersiveDelayRateFromBin(row, eis):
@@ -1305,7 +1362,7 @@ class DelayModelRow:
         row._dispersiveDelayRateExists = eis.readBool()
         if row._dispersiveDelayRateExists:
 
-            row._dispersiveDelayRate = eis.readFloat()
+            row._dispersiveDelayRate = eis.readDouble()
 
     @staticmethod
     def atmosphericDryDelayFromBin(row, eis):
@@ -1315,7 +1372,7 @@ class DelayModelRow:
         row._atmosphericDryDelayExists = eis.readBool()
         if row._atmosphericDryDelayExists:
 
-            row._atmosphericDryDelay = eis.readFloat()
+            row._atmosphericDryDelay = eis.readDouble()
 
     @staticmethod
     def atmosphericWetDelayFromBin(row, eis):
@@ -1325,7 +1382,7 @@ class DelayModelRow:
         row._atmosphericWetDelayExists = eis.readBool()
         if row._atmosphericWetDelayExists:
 
-            row._atmosphericWetDelay = eis.readFloat()
+            row._atmosphericWetDelay = eis.readDouble()
 
     @staticmethod
     def padDelayFromBin(row, eis):
@@ -1335,7 +1392,7 @@ class DelayModelRow:
         row._padDelayExists = eis.readBool()
         if row._padDelayExists:
 
-            row._padDelay = eis.readFloat()
+            row._padDelay = eis.readDouble()
 
     @staticmethod
     def antennaDelayFromBin(row, eis):
@@ -1345,7 +1402,7 @@ class DelayModelRow:
         row._antennaDelayExists = eis.readBool()
         if row._antennaDelayExists:
 
-            row._antennaDelay = eis.readFloat()
+            row._antennaDelay = eis.readDouble()
 
     @staticmethod
     def numReceptorFromBin(row, eis):
@@ -1383,7 +1440,7 @@ class DelayModelRow:
             electronicDelayDim1 = eis.readInt()
             thisList = []
             for i in range(electronicDelayDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._electronicDelay = thisList
 
@@ -1398,7 +1455,7 @@ class DelayModelRow:
             electronicDelayRateDim1 = eis.readInt()
             thisList = []
             for i in range(electronicDelayRateDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._electronicDelayRate = thisList
 
@@ -1413,7 +1470,7 @@ class DelayModelRow:
             receiverDelayDim1 = eis.readInt()
             thisList = []
             for i in range(receiverDelayDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._receiverDelay = thisList
 
@@ -1428,7 +1485,7 @@ class DelayModelRow:
             IFDelayDim1 = eis.readInt()
             thisList = []
             for i in range(IFDelayDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._IFDelay = thisList
 
@@ -1443,7 +1500,7 @@ class DelayModelRow:
             LODelayDim1 = eis.readInt()
             thisList = []
             for i in range(LODelayDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._LODelay = thisList
 
@@ -1455,7 +1512,7 @@ class DelayModelRow:
         row._crossPolarizationDelayExists = eis.readBool()
         if row._crossPolarizationDelayExists:
 
-            row._crossPolarizationDelay = eis.readFloat()
+            row._crossPolarizationDelay = eis.readDouble()
 
     @staticmethod
     def centerOfArrayFromBin(row, eis):
@@ -1588,6 +1645,7 @@ class DelayModelRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1619,6 +1677,7 @@ class DelayModelRow:
         numPoly The int value to which numPoly is to be set.
 
 
+
         """
 
         self._numPoly = int(numPoly)
@@ -1639,6 +1698,9 @@ class DelayModelRow:
         """
         Set phaseDelay with the specified float []  value.
         phaseDelay The float []  value to which phaseDelay is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1683,6 +1745,9 @@ class DelayModelRow:
         Set phaseDelayRate with the specified float []  value.
         phaseDelayRate The float []  value to which phaseDelayRate is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1726,6 +1791,9 @@ class DelayModelRow:
         Set groupDelay with the specified float []  value.
         groupDelay The float []  value to which groupDelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1768,6 +1836,9 @@ class DelayModelRow:
         """
         Set groupDelayRate with the specified float []  value.
         groupDelayRate The float []  value to which groupDelayRate is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1826,6 +1897,7 @@ class DelayModelRow:
         """
         Set timeOrigin with the specified ArrayTime value.
         timeOrigin The ArrayTime value to which timeOrigin is to be set.
+
         The value of timeOrigin can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1871,6 +1943,9 @@ class DelayModelRow:
         Set atmosphericGroupDelay with the specified float value.
         atmosphericGroupDelay The float value to which atmosphericGroupDelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1914,6 +1989,9 @@ class DelayModelRow:
         """
         Set atmosphericGroupDelayRate with the specified float value.
         atmosphericGroupDelayRate The float value to which atmosphericGroupDelayRate is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1959,6 +2037,9 @@ class DelayModelRow:
         Set geometricDelay with the specified float value.
         geometricDelay The float value to which geometricDelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -2002,6 +2083,9 @@ class DelayModelRow:
         """
         Set geometricDelayRate with the specified float value.
         geometricDelayRate The float value to which geometricDelayRate is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -2048,6 +2132,7 @@ class DelayModelRow:
         numLO The int value to which numLO is to be set.
 
 
+
         """
 
         self._numLO = int(numLO)
@@ -2090,6 +2175,7 @@ class DelayModelRow:
         """
         Set LOOffset with the specified Frequency []  value.
         LOOffset The Frequency []  value to which LOOffset is to be set.
+
         The value of LOOffset can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2155,6 +2241,7 @@ class DelayModelRow:
         """
         Set LOOffsetRate with the specified Frequency []  value.
         LOOffsetRate The Frequency []  value to which LOOffsetRate is to be set.
+
         The value of LOOffsetRate can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2221,6 +2308,9 @@ class DelayModelRow:
         Set dispersiveDelay with the specified float value.
         dispersiveDelay The float value to which dispersiveDelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -2264,6 +2354,9 @@ class DelayModelRow:
         """
         Set dispersiveDelayRate with the specified float value.
         dispersiveDelayRate The float value to which dispersiveDelayRate is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -2309,6 +2402,9 @@ class DelayModelRow:
         Set atmosphericDryDelay with the specified float value.
         atmosphericDryDelay The float value to which atmosphericDryDelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -2352,6 +2448,9 @@ class DelayModelRow:
         """
         Set atmosphericWetDelay with the specified float value.
         atmosphericWetDelay The float value to which atmosphericWetDelay is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -2397,6 +2496,9 @@ class DelayModelRow:
         Set padDelay with the specified float value.
         padDelay The float value to which padDelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -2440,6 +2542,9 @@ class DelayModelRow:
         """
         Set antennaDelay with the specified float value.
         antennaDelay The float value to which antennaDelay is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -2486,6 +2591,7 @@ class DelayModelRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -2528,6 +2634,7 @@ class DelayModelRow:
         """
         Set polarizationType with the specified PolarizationType []  value.
         polarizationType The PolarizationType []  value to which polarizationType is to be set.
+
 
 
         """
@@ -2594,6 +2701,9 @@ class DelayModelRow:
         Set electronicDelay with the specified float []  value.
         electronicDelay The float []  value to which electronicDelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -2658,6 +2768,9 @@ class DelayModelRow:
         """
         Set electronicDelayRate with the specified float []  value.
         electronicDelayRate The float []  value to which electronicDelayRate is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -2724,6 +2837,9 @@ class DelayModelRow:
         Set receiverDelay with the specified float []  value.
         receiverDelay The float []  value to which receiverDelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -2788,6 +2904,9 @@ class DelayModelRow:
         """
         Set IFDelay with the specified float []  value.
         IFDelay The float []  value to which IFDelay is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -2854,6 +2973,9 @@ class DelayModelRow:
         Set LODelay with the specified float []  value.
         LODelay The float []  value to which LODelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -2919,6 +3041,9 @@ class DelayModelRow:
         Set crossPolarizationDelay with the specified float value.
         crossPolarizationDelay The float value to which crossPolarizationDelay is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -2962,6 +3087,7 @@ class DelayModelRow:
         """
         Set centerOfArray with the specified Length []  value.
         centerOfArray The Length []  value to which centerOfArray is to be set.
+
         The value of centerOfArray can be anything allowed by the Length []  constructor.
 
         """
@@ -3029,6 +3155,7 @@ class DelayModelRow:
         delayModelVersion The str value to which delayModelVersion is to be set.
 
 
+
         """
 
         self._delayModelVersion = str(delayModelVersion)
@@ -3072,6 +3199,7 @@ class DelayModelRow:
         """
         Set ionosphericDelay with the specified Interval value.
         ionosphericDelay The Interval value to which ionosphericDelay is to be set.
+
         The value of ionosphericDelay can be anything allowed by the Interval constructor.
 
         """
@@ -3105,6 +3233,7 @@ class DelayModelRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -3135,6 +3264,7 @@ class DelayModelRow:
         """
         Set fieldId with the specified Tag value.
         fieldId The Tag value to which fieldId is to be set.
+
         The value of fieldId can be anything allowed by the Tag constructor.
 
         """
@@ -3158,6 +3288,7 @@ class DelayModelRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

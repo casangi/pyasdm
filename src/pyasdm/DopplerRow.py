@@ -139,23 +139,31 @@ class DopplerRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("dopplerId", self._dopplerId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("transitionIndex", self._transitionIndex)
+
+        result += "\n   "
 
         result += Parser.valueToXML("velDef", DopplerReferenceCode.name(self._velDef))
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("sourceId", self._sourceId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -306,6 +314,7 @@ class DopplerRow:
         dopplerId The int value to which dopplerId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -335,6 +344,7 @@ class DopplerRow:
         transitionIndex The int value to which transitionIndex is to be set.
 
 
+
         """
 
         self._transitionIndex = int(transitionIndex)
@@ -355,6 +365,7 @@ class DopplerRow:
         """
         Set velDef with the specified DopplerReferenceCode value.
         velDef The DopplerReferenceCode value to which velDef is to be set.
+
 
 
         """
@@ -379,6 +390,7 @@ class DopplerRow:
         """
         Set sourceId with the specified int value.
         sourceId The int value to which sourceId is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

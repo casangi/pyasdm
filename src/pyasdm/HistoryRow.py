@@ -152,33 +152,51 @@ class HistoryRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("time", self._time)
+
+        result += "\n   "
 
         result += Parser.valueToXML("message", self._message)
 
+        result += "\n   "
+
         result += Parser.valueToXML("priority", self._priority)
+
+        result += "\n   "
 
         result += Parser.valueToXML("origin", self._origin)
 
+        result += "\n   "
+
         result += Parser.valueToXML("objectId", self._objectId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("application", self._application)
 
+        result += "\n   "
+
         result += Parser.valueToXML("cliCommand", self._cliCommand)
+
+        result += "\n   "
 
         result += Parser.valueToXML("appParms", self._appParms)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -401,6 +419,7 @@ class HistoryRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -432,6 +451,7 @@ class HistoryRow:
         message The str value to which message is to be set.
 
 
+
         """
 
         self._message = str(message)
@@ -452,6 +472,7 @@ class HistoryRow:
         """
         Set priority with the specified str value.
         priority The str value to which priority is to be set.
+
 
 
         """
@@ -476,6 +497,7 @@ class HistoryRow:
         origin The str value to which origin is to be set.
 
 
+
         """
 
         self._origin = str(origin)
@@ -496,6 +518,7 @@ class HistoryRow:
         """
         Set objectId with the specified str value.
         objectId The str value to which objectId is to be set.
+
 
 
         """
@@ -520,6 +543,7 @@ class HistoryRow:
         application The str value to which application is to be set.
 
 
+
         """
 
         self._application = str(application)
@@ -542,6 +566,7 @@ class HistoryRow:
         cliCommand The str value to which cliCommand is to be set.
 
 
+
         """
 
         self._cliCommand = str(cliCommand)
@@ -562,6 +587,7 @@ class HistoryRow:
         """
         Set appParms with the specified str value.
         appParms The str value to which appParms is to be set.
+
 
 
         """
@@ -587,6 +613,7 @@ class HistoryRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

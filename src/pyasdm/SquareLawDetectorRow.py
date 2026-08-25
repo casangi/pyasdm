@@ -133,21 +133,27 @@ class SquareLawDetectorRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "squareLawDetectorId", self._squareLawDetectorId
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numBand", self._numBand)
+
+        result += "\n   "
 
         result += Parser.valueToXML("bandType", DetectorBandType.name(self._bandType))
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -286,6 +292,7 @@ class SquareLawDetectorRow:
         """
         Set squareLawDetectorId with the specified Tag value.
         squareLawDetectorId The Tag value to which squareLawDetectorId is to be set.
+
         The value of squareLawDetectorId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -317,6 +324,7 @@ class SquareLawDetectorRow:
         numBand The int value to which numBand is to be set.
 
 
+
         """
 
         self._numBand = int(numBand)
@@ -337,6 +345,7 @@ class SquareLawDetectorRow:
         """
         Set bandType with the specified DetectorBandType value.
         bandType The DetectorBandType value to which bandType is to be set.
+
 
 
         """

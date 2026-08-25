@@ -524,15 +524,14 @@ class ScanTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<ScanTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scn="http://Alma/XASDM/ScanTable" xsi:schemaLocation="http://Alma/XASDM/ScanTable http://almaobservatory.org/XML/XASDM/4/ScanTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<ScanTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scn="http://Alma/XASDM/ScanTable" xsi:schemaLocation="http://Alma/XASDM/ScanTable http://almaobservatory.org/XML/XASDM/4/ScanTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</ScanTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</ScanTable>"
         return result
 
     def fromXML(self, xmlstr):

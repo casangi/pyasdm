@@ -123,7 +123,9 @@ class CalPrimaryBeamRow:
 
         self._polarizationTypes = []  # this is a list of PolarizationType []
 
-        self._mainBeamEfficiency = []  # this is a list of float []
+        self._mainBeamEfficiency = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._beamDescriptionUID = EntityRef()
 
@@ -228,55 +230,95 @@ class CalPrimaryBeamRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += "\n   "
 
         result += Parser.valueToXML("numSubband", self._numSubband)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
-        result += Parser.listValueToXML("mainBeamEfficiency", self._mainBeamEfficiency)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML(
+            "mainBeamEfficiency", self._mainBeamEfficiency
+        )
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "beamDescriptionUID", self._beamDescriptionUID
         )
 
-        result += Parser.valueToXML("relativeAmplitudeRms", self._relativeAmplitudeRms)
+        result += "\n   "
+
+        result += Parser.floatValueToXML(
+            "relativeAmplitudeRms", self._relativeAmplitudeRms
+        )
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("direction", self._direction)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "minValidDirection", self._minValidDirection
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML(
             "maxValidDirection", self._maxValidDirection
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "descriptionType", PrimaryBeamDescription.name(self._descriptionType)
         )
 
+        result += "\n   "
+
         result += Parser.listValueToXML("imageChannelNumber", self._imageChannelNumber)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "imageNominalFrequency", self._imageNominalFrequency
@@ -284,13 +326,17 @@ class CalPrimaryBeamRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -479,7 +525,7 @@ class CalPrimaryBeamRow:
         eos.writeInt(len(self._mainBeamEfficiency))
         for i in range(len(self._mainBeamEfficiency)):
 
-            eos.writeFloat(self._mainBeamEfficiency[i])
+            eos.writeDouble(self._mainBeamEfficiency[i])
 
         self._beamDescriptionUID.toBin(eos)
 
@@ -602,7 +648,7 @@ class CalPrimaryBeamRow:
         mainBeamEfficiencyDim1 = eis.readInt()
         thisList = []
         for i in range(mainBeamEfficiencyDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._mainBeamEfficiency = thisList
 
@@ -764,6 +810,7 @@ class CalPrimaryBeamRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -791,6 +838,7 @@ class CalPrimaryBeamRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -821,6 +869,7 @@ class CalPrimaryBeamRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -844,6 +893,7 @@ class CalPrimaryBeamRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -868,6 +918,7 @@ class CalPrimaryBeamRow:
         antennaMake The AntennaMake value to which antennaMake is to be set.
 
 
+
         """
 
         self._antennaMake = AntennaMake(antennaMake)
@@ -890,6 +941,7 @@ class CalPrimaryBeamRow:
         numSubband The int value to which numSubband is to be set.
 
 
+
         """
 
         self._numSubband = int(numSubband)
@@ -910,6 +962,7 @@ class CalPrimaryBeamRow:
         """
         Set frequencyRange with the specified Frequency []  []  value.
         frequencyRange The Frequency []  []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  []  constructor.
 
         """
@@ -955,6 +1008,7 @@ class CalPrimaryBeamRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -975,6 +1029,7 @@ class CalPrimaryBeamRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1019,6 +1074,9 @@ class CalPrimaryBeamRow:
         Set mainBeamEfficiency with the specified float []  value.
         mainBeamEfficiency The float []  value to which mainBeamEfficiency is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1062,6 +1120,7 @@ class CalPrimaryBeamRow:
         """
         Set beamDescriptionUID with the specified EntityRef value.
         beamDescriptionUID The EntityRef value to which beamDescriptionUID is to be set.
+
         The value of beamDescriptionUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1085,6 +1144,9 @@ class CalPrimaryBeamRow:
         Set relativeAmplitudeRms with the specified float value.
         relativeAmplitudeRms The float value to which relativeAmplitudeRms is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1106,6 +1168,7 @@ class CalPrimaryBeamRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1149,6 +1212,7 @@ class CalPrimaryBeamRow:
         """
         Set minValidDirection with the specified Angle []  value.
         minValidDirection The Angle []  value to which minValidDirection is to be set.
+
         The value of minValidDirection can be anything allowed by the Angle []  constructor.
 
         """
@@ -1192,6 +1256,7 @@ class CalPrimaryBeamRow:
         """
         Set maxValidDirection with the specified Angle []  value.
         maxValidDirection The Angle []  value to which maxValidDirection is to be set.
+
         The value of maxValidDirection can be anything allowed by the Angle []  constructor.
 
         """
@@ -1237,6 +1302,7 @@ class CalPrimaryBeamRow:
         descriptionType The PrimaryBeamDescription value to which descriptionType is to be set.
 
 
+
         """
 
         self._descriptionType = PrimaryBeamDescription(descriptionType)
@@ -1257,6 +1323,7 @@ class CalPrimaryBeamRow:
         """
         Set imageChannelNumber with the specified int []  value.
         imageChannelNumber The int []  value to which imageChannelNumber is to be set.
+
 
 
         """
@@ -1300,6 +1367,7 @@ class CalPrimaryBeamRow:
         """
         Set imageNominalFrequency with the specified Frequency []  value.
         imageNominalFrequency The Frequency []  value to which imageNominalFrequency is to be set.
+
         The value of imageNominalFrequency can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1346,6 +1414,7 @@ class CalPrimaryBeamRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1376,6 +1445,7 @@ class CalPrimaryBeamRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

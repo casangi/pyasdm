@@ -25,6 +25,7 @@
 
 import math
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class Angle:
@@ -221,7 +222,7 @@ class Angle:
         """
         Print the value of this angle in the units of RADIAN.
         """
-        return str(self.get())
+        return pyasdm.Parser.doubleToString(self.get())
 
     @staticmethod
     def values(items):

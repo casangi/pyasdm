@@ -242,71 +242,111 @@ class CalPositionRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "antennaPosition", self._antennaPosition
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("stationName", self._stationName)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "stationPosition", self._stationPosition
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "positionMethod", PositionMethod.name(self._positionMethod)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAntenna", self._numAntenna)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("refAntennaNames", self._refAntennaNames)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("axesOffset", self._axesOffset)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("axesOffsetErr", self._axesOffsetErr)
 
+        result += "\n   "
+
         result += Parser.valueToXML("axesOffsetFixed", self._axesOffsetFixed)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("positionOffset", self._positionOffset)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("positionErr", self._positionErr)
 
-        result += Parser.valueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("reducedChiSquared", self._reducedChiSquared)
 
         if self._delayRmsExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("delayRms", self._delayRms)
+            result += Parser.doubleValueToXML("delayRms", self._delayRms)
 
         if self._phaseRmsExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("phaseRms", self._phaseRms)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -499,12 +539,12 @@ class CalPositionRow:
 
         Length.listToBin(self._positionErr, eos)
 
-        eos.writeFloat(self._reducedChiSquared)
+        eos.writeDouble(self._reducedChiSquared)
 
         eos.writeBool(self._delayRmsExists)
         if self._delayRmsExists:
 
-            eos.writeFloat(self._delayRms)
+            eos.writeDouble(self._delayRms)
 
         eos.writeBool(self._phaseRmsExists)
         if self._phaseRmsExists:
@@ -666,7 +706,7 @@ class CalPositionRow:
         Set the reducedChiSquared in row from the EndianInput (eis) instance.
         """
 
-        row._reducedChiSquared = eis.readFloat()
+        row._reducedChiSquared = eis.readDouble()
 
     @staticmethod
     def delayRmsFromBin(row, eis):
@@ -676,7 +716,7 @@ class CalPositionRow:
         row._delayRmsExists = eis.readBool()
         if row._delayRmsExists:
 
-            row._delayRms = eis.readFloat()
+            row._delayRms = eis.readDouble()
 
     @staticmethod
     def phaseRmsFromBin(row, eis):
@@ -763,6 +803,7 @@ class CalPositionRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -790,6 +831,7 @@ class CalPositionRow:
         """
         Set atmPhaseCorrection with the specified AtmPhaseCorrection value.
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -820,6 +862,7 @@ class CalPositionRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -843,6 +886,7 @@ class CalPositionRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -865,6 +909,7 @@ class CalPositionRow:
         """
         Set antennaPosition with the specified Length []  value.
         antennaPosition The Length []  value to which antennaPosition is to be set.
+
         The value of antennaPosition can be anything allowed by the Length []  constructor.
 
         """
@@ -910,6 +955,7 @@ class CalPositionRow:
         stationName The str value to which stationName is to be set.
 
 
+
         """
 
         self._stationName = str(stationName)
@@ -930,6 +976,7 @@ class CalPositionRow:
         """
         Set stationPosition with the specified Length []  value.
         stationPosition The Length []  value to which stationPosition is to be set.
+
         The value of stationPosition can be anything allowed by the Length []  constructor.
 
         """
@@ -975,6 +1022,7 @@ class CalPositionRow:
         positionMethod The PositionMethod value to which positionMethod is to be set.
 
 
+
         """
 
         self._positionMethod = PositionMethod(positionMethod)
@@ -995,6 +1043,7 @@ class CalPositionRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         """
@@ -1019,6 +1068,7 @@ class CalPositionRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -1039,6 +1089,7 @@ class CalPositionRow:
         """
         Set refAntennaNames with the specified str []  value.
         refAntennaNames The str []  value to which refAntennaNames is to be set.
+
 
 
         """
@@ -1083,6 +1134,7 @@ class CalPositionRow:
         """
         Set axesOffset with the specified Length value.
         axesOffset The Length value to which axesOffset is to be set.
+
         The value of axesOffset can be anything allowed by the Length constructor.
 
         """
@@ -1106,6 +1158,7 @@ class CalPositionRow:
         """
         Set axesOffsetErr with the specified Length value.
         axesOffsetErr The Length value to which axesOffsetErr is to be set.
+
         The value of axesOffsetErr can be anything allowed by the Length constructor.
 
         """
@@ -1130,6 +1183,7 @@ class CalPositionRow:
         axesOffsetFixed The bool value to which axesOffsetFixed is to be set.
 
 
+
         """
 
         self._axesOffsetFixed = bool(axesOffsetFixed)
@@ -1150,6 +1204,7 @@ class CalPositionRow:
         """
         Set positionOffset with the specified Length []  value.
         positionOffset The Length []  value to which positionOffset is to be set.
+
         The value of positionOffset can be anything allowed by the Length []  constructor.
 
         """
@@ -1193,6 +1248,7 @@ class CalPositionRow:
         """
         Set positionErr with the specified Length []  value.
         positionErr The Length []  value to which positionErr is to be set.
+
         The value of positionErr can be anything allowed by the Length []  constructor.
 
         """
@@ -1237,6 +1293,9 @@ class CalPositionRow:
         Set reducedChiSquared with the specified float value.
         reducedChiSquared The float value to which reducedChiSquared is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1272,6 +1331,9 @@ class CalPositionRow:
         """
         Set delayRms with the specified float value.
         delayRms The float value to which delayRms is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1317,6 +1379,7 @@ class CalPositionRow:
         """
         Set phaseRms with the specified Angle value.
         phaseRms The Angle value to which phaseRms is to be set.
+
         The value of phaseRms can be anything allowed by the Angle constructor.
 
         """
@@ -1350,6 +1413,7 @@ class CalPositionRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1380,6 +1444,7 @@ class CalPositionRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

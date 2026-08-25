@@ -100,7 +100,7 @@ class SwitchCycleRow:
 
         self._numStep = 0
 
-        self._weightArray = []  # this is a list of float []
+        self._weightArray = []  # this is a list of float []  saved as single precision
 
         self._dirOffsetArray = []  # this is a list of Angle []  []
 
@@ -172,33 +172,47 @@ class SwitchCycleRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("switchCycleId", self._switchCycleId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numStep", self._numStep)
 
-        result += Parser.listValueToXML("weightArray", self._weightArray)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("weightArray", self._weightArray)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("dirOffsetArray", self._dirOffsetArray)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "freqOffsetArray", self._freqOffsetArray
         )
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "stepDurationArray", self._stepDurationArray
         )
 
         if self._directionCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "directionCode", DirectionReferenceCode.name(self._directionCode)
             )
 
         if self._directionEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "directionEquinox", self._directionEquinox
@@ -206,7 +220,7 @@ class SwitchCycleRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -457,6 +471,7 @@ class SwitchCycleRow:
         """
         Set switchCycleId with the specified Tag value.
         switchCycleId The Tag value to which switchCycleId is to be set.
+
         The value of switchCycleId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -488,6 +503,7 @@ class SwitchCycleRow:
         numStep The int value to which numStep is to be set.
 
 
+
         """
 
         self._numStep = int(numStep)
@@ -508,6 +524,9 @@ class SwitchCycleRow:
         """
         Set weightArray with the specified float []  value.
         weightArray The float []  value to which weightArray is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -551,6 +570,7 @@ class SwitchCycleRow:
         """
         Set dirOffsetArray with the specified Angle []  []  value.
         dirOffsetArray The Angle []  []  value to which dirOffsetArray is to be set.
+
         The value of dirOffsetArray can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -594,6 +614,7 @@ class SwitchCycleRow:
         """
         Set freqOffsetArray with the specified Frequency []  value.
         freqOffsetArray The Frequency []  value to which freqOffsetArray is to be set.
+
         The value of freqOffsetArray can be anything allowed by the Frequency []  constructor.
 
         """
@@ -637,6 +658,7 @@ class SwitchCycleRow:
         """
         Set stepDurationArray with the specified Interval []  value.
         stepDurationArray The Interval []  value to which stepDurationArray is to be set.
+
         The value of stepDurationArray can be anything allowed by the Interval []  constructor.
 
         """
@@ -696,6 +718,7 @@ class SwitchCycleRow:
         directionCode The DirectionReferenceCode value to which directionCode is to be set.
 
 
+
         """
 
         self._directionCode = DirectionReferenceCode(directionCode)
@@ -739,6 +762,7 @@ class SwitchCycleRow:
         """
         Set directionEquinox with the specified ArrayTime value.
         directionEquinox The ArrayTime value to which directionEquinox is to be set.
+
         The value of directionEquinox can be anything allowed by the ArrayTime constructor.
 
         """

@@ -138,21 +138,29 @@ class PolarizationRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("polarizationId", self._polarizationId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numCorr", self._numCorr)
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("corrType", self._corrType)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("corrProduct", self._corrProduct)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -332,6 +340,7 @@ class PolarizationRow:
         """
         Set polarizationId with the specified Tag value.
         polarizationId The Tag value to which polarizationId is to be set.
+
         The value of polarizationId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -363,6 +372,7 @@ class PolarizationRow:
         numCorr The int value to which numCorr is to be set.
 
 
+
         """
 
         self._numCorr = int(numCorr)
@@ -383,6 +393,7 @@ class PolarizationRow:
         """
         Set corrType with the specified StokesParameter []  value.
         corrType The StokesParameter []  value to which corrType is to be set.
+
 
 
         """
@@ -426,6 +437,7 @@ class PolarizationRow:
         """
         Set corrProduct with the specified PolarizationType []  []  value.
         corrProduct The PolarizationType []  []  value to which corrProduct is to be set.
+
 
 
         """

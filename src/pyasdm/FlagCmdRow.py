@@ -142,27 +142,41 @@ class FlagCmdRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("type", self._type)
 
+        result += "\n   "
+
         result += Parser.valueToXML("reason", self._reason)
+
+        result += "\n   "
 
         result += Parser.valueToXML("level", self._level)
 
+        result += "\n   "
+
         result += Parser.valueToXML("severity", self._severity)
 
+        result += "\n   "
+
         result += Parser.valueToXML("applied", self._applied)
+
+        result += "\n   "
 
         result += Parser.valueToXML("command", self._command)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -355,6 +369,7 @@ class FlagCmdRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -386,6 +401,7 @@ class FlagCmdRow:
         type The str value to which type is to be set.
 
 
+
         """
 
         self._type = str(type)
@@ -406,6 +422,7 @@ class FlagCmdRow:
         """
         Set reason with the specified str value.
         reason The str value to which reason is to be set.
+
 
 
         """
@@ -430,6 +447,7 @@ class FlagCmdRow:
         level The int value to which level is to be set.
 
 
+
         """
 
         self._level = int(level)
@@ -450,6 +468,7 @@ class FlagCmdRow:
         """
         Set severity with the specified int value.
         severity The int value to which severity is to be set.
+
 
 
         """
@@ -474,6 +493,7 @@ class FlagCmdRow:
         applied The bool value to which applied is to be set.
 
 
+
         """
 
         self._applied = bool(applied)
@@ -494,6 +514,7 @@ class FlagCmdRow:
         """
         Set command with the specified str value.
         command The str value to which command is to be set.
+
 
 
         """

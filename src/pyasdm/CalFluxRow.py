@@ -119,9 +119,11 @@ class CalFluxRow:
 
         self._fluxMethod = FluxCalibrationMethod.from_int(0)
 
-        self._flux = []  # this is a list of float []  []
+        self._flux = []  # this is a list of float []  []  saved as double precision
 
-        self._fluxError = []  # this is a list of float []  []
+        self._fluxError = (
+            []
+        )  # this is a list of float []  []  saved as double precision
 
         self._stokes = []  # this is a list of StokesParameter []
 
@@ -291,67 +293,95 @@ class CalFluxRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("sourceName", self._sourceName)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numFrequencyRanges", self._numFrequencyRanges)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numStokes", self._numStokes)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "frequencyRanges", self._frequencyRanges
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "fluxMethod", FluxCalibrationMethod.name(self._fluxMethod)
         )
 
-        result += Parser.listValueToXML("flux", self._flux)
+        result += "\n   "
 
-        result += Parser.listValueToXML("fluxError", self._fluxError)
+        result += Parser.doubleListValueToXML("flux", self._flux)
+
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("fluxError", self._fluxError)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("stokes", self._stokes)
 
         if self._directionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("direction", self._direction)
 
         if self._directionCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "directionCode", DirectionReferenceCode.name(self._directionCode)
             )
 
         if self._directionEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "directionEquinox", self._directionEquinox
             )
 
         if self._PAExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("PA", self._PA)
 
         if self._PAErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("PAError", self._PAError)
 
         if self._sizeExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("size", self._size)
 
         if self._sizeErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("sizeError", self._sizeError)
 
         if self._sourceModelExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "sourceModel", SourceModel.name(self._sourceModel)
@@ -359,13 +389,17 @@ class CalFluxRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -571,7 +605,7 @@ class CalFluxRow:
         eos.writeInt(flux_dims[1])
         for i in range(flux_dims[0]):
             for j in range(flux_dims[1]):
-                eos.writeFloat(self._flux[i][j])
+                eos.writeDouble(self._flux[i][j])
 
         # null array case, unsure if this is possible but this should work
         if self._fluxError is None:
@@ -584,7 +618,7 @@ class CalFluxRow:
         eos.writeInt(fluxError_dims[1])
         for i in range(fluxError_dims[0]):
             for j in range(fluxError_dims[1]):
-                eos.writeFloat(self._fluxError[i][j])
+                eos.writeDouble(self._fluxError[i][j])
 
         eos.writeInt(len(self._stokes))
         for i in range(len(self._stokes)):
@@ -715,7 +749,7 @@ class CalFluxRow:
         for i in range(fluxDim1):
             thisList_j = []
             for j in range(fluxDim2):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
         row._flux = thisList
@@ -732,7 +766,7 @@ class CalFluxRow:
         for i in range(fluxErrorDim1):
             thisList_j = []
             for j in range(fluxErrorDim2):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
         row._fluxError = thisList
@@ -904,6 +938,7 @@ class CalFluxRow:
         sourceName The str value to which sourceName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -932,6 +967,7 @@ class CalFluxRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -955,6 +991,7 @@ class CalFluxRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -979,6 +1016,7 @@ class CalFluxRow:
         numFrequencyRanges The int value to which numFrequencyRanges is to be set.
 
 
+
         """
 
         self._numFrequencyRanges = int(numFrequencyRanges)
@@ -1001,6 +1039,7 @@ class CalFluxRow:
         numStokes The int value to which numStokes is to be set.
 
 
+
         """
 
         self._numStokes = int(numStokes)
@@ -1021,6 +1060,7 @@ class CalFluxRow:
         """
         Set frequencyRanges with the specified Frequency []  []  value.
         frequencyRanges The Frequency []  []  value to which frequencyRanges is to be set.
+
         The value of frequencyRanges can be anything allowed by the Frequency []  []  constructor.
 
         """
@@ -1066,6 +1106,7 @@ class CalFluxRow:
         fluxMethod The FluxCalibrationMethod value to which fluxMethod is to be set.
 
 
+
         """
 
         self._fluxMethod = FluxCalibrationMethod(fluxMethod)
@@ -1086,6 +1127,9 @@ class CalFluxRow:
         """
         Set flux with the specified float []  []  value.
         flux The float []  []  value to which flux is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1130,6 +1174,9 @@ class CalFluxRow:
         Set fluxError with the specified float []  []  value.
         fluxError The float []  []  value to which fluxError is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1172,6 +1219,7 @@ class CalFluxRow:
         """
         Set stokes with the specified StokesParameter []  value.
         stokes The StokesParameter []  value to which stokes is to be set.
+
 
 
         """
@@ -1229,6 +1277,7 @@ class CalFluxRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1296,6 +1345,7 @@ class CalFluxRow:
         directionCode The DirectionReferenceCode value to which directionCode is to be set.
 
 
+
         """
 
         self._directionCode = DirectionReferenceCode(directionCode)
@@ -1339,6 +1389,7 @@ class CalFluxRow:
         """
         Set directionEquinox with the specified Angle value.
         directionEquinox The Angle value to which directionEquinox is to be set.
+
         The value of directionEquinox can be anything allowed by the Angle constructor.
 
         """
@@ -1383,6 +1434,7 @@ class CalFluxRow:
         """
         Set PA with the specified Angle []  []  value.
         PA The Angle []  []  value to which PA is to be set.
+
         The value of PA can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1448,6 +1500,7 @@ class CalFluxRow:
         """
         Set PAError with the specified Angle []  []  value.
         PAError The Angle []  []  value to which PAError is to be set.
+
         The value of PAError can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1513,6 +1566,7 @@ class CalFluxRow:
         """
         Set size with the specified Angle []  []  []  value.
         size The Angle []  []  []  value to which size is to be set.
+
         The value of size can be anything allowed by the Angle []  []  []  constructor.
 
         """
@@ -1578,6 +1632,7 @@ class CalFluxRow:
         """
         Set sizeError with the specified Angle []  []  []  value.
         sizeError The Angle []  []  []  value to which sizeError is to be set.
+
         The value of sizeError can be anything allowed by the Angle []  []  []  constructor.
 
         """
@@ -1645,6 +1700,7 @@ class CalFluxRow:
         sourceModel The SourceModel value to which sourceModel is to be set.
 
 
+
         """
 
         self._sourceModel = SourceModel(sourceModel)
@@ -1676,6 +1732,7 @@ class CalFluxRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1706,6 +1763,7 @@ class CalFluxRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

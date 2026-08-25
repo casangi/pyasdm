@@ -542,15 +542,14 @@ class SeeingTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<SeeingTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sng="http://Alma/XASDM/SeeingTable" xsi:schemaLocation="http://Alma/XASDM/SeeingTable http://almaobservatory.org/XML/XASDM/4/SeeingTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<SeeingTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sng="http://Alma/XASDM/SeeingTable" xsi:schemaLocation="http://Alma/XASDM/SeeingTable http://almaobservatory.org/XML/XASDM/4/SeeingTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</SeeingTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</SeeingTable>"
         return result
 
     def fromXML(self, xmlstr):

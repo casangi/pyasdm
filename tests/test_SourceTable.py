@@ -1,6 +1,6 @@
-
 import unittest
 import pyasdm
+
 
 class source_table_test(unittest.TestCase):
 
@@ -15,7 +15,7 @@ class source_table_test(unittest.TestCase):
     def test_table_row(self):
         # a simple test to add a row to an empty SourceTable directly from XML
         # nothing is written to disk
-        
+
         test_asdm = pyasdm.ASDM()
         source_row_0_xml = """
         <row>
@@ -41,6 +41,7 @@ class source_table_test(unittest.TestCase):
         source_row_0.setFromXML(source_row_0_xml)
         source_table.add(source_row_0)
         print(source_table)
+
 
 if __name__ == "__main__":
 

@@ -655,15 +655,14 @@ class GainTrackingTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<GainTrackingTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gntrk="http://Alma/XASDM/GainTrackingTable" xsi:schemaLocation="http://Alma/XASDM/GainTrackingTable http://almaobservatory.org/XML/XASDM/4/GainTrackingTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<GainTrackingTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gntrk="http://Alma/XASDM/GainTrackingTable" xsi:schemaLocation="http://Alma/XASDM/GainTrackingTable http://almaobservatory.org/XML/XASDM/4/GainTrackingTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</GainTrackingTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</GainTrackingTable>"
         return result
 
     def fromXML(self, xmlstr):

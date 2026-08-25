@@ -234,49 +234,81 @@ class SBSummaryRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("sBSummaryId", self._sBSummaryId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("sbSummaryUID", self._sbSummaryUID)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("projectUID", self._projectUID)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("obsUnitSetUID", self._obsUnitSetUID)
 
-        result += Parser.valueToXML("frequency", self._frequency)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("frequency", self._frequency)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "frequencyBand", ReceiverBand.name(self._frequencyBand)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("sbType", SBType.name(self._sbType))
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("sbDuration", self._sbDuration)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numObservingMode", self._numObservingMode)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("observingMode", self._observingMode)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numberRepeats", self._numberRepeats)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numScienceGoal", self._numScienceGoal)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("scienceGoal", self._scienceGoal)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numWeatherConstraint", self._numWeatherConstraint)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("weatherConstraint", self._weatherConstraint)
 
         if self._centerDirectionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "centerDirection", self._centerDirection
             )
 
         if self._centerDirectionCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "centerDirectionCode",
@@ -284,6 +316,7 @@ class SBSummaryRow:
             )
 
         if self._centerDirectionEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "centerDirectionEquinox", self._centerDirectionEquinox
@@ -291,7 +324,7 @@ class SBSummaryRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -444,7 +477,7 @@ class SBSummaryRow:
 
         self._obsUnitSetUID.toBin(eos)
 
-        eos.writeFloat(self._frequency)
+        eos.writeDouble(self._frequency)
 
         eos.writeString(str(self._frequencyBand))
 
@@ -528,7 +561,7 @@ class SBSummaryRow:
         Set the frequency in row from the EndianInput (eis) instance.
         """
 
-        row._frequency = eis.readFloat()
+        row._frequency = eis.readDouble()
 
     @staticmethod
     def frequencyBandFromBin(row, eis):
@@ -730,6 +763,7 @@ class SBSummaryRow:
         """
         Set sBSummaryId with the specified Tag value.
         sBSummaryId The Tag value to which sBSummaryId is to be set.
+
         The value of sBSummaryId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -760,6 +794,7 @@ class SBSummaryRow:
         """
         Set sbSummaryUID with the specified EntityRef value.
         sbSummaryUID The EntityRef value to which sbSummaryUID is to be set.
+
         The value of sbSummaryUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -783,6 +818,7 @@ class SBSummaryRow:
         """
         Set projectUID with the specified EntityRef value.
         projectUID The EntityRef value to which projectUID is to be set.
+
         The value of projectUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -806,6 +842,7 @@ class SBSummaryRow:
         """
         Set obsUnitSetUID with the specified EntityRef value.
         obsUnitSetUID The EntityRef value to which obsUnitSetUID is to be set.
+
         The value of obsUnitSetUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -828,6 +865,9 @@ class SBSummaryRow:
         """
         Set frequency with the specified float value.
         frequency The float value to which frequency is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -852,6 +892,7 @@ class SBSummaryRow:
         frequencyBand The ReceiverBand value to which frequencyBand is to be set.
 
 
+
         """
 
         self._frequencyBand = ReceiverBand(frequencyBand)
@@ -872,6 +913,7 @@ class SBSummaryRow:
         """
         Set sbType with the specified SBType value.
         sbType The SBType value to which sbType is to be set.
+
 
 
         """
@@ -895,6 +937,7 @@ class SBSummaryRow:
         """
         Set sbDuration with the specified Interval value.
         sbDuration The Interval value to which sbDuration is to be set.
+
         The value of sbDuration can be anything allowed by the Interval constructor.
 
         """
@@ -919,6 +962,7 @@ class SBSummaryRow:
         numObservingMode The int value to which numObservingMode is to be set.
 
 
+
         """
 
         self._numObservingMode = int(numObservingMode)
@@ -939,6 +983,7 @@ class SBSummaryRow:
         """
         Set observingMode with the specified str []  value.
         observingMode The str []  value to which observingMode is to be set.
+
 
 
         """
@@ -984,6 +1029,7 @@ class SBSummaryRow:
         numberRepeats The int value to which numberRepeats is to be set.
 
 
+
         """
 
         self._numberRepeats = int(numberRepeats)
@@ -1006,6 +1052,7 @@ class SBSummaryRow:
         numScienceGoal The int value to which numScienceGoal is to be set.
 
 
+
         """
 
         self._numScienceGoal = int(numScienceGoal)
@@ -1026,6 +1073,7 @@ class SBSummaryRow:
         """
         Set scienceGoal with the specified str []  value.
         scienceGoal The str []  value to which scienceGoal is to be set.
+
 
 
         """
@@ -1071,6 +1119,7 @@ class SBSummaryRow:
         numWeatherConstraint The int value to which numWeatherConstraint is to be set.
 
 
+
         """
 
         self._numWeatherConstraint = int(numWeatherConstraint)
@@ -1091,6 +1140,7 @@ class SBSummaryRow:
         """
         Set weatherConstraint with the specified str []  value.
         weatherConstraint The str []  value to which weatherConstraint is to be set.
+
 
 
         """
@@ -1148,6 +1198,7 @@ class SBSummaryRow:
         """
         Set centerDirection with the specified Angle []  value.
         centerDirection The Angle []  value to which centerDirection is to be set.
+
         The value of centerDirection can be anything allowed by the Angle []  constructor.
 
         """
@@ -1215,6 +1266,7 @@ class SBSummaryRow:
         centerDirectionCode The DirectionReferenceCode value to which centerDirectionCode is to be set.
 
 
+
         """
 
         self._centerDirectionCode = DirectionReferenceCode(centerDirectionCode)
@@ -1258,6 +1310,7 @@ class SBSummaryRow:
         """
         Set centerDirectionEquinox with the specified ArrayTime value.
         centerDirectionEquinox The ArrayTime value to which centerDirectionEquinox is to be set.
+
         The value of centerDirectionEquinox can be anything allowed by the ArrayTime constructor.
 
         """

@@ -150,25 +150,34 @@ class StationRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("stationId", self._stationId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("name", self._name)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("position", self._position)
+
+        result += "\n   "
 
         result += Parser.valueToXML("type", StationType.name(self._type))
 
         if self._timeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("time", self._time)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -340,6 +349,7 @@ class StationRow:
         """
         Set stationId with the specified Tag value.
         stationId The Tag value to which stationId is to be set.
+
         The value of stationId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -371,6 +381,7 @@ class StationRow:
         name The str value to which name is to be set.
 
 
+
         """
 
         self._name = str(name)
@@ -391,6 +402,7 @@ class StationRow:
         """
         Set position with the specified Length []  value.
         position The Length []  value to which position is to be set.
+
         The value of position can be anything allowed by the Length []  constructor.
 
         """
@@ -436,6 +448,7 @@ class StationRow:
         type The StationType value to which type is to be set.
 
 
+
         """
 
         self._type = StationType(type)
@@ -471,6 +484,7 @@ class StationRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """

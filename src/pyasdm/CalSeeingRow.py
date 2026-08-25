@@ -210,55 +210,82 @@ class CalSeeingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("integrationTime", self._integrationTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numBaseLengths", self._numBaseLengths)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "baselineLengths", self._baselineLengths
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("phaseRMS", self._phaseRMS)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("seeing", self._seeing)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("seeingError", self._seeingError)
 
         if self._exponentExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("exponent", self._exponent)
+            result += Parser.floatValueToXML("exponent", self._exponent)
 
         if self._outerScaleExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("outerScale", self._outerScale)
 
         if self._outerScaleRMSExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("outerScaleRMS", self._outerScaleRMS)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
         return result
 
     def setFromXML(self, xmlrow):
@@ -609,6 +636,7 @@ class CalSeeingRow:
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -637,6 +665,7 @@ class CalSeeingRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -660,6 +689,7 @@ class CalSeeingRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -682,6 +712,7 @@ class CalSeeingRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -726,6 +757,7 @@ class CalSeeingRow:
         """
         Set integrationTime with the specified Interval value.
         integrationTime The Interval value to which integrationTime is to be set.
+
         The value of integrationTime can be anything allowed by the Interval constructor.
 
         """
@@ -750,6 +782,7 @@ class CalSeeingRow:
         numBaseLengths The int value to which numBaseLengths is to be set.
 
 
+
         """
 
         self._numBaseLengths = int(numBaseLengths)
@@ -770,6 +803,7 @@ class CalSeeingRow:
         """
         Set baselineLengths with the specified Length []  value.
         baselineLengths The Length []  value to which baselineLengths is to be set.
+
         The value of baselineLengths can be anything allowed by the Length []  constructor.
 
         """
@@ -813,6 +847,7 @@ class CalSeeingRow:
         """
         Set phaseRMS with the specified Angle []  value.
         phaseRMS The Angle []  value to which phaseRMS is to be set.
+
         The value of phaseRMS can be anything allowed by the Angle []  constructor.
 
         """
@@ -857,6 +892,7 @@ class CalSeeingRow:
         """
         Set seeing with the specified Angle value.
         seeing The Angle value to which seeing is to be set.
+
         The value of seeing can be anything allowed by the Angle constructor.
 
         """
@@ -880,6 +916,7 @@ class CalSeeingRow:
         """
         Set seeingError with the specified Angle value.
         seeingError The Angle value to which seeingError is to be set.
+
         The value of seeingError can be anything allowed by the Angle constructor.
 
         """
@@ -916,6 +953,9 @@ class CalSeeingRow:
         """
         Set exponent with the specified float value.
         exponent The float value to which exponent is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -961,6 +1001,7 @@ class CalSeeingRow:
         """
         Set outerScale with the specified Length value.
         outerScale The Length value to which outerScale is to be set.
+
         The value of outerScale can be anything allowed by the Length constructor.
 
         """
@@ -1006,6 +1047,7 @@ class CalSeeingRow:
         """
         Set outerScaleRMS with the specified Angle value.
         outerScaleRMS The Angle value to which outerScaleRMS is to be set.
+
         The value of outerScaleRMS can be anything allowed by the Angle constructor.
 
         """
@@ -1039,6 +1081,7 @@ class CalSeeingRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1069,6 +1112,7 @@ class CalSeeingRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
