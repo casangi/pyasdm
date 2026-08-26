@@ -258,6 +258,27 @@ class GainTrackingRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "GainTrackingTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -282,17 +303,17 @@ class GainTrackingRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
         self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        attenuatorNode = rowdom.getElementsByTagName("attenuator")[0]
+        attenuatorNode = self._getFirstNodeByTagName(rowdom, "attenuator", True)
 
         attenuatorStr = self._getXMLNodeChildText(attenuatorNode)
 
@@ -300,31 +321,33 @@ class GainTrackingRow:
             attenuatorStr, float, "GainTracking", False
         )
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", True
+        )
 
         polarizationTypeStr = self._getXMLNodeChildText(polarizationTypeNode)
         self._polarizationType = Parser.stringListToLists(
             polarizationTypeStr, PolarizationType, "GainTracking", False
         )
 
-        samplingLevelNode = rowdom.getElementsByTagName("samplingLevel")
-        if len(samplingLevelNode) > 0:
+        samplingLevelNode = self._getFirstNodeByTagName(rowdom, "samplingLevel", False)
+        if samplingLevelNode:
 
-            self._samplingLevel = float(self._getXMLNodeChildText(samplingLevelNode[0]))
+            self._samplingLevel = float(self._getXMLNodeChildText(samplingLevelNode))
 
             self._samplingLevelExists = True
 
-        numAttFreqNode = rowdom.getElementsByTagName("numAttFreq")
-        if len(numAttFreqNode) > 0:
+        numAttFreqNode = self._getFirstNodeByTagName(rowdom, "numAttFreq", False)
+        if numAttFreqNode:
 
-            self._numAttFreq = int(self._getXMLNodeChildText(numAttFreqNode[0]))
+            self._numAttFreq = int(self._getXMLNodeChildText(numAttFreqNode))
 
             self._numAttFreqExists = True
 
-        attFreqNode = rowdom.getElementsByTagName("attFreq")
-        if len(attFreqNode) > 0:
+        attFreqNode = self._getFirstNodeByTagName(rowdom, "attFreq", False)
+        if attFreqNode:
 
-            attFreqStr = self._getXMLNodeChildText(attFreqNode[0])
+            attFreqStr = self._getXMLNodeChildText(attFreqNode)
 
             self._attFreq = Parser.stringListToLists(
                 attFreqStr, float, "GainTracking", False
@@ -332,10 +355,10 @@ class GainTrackingRow:
 
             self._attFreqExists = True
 
-        attSpectrumNode = rowdom.getElementsByTagName("attSpectrum")
-        if len(attSpectrumNode) > 0:
+        attSpectrumNode = self._getFirstNodeByTagName(rowdom, "attSpectrum", False)
+        if attSpectrumNode:
 
-            attSpectrumStr = self._getXMLNodeChildText(attSpectrumNode[0])
+            attSpectrumStr = self._getXMLNodeChildText(attSpectrumNode)
 
             self._attSpectrum = Parser.stringListToLists(
                 attSpectrumStr, Complex, "GainTracking", True
@@ -345,15 +368,17 @@ class GainTrackingRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
         self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        feedIdNode = rowdom.getElementsByTagName("feedId")[0]
+        feedIdNode = self._getFirstNodeByTagName(rowdom, "feedId", True)
 
         self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
         self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 

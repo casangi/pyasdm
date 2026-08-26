@@ -176,6 +176,27 @@ class AlmaRadiometerRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "AlmaRadiometerTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -202,23 +223,27 @@ class AlmaRadiometerRow:
 
         # intrinsic attribute values
 
-        almaRadiometerIdNode = rowdom.getElementsByTagName("almaRadiometerId")[0]
+        almaRadiometerIdNode = self._getFirstNodeByTagName(
+            rowdom, "almaRadiometerId", True
+        )
 
         self._almaRadiometerId = Tag(self._getXMLNodeChildText(almaRadiometerIdNode))
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")
-        if len(numAntennaNode) > 0:
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", False)
+        if numAntennaNode:
 
-            self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode[0]))
+            self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
             self._numAntennaExists = True
 
         # extrinsic attribute values
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")
-        if len(spectralWindowIdNode) > 0:
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", False
+        )
+        if spectralWindowIdNode:
 
-            spectralWindowIdStr = self._getXMLNodeChildText(spectralWindowIdNode[0])
+            spectralWindowIdStr = self._getXMLNodeChildText(spectralWindowIdNode)
 
             self._spectralWindowId = Parser.stringListToLists(
                 spectralWindowIdStr, Tag, "AlmaRadiometer", True

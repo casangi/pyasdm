@@ -222,6 +222,27 @@ class ReceiverRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ReceiverTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -246,43 +267,45 @@ class ReceiverRow:
 
         # intrinsic attribute values
 
-        receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
+        receiverIdNode = self._getFirstNodeByTagName(rowdom, "receiverId", True)
 
         self._receiverId = int(self._getXMLNodeChildText(receiverIdNode))
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        nameNode = rowdom.getElementsByTagName("name")[0]
+        nameNode = self._getFirstNodeByTagName(rowdom, "name", True)
 
         self._name = str(self._getXMLNodeChildText(nameNode))
 
-        numLONode = rowdom.getElementsByTagName("numLO")[0]
+        numLONode = self._getFirstNodeByTagName(rowdom, "numLO", True)
 
         self._numLO = int(self._getXMLNodeChildText(numLONode))
 
-        frequencyBandNode = rowdom.getElementsByTagName("frequencyBand")[0]
+        frequencyBandNode = self._getFirstNodeByTagName(rowdom, "frequencyBand", True)
 
         self._frequencyBand = ReceiverBand.newReceiverBand(
             self._getXMLNodeChildText(frequencyBandNode)
         )
 
-        freqLONode = rowdom.getElementsByTagName("freqLO")[0]
+        freqLONode = self._getFirstNodeByTagName(rowdom, "freqLO", True)
 
         freqLOStr = self._getXMLNodeChildText(freqLONode)
 
         self._freqLO = Parser.stringListToLists(freqLOStr, Frequency, "Receiver", True)
 
-        receiverSidebandNode = rowdom.getElementsByTagName("receiverSideband")[0]
+        receiverSidebandNode = self._getFirstNodeByTagName(
+            rowdom, "receiverSideband", True
+        )
 
         self._receiverSideband = ReceiverSideband.newReceiverSideband(
             self._getXMLNodeChildText(receiverSidebandNode)
         )
 
-        sidebandLONode = rowdom.getElementsByTagName("sidebandLO")[0]
+        sidebandLONode = self._getFirstNodeByTagName(rowdom, "sidebandLO", True)
 
         sidebandLOStr = self._getXMLNodeChildText(sidebandLONode)
         self._sidebandLO = Parser.stringListToLists(
@@ -291,7 +314,9 @@ class ReceiverRow:
 
         # extrinsic attribute values
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
         self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 

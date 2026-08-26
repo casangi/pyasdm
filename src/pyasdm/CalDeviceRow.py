@@ -274,6 +274,27 @@ class CalDeviceRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalDeviceTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -298,34 +319,34 @@ class CalDeviceRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        numCalloadNode = rowdom.getElementsByTagName("numCalload")[0]
+        numCalloadNode = self._getFirstNodeByTagName(rowdom, "numCalload", True)
 
         self._numCalload = int(self._getXMLNodeChildText(numCalloadNode))
 
-        calLoadNamesNode = rowdom.getElementsByTagName("calLoadNames")[0]
+        calLoadNamesNode = self._getFirstNodeByTagName(rowdom, "calLoadNames", True)
 
         calLoadNamesStr = self._getXMLNodeChildText(calLoadNamesNode)
         self._calLoadNames = Parser.stringListToLists(
             calLoadNamesStr, CalibrationDevice, "CalDevice", False
         )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")
-        if len(numReceptorNode) > 0:
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", False)
+        if numReceptorNode:
 
-            self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode[0]))
+            self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
             self._numReceptorExists = True
 
-        calEffNode = rowdom.getElementsByTagName("calEff")
-        if len(calEffNode) > 0:
+        calEffNode = self._getFirstNodeByTagName(rowdom, "calEff", False)
+        if calEffNode:
 
-            calEffStr = self._getXMLNodeChildText(calEffNode[0])
+            calEffStr = self._getXMLNodeChildText(calEffNode)
 
             self._calEff = Parser.stringListToLists(
                 calEffStr, float, "CalDevice", False
@@ -333,10 +354,10 @@ class CalDeviceRow:
 
             self._calEffExists = True
 
-        noiseCalNode = rowdom.getElementsByTagName("noiseCal")
-        if len(noiseCalNode) > 0:
+        noiseCalNode = self._getFirstNodeByTagName(rowdom, "noiseCal", False)
+        if noiseCalNode:
 
-            noiseCalStr = self._getXMLNodeChildText(noiseCalNode[0])
+            noiseCalStr = self._getXMLNodeChildText(noiseCalNode)
 
             self._noiseCal = Parser.stringListToLists(
                 noiseCalStr, float, "CalDevice", False
@@ -344,10 +365,12 @@ class CalDeviceRow:
 
             self._noiseCalExists = True
 
-        coupledNoiseCalNode = rowdom.getElementsByTagName("coupledNoiseCal")
-        if len(coupledNoiseCalNode) > 0:
+        coupledNoiseCalNode = self._getFirstNodeByTagName(
+            rowdom, "coupledNoiseCal", False
+        )
+        if coupledNoiseCalNode:
 
-            coupledNoiseCalStr = self._getXMLNodeChildText(coupledNoiseCalNode[0])
+            coupledNoiseCalStr = self._getXMLNodeChildText(coupledNoiseCalNode)
 
             self._coupledNoiseCal = Parser.stringListToLists(
                 coupledNoiseCalStr, float, "CalDevice", False
@@ -355,10 +378,12 @@ class CalDeviceRow:
 
             self._coupledNoiseCalExists = True
 
-        temperatureLoadNode = rowdom.getElementsByTagName("temperatureLoad")
-        if len(temperatureLoadNode) > 0:
+        temperatureLoadNode = self._getFirstNodeByTagName(
+            rowdom, "temperatureLoad", False
+        )
+        if temperatureLoadNode:
 
-            temperatureLoadStr = self._getXMLNodeChildText(temperatureLoadNode[0])
+            temperatureLoadStr = self._getXMLNodeChildText(temperatureLoadNode)
 
             self._temperatureLoad = Parser.stringListToLists(
                 temperatureLoadStr, Temperature, "CalDevice", True
@@ -368,15 +393,17 @@ class CalDeviceRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
         self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        feedIdNode = rowdom.getElementsByTagName("feedId")[0]
+        feedIdNode = self._getFirstNodeByTagName(rowdom, "feedId", True)
 
         self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
         self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 

@@ -224,6 +224,27 @@ class VLAWVRRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "VLAWVRTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -248,32 +269,34 @@ class VLAWVRRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        numChanNode = rowdom.getElementsByTagName("numChan")[0]
+        numChanNode = self._getFirstNodeByTagName(rowdom, "numChan", True)
 
         self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
-        hiValuesNode = rowdom.getElementsByTagName("hiValues")[0]
+        hiValuesNode = self._getFirstNodeByTagName(rowdom, "hiValues", True)
 
         hiValuesStr = self._getXMLNodeChildText(hiValuesNode)
 
         self._hiValues = Parser.stringListToLists(hiValuesStr, float, "VLAWVR", False)
 
-        loValuesNode = rowdom.getElementsByTagName("loValues")[0]
+        loValuesNode = self._getFirstNodeByTagName(rowdom, "loValues", True)
 
         loValuesStr = self._getXMLNodeChildText(loValuesNode)
 
         self._loValues = Parser.stringListToLists(loValuesStr, float, "VLAWVR", False)
 
-        chanFreqCenterNode = rowdom.getElementsByTagName("chanFreqCenter")
-        if len(chanFreqCenterNode) > 0:
+        chanFreqCenterNode = self._getFirstNodeByTagName(
+            rowdom, "chanFreqCenter", False
+        )
+        if chanFreqCenterNode:
 
-            chanFreqCenterStr = self._getXMLNodeChildText(chanFreqCenterNode[0])
+            chanFreqCenterStr = self._getXMLNodeChildText(chanFreqCenterNode)
 
             self._chanFreqCenter = Parser.stringListToLists(
                 chanFreqCenterStr, Frequency, "VLAWVR", True
@@ -281,10 +304,10 @@ class VLAWVRRow:
 
             self._chanFreqCenterExists = True
 
-        chanWidthNode = rowdom.getElementsByTagName("chanWidth")
-        if len(chanWidthNode) > 0:
+        chanWidthNode = self._getFirstNodeByTagName(rowdom, "chanWidth", False)
+        if chanWidthNode:
 
-            chanWidthStr = self._getXMLNodeChildText(chanWidthNode[0])
+            chanWidthStr = self._getXMLNodeChildText(chanWidthNode)
 
             self._chanWidth = Parser.stringListToLists(
                 chanWidthStr, Frequency, "VLAWVR", True
@@ -292,16 +315,16 @@ class VLAWVRRow:
 
             self._chanWidthExists = True
 
-        wvrIdNode = rowdom.getElementsByTagName("wvrId")
-        if len(wvrIdNode) > 0:
+        wvrIdNode = self._getFirstNodeByTagName(rowdom, "wvrId", False)
+        if wvrIdNode:
 
-            self._wvrId = str(self._getXMLNodeChildText(wvrIdNode[0]))
+            self._wvrId = str(self._getXMLNodeChildText(wvrIdNode))
 
             self._wvrIdExists = True
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
         self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 

@@ -289,6 +289,27 @@ class PulsarRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "PulsarTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -313,37 +334,37 @@ class PulsarRow:
 
         # intrinsic attribute values
 
-        pulsarIdNode = rowdom.getElementsByTagName("pulsarId")[0]
+        pulsarIdNode = self._getFirstNodeByTagName(rowdom, "pulsarId", True)
 
         self._pulsarId = Tag(self._getXMLNodeChildText(pulsarIdNode))
 
-        refTimeNode = rowdom.getElementsByTagName("refTime")[0]
+        refTimeNode = self._getFirstNodeByTagName(rowdom, "refTime", True)
 
         self._refTime = ArrayTime(self._getXMLNodeChildText(refTimeNode))
 
-        refPulseFreqNode = rowdom.getElementsByTagName("refPulseFreq")[0]
+        refPulseFreqNode = self._getFirstNodeByTagName(rowdom, "refPulseFreq", True)
 
         self._refPulseFreq = Frequency(self._getXMLNodeChildText(refPulseFreqNode))
 
-        refPhaseNode = rowdom.getElementsByTagName("refPhase")[0]
+        refPhaseNode = self._getFirstNodeByTagName(rowdom, "refPhase", True)
 
         self._refPhase = float(self._getXMLNodeChildText(refPhaseNode))
 
-        numBinNode = rowdom.getElementsByTagName("numBin")[0]
+        numBinNode = self._getFirstNodeByTagName(rowdom, "numBin", True)
 
         self._numBin = int(self._getXMLNodeChildText(numBinNode))
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")
-        if len(numPolyNode) > 0:
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", False)
+        if numPolyNode:
 
-            self._numPoly = int(self._getXMLNodeChildText(numPolyNode[0]))
+            self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
             self._numPolyExists = True
 
-        phasePolyNode = rowdom.getElementsByTagName("phasePoly")
-        if len(phasePolyNode) > 0:
+        phasePolyNode = self._getFirstNodeByTagName(rowdom, "phasePoly", False)
+        if phasePolyNode:
 
-            phasePolyStr = self._getXMLNodeChildText(phasePolyNode[0])
+            phasePolyStr = self._getXMLNodeChildText(phasePolyNode)
 
             self._phasePoly = Parser.stringListToLists(
                 phasePolyStr, float, "Pulsar", False
@@ -351,17 +372,17 @@ class PulsarRow:
 
             self._phasePolyExists = True
 
-        timeSpanNode = rowdom.getElementsByTagName("timeSpan")
-        if len(timeSpanNode) > 0:
+        timeSpanNode = self._getFirstNodeByTagName(rowdom, "timeSpan", False)
+        if timeSpanNode:
 
-            self._timeSpan = Interval(self._getXMLNodeChildText(timeSpanNode[0]))
+            self._timeSpan = Interval(self._getXMLNodeChildText(timeSpanNode))
 
             self._timeSpanExists = True
 
-        startPhaseBinNode = rowdom.getElementsByTagName("startPhaseBin")
-        if len(startPhaseBinNode) > 0:
+        startPhaseBinNode = self._getFirstNodeByTagName(rowdom, "startPhaseBin", False)
+        if startPhaseBinNode:
 
-            startPhaseBinStr = self._getXMLNodeChildText(startPhaseBinNode[0])
+            startPhaseBinStr = self._getXMLNodeChildText(startPhaseBinNode)
 
             self._startPhaseBin = Parser.stringListToLists(
                 startPhaseBinStr, float, "Pulsar", False
@@ -369,10 +390,10 @@ class PulsarRow:
 
             self._startPhaseBinExists = True
 
-        endPhaseBinNode = rowdom.getElementsByTagName("endPhaseBin")
-        if len(endPhaseBinNode) > 0:
+        endPhaseBinNode = self._getFirstNodeByTagName(rowdom, "endPhaseBin", False)
+        if endPhaseBinNode:
 
-            endPhaseBinStr = self._getXMLNodeChildText(endPhaseBinNode[0])
+            endPhaseBinStr = self._getXMLNodeChildText(endPhaseBinNode)
 
             self._endPhaseBin = Parser.stringListToLists(
                 endPhaseBinStr, float, "Pulsar", False
@@ -380,21 +401,21 @@ class PulsarRow:
 
             self._endPhaseBinExists = True
 
-        dispersionMeasureNode = rowdom.getElementsByTagName("dispersionMeasure")
-        if len(dispersionMeasureNode) > 0:
+        dispersionMeasureNode = self._getFirstNodeByTagName(
+            rowdom, "dispersionMeasure", False
+        )
+        if dispersionMeasureNode:
 
             self._dispersionMeasure = float(
-                self._getXMLNodeChildText(dispersionMeasureNode[0])
+                self._getXMLNodeChildText(dispersionMeasureNode)
             )
 
             self._dispersionMeasureExists = True
 
-        refFrequencyNode = rowdom.getElementsByTagName("refFrequency")
-        if len(refFrequencyNode) > 0:
+        refFrequencyNode = self._getFirstNodeByTagName(rowdom, "refFrequency", False)
+        if refFrequencyNode:
 
-            self._refFrequency = Frequency(
-                self._getXMLNodeChildText(refFrequencyNode[0])
-            )
+            self._refFrequency = Frequency(self._getXMLNodeChildText(refFrequencyNode))
 
             self._refFrequencyExists = True
 

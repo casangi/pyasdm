@@ -189,6 +189,27 @@ class StateRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "StateTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -213,32 +234,32 @@ class StateRow:
 
         # intrinsic attribute values
 
-        stateIdNode = rowdom.getElementsByTagName("stateId")[0]
+        stateIdNode = self._getFirstNodeByTagName(rowdom, "stateId", True)
 
         self._stateId = Tag(self._getXMLNodeChildText(stateIdNode))
 
-        calDeviceNameNode = rowdom.getElementsByTagName("calDeviceName")[0]
+        calDeviceNameNode = self._getFirstNodeByTagName(rowdom, "calDeviceName", True)
 
         self._calDeviceName = CalibrationDevice.newCalibrationDevice(
             self._getXMLNodeChildText(calDeviceNameNode)
         )
 
-        sigNode = rowdom.getElementsByTagName("sig")[0]
+        sigNode = self._getFirstNodeByTagName(rowdom, "sig", True)
 
         self._sig = bool(self._getXMLNodeChildText(sigNode))
 
-        refNode = rowdom.getElementsByTagName("ref")[0]
+        refNode = self._getFirstNodeByTagName(rowdom, "ref", True)
 
         self._ref = bool(self._getXMLNodeChildText(refNode))
 
-        onSkyNode = rowdom.getElementsByTagName("onSky")[0]
+        onSkyNode = self._getFirstNodeByTagName(rowdom, "onSky", True)
 
         self._onSky = bool(self._getXMLNodeChildText(onSkyNode))
 
-        weightNode = rowdom.getElementsByTagName("weight")
-        if len(weightNode) > 0:
+        weightNode = self._getFirstNodeByTagName(rowdom, "weight", False)
+        if weightNode:
 
-            self._weight = float(self._getXMLNodeChildText(weightNode[0]))
+            self._weight = float(self._getXMLNodeChildText(weightNode))
 
             self._weightExists = True
 

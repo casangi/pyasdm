@@ -223,6 +223,27 @@ class SwitchCycleRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SwitchCycleTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -247,15 +268,15 @@ class SwitchCycleRow:
 
         # intrinsic attribute values
 
-        switchCycleIdNode = rowdom.getElementsByTagName("switchCycleId")[0]
+        switchCycleIdNode = self._getFirstNodeByTagName(rowdom, "switchCycleId", True)
 
         self._switchCycleId = Tag(self._getXMLNodeChildText(switchCycleIdNode))
 
-        numStepNode = rowdom.getElementsByTagName("numStep")[0]
+        numStepNode = self._getFirstNodeByTagName(rowdom, "numStep", True)
 
         self._numStep = int(self._getXMLNodeChildText(numStepNode))
 
-        weightArrayNode = rowdom.getElementsByTagName("weightArray")[0]
+        weightArrayNode = self._getFirstNodeByTagName(rowdom, "weightArray", True)
 
         weightArrayStr = self._getXMLNodeChildText(weightArrayNode)
 
@@ -263,7 +284,7 @@ class SwitchCycleRow:
             weightArrayStr, float, "SwitchCycle", False
         )
 
-        dirOffsetArrayNode = rowdom.getElementsByTagName("dirOffsetArray")[0]
+        dirOffsetArrayNode = self._getFirstNodeByTagName(rowdom, "dirOffsetArray", True)
 
         dirOffsetArrayStr = self._getXMLNodeChildText(dirOffsetArrayNode)
 
@@ -271,7 +292,9 @@ class SwitchCycleRow:
             dirOffsetArrayStr, Angle, "SwitchCycle", True
         )
 
-        freqOffsetArrayNode = rowdom.getElementsByTagName("freqOffsetArray")[0]
+        freqOffsetArrayNode = self._getFirstNodeByTagName(
+            rowdom, "freqOffsetArray", True
+        )
 
         freqOffsetArrayStr = self._getXMLNodeChildText(freqOffsetArrayNode)
 
@@ -279,7 +302,9 @@ class SwitchCycleRow:
             freqOffsetArrayStr, Frequency, "SwitchCycle", True
         )
 
-        stepDurationArrayNode = rowdom.getElementsByTagName("stepDurationArray")[0]
+        stepDurationArrayNode = self._getFirstNodeByTagName(
+            rowdom, "stepDurationArray", True
+        )
 
         stepDurationArrayStr = self._getXMLNodeChildText(stepDurationArrayNode)
 
@@ -287,20 +312,22 @@ class SwitchCycleRow:
             stepDurationArrayStr, Interval, "SwitchCycle", True
         )
 
-        directionCodeNode = rowdom.getElementsByTagName("directionCode")
-        if len(directionCodeNode) > 0:
+        directionCodeNode = self._getFirstNodeByTagName(rowdom, "directionCode", False)
+        if directionCodeNode:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                self._getXMLNodeChildText(directionCodeNode[0])
+                self._getXMLNodeChildText(directionCodeNode)
             )
 
             self._directionCodeExists = True
 
-        directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
-        if len(directionEquinoxNode) > 0:
+        directionEquinoxNode = self._getFirstNodeByTagName(
+            rowdom, "directionEquinox", False
+        )
+        if directionEquinoxNode:
 
             self._directionEquinox = ArrayTime(
-                self._getXMLNodeChildText(directionEquinoxNode[0])
+                self._getXMLNodeChildText(directionEquinoxNode)
             )
 
             self._directionEquinoxExists = True

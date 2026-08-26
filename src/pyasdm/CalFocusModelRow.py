@@ -302,6 +302,27 @@ class CalFocusModelRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalFocusModelTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -326,45 +347,47 @@ class CalFocusModelRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
         self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
             self._getXMLNodeChildText(receiverBandNode)
         )
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", True
+        )
 
         self._polarizationType = PolarizationType.newPolarizationType(
             self._getXMLNodeChildText(polarizationTypeNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
         self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
         self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+        antennaMakeNode = self._getFirstNodeByTagName(rowdom, "antennaMake", True)
 
         self._antennaMake = AntennaMake.newAntennaMake(
             self._getXMLNodeChildText(antennaMakeNode)
         )
 
-        numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
+        numCoeffNode = self._getFirstNodeByTagName(rowdom, "numCoeff", True)
 
         self._numCoeff = int(self._getXMLNodeChildText(numCoeffNode))
 
-        numSourceObsNode = rowdom.getElementsByTagName("numSourceObs")[0]
+        numSourceObsNode = self._getFirstNodeByTagName(rowdom, "numSourceObs", True)
 
         self._numSourceObs = int(self._getXMLNodeChildText(numSourceObsNode))
 
-        coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
+        coeffNameNode = self._getFirstNodeByTagName(rowdom, "coeffName", True)
 
         coeffNameStr = self._getXMLNodeChildText(coeffNameNode)
 
@@ -372,7 +395,7 @@ class CalFocusModelRow:
             coeffNameStr, str, "CalFocusModel", False
         )
 
-        coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")[0]
+        coeffFormulaNode = self._getFirstNodeByTagName(rowdom, "coeffFormula", True)
 
         coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode)
 
@@ -380,7 +403,7 @@ class CalFocusModelRow:
             coeffFormulaStr, str, "CalFocusModel", False
         )
 
-        coeffValueNode = rowdom.getElementsByTagName("coeffValue")[0]
+        coeffValueNode = self._getFirstNodeByTagName(rowdom, "coeffValue", True)
 
         coeffValueStr = self._getXMLNodeChildText(coeffValueNode)
 
@@ -388,7 +411,7 @@ class CalFocusModelRow:
             coeffValueStr, float, "CalFocusModel", False
         )
 
-        coeffErrorNode = rowdom.getElementsByTagName("coeffError")[0]
+        coeffErrorNode = self._getFirstNodeByTagName(rowdom, "coeffError", True)
 
         coeffErrorStr = self._getXMLNodeChildText(coeffErrorNode)
 
@@ -396,7 +419,7 @@ class CalFocusModelRow:
             coeffErrorStr, float, "CalFocusModel", False
         )
 
-        coeffFixedNode = rowdom.getElementsByTagName("coeffFixed")[0]
+        coeffFixedNode = self._getFirstNodeByTagName(rowdom, "coeffFixed", True)
 
         coeffFixedStr = self._getXMLNodeChildText(coeffFixedNode)
 
@@ -404,11 +427,11 @@ class CalFocusModelRow:
             coeffFixedStr, bool, "CalFocusModel", False
         )
 
-        focusModelNode = rowdom.getElementsByTagName("focusModel")[0]
+        focusModelNode = self._getFirstNodeByTagName(rowdom, "focusModel", True)
 
         self._focusModel = str(self._getXMLNodeChildText(focusModelNode))
 
-        focusRMSNode = rowdom.getElementsByTagName("focusRMS")[0]
+        focusRMSNode = self._getFirstNodeByTagName(rowdom, "focusRMS", True)
 
         focusRMSStr = self._getXMLNodeChildText(focusRMSNode)
 
@@ -416,7 +439,9 @@ class CalFocusModelRow:
             focusRMSStr, Length, "CalFocusModel", True
         )
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
         self._reducedChiSquared = float(
             self._getXMLNodeChildText(reducedChiSquaredNode)
@@ -424,11 +449,11 @@ class CalFocusModelRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 

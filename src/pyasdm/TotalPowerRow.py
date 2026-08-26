@@ -282,6 +282,27 @@ class TotalPowerRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "TotalPowerTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -306,29 +327,31 @@ class TotalPowerRow:
 
         # intrinsic attribute values
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
         self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", True)
 
         self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
-        subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
+        subscanNumberNode = self._getFirstNodeByTagName(rowdom, "subscanNumber", True)
 
         self._subscanNumber = int(self._getXMLNodeChildText(subscanNumberNode))
 
-        integrationNumberNode = rowdom.getElementsByTagName("integrationNumber")[0]
+        integrationNumberNode = self._getFirstNodeByTagName(
+            rowdom, "integrationNumber", True
+        )
 
         self._integrationNumber = int(self._getXMLNodeChildText(integrationNumberNode))
 
-        uvwNode = rowdom.getElementsByTagName("uvw")[0]
+        uvwNode = self._getFirstNodeByTagName(rowdom, "uvw", True)
 
         uvwStr = self._getXMLNodeChildText(uvwNode)
 
         self._uvw = Parser.stringListToLists(uvwStr, Length, "TotalPower", True)
 
-        exposureNode = rowdom.getElementsByTagName("exposure")[0]
+        exposureNode = self._getFirstNodeByTagName(rowdom, "exposure", True)
 
         exposureStr = self._getXMLNodeChildText(exposureNode)
 
@@ -336,7 +359,7 @@ class TotalPowerRow:
             exposureStr, Interval, "TotalPower", True
         )
 
-        timeCentroidNode = rowdom.getElementsByTagName("timeCentroid")[0]
+        timeCentroidNode = self._getFirstNodeByTagName(rowdom, "timeCentroid", True)
 
         timeCentroidStr = self._getXMLNodeChildText(timeCentroidNode)
 
@@ -344,7 +367,7 @@ class TotalPowerRow:
             timeCentroidStr, ArrayTime, "TotalPower", True
         )
 
-        floatDataNode = rowdom.getElementsByTagName("floatData")[0]
+        floatDataNode = self._getFirstNodeByTagName(rowdom, "floatData", True)
 
         floatDataStr = self._getXMLNodeChildText(floatDataNode)
 
@@ -352,48 +375,52 @@ class TotalPowerRow:
             floatDataStr, float, "TotalPower", False
         )
 
-        flagAntNode = rowdom.getElementsByTagName("flagAnt")[0]
+        flagAntNode = self._getFirstNodeByTagName(rowdom, "flagAnt", True)
 
         flagAntStr = self._getXMLNodeChildText(flagAntNode)
 
         self._flagAnt = Parser.stringListToLists(flagAntStr, int, "TotalPower", False)
 
-        flagPolNode = rowdom.getElementsByTagName("flagPol")[0]
+        flagPolNode = self._getFirstNodeByTagName(rowdom, "flagPol", True)
 
         flagPolStr = self._getXMLNodeChildText(flagPolNode)
 
         self._flagPol = Parser.stringListToLists(flagPolStr, int, "TotalPower", False)
 
-        intervalNode = rowdom.getElementsByTagName("interval")[0]
+        intervalNode = self._getFirstNodeByTagName(rowdom, "interval", True)
 
         self._interval = Interval(self._getXMLNodeChildText(intervalNode))
 
-        subintegrationNumberNode = rowdom.getElementsByTagName("subintegrationNumber")
-        if len(subintegrationNumberNode) > 0:
+        subintegrationNumberNode = self._getFirstNodeByTagName(
+            rowdom, "subintegrationNumber", False
+        )
+        if subintegrationNumberNode:
 
             self._subintegrationNumber = int(
-                self._getXMLNodeChildText(subintegrationNumberNode[0])
+                self._getXMLNodeChildText(subintegrationNumberNode)
             )
 
             self._subintegrationNumberExists = True
 
         # extrinsic attribute values
 
-        configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
+        configDescriptionIdNode = self._getFirstNodeByTagName(
+            rowdom, "configDescriptionId", True
+        )
 
         self._configDescriptionId = Tag(
             self._getXMLNodeChildText(configDescriptionIdNode)
         )
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
         self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
-        fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
+        fieldIdNode = self._getFirstNodeByTagName(rowdom, "fieldId", True)
 
         self._fieldId = Tag(self._getXMLNodeChildText(fieldIdNode))
 
-        stateIdNode = rowdom.getElementsByTagName("stateId")[0]
+        stateIdNode = self._getFirstNodeByTagName(rowdom, "stateId", True)
 
         stateIdStr = self._getXMLNodeChildText(stateIdNode)
 

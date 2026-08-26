@@ -156,6 +156,27 @@ class SquareLawDetectorRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SquareLawDetectorTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -182,17 +203,19 @@ class SquareLawDetectorRow:
 
         # intrinsic attribute values
 
-        squareLawDetectorIdNode = rowdom.getElementsByTagName("squareLawDetectorId")[0]
+        squareLawDetectorIdNode = self._getFirstNodeByTagName(
+            rowdom, "squareLawDetectorId", True
+        )
 
         self._squareLawDetectorId = Tag(
             self._getXMLNodeChildText(squareLawDetectorIdNode)
         )
 
-        numBandNode = rowdom.getElementsByTagName("numBand")[0]
+        numBandNode = self._getFirstNodeByTagName(rowdom, "numBand", True)
 
         self._numBand = int(self._getXMLNodeChildText(numBandNode))
 
-        bandTypeNode = rowdom.getElementsByTagName("bandType")[0]
+        bandTypeNode = self._getFirstNodeByTagName(rowdom, "bandType", True)
 
         self._bandType = DetectorBandType.newDetectorBandType(
             self._getXMLNodeChildText(bandTypeNode)

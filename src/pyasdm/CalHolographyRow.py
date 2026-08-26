@@ -449,6 +449,27 @@ class CalHolographyRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalHolographyTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -473,31 +494,33 @@ class CalHolographyRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
         self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+        antennaMakeNode = self._getFirstNodeByTagName(rowdom, "antennaMake", True)
 
         self._antennaMake = AntennaMake.newAntennaMake(
             self._getXMLNodeChildText(antennaMakeNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
         self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
         self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        ambientTemperatureNode = rowdom.getElementsByTagName("ambientTemperature")[0]
+        ambientTemperatureNode = self._getFirstNodeByTagName(
+            rowdom, "ambientTemperature", True
+        )
 
         self._ambientTemperature = Temperature(
             self._getXMLNodeChildText(ambientTemperatureNode)
         )
 
-        focusPositionNode = rowdom.getElementsByTagName("focusPosition")[0]
+        focusPositionNode = self._getFirstNodeByTagName(rowdom, "focusPosition", True)
 
         focusPositionStr = self._getXMLNodeChildText(focusPositionNode)
 
@@ -505,7 +528,7 @@ class CalHolographyRow:
             focusPositionStr, Length, "CalHolography", True
         )
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
         frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
@@ -513,50 +536,54 @@ class CalHolographyRow:
             frequencyRangeStr, Frequency, "CalHolography", True
         )
 
-        illuminationTaperNode = rowdom.getElementsByTagName("illuminationTaper")[0]
+        illuminationTaperNode = self._getFirstNodeByTagName(
+            rowdom, "illuminationTaper", True
+        )
 
         self._illuminationTaper = float(
             self._getXMLNodeChildText(illuminationTaperNode)
         )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
         self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
         polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalHolography", False
         )
 
-        numPanelModesNode = rowdom.getElementsByTagName("numPanelModes")[0]
+        numPanelModesNode = self._getFirstNodeByTagName(rowdom, "numPanelModes", True)
 
         self._numPanelModes = int(self._getXMLNodeChildText(numPanelModesNode))
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
             self._getXMLNodeChildText(receiverBandNode)
         )
 
-        beamMapUIDNode = rowdom.getElementsByTagName("beamMapUID")[0]
+        beamMapUIDNode = self._getFirstNodeByTagName(rowdom, "beamMapUID", True)
 
         self._beamMapUID = EntityRef(beamMapUIDNode.toxml())
 
-        rawRMSNode = rowdom.getElementsByTagName("rawRMS")[0]
+        rawRMSNode = self._getFirstNodeByTagName(rowdom, "rawRMS", True)
 
         self._rawRMS = Length(self._getXMLNodeChildText(rawRMSNode))
 
-        weightedRMSNode = rowdom.getElementsByTagName("weightedRMS")[0]
+        weightedRMSNode = self._getFirstNodeByTagName(rowdom, "weightedRMS", True)
 
         self._weightedRMS = Length(self._getXMLNodeChildText(weightedRMSNode))
 
-        surfaceMapUIDNode = rowdom.getElementsByTagName("surfaceMapUID")[0]
+        surfaceMapUIDNode = self._getFirstNodeByTagName(rowdom, "surfaceMapUID", True)
 
         self._surfaceMapUID = EntityRef(surfaceMapUIDNode.toxml())
 
-        directionNode = rowdom.getElementsByTagName("direction")[0]
+        directionNode = self._getFirstNodeByTagName(rowdom, "direction", True)
 
         directionStr = self._getXMLNodeChildText(directionNode)
 
@@ -564,17 +591,17 @@ class CalHolographyRow:
             directionStr, Angle, "CalHolography", True
         )
 
-        numScrewNode = rowdom.getElementsByTagName("numScrew")
-        if len(numScrewNode) > 0:
+        numScrewNode = self._getFirstNodeByTagName(rowdom, "numScrew", False)
+        if numScrewNode:
 
-            self._numScrew = int(self._getXMLNodeChildText(numScrewNode[0]))
+            self._numScrew = int(self._getXMLNodeChildText(numScrewNode))
 
             self._numScrewExists = True
 
-        screwNameNode = rowdom.getElementsByTagName("screwName")
-        if len(screwNameNode) > 0:
+        screwNameNode = self._getFirstNodeByTagName(rowdom, "screwName", False)
+        if screwNameNode:
 
-            screwNameStr = self._getXMLNodeChildText(screwNameNode[0])
+            screwNameStr = self._getXMLNodeChildText(screwNameNode)
 
             self._screwName = Parser.stringListToLists(
                 screwNameStr, str, "CalHolography", False
@@ -582,10 +609,10 @@ class CalHolographyRow:
 
             self._screwNameExists = True
 
-        screwMotionNode = rowdom.getElementsByTagName("screwMotion")
-        if len(screwMotionNode) > 0:
+        screwMotionNode = self._getFirstNodeByTagName(rowdom, "screwMotion", False)
+        if screwMotionNode:
 
-            screwMotionStr = self._getXMLNodeChildText(screwMotionNode[0])
+            screwMotionStr = self._getXMLNodeChildText(screwMotionNode)
 
             self._screwMotion = Parser.stringListToLists(
                 screwMotionStr, Length, "CalHolography", True
@@ -593,10 +620,12 @@ class CalHolographyRow:
 
             self._screwMotionExists = True
 
-        screwMotionErrorNode = rowdom.getElementsByTagName("screwMotionError")
-        if len(screwMotionErrorNode) > 0:
+        screwMotionErrorNode = self._getFirstNodeByTagName(
+            rowdom, "screwMotionError", False
+        )
+        if screwMotionErrorNode:
 
-            screwMotionErrorStr = self._getXMLNodeChildText(screwMotionErrorNode[0])
+            screwMotionErrorStr = self._getXMLNodeChildText(screwMotionErrorNode)
 
             self._screwMotionError = Parser.stringListToLists(
                 screwMotionErrorStr, Length, "CalHolography", True
@@ -604,19 +633,19 @@ class CalHolographyRow:
 
             self._screwMotionErrorExists = True
 
-        gravCorrectionNode = rowdom.getElementsByTagName("gravCorrection")
-        if len(gravCorrectionNode) > 0:
+        gravCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "gravCorrection", False
+        )
+        if gravCorrectionNode:
 
-            self._gravCorrection = bool(
-                self._getXMLNodeChildText(gravCorrectionNode[0])
-            )
+            self._gravCorrection = bool(self._getXMLNodeChildText(gravCorrectionNode))
 
             self._gravCorrectionExists = True
 
-        gravOptRangeNode = rowdom.getElementsByTagName("gravOptRange")
-        if len(gravOptRangeNode) > 0:
+        gravOptRangeNode = self._getFirstNodeByTagName(rowdom, "gravOptRange", False)
+        if gravOptRangeNode:
 
-            gravOptRangeStr = self._getXMLNodeChildText(gravOptRangeNode[0])
+            gravOptRangeStr = self._getXMLNodeChildText(gravOptRangeNode)
 
             self._gravOptRange = Parser.stringListToLists(
                 gravOptRangeStr, Angle, "CalHolography", True
@@ -624,19 +653,19 @@ class CalHolographyRow:
 
             self._gravOptRangeExists = True
 
-        tempCorrectionNode = rowdom.getElementsByTagName("tempCorrection")
-        if len(tempCorrectionNode) > 0:
+        tempCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "tempCorrection", False
+        )
+        if tempCorrectionNode:
 
-            self._tempCorrection = bool(
-                self._getXMLNodeChildText(tempCorrectionNode[0])
-            )
+            self._tempCorrection = bool(self._getXMLNodeChildText(tempCorrectionNode))
 
             self._tempCorrectionExists = True
 
-        tempOptRangeNode = rowdom.getElementsByTagName("tempOptRange")
-        if len(tempOptRangeNode) > 0:
+        tempOptRangeNode = self._getFirstNodeByTagName(rowdom, "tempOptRange", False)
+        if tempOptRangeNode:
 
-            tempOptRangeStr = self._getXMLNodeChildText(tempOptRangeNode[0])
+            tempOptRangeStr = self._getXMLNodeChildText(tempOptRangeNode)
 
             self._tempOptRange = Parser.stringListToLists(
                 tempOptRangeStr, Temperature, "CalHolography", True
@@ -646,11 +675,11 @@ class CalHolographyRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 

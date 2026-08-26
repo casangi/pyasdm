@@ -195,6 +195,27 @@ class ScaleRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ScaleTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -219,29 +240,29 @@ class ScaleRow:
 
         # intrinsic attribute values
 
-        scaleIdNode = rowdom.getElementsByTagName("scaleId")[0]
+        scaleIdNode = self._getFirstNodeByTagName(rowdom, "scaleId", True)
 
         self._scaleId = Tag(self._getXMLNodeChildText(scaleIdNode))
 
-        timeScaleNode = rowdom.getElementsByTagName("timeScale")[0]
+        timeScaleNode = self._getFirstNodeByTagName(rowdom, "timeScale", True)
 
         self._timeScale = TimeScale.newTimeScale(
             self._getXMLNodeChildText(timeScaleNode)
         )
 
-        crossDataScaleNode = rowdom.getElementsByTagName("crossDataScale")[0]
+        crossDataScaleNode = self._getFirstNodeByTagName(rowdom, "crossDataScale", True)
 
         self._crossDataScale = DataScale.newDataScale(
             self._getXMLNodeChildText(crossDataScaleNode)
         )
 
-        autoDataScaleNode = rowdom.getElementsByTagName("autoDataScale")[0]
+        autoDataScaleNode = self._getFirstNodeByTagName(rowdom, "autoDataScale", True)
 
         self._autoDataScale = DataScale.newDataScale(
             self._getXMLNodeChildText(autoDataScaleNode)
         )
 
-        weightTypeNode = rowdom.getElementsByTagName("weightType")[0]
+        weightTypeNode = self._getFirstNodeByTagName(rowdom, "weightType", True)
 
         self._weightType = WeightType.newWeightType(
             self._getXMLNodeChildText(weightTypeNode)

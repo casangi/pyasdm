@@ -599,6 +599,27 @@ class CalPointingRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalPointingTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -623,43 +644,47 @@ class CalPointingRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
         self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
             self._getXMLNodeChildText(receiverBandNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
         self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
         self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        ambientTemperatureNode = rowdom.getElementsByTagName("ambientTemperature")[0]
+        ambientTemperatureNode = self._getFirstNodeByTagName(
+            rowdom, "ambientTemperature", True
+        )
 
         self._ambientTemperature = Temperature(
             self._getXMLNodeChildText(ambientTemperatureNode)
         )
 
-        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+        antennaMakeNode = self._getFirstNodeByTagName(rowdom, "antennaMake", True)
 
         self._antennaMake = AntennaMake.newAntennaMake(
             self._getXMLNodeChildText(antennaMakeNode)
         )
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
             self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        directionNode = rowdom.getElementsByTagName("direction")[0]
+        directionNode = self._getFirstNodeByTagName(rowdom, "direction", True)
 
         directionStr = self._getXMLNodeChildText(directionNode)
 
@@ -667,7 +692,7 @@ class CalPointingRow:
             directionStr, Angle, "CalPointing", True
         )
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
         frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
@@ -675,30 +700,36 @@ class CalPointingRow:
             frequencyRangeStr, Frequency, "CalPointing", True
         )
 
-        pointingModelModeNode = rowdom.getElementsByTagName("pointingModelMode")[0]
+        pointingModelModeNode = self._getFirstNodeByTagName(
+            rowdom, "pointingModelMode", True
+        )
 
         self._pointingModelMode = PointingModelMode.newPointingModelMode(
             self._getXMLNodeChildText(pointingModelModeNode)
         )
 
-        pointingMethodNode = rowdom.getElementsByTagName("pointingMethod")[0]
+        pointingMethodNode = self._getFirstNodeByTagName(rowdom, "pointingMethod", True)
 
         self._pointingMethod = PointingMethod.newPointingMethod(
             self._getXMLNodeChildText(pointingMethodNode)
         )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
         self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
         polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalPointing", False
         )
 
-        collOffsetRelativeNode = rowdom.getElementsByTagName("collOffsetRelative")[0]
+        collOffsetRelativeNode = self._getFirstNodeByTagName(
+            rowdom, "collOffsetRelative", True
+        )
 
         collOffsetRelativeStr = self._getXMLNodeChildText(collOffsetRelativeNode)
 
@@ -706,7 +737,9 @@ class CalPointingRow:
             collOffsetRelativeStr, Angle, "CalPointing", True
         )
 
-        collOffsetAbsoluteNode = rowdom.getElementsByTagName("collOffsetAbsolute")[0]
+        collOffsetAbsoluteNode = self._getFirstNodeByTagName(
+            rowdom, "collOffsetAbsolute", True
+        )
 
         collOffsetAbsoluteStr = self._getXMLNodeChildText(collOffsetAbsoluteNode)
 
@@ -714,7 +747,7 @@ class CalPointingRow:
             collOffsetAbsoluteStr, Angle, "CalPointing", True
         )
 
-        collErrorNode = rowdom.getElementsByTagName("collError")[0]
+        collErrorNode = self._getFirstNodeByTagName(rowdom, "collError", True)
 
         collErrorStr = self._getXMLNodeChildText(collErrorNode)
 
@@ -722,7 +755,7 @@ class CalPointingRow:
             collErrorStr, Angle, "CalPointing", True
         )
 
-        collOffsetTiedNode = rowdom.getElementsByTagName("collOffsetTied")[0]
+        collOffsetTiedNode = self._getFirstNodeByTagName(rowdom, "collOffsetTied", True)
 
         collOffsetTiedStr = self._getXMLNodeChildText(collOffsetTiedNode)
 
@@ -730,7 +763,9 @@ class CalPointingRow:
             collOffsetTiedStr, bool, "CalPointing", False
         )
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
         reducedChiSquaredStr = self._getXMLNodeChildText(reducedChiSquaredNode)
 
@@ -738,19 +773,21 @@ class CalPointingRow:
             reducedChiSquaredStr, float, "CalPointing", False
         )
 
-        averagedPolarizationsNode = rowdom.getElementsByTagName("averagedPolarizations")
-        if len(averagedPolarizationsNode) > 0:
+        averagedPolarizationsNode = self._getFirstNodeByTagName(
+            rowdom, "averagedPolarizations", False
+        )
+        if averagedPolarizationsNode:
 
             self._averagedPolarizations = bool(
-                self._getXMLNodeChildText(averagedPolarizationsNode[0])
+                self._getXMLNodeChildText(averagedPolarizationsNode)
             )
 
             self._averagedPolarizationsExists = True
 
-        beamPANode = rowdom.getElementsByTagName("beamPA")
-        if len(beamPANode) > 0:
+        beamPANode = self._getFirstNodeByTagName(rowdom, "beamPA", False)
+        if beamPANode:
 
-            beamPAStr = self._getXMLNodeChildText(beamPANode[0])
+            beamPAStr = self._getXMLNodeChildText(beamPANode)
 
             self._beamPA = Parser.stringListToLists(
                 beamPAStr, Angle, "CalPointing", True
@@ -758,10 +795,10 @@ class CalPointingRow:
 
             self._beamPAExists = True
 
-        beamPAErrorNode = rowdom.getElementsByTagName("beamPAError")
-        if len(beamPAErrorNode) > 0:
+        beamPAErrorNode = self._getFirstNodeByTagName(rowdom, "beamPAError", False)
+        if beamPAErrorNode:
 
-            beamPAErrorStr = self._getXMLNodeChildText(beamPAErrorNode[0])
+            beamPAErrorStr = self._getXMLNodeChildText(beamPAErrorNode)
 
             self._beamPAError = Parser.stringListToLists(
                 beamPAErrorStr, Angle, "CalPointing", True
@@ -769,19 +806,19 @@ class CalPointingRow:
 
             self._beamPAErrorExists = True
 
-        beamPAWasFixedNode = rowdom.getElementsByTagName("beamPAWasFixed")
-        if len(beamPAWasFixedNode) > 0:
+        beamPAWasFixedNode = self._getFirstNodeByTagName(
+            rowdom, "beamPAWasFixed", False
+        )
+        if beamPAWasFixedNode:
 
-            self._beamPAWasFixed = bool(
-                self._getXMLNodeChildText(beamPAWasFixedNode[0])
-            )
+            self._beamPAWasFixed = bool(self._getXMLNodeChildText(beamPAWasFixedNode))
 
             self._beamPAWasFixedExists = True
 
-        beamWidthNode = rowdom.getElementsByTagName("beamWidth")
-        if len(beamWidthNode) > 0:
+        beamWidthNode = self._getFirstNodeByTagName(rowdom, "beamWidth", False)
+        if beamWidthNode:
 
-            beamWidthStr = self._getXMLNodeChildText(beamWidthNode[0])
+            beamWidthStr = self._getXMLNodeChildText(beamWidthNode)
 
             self._beamWidth = Parser.stringListToLists(
                 beamWidthStr, Angle, "CalPointing", True
@@ -789,10 +826,12 @@ class CalPointingRow:
 
             self._beamWidthExists = True
 
-        beamWidthErrorNode = rowdom.getElementsByTagName("beamWidthError")
-        if len(beamWidthErrorNode) > 0:
+        beamWidthErrorNode = self._getFirstNodeByTagName(
+            rowdom, "beamWidthError", False
+        )
+        if beamWidthErrorNode:
 
-            beamWidthErrorStr = self._getXMLNodeChildText(beamWidthErrorNode[0])
+            beamWidthErrorStr = self._getXMLNodeChildText(beamWidthErrorNode)
 
             self._beamWidthError = Parser.stringListToLists(
                 beamWidthErrorStr, Angle, "CalPointing", True
@@ -800,10 +839,12 @@ class CalPointingRow:
 
             self._beamWidthErrorExists = True
 
-        beamWidthWasFixedNode = rowdom.getElementsByTagName("beamWidthWasFixed")
-        if len(beamWidthWasFixedNode) > 0:
+        beamWidthWasFixedNode = self._getFirstNodeByTagName(
+            rowdom, "beamWidthWasFixed", False
+        )
+        if beamWidthWasFixedNode:
 
-            beamWidthWasFixedStr = self._getXMLNodeChildText(beamWidthWasFixedNode[0])
+            beamWidthWasFixedStr = self._getXMLNodeChildText(beamWidthWasFixedNode)
 
             self._beamWidthWasFixed = Parser.stringListToLists(
                 beamWidthWasFixedStr, bool, "CalPointing", False
@@ -811,10 +852,10 @@ class CalPointingRow:
 
             self._beamWidthWasFixedExists = True
 
-        offIntensityNode = rowdom.getElementsByTagName("offIntensity")
-        if len(offIntensityNode) > 0:
+        offIntensityNode = self._getFirstNodeByTagName(rowdom, "offIntensity", False)
+        if offIntensityNode:
 
-            offIntensityStr = self._getXMLNodeChildText(offIntensityNode[0])
+            offIntensityStr = self._getXMLNodeChildText(offIntensityNode)
 
             self._offIntensity = Parser.stringListToLists(
                 offIntensityStr, Temperature, "CalPointing", True
@@ -822,10 +863,12 @@ class CalPointingRow:
 
             self._offIntensityExists = True
 
-        offIntensityErrorNode = rowdom.getElementsByTagName("offIntensityError")
-        if len(offIntensityErrorNode) > 0:
+        offIntensityErrorNode = self._getFirstNodeByTagName(
+            rowdom, "offIntensityError", False
+        )
+        if offIntensityErrorNode:
 
-            offIntensityErrorStr = self._getXMLNodeChildText(offIntensityErrorNode[0])
+            offIntensityErrorStr = self._getXMLNodeChildText(offIntensityErrorNode)
 
             self._offIntensityError = Parser.stringListToLists(
                 offIntensityErrorStr, Temperature, "CalPointing", True
@@ -833,19 +876,21 @@ class CalPointingRow:
 
             self._offIntensityErrorExists = True
 
-        offIntensityWasFixedNode = rowdom.getElementsByTagName("offIntensityWasFixed")
-        if len(offIntensityWasFixedNode) > 0:
+        offIntensityWasFixedNode = self._getFirstNodeByTagName(
+            rowdom, "offIntensityWasFixed", False
+        )
+        if offIntensityWasFixedNode:
 
             self._offIntensityWasFixed = bool(
-                self._getXMLNodeChildText(offIntensityWasFixedNode[0])
+                self._getXMLNodeChildText(offIntensityWasFixedNode)
             )
 
             self._offIntensityWasFixedExists = True
 
-        peakIntensityNode = rowdom.getElementsByTagName("peakIntensity")
-        if len(peakIntensityNode) > 0:
+        peakIntensityNode = self._getFirstNodeByTagName(rowdom, "peakIntensity", False)
+        if peakIntensityNode:
 
-            peakIntensityStr = self._getXMLNodeChildText(peakIntensityNode[0])
+            peakIntensityStr = self._getXMLNodeChildText(peakIntensityNode)
 
             self._peakIntensity = Parser.stringListToLists(
                 peakIntensityStr, Temperature, "CalPointing", True
@@ -853,10 +898,12 @@ class CalPointingRow:
 
             self._peakIntensityExists = True
 
-        peakIntensityErrorNode = rowdom.getElementsByTagName("peakIntensityError")
-        if len(peakIntensityErrorNode) > 0:
+        peakIntensityErrorNode = self._getFirstNodeByTagName(
+            rowdom, "peakIntensityError", False
+        )
+        if peakIntensityErrorNode:
 
-            peakIntensityErrorStr = self._getXMLNodeChildText(peakIntensityErrorNode[0])
+            peakIntensityErrorStr = self._getXMLNodeChildText(peakIntensityErrorNode)
 
             self._peakIntensityError = Parser.stringListToLists(
                 peakIntensityErrorStr, Temperature, "CalPointing", True
@@ -864,22 +911,24 @@ class CalPointingRow:
 
             self._peakIntensityErrorExists = True
 
-        peakIntensityWasFixedNode = rowdom.getElementsByTagName("peakIntensityWasFixed")
-        if len(peakIntensityWasFixedNode) > 0:
+        peakIntensityWasFixedNode = self._getFirstNodeByTagName(
+            rowdom, "peakIntensityWasFixed", False
+        )
+        if peakIntensityWasFixedNode:
 
             self._peakIntensityWasFixed = bool(
-                self._getXMLNodeChildText(peakIntensityWasFixedNode[0])
+                self._getXMLNodeChildText(peakIntensityWasFixedNode)
             )
 
             self._peakIntensityWasFixedExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 

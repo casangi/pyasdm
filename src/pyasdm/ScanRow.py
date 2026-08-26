@@ -325,6 +325,27 @@ class ScanRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ScanTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -349,41 +370,43 @@ class ScanRow:
 
         # intrinsic attribute values
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", True)
 
         self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
-        startTimeNode = rowdom.getElementsByTagName("startTime")[0]
+        startTimeNode = self._getFirstNodeByTagName(rowdom, "startTime", True)
 
         self._startTime = ArrayTime(self._getXMLNodeChildText(startTimeNode))
 
-        endTimeNode = rowdom.getElementsByTagName("endTime")[0]
+        endTimeNode = self._getFirstNodeByTagName(rowdom, "endTime", True)
 
         self._endTime = ArrayTime(self._getXMLNodeChildText(endTimeNode))
 
-        numIntentNode = rowdom.getElementsByTagName("numIntent")[0]
+        numIntentNode = self._getFirstNodeByTagName(rowdom, "numIntent", True)
 
         self._numIntent = int(self._getXMLNodeChildText(numIntentNode))
 
-        numSubscanNode = rowdom.getElementsByTagName("numSubscan")[0]
+        numSubscanNode = self._getFirstNodeByTagName(rowdom, "numSubscan", True)
 
         self._numSubscan = int(self._getXMLNodeChildText(numSubscanNode))
 
-        scanIntentNode = rowdom.getElementsByTagName("scanIntent")[0]
+        scanIntentNode = self._getFirstNodeByTagName(rowdom, "scanIntent", True)
 
         scanIntentStr = self._getXMLNodeChildText(scanIntentNode)
         self._scanIntent = Parser.stringListToLists(
             scanIntentStr, ScanIntent, "Scan", False
         )
 
-        calDataTypeNode = rowdom.getElementsByTagName("calDataType")[0]
+        calDataTypeNode = self._getFirstNodeByTagName(rowdom, "calDataType", True)
 
         calDataTypeStr = self._getXMLNodeChildText(calDataTypeNode)
         self._calDataType = Parser.stringListToLists(
             calDataTypeStr, CalDataOrigin, "Scan", False
         )
 
-        calibrationOnLineNode = rowdom.getElementsByTagName("calibrationOnLine")[0]
+        calibrationOnLineNode = self._getFirstNodeByTagName(
+            rowdom, "calibrationOnLine", True
+        )
 
         calibrationOnLineStr = self._getXMLNodeChildText(calibrationOnLineNode)
 
@@ -391,64 +414,66 @@ class ScanRow:
             calibrationOnLineStr, bool, "Scan", False
         )
 
-        calibrationFunctionNode = rowdom.getElementsByTagName("calibrationFunction")
-        if len(calibrationFunctionNode) > 0:
+        calibrationFunctionNode = self._getFirstNodeByTagName(
+            rowdom, "calibrationFunction", False
+        )
+        if calibrationFunctionNode:
 
-            calibrationFunctionStr = self._getXMLNodeChildText(
-                calibrationFunctionNode[0]
-            )
+            calibrationFunctionStr = self._getXMLNodeChildText(calibrationFunctionNode)
             self._calibrationFunction = Parser.stringListToLists(
                 calibrationFunctionStr, CalibrationFunction, "Scan", False
             )
 
             self._calibrationFunctionExists = True
 
-        calibrationSetNode = rowdom.getElementsByTagName("calibrationSet")
-        if len(calibrationSetNode) > 0:
+        calibrationSetNode = self._getFirstNodeByTagName(
+            rowdom, "calibrationSet", False
+        )
+        if calibrationSetNode:
 
-            calibrationSetStr = self._getXMLNodeChildText(calibrationSetNode[0])
+            calibrationSetStr = self._getXMLNodeChildText(calibrationSetNode)
             self._calibrationSet = Parser.stringListToLists(
                 calibrationSetStr, CalibrationSet, "Scan", False
             )
 
             self._calibrationSetExists = True
 
-        calPatternNode = rowdom.getElementsByTagName("calPattern")
-        if len(calPatternNode) > 0:
+        calPatternNode = self._getFirstNodeByTagName(rowdom, "calPattern", False)
+        if calPatternNode:
 
-            calPatternStr = self._getXMLNodeChildText(calPatternNode[0])
+            calPatternStr = self._getXMLNodeChildText(calPatternNode)
             self._calPattern = Parser.stringListToLists(
                 calPatternStr, AntennaMotionPattern, "Scan", False
             )
 
             self._calPatternExists = True
 
-        numFieldNode = rowdom.getElementsByTagName("numField")
-        if len(numFieldNode) > 0:
+        numFieldNode = self._getFirstNodeByTagName(rowdom, "numField", False)
+        if numFieldNode:
 
-            self._numField = int(self._getXMLNodeChildText(numFieldNode[0]))
+            self._numField = int(self._getXMLNodeChildText(numFieldNode))
 
             self._numFieldExists = True
 
-        fieldNameNode = rowdom.getElementsByTagName("fieldName")
-        if len(fieldNameNode) > 0:
+        fieldNameNode = self._getFirstNodeByTagName(rowdom, "fieldName", False)
+        if fieldNameNode:
 
-            fieldNameStr = self._getXMLNodeChildText(fieldNameNode[0])
+            fieldNameStr = self._getXMLNodeChildText(fieldNameNode)
 
             self._fieldName = Parser.stringListToLists(fieldNameStr, str, "Scan", False)
 
             self._fieldNameExists = True
 
-        sourceNameNode = rowdom.getElementsByTagName("sourceName")
-        if len(sourceNameNode) > 0:
+        sourceNameNode = self._getFirstNodeByTagName(rowdom, "sourceName", False)
+        if sourceNameNode:
 
-            self._sourceName = str(self._getXMLNodeChildText(sourceNameNode[0]))
+            self._sourceName = str(self._getXMLNodeChildText(sourceNameNode))
 
             self._sourceNameExists = True
 
         # extrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
         self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 

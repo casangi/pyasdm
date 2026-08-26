@@ -398,6 +398,27 @@ class CalAppPhaseRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalAppPhaseTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -422,41 +443,43 @@ class CalAppPhaseRow:
 
         # intrinsic attribute values
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", True)
 
         self._basebandName = BasebandName.newBasebandName(
             self._getXMLNodeChildText(basebandNameNode)
         )
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", True)
 
         self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
         self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
         self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        adjustTimeNode = rowdom.getElementsByTagName("adjustTime")[0]
+        adjustTimeNode = self._getFirstNodeByTagName(rowdom, "adjustTime", True)
 
         self._adjustTime = ArrayTime(self._getXMLNodeChildText(adjustTimeNode))
 
-        adjustTokenNode = rowdom.getElementsByTagName("adjustToken")[0]
+        adjustTokenNode = self._getFirstNodeByTagName(rowdom, "adjustToken", True)
 
         self._adjustToken = str(self._getXMLNodeChildText(adjustTokenNode))
 
-        phasingModeNode = rowdom.getElementsByTagName("phasingMode")[0]
+        phasingModeNode = self._getFirstNodeByTagName(rowdom, "phasingMode", True)
 
         self._phasingMode = str(self._getXMLNodeChildText(phasingModeNode))
 
-        numPhasedAntennasNode = rowdom.getElementsByTagName("numPhasedAntennas")[0]
+        numPhasedAntennasNode = self._getFirstNodeByTagName(
+            rowdom, "numPhasedAntennas", True
+        )
 
         self._numPhasedAntennas = int(self._getXMLNodeChildText(numPhasedAntennasNode))
 
-        phasedAntennasNode = rowdom.getElementsByTagName("phasedAntennas")[0]
+        phasedAntennasNode = self._getFirstNodeByTagName(rowdom, "phasedAntennas", True)
 
         phasedAntennasStr = self._getXMLNodeChildText(phasedAntennasNode)
 
@@ -464,33 +487,37 @@ class CalAppPhaseRow:
             phasedAntennasStr, str, "CalAppPhase", False
         )
 
-        refAntennaIndexNode = rowdom.getElementsByTagName("refAntennaIndex")[0]
+        refAntennaIndexNode = self._getFirstNodeByTagName(
+            rowdom, "refAntennaIndex", True
+        )
 
         self._refAntennaIndex = int(self._getXMLNodeChildText(refAntennaIndexNode))
 
-        candRefAntennaIndexNode = rowdom.getElementsByTagName("candRefAntennaIndex")[0]
+        candRefAntennaIndexNode = self._getFirstNodeByTagName(
+            rowdom, "candRefAntennaIndex", True
+        )
 
         self._candRefAntennaIndex = int(
             self._getXMLNodeChildText(candRefAntennaIndexNode)
         )
 
-        phasePackingNode = rowdom.getElementsByTagName("phasePacking")[0]
+        phasePackingNode = self._getFirstNodeByTagName(rowdom, "phasePacking", True)
 
         self._phasePacking = str(self._getXMLNodeChildText(phasePackingNode))
 
-        numReceptorsNode = rowdom.getElementsByTagName("numReceptors")[0]
+        numReceptorsNode = self._getFirstNodeByTagName(rowdom, "numReceptors", True)
 
         self._numReceptors = int(self._getXMLNodeChildText(numReceptorsNode))
 
-        numChannelsNode = rowdom.getElementsByTagName("numChannels")[0]
+        numChannelsNode = self._getFirstNodeByTagName(rowdom, "numChannels", True)
 
         self._numChannels = int(self._getXMLNodeChildText(numChannelsNode))
 
-        numPhaseValuesNode = rowdom.getElementsByTagName("numPhaseValues")[0]
+        numPhaseValuesNode = self._getFirstNodeByTagName(rowdom, "numPhaseValues", True)
 
         self._numPhaseValues = int(self._getXMLNodeChildText(numPhaseValuesNode))
 
-        phaseValuesNode = rowdom.getElementsByTagName("phaseValues")[0]
+        phaseValuesNode = self._getFirstNodeByTagName(rowdom, "phaseValues", True)
 
         phaseValuesStr = self._getXMLNodeChildText(phaseValuesNode)
 
@@ -498,15 +525,17 @@ class CalAppPhaseRow:
             phaseValuesStr, float, "CalAppPhase", False
         )
 
-        numCompareNode = rowdom.getElementsByTagName("numCompare")[0]
+        numCompareNode = self._getFirstNodeByTagName(rowdom, "numCompare", True)
 
         self._numCompare = int(self._getXMLNodeChildText(numCompareNode))
 
-        numEfficienciesNode = rowdom.getElementsByTagName("numEfficiencies")[0]
+        numEfficienciesNode = self._getFirstNodeByTagName(
+            rowdom, "numEfficiencies", True
+        )
 
         self._numEfficiencies = int(self._getXMLNodeChildText(numEfficienciesNode))
 
-        compareArrayNode = rowdom.getElementsByTagName("compareArray")[0]
+        compareArrayNode = self._getFirstNodeByTagName(rowdom, "compareArray", True)
 
         compareArrayStr = self._getXMLNodeChildText(compareArrayNode)
 
@@ -514,7 +543,9 @@ class CalAppPhaseRow:
             compareArrayStr, str, "CalAppPhase", False
         )
 
-        efficiencyIndicesNode = rowdom.getElementsByTagName("efficiencyIndices")[0]
+        efficiencyIndicesNode = self._getFirstNodeByTagName(
+            rowdom, "efficiencyIndices", True
+        )
 
         efficiencyIndicesStr = self._getXMLNodeChildText(efficiencyIndicesNode)
 
@@ -522,7 +553,7 @@ class CalAppPhaseRow:
             efficiencyIndicesStr, int, "CalAppPhase", False
         )
 
-        efficienciesNode = rowdom.getElementsByTagName("efficiencies")[0]
+        efficienciesNode = self._getFirstNodeByTagName(rowdom, "efficiencies", True)
 
         efficienciesStr = self._getXMLNodeChildText(efficienciesNode)
 
@@ -530,7 +561,7 @@ class CalAppPhaseRow:
             efficienciesStr, float, "CalAppPhase", False
         )
 
-        qualityNode = rowdom.getElementsByTagName("quality")[0]
+        qualityNode = self._getFirstNodeByTagName(rowdom, "quality", True)
 
         qualityStr = self._getXMLNodeChildText(qualityNode)
 
@@ -538,28 +569,30 @@ class CalAppPhaseRow:
             qualityStr, float, "CalAppPhase", False
         )
 
-        phasedSumAntennaNode = rowdom.getElementsByTagName("phasedSumAntenna")[0]
+        phasedSumAntennaNode = self._getFirstNodeByTagName(
+            rowdom, "phasedSumAntenna", True
+        )
 
         self._phasedSumAntenna = str(self._getXMLNodeChildText(phasedSumAntennaNode))
 
-        typeSupportsNode = rowdom.getElementsByTagName("typeSupports")
-        if len(typeSupportsNode) > 0:
+        typeSupportsNode = self._getFirstNodeByTagName(rowdom, "typeSupports", False)
+        if typeSupportsNode:
 
-            self._typeSupports = str(self._getXMLNodeChildText(typeSupportsNode[0]))
+            self._typeSupports = str(self._getXMLNodeChildText(typeSupportsNode))
 
             self._typeSupportsExists = True
 
-        numSupportsNode = rowdom.getElementsByTagName("numSupports")
-        if len(numSupportsNode) > 0:
+        numSupportsNode = self._getFirstNodeByTagName(rowdom, "numSupports", False)
+        if numSupportsNode:
 
-            self._numSupports = int(self._getXMLNodeChildText(numSupportsNode[0]))
+            self._numSupports = int(self._getXMLNodeChildText(numSupportsNode))
 
             self._numSupportsExists = True
 
-        phaseSupportsNode = rowdom.getElementsByTagName("phaseSupports")
-        if len(phaseSupportsNode) > 0:
+        phaseSupportsNode = self._getFirstNodeByTagName(rowdom, "phaseSupports", False)
+        if phaseSupportsNode:
 
-            phaseSupportsStr = self._getXMLNodeChildText(phaseSupportsNode[0])
+            phaseSupportsStr = self._getXMLNodeChildText(phaseSupportsNode)
 
             self._phaseSupports = Parser.stringListToLists(
                 phaseSupportsStr, float, "CalAppPhase", False
@@ -569,11 +602,11 @@ class CalAppPhaseRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 

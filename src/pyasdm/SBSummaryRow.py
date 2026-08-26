@@ -327,6 +327,27 @@ class SBSummaryRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SBSummaryTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -351,45 +372,47 @@ class SBSummaryRow:
 
         # intrinsic attribute values
 
-        sBSummaryIdNode = rowdom.getElementsByTagName("sBSummaryId")[0]
+        sBSummaryIdNode = self._getFirstNodeByTagName(rowdom, "sBSummaryId", True)
 
         self._sBSummaryId = Tag(self._getXMLNodeChildText(sBSummaryIdNode))
 
-        sbSummaryUIDNode = rowdom.getElementsByTagName("sbSummaryUID")[0]
+        sbSummaryUIDNode = self._getFirstNodeByTagName(rowdom, "sbSummaryUID", True)
 
         self._sbSummaryUID = EntityRef(sbSummaryUIDNode.toxml())
 
-        projectUIDNode = rowdom.getElementsByTagName("projectUID")[0]
+        projectUIDNode = self._getFirstNodeByTagName(rowdom, "projectUID", True)
 
         self._projectUID = EntityRef(projectUIDNode.toxml())
 
-        obsUnitSetUIDNode = rowdom.getElementsByTagName("obsUnitSetUID")[0]
+        obsUnitSetUIDNode = self._getFirstNodeByTagName(rowdom, "obsUnitSetUID", True)
 
         self._obsUnitSetUID = EntityRef(obsUnitSetUIDNode.toxml())
 
-        frequencyNode = rowdom.getElementsByTagName("frequency")[0]
+        frequencyNode = self._getFirstNodeByTagName(rowdom, "frequency", True)
 
         self._frequency = float(self._getXMLNodeChildText(frequencyNode))
 
-        frequencyBandNode = rowdom.getElementsByTagName("frequencyBand")[0]
+        frequencyBandNode = self._getFirstNodeByTagName(rowdom, "frequencyBand", True)
 
         self._frequencyBand = ReceiverBand.newReceiverBand(
             self._getXMLNodeChildText(frequencyBandNode)
         )
 
-        sbTypeNode = rowdom.getElementsByTagName("sbType")[0]
+        sbTypeNode = self._getFirstNodeByTagName(rowdom, "sbType", True)
 
         self._sbType = SBType.newSBType(self._getXMLNodeChildText(sbTypeNode))
 
-        sbDurationNode = rowdom.getElementsByTagName("sbDuration")[0]
+        sbDurationNode = self._getFirstNodeByTagName(rowdom, "sbDuration", True)
 
         self._sbDuration = Interval(self._getXMLNodeChildText(sbDurationNode))
 
-        numObservingModeNode = rowdom.getElementsByTagName("numObservingMode")[0]
+        numObservingModeNode = self._getFirstNodeByTagName(
+            rowdom, "numObservingMode", True
+        )
 
         self._numObservingMode = int(self._getXMLNodeChildText(numObservingModeNode))
 
-        observingModeNode = rowdom.getElementsByTagName("observingMode")[0]
+        observingModeNode = self._getFirstNodeByTagName(rowdom, "observingMode", True)
 
         observingModeStr = self._getXMLNodeChildText(observingModeNode)
 
@@ -397,15 +420,15 @@ class SBSummaryRow:
             observingModeStr, str, "SBSummary", False
         )
 
-        numberRepeatsNode = rowdom.getElementsByTagName("numberRepeats")[0]
+        numberRepeatsNode = self._getFirstNodeByTagName(rowdom, "numberRepeats", True)
 
         self._numberRepeats = int(self._getXMLNodeChildText(numberRepeatsNode))
 
-        numScienceGoalNode = rowdom.getElementsByTagName("numScienceGoal")[0]
+        numScienceGoalNode = self._getFirstNodeByTagName(rowdom, "numScienceGoal", True)
 
         self._numScienceGoal = int(self._getXMLNodeChildText(numScienceGoalNode))
 
-        scienceGoalNode = rowdom.getElementsByTagName("scienceGoal")[0]
+        scienceGoalNode = self._getFirstNodeByTagName(rowdom, "scienceGoal", True)
 
         scienceGoalStr = self._getXMLNodeChildText(scienceGoalNode)
 
@@ -413,15 +436,17 @@ class SBSummaryRow:
             scienceGoalStr, str, "SBSummary", False
         )
 
-        numWeatherConstraintNode = rowdom.getElementsByTagName("numWeatherConstraint")[
-            0
-        ]
+        numWeatherConstraintNode = self._getFirstNodeByTagName(
+            rowdom, "numWeatherConstraint", True
+        )
 
         self._numWeatherConstraint = int(
             self._getXMLNodeChildText(numWeatherConstraintNode)
         )
 
-        weatherConstraintNode = rowdom.getElementsByTagName("weatherConstraint")[0]
+        weatherConstraintNode = self._getFirstNodeByTagName(
+            rowdom, "weatherConstraint", True
+        )
 
         weatherConstraintStr = self._getXMLNodeChildText(weatherConstraintNode)
 
@@ -429,10 +454,12 @@ class SBSummaryRow:
             weatherConstraintStr, str, "SBSummary", False
         )
 
-        centerDirectionNode = rowdom.getElementsByTagName("centerDirection")
-        if len(centerDirectionNode) > 0:
+        centerDirectionNode = self._getFirstNodeByTagName(
+            rowdom, "centerDirection", False
+        )
+        if centerDirectionNode:
 
-            centerDirectionStr = self._getXMLNodeChildText(centerDirectionNode[0])
+            centerDirectionStr = self._getXMLNodeChildText(centerDirectionNode)
 
             self._centerDirection = Parser.stringListToLists(
                 centerDirectionStr, Angle, "SBSummary", True
@@ -440,24 +467,26 @@ class SBSummaryRow:
 
             self._centerDirectionExists = True
 
-        centerDirectionCodeNode = rowdom.getElementsByTagName("centerDirectionCode")
-        if len(centerDirectionCodeNode) > 0:
+        centerDirectionCodeNode = self._getFirstNodeByTagName(
+            rowdom, "centerDirectionCode", False
+        )
+        if centerDirectionCodeNode:
 
             self._centerDirectionCode = (
                 DirectionReferenceCode.newDirectionReferenceCode(
-                    self._getXMLNodeChildText(centerDirectionCodeNode[0])
+                    self._getXMLNodeChildText(centerDirectionCodeNode)
                 )
             )
 
             self._centerDirectionCodeExists = True
 
-        centerDirectionEquinoxNode = rowdom.getElementsByTagName(
-            "centerDirectionEquinox"
+        centerDirectionEquinoxNode = self._getFirstNodeByTagName(
+            rowdom, "centerDirectionEquinox", False
         )
-        if len(centerDirectionEquinoxNode) > 0:
+        if centerDirectionEquinoxNode:
 
             self._centerDirectionEquinox = ArrayTime(
-                self._getXMLNodeChildText(centerDirectionEquinoxNode[0])
+                self._getXMLNodeChildText(centerDirectionEquinoxNode)
             )
 
             self._centerDirectionEquinoxExists = True

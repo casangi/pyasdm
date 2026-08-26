@@ -251,6 +251,27 @@ class CorrelatorModeRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CorrelatorModeTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -277,22 +298,24 @@ class CorrelatorModeRow:
 
         # intrinsic attribute values
 
-        correlatorModeIdNode = rowdom.getElementsByTagName("correlatorModeId")[0]
+        correlatorModeIdNode = self._getFirstNodeByTagName(
+            rowdom, "correlatorModeId", True
+        )
 
         self._correlatorModeId = Tag(self._getXMLNodeChildText(correlatorModeIdNode))
 
-        numBasebandNode = rowdom.getElementsByTagName("numBaseband")[0]
+        numBasebandNode = self._getFirstNodeByTagName(rowdom, "numBaseband", True)
 
         self._numBaseband = int(self._getXMLNodeChildText(numBasebandNode))
 
-        basebandNamesNode = rowdom.getElementsByTagName("basebandNames")[0]
+        basebandNamesNode = self._getFirstNodeByTagName(rowdom, "basebandNames", True)
 
         basebandNamesStr = self._getXMLNodeChildText(basebandNamesNode)
         self._basebandNames = Parser.stringListToLists(
             basebandNamesStr, BasebandName, "CorrelatorMode", False
         )
 
-        basebandConfigNode = rowdom.getElementsByTagName("basebandConfig")[0]
+        basebandConfigNode = self._getFirstNodeByTagName(rowdom, "basebandConfig", True)
 
         basebandConfigStr = self._getXMLNodeChildText(basebandConfigNode)
 
@@ -300,47 +323,47 @@ class CorrelatorModeRow:
             basebandConfigStr, int, "CorrelatorMode", False
         )
 
-        accumModeNode = rowdom.getElementsByTagName("accumMode")[0]
+        accumModeNode = self._getFirstNodeByTagName(rowdom, "accumMode", True)
 
         self._accumMode = AccumMode.newAccumMode(
             self._getXMLNodeChildText(accumModeNode)
         )
 
-        binModeNode = rowdom.getElementsByTagName("binMode")[0]
+        binModeNode = self._getFirstNodeByTagName(rowdom, "binMode", True)
 
         self._binMode = int(self._getXMLNodeChildText(binModeNode))
 
-        numAxesNode = rowdom.getElementsByTagName("numAxes")[0]
+        numAxesNode = self._getFirstNodeByTagName(rowdom, "numAxes", True)
 
         self._numAxes = int(self._getXMLNodeChildText(numAxesNode))
 
-        axesOrderArrayNode = rowdom.getElementsByTagName("axesOrderArray")[0]
+        axesOrderArrayNode = self._getFirstNodeByTagName(rowdom, "axesOrderArray", True)
 
         axesOrderArrayStr = self._getXMLNodeChildText(axesOrderArrayNode)
         self._axesOrderArray = Parser.stringListToLists(
             axesOrderArrayStr, AxisName, "CorrelatorMode", False
         )
 
-        filterModeNode = rowdom.getElementsByTagName("filterMode")[0]
+        filterModeNode = self._getFirstNodeByTagName(rowdom, "filterMode", True)
 
         filterModeStr = self._getXMLNodeChildText(filterModeNode)
         self._filterMode = Parser.stringListToLists(
             filterModeStr, FilterMode, "CorrelatorMode", False
         )
 
-        correlatorNameNode = rowdom.getElementsByTagName("correlatorName")[0]
+        correlatorNameNode = self._getFirstNodeByTagName(rowdom, "correlatorName", True)
 
         self._correlatorName = CorrelatorName.newCorrelatorName(
             self._getXMLNodeChildText(correlatorNameNode)
         )
 
-        correlatorSoftwareVersionNode = rowdom.getElementsByTagName(
-            "correlatorSoftwareVersion"
+        correlatorSoftwareVersionNode = self._getFirstNodeByTagName(
+            rowdom, "correlatorSoftwareVersion", False
         )
-        if len(correlatorSoftwareVersionNode) > 0:
+        if correlatorSoftwareVersionNode:
 
             self._correlatorSoftwareVersion = str(
-                self._getXMLNodeChildText(correlatorSoftwareVersionNode[0])
+                self._getXMLNodeChildText(correlatorSoftwareVersionNode)
             )
 
             self._correlatorSoftwareVersionExists = True

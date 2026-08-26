@@ -323,6 +323,27 @@ class CalDataRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalDataTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -347,66 +368,74 @@ class CalDataRow:
 
         # intrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        startTimeObservedNode = rowdom.getElementsByTagName("startTimeObserved")[0]
+        startTimeObservedNode = self._getFirstNodeByTagName(
+            rowdom, "startTimeObserved", True
+        )
 
         self._startTimeObserved = ArrayTime(
             self._getXMLNodeChildText(startTimeObservedNode)
         )
 
-        endTimeObservedNode = rowdom.getElementsByTagName("endTimeObserved")[0]
+        endTimeObservedNode = self._getFirstNodeByTagName(
+            rowdom, "endTimeObserved", True
+        )
 
         self._endTimeObserved = ArrayTime(
             self._getXMLNodeChildText(endTimeObservedNode)
         )
 
-        execBlockUIDNode = rowdom.getElementsByTagName("execBlockUID")[0]
+        execBlockUIDNode = self._getFirstNodeByTagName(rowdom, "execBlockUID", True)
 
         self._execBlockUID = EntityRef(execBlockUIDNode.toxml())
 
-        calDataTypeNode = rowdom.getElementsByTagName("calDataType")[0]
+        calDataTypeNode = self._getFirstNodeByTagName(rowdom, "calDataType", True)
 
         self._calDataType = CalDataOrigin.newCalDataOrigin(
             self._getXMLNodeChildText(calDataTypeNode)
         )
 
-        calTypeNode = rowdom.getElementsByTagName("calType")[0]
+        calTypeNode = self._getFirstNodeByTagName(rowdom, "calType", True)
 
         self._calType = CalType.newCalType(self._getXMLNodeChildText(calTypeNode))
 
-        numScanNode = rowdom.getElementsByTagName("numScan")[0]
+        numScanNode = self._getFirstNodeByTagName(rowdom, "numScan", True)
 
         self._numScan = int(self._getXMLNodeChildText(numScanNode))
 
-        scanSetNode = rowdom.getElementsByTagName("scanSet")[0]
+        scanSetNode = self._getFirstNodeByTagName(rowdom, "scanSet", True)
 
         scanSetStr = self._getXMLNodeChildText(scanSetNode)
 
         self._scanSet = Parser.stringListToLists(scanSetStr, int, "CalData", False)
 
-        assocCalDataIdNode = rowdom.getElementsByTagName("assocCalDataId")
-        if len(assocCalDataIdNode) > 0:
+        assocCalDataIdNode = self._getFirstNodeByTagName(
+            rowdom, "assocCalDataId", False
+        )
+        if assocCalDataIdNode:
 
-            self._assocCalDataId = Tag(self._getXMLNodeChildText(assocCalDataIdNode[0]))
+            self._assocCalDataId = Tag(self._getXMLNodeChildText(assocCalDataIdNode))
 
             self._assocCalDataIdExists = True
 
-        assocCalNatureNode = rowdom.getElementsByTagName("assocCalNature")
-        if len(assocCalNatureNode) > 0:
+        assocCalNatureNode = self._getFirstNodeByTagName(
+            rowdom, "assocCalNature", False
+        )
+        if assocCalNatureNode:
 
             self._assocCalNature = AssociatedCalNature.newAssociatedCalNature(
-                self._getXMLNodeChildText(assocCalNatureNode[0])
+                self._getXMLNodeChildText(assocCalNatureNode)
             )
 
             self._assocCalNatureExists = True
 
-        fieldNameNode = rowdom.getElementsByTagName("fieldName")
-        if len(fieldNameNode) > 0:
+        fieldNameNode = self._getFirstNodeByTagName(rowdom, "fieldName", False)
+        if fieldNameNode:
 
-            fieldNameStr = self._getXMLNodeChildText(fieldNameNode[0])
+            fieldNameStr = self._getXMLNodeChildText(fieldNameNode)
 
             self._fieldName = Parser.stringListToLists(
                 fieldNameStr, str, "CalData", False
@@ -414,10 +443,10 @@ class CalDataRow:
 
             self._fieldNameExists = True
 
-        sourceNameNode = rowdom.getElementsByTagName("sourceName")
-        if len(sourceNameNode) > 0:
+        sourceNameNode = self._getFirstNodeByTagName(rowdom, "sourceName", False)
+        if sourceNameNode:
 
-            sourceNameStr = self._getXMLNodeChildText(sourceNameNode[0])
+            sourceNameStr = self._getXMLNodeChildText(sourceNameNode)
 
             self._sourceName = Parser.stringListToLists(
                 sourceNameStr, str, "CalData", False
@@ -425,10 +454,10 @@ class CalDataRow:
 
             self._sourceNameExists = True
 
-        sourceCodeNode = rowdom.getElementsByTagName("sourceCode")
-        if len(sourceCodeNode) > 0:
+        sourceCodeNode = self._getFirstNodeByTagName(rowdom, "sourceCode", False)
+        if sourceCodeNode:
 
-            sourceCodeStr = self._getXMLNodeChildText(sourceCodeNode[0])
+            sourceCodeStr = self._getXMLNodeChildText(sourceCodeNode)
 
             self._sourceCode = Parser.stringListToLists(
                 sourceCodeStr, str, "CalData", False
@@ -436,10 +465,10 @@ class CalDataRow:
 
             self._sourceCodeExists = True
 
-        scanIntentNode = rowdom.getElementsByTagName("scanIntent")
-        if len(scanIntentNode) > 0:
+        scanIntentNode = self._getFirstNodeByTagName(rowdom, "scanIntent", False)
+        if scanIntentNode:
 
-            scanIntentStr = self._getXMLNodeChildText(scanIntentNode[0])
+            scanIntentStr = self._getXMLNodeChildText(scanIntentNode)
             self._scanIntent = Parser.stringListToLists(
                 scanIntentStr, ScanIntent, "CalData", False
             )

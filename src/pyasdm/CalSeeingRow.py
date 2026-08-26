@@ -288,6 +288,27 @@ class CalSeeingRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalSeeingTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -312,21 +333,23 @@ class CalSeeingRow:
 
         # intrinsic attribute values
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
             self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
         self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
         self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
         frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
@@ -334,15 +357,19 @@ class CalSeeingRow:
             frequencyRangeStr, Frequency, "CalSeeing", True
         )
 
-        integrationTimeNode = rowdom.getElementsByTagName("integrationTime")[0]
+        integrationTimeNode = self._getFirstNodeByTagName(
+            rowdom, "integrationTime", True
+        )
 
         self._integrationTime = Interval(self._getXMLNodeChildText(integrationTimeNode))
 
-        numBaseLengthsNode = rowdom.getElementsByTagName("numBaseLengths")[0]
+        numBaseLengthsNode = self._getFirstNodeByTagName(rowdom, "numBaseLengths", True)
 
         self._numBaseLengths = int(self._getXMLNodeChildText(numBaseLengthsNode))
 
-        baselineLengthsNode = rowdom.getElementsByTagName("baselineLengths")[0]
+        baselineLengthsNode = self._getFirstNodeByTagName(
+            rowdom, "baselineLengths", True
+        )
 
         baselineLengthsStr = self._getXMLNodeChildText(baselineLengthsNode)
 
@@ -350,48 +377,48 @@ class CalSeeingRow:
             baselineLengthsStr, Length, "CalSeeing", True
         )
 
-        phaseRMSNode = rowdom.getElementsByTagName("phaseRMS")[0]
+        phaseRMSNode = self._getFirstNodeByTagName(rowdom, "phaseRMS", True)
 
         phaseRMSStr = self._getXMLNodeChildText(phaseRMSNode)
 
         self._phaseRMS = Parser.stringListToLists(phaseRMSStr, Angle, "CalSeeing", True)
 
-        seeingNode = rowdom.getElementsByTagName("seeing")[0]
+        seeingNode = self._getFirstNodeByTagName(rowdom, "seeing", True)
 
         self._seeing = Angle(self._getXMLNodeChildText(seeingNode))
 
-        seeingErrorNode = rowdom.getElementsByTagName("seeingError")[0]
+        seeingErrorNode = self._getFirstNodeByTagName(rowdom, "seeingError", True)
 
         self._seeingError = Angle(self._getXMLNodeChildText(seeingErrorNode))
 
-        exponentNode = rowdom.getElementsByTagName("exponent")
-        if len(exponentNode) > 0:
+        exponentNode = self._getFirstNodeByTagName(rowdom, "exponent", False)
+        if exponentNode:
 
-            self._exponent = float(self._getXMLNodeChildText(exponentNode[0]))
+            self._exponent = float(self._getXMLNodeChildText(exponentNode))
 
             self._exponentExists = True
 
-        outerScaleNode = rowdom.getElementsByTagName("outerScale")
-        if len(outerScaleNode) > 0:
+        outerScaleNode = self._getFirstNodeByTagName(rowdom, "outerScale", False)
+        if outerScaleNode:
 
-            self._outerScale = Length(self._getXMLNodeChildText(outerScaleNode[0]))
+            self._outerScale = Length(self._getXMLNodeChildText(outerScaleNode))
 
             self._outerScaleExists = True
 
-        outerScaleRMSNode = rowdom.getElementsByTagName("outerScaleRMS")
-        if len(outerScaleRMSNode) > 0:
+        outerScaleRMSNode = self._getFirstNodeByTagName(rowdom, "outerScaleRMS", False)
+        if outerScaleRMSNode:
 
-            self._outerScaleRMS = Angle(self._getXMLNodeChildText(outerScaleRMSNode[0]))
+            self._outerScaleRMS = Angle(self._getXMLNodeChildText(outerScaleRMSNode))
 
             self._outerScaleRMSExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 

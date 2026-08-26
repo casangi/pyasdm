@@ -328,6 +328,27 @@ class CalAntennaSolutionsRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalAntennaSolutionsTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -355,45 +376,47 @@ class CalAntennaSolutionsRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
         self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
             self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", True)
 
         self._basebandName = BasebandName.newBasebandName(
             self._getXMLNodeChildText(basebandNameNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
             self._getXMLNodeChildText(receiverBandNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
         self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
         self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
         self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
+        refAntennaNameNode = self._getFirstNodeByTagName(rowdom, "refAntennaName", True)
 
         self._refAntennaName = str(self._getXMLNodeChildText(refAntennaNameNode))
 
-        directionNode = rowdom.getElementsByTagName("direction")[0]
+        directionNode = self._getFirstNodeByTagName(rowdom, "direction", True)
 
         directionStr = self._getXMLNodeChildText(directionNode)
 
@@ -401,7 +424,7 @@ class CalAntennaSolutionsRow:
             directionStr, Angle, "CalAntennaSolutions", True
         )
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
         frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
@@ -409,24 +432,30 @@ class CalAntennaSolutionsRow:
             frequencyRangeStr, Frequency, "CalAntennaSolutions", True
         )
 
-        integrationTimeNode = rowdom.getElementsByTagName("integrationTime")[0]
+        integrationTimeNode = self._getFirstNodeByTagName(
+            rowdom, "integrationTime", True
+        )
 
         self._integrationTime = Interval(self._getXMLNodeChildText(integrationTimeNode))
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
         polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalAntennaSolutions", False
         )
 
-        correctionValidityNode = rowdom.getElementsByTagName("correctionValidity")[0]
+        correctionValidityNode = self._getFirstNodeByTagName(
+            rowdom, "correctionValidity", True
+        )
 
         self._correctionValidity = bool(
             self._getXMLNodeChildText(correctionValidityNode)
         )
 
-        phaseAntNode = rowdom.getElementsByTagName("phaseAnt")[0]
+        phaseAntNode = self._getFirstNodeByTagName(rowdom, "phaseAnt", True)
 
         phaseAntStr = self._getXMLNodeChildText(phaseAntNode)
 
@@ -434,7 +463,7 @@ class CalAntennaSolutionsRow:
             phaseAntStr, float, "CalAntennaSolutions", False
         )
 
-        phaseAntRMSNode = rowdom.getElementsByTagName("phaseAntRMS")[0]
+        phaseAntRMSNode = self._getFirstNodeByTagName(rowdom, "phaseAntRMS", True)
 
         phaseAntRMSStr = self._getXMLNodeChildText(phaseAntRMSNode)
 
@@ -442,7 +471,7 @@ class CalAntennaSolutionsRow:
             phaseAntRMSStr, float, "CalAntennaSolutions", False
         )
 
-        amplitudeAntNode = rowdom.getElementsByTagName("amplitudeAnt")[0]
+        amplitudeAntNode = self._getFirstNodeByTagName(rowdom, "amplitudeAnt", True)
 
         amplitudeAntStr = self._getXMLNodeChildText(amplitudeAntNode)
 
@@ -450,7 +479,9 @@ class CalAntennaSolutionsRow:
             amplitudeAntStr, float, "CalAntennaSolutions", False
         )
 
-        amplitudeAntRMSNode = rowdom.getElementsByTagName("amplitudeAntRMS")[0]
+        amplitudeAntRMSNode = self._getFirstNodeByTagName(
+            rowdom, "amplitudeAntRMS", True
+        )
 
         amplitudeAntRMSStr = self._getXMLNodeChildText(amplitudeAntRMSNode)
 
@@ -460,15 +491,17 @@ class CalAntennaSolutionsRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
         self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 

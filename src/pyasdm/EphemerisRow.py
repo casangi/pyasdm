@@ -245,6 +245,27 @@ class EphemerisRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "EphemerisTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -269,17 +290,19 @@ class EphemerisRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        ephemerisIdNode = rowdom.getElementsByTagName("ephemerisId")[0]
+        ephemerisIdNode = self._getFirstNodeByTagName(rowdom, "ephemerisId", True)
 
         self._ephemerisId = int(self._getXMLNodeChildText(ephemerisIdNode))
 
-        observerLocationNode = rowdom.getElementsByTagName("observerLocation")[0]
+        observerLocationNode = self._getFirstNodeByTagName(
+            rowdom, "observerLocation", True
+        )
 
         observerLocationStr = self._getXMLNodeChildText(observerLocationNode)
 
@@ -287,25 +310,25 @@ class EphemerisRow:
             observerLocationStr, float, "Ephemeris", False
         )
 
-        equinoxEquatorNode = rowdom.getElementsByTagName("equinoxEquator")[0]
+        equinoxEquatorNode = self._getFirstNodeByTagName(rowdom, "equinoxEquator", True)
 
         self._equinoxEquator = float(self._getXMLNodeChildText(equinoxEquatorNode))
 
-        numPolyDirNode = rowdom.getElementsByTagName("numPolyDir")[0]
+        numPolyDirNode = self._getFirstNodeByTagName(rowdom, "numPolyDir", True)
 
         self._numPolyDir = int(self._getXMLNodeChildText(numPolyDirNode))
 
-        dirNode = rowdom.getElementsByTagName("dir")[0]
+        dirNode = self._getFirstNodeByTagName(rowdom, "dir", True)
 
         dirStr = self._getXMLNodeChildText(dirNode)
 
         self._dir = Parser.stringListToLists(dirStr, float, "Ephemeris", False)
 
-        numPolyDistNode = rowdom.getElementsByTagName("numPolyDist")[0]
+        numPolyDistNode = self._getFirstNodeByTagName(rowdom, "numPolyDist", True)
 
         self._numPolyDist = int(self._getXMLNodeChildText(numPolyDistNode))
 
-        distanceNode = rowdom.getElementsByTagName("distance")[0]
+        distanceNode = self._getFirstNodeByTagName(rowdom, "distance", True)
 
         distanceStr = self._getXMLNodeChildText(distanceNode)
 
@@ -313,25 +336,25 @@ class EphemerisRow:
             distanceStr, float, "Ephemeris", False
         )
 
-        timeOriginNode = rowdom.getElementsByTagName("timeOrigin")[0]
+        timeOriginNode = self._getFirstNodeByTagName(rowdom, "timeOrigin", True)
 
         self._timeOrigin = ArrayTime(self._getXMLNodeChildText(timeOriginNode))
 
-        originNode = rowdom.getElementsByTagName("origin")[0]
+        originNode = self._getFirstNodeByTagName(rowdom, "origin", True)
 
         self._origin = str(self._getXMLNodeChildText(originNode))
 
-        numPolyRadVelNode = rowdom.getElementsByTagName("numPolyRadVel")
-        if len(numPolyRadVelNode) > 0:
+        numPolyRadVelNode = self._getFirstNodeByTagName(rowdom, "numPolyRadVel", False)
+        if numPolyRadVelNode:
 
-            self._numPolyRadVel = int(self._getXMLNodeChildText(numPolyRadVelNode[0]))
+            self._numPolyRadVel = int(self._getXMLNodeChildText(numPolyRadVelNode))
 
             self._numPolyRadVelExists = True
 
-        radVelNode = rowdom.getElementsByTagName("radVel")
-        if len(radVelNode) > 0:
+        radVelNode = self._getFirstNodeByTagName(rowdom, "radVel", False)
+        if radVelNode:
 
-            radVelStr = self._getXMLNodeChildText(radVelNode[0])
+            radVelStr = self._getXMLNodeChildText(radVelNode)
 
             self._radVel = Parser.stringListToLists(
                 radVelStr, float, "Ephemeris", False

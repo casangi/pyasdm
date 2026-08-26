@@ -250,6 +250,27 @@ class MainRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "MainTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -274,61 +295,63 @@ class MainRow:
 
         # intrinsic attribute values
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
         self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", True)
 
         self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
-        timeSamplingNode = rowdom.getElementsByTagName("timeSampling")[0]
+        timeSamplingNode = self._getFirstNodeByTagName(rowdom, "timeSampling", True)
 
         self._timeSampling = TimeSampling.newTimeSampling(
             self._getXMLNodeChildText(timeSamplingNode)
         )
 
-        intervalNode = rowdom.getElementsByTagName("interval")[0]
+        intervalNode = self._getFirstNodeByTagName(rowdom, "interval", True)
 
         self._interval = Interval(self._getXMLNodeChildText(intervalNode))
 
-        numIntegrationNode = rowdom.getElementsByTagName("numIntegration")[0]
+        numIntegrationNode = self._getFirstNodeByTagName(rowdom, "numIntegration", True)
 
         self._numIntegration = int(self._getXMLNodeChildText(numIntegrationNode))
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", True)
 
         self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
-        subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
+        subscanNumberNode = self._getFirstNodeByTagName(rowdom, "subscanNumber", True)
 
         self._subscanNumber = int(self._getXMLNodeChildText(subscanNumberNode))
 
-        dataSizeNode = rowdom.getElementsByTagName("dataSize")[0]
+        dataSizeNode = self._getFirstNodeByTagName(rowdom, "dataSize", True)
 
         self._dataSize = int(self._getXMLNodeChildText(dataSizeNode))
 
-        dataUIDNode = rowdom.getElementsByTagName("dataUID")[0]
+        dataUIDNode = self._getFirstNodeByTagName(rowdom, "dataUID", True)
 
         self._dataUID = EntityRef(dataUIDNode.toxml())
 
         # extrinsic attribute values
 
-        configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
+        configDescriptionIdNode = self._getFirstNodeByTagName(
+            rowdom, "configDescriptionId", True
+        )
 
         self._configDescriptionId = Tag(
             self._getXMLNodeChildText(configDescriptionIdNode)
         )
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
         self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
-        fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
+        fieldIdNode = self._getFirstNodeByTagName(rowdom, "fieldId", True)
 
         self._fieldId = Tag(self._getXMLNodeChildText(fieldIdNode))
 
-        stateIdNode = rowdom.getElementsByTagName("stateId")[0]
+        stateIdNode = self._getFirstNodeByTagName(rowdom, "stateId", True)
 
         stateIdStr = self._getXMLNodeChildText(stateIdNode)
 

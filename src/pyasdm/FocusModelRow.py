@@ -228,6 +228,27 @@ class FocusModelRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "FocusModelTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -252,27 +273,29 @@ class FocusModelRow:
 
         # intrinsic attribute values
 
-        focusModelIdNode = rowdom.getElementsByTagName("focusModelId")[0]
+        focusModelIdNode = self._getFirstNodeByTagName(rowdom, "focusModelId", True)
 
         self._focusModelId = int(self._getXMLNodeChildText(focusModelIdNode))
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", True
+        )
 
         self._polarizationType = PolarizationType.newPolarizationType(
             self._getXMLNodeChildText(polarizationTypeNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
             self._getXMLNodeChildText(receiverBandNode)
         )
 
-        numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
+        numCoeffNode = self._getFirstNodeByTagName(rowdom, "numCoeff", True)
 
         self._numCoeff = int(self._getXMLNodeChildText(numCoeffNode))
 
-        coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
+        coeffNameNode = self._getFirstNodeByTagName(rowdom, "coeffName", True)
 
         coeffNameStr = self._getXMLNodeChildText(coeffNameNode)
 
@@ -280,7 +303,7 @@ class FocusModelRow:
             coeffNameStr, str, "FocusModel", False
         )
 
-        coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")[0]
+        coeffFormulaNode = self._getFirstNodeByTagName(rowdom, "coeffFormula", True)
 
         coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode)
 
@@ -288,7 +311,7 @@ class FocusModelRow:
             coeffFormulaStr, str, "FocusModel", False
         )
 
-        coeffValNode = rowdom.getElementsByTagName("coeffVal")[0]
+        coeffValNode = self._getFirstNodeByTagName(rowdom, "coeffVal", True)
 
         coeffValStr = self._getXMLNodeChildText(coeffValNode)
 
@@ -296,17 +319,19 @@ class FocusModelRow:
             coeffValStr, float, "FocusModel", False
         )
 
-        assocNatureNode = rowdom.getElementsByTagName("assocNature")[0]
+        assocNatureNode = self._getFirstNodeByTagName(rowdom, "assocNature", True)
 
         self._assocNature = str(self._getXMLNodeChildText(assocNatureNode))
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
         self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        assocFocusModelIdNode = rowdom.getElementsByTagName("assocFocusModelId")[0]
+        assocFocusModelIdNode = self._getFirstNodeByTagName(
+            rowdom, "assocFocusModelId", True
+        )
 
         self._assocFocusModelId = int(self._getXMLNodeChildText(assocFocusModelIdNode))
 

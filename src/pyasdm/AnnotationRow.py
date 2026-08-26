@@ -378,6 +378,27 @@ class AnnotationRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "AnnotationTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -402,64 +423,64 @@ class AnnotationRow:
 
         # intrinsic attribute values
 
-        annotationIdNode = rowdom.getElementsByTagName("annotationId")[0]
+        annotationIdNode = self._getFirstNodeByTagName(rowdom, "annotationId", True)
 
         self._annotationId = Tag(self._getXMLNodeChildText(annotationIdNode))
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
         self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
-        issueNode = rowdom.getElementsByTagName("issue")[0]
+        issueNode = self._getFirstNodeByTagName(rowdom, "issue", True)
 
         self._issue = str(self._getXMLNodeChildText(issueNode))
 
-        detailsNode = rowdom.getElementsByTagName("details")[0]
+        detailsNode = self._getFirstNodeByTagName(rowdom, "details", True)
 
         self._details = str(self._getXMLNodeChildText(detailsNode))
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")
-        if len(numAntennaNode) > 0:
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", False)
+        if numAntennaNode:
 
-            self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode[0]))
+            self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
             self._numAntennaExists = True
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")
-        if len(basebandNameNode) > 0:
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", False)
+        if basebandNameNode:
 
-            basebandNameStr = self._getXMLNodeChildText(basebandNameNode[0])
+            basebandNameStr = self._getXMLNodeChildText(basebandNameNode)
             self._basebandName = Parser.stringListToLists(
                 basebandNameStr, BasebandName, "Annotation", False
             )
 
             self._basebandNameExists = True
 
-        numBasebandNode = rowdom.getElementsByTagName("numBaseband")
-        if len(numBasebandNode) > 0:
+        numBasebandNode = self._getFirstNodeByTagName(rowdom, "numBaseband", False)
+        if numBasebandNode:
 
-            self._numBaseband = int(self._getXMLNodeChildText(numBasebandNode[0]))
+            self._numBaseband = int(self._getXMLNodeChildText(numBasebandNode))
 
             self._numBasebandExists = True
 
-        intervalNode = rowdom.getElementsByTagName("interval")
-        if len(intervalNode) > 0:
+        intervalNode = self._getFirstNodeByTagName(rowdom, "interval", False)
+        if intervalNode:
 
-            self._interval = Interval(self._getXMLNodeChildText(intervalNode[0]))
+            self._interval = Interval(self._getXMLNodeChildText(intervalNode))
 
             self._intervalExists = True
 
-        dValueNode = rowdom.getElementsByTagName("dValue")
-        if len(dValueNode) > 0:
+        dValueNode = self._getFirstNodeByTagName(rowdom, "dValue", False)
+        if dValueNode:
 
-            self._dValue = float(self._getXMLNodeChildText(dValueNode[0]))
+            self._dValue = float(self._getXMLNodeChildText(dValueNode))
 
             self._dValueExists = True
 
-        vdValueNode = rowdom.getElementsByTagName("vdValue")
-        if len(vdValueNode) > 0:
+        vdValueNode = self._getFirstNodeByTagName(rowdom, "vdValue", False)
+        if vdValueNode:
 
-            vdValueStr = self._getXMLNodeChildText(vdValueNode[0])
+            vdValueStr = self._getXMLNodeChildText(vdValueNode)
 
             self._vdValue = Parser.stringListToLists(
                 vdValueStr, float, "Annotation", False
@@ -467,10 +488,10 @@ class AnnotationRow:
 
             self._vdValueExists = True
 
-        vvdValuesNode = rowdom.getElementsByTagName("vvdValues")
-        if len(vvdValuesNode) > 0:
+        vvdValuesNode = self._getFirstNodeByTagName(rowdom, "vvdValues", False)
+        if vvdValuesNode:
 
-            vvdValuesStr = self._getXMLNodeChildText(vvdValuesNode[0])
+            vvdValuesStr = self._getXMLNodeChildText(vvdValuesNode)
 
             self._vvdValues = Parser.stringListToLists(
                 vvdValuesStr, float, "Annotation", False
@@ -478,17 +499,17 @@ class AnnotationRow:
 
             self._vvdValuesExists = True
 
-        llValueNode = rowdom.getElementsByTagName("llValue")
-        if len(llValueNode) > 0:
+        llValueNode = self._getFirstNodeByTagName(rowdom, "llValue", False)
+        if llValueNode:
 
-            self._llValue = int(self._getXMLNodeChildText(llValueNode[0]))
+            self._llValue = int(self._getXMLNodeChildText(llValueNode))
 
             self._llValueExists = True
 
-        vllValueNode = rowdom.getElementsByTagName("vllValue")
-        if len(vllValueNode) > 0:
+        vllValueNode = self._getFirstNodeByTagName(rowdom, "vllValue", False)
+        if vllValueNode:
 
-            vllValueStr = self._getXMLNodeChildText(vllValueNode[0])
+            vllValueStr = self._getXMLNodeChildText(vllValueNode)
 
             self._vllValue = Parser.stringListToLists(
                 vllValueStr, int, "Annotation", False
@@ -496,10 +517,10 @@ class AnnotationRow:
 
             self._vllValueExists = True
 
-        vvllValueNode = rowdom.getElementsByTagName("vvllValue")
-        if len(vvllValueNode) > 0:
+        vvllValueNode = self._getFirstNodeByTagName(rowdom, "vvllValue", False)
+        if vvllValueNode:
 
-            vvllValueStr = self._getXMLNodeChildText(vvllValueNode[0])
+            vvllValueStr = self._getXMLNodeChildText(vvllValueNode)
 
             self._vvllValue = Parser.stringListToLists(
                 vvllValueStr, int, "Annotation", False
@@ -507,19 +528,19 @@ class AnnotationRow:
 
             self._vvllValueExists = True
 
-        sValueNode = rowdom.getElementsByTagName("sValue")
-        if len(sValueNode) > 0:
+        sValueNode = self._getFirstNodeByTagName(rowdom, "sValue", False)
+        if sValueNode:
 
-            self._sValue = str(self._getXMLNodeChildText(sValueNode[0]))
+            self._sValue = str(self._getXMLNodeChildText(sValueNode))
 
             self._sValueExists = True
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")
-        if len(antennaIdNode) > 0:
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", False)
+        if antennaIdNode:
 
-            antennaIdStr = self._getXMLNodeChildText(antennaIdNode[0])
+            antennaIdStr = self._getXMLNodeChildText(antennaIdNode)
 
             self._antennaId = Parser.stringListToLists(
                 antennaIdStr, Tag, "Annotation", True

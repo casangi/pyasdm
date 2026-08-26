@@ -215,6 +215,27 @@ class CalGainRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalGainTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -239,49 +260,49 @@ class CalGainRow:
 
         # intrinsic attribute values
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
         self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
         self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        gainNode = rowdom.getElementsByTagName("gain")[0]
+        gainNode = self._getFirstNodeByTagName(rowdom, "gain", True)
 
         self._gain = float(self._getXMLNodeChildText(gainNode))
 
-        gainValidNode = rowdom.getElementsByTagName("gainValid")[0]
+        gainValidNode = self._getFirstNodeByTagName(rowdom, "gainValid", True)
 
         self._gainValid = bool(self._getXMLNodeChildText(gainValidNode))
 
-        fitNode = rowdom.getElementsByTagName("fit")[0]
+        fitNode = self._getFirstNodeByTagName(rowdom, "fit", True)
 
         self._fit = float(self._getXMLNodeChildText(fitNode))
 
-        fitWeightNode = rowdom.getElementsByTagName("fitWeight")[0]
+        fitWeightNode = self._getFirstNodeByTagName(rowdom, "fitWeight", True)
 
         self._fitWeight = float(self._getXMLNodeChildText(fitWeightNode))
 
-        totalGainValidNode = rowdom.getElementsByTagName("totalGainValid")[0]
+        totalGainValidNode = self._getFirstNodeByTagName(rowdom, "totalGainValid", True)
 
         self._totalGainValid = bool(self._getXMLNodeChildText(totalGainValidNode))
 
-        totalFitNode = rowdom.getElementsByTagName("totalFit")[0]
+        totalFitNode = self._getFirstNodeByTagName(rowdom, "totalFit", True)
 
         self._totalFit = float(self._getXMLNodeChildText(totalFitNode))
 
-        totalFitWeightNode = rowdom.getElementsByTagName("totalFitWeight")[0]
+        totalFitWeightNode = self._getFirstNodeByTagName(rowdom, "totalFitWeight", True)
 
         self._totalFitWeight = float(self._getXMLNodeChildText(totalFitWeightNode))
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 

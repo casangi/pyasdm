@@ -674,6 +674,27 @@ class DelayModelRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "DelayModelTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -698,17 +719,17 @@ class DelayModelRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", True)
 
         self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
-        phaseDelayNode = rowdom.getElementsByTagName("phaseDelay")[0]
+        phaseDelayNode = self._getFirstNodeByTagName(rowdom, "phaseDelay", True)
 
         phaseDelayStr = self._getXMLNodeChildText(phaseDelayNode)
 
@@ -716,7 +737,7 @@ class DelayModelRow:
             phaseDelayStr, float, "DelayModel", False
         )
 
-        phaseDelayRateNode = rowdom.getElementsByTagName("phaseDelayRate")[0]
+        phaseDelayRateNode = self._getFirstNodeByTagName(rowdom, "phaseDelayRate", True)
 
         phaseDelayRateStr = self._getXMLNodeChildText(phaseDelayRateNode)
 
@@ -724,7 +745,7 @@ class DelayModelRow:
             phaseDelayRateStr, float, "DelayModel", False
         )
 
-        groupDelayNode = rowdom.getElementsByTagName("groupDelay")[0]
+        groupDelayNode = self._getFirstNodeByTagName(rowdom, "groupDelay", True)
 
         groupDelayStr = self._getXMLNodeChildText(groupDelayNode)
 
@@ -732,7 +753,7 @@ class DelayModelRow:
             groupDelayStr, float, "DelayModel", False
         )
 
-        groupDelayRateNode = rowdom.getElementsByTagName("groupDelayRate")[0]
+        groupDelayRateNode = self._getFirstNodeByTagName(rowdom, "groupDelayRate", True)
 
         groupDelayRateStr = self._getXMLNodeChildText(groupDelayRateNode)
 
@@ -740,62 +761,66 @@ class DelayModelRow:
             groupDelayRateStr, float, "DelayModel", False
         )
 
-        timeOriginNode = rowdom.getElementsByTagName("timeOrigin")
-        if len(timeOriginNode) > 0:
+        timeOriginNode = self._getFirstNodeByTagName(rowdom, "timeOrigin", False)
+        if timeOriginNode:
 
-            self._timeOrigin = ArrayTime(self._getXMLNodeChildText(timeOriginNode[0]))
+            self._timeOrigin = ArrayTime(self._getXMLNodeChildText(timeOriginNode))
 
             self._timeOriginExists = True
 
-        atmosphericGroupDelayNode = rowdom.getElementsByTagName("atmosphericGroupDelay")
-        if len(atmosphericGroupDelayNode) > 0:
+        atmosphericGroupDelayNode = self._getFirstNodeByTagName(
+            rowdom, "atmosphericGroupDelay", False
+        )
+        if atmosphericGroupDelayNode:
 
             self._atmosphericGroupDelay = float(
-                self._getXMLNodeChildText(atmosphericGroupDelayNode[0])
+                self._getXMLNodeChildText(atmosphericGroupDelayNode)
             )
 
             self._atmosphericGroupDelayExists = True
 
-        atmosphericGroupDelayRateNode = rowdom.getElementsByTagName(
-            "atmosphericGroupDelayRate"
+        atmosphericGroupDelayRateNode = self._getFirstNodeByTagName(
+            rowdom, "atmosphericGroupDelayRate", False
         )
-        if len(atmosphericGroupDelayRateNode) > 0:
+        if atmosphericGroupDelayRateNode:
 
             self._atmosphericGroupDelayRate = float(
-                self._getXMLNodeChildText(atmosphericGroupDelayRateNode[0])
+                self._getXMLNodeChildText(atmosphericGroupDelayRateNode)
             )
 
             self._atmosphericGroupDelayRateExists = True
 
-        geometricDelayNode = rowdom.getElementsByTagName("geometricDelay")
-        if len(geometricDelayNode) > 0:
+        geometricDelayNode = self._getFirstNodeByTagName(
+            rowdom, "geometricDelay", False
+        )
+        if geometricDelayNode:
 
-            self._geometricDelay = float(
-                self._getXMLNodeChildText(geometricDelayNode[0])
-            )
+            self._geometricDelay = float(self._getXMLNodeChildText(geometricDelayNode))
 
             self._geometricDelayExists = True
 
-        geometricDelayRateNode = rowdom.getElementsByTagName("geometricDelayRate")
-        if len(geometricDelayRateNode) > 0:
+        geometricDelayRateNode = self._getFirstNodeByTagName(
+            rowdom, "geometricDelayRate", False
+        )
+        if geometricDelayRateNode:
 
             self._geometricDelayRate = float(
-                self._getXMLNodeChildText(geometricDelayRateNode[0])
+                self._getXMLNodeChildText(geometricDelayRateNode)
             )
 
             self._geometricDelayRateExists = True
 
-        numLONode = rowdom.getElementsByTagName("numLO")
-        if len(numLONode) > 0:
+        numLONode = self._getFirstNodeByTagName(rowdom, "numLO", False)
+        if numLONode:
 
-            self._numLO = int(self._getXMLNodeChildText(numLONode[0]))
+            self._numLO = int(self._getXMLNodeChildText(numLONode))
 
             self._numLOExists = True
 
-        LOOffsetNode = rowdom.getElementsByTagName("LOOffset")
-        if len(LOOffsetNode) > 0:
+        LOOffsetNode = self._getFirstNodeByTagName(rowdom, "LOOffset", False)
+        if LOOffsetNode:
 
-            LOOffsetStr = self._getXMLNodeChildText(LOOffsetNode[0])
+            LOOffsetStr = self._getXMLNodeChildText(LOOffsetNode)
 
             self._LOOffset = Parser.stringListToLists(
                 LOOffsetStr, Frequency, "DelayModel", True
@@ -803,10 +828,10 @@ class DelayModelRow:
 
             self._LOOffsetExists = True
 
-        LOOffsetRateNode = rowdom.getElementsByTagName("LOOffsetRate")
-        if len(LOOffsetRateNode) > 0:
+        LOOffsetRateNode = self._getFirstNodeByTagName(rowdom, "LOOffsetRate", False)
+        if LOOffsetRateNode:
 
-            LOOffsetRateStr = self._getXMLNodeChildText(LOOffsetRateNode[0])
+            LOOffsetRateStr = self._getXMLNodeChildText(LOOffsetRateNode)
 
             self._LOOffsetRate = Parser.stringListToLists(
                 LOOffsetRateStr, Frequency, "DelayModel", True
@@ -814,77 +839,89 @@ class DelayModelRow:
 
             self._LOOffsetRateExists = True
 
-        dispersiveDelayNode = rowdom.getElementsByTagName("dispersiveDelay")
-        if len(dispersiveDelayNode) > 0:
+        dispersiveDelayNode = self._getFirstNodeByTagName(
+            rowdom, "dispersiveDelay", False
+        )
+        if dispersiveDelayNode:
 
             self._dispersiveDelay = float(
-                self._getXMLNodeChildText(dispersiveDelayNode[0])
+                self._getXMLNodeChildText(dispersiveDelayNode)
             )
 
             self._dispersiveDelayExists = True
 
-        dispersiveDelayRateNode = rowdom.getElementsByTagName("dispersiveDelayRate")
-        if len(dispersiveDelayRateNode) > 0:
+        dispersiveDelayRateNode = self._getFirstNodeByTagName(
+            rowdom, "dispersiveDelayRate", False
+        )
+        if dispersiveDelayRateNode:
 
             self._dispersiveDelayRate = float(
-                self._getXMLNodeChildText(dispersiveDelayRateNode[0])
+                self._getXMLNodeChildText(dispersiveDelayRateNode)
             )
 
             self._dispersiveDelayRateExists = True
 
-        atmosphericDryDelayNode = rowdom.getElementsByTagName("atmosphericDryDelay")
-        if len(atmosphericDryDelayNode) > 0:
+        atmosphericDryDelayNode = self._getFirstNodeByTagName(
+            rowdom, "atmosphericDryDelay", False
+        )
+        if atmosphericDryDelayNode:
 
             self._atmosphericDryDelay = float(
-                self._getXMLNodeChildText(atmosphericDryDelayNode[0])
+                self._getXMLNodeChildText(atmosphericDryDelayNode)
             )
 
             self._atmosphericDryDelayExists = True
 
-        atmosphericWetDelayNode = rowdom.getElementsByTagName("atmosphericWetDelay")
-        if len(atmosphericWetDelayNode) > 0:
+        atmosphericWetDelayNode = self._getFirstNodeByTagName(
+            rowdom, "atmosphericWetDelay", False
+        )
+        if atmosphericWetDelayNode:
 
             self._atmosphericWetDelay = float(
-                self._getXMLNodeChildText(atmosphericWetDelayNode[0])
+                self._getXMLNodeChildText(atmosphericWetDelayNode)
             )
 
             self._atmosphericWetDelayExists = True
 
-        padDelayNode = rowdom.getElementsByTagName("padDelay")
-        if len(padDelayNode) > 0:
+        padDelayNode = self._getFirstNodeByTagName(rowdom, "padDelay", False)
+        if padDelayNode:
 
-            self._padDelay = float(self._getXMLNodeChildText(padDelayNode[0]))
+            self._padDelay = float(self._getXMLNodeChildText(padDelayNode))
 
             self._padDelayExists = True
 
-        antennaDelayNode = rowdom.getElementsByTagName("antennaDelay")
-        if len(antennaDelayNode) > 0:
+        antennaDelayNode = self._getFirstNodeByTagName(rowdom, "antennaDelay", False)
+        if antennaDelayNode:
 
-            self._antennaDelay = float(self._getXMLNodeChildText(antennaDelayNode[0]))
+            self._antennaDelay = float(self._getXMLNodeChildText(antennaDelayNode))
 
             self._antennaDelayExists = True
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")
-        if len(numReceptorNode) > 0:
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", False)
+        if numReceptorNode:
 
-            self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode[0]))
+            self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
             self._numReceptorExists = True
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")
-        if len(polarizationTypeNode) > 0:
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", False
+        )
+        if polarizationTypeNode:
 
-            polarizationTypeStr = self._getXMLNodeChildText(polarizationTypeNode[0])
+            polarizationTypeStr = self._getXMLNodeChildText(polarizationTypeNode)
             self._polarizationType = Parser.stringListToLists(
                 polarizationTypeStr, PolarizationType, "DelayModel", False
             )
 
             self._polarizationTypeExists = True
 
-        electronicDelayNode = rowdom.getElementsByTagName("electronicDelay")
-        if len(electronicDelayNode) > 0:
+        electronicDelayNode = self._getFirstNodeByTagName(
+            rowdom, "electronicDelay", False
+        )
+        if electronicDelayNode:
 
-            electronicDelayStr = self._getXMLNodeChildText(electronicDelayNode[0])
+            electronicDelayStr = self._getXMLNodeChildText(electronicDelayNode)
 
             self._electronicDelay = Parser.stringListToLists(
                 electronicDelayStr, float, "DelayModel", False
@@ -892,12 +929,12 @@ class DelayModelRow:
 
             self._electronicDelayExists = True
 
-        electronicDelayRateNode = rowdom.getElementsByTagName("electronicDelayRate")
-        if len(electronicDelayRateNode) > 0:
+        electronicDelayRateNode = self._getFirstNodeByTagName(
+            rowdom, "electronicDelayRate", False
+        )
+        if electronicDelayRateNode:
 
-            electronicDelayRateStr = self._getXMLNodeChildText(
-                electronicDelayRateNode[0]
-            )
+            electronicDelayRateStr = self._getXMLNodeChildText(electronicDelayRateNode)
 
             self._electronicDelayRate = Parser.stringListToLists(
                 electronicDelayRateStr, float, "DelayModel", False
@@ -905,10 +942,10 @@ class DelayModelRow:
 
             self._electronicDelayRateExists = True
 
-        receiverDelayNode = rowdom.getElementsByTagName("receiverDelay")
-        if len(receiverDelayNode) > 0:
+        receiverDelayNode = self._getFirstNodeByTagName(rowdom, "receiverDelay", False)
+        if receiverDelayNode:
 
-            receiverDelayStr = self._getXMLNodeChildText(receiverDelayNode[0])
+            receiverDelayStr = self._getXMLNodeChildText(receiverDelayNode)
 
             self._receiverDelay = Parser.stringListToLists(
                 receiverDelayStr, float, "DelayModel", False
@@ -916,10 +953,10 @@ class DelayModelRow:
 
             self._receiverDelayExists = True
 
-        IFDelayNode = rowdom.getElementsByTagName("IFDelay")
-        if len(IFDelayNode) > 0:
+        IFDelayNode = self._getFirstNodeByTagName(rowdom, "IFDelay", False)
+        if IFDelayNode:
 
-            IFDelayStr = self._getXMLNodeChildText(IFDelayNode[0])
+            IFDelayStr = self._getXMLNodeChildText(IFDelayNode)
 
             self._IFDelay = Parser.stringListToLists(
                 IFDelayStr, float, "DelayModel", False
@@ -927,10 +964,10 @@ class DelayModelRow:
 
             self._IFDelayExists = True
 
-        LODelayNode = rowdom.getElementsByTagName("LODelay")
-        if len(LODelayNode) > 0:
+        LODelayNode = self._getFirstNodeByTagName(rowdom, "LODelay", False)
+        if LODelayNode:
 
-            LODelayStr = self._getXMLNodeChildText(LODelayNode[0])
+            LODelayStr = self._getXMLNodeChildText(LODelayNode)
 
             self._LODelay = Parser.stringListToLists(
                 LODelayStr, float, "DelayModel", False
@@ -938,21 +975,21 @@ class DelayModelRow:
 
             self._LODelayExists = True
 
-        crossPolarizationDelayNode = rowdom.getElementsByTagName(
-            "crossPolarizationDelay"
+        crossPolarizationDelayNode = self._getFirstNodeByTagName(
+            rowdom, "crossPolarizationDelay", False
         )
-        if len(crossPolarizationDelayNode) > 0:
+        if crossPolarizationDelayNode:
 
             self._crossPolarizationDelay = float(
-                self._getXMLNodeChildText(crossPolarizationDelayNode[0])
+                self._getXMLNodeChildText(crossPolarizationDelayNode)
             )
 
             self._crossPolarizationDelayExists = True
 
-        centerOfArrayNode = rowdom.getElementsByTagName("centerOfArray")
-        if len(centerOfArrayNode) > 0:
+        centerOfArrayNode = self._getFirstNodeByTagName(rowdom, "centerOfArray", False)
+        if centerOfArrayNode:
 
-            centerOfArrayStr = self._getXMLNodeChildText(centerOfArrayNode[0])
+            centerOfArrayStr = self._getXMLNodeChildText(centerOfArrayNode)
 
             self._centerOfArray = Parser.stringListToLists(
                 centerOfArrayStr, Length, "DelayModel", True
@@ -960,35 +997,41 @@ class DelayModelRow:
 
             self._centerOfArrayExists = True
 
-        delayModelVersionNode = rowdom.getElementsByTagName("delayModelVersion")
-        if len(delayModelVersionNode) > 0:
+        delayModelVersionNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelVersion", False
+        )
+        if delayModelVersionNode:
 
             self._delayModelVersion = str(
-                self._getXMLNodeChildText(delayModelVersionNode[0])
+                self._getXMLNodeChildText(delayModelVersionNode)
             )
 
             self._delayModelVersionExists = True
 
-        ionosphericDelayNode = rowdom.getElementsByTagName("ionosphericDelay")
-        if len(ionosphericDelayNode) > 0:
+        ionosphericDelayNode = self._getFirstNodeByTagName(
+            rowdom, "ionosphericDelay", False
+        )
+        if ionosphericDelayNode:
 
             self._ionosphericDelay = Interval(
-                self._getXMLNodeChildText(ionosphericDelayNode[0])
+                self._getXMLNodeChildText(ionosphericDelayNode)
             )
 
             self._ionosphericDelayExists = True
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
         self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
+        fieldIdNode = self._getFirstNodeByTagName(rowdom, "fieldId", True)
 
         self._fieldId = Tag(self._getXMLNodeChildText(fieldIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
         self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 

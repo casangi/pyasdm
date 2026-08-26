@@ -448,6 +448,27 @@ class DelayModelFixedParametersRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "DelayModelFixedParametersTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -475,152 +496,164 @@ class DelayModelFixedParametersRow:
 
         # intrinsic attribute values
 
-        delayModelFixedParametersIdNode = rowdom.getElementsByTagName(
-            "delayModelFixedParametersId"
-        )[0]
+        delayModelFixedParametersIdNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelFixedParametersId", True
+        )
 
         self._delayModelFixedParametersId = Tag(
             self._getXMLNodeChildText(delayModelFixedParametersIdNode)
         )
 
-        delayModelVersionNode = rowdom.getElementsByTagName("delayModelVersion")[0]
+        delayModelVersionNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelVersion", True
+        )
 
         self._delayModelVersion = str(self._getXMLNodeChildText(delayModelVersionNode))
 
-        gaussConstantNode = rowdom.getElementsByTagName("gaussConstant")
-        if len(gaussConstantNode) > 0:
+        gaussConstantNode = self._getFirstNodeByTagName(rowdom, "gaussConstant", False)
+        if gaussConstantNode:
 
             self._gaussConstant = AngularRate(
-                self._getXMLNodeChildText(gaussConstantNode[0])
+                self._getXMLNodeChildText(gaussConstantNode)
             )
 
             self._gaussConstantExists = True
 
-        newtonianConstantNode = rowdom.getElementsByTagName("newtonianConstant")
-        if len(newtonianConstantNode) > 0:
+        newtonianConstantNode = self._getFirstNodeByTagName(
+            rowdom, "newtonianConstant", False
+        )
+        if newtonianConstantNode:
 
             self._newtonianConstant = float(
-                self._getXMLNodeChildText(newtonianConstantNode[0])
+                self._getXMLNodeChildText(newtonianConstantNode)
             )
 
             self._newtonianConstantExists = True
 
-        gravityNode = rowdom.getElementsByTagName("gravity")
-        if len(gravityNode) > 0:
+        gravityNode = self._getFirstNodeByTagName(rowdom, "gravity", False)
+        if gravityNode:
 
-            self._gravity = float(self._getXMLNodeChildText(gravityNode[0]))
+            self._gravity = float(self._getXMLNodeChildText(gravityNode))
 
             self._gravityExists = True
 
-        earthFlatteningNode = rowdom.getElementsByTagName("earthFlattening")
-        if len(earthFlatteningNode) > 0:
+        earthFlatteningNode = self._getFirstNodeByTagName(
+            rowdom, "earthFlattening", False
+        )
+        if earthFlatteningNode:
 
             self._earthFlattening = float(
-                self._getXMLNodeChildText(earthFlatteningNode[0])
+                self._getXMLNodeChildText(earthFlatteningNode)
             )
 
             self._earthFlatteningExists = True
 
-        earthRadiusNode = rowdom.getElementsByTagName("earthRadius")
-        if len(earthRadiusNode) > 0:
+        earthRadiusNode = self._getFirstNodeByTagName(rowdom, "earthRadius", False)
+        if earthRadiusNode:
 
-            self._earthRadius = Length(self._getXMLNodeChildText(earthRadiusNode[0]))
+            self._earthRadius = Length(self._getXMLNodeChildText(earthRadiusNode))
 
             self._earthRadiusExists = True
 
-        moonEarthMassRatioNode = rowdom.getElementsByTagName("moonEarthMassRatio")
-        if len(moonEarthMassRatioNode) > 0:
+        moonEarthMassRatioNode = self._getFirstNodeByTagName(
+            rowdom, "moonEarthMassRatio", False
+        )
+        if moonEarthMassRatioNode:
 
             self._moonEarthMassRatio = float(
-                self._getXMLNodeChildText(moonEarthMassRatioNode[0])
+                self._getXMLNodeChildText(moonEarthMassRatioNode)
             )
 
             self._moonEarthMassRatioExists = True
 
-        ephemerisEpochNode = rowdom.getElementsByTagName("ephemerisEpoch")
-        if len(ephemerisEpochNode) > 0:
+        ephemerisEpochNode = self._getFirstNodeByTagName(
+            rowdom, "ephemerisEpoch", False
+        )
+        if ephemerisEpochNode:
 
-            self._ephemerisEpoch = str(self._getXMLNodeChildText(ephemerisEpochNode[0]))
+            self._ephemerisEpoch = str(self._getXMLNodeChildText(ephemerisEpochNode))
 
             self._ephemerisEpochExists = True
 
-        earthTideLagNode = rowdom.getElementsByTagName("earthTideLag")
-        if len(earthTideLagNode) > 0:
+        earthTideLagNode = self._getFirstNodeByTagName(rowdom, "earthTideLag", False)
+        if earthTideLagNode:
 
-            self._earthTideLag = float(self._getXMLNodeChildText(earthTideLagNode[0]))
+            self._earthTideLag = float(self._getXMLNodeChildText(earthTideLagNode))
 
             self._earthTideLagExists = True
 
-        earthGMNode = rowdom.getElementsByTagName("earthGM")
-        if len(earthGMNode) > 0:
+        earthGMNode = self._getFirstNodeByTagName(rowdom, "earthGM", False)
+        if earthGMNode:
 
-            self._earthGM = float(self._getXMLNodeChildText(earthGMNode[0]))
+            self._earthGM = float(self._getXMLNodeChildText(earthGMNode))
 
             self._earthGMExists = True
 
-        moonGMNode = rowdom.getElementsByTagName("moonGM")
-        if len(moonGMNode) > 0:
+        moonGMNode = self._getFirstNodeByTagName(rowdom, "moonGM", False)
+        if moonGMNode:
 
-            self._moonGM = float(self._getXMLNodeChildText(moonGMNode[0]))
+            self._moonGM = float(self._getXMLNodeChildText(moonGMNode))
 
             self._moonGMExists = True
 
-        sunGMNode = rowdom.getElementsByTagName("sunGM")
-        if len(sunGMNode) > 0:
+        sunGMNode = self._getFirstNodeByTagName(rowdom, "sunGM", False)
+        if sunGMNode:
 
-            self._sunGM = float(self._getXMLNodeChildText(sunGMNode[0]))
+            self._sunGM = float(self._getXMLNodeChildText(sunGMNode))
 
             self._sunGMExists = True
 
-        loveNumberHNode = rowdom.getElementsByTagName("loveNumberH")
-        if len(loveNumberHNode) > 0:
+        loveNumberHNode = self._getFirstNodeByTagName(rowdom, "loveNumberH", False)
+        if loveNumberHNode:
 
-            self._loveNumberH = float(self._getXMLNodeChildText(loveNumberHNode[0]))
+            self._loveNumberH = float(self._getXMLNodeChildText(loveNumberHNode))
 
             self._loveNumberHExists = True
 
-        loveNumberLNode = rowdom.getElementsByTagName("loveNumberL")
-        if len(loveNumberLNode) > 0:
+        loveNumberLNode = self._getFirstNodeByTagName(rowdom, "loveNumberL", False)
+        if loveNumberLNode:
 
-            self._loveNumberL = float(self._getXMLNodeChildText(loveNumberLNode[0]))
+            self._loveNumberL = float(self._getXMLNodeChildText(loveNumberLNode))
 
             self._loveNumberLExists = True
 
-        precessionConstantNode = rowdom.getElementsByTagName("precessionConstant")
-        if len(precessionConstantNode) > 0:
+        precessionConstantNode = self._getFirstNodeByTagName(
+            rowdom, "precessionConstant", False
+        )
+        if precessionConstantNode:
 
             self._precessionConstant = AngularRate(
-                self._getXMLNodeChildText(precessionConstantNode[0])
+                self._getXMLNodeChildText(precessionConstantNode)
             )
 
             self._precessionConstantExists = True
 
-        lightTime1AUNode = rowdom.getElementsByTagName("lightTime1AU")
-        if len(lightTime1AUNode) > 0:
+        lightTime1AUNode = self._getFirstNodeByTagName(rowdom, "lightTime1AU", False)
+        if lightTime1AUNode:
 
-            self._lightTime1AU = float(self._getXMLNodeChildText(lightTime1AUNode[0]))
+            self._lightTime1AU = float(self._getXMLNodeChildText(lightTime1AUNode))
 
             self._lightTime1AUExists = True
 
-        speedOfLightNode = rowdom.getElementsByTagName("speedOfLight")
-        if len(speedOfLightNode) > 0:
+        speedOfLightNode = self._getFirstNodeByTagName(rowdom, "speedOfLight", False)
+        if speedOfLightNode:
 
-            self._speedOfLight = Speed(self._getXMLNodeChildText(speedOfLightNode[0]))
+            self._speedOfLight = Speed(self._getXMLNodeChildText(speedOfLightNode))
 
             self._speedOfLightExists = True
 
-        delayModelFlagsNode = rowdom.getElementsByTagName("delayModelFlags")
-        if len(delayModelFlagsNode) > 0:
+        delayModelFlagsNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelFlags", False
+        )
+        if delayModelFlagsNode:
 
-            self._delayModelFlags = str(
-                self._getXMLNodeChildText(delayModelFlagsNode[0])
-            )
+            self._delayModelFlags = str(self._getXMLNodeChildText(delayModelFlagsNode))
 
             self._delayModelFlagsExists = True
 
         # extrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
         self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 

@@ -237,6 +237,27 @@ class PointingModelRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "PointingModelTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -261,15 +282,17 @@ class PointingModelRow:
 
         # intrinsic attribute values
 
-        pointingModelIdNode = rowdom.getElementsByTagName("pointingModelId")[0]
+        pointingModelIdNode = self._getFirstNodeByTagName(
+            rowdom, "pointingModelId", True
+        )
 
         self._pointingModelId = int(self._getXMLNodeChildText(pointingModelIdNode))
 
-        numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
+        numCoeffNode = self._getFirstNodeByTagName(rowdom, "numCoeff", True)
 
         self._numCoeff = int(self._getXMLNodeChildText(numCoeffNode))
 
-        coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
+        coeffNameNode = self._getFirstNodeByTagName(rowdom, "coeffName", True)
 
         coeffNameStr = self._getXMLNodeChildText(coeffNameNode)
 
@@ -277,7 +300,7 @@ class PointingModelRow:
             coeffNameStr, str, "PointingModel", False
         )
 
-        coeffValNode = rowdom.getElementsByTagName("coeffVal")[0]
+        coeffValNode = self._getFirstNodeByTagName(rowdom, "coeffVal", True)
 
         coeffValStr = self._getXMLNodeChildText(coeffValNode)
 
@@ -285,26 +308,28 @@ class PointingModelRow:
             coeffValStr, float, "PointingModel", False
         )
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", True
+        )
 
         self._polarizationType = PolarizationType.newPolarizationType(
             self._getXMLNodeChildText(polarizationTypeNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
             self._getXMLNodeChildText(receiverBandNode)
         )
 
-        assocNatureNode = rowdom.getElementsByTagName("assocNature")[0]
+        assocNatureNode = self._getFirstNodeByTagName(rowdom, "assocNature", True)
 
         self._assocNature = str(self._getXMLNodeChildText(assocNatureNode))
 
-        coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")
-        if len(coeffFormulaNode) > 0:
+        coeffFormulaNode = self._getFirstNodeByTagName(rowdom, "coeffFormula", False)
+        if coeffFormulaNode:
 
-            coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode[0])
+            coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode)
 
             self._coeffFormula = Parser.stringListToLists(
                 coeffFormulaStr, str, "PointingModel", False
@@ -314,13 +339,13 @@ class PointingModelRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
         self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        assocPointingModelIdNode = rowdom.getElementsByTagName("assocPointingModelId")[
-            0
-        ]
+        assocPointingModelIdNode = self._getFirstNodeByTagName(
+            rowdom, "assocPointingModelId", True
+        )
 
         self._assocPointingModelId = int(
             self._getXMLNodeChildText(assocPointingModelIdNode)

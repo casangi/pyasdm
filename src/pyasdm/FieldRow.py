@@ -324,6 +324,27 @@ class FieldRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "FieldTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -348,31 +369,31 @@ class FieldRow:
 
         # intrinsic attribute values
 
-        fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
+        fieldIdNode = self._getFirstNodeByTagName(rowdom, "fieldId", True)
 
         self._fieldId = Tag(self._getXMLNodeChildText(fieldIdNode))
 
-        fieldNameNode = rowdom.getElementsByTagName("fieldName")[0]
+        fieldNameNode = self._getFirstNodeByTagName(rowdom, "fieldName", True)
 
         self._fieldName = str(self._getXMLNodeChildText(fieldNameNode))
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", True)
 
         self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
-        delayDirNode = rowdom.getElementsByTagName("delayDir")[0]
+        delayDirNode = self._getFirstNodeByTagName(rowdom, "delayDir", True)
 
         delayDirStr = self._getXMLNodeChildText(delayDirNode)
 
         self._delayDir = Parser.stringListToLists(delayDirStr, Angle, "Field", True)
 
-        phaseDirNode = rowdom.getElementsByTagName("phaseDir")[0]
+        phaseDirNode = self._getFirstNodeByTagName(rowdom, "phaseDir", True)
 
         phaseDirStr = self._getXMLNodeChildText(phaseDirNode)
 
         self._phaseDir = Parser.stringListToLists(phaseDirStr, Angle, "Field", True)
 
-        referenceDirNode = rowdom.getElementsByTagName("referenceDir")[0]
+        referenceDirNode = self._getFirstNodeByTagName(rowdom, "referenceDir", True)
 
         referenceDirStr = self._getXMLNodeChildText(referenceDirNode)
 
@@ -380,65 +401,67 @@ class FieldRow:
             referenceDirStr, Angle, "Field", True
         )
 
-        timeNode = rowdom.getElementsByTagName("time")
-        if len(timeNode) > 0:
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", False)
+        if timeNode:
 
-            self._time = ArrayTime(self._getXMLNodeChildText(timeNode[0]))
+            self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
             self._timeExists = True
 
-        codeNode = rowdom.getElementsByTagName("code")
-        if len(codeNode) > 0:
+        codeNode = self._getFirstNodeByTagName(rowdom, "code", False)
+        if codeNode:
 
-            self._code = str(self._getXMLNodeChildText(codeNode[0]))
+            self._code = str(self._getXMLNodeChildText(codeNode))
 
             self._codeExists = True
 
-        directionCodeNode = rowdom.getElementsByTagName("directionCode")
-        if len(directionCodeNode) > 0:
+        directionCodeNode = self._getFirstNodeByTagName(rowdom, "directionCode", False)
+        if directionCodeNode:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                self._getXMLNodeChildText(directionCodeNode[0])
+                self._getXMLNodeChildText(directionCodeNode)
             )
 
             self._directionCodeExists = True
 
-        directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
-        if len(directionEquinoxNode) > 0:
+        directionEquinoxNode = self._getFirstNodeByTagName(
+            rowdom, "directionEquinox", False
+        )
+        if directionEquinoxNode:
 
             self._directionEquinox = ArrayTime(
-                self._getXMLNodeChildText(directionEquinoxNode[0])
+                self._getXMLNodeChildText(directionEquinoxNode)
             )
 
             self._directionEquinoxExists = True
 
-        assocNatureNode = rowdom.getElementsByTagName("assocNature")
-        if len(assocNatureNode) > 0:
+        assocNatureNode = self._getFirstNodeByTagName(rowdom, "assocNature", False)
+        if assocNatureNode:
 
-            self._assocNature = str(self._getXMLNodeChildText(assocNatureNode[0]))
+            self._assocNature = str(self._getXMLNodeChildText(assocNatureNode))
 
             self._assocNatureExists = True
 
         # extrinsic attribute values
 
-        assocFieldIdNode = rowdom.getElementsByTagName("assocFieldId")
-        if len(assocFieldIdNode) > 0:
+        assocFieldIdNode = self._getFirstNodeByTagName(rowdom, "assocFieldId", False)
+        if assocFieldIdNode:
 
-            self._assocFieldId = Tag(self._getXMLNodeChildText(assocFieldIdNode[0]))
+            self._assocFieldId = Tag(self._getXMLNodeChildText(assocFieldIdNode))
 
             self._assocFieldIdExists = True
 
-        ephemerisIdNode = rowdom.getElementsByTagName("ephemerisId")
-        if len(ephemerisIdNode) > 0:
+        ephemerisIdNode = self._getFirstNodeByTagName(rowdom, "ephemerisId", False)
+        if ephemerisIdNode:
 
-            self._ephemerisId = int(self._getXMLNodeChildText(ephemerisIdNode[0]))
+            self._ephemerisId = int(self._getXMLNodeChildText(ephemerisIdNode))
 
             self._ephemerisIdExists = True
 
-        sourceIdNode = rowdom.getElementsByTagName("sourceId")
-        if len(sourceIdNode) > 0:
+        sourceIdNode = self._getFirstNodeByTagName(rowdom, "sourceId", False)
+        if sourceIdNode:
 
-            self._sourceId = int(self._getXMLNodeChildText(sourceIdNode[0]))
+            self._sourceId = int(self._getXMLNodeChildText(sourceIdNode))
 
             self._sourceIdExists = True
 

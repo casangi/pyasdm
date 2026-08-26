@@ -173,6 +173,27 @@ class ProcessorRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ProcessorTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -197,21 +218,23 @@ class ProcessorRow:
 
         # intrinsic attribute values
 
-        processorIdNode = rowdom.getElementsByTagName("processorId")[0]
+        processorIdNode = self._getFirstNodeByTagName(rowdom, "processorId", True)
 
         self._processorId = Tag(self._getXMLNodeChildText(processorIdNode))
 
-        modeIdNode = rowdom.getElementsByTagName("modeId")[0]
+        modeIdNode = self._getFirstNodeByTagName(rowdom, "modeId", True)
 
         self._modeId = Tag(self._getXMLNodeChildText(modeIdNode))
 
-        processorTypeNode = rowdom.getElementsByTagName("processorType")[0]
+        processorTypeNode = self._getFirstNodeByTagName(rowdom, "processorType", True)
 
         self._processorType = ProcessorType.newProcessorType(
             self._getXMLNodeChildText(processorTypeNode)
         )
 
-        processorSubTypeNode = rowdom.getElementsByTagName("processorSubType")[0]
+        processorSubTypeNode = self._getFirstNodeByTagName(
+            rowdom, "processorSubType", True
+        )
 
         self._processorSubType = ProcessorSubType.newProcessorSubType(
             self._getXMLNodeChildText(processorSubTypeNode)

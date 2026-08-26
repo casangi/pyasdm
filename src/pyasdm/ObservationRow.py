@@ -131,6 +131,27 @@ class ObservationRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ObservationTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -155,7 +176,7 @@ class ObservationRow:
 
         # intrinsic attribute values
 
-        observationIdNode = rowdom.getElementsByTagName("observationId")[0]
+        observationIdNode = self._getFirstNodeByTagName(rowdom, "observationId", True)
 
         self._observationId = Tag(self._getXMLNodeChildText(observationIdNode))
 

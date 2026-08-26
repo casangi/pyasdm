@@ -179,6 +179,27 @@ class FlagCmdRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "FlagCmdTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -203,33 +224,33 @@ class FlagCmdRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        typeNode = rowdom.getElementsByTagName("type")[0]
+        typeNode = self._getFirstNodeByTagName(rowdom, "type", True)
 
         self._type = str(self._getXMLNodeChildText(typeNode))
 
-        reasonNode = rowdom.getElementsByTagName("reason")[0]
+        reasonNode = self._getFirstNodeByTagName(rowdom, "reason", True)
 
         self._reason = str(self._getXMLNodeChildText(reasonNode))
 
-        levelNode = rowdom.getElementsByTagName("level")[0]
+        levelNode = self._getFirstNodeByTagName(rowdom, "level", True)
 
         self._level = int(self._getXMLNodeChildText(levelNode))
 
-        severityNode = rowdom.getElementsByTagName("severity")[0]
+        severityNode = self._getFirstNodeByTagName(rowdom, "severity", True)
 
         self._severity = int(self._getXMLNodeChildText(severityNode))
 
-        appliedNode = rowdom.getElementsByTagName("applied")[0]
+        appliedNode = self._getFirstNodeByTagName(rowdom, "applied", True)
 
         self._applied = bool(self._getXMLNodeChildText(appliedNode))
 
-        commandNode = rowdom.getElementsByTagName("command")[0]
+        commandNode = self._getFirstNodeByTagName(rowdom, "command", True)
 
         self._command = str(self._getXMLNodeChildText(commandNode))
 

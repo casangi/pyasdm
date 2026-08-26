@@ -180,6 +180,27 @@ class StationRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "StationTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -204,28 +225,28 @@ class StationRow:
 
         # intrinsic attribute values
 
-        stationIdNode = rowdom.getElementsByTagName("stationId")[0]
+        stationIdNode = self._getFirstNodeByTagName(rowdom, "stationId", True)
 
         self._stationId = Tag(self._getXMLNodeChildText(stationIdNode))
 
-        nameNode = rowdom.getElementsByTagName("name")[0]
+        nameNode = self._getFirstNodeByTagName(rowdom, "name", True)
 
         self._name = str(self._getXMLNodeChildText(nameNode))
 
-        positionNode = rowdom.getElementsByTagName("position")[0]
+        positionNode = self._getFirstNodeByTagName(rowdom, "position", True)
 
         positionStr = self._getXMLNodeChildText(positionNode)
 
         self._position = Parser.stringListToLists(positionStr, Length, "Station", True)
 
-        typeNode = rowdom.getElementsByTagName("type")[0]
+        typeNode = self._getFirstNodeByTagName(rowdom, "type", True)
 
         self._type = StationType.newStationType(self._getXMLNodeChildText(typeNode))
 
-        timeNode = rowdom.getElementsByTagName("time")
-        if len(timeNode) > 0:
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", False)
+        if timeNode:
 
-            self._time = ArrayTime(self._getXMLNodeChildText(timeNode[0]))
+            self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
             self._timeExists = True
 

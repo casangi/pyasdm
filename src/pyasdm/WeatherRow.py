@@ -386,6 +386,27 @@ class WeatherRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "WeatherTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -410,74 +431,72 @@ class WeatherRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        pressureNode = rowdom.getElementsByTagName("pressure")
-        if len(pressureNode) > 0:
+        pressureNode = self._getFirstNodeByTagName(rowdom, "pressure", False)
+        if pressureNode:
 
-            self._pressure = Pressure(self._getXMLNodeChildText(pressureNode[0]))
+            self._pressure = Pressure(self._getXMLNodeChildText(pressureNode))
 
             self._pressureExists = True
 
-        relHumidityNode = rowdom.getElementsByTagName("relHumidity")
-        if len(relHumidityNode) > 0:
+        relHumidityNode = self._getFirstNodeByTagName(rowdom, "relHumidity", False)
+        if relHumidityNode:
 
-            self._relHumidity = Humidity(self._getXMLNodeChildText(relHumidityNode[0]))
+            self._relHumidity = Humidity(self._getXMLNodeChildText(relHumidityNode))
 
             self._relHumidityExists = True
 
-        temperatureNode = rowdom.getElementsByTagName("temperature")
-        if len(temperatureNode) > 0:
+        temperatureNode = self._getFirstNodeByTagName(rowdom, "temperature", False)
+        if temperatureNode:
 
-            self._temperature = Temperature(
-                self._getXMLNodeChildText(temperatureNode[0])
-            )
+            self._temperature = Temperature(self._getXMLNodeChildText(temperatureNode))
 
             self._temperatureExists = True
 
-        windDirectionNode = rowdom.getElementsByTagName("windDirection")
-        if len(windDirectionNode) > 0:
+        windDirectionNode = self._getFirstNodeByTagName(rowdom, "windDirection", False)
+        if windDirectionNode:
 
-            self._windDirection = Angle(self._getXMLNodeChildText(windDirectionNode[0]))
+            self._windDirection = Angle(self._getXMLNodeChildText(windDirectionNode))
 
             self._windDirectionExists = True
 
-        windSpeedNode = rowdom.getElementsByTagName("windSpeed")
-        if len(windSpeedNode) > 0:
+        windSpeedNode = self._getFirstNodeByTagName(rowdom, "windSpeed", False)
+        if windSpeedNode:
 
-            self._windSpeed = Speed(self._getXMLNodeChildText(windSpeedNode[0]))
+            self._windSpeed = Speed(self._getXMLNodeChildText(windSpeedNode))
 
             self._windSpeedExists = True
 
-        windMaxNode = rowdom.getElementsByTagName("windMax")
-        if len(windMaxNode) > 0:
+        windMaxNode = self._getFirstNodeByTagName(rowdom, "windMax", False)
+        if windMaxNode:
 
-            self._windMax = Speed(self._getXMLNodeChildText(windMaxNode[0]))
+            self._windMax = Speed(self._getXMLNodeChildText(windMaxNode))
 
             self._windMaxExists = True
 
-        dewPointNode = rowdom.getElementsByTagName("dewPoint")
-        if len(dewPointNode) > 0:
+        dewPointNode = self._getFirstNodeByTagName(rowdom, "dewPoint", False)
+        if dewPointNode:
 
-            self._dewPoint = Temperature(self._getXMLNodeChildText(dewPointNode[0]))
+            self._dewPoint = Temperature(self._getXMLNodeChildText(dewPointNode))
 
             self._dewPointExists = True
 
-        numLayerNode = rowdom.getElementsByTagName("numLayer")
-        if len(numLayerNode) > 0:
+        numLayerNode = self._getFirstNodeByTagName(rowdom, "numLayer", False)
+        if numLayerNode:
 
-            self._numLayer = int(self._getXMLNodeChildText(numLayerNode[0]))
+            self._numLayer = int(self._getXMLNodeChildText(numLayerNode))
 
             self._numLayerExists = True
 
-        layerHeightNode = rowdom.getElementsByTagName("layerHeight")
-        if len(layerHeightNode) > 0:
+        layerHeightNode = self._getFirstNodeByTagName(rowdom, "layerHeight", False)
+        if layerHeightNode:
 
-            layerHeightStr = self._getXMLNodeChildText(layerHeightNode[0])
+            layerHeightStr = self._getXMLNodeChildText(layerHeightNode)
 
             self._layerHeight = Parser.stringListToLists(
                 layerHeightStr, Length, "Weather", True
@@ -485,10 +504,12 @@ class WeatherRow:
 
             self._layerHeightExists = True
 
-        temperatureProfileNode = rowdom.getElementsByTagName("temperatureProfile")
-        if len(temperatureProfileNode) > 0:
+        temperatureProfileNode = self._getFirstNodeByTagName(
+            rowdom, "temperatureProfile", False
+        )
+        if temperatureProfileNode:
 
-            temperatureProfileStr = self._getXMLNodeChildText(temperatureProfileNode[0])
+            temperatureProfileStr = self._getXMLNodeChildText(temperatureProfileNode)
 
             self._temperatureProfile = Parser.stringListToLists(
                 temperatureProfileStr, Temperature, "Weather", True
@@ -496,26 +517,26 @@ class WeatherRow:
 
             self._temperatureProfileExists = True
 
-        cloudMonitorNode = rowdom.getElementsByTagName("cloudMonitor")
-        if len(cloudMonitorNode) > 0:
+        cloudMonitorNode = self._getFirstNodeByTagName(rowdom, "cloudMonitor", False)
+        if cloudMonitorNode:
 
             self._cloudMonitor = Temperature(
-                self._getXMLNodeChildText(cloudMonitorNode[0])
+                self._getXMLNodeChildText(cloudMonitorNode)
             )
 
             self._cloudMonitorExists = True
 
-        numWVRNode = rowdom.getElementsByTagName("numWVR")
-        if len(numWVRNode) > 0:
+        numWVRNode = self._getFirstNodeByTagName(rowdom, "numWVR", False)
+        if numWVRNode:
 
-            self._numWVR = int(self._getXMLNodeChildText(numWVRNode[0]))
+            self._numWVR = int(self._getXMLNodeChildText(numWVRNode))
 
             self._numWVRExists = True
 
-        wvrTempNode = rowdom.getElementsByTagName("wvrTemp")
-        if len(wvrTempNode) > 0:
+        wvrTempNode = self._getFirstNodeByTagName(rowdom, "wvrTemp", False)
+        if wvrTempNode:
 
-            wvrTempStr = self._getXMLNodeChildText(wvrTempNode[0])
+            wvrTempStr = self._getXMLNodeChildText(wvrTempNode)
 
             self._wvrTemp = Parser.stringListToLists(
                 wvrTempStr, Temperature, "Weather", True
@@ -523,16 +544,16 @@ class WeatherRow:
 
             self._wvrTempExists = True
 
-        waterNode = rowdom.getElementsByTagName("water")
-        if len(waterNode) > 0:
+        waterNode = self._getFirstNodeByTagName(rowdom, "water", False)
+        if waterNode:
 
-            self._water = float(self._getXMLNodeChildText(waterNode[0]))
+            self._water = float(self._getXMLNodeChildText(waterNode))
 
             self._waterExists = True
 
         # extrinsic attribute values
 
-        stationIdNode = rowdom.getElementsByTagName("stationId")[0]
+        stationIdNode = self._getFirstNodeByTagName(rowdom, "stationId", True)
 
         self._stationId = Tag(self._getXMLNodeChildText(stationIdNode))
 

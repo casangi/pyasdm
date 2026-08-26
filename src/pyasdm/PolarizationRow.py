@@ -163,6 +163,27 @@ class PolarizationRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "PolarizationTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -187,22 +208,22 @@ class PolarizationRow:
 
         # intrinsic attribute values
 
-        polarizationIdNode = rowdom.getElementsByTagName("polarizationId")[0]
+        polarizationIdNode = self._getFirstNodeByTagName(rowdom, "polarizationId", True)
 
         self._polarizationId = Tag(self._getXMLNodeChildText(polarizationIdNode))
 
-        numCorrNode = rowdom.getElementsByTagName("numCorr")[0]
+        numCorrNode = self._getFirstNodeByTagName(rowdom, "numCorr", True)
 
         self._numCorr = int(self._getXMLNodeChildText(numCorrNode))
 
-        corrTypeNode = rowdom.getElementsByTagName("corrType")[0]
+        corrTypeNode = self._getFirstNodeByTagName(rowdom, "corrType", True)
 
         corrTypeStr = self._getXMLNodeChildText(corrTypeNode)
         self._corrType = Parser.stringListToLists(
             corrTypeStr, StokesParameter, "Polarization", False
         )
 
-        corrProductNode = rowdom.getElementsByTagName("corrProduct")[0]
+        corrProductNode = self._getFirstNodeByTagName(rowdom, "corrProduct", True)
 
         corrProductStr = self._getXMLNodeChildText(corrProductNode)
         self._corrProduct = Parser.stringListToLists(

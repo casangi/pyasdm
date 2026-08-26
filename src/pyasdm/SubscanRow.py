@@ -260,6 +260,27 @@ class SubscanRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SubscanTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -284,46 +305,48 @@ class SubscanRow:
 
         # intrinsic attribute values
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", True)
 
         self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
-        subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
+        subscanNumberNode = self._getFirstNodeByTagName(rowdom, "subscanNumber", True)
 
         self._subscanNumber = int(self._getXMLNodeChildText(subscanNumberNode))
 
-        startTimeNode = rowdom.getElementsByTagName("startTime")[0]
+        startTimeNode = self._getFirstNodeByTagName(rowdom, "startTime", True)
 
         self._startTime = ArrayTime(self._getXMLNodeChildText(startTimeNode))
 
-        endTimeNode = rowdom.getElementsByTagName("endTime")[0]
+        endTimeNode = self._getFirstNodeByTagName(rowdom, "endTime", True)
 
         self._endTime = ArrayTime(self._getXMLNodeChildText(endTimeNode))
 
-        fieldNameNode = rowdom.getElementsByTagName("fieldName")[0]
+        fieldNameNode = self._getFirstNodeByTagName(rowdom, "fieldName", True)
 
         self._fieldName = str(self._getXMLNodeChildText(fieldNameNode))
 
-        subscanIntentNode = rowdom.getElementsByTagName("subscanIntent")[0]
+        subscanIntentNode = self._getFirstNodeByTagName(rowdom, "subscanIntent", True)
 
         self._subscanIntent = SubscanIntent.newSubscanIntent(
             self._getXMLNodeChildText(subscanIntentNode)
         )
 
-        subscanModeNode = rowdom.getElementsByTagName("subscanMode")
-        if len(subscanModeNode) > 0:
+        subscanModeNode = self._getFirstNodeByTagName(rowdom, "subscanMode", False)
+        if subscanModeNode:
 
             self._subscanMode = SwitchingMode.newSwitchingMode(
-                self._getXMLNodeChildText(subscanModeNode[0])
+                self._getXMLNodeChildText(subscanModeNode)
             )
 
             self._subscanModeExists = True
 
-        numIntegrationNode = rowdom.getElementsByTagName("numIntegration")[0]
+        numIntegrationNode = self._getFirstNodeByTagName(rowdom, "numIntegration", True)
 
         self._numIntegration = int(self._getXMLNodeChildText(numIntegrationNode))
 
-        numSubintegrationNode = rowdom.getElementsByTagName("numSubintegration")[0]
+        numSubintegrationNode = self._getFirstNodeByTagName(
+            rowdom, "numSubintegration", True
+        )
 
         numSubintegrationStr = self._getXMLNodeChildText(numSubintegrationNode)
 
@@ -331,12 +354,14 @@ class SubscanRow:
             numSubintegrationStr, int, "Subscan", False
         )
 
-        correlatorCalibrationNode = rowdom.getElementsByTagName("correlatorCalibration")
-        if len(correlatorCalibrationNode) > 0:
+        correlatorCalibrationNode = self._getFirstNodeByTagName(
+            rowdom, "correlatorCalibration", False
+        )
+        if correlatorCalibrationNode:
 
             self._correlatorCalibration = (
                 CorrelatorCalibration.newCorrelatorCalibration(
-                    self._getXMLNodeChildText(correlatorCalibrationNode[0])
+                    self._getXMLNodeChildText(correlatorCalibrationNode)
                 )
             )
 
@@ -344,7 +369,7 @@ class SubscanRow:
 
         # extrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
         self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 

@@ -199,6 +199,27 @@ class HistoryRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "HistoryTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -223,41 +244,41 @@ class HistoryRow:
 
         # intrinsic attribute values
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
         self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
-        messageNode = rowdom.getElementsByTagName("message")[0]
+        messageNode = self._getFirstNodeByTagName(rowdom, "message", True)
 
         self._message = str(self._getXMLNodeChildText(messageNode))
 
-        priorityNode = rowdom.getElementsByTagName("priority")[0]
+        priorityNode = self._getFirstNodeByTagName(rowdom, "priority", True)
 
         self._priority = str(self._getXMLNodeChildText(priorityNode))
 
-        originNode = rowdom.getElementsByTagName("origin")[0]
+        originNode = self._getFirstNodeByTagName(rowdom, "origin", True)
 
         self._origin = str(self._getXMLNodeChildText(originNode))
 
-        objectIdNode = rowdom.getElementsByTagName("objectId")[0]
+        objectIdNode = self._getFirstNodeByTagName(rowdom, "objectId", True)
 
         self._objectId = str(self._getXMLNodeChildText(objectIdNode))
 
-        applicationNode = rowdom.getElementsByTagName("application")[0]
+        applicationNode = self._getFirstNodeByTagName(rowdom, "application", True)
 
         self._application = str(self._getXMLNodeChildText(applicationNode))
 
-        cliCommandNode = rowdom.getElementsByTagName("cliCommand")[0]
+        cliCommandNode = self._getFirstNodeByTagName(rowdom, "cliCommand", True)
 
         self._cliCommand = str(self._getXMLNodeChildText(cliCommandNode))
 
-        appParmsNode = rowdom.getElementsByTagName("appParms")[0]
+        appParmsNode = self._getFirstNodeByTagName(rowdom, "appParms", True)
 
         self._appParms = str(self._getXMLNodeChildText(appParmsNode))
 
         # extrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
         self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 

@@ -170,6 +170,27 @@ class DataDescriptionRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "DataDescriptionTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -196,24 +217,28 @@ class DataDescriptionRow:
 
         # intrinsic attribute values
 
-        dataDescriptionIdNode = rowdom.getElementsByTagName("dataDescriptionId")[0]
+        dataDescriptionIdNode = self._getFirstNodeByTagName(
+            rowdom, "dataDescriptionId", True
+        )
 
         self._dataDescriptionId = Tag(self._getXMLNodeChildText(dataDescriptionIdNode))
 
         # extrinsic attribute values
 
-        polOrHoloIdNode = rowdom.getElementsByTagName("polOrHoloId")[0]
+        polOrHoloIdNode = self._getFirstNodeByTagName(rowdom, "polOrHoloId", True)
 
         self._polOrHoloId = Tag(self._getXMLNodeChildText(polOrHoloIdNode))
 
-        pulsarIdNode = rowdom.getElementsByTagName("pulsarId")
-        if len(pulsarIdNode) > 0:
+        pulsarIdNode = self._getFirstNodeByTagName(rowdom, "pulsarId", False)
+        if pulsarIdNode:
 
-            self._pulsarId = Tag(self._getXMLNodeChildText(pulsarIdNode[0]))
+            self._pulsarId = Tag(self._getXMLNodeChildText(pulsarIdNode))
 
             self._pulsarIdExists = True
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
         self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 

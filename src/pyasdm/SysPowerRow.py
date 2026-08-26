@@ -377,6 +377,27 @@ class SysPowerRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SysPowerTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -401,23 +422,23 @@ class SysPowerRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
         self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        switchedPowerDifferenceNode = rowdom.getElementsByTagName(
-            "switchedPowerDifference"
+        switchedPowerDifferenceNode = self._getFirstNodeByTagName(
+            rowdom, "switchedPowerDifference", False
         )
-        if len(switchedPowerDifferenceNode) > 0:
+        if switchedPowerDifferenceNode:
 
             switchedPowerDifferenceStr = self._getXMLNodeChildText(
-                switchedPowerDifferenceNode[0]
+                switchedPowerDifferenceNode
             )
 
             self._switchedPowerDifference = Parser.stringListToLists(
@@ -426,10 +447,12 @@ class SysPowerRow:
 
             self._switchedPowerDifferenceExists = True
 
-        switchedPowerSumNode = rowdom.getElementsByTagName("switchedPowerSum")
-        if len(switchedPowerSumNode) > 0:
+        switchedPowerSumNode = self._getFirstNodeByTagName(
+            rowdom, "switchedPowerSum", False
+        )
+        if switchedPowerSumNode:
 
-            switchedPowerSumStr = self._getXMLNodeChildText(switchedPowerSumNode[0])
+            switchedPowerSumStr = self._getXMLNodeChildText(switchedPowerSumNode)
 
             self._switchedPowerSum = Parser.stringListToLists(
                 switchedPowerSumStr, float, "SysPower", False
@@ -437,10 +460,12 @@ class SysPowerRow:
 
             self._switchedPowerSumExists = True
 
-        requantizerGainNode = rowdom.getElementsByTagName("requantizerGain")
-        if len(requantizerGainNode) > 0:
+        requantizerGainNode = self._getFirstNodeByTagName(
+            rowdom, "requantizerGain", False
+        )
+        if requantizerGainNode:
 
-            requantizerGainStr = self._getXMLNodeChildText(requantizerGainNode[0])
+            requantizerGainStr = self._getXMLNodeChildText(requantizerGainNode)
 
             self._requantizerGain = Parser.stringListToLists(
                 requantizerGainStr, float, "SysPower", False
@@ -448,47 +473,47 @@ class SysPowerRow:
 
             self._requantizerGainExists = True
 
-        numChannelsNode = rowdom.getElementsByTagName("numChannels")
-        if len(numChannelsNode) > 0:
+        numChannelsNode = self._getFirstNodeByTagName(rowdom, "numChannels", False)
+        if numChannelsNode:
 
-            self._numChannels = int(self._getXMLNodeChildText(numChannelsNode[0]))
+            self._numChannels = int(self._getXMLNodeChildText(numChannelsNode))
 
             self._numChannelsExists = True
 
-        numPolarizationTypeNode = rowdom.getElementsByTagName("numPolarizationType")
-        if len(numPolarizationTypeNode) > 0:
+        numPolarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "numPolarizationType", False
+        )
+        if numPolarizationTypeNode:
 
             self._numPolarizationType = int(
-                self._getXMLNodeChildText(numPolarizationTypeNode[0])
+                self._getXMLNodeChildText(numPolarizationTypeNode)
             )
 
             self._numPolarizationTypeExists = True
 
-        chanFreqStartNode = rowdom.getElementsByTagName("chanFreqStart")
-        if len(chanFreqStartNode) > 0:
+        chanFreqStartNode = self._getFirstNodeByTagName(rowdom, "chanFreqStart", False)
+        if chanFreqStartNode:
 
             self._chanFreqStart = Frequency(
-                self._getXMLNodeChildText(chanFreqStartNode[0])
+                self._getXMLNodeChildText(chanFreqStartNode)
             )
 
             self._chanFreqStartExists = True
 
-        chanFreqStepNode = rowdom.getElementsByTagName("chanFreqStep")
-        if len(chanFreqStepNode) > 0:
+        chanFreqStepNode = self._getFirstNodeByTagName(rowdom, "chanFreqStep", False)
+        if chanFreqStepNode:
 
-            self._chanFreqStep = Frequency(
-                self._getXMLNodeChildText(chanFreqStepNode[0])
-            )
+            self._chanFreqStep = Frequency(self._getXMLNodeChildText(chanFreqStepNode))
 
             self._chanFreqStepExists = True
 
-        switchedPowerDifferenceSpectrumNode = rowdom.getElementsByTagName(
-            "switchedPowerDifferenceSpectrum"
+        switchedPowerDifferenceSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "switchedPowerDifferenceSpectrum", False
         )
-        if len(switchedPowerDifferenceSpectrumNode) > 0:
+        if switchedPowerDifferenceSpectrumNode:
 
             switchedPowerDifferenceSpectrumStr = self._getXMLNodeChildText(
-                switchedPowerDifferenceSpectrumNode[0]
+                switchedPowerDifferenceSpectrumNode
             )
 
             self._switchedPowerDifferenceSpectrum = Parser.stringListToLists(
@@ -497,13 +522,13 @@ class SysPowerRow:
 
             self._switchedPowerDifferenceSpectrumExists = True
 
-        switchedPowerSumSpectrumNode = rowdom.getElementsByTagName(
-            "switchedPowerSumSpectrum"
+        switchedPowerSumSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "switchedPowerSumSpectrum", False
         )
-        if len(switchedPowerSumSpectrumNode) > 0:
+        if switchedPowerSumSpectrumNode:
 
             switchedPowerSumSpectrumStr = self._getXMLNodeChildText(
-                switchedPowerSumSpectrumNode[0]
+                switchedPowerSumSpectrumNode
             )
 
             self._switchedPowerSumSpectrum = Parser.stringListToLists(
@@ -512,13 +537,13 @@ class SysPowerRow:
 
             self._switchedPowerSumSpectrumExists = True
 
-        requantizerGainSpectrumNode = rowdom.getElementsByTagName(
-            "requantizerGainSpectrum"
+        requantizerGainSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "requantizerGainSpectrum", False
         )
-        if len(requantizerGainSpectrumNode) > 0:
+        if requantizerGainSpectrumNode:
 
             requantizerGainSpectrumStr = self._getXMLNodeChildText(
-                requantizerGainSpectrumNode[0]
+                requantizerGainSpectrumNode
             )
 
             self._requantizerGainSpectrum = Parser.stringListToLists(
@@ -529,15 +554,17 @@ class SysPowerRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
         self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        feedIdNode = rowdom.getElementsByTagName("feedId")[0]
+        feedIdNode = self._getFirstNodeByTagName(rowdom, "feedId", True)
 
         self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
         self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 

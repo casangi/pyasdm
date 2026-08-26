@@ -329,6 +329,27 @@ class DelayModelVariableParametersRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "DelayModelVariableParametersTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -356,43 +377,45 @@ class DelayModelVariableParametersRow:
 
         # intrinsic attribute values
 
-        delayModelVariableParametersIdNode = rowdom.getElementsByTagName(
-            "delayModelVariableParametersId"
-        )[0]
+        delayModelVariableParametersIdNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelVariableParametersId", True
+        )
 
         self._delayModelVariableParametersId = Tag(
             self._getXMLNodeChildText(delayModelVariableParametersIdNode)
         )
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
         self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
-        ut1_utcNode = rowdom.getElementsByTagName("ut1_utc")[0]
+        ut1_utcNode = self._getFirstNodeByTagName(rowdom, "ut1_utc", True)
 
         self._ut1_utc = float(self._getXMLNodeChildText(ut1_utcNode))
 
-        iat_utcNode = rowdom.getElementsByTagName("iat_utc")[0]
+        iat_utcNode = self._getFirstNodeByTagName(rowdom, "iat_utc", True)
 
         self._iat_utc = float(self._getXMLNodeChildText(iat_utcNode))
 
-        timeTypeNode = rowdom.getElementsByTagName("timeType")[0]
+        timeTypeNode = self._getFirstNodeByTagName(rowdom, "timeType", True)
 
         self._timeType = DifferenceType.newDifferenceType(
             self._getXMLNodeChildText(timeTypeNode)
         )
 
-        gstAtUt0Node = rowdom.getElementsByTagName("gstAtUt0")[0]
+        gstAtUt0Node = self._getFirstNodeByTagName(rowdom, "gstAtUt0", True)
 
         self._gstAtUt0 = Angle(self._getXMLNodeChildText(gstAtUt0Node))
 
-        earthRotationRateNode = rowdom.getElementsByTagName("earthRotationRate")[0]
+        earthRotationRateNode = self._getFirstNodeByTagName(
+            rowdom, "earthRotationRate", True
+        )
 
         self._earthRotationRate = AngularRate(
             self._getXMLNodeChildText(earthRotationRateNode)
         )
 
-        polarOffsetsNode = rowdom.getElementsByTagName("polarOffsets")[0]
+        polarOffsetsNode = self._getFirstNodeByTagName(rowdom, "polarOffsets", True)
 
         polarOffsetsStr = self._getXMLNodeChildText(polarOffsetsNode)
 
@@ -400,66 +423,74 @@ class DelayModelVariableParametersRow:
             polarOffsetsStr, float, "DelayModelVariableParameters", False
         )
 
-        polarOffsetsTypeNode = rowdom.getElementsByTagName("polarOffsetsType")[0]
+        polarOffsetsTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarOffsetsType", True
+        )
 
         self._polarOffsetsType = DifferenceType.newDifferenceType(
             self._getXMLNodeChildText(polarOffsetsTypeNode)
         )
 
-        nutationInLongitudeNode = rowdom.getElementsByTagName("nutationInLongitude")
-        if len(nutationInLongitudeNode) > 0:
+        nutationInLongitudeNode = self._getFirstNodeByTagName(
+            rowdom, "nutationInLongitude", False
+        )
+        if nutationInLongitudeNode:
 
             self._nutationInLongitude = Angle(
-                self._getXMLNodeChildText(nutationInLongitudeNode[0])
+                self._getXMLNodeChildText(nutationInLongitudeNode)
             )
 
             self._nutationInLongitudeExists = True
 
-        nutationInLongitudeRateNode = rowdom.getElementsByTagName(
-            "nutationInLongitudeRate"
+        nutationInLongitudeRateNode = self._getFirstNodeByTagName(
+            rowdom, "nutationInLongitudeRate", False
         )
-        if len(nutationInLongitudeRateNode) > 0:
+        if nutationInLongitudeRateNode:
 
             self._nutationInLongitudeRate = AngularRate(
-                self._getXMLNodeChildText(nutationInLongitudeRateNode[0])
+                self._getXMLNodeChildText(nutationInLongitudeRateNode)
             )
 
             self._nutationInLongitudeRateExists = True
 
-        nutationInObliquityNode = rowdom.getElementsByTagName("nutationInObliquity")
-        if len(nutationInObliquityNode) > 0:
+        nutationInObliquityNode = self._getFirstNodeByTagName(
+            rowdom, "nutationInObliquity", False
+        )
+        if nutationInObliquityNode:
 
             self._nutationInObliquity = Angle(
-                self._getXMLNodeChildText(nutationInObliquityNode[0])
+                self._getXMLNodeChildText(nutationInObliquityNode)
             )
 
             self._nutationInObliquityExists = True
 
-        nutationInObliquityRateNode = rowdom.getElementsByTagName(
-            "nutationInObliquityRate"
+        nutationInObliquityRateNode = self._getFirstNodeByTagName(
+            rowdom, "nutationInObliquityRate", False
         )
-        if len(nutationInObliquityRateNode) > 0:
+        if nutationInObliquityRateNode:
 
             self._nutationInObliquityRate = AngularRate(
-                self._getXMLNodeChildText(nutationInObliquityRateNode[0])
+                self._getXMLNodeChildText(nutationInObliquityRateNode)
             )
 
             self._nutationInObliquityRateExists = True
 
-        delayModelVersionNode = rowdom.getElementsByTagName("delayModelVersion")
-        if len(delayModelVersionNode) > 0:
+        delayModelVersionNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelVersion", False
+        )
+        if delayModelVersionNode:
 
             self._delayModelVersion = str(
-                self._getXMLNodeChildText(delayModelVersionNode[0])
+                self._getXMLNodeChildText(delayModelVersionNode)
             )
 
             self._delayModelVersionExists = True
 
         # extrinsic attribute values
 
-        delayModelFixedParametersIdNode = rowdom.getElementsByTagName(
-            "delayModelFixedParametersId"
-        )[0]
+        delayModelFixedParametersIdNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelFixedParametersId", True
+        )
 
         self._delayModelFixedParametersId = Tag(
             self._getXMLNodeChildText(delayModelFixedParametersIdNode)

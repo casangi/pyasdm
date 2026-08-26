@@ -167,6 +167,27 @@ class HolographyRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "HolographyTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -191,23 +212,23 @@ class HolographyRow:
 
         # intrinsic attribute values
 
-        holographyIdNode = rowdom.getElementsByTagName("holographyId")[0]
+        holographyIdNode = self._getFirstNodeByTagName(rowdom, "holographyId", True)
 
         self._holographyId = Tag(self._getXMLNodeChildText(holographyIdNode))
 
-        distanceNode = rowdom.getElementsByTagName("distance")[0]
+        distanceNode = self._getFirstNodeByTagName(rowdom, "distance", True)
 
         self._distance = Length(self._getXMLNodeChildText(distanceNode))
 
-        focusNode = rowdom.getElementsByTagName("focus")[0]
+        focusNode = self._getFirstNodeByTagName(rowdom, "focus", True)
 
         self._focus = Length(self._getXMLNodeChildText(focusNode))
 
-        numCorrNode = rowdom.getElementsByTagName("numCorr")[0]
+        numCorrNode = self._getFirstNodeByTagName(rowdom, "numCorr", True)
 
         self._numCorr = int(self._getXMLNodeChildText(numCorrNode))
 
-        typeNode = rowdom.getElementsByTagName("type")[0]
+        typeNode = self._getFirstNodeByTagName(rowdom, "type", True)
 
         typeStr = self._getXMLNodeChildText(typeNode)
         self._type = Parser.stringListToLists(

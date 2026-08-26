@@ -402,6 +402,27 @@ class CalFluxRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalFluxTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -426,29 +447,33 @@ class CalFluxRow:
 
         # intrinsic attribute values
 
-        sourceNameNode = rowdom.getElementsByTagName("sourceName")[0]
+        sourceNameNode = self._getFirstNodeByTagName(rowdom, "sourceName", True)
 
         self._sourceName = str(self._getXMLNodeChildText(sourceNameNode))
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
         self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
         self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        numFrequencyRangesNode = rowdom.getElementsByTagName("numFrequencyRanges")[0]
+        numFrequencyRangesNode = self._getFirstNodeByTagName(
+            rowdom, "numFrequencyRanges", True
+        )
 
         self._numFrequencyRanges = int(
             self._getXMLNodeChildText(numFrequencyRangesNode)
         )
 
-        numStokesNode = rowdom.getElementsByTagName("numStokes")[0]
+        numStokesNode = self._getFirstNodeByTagName(rowdom, "numStokes", True)
 
         self._numStokes = int(self._getXMLNodeChildText(numStokesNode))
 
-        frequencyRangesNode = rowdom.getElementsByTagName("frequencyRanges")[0]
+        frequencyRangesNode = self._getFirstNodeByTagName(
+            rowdom, "frequencyRanges", True
+        )
 
         frequencyRangesStr = self._getXMLNodeChildText(frequencyRangesNode)
 
@@ -456,19 +481,19 @@ class CalFluxRow:
             frequencyRangesStr, Frequency, "CalFlux", True
         )
 
-        fluxMethodNode = rowdom.getElementsByTagName("fluxMethod")[0]
+        fluxMethodNode = self._getFirstNodeByTagName(rowdom, "fluxMethod", True)
 
         self._fluxMethod = FluxCalibrationMethod.newFluxCalibrationMethod(
             self._getXMLNodeChildText(fluxMethodNode)
         )
 
-        fluxNode = rowdom.getElementsByTagName("flux")[0]
+        fluxNode = self._getFirstNodeByTagName(rowdom, "flux", True)
 
         fluxStr = self._getXMLNodeChildText(fluxNode)
 
         self._flux = Parser.stringListToLists(fluxStr, float, "CalFlux", False)
 
-        fluxErrorNode = rowdom.getElementsByTagName("fluxError")[0]
+        fluxErrorNode = self._getFirstNodeByTagName(rowdom, "fluxError", True)
 
         fluxErrorStr = self._getXMLNodeChildText(fluxErrorNode)
 
@@ -476,17 +501,17 @@ class CalFluxRow:
             fluxErrorStr, float, "CalFlux", False
         )
 
-        stokesNode = rowdom.getElementsByTagName("stokes")[0]
+        stokesNode = self._getFirstNodeByTagName(rowdom, "stokes", True)
 
         stokesStr = self._getXMLNodeChildText(stokesNode)
         self._stokes = Parser.stringListToLists(
             stokesStr, StokesParameter, "CalFlux", False
         )
 
-        directionNode = rowdom.getElementsByTagName("direction")
-        if len(directionNode) > 0:
+        directionNode = self._getFirstNodeByTagName(rowdom, "direction", False)
+        if directionNode:
 
-            directionStr = self._getXMLNodeChildText(directionNode[0])
+            directionStr = self._getXMLNodeChildText(directionNode)
 
             self._direction = Parser.stringListToLists(
                 directionStr, Angle, "CalFlux", True
@@ -494,55 +519,57 @@ class CalFluxRow:
 
             self._directionExists = True
 
-        directionCodeNode = rowdom.getElementsByTagName("directionCode")
-        if len(directionCodeNode) > 0:
+        directionCodeNode = self._getFirstNodeByTagName(rowdom, "directionCode", False)
+        if directionCodeNode:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                self._getXMLNodeChildText(directionCodeNode[0])
+                self._getXMLNodeChildText(directionCodeNode)
             )
 
             self._directionCodeExists = True
 
-        directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
-        if len(directionEquinoxNode) > 0:
+        directionEquinoxNode = self._getFirstNodeByTagName(
+            rowdom, "directionEquinox", False
+        )
+        if directionEquinoxNode:
 
             self._directionEquinox = Angle(
-                self._getXMLNodeChildText(directionEquinoxNode[0])
+                self._getXMLNodeChildText(directionEquinoxNode)
             )
 
             self._directionEquinoxExists = True
 
-        PANode = rowdom.getElementsByTagName("PA")
-        if len(PANode) > 0:
+        PANode = self._getFirstNodeByTagName(rowdom, "PA", False)
+        if PANode:
 
-            PAStr = self._getXMLNodeChildText(PANode[0])
+            PAStr = self._getXMLNodeChildText(PANode)
 
             self._PA = Parser.stringListToLists(PAStr, Angle, "CalFlux", True)
 
             self._PAExists = True
 
-        PAErrorNode = rowdom.getElementsByTagName("PAError")
-        if len(PAErrorNode) > 0:
+        PAErrorNode = self._getFirstNodeByTagName(rowdom, "PAError", False)
+        if PAErrorNode:
 
-            PAErrorStr = self._getXMLNodeChildText(PAErrorNode[0])
+            PAErrorStr = self._getXMLNodeChildText(PAErrorNode)
 
             self._PAError = Parser.stringListToLists(PAErrorStr, Angle, "CalFlux", True)
 
             self._PAErrorExists = True
 
-        sizeNode = rowdom.getElementsByTagName("size")
-        if len(sizeNode) > 0:
+        sizeNode = self._getFirstNodeByTagName(rowdom, "size", False)
+        if sizeNode:
 
-            sizeStr = self._getXMLNodeChildText(sizeNode[0])
+            sizeStr = self._getXMLNodeChildText(sizeNode)
 
             self._size = Parser.stringListToLists(sizeStr, Angle, "CalFlux", True)
 
             self._sizeExists = True
 
-        sizeErrorNode = rowdom.getElementsByTagName("sizeError")
-        if len(sizeErrorNode) > 0:
+        sizeErrorNode = self._getFirstNodeByTagName(rowdom, "sizeError", False)
+        if sizeErrorNode:
 
-            sizeErrorStr = self._getXMLNodeChildText(sizeErrorNode[0])
+            sizeErrorStr = self._getXMLNodeChildText(sizeErrorNode)
 
             self._sizeError = Parser.stringListToLists(
                 sizeErrorStr, Angle, "CalFlux", True
@@ -550,22 +577,22 @@ class CalFluxRow:
 
             self._sizeErrorExists = True
 
-        sourceModelNode = rowdom.getElementsByTagName("sourceModel")
-        if len(sourceModelNode) > 0:
+        sourceModelNode = self._getFirstNodeByTagName(rowdom, "sourceModel", False)
+        if sourceModelNode:
 
             self._sourceModel = SourceModel.newSourceModel(
-                self._getXMLNodeChildText(sourceModelNode[0])
+                self._getXMLNodeChildText(sourceModelNode)
             )
 
             self._sourceModelExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 

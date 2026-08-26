@@ -219,6 +219,27 @@ class ModulationRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ModulationTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -243,53 +264,57 @@ class ModulationRow:
 
         # intrinsic attribute values
 
-        receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
+        receiverIdNode = self._getFirstNodeByTagName(rowdom, "receiverId", True)
 
         self._receiverId = int(self._getXMLNodeChildText(receiverIdNode))
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        localOscillatorOffsetNode = rowdom.getElementsByTagName(
-            "localOscillatorOffset"
-        )[0]
+        localOscillatorOffsetNode = self._getFirstNodeByTagName(
+            rowdom, "localOscillatorOffset", True
+        )
 
         self._localOscillatorOffset = Frequency(
             self._getXMLNodeChildText(localOscillatorOffsetNode)
         )
 
-        walsh180enabledNode = rowdom.getElementsByTagName("walsh180enabled")[0]
+        walsh180enabledNode = self._getFirstNodeByTagName(
+            rowdom, "walsh180enabled", True
+        )
 
         self._walsh180enabled = bool(self._getXMLNodeChildText(walsh180enabledNode))
 
-        walsh90enabledNode = rowdom.getElementsByTagName("walsh90enabled")[0]
+        walsh90enabledNode = self._getFirstNodeByTagName(rowdom, "walsh90enabled", True)
 
         self._walsh90enabled = bool(self._getXMLNodeChildText(walsh90enabledNode))
 
-        walsh180indexNode = rowdom.getElementsByTagName("walsh180index")
-        if len(walsh180indexNode) > 0:
+        walsh180indexNode = self._getFirstNodeByTagName(rowdom, "walsh180index", False)
+        if walsh180indexNode:
 
-            self._walsh180index = int(self._getXMLNodeChildText(walsh180indexNode[0]))
+            self._walsh180index = int(self._getXMLNodeChildText(walsh180indexNode))
 
             self._walsh180indexExists = True
 
-        walsh90indexNode = rowdom.getElementsByTagName("walsh90index")
-        if len(walsh90indexNode) > 0:
+        walsh90indexNode = self._getFirstNodeByTagName(rowdom, "walsh90index", False)
+        if walsh90indexNode:
 
-            self._walsh90index = int(self._getXMLNodeChildText(walsh90indexNode[0]))
+            self._walsh90index = int(self._getXMLNodeChildText(walsh90indexNode))
 
             self._walsh90indexExists = True
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
         self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
         self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 

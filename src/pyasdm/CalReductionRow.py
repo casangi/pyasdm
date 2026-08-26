@@ -221,6 +221,27 @@ class CalReductionRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalReductionTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -245,15 +266,17 @@ class CalReductionRow:
 
         # intrinsic attribute values
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
-        numAppliedNode = rowdom.getElementsByTagName("numApplied")[0]
+        numAppliedNode = self._getFirstNodeByTagName(rowdom, "numApplied", True)
 
         self._numApplied = int(self._getXMLNodeChildText(numAppliedNode))
 
-        appliedCalibrationsNode = rowdom.getElementsByTagName("appliedCalibrations")[0]
+        appliedCalibrationsNode = self._getFirstNodeByTagName(
+            rowdom, "appliedCalibrations", True
+        )
 
         appliedCalibrationsStr = self._getXMLNodeChildText(appliedCalibrationsNode)
 
@@ -261,11 +284,11 @@ class CalReductionRow:
             appliedCalibrationsStr, str, "CalReduction", False
         )
 
-        numParamNode = rowdom.getElementsByTagName("numParam")[0]
+        numParamNode = self._getFirstNodeByTagName(rowdom, "numParam", True)
 
         self._numParam = int(self._getXMLNodeChildText(numParamNode))
 
-        paramSetNode = rowdom.getElementsByTagName("paramSet")[0]
+        paramSetNode = self._getFirstNodeByTagName(rowdom, "paramSet", True)
 
         paramSetStr = self._getXMLNodeChildText(paramSetNode)
 
@@ -273,34 +296,38 @@ class CalReductionRow:
             paramSetStr, str, "CalReduction", False
         )
 
-        numInvalidConditionsNode = rowdom.getElementsByTagName("numInvalidConditions")[
-            0
-        ]
+        numInvalidConditionsNode = self._getFirstNodeByTagName(
+            rowdom, "numInvalidConditions", True
+        )
 
         self._numInvalidConditions = int(
             self._getXMLNodeChildText(numInvalidConditionsNode)
         )
 
-        invalidConditionsNode = rowdom.getElementsByTagName("invalidConditions")[0]
+        invalidConditionsNode = self._getFirstNodeByTagName(
+            rowdom, "invalidConditions", True
+        )
 
         invalidConditionsStr = self._getXMLNodeChildText(invalidConditionsNode)
         self._invalidConditions = Parser.stringListToLists(
             invalidConditionsStr, InvalidatingCondition, "CalReduction", False
         )
 
-        timeReducedNode = rowdom.getElementsByTagName("timeReduced")[0]
+        timeReducedNode = self._getFirstNodeByTagName(rowdom, "timeReduced", True)
 
         self._timeReduced = ArrayTime(self._getXMLNodeChildText(timeReducedNode))
 
-        messagesNode = rowdom.getElementsByTagName("messages")[0]
+        messagesNode = self._getFirstNodeByTagName(rowdom, "messages", True)
 
         self._messages = str(self._getXMLNodeChildText(messagesNode))
 
-        softwareNode = rowdom.getElementsByTagName("software")[0]
+        softwareNode = self._getFirstNodeByTagName(rowdom, "software", True)
 
         self._software = str(self._getXMLNodeChildText(softwareNode))
 
-        softwareVersionNode = rowdom.getElementsByTagName("softwareVersion")[0]
+        softwareVersionNode = self._getFirstNodeByTagName(
+            rowdom, "softwareVersion", True
+        )
 
         self._softwareVersion = str(self._getXMLNodeChildText(softwareVersionNode))
 

@@ -233,6 +233,27 @@ class WVMCalRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "WVMCalTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -257,19 +278,19 @@ class WVMCalRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        wvrMethodNode = rowdom.getElementsByTagName("wvrMethod")[0]
+        wvrMethodNode = self._getFirstNodeByTagName(rowdom, "wvrMethod", True)
 
         self._wvrMethod = WVRMethod.newWVRMethod(
             self._getXMLNodeChildText(wvrMethodNode)
         )
 
-        polyFreqLimitsNode = rowdom.getElementsByTagName("polyFreqLimits")[0]
+        polyFreqLimitsNode = self._getFirstNodeByTagName(rowdom, "polyFreqLimits", True)
 
         polyFreqLimitsStr = self._getXMLNodeChildText(polyFreqLimitsNode)
 
@@ -277,25 +298,27 @@ class WVMCalRow:
             polyFreqLimitsStr, Frequency, "WVMCal", True
         )
 
-        numInputAntennaNode = rowdom.getElementsByTagName("numInputAntenna")[0]
+        numInputAntennaNode = self._getFirstNodeByTagName(
+            rowdom, "numInputAntenna", True
+        )
 
         self._numInputAntenna = int(self._getXMLNodeChildText(numInputAntennaNode))
 
-        numChanNode = rowdom.getElementsByTagName("numChan")[0]
+        numChanNode = self._getFirstNodeByTagName(rowdom, "numChan", True)
 
         self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", True)
 
         self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
-        pathCoeffNode = rowdom.getElementsByTagName("pathCoeff")[0]
+        pathCoeffNode = self._getFirstNodeByTagName(rowdom, "pathCoeff", True)
 
         pathCoeffStr = self._getXMLNodeChildText(pathCoeffNode)
 
         self._pathCoeff = Parser.stringListToLists(pathCoeffStr, float, "WVMCal", False)
 
-        refTempNode = rowdom.getElementsByTagName("refTemp")[0]
+        refTempNode = self._getFirstNodeByTagName(rowdom, "refTemp", True)
 
         refTempStr = self._getXMLNodeChildText(refTempNode)
 
@@ -305,11 +328,11 @@ class WVMCalRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
         self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        inputAntennaIdNode = rowdom.getElementsByTagName("inputAntennaId")[0]
+        inputAntennaIdNode = self._getFirstNodeByTagName(rowdom, "inputAntennaId", True)
 
         inputAntennaIdStr = self._getXMLNodeChildText(inputAntennaIdNode)
 
@@ -317,7 +340,9 @@ class WVMCalRow:
             inputAntennaIdStr, Tag, "WVMCal", True
         )
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
         self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 

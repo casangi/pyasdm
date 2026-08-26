@@ -349,6 +349,27 @@ class CalPositionRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalPositionTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -373,25 +394,29 @@ class CalPositionRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
         self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
             self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
         self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
         self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        antennaPositionNode = rowdom.getElementsByTagName("antennaPosition")[0]
+        antennaPositionNode = self._getFirstNodeByTagName(
+            rowdom, "antennaPosition", True
+        )
 
         antennaPositionStr = self._getXMLNodeChildText(antennaPositionNode)
 
@@ -399,11 +424,13 @@ class CalPositionRow:
             antennaPositionStr, Length, "CalPosition", True
         )
 
-        stationNameNode = rowdom.getElementsByTagName("stationName")[0]
+        stationNameNode = self._getFirstNodeByTagName(rowdom, "stationName", True)
 
         self._stationName = str(self._getXMLNodeChildText(stationNameNode))
 
-        stationPositionNode = rowdom.getElementsByTagName("stationPosition")[0]
+        stationPositionNode = self._getFirstNodeByTagName(
+            rowdom, "stationPosition", True
+        )
 
         stationPositionStr = self._getXMLNodeChildText(stationPositionNode)
 
@@ -411,23 +438,25 @@ class CalPositionRow:
             stationPositionStr, Length, "CalPosition", True
         )
 
-        positionMethodNode = rowdom.getElementsByTagName("positionMethod")[0]
+        positionMethodNode = self._getFirstNodeByTagName(rowdom, "positionMethod", True)
 
         self._positionMethod = PositionMethod.newPositionMethod(
             self._getXMLNodeChildText(positionMethodNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
             self._getXMLNodeChildText(receiverBandNode)
         )
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", True)
 
         self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
-        refAntennaNamesNode = rowdom.getElementsByTagName("refAntennaNames")[0]
+        refAntennaNamesNode = self._getFirstNodeByTagName(
+            rowdom, "refAntennaNames", True
+        )
 
         refAntennaNamesStr = self._getXMLNodeChildText(refAntennaNamesNode)
 
@@ -435,19 +464,21 @@ class CalPositionRow:
             refAntennaNamesStr, str, "CalPosition", False
         )
 
-        axesOffsetNode = rowdom.getElementsByTagName("axesOffset")[0]
+        axesOffsetNode = self._getFirstNodeByTagName(rowdom, "axesOffset", True)
 
         self._axesOffset = Length(self._getXMLNodeChildText(axesOffsetNode))
 
-        axesOffsetErrNode = rowdom.getElementsByTagName("axesOffsetErr")[0]
+        axesOffsetErrNode = self._getFirstNodeByTagName(rowdom, "axesOffsetErr", True)
 
         self._axesOffsetErr = Length(self._getXMLNodeChildText(axesOffsetErrNode))
 
-        axesOffsetFixedNode = rowdom.getElementsByTagName("axesOffsetFixed")[0]
+        axesOffsetFixedNode = self._getFirstNodeByTagName(
+            rowdom, "axesOffsetFixed", True
+        )
 
         self._axesOffsetFixed = bool(self._getXMLNodeChildText(axesOffsetFixedNode))
 
-        positionOffsetNode = rowdom.getElementsByTagName("positionOffset")[0]
+        positionOffsetNode = self._getFirstNodeByTagName(rowdom, "positionOffset", True)
 
         positionOffsetStr = self._getXMLNodeChildText(positionOffsetNode)
 
@@ -455,7 +486,7 @@ class CalPositionRow:
             positionOffsetStr, Length, "CalPosition", True
         )
 
-        positionErrNode = rowdom.getElementsByTagName("positionErr")[0]
+        positionErrNode = self._getFirstNodeByTagName(rowdom, "positionErr", True)
 
         positionErrStr = self._getXMLNodeChildText(positionErrNode)
 
@@ -463,33 +494,35 @@ class CalPositionRow:
             positionErrStr, Length, "CalPosition", True
         )
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
         self._reducedChiSquared = float(
             self._getXMLNodeChildText(reducedChiSquaredNode)
         )
 
-        delayRmsNode = rowdom.getElementsByTagName("delayRms")
-        if len(delayRmsNode) > 0:
+        delayRmsNode = self._getFirstNodeByTagName(rowdom, "delayRms", False)
+        if delayRmsNode:
 
-            self._delayRms = float(self._getXMLNodeChildText(delayRmsNode[0]))
+            self._delayRms = float(self._getXMLNodeChildText(delayRmsNode))
 
             self._delayRmsExists = True
 
-        phaseRmsNode = rowdom.getElementsByTagName("phaseRms")
-        if len(phaseRmsNode) > 0:
+        phaseRmsNode = self._getFirstNodeByTagName(rowdom, "phaseRms", False)
+        if phaseRmsNode:
 
-            self._phaseRms = Angle(self._getXMLNodeChildText(phaseRmsNode[0]))
+            self._phaseRms = Angle(self._getXMLNodeChildText(phaseRmsNode))
 
             self._phaseRmsExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
         self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
         self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 

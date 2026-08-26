@@ -173,6 +173,27 @@ class SeeingRow:
         result += "</row>"
         return result
 
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SeeingTable",
+                )
+        return result
+
     def setFromXML(self, xmlrow):
         """
         Fill the values of this row from an XML string
@@ -197,17 +218,17 @@ class SeeingRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
         self._timeInterval = ArrayTimeInterval(
             self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        numBaseLengthNode = rowdom.getElementsByTagName("numBaseLength")[0]
+        numBaseLengthNode = self._getFirstNodeByTagName(rowdom, "numBaseLength", True)
 
         self._numBaseLength = int(self._getXMLNodeChildText(numBaseLengthNode))
 
-        baseLengthNode = rowdom.getElementsByTagName("baseLength")[0]
+        baseLengthNode = self._getFirstNodeByTagName(rowdom, "baseLength", True)
 
         baseLengthStr = self._getXMLNodeChildText(baseLengthNode)
 
@@ -215,17 +236,17 @@ class SeeingRow:
             baseLengthStr, Length, "Seeing", True
         )
 
-        phaseRmsNode = rowdom.getElementsByTagName("phaseRms")[0]
+        phaseRmsNode = self._getFirstNodeByTagName(rowdom, "phaseRms", True)
 
         phaseRmsStr = self._getXMLNodeChildText(phaseRmsNode)
 
         self._phaseRms = Parser.stringListToLists(phaseRmsStr, Angle, "Seeing", True)
 
-        seeingNode = rowdom.getElementsByTagName("seeing")[0]
+        seeingNode = self._getFirstNodeByTagName(rowdom, "seeing", True)
 
         self._seeing = float(self._getXMLNodeChildText(seeingNode))
 
-        exponentNode = rowdom.getElementsByTagName("exponent")[0]
+        exponentNode = self._getFirstNodeByTagName(rowdom, "exponent", True)
 
         self._exponent = float(self._getXMLNodeChildText(exponentNode))
 
