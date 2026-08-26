@@ -69,6 +69,16 @@ class AntennaRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -170,37 +180,77 @@ class AntennaRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("name", self._name)
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += "\n   "
 
         result += Parser.valueToXML("antennaType", AntennaType.name(self._antennaType))
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("dishDiameter", self._dishDiameter)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("position", self._position)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("offset", self._offset)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("time", self._time)
 
         # extrinsic attributes
 
         if self._assocAntennaIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("assocAntennaId", self._assocAntennaId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("stationId", self._stationId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "AntennaTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -227,58 +277,60 @@ class AntennaRow:
 
         # intrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        nameNode = rowdom.getElementsByTagName("name")[0]
+        nameNode = self._getFirstNodeByTagName(rowdom, "name", True)
 
-        self._name = str(nameNode.firstChild.data.strip())
+        self._name = str(self._getXMLNodeChildText(nameNode))
 
-        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+        antennaMakeNode = self._getFirstNodeByTagName(rowdom, "antennaMake", True)
 
         self._antennaMake = AntennaMake.newAntennaMake(
-            antennaMakeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaMakeNode)
         )
 
-        antennaTypeNode = rowdom.getElementsByTagName("antennaType")[0]
+        antennaTypeNode = self._getFirstNodeByTagName(rowdom, "antennaType", True)
 
         self._antennaType = AntennaType.newAntennaType(
-            antennaTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaTypeNode)
         )
 
-        dishDiameterNode = rowdom.getElementsByTagName("dishDiameter")[0]
+        dishDiameterNode = self._getFirstNodeByTagName(rowdom, "dishDiameter", True)
 
-        self._dishDiameter = Length(dishDiameterNode.firstChild.data.strip())
+        self._dishDiameter = Length(self._getXMLNodeChildText(dishDiameterNode))
 
-        positionNode = rowdom.getElementsByTagName("position")[0]
+        positionNode = self._getFirstNodeByTagName(rowdom, "position", True)
 
-        positionStr = positionNode.firstChild.data.strip()
+        positionStr = self._getXMLNodeChildText(positionNode)
 
         self._position = Parser.stringListToLists(positionStr, Length, "Antenna", True)
 
-        offsetNode = rowdom.getElementsByTagName("offset")[0]
+        offsetNode = self._getFirstNodeByTagName(rowdom, "offset", True)
 
-        offsetStr = offsetNode.firstChild.data.strip()
+        offsetStr = self._getXMLNodeChildText(offsetNode)
 
         self._offset = Parser.stringListToLists(offsetStr, Length, "Antenna", True)
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
-        self._time = ArrayTime(timeNode.firstChild.data.strip())
+        self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
         # extrinsic attribute values
 
-        assocAntennaIdNode = rowdom.getElementsByTagName("assocAntennaId")
-        if len(assocAntennaIdNode) > 0:
+        assocAntennaIdNode = self._getFirstNodeByTagName(
+            rowdom, "assocAntennaId", False
+        )
+        if assocAntennaIdNode:
 
-            self._assocAntennaId = Tag(assocAntennaIdNode[0].firstChild.data.strip())
+            self._assocAntennaId = Tag(self._getXMLNodeChildText(assocAntennaIdNode))
 
             self._assocAntennaIdExists = True
 
-        stationIdNode = rowdom.getElementsByTagName("stationId")[0]
+        stationIdNode = self._getFirstNodeByTagName(rowdom, "stationId", True)
 
-        self._stationId = Tag(stationIdNode.firstChild.data.strip())
+        self._stationId = Tag(self._getXMLNodeChildText(stationIdNode))
 
         # from link values, if any
 
@@ -455,6 +507,7 @@ class AntennaRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -486,6 +539,7 @@ class AntennaRow:
         name The str value to which name is to be set.
 
 
+
         """
 
         self._name = str(name)
@@ -506,6 +560,7 @@ class AntennaRow:
         """
         Set antennaMake with the specified AntennaMake value.
         antennaMake The AntennaMake value to which antennaMake is to be set.
+
 
 
         """
@@ -530,6 +585,7 @@ class AntennaRow:
         antennaType The AntennaType value to which antennaType is to be set.
 
 
+
         """
 
         self._antennaType = AntennaType(antennaType)
@@ -551,6 +607,7 @@ class AntennaRow:
         """
         Set dishDiameter with the specified Length value.
         dishDiameter The Length value to which dishDiameter is to be set.
+
         The value of dishDiameter can be anything allowed by the Length constructor.
 
         """
@@ -573,6 +630,7 @@ class AntennaRow:
         """
         Set position with the specified Length []  value.
         position The Length []  value to which position is to be set.
+
         The value of position can be anything allowed by the Length []  constructor.
 
         """
@@ -616,6 +674,7 @@ class AntennaRow:
         """
         Set offset with the specified Length []  value.
         offset The Length []  value to which offset is to be set.
+
         The value of offset can be anything allowed by the Length []  constructor.
 
         """
@@ -660,6 +719,7 @@ class AntennaRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """
@@ -699,6 +759,7 @@ class AntennaRow:
         """
         Set assocAntennaId with the specified Tag value.
         assocAntennaId The Tag value to which assocAntennaId is to be set.
+
         The value of assocAntennaId can be anything allowed by the Tag constructor.
 
         """
@@ -730,6 +791,7 @@ class AntennaRow:
         """
         Set stationId with the specified Tag value.
         stationId The Tag value to which stationId is to be set.
+
         The value of stationId can be anything allowed by the Tag constructor.
 
         """

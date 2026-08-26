@@ -63,6 +63,16 @@ class CalGainRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -150,37 +160,80 @@ class CalGainRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
-        result += Parser.valueToXML("gain", self._gain)
+        result += "\n   "
+
+        result += Parser.floatValueToXML("gain", self._gain)
+
+        result += "\n   "
 
         result += Parser.valueToXML("gainValid", self._gainValid)
 
-        result += Parser.valueToXML("fit", self._fit)
+        result += "\n   "
 
-        result += Parser.valueToXML("fitWeight", self._fitWeight)
+        result += Parser.floatValueToXML("fit", self._fit)
+
+        result += "\n   "
+
+        result += Parser.floatValueToXML("fitWeight", self._fitWeight)
+
+        result += "\n   "
 
         result += Parser.valueToXML("totalGainValid", self._totalGainValid)
 
-        result += Parser.valueToXML("totalFit", self._totalFit)
+        result += "\n   "
 
-        result += Parser.valueToXML("totalFitWeight", self._totalFitWeight)
+        result += Parser.floatValueToXML("totalFit", self._totalFit)
+
+        result += "\n   "
+
+        result += Parser.floatValueToXML("totalFitWeight", self._totalFitWeight)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalGainTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -207,51 +260,51 @@ class CalGainRow:
 
         # intrinsic attribute values
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        gainNode = rowdom.getElementsByTagName("gain")[0]
+        gainNode = self._getFirstNodeByTagName(rowdom, "gain", True)
 
-        self._gain = float(gainNode.firstChild.data.strip())
+        self._gain = float(self._getXMLNodeChildText(gainNode))
 
-        gainValidNode = rowdom.getElementsByTagName("gainValid")[0]
+        gainValidNode = self._getFirstNodeByTagName(rowdom, "gainValid", True)
 
-        self._gainValid = bool(gainValidNode.firstChild.data.strip())
+        self._gainValid = bool(self._getXMLNodeChildText(gainValidNode))
 
-        fitNode = rowdom.getElementsByTagName("fit")[0]
+        fitNode = self._getFirstNodeByTagName(rowdom, "fit", True)
 
-        self._fit = float(fitNode.firstChild.data.strip())
+        self._fit = float(self._getXMLNodeChildText(fitNode))
 
-        fitWeightNode = rowdom.getElementsByTagName("fitWeight")[0]
+        fitWeightNode = self._getFirstNodeByTagName(rowdom, "fitWeight", True)
 
-        self._fitWeight = float(fitWeightNode.firstChild.data.strip())
+        self._fitWeight = float(self._getXMLNodeChildText(fitWeightNode))
 
-        totalGainValidNode = rowdom.getElementsByTagName("totalGainValid")[0]
+        totalGainValidNode = self._getFirstNodeByTagName(rowdom, "totalGainValid", True)
 
-        self._totalGainValid = bool(totalGainValidNode.firstChild.data.strip())
+        self._totalGainValid = bool(self._getXMLNodeChildText(totalGainValidNode))
 
-        totalFitNode = rowdom.getElementsByTagName("totalFit")[0]
+        totalFitNode = self._getFirstNodeByTagName(rowdom, "totalFit", True)
 
-        self._totalFit = float(totalFitNode.firstChild.data.strip())
+        self._totalFit = float(self._getXMLNodeChildText(totalFitNode))
 
-        totalFitWeightNode = rowdom.getElementsByTagName("totalFitWeight")[0]
+        totalFitWeightNode = self._getFirstNodeByTagName(rowdom, "totalFitWeight", True)
 
-        self._totalFitWeight = float(totalFitWeightNode.firstChild.data.strip())
+        self._totalFitWeight = float(self._getXMLNodeChildText(totalFitWeightNode))
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -433,6 +486,7 @@ class CalGainRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -456,6 +510,7 @@ class CalGainRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -478,6 +533,9 @@ class CalGainRow:
         """
         Set gain with the specified float value.
         gain The float value to which gain is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -502,6 +560,7 @@ class CalGainRow:
         gainValid The bool value to which gainValid is to be set.
 
 
+
         """
 
         self._gainValid = bool(gainValid)
@@ -522,6 +581,9 @@ class CalGainRow:
         """
         Set fit with the specified float value.
         fit The float value to which fit is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -544,6 +606,9 @@ class CalGainRow:
         """
         Set fitWeight with the specified float value.
         fitWeight The float value to which fitWeight is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -568,6 +633,7 @@ class CalGainRow:
         totalGainValid The bool value to which totalGainValid is to be set.
 
 
+
         """
 
         self._totalGainValid = bool(totalGainValid)
@@ -588,6 +654,9 @@ class CalGainRow:
         """
         Set totalFit with the specified float value.
         totalFit The float value to which totalFit is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -610,6 +679,9 @@ class CalGainRow:
         """
         Set totalFitWeight with the specified float value.
         totalFitWeight The float value to which totalFitWeight is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -635,6 +707,7 @@ class CalGainRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -665,6 +738,7 @@ class CalGainRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

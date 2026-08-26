@@ -72,6 +72,16 @@ class CalPositionRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -232,71 +242,132 @@ class CalPositionRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "antennaPosition", self._antennaPosition
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("stationName", self._stationName)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "stationPosition", self._stationPosition
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "positionMethod", PositionMethod.name(self._positionMethod)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAntenna", self._numAntenna)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("refAntennaNames", self._refAntennaNames)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("axesOffset", self._axesOffset)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("axesOffsetErr", self._axesOffsetErr)
 
+        result += "\n   "
+
         result += Parser.valueToXML("axesOffsetFixed", self._axesOffsetFixed)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("positionOffset", self._positionOffset)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("positionErr", self._positionErr)
 
-        result += Parser.valueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("reducedChiSquared", self._reducedChiSquared)
 
         if self._delayRmsExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("delayRms", self._delayRms)
+            result += Parser.doubleValueToXML("delayRms", self._delayRms)
 
         if self._phaseRmsExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("phaseRms", self._phaseRms)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalPositionTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -323,123 +394,137 @@ class CalPositionRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
-
-        self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
+        )
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        antennaPositionNode = rowdom.getElementsByTagName("antennaPosition")[0]
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        antennaPositionStr = antennaPositionNode.firstChild.data.strip()
+        antennaPositionNode = self._getFirstNodeByTagName(
+            rowdom, "antennaPosition", True
+        )
+
+        antennaPositionStr = self._getXMLNodeChildText(antennaPositionNode)
 
         self._antennaPosition = Parser.stringListToLists(
             antennaPositionStr, Length, "CalPosition", True
         )
 
-        stationNameNode = rowdom.getElementsByTagName("stationName")[0]
+        stationNameNode = self._getFirstNodeByTagName(rowdom, "stationName", True)
 
-        self._stationName = str(stationNameNode.firstChild.data.strip())
+        self._stationName = str(self._getXMLNodeChildText(stationNameNode))
 
-        stationPositionNode = rowdom.getElementsByTagName("stationPosition")[0]
+        stationPositionNode = self._getFirstNodeByTagName(
+            rowdom, "stationPosition", True
+        )
 
-        stationPositionStr = stationPositionNode.firstChild.data.strip()
+        stationPositionStr = self._getXMLNodeChildText(stationPositionNode)
 
         self._stationPosition = Parser.stringListToLists(
             stationPositionStr, Length, "CalPosition", True
         )
 
-        positionMethodNode = rowdom.getElementsByTagName("positionMethod")[0]
+        positionMethodNode = self._getFirstNodeByTagName(rowdom, "positionMethod", True)
 
         self._positionMethod = PositionMethod.newPositionMethod(
-            positionMethodNode.firstChild.data.strip()
+            self._getXMLNodeChildText(positionMethodNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", True)
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
-        refAntennaNamesNode = rowdom.getElementsByTagName("refAntennaNames")[0]
+        refAntennaNamesNode = self._getFirstNodeByTagName(
+            rowdom, "refAntennaNames", True
+        )
 
-        refAntennaNamesStr = refAntennaNamesNode.firstChild.data.strip()
+        refAntennaNamesStr = self._getXMLNodeChildText(refAntennaNamesNode)
 
         self._refAntennaNames = Parser.stringListToLists(
             refAntennaNamesStr, str, "CalPosition", False
         )
 
-        axesOffsetNode = rowdom.getElementsByTagName("axesOffset")[0]
+        axesOffsetNode = self._getFirstNodeByTagName(rowdom, "axesOffset", True)
 
-        self._axesOffset = Length(axesOffsetNode.firstChild.data.strip())
+        self._axesOffset = Length(self._getXMLNodeChildText(axesOffsetNode))
 
-        axesOffsetErrNode = rowdom.getElementsByTagName("axesOffsetErr")[0]
+        axesOffsetErrNode = self._getFirstNodeByTagName(rowdom, "axesOffsetErr", True)
 
-        self._axesOffsetErr = Length(axesOffsetErrNode.firstChild.data.strip())
+        self._axesOffsetErr = Length(self._getXMLNodeChildText(axesOffsetErrNode))
 
-        axesOffsetFixedNode = rowdom.getElementsByTagName("axesOffsetFixed")[0]
+        axesOffsetFixedNode = self._getFirstNodeByTagName(
+            rowdom, "axesOffsetFixed", True
+        )
 
-        self._axesOffsetFixed = bool(axesOffsetFixedNode.firstChild.data.strip())
+        self._axesOffsetFixed = bool(self._getXMLNodeChildText(axesOffsetFixedNode))
 
-        positionOffsetNode = rowdom.getElementsByTagName("positionOffset")[0]
+        positionOffsetNode = self._getFirstNodeByTagName(rowdom, "positionOffset", True)
 
-        positionOffsetStr = positionOffsetNode.firstChild.data.strip()
+        positionOffsetStr = self._getXMLNodeChildText(positionOffsetNode)
 
         self._positionOffset = Parser.stringListToLists(
             positionOffsetStr, Length, "CalPosition", True
         )
 
-        positionErrNode = rowdom.getElementsByTagName("positionErr")[0]
+        positionErrNode = self._getFirstNodeByTagName(rowdom, "positionErr", True)
 
-        positionErrStr = positionErrNode.firstChild.data.strip()
+        positionErrStr = self._getXMLNodeChildText(positionErrNode)
 
         self._positionErr = Parser.stringListToLists(
             positionErrStr, Length, "CalPosition", True
         )
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
-        self._reducedChiSquared = float(reducedChiSquaredNode.firstChild.data.strip())
+        self._reducedChiSquared = float(
+            self._getXMLNodeChildText(reducedChiSquaredNode)
+        )
 
-        delayRmsNode = rowdom.getElementsByTagName("delayRms")
-        if len(delayRmsNode) > 0:
+        delayRmsNode = self._getFirstNodeByTagName(rowdom, "delayRms", False)
+        if delayRmsNode:
 
-            self._delayRms = float(delayRmsNode[0].firstChild.data.strip())
+            self._delayRms = float(self._getXMLNodeChildText(delayRmsNode))
 
             self._delayRmsExists = True
 
-        phaseRmsNode = rowdom.getElementsByTagName("phaseRms")
-        if len(phaseRmsNode) > 0:
+        phaseRmsNode = self._getFirstNodeByTagName(rowdom, "phaseRms", False)
+        if phaseRmsNode:
 
-            self._phaseRms = Angle(phaseRmsNode[0].firstChild.data.strip())
+            self._phaseRms = Angle(self._getXMLNodeChildText(phaseRmsNode))
 
             self._phaseRmsExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -487,12 +572,12 @@ class CalPositionRow:
 
         Length.listToBin(self._positionErr, eos)
 
-        eos.writeFloat(self._reducedChiSquared)
+        eos.writeDouble(self._reducedChiSquared)
 
         eos.writeBool(self._delayRmsExists)
         if self._delayRmsExists:
 
-            eos.writeFloat(self._delayRms)
+            eos.writeDouble(self._delayRms)
 
         eos.writeBool(self._phaseRmsExists)
         if self._phaseRmsExists:
@@ -654,7 +739,7 @@ class CalPositionRow:
         Set the reducedChiSquared in row from the EndianInput (eis) instance.
         """
 
-        row._reducedChiSquared = eis.readFloat()
+        row._reducedChiSquared = eis.readDouble()
 
     @staticmethod
     def delayRmsFromBin(row, eis):
@@ -664,7 +749,7 @@ class CalPositionRow:
         row._delayRmsExists = eis.readBool()
         if row._delayRmsExists:
 
-            row._delayRms = eis.readFloat()
+            row._delayRms = eis.readDouble()
 
     @staticmethod
     def phaseRmsFromBin(row, eis):
@@ -751,6 +836,7 @@ class CalPositionRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -778,6 +864,7 @@ class CalPositionRow:
         """
         Set atmPhaseCorrection with the specified AtmPhaseCorrection value.
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -808,6 +895,7 @@ class CalPositionRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -831,6 +919,7 @@ class CalPositionRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -853,6 +942,7 @@ class CalPositionRow:
         """
         Set antennaPosition with the specified Length []  value.
         antennaPosition The Length []  value to which antennaPosition is to be set.
+
         The value of antennaPosition can be anything allowed by the Length []  constructor.
 
         """
@@ -898,6 +988,7 @@ class CalPositionRow:
         stationName The str value to which stationName is to be set.
 
 
+
         """
 
         self._stationName = str(stationName)
@@ -918,6 +1009,7 @@ class CalPositionRow:
         """
         Set stationPosition with the specified Length []  value.
         stationPosition The Length []  value to which stationPosition is to be set.
+
         The value of stationPosition can be anything allowed by the Length []  constructor.
 
         """
@@ -963,6 +1055,7 @@ class CalPositionRow:
         positionMethod The PositionMethod value to which positionMethod is to be set.
 
 
+
         """
 
         self._positionMethod = PositionMethod(positionMethod)
@@ -983,6 +1076,7 @@ class CalPositionRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         """
@@ -1007,6 +1101,7 @@ class CalPositionRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -1027,6 +1122,7 @@ class CalPositionRow:
         """
         Set refAntennaNames with the specified str []  value.
         refAntennaNames The str []  value to which refAntennaNames is to be set.
+
 
 
         """
@@ -1071,6 +1167,7 @@ class CalPositionRow:
         """
         Set axesOffset with the specified Length value.
         axesOffset The Length value to which axesOffset is to be set.
+
         The value of axesOffset can be anything allowed by the Length constructor.
 
         """
@@ -1094,6 +1191,7 @@ class CalPositionRow:
         """
         Set axesOffsetErr with the specified Length value.
         axesOffsetErr The Length value to which axesOffsetErr is to be set.
+
         The value of axesOffsetErr can be anything allowed by the Length constructor.
 
         """
@@ -1118,6 +1216,7 @@ class CalPositionRow:
         axesOffsetFixed The bool value to which axesOffsetFixed is to be set.
 
 
+
         """
 
         self._axesOffsetFixed = bool(axesOffsetFixed)
@@ -1138,6 +1237,7 @@ class CalPositionRow:
         """
         Set positionOffset with the specified Length []  value.
         positionOffset The Length []  value to which positionOffset is to be set.
+
         The value of positionOffset can be anything allowed by the Length []  constructor.
 
         """
@@ -1181,6 +1281,7 @@ class CalPositionRow:
         """
         Set positionErr with the specified Length []  value.
         positionErr The Length []  value to which positionErr is to be set.
+
         The value of positionErr can be anything allowed by the Length []  constructor.
 
         """
@@ -1225,6 +1326,9 @@ class CalPositionRow:
         Set reducedChiSquared with the specified float value.
         reducedChiSquared The float value to which reducedChiSquared is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1260,6 +1364,9 @@ class CalPositionRow:
         """
         Set delayRms with the specified float value.
         delayRms The float value to which delayRms is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1305,6 +1412,7 @@ class CalPositionRow:
         """
         Set phaseRms with the specified Angle value.
         phaseRms The Angle value to which phaseRms is to be set.
+
         The value of phaseRms can be anything allowed by the Angle constructor.
 
         """
@@ -1338,6 +1446,7 @@ class CalPositionRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1368,6 +1477,7 @@ class CalPositionRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

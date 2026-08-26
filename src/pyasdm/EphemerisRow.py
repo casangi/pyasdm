@@ -63,6 +63,16 @@ class EphemerisRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -87,17 +97,19 @@ class EphemerisRow:
 
         self._ephemerisId = 0
 
-        self._observerLocation = []  # this is a list of float []
+        self._observerLocation = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._equinoxEquator = None
 
         self._numPolyDir = 0
 
-        self._dir = []  # this is a list of float []  []
+        self._dir = []  # this is a list of float []  []  saved as double precision
 
         self._numPolyDist = 0
 
-        self._distance = []  # this is a list of float []
+        self._distance = []  # this is a list of float []  saved as double precision
 
         self._timeOrigin = ArrayTime()
 
@@ -109,7 +121,7 @@ class EphemerisRow:
 
         self._radVelExists = False
 
-        self._radVel = []  # this is a list of float []
+        self._radVel = []  # this is a list of float []  saved as double precision
 
         if row is not None:
             if not isinstance(row, EphemerisRow):
@@ -172,41 +184,86 @@ class EphemerisRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("ephemerisId", self._ephemerisId)
 
-        result += Parser.listValueToXML("observerLocation", self._observerLocation)
+        result += "\n   "
 
-        result += Parser.valueToXML("equinoxEquator", self._equinoxEquator)
+        result += Parser.doubleListValueToXML(
+            "observerLocation", self._observerLocation
+        )
+
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("equinoxEquator", self._equinoxEquator)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPolyDir", self._numPolyDir)
 
-        result += Parser.listValueToXML("dir", self._dir)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("dir", self._dir)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPolyDist", self._numPolyDist)
 
-        result += Parser.listValueToXML("distance", self._distance)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("distance", self._distance)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeOrigin", self._timeOrigin)
+
+        result += "\n   "
 
         result += Parser.valueToXML("origin", self._origin)
 
         if self._numPolyRadVelExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numPolyRadVel", self._numPolyRadVel)
 
         if self._radVelExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("radVel", self._radVel)
+            result += Parser.doubleListValueToXML("radVel", self._radVel)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "EphemerisTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -233,67 +290,71 @@ class EphemerisRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        ephemerisIdNode = rowdom.getElementsByTagName("ephemerisId")[0]
+        ephemerisIdNode = self._getFirstNodeByTagName(rowdom, "ephemerisId", True)
 
-        self._ephemerisId = int(ephemerisIdNode.firstChild.data.strip())
+        self._ephemerisId = int(self._getXMLNodeChildText(ephemerisIdNode))
 
-        observerLocationNode = rowdom.getElementsByTagName("observerLocation")[0]
+        observerLocationNode = self._getFirstNodeByTagName(
+            rowdom, "observerLocation", True
+        )
 
-        observerLocationStr = observerLocationNode.firstChild.data.strip()
+        observerLocationStr = self._getXMLNodeChildText(observerLocationNode)
 
         self._observerLocation = Parser.stringListToLists(
             observerLocationStr, float, "Ephemeris", False
         )
 
-        equinoxEquatorNode = rowdom.getElementsByTagName("equinoxEquator")[0]
+        equinoxEquatorNode = self._getFirstNodeByTagName(rowdom, "equinoxEquator", True)
 
-        self._equinoxEquator = float(equinoxEquatorNode.firstChild.data.strip())
+        self._equinoxEquator = float(self._getXMLNodeChildText(equinoxEquatorNode))
 
-        numPolyDirNode = rowdom.getElementsByTagName("numPolyDir")[0]
+        numPolyDirNode = self._getFirstNodeByTagName(rowdom, "numPolyDir", True)
 
-        self._numPolyDir = int(numPolyDirNode.firstChild.data.strip())
+        self._numPolyDir = int(self._getXMLNodeChildText(numPolyDirNode))
 
-        dirNode = rowdom.getElementsByTagName("dir")[0]
+        dirNode = self._getFirstNodeByTagName(rowdom, "dir", True)
 
-        dirStr = dirNode.firstChild.data.strip()
+        dirStr = self._getXMLNodeChildText(dirNode)
 
         self._dir = Parser.stringListToLists(dirStr, float, "Ephemeris", False)
 
-        numPolyDistNode = rowdom.getElementsByTagName("numPolyDist")[0]
+        numPolyDistNode = self._getFirstNodeByTagName(rowdom, "numPolyDist", True)
 
-        self._numPolyDist = int(numPolyDistNode.firstChild.data.strip())
+        self._numPolyDist = int(self._getXMLNodeChildText(numPolyDistNode))
 
-        distanceNode = rowdom.getElementsByTagName("distance")[0]
+        distanceNode = self._getFirstNodeByTagName(rowdom, "distance", True)
 
-        distanceStr = distanceNode.firstChild.data.strip()
+        distanceStr = self._getXMLNodeChildText(distanceNode)
 
         self._distance = Parser.stringListToLists(
             distanceStr, float, "Ephemeris", False
         )
 
-        timeOriginNode = rowdom.getElementsByTagName("timeOrigin")[0]
+        timeOriginNode = self._getFirstNodeByTagName(rowdom, "timeOrigin", True)
 
-        self._timeOrigin = ArrayTime(timeOriginNode.firstChild.data.strip())
+        self._timeOrigin = ArrayTime(self._getXMLNodeChildText(timeOriginNode))
 
-        originNode = rowdom.getElementsByTagName("origin")[0]
+        originNode = self._getFirstNodeByTagName(rowdom, "origin", True)
 
-        self._origin = str(originNode.firstChild.data.strip())
+        self._origin = str(self._getXMLNodeChildText(originNode))
 
-        numPolyRadVelNode = rowdom.getElementsByTagName("numPolyRadVel")
-        if len(numPolyRadVelNode) > 0:
+        numPolyRadVelNode = self._getFirstNodeByTagName(rowdom, "numPolyRadVel", False)
+        if numPolyRadVelNode:
 
-            self._numPolyRadVel = int(numPolyRadVelNode[0].firstChild.data.strip())
+            self._numPolyRadVel = int(self._getXMLNodeChildText(numPolyRadVelNode))
 
             self._numPolyRadVelExists = True
 
-        radVelNode = rowdom.getElementsByTagName("radVel")
-        if len(radVelNode) > 0:
+        radVelNode = self._getFirstNodeByTagName(rowdom, "radVel", False)
+        if radVelNode:
 
-            radVelStr = radVelNode[0].firstChild.data.strip()
+            radVelStr = self._getXMLNodeChildText(radVelNode)
 
             self._radVel = Parser.stringListToLists(
                 radVelStr, float, "Ephemeris", False
@@ -315,9 +376,9 @@ class EphemerisRow:
         eos.writeInt(len(self._observerLocation))
         for i in range(len(self._observerLocation)):
 
-            eos.writeFloat(self._observerLocation[i])
+            eos.writeDouble(self._observerLocation[i])
 
-        eos.writeFloat(self._equinoxEquator)
+        eos.writeDouble(self._equinoxEquator)
 
         eos.writeInt(self._numPolyDir)
 
@@ -332,14 +393,14 @@ class EphemerisRow:
         eos.writeInt(dir_dims[1])
         for i in range(dir_dims[0]):
             for j in range(dir_dims[1]):
-                eos.writeFloat(self._dir[i][j])
+                eos.writeDouble(self._dir[i][j])
 
         eos.writeInt(self._numPolyDist)
 
         eos.writeInt(len(self._distance))
         for i in range(len(self._distance)):
 
-            eos.writeFloat(self._distance[i])
+            eos.writeDouble(self._distance[i])
 
         self._timeOrigin.toBin(eos)
 
@@ -356,7 +417,7 @@ class EphemerisRow:
             eos.writeInt(len(self._radVel))
             for i in range(len(self._radVel)):
 
-                eos.writeFloat(self._radVel[i])
+                eos.writeDouble(self._radVel[i])
 
     @staticmethod
     def timeIntervalFromBin(row, eis):
@@ -383,7 +444,7 @@ class EphemerisRow:
         observerLocationDim1 = eis.readInt()
         thisList = []
         for i in range(observerLocationDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._observerLocation = thisList
 
@@ -393,7 +454,7 @@ class EphemerisRow:
         Set the equinoxEquator in row from the EndianInput (eis) instance.
         """
 
-        row._equinoxEquator = eis.readFloat()
+        row._equinoxEquator = eis.readDouble()
 
     @staticmethod
     def numPolyDirFromBin(row, eis):
@@ -415,7 +476,7 @@ class EphemerisRow:
         for i in range(dirDim1):
             thisList_j = []
             for j in range(dirDim2):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
         row._dir = thisList
@@ -437,7 +498,7 @@ class EphemerisRow:
         distanceDim1 = eis.readInt()
         thisList = []
         for i in range(distanceDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._distance = thisList
 
@@ -478,7 +539,7 @@ class EphemerisRow:
             radVelDim1 = eis.readInt()
             thisList = []
             for i in range(radVelDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._radVel = thisList
 
@@ -547,6 +608,7 @@ class EphemerisRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -578,6 +640,7 @@ class EphemerisRow:
         ephemerisId The int value to which ephemerisId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -605,6 +668,9 @@ class EphemerisRow:
         """
         Set observerLocation with the specified float []  value.
         observerLocation The float []  value to which observerLocation is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -649,6 +715,9 @@ class EphemerisRow:
         Set equinoxEquator with the specified float value.
         equinoxEquator The float value to which equinoxEquator is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -672,6 +741,7 @@ class EphemerisRow:
         numPolyDir The int value to which numPolyDir is to be set.
 
 
+
         """
 
         self._numPolyDir = int(numPolyDir)
@@ -692,6 +762,9 @@ class EphemerisRow:
         """
         Set dir with the specified float []  []  value.
         dir The float []  []  value to which dir is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -737,6 +810,7 @@ class EphemerisRow:
         numPolyDist The int value to which numPolyDist is to be set.
 
 
+
         """
 
         self._numPolyDist = int(numPolyDist)
@@ -757,6 +831,9 @@ class EphemerisRow:
         """
         Set distance with the specified float []  value.
         distance The float []  value to which distance is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -801,6 +878,7 @@ class EphemerisRow:
         """
         Set timeOrigin with the specified ArrayTime value.
         timeOrigin The ArrayTime value to which timeOrigin is to be set.
+
         The value of timeOrigin can be anything allowed by the ArrayTime constructor.
 
         """
@@ -823,6 +901,7 @@ class EphemerisRow:
         """
         Set origin with the specified str value.
         origin The str value to which origin is to be set.
+
 
 
         """
@@ -859,6 +938,7 @@ class EphemerisRow:
         """
         Set numPolyRadVel with the specified int value.
         numPolyRadVel The int value to which numPolyRadVel is to be set.
+
 
 
         """
@@ -903,6 +983,9 @@ class EphemerisRow:
         """
         Set radVel with the specified float []  value.
         radVel The float []  value to which radVel is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """

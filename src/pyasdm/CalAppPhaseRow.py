@@ -66,6 +66,16 @@ class CalAppPhaseRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -116,7 +126,7 @@ class CalAppPhaseRow:
 
         self._numPhaseValues = 0
 
-        self._phaseValues = []  # this is a list of float []
+        self._phaseValues = []  # this is a list of float []  saved as single precision
 
         self._numCompare = 0
 
@@ -126,9 +136,11 @@ class CalAppPhaseRow:
 
         self._efficiencyIndices = []  # this is a list of int []
 
-        self._efficiencies = []  # this is a list of float []  []
+        self._efficiencies = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
-        self._quality = []  # this is a list of float []
+        self._quality = []  # this is a list of float []  saved as single precision
 
         self._phasedSumAntenna = None
 
@@ -142,7 +154,9 @@ class CalAppPhaseRow:
 
         self._phaseSupportsExists = False
 
-        self._phaseSupports = []  # this is a list of float []
+        self._phaseSupports = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         # extrinsic attributes
 
@@ -256,79 +270,153 @@ class CalAppPhaseRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("scanNumber", self._scanNumber)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("adjustTime", self._adjustTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("adjustToken", self._adjustToken)
+
+        result += "\n   "
 
         result += Parser.valueToXML("phasingMode", self._phasingMode)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numPhasedAntennas", self._numPhasedAntennas)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("phasedAntennas", self._phasedAntennas)
 
+        result += "\n   "
+
         result += Parser.valueToXML("refAntennaIndex", self._refAntennaIndex)
+
+        result += "\n   "
 
         result += Parser.valueToXML("candRefAntennaIndex", self._candRefAntennaIndex)
 
+        result += "\n   "
+
         result += Parser.valueToXML("phasePacking", self._phasePacking)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptors", self._numReceptors)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numChannels", self._numChannels)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPhaseValues", self._numPhaseValues)
 
-        result += Parser.listValueToXML("phaseValues", self._phaseValues)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("phaseValues", self._phaseValues)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numCompare", self._numCompare)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numEfficiencies", self._numEfficiencies)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("compareArray", self._compareArray)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("efficiencyIndices", self._efficiencyIndices)
 
-        result += Parser.listValueToXML("efficiencies", self._efficiencies)
+        result += "\n   "
 
-        result += Parser.listValueToXML("quality", self._quality)
+        result += Parser.floatListValueToXML("efficiencies", self._efficiencies)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("quality", self._quality)
+
+        result += "\n   "
 
         result += Parser.valueToXML("phasedSumAntenna", self._phasedSumAntenna)
 
         if self._typeSupportsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("typeSupports", self._typeSupports)
 
         if self._numSupportsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numSupports", self._numSupports)
 
         if self._phaseSupportsExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("phaseSupports", self._phaseSupports)
+            result += Parser.floatListValueToXML("phaseSupports", self._phaseSupports)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalAppPhaseTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -355,142 +443,156 @@ class CalAppPhaseRow:
 
         # intrinsic attribute values
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", True)
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", True)
 
-        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
+        self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        adjustTimeNode = rowdom.getElementsByTagName("adjustTime")[0]
+        adjustTimeNode = self._getFirstNodeByTagName(rowdom, "adjustTime", True)
 
-        self._adjustTime = ArrayTime(adjustTimeNode.firstChild.data.strip())
+        self._adjustTime = ArrayTime(self._getXMLNodeChildText(adjustTimeNode))
 
-        adjustTokenNode = rowdom.getElementsByTagName("adjustToken")[0]
+        adjustTokenNode = self._getFirstNodeByTagName(rowdom, "adjustToken", True)
 
-        self._adjustToken = str(adjustTokenNode.firstChild.data.strip())
+        self._adjustToken = str(self._getXMLNodeChildText(adjustTokenNode))
 
-        phasingModeNode = rowdom.getElementsByTagName("phasingMode")[0]
+        phasingModeNode = self._getFirstNodeByTagName(rowdom, "phasingMode", True)
 
-        self._phasingMode = str(phasingModeNode.firstChild.data.strip())
+        self._phasingMode = str(self._getXMLNodeChildText(phasingModeNode))
 
-        numPhasedAntennasNode = rowdom.getElementsByTagName("numPhasedAntennas")[0]
+        numPhasedAntennasNode = self._getFirstNodeByTagName(
+            rowdom, "numPhasedAntennas", True
+        )
 
-        self._numPhasedAntennas = int(numPhasedAntennasNode.firstChild.data.strip())
+        self._numPhasedAntennas = int(self._getXMLNodeChildText(numPhasedAntennasNode))
 
-        phasedAntennasNode = rowdom.getElementsByTagName("phasedAntennas")[0]
+        phasedAntennasNode = self._getFirstNodeByTagName(rowdom, "phasedAntennas", True)
 
-        phasedAntennasStr = phasedAntennasNode.firstChild.data.strip()
+        phasedAntennasStr = self._getXMLNodeChildText(phasedAntennasNode)
 
         self._phasedAntennas = Parser.stringListToLists(
             phasedAntennasStr, str, "CalAppPhase", False
         )
 
-        refAntennaIndexNode = rowdom.getElementsByTagName("refAntennaIndex")[0]
+        refAntennaIndexNode = self._getFirstNodeByTagName(
+            rowdom, "refAntennaIndex", True
+        )
 
-        self._refAntennaIndex = int(refAntennaIndexNode.firstChild.data.strip())
+        self._refAntennaIndex = int(self._getXMLNodeChildText(refAntennaIndexNode))
 
-        candRefAntennaIndexNode = rowdom.getElementsByTagName("candRefAntennaIndex")[0]
+        candRefAntennaIndexNode = self._getFirstNodeByTagName(
+            rowdom, "candRefAntennaIndex", True
+        )
 
-        self._candRefAntennaIndex = int(candRefAntennaIndexNode.firstChild.data.strip())
+        self._candRefAntennaIndex = int(
+            self._getXMLNodeChildText(candRefAntennaIndexNode)
+        )
 
-        phasePackingNode = rowdom.getElementsByTagName("phasePacking")[0]
+        phasePackingNode = self._getFirstNodeByTagName(rowdom, "phasePacking", True)
 
-        self._phasePacking = str(phasePackingNode.firstChild.data.strip())
+        self._phasePacking = str(self._getXMLNodeChildText(phasePackingNode))
 
-        numReceptorsNode = rowdom.getElementsByTagName("numReceptors")[0]
+        numReceptorsNode = self._getFirstNodeByTagName(rowdom, "numReceptors", True)
 
-        self._numReceptors = int(numReceptorsNode.firstChild.data.strip())
+        self._numReceptors = int(self._getXMLNodeChildText(numReceptorsNode))
 
-        numChannelsNode = rowdom.getElementsByTagName("numChannels")[0]
+        numChannelsNode = self._getFirstNodeByTagName(rowdom, "numChannels", True)
 
-        self._numChannels = int(numChannelsNode.firstChild.data.strip())
+        self._numChannels = int(self._getXMLNodeChildText(numChannelsNode))
 
-        numPhaseValuesNode = rowdom.getElementsByTagName("numPhaseValues")[0]
+        numPhaseValuesNode = self._getFirstNodeByTagName(rowdom, "numPhaseValues", True)
 
-        self._numPhaseValues = int(numPhaseValuesNode.firstChild.data.strip())
+        self._numPhaseValues = int(self._getXMLNodeChildText(numPhaseValuesNode))
 
-        phaseValuesNode = rowdom.getElementsByTagName("phaseValues")[0]
+        phaseValuesNode = self._getFirstNodeByTagName(rowdom, "phaseValues", True)
 
-        phaseValuesStr = phaseValuesNode.firstChild.data.strip()
+        phaseValuesStr = self._getXMLNodeChildText(phaseValuesNode)
 
         self._phaseValues = Parser.stringListToLists(
             phaseValuesStr, float, "CalAppPhase", False
         )
 
-        numCompareNode = rowdom.getElementsByTagName("numCompare")[0]
+        numCompareNode = self._getFirstNodeByTagName(rowdom, "numCompare", True)
 
-        self._numCompare = int(numCompareNode.firstChild.data.strip())
+        self._numCompare = int(self._getXMLNodeChildText(numCompareNode))
 
-        numEfficienciesNode = rowdom.getElementsByTagName("numEfficiencies")[0]
+        numEfficienciesNode = self._getFirstNodeByTagName(
+            rowdom, "numEfficiencies", True
+        )
 
-        self._numEfficiencies = int(numEfficienciesNode.firstChild.data.strip())
+        self._numEfficiencies = int(self._getXMLNodeChildText(numEfficienciesNode))
 
-        compareArrayNode = rowdom.getElementsByTagName("compareArray")[0]
+        compareArrayNode = self._getFirstNodeByTagName(rowdom, "compareArray", True)
 
-        compareArrayStr = compareArrayNode.firstChild.data.strip()
+        compareArrayStr = self._getXMLNodeChildText(compareArrayNode)
 
         self._compareArray = Parser.stringListToLists(
             compareArrayStr, str, "CalAppPhase", False
         )
 
-        efficiencyIndicesNode = rowdom.getElementsByTagName("efficiencyIndices")[0]
+        efficiencyIndicesNode = self._getFirstNodeByTagName(
+            rowdom, "efficiencyIndices", True
+        )
 
-        efficiencyIndicesStr = efficiencyIndicesNode.firstChild.data.strip()
+        efficiencyIndicesStr = self._getXMLNodeChildText(efficiencyIndicesNode)
 
         self._efficiencyIndices = Parser.stringListToLists(
             efficiencyIndicesStr, int, "CalAppPhase", False
         )
 
-        efficienciesNode = rowdom.getElementsByTagName("efficiencies")[0]
+        efficienciesNode = self._getFirstNodeByTagName(rowdom, "efficiencies", True)
 
-        efficienciesStr = efficienciesNode.firstChild.data.strip()
+        efficienciesStr = self._getXMLNodeChildText(efficienciesNode)
 
         self._efficiencies = Parser.stringListToLists(
             efficienciesStr, float, "CalAppPhase", False
         )
 
-        qualityNode = rowdom.getElementsByTagName("quality")[0]
+        qualityNode = self._getFirstNodeByTagName(rowdom, "quality", True)
 
-        qualityStr = qualityNode.firstChild.data.strip()
+        qualityStr = self._getXMLNodeChildText(qualityNode)
 
         self._quality = Parser.stringListToLists(
             qualityStr, float, "CalAppPhase", False
         )
 
-        phasedSumAntennaNode = rowdom.getElementsByTagName("phasedSumAntenna")[0]
+        phasedSumAntennaNode = self._getFirstNodeByTagName(
+            rowdom, "phasedSumAntenna", True
+        )
 
-        self._phasedSumAntenna = str(phasedSumAntennaNode.firstChild.data.strip())
+        self._phasedSumAntenna = str(self._getXMLNodeChildText(phasedSumAntennaNode))
 
-        typeSupportsNode = rowdom.getElementsByTagName("typeSupports")
-        if len(typeSupportsNode) > 0:
+        typeSupportsNode = self._getFirstNodeByTagName(rowdom, "typeSupports", False)
+        if typeSupportsNode:
 
-            self._typeSupports = str(typeSupportsNode[0].firstChild.data.strip())
+            self._typeSupports = str(self._getXMLNodeChildText(typeSupportsNode))
 
             self._typeSupportsExists = True
 
-        numSupportsNode = rowdom.getElementsByTagName("numSupports")
-        if len(numSupportsNode) > 0:
+        numSupportsNode = self._getFirstNodeByTagName(rowdom, "numSupports", False)
+        if numSupportsNode:
 
-            self._numSupports = int(numSupportsNode[0].firstChild.data.strip())
+            self._numSupports = int(self._getXMLNodeChildText(numSupportsNode))
 
             self._numSupportsExists = True
 
-        phaseSupportsNode = rowdom.getElementsByTagName("phaseSupports")
-        if len(phaseSupportsNode) > 0:
+        phaseSupportsNode = self._getFirstNodeByTagName(rowdom, "phaseSupports", False)
+        if phaseSupportsNode:
 
-            phaseSupportsStr = phaseSupportsNode[0].firstChild.data.strip()
+            phaseSupportsStr = self._getXMLNodeChildText(phaseSupportsNode)
 
             self._phaseSupports = Parser.stringListToLists(
                 phaseSupportsStr, float, "CalAppPhase", False
@@ -500,13 +602,13 @@ class CalAppPhaseRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -962,6 +1064,7 @@ class CalAppPhaseRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -989,6 +1092,7 @@ class CalAppPhaseRow:
         """
         Set scanNumber with the specified int value.
         scanNumber The int value to which scanNumber is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1019,6 +1123,7 @@ class CalAppPhaseRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1042,6 +1147,7 @@ class CalAppPhaseRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1065,6 +1171,7 @@ class CalAppPhaseRow:
         """
         Set adjustTime with the specified ArrayTime value.
         adjustTime The ArrayTime value to which adjustTime is to be set.
+
         The value of adjustTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1089,6 +1196,7 @@ class CalAppPhaseRow:
         adjustToken The str value to which adjustToken is to be set.
 
 
+
         """
 
         self._adjustToken = str(adjustToken)
@@ -1109,6 +1217,7 @@ class CalAppPhaseRow:
         """
         Set phasingMode with the specified str value.
         phasingMode The str value to which phasingMode is to be set.
+
 
 
         """
@@ -1133,6 +1242,7 @@ class CalAppPhaseRow:
         numPhasedAntennas The int value to which numPhasedAntennas is to be set.
 
 
+
         """
 
         self._numPhasedAntennas = int(numPhasedAntennas)
@@ -1153,6 +1263,7 @@ class CalAppPhaseRow:
         """
         Set phasedAntennas with the specified str []  value.
         phasedAntennas The str []  value to which phasedAntennas is to be set.
+
 
 
         """
@@ -1198,6 +1309,7 @@ class CalAppPhaseRow:
         refAntennaIndex The int value to which refAntennaIndex is to be set.
 
 
+
         """
 
         self._refAntennaIndex = int(refAntennaIndex)
@@ -1218,6 +1330,7 @@ class CalAppPhaseRow:
         """
         Set candRefAntennaIndex with the specified int value.
         candRefAntennaIndex The int value to which candRefAntennaIndex is to be set.
+
 
 
         """
@@ -1242,6 +1355,7 @@ class CalAppPhaseRow:
         phasePacking The str value to which phasePacking is to be set.
 
 
+
         """
 
         self._phasePacking = str(phasePacking)
@@ -1262,6 +1376,7 @@ class CalAppPhaseRow:
         """
         Set numReceptors with the specified int value.
         numReceptors The int value to which numReceptors is to be set.
+
 
 
         """
@@ -1286,6 +1401,7 @@ class CalAppPhaseRow:
         numChannels The int value to which numChannels is to be set.
 
 
+
         """
 
         self._numChannels = int(numChannels)
@@ -1308,6 +1424,7 @@ class CalAppPhaseRow:
         numPhaseValues The int value to which numPhaseValues is to be set.
 
 
+
         """
 
         self._numPhaseValues = int(numPhaseValues)
@@ -1328,6 +1445,9 @@ class CalAppPhaseRow:
         """
         Set phaseValues with the specified float []  value.
         phaseValues The float []  value to which phaseValues is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1373,6 +1493,7 @@ class CalAppPhaseRow:
         numCompare The int value to which numCompare is to be set.
 
 
+
         """
 
         self._numCompare = int(numCompare)
@@ -1395,6 +1516,7 @@ class CalAppPhaseRow:
         numEfficiencies The int value to which numEfficiencies is to be set.
 
 
+
         """
 
         self._numEfficiencies = int(numEfficiencies)
@@ -1415,6 +1537,7 @@ class CalAppPhaseRow:
         """
         Set compareArray with the specified str []  value.
         compareArray The str []  value to which compareArray is to be set.
+
 
 
         """
@@ -1460,6 +1583,7 @@ class CalAppPhaseRow:
         efficiencyIndices The int []  value to which efficiencyIndices is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1501,6 +1625,9 @@ class CalAppPhaseRow:
         """
         Set efficiencies with the specified float []  []  value.
         efficiencies The float []  []  value to which efficiencies is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1544,6 +1671,9 @@ class CalAppPhaseRow:
         """
         Set quality with the specified float []  value.
         quality The float []  value to which quality is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1589,6 +1719,7 @@ class CalAppPhaseRow:
         phasedSumAntenna The str value to which phasedSumAntenna is to be set.
 
 
+
         """
 
         self._phasedSumAntenna = str(phasedSumAntenna)
@@ -1623,6 +1754,7 @@ class CalAppPhaseRow:
         """
         Set typeSupports with the specified str value.
         typeSupports The str value to which typeSupports is to be set.
+
 
 
         """
@@ -1669,6 +1801,7 @@ class CalAppPhaseRow:
         numSupports The int value to which numSupports is to be set.
 
 
+
         """
 
         self._numSupports = int(numSupports)
@@ -1711,6 +1844,9 @@ class CalAppPhaseRow:
         """
         Set phaseSupports with the specified float []  value.
         phaseSupports The float []  value to which phaseSupports is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1765,6 +1901,7 @@ class CalAppPhaseRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1795,6 +1932,7 @@ class CalAppPhaseRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

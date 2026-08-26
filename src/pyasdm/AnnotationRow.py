@@ -66,6 +66,16 @@ class AnnotationRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -116,11 +126,13 @@ class AnnotationRow:
 
         self._vdValueExists = False
 
-        self._vdValue = []  # this is a list of float []
+        self._vdValue = []  # this is a list of float []  saved as double precision
 
         self._vvdValuesExists = False
 
-        self._vvdValues = []  # this is a list of float []  []
+        self._vvdValues = (
+            []
+        )  # this is a list of float []  []  saved as double precision
 
         self._llValueExists = False
 
@@ -279,71 +291,112 @@ class AnnotationRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("annotationId", self._annotationId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("time", self._time)
 
+        result += "\n   "
+
         result += Parser.valueToXML("issue", self._issue)
+
+        result += "\n   "
 
         result += Parser.valueToXML("details", self._details)
 
         if self._numAntennaExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAntenna", self._numAntenna)
 
         if self._basebandNameExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("basebandName", self._basebandName)
 
         if self._numBasebandExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numBaseband", self._numBaseband)
 
         if self._intervalExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("interval", self._interval)
 
         if self._dValueExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("dValue", self._dValue)
+            result += Parser.doubleValueToXML("dValue", self._dValue)
 
         if self._vdValueExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("vdValue", self._vdValue)
+            result += Parser.doubleListValueToXML("vdValue", self._vdValue)
 
         if self._vvdValuesExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("vvdValues", self._vvdValues)
+            result += Parser.doubleListValueToXML("vvdValues", self._vvdValues)
 
         if self._llValueExists:
+            result += "\n   "
 
             result += Parser.valueToXML("llValue", self._llValue)
 
         if self._vllValueExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("vllValue", self._vllValue)
 
         if self._vvllValueExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("vvllValue", self._vvllValue)
 
         if self._sValueExists:
+            result += "\n   "
 
             result += Parser.valueToXML("sValue", self._sValue)
 
         # extrinsic attributes
 
         if self._antennaIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("antennaId", self._antennaId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "AnnotationTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -370,64 +423,64 @@ class AnnotationRow:
 
         # intrinsic attribute values
 
-        annotationIdNode = rowdom.getElementsByTagName("annotationId")[0]
+        annotationIdNode = self._getFirstNodeByTagName(rowdom, "annotationId", True)
 
-        self._annotationId = Tag(annotationIdNode.firstChild.data.strip())
+        self._annotationId = Tag(self._getXMLNodeChildText(annotationIdNode))
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
-        self._time = ArrayTime(timeNode.firstChild.data.strip())
+        self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
-        issueNode = rowdom.getElementsByTagName("issue")[0]
+        issueNode = self._getFirstNodeByTagName(rowdom, "issue", True)
 
-        self._issue = str(issueNode.firstChild.data.strip())
+        self._issue = str(self._getXMLNodeChildText(issueNode))
 
-        detailsNode = rowdom.getElementsByTagName("details")[0]
+        detailsNode = self._getFirstNodeByTagName(rowdom, "details", True)
 
-        self._details = str(detailsNode.firstChild.data.strip())
+        self._details = str(self._getXMLNodeChildText(detailsNode))
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")
-        if len(numAntennaNode) > 0:
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", False)
+        if numAntennaNode:
 
-            self._numAntenna = int(numAntennaNode[0].firstChild.data.strip())
+            self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
             self._numAntennaExists = True
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")
-        if len(basebandNameNode) > 0:
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", False)
+        if basebandNameNode:
 
-            basebandNameStr = basebandNameNode[0].firstChild.data.strip()
+            basebandNameStr = self._getXMLNodeChildText(basebandNameNode)
             self._basebandName = Parser.stringListToLists(
                 basebandNameStr, BasebandName, "Annotation", False
             )
 
             self._basebandNameExists = True
 
-        numBasebandNode = rowdom.getElementsByTagName("numBaseband")
-        if len(numBasebandNode) > 0:
+        numBasebandNode = self._getFirstNodeByTagName(rowdom, "numBaseband", False)
+        if numBasebandNode:
 
-            self._numBaseband = int(numBasebandNode[0].firstChild.data.strip())
+            self._numBaseband = int(self._getXMLNodeChildText(numBasebandNode))
 
             self._numBasebandExists = True
 
-        intervalNode = rowdom.getElementsByTagName("interval")
-        if len(intervalNode) > 0:
+        intervalNode = self._getFirstNodeByTagName(rowdom, "interval", False)
+        if intervalNode:
 
-            self._interval = Interval(intervalNode[0].firstChild.data.strip())
+            self._interval = Interval(self._getXMLNodeChildText(intervalNode))
 
             self._intervalExists = True
 
-        dValueNode = rowdom.getElementsByTagName("dValue")
-        if len(dValueNode) > 0:
+        dValueNode = self._getFirstNodeByTagName(rowdom, "dValue", False)
+        if dValueNode:
 
-            self._dValue = float(dValueNode[0].firstChild.data.strip())
+            self._dValue = float(self._getXMLNodeChildText(dValueNode))
 
             self._dValueExists = True
 
-        vdValueNode = rowdom.getElementsByTagName("vdValue")
-        if len(vdValueNode) > 0:
+        vdValueNode = self._getFirstNodeByTagName(rowdom, "vdValue", False)
+        if vdValueNode:
 
-            vdValueStr = vdValueNode[0].firstChild.data.strip()
+            vdValueStr = self._getXMLNodeChildText(vdValueNode)
 
             self._vdValue = Parser.stringListToLists(
                 vdValueStr, float, "Annotation", False
@@ -435,10 +488,10 @@ class AnnotationRow:
 
             self._vdValueExists = True
 
-        vvdValuesNode = rowdom.getElementsByTagName("vvdValues")
-        if len(vvdValuesNode) > 0:
+        vvdValuesNode = self._getFirstNodeByTagName(rowdom, "vvdValues", False)
+        if vvdValuesNode:
 
-            vvdValuesStr = vvdValuesNode[0].firstChild.data.strip()
+            vvdValuesStr = self._getXMLNodeChildText(vvdValuesNode)
 
             self._vvdValues = Parser.stringListToLists(
                 vvdValuesStr, float, "Annotation", False
@@ -446,17 +499,17 @@ class AnnotationRow:
 
             self._vvdValuesExists = True
 
-        llValueNode = rowdom.getElementsByTagName("llValue")
-        if len(llValueNode) > 0:
+        llValueNode = self._getFirstNodeByTagName(rowdom, "llValue", False)
+        if llValueNode:
 
-            self._llValue = int(llValueNode[0].firstChild.data.strip())
+            self._llValue = int(self._getXMLNodeChildText(llValueNode))
 
             self._llValueExists = True
 
-        vllValueNode = rowdom.getElementsByTagName("vllValue")
-        if len(vllValueNode) > 0:
+        vllValueNode = self._getFirstNodeByTagName(rowdom, "vllValue", False)
+        if vllValueNode:
 
-            vllValueStr = vllValueNode[0].firstChild.data.strip()
+            vllValueStr = self._getXMLNodeChildText(vllValueNode)
 
             self._vllValue = Parser.stringListToLists(
                 vllValueStr, int, "Annotation", False
@@ -464,10 +517,10 @@ class AnnotationRow:
 
             self._vllValueExists = True
 
-        vvllValueNode = rowdom.getElementsByTagName("vvllValue")
-        if len(vvllValueNode) > 0:
+        vvllValueNode = self._getFirstNodeByTagName(rowdom, "vvllValue", False)
+        if vvllValueNode:
 
-            vvllValueStr = vvllValueNode[0].firstChild.data.strip()
+            vvllValueStr = self._getXMLNodeChildText(vvllValueNode)
 
             self._vvllValue = Parser.stringListToLists(
                 vvllValueStr, int, "Annotation", False
@@ -475,19 +528,19 @@ class AnnotationRow:
 
             self._vvllValueExists = True
 
-        sValueNode = rowdom.getElementsByTagName("sValue")
-        if len(sValueNode) > 0:
+        sValueNode = self._getFirstNodeByTagName(rowdom, "sValue", False)
+        if sValueNode:
 
-            self._sValue = str(sValueNode[0].firstChild.data.strip())
+            self._sValue = str(self._getXMLNodeChildText(sValueNode))
 
             self._sValueExists = True
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")
-        if len(antennaIdNode) > 0:
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", False)
+        if antennaIdNode:
 
-            antennaIdStr = antennaIdNode[0].firstChild.data.strip()
+            antennaIdStr = self._getXMLNodeChildText(antennaIdNode)
 
             self._antennaId = Parser.stringListToLists(
                 antennaIdStr, Tag, "Annotation", True
@@ -536,7 +589,7 @@ class AnnotationRow:
         eos.writeBool(self._dValueExists)
         if self._dValueExists:
 
-            eos.writeFloat(self._dValue)
+            eos.writeDouble(self._dValue)
 
         eos.writeBool(self._vdValueExists)
         if self._vdValueExists:
@@ -544,7 +597,7 @@ class AnnotationRow:
             eos.writeInt(len(self._vdValue))
             for i in range(len(self._vdValue)):
 
-                eos.writeFloat(self._vdValue[i])
+                eos.writeDouble(self._vdValue[i])
 
         eos.writeBool(self._vvdValuesExists)
         if self._vvdValuesExists:
@@ -560,7 +613,7 @@ class AnnotationRow:
             eos.writeInt(vvdValues_dims[1])
             for i in range(vvdValues_dims[0]):
                 for j in range(vvdValues_dims[1]):
-                    eos.writeFloat(self._vvdValues[i][j])
+                    eos.writeDouble(self._vvdValues[i][j])
 
         eos.writeBool(self._llValueExists)
         if self._llValueExists:
@@ -686,7 +739,7 @@ class AnnotationRow:
         row._dValueExists = eis.readBool()
         if row._dValueExists:
 
-            row._dValue = eis.readFloat()
+            row._dValue = eis.readDouble()
 
     @staticmethod
     def vdValueFromBin(row, eis):
@@ -699,7 +752,7 @@ class AnnotationRow:
             vdValueDim1 = eis.readInt()
             thisList = []
             for i in range(vdValueDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._vdValue = thisList
 
@@ -717,7 +770,7 @@ class AnnotationRow:
             for i in range(vvdValuesDim1):
                 thisList_j = []
                 for j in range(vvdValuesDim2):
-                    thisValue = eis.readFloat()
+                    thisValue = eis.readDouble()
                     thisList_j.append(thisValue)
                 thisList.append(thisList_j)
             row._vvdValues = thisList
@@ -855,6 +908,7 @@ class AnnotationRow:
         """
         Set annotationId with the specified Tag value.
         annotationId The Tag value to which annotationId is to be set.
+
         The value of annotationId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -885,6 +939,7 @@ class AnnotationRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """
@@ -909,6 +964,7 @@ class AnnotationRow:
         issue The str value to which issue is to be set.
 
 
+
         """
 
         self._issue = str(issue)
@@ -929,6 +985,7 @@ class AnnotationRow:
         """
         Set details with the specified str value.
         details The str value to which details is to be set.
+
 
 
         """
@@ -965,6 +1022,7 @@ class AnnotationRow:
         """
         Set numAntenna with the specified int value.
         numAntenna The int value to which numAntenna is to be set.
+
 
 
         """
@@ -1009,6 +1067,7 @@ class AnnotationRow:
         """
         Set basebandName with the specified BasebandName []  value.
         basebandName The BasebandName []  value to which basebandName is to be set.
+
 
 
         """
@@ -1076,6 +1135,7 @@ class AnnotationRow:
         numBaseband The int value to which numBaseband is to be set.
 
 
+
         """
 
         self._numBaseband = int(numBaseband)
@@ -1119,6 +1179,7 @@ class AnnotationRow:
         """
         Set interval with the specified Interval value.
         interval The Interval value to which interval is to be set.
+
         The value of interval can be anything allowed by the Interval constructor.
 
         """
@@ -1164,6 +1225,9 @@ class AnnotationRow:
         Set dValue with the specified float value.
         dValue The float value to which dValue is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1207,6 +1271,9 @@ class AnnotationRow:
         """
         Set vdValue with the specified float []  value.
         vdValue The float []  value to which vdValue is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1272,6 +1339,9 @@ class AnnotationRow:
         """
         Set vvdValues with the specified float []  []  value.
         vvdValues The float []  []  value to which vvdValues is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1339,6 +1409,7 @@ class AnnotationRow:
         llValue The int value to which llValue is to be set.
 
 
+
         """
 
         self._llValue = int(llValue)
@@ -1381,6 +1452,7 @@ class AnnotationRow:
         """
         Set vllValue with the specified int []  value.
         vllValue The int []  value to which vllValue is to be set.
+
 
 
         """
@@ -1448,6 +1520,7 @@ class AnnotationRow:
         vvllValue The int []  []  value to which vvllValue is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1513,6 +1586,7 @@ class AnnotationRow:
         sValue The str value to which sValue is to be set.
 
 
+
         """
 
         self._sValue = str(sValue)
@@ -1557,6 +1631,7 @@ class AnnotationRow:
         """
         Set antennaId with the specified Tag []  value.
         antennaId The Tag []  value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag []  constructor.
 
         """

@@ -75,6 +75,16 @@ class CalPrimaryBeamRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -113,7 +123,9 @@ class CalPrimaryBeamRow:
 
         self._polarizationTypes = []  # this is a list of PolarizationType []
 
-        self._mainBeamEfficiency = []  # this is a list of float []
+        self._mainBeamEfficiency = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._beamDescriptionUID = EntityRef()
 
@@ -218,55 +230,95 @@ class CalPrimaryBeamRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += "\n   "
 
         result += Parser.valueToXML("numSubband", self._numSubband)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
-        result += Parser.listValueToXML("mainBeamEfficiency", self._mainBeamEfficiency)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML(
+            "mainBeamEfficiency", self._mainBeamEfficiency
+        )
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "beamDescriptionUID", self._beamDescriptionUID
         )
 
-        result += Parser.valueToXML("relativeAmplitudeRms", self._relativeAmplitudeRms)
+        result += "\n   "
+
+        result += Parser.floatValueToXML(
+            "relativeAmplitudeRms", self._relativeAmplitudeRms
+        )
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("direction", self._direction)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "minValidDirection", self._minValidDirection
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML(
             "maxValidDirection", self._maxValidDirection
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "descriptionType", PrimaryBeamDescription.name(self._descriptionType)
         )
 
+        result += "\n   "
+
         result += Parser.listValueToXML("imageChannelNumber", self._imageChannelNumber)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "imageNominalFrequency", self._imageNominalFrequency
@@ -274,13 +326,38 @@ class CalPrimaryBeamRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalPrimaryBeamTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -309,116 +386,130 @@ class CalPrimaryBeamRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+        antennaMakeNode = self._getFirstNodeByTagName(rowdom, "antennaMake", True)
 
         self._antennaMake = AntennaMake.newAntennaMake(
-            antennaMakeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaMakeNode)
         )
 
-        numSubbandNode = rowdom.getElementsByTagName("numSubband")[0]
+        numSubbandNode = self._getFirstNodeByTagName(rowdom, "numSubband", True)
 
-        self._numSubband = int(numSubbandNode.firstChild.data.strip())
+        self._numSubband = int(self._getXMLNodeChildText(numSubbandNode))
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalPrimaryBeam", True
         )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalPrimaryBeam", False
         )
 
-        mainBeamEfficiencyNode = rowdom.getElementsByTagName("mainBeamEfficiency")[0]
+        mainBeamEfficiencyNode = self._getFirstNodeByTagName(
+            rowdom, "mainBeamEfficiency", True
+        )
 
-        mainBeamEfficiencyStr = mainBeamEfficiencyNode.firstChild.data.strip()
+        mainBeamEfficiencyStr = self._getXMLNodeChildText(mainBeamEfficiencyNode)
 
         self._mainBeamEfficiency = Parser.stringListToLists(
             mainBeamEfficiencyStr, float, "CalPrimaryBeam", False
         )
 
-        beamDescriptionUIDNode = rowdom.getElementsByTagName("beamDescriptionUID")[0]
+        beamDescriptionUIDNode = self._getFirstNodeByTagName(
+            rowdom, "beamDescriptionUID", True
+        )
 
         self._beamDescriptionUID = EntityRef(beamDescriptionUIDNode.toxml())
 
-        relativeAmplitudeRmsNode = rowdom.getElementsByTagName("relativeAmplitudeRms")[
-            0
-        ]
-
-        self._relativeAmplitudeRms = float(
-            relativeAmplitudeRmsNode.firstChild.data.strip()
+        relativeAmplitudeRmsNode = self._getFirstNodeByTagName(
+            rowdom, "relativeAmplitudeRms", True
         )
 
-        directionNode = rowdom.getElementsByTagName("direction")[0]
+        self._relativeAmplitudeRms = float(
+            self._getXMLNodeChildText(relativeAmplitudeRmsNode)
+        )
 
-        directionStr = directionNode.firstChild.data.strip()
+        directionNode = self._getFirstNodeByTagName(rowdom, "direction", True)
+
+        directionStr = self._getXMLNodeChildText(directionNode)
 
         self._direction = Parser.stringListToLists(
             directionStr, Angle, "CalPrimaryBeam", True
         )
 
-        minValidDirectionNode = rowdom.getElementsByTagName("minValidDirection")[0]
+        minValidDirectionNode = self._getFirstNodeByTagName(
+            rowdom, "minValidDirection", True
+        )
 
-        minValidDirectionStr = minValidDirectionNode.firstChild.data.strip()
+        minValidDirectionStr = self._getXMLNodeChildText(minValidDirectionNode)
 
         self._minValidDirection = Parser.stringListToLists(
             minValidDirectionStr, Angle, "CalPrimaryBeam", True
         )
 
-        maxValidDirectionNode = rowdom.getElementsByTagName("maxValidDirection")[0]
+        maxValidDirectionNode = self._getFirstNodeByTagName(
+            rowdom, "maxValidDirection", True
+        )
 
-        maxValidDirectionStr = maxValidDirectionNode.firstChild.data.strip()
+        maxValidDirectionStr = self._getXMLNodeChildText(maxValidDirectionNode)
 
         self._maxValidDirection = Parser.stringListToLists(
             maxValidDirectionStr, Angle, "CalPrimaryBeam", True
         )
 
-        descriptionTypeNode = rowdom.getElementsByTagName("descriptionType")[0]
-
-        self._descriptionType = PrimaryBeamDescription.newPrimaryBeamDescription(
-            descriptionTypeNode.firstChild.data.strip()
+        descriptionTypeNode = self._getFirstNodeByTagName(
+            rowdom, "descriptionType", True
         )
 
-        imageChannelNumberNode = rowdom.getElementsByTagName("imageChannelNumber")[0]
+        self._descriptionType = PrimaryBeamDescription.newPrimaryBeamDescription(
+            self._getXMLNodeChildText(descriptionTypeNode)
+        )
 
-        imageChannelNumberStr = imageChannelNumberNode.firstChild.data.strip()
+        imageChannelNumberNode = self._getFirstNodeByTagName(
+            rowdom, "imageChannelNumber", True
+        )
+
+        imageChannelNumberStr = self._getXMLNodeChildText(imageChannelNumberNode)
 
         self._imageChannelNumber = Parser.stringListToLists(
             imageChannelNumberStr, int, "CalPrimaryBeam", False
         )
 
-        imageNominalFrequencyNode = rowdom.getElementsByTagName(
-            "imageNominalFrequency"
-        )[0]
+        imageNominalFrequencyNode = self._getFirstNodeByTagName(
+            rowdom, "imageNominalFrequency", True
+        )
 
-        imageNominalFrequencyStr = imageNominalFrequencyNode.firstChild.data.strip()
+        imageNominalFrequencyStr = self._getXMLNodeChildText(imageNominalFrequencyNode)
 
         self._imageNominalFrequency = Parser.stringListToLists(
             imageNominalFrequencyStr, Frequency, "CalPrimaryBeam", True
@@ -426,13 +517,13 @@ class CalPrimaryBeamRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -469,7 +560,7 @@ class CalPrimaryBeamRow:
         eos.writeInt(len(self._mainBeamEfficiency))
         for i in range(len(self._mainBeamEfficiency)):
 
-            eos.writeFloat(self._mainBeamEfficiency[i])
+            eos.writeDouble(self._mainBeamEfficiency[i])
 
         self._beamDescriptionUID.toBin(eos)
 
@@ -592,7 +683,7 @@ class CalPrimaryBeamRow:
         mainBeamEfficiencyDim1 = eis.readInt()
         thisList = []
         for i in range(mainBeamEfficiencyDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._mainBeamEfficiency = thisList
 
@@ -754,6 +845,7 @@ class CalPrimaryBeamRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -781,6 +873,7 @@ class CalPrimaryBeamRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -811,6 +904,7 @@ class CalPrimaryBeamRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -834,6 +928,7 @@ class CalPrimaryBeamRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -858,6 +953,7 @@ class CalPrimaryBeamRow:
         antennaMake The AntennaMake value to which antennaMake is to be set.
 
 
+
         """
 
         self._antennaMake = AntennaMake(antennaMake)
@@ -880,6 +976,7 @@ class CalPrimaryBeamRow:
         numSubband The int value to which numSubband is to be set.
 
 
+
         """
 
         self._numSubband = int(numSubband)
@@ -900,6 +997,7 @@ class CalPrimaryBeamRow:
         """
         Set frequencyRange with the specified Frequency []  []  value.
         frequencyRange The Frequency []  []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  []  constructor.
 
         """
@@ -945,6 +1043,7 @@ class CalPrimaryBeamRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -965,6 +1064,7 @@ class CalPrimaryBeamRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1009,6 +1109,9 @@ class CalPrimaryBeamRow:
         Set mainBeamEfficiency with the specified float []  value.
         mainBeamEfficiency The float []  value to which mainBeamEfficiency is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1052,6 +1155,7 @@ class CalPrimaryBeamRow:
         """
         Set beamDescriptionUID with the specified EntityRef value.
         beamDescriptionUID The EntityRef value to which beamDescriptionUID is to be set.
+
         The value of beamDescriptionUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1075,6 +1179,9 @@ class CalPrimaryBeamRow:
         Set relativeAmplitudeRms with the specified float value.
         relativeAmplitudeRms The float value to which relativeAmplitudeRms is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1096,6 +1203,7 @@ class CalPrimaryBeamRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1139,6 +1247,7 @@ class CalPrimaryBeamRow:
         """
         Set minValidDirection with the specified Angle []  value.
         minValidDirection The Angle []  value to which minValidDirection is to be set.
+
         The value of minValidDirection can be anything allowed by the Angle []  constructor.
 
         """
@@ -1182,6 +1291,7 @@ class CalPrimaryBeamRow:
         """
         Set maxValidDirection with the specified Angle []  value.
         maxValidDirection The Angle []  value to which maxValidDirection is to be set.
+
         The value of maxValidDirection can be anything allowed by the Angle []  constructor.
 
         """
@@ -1227,6 +1337,7 @@ class CalPrimaryBeamRow:
         descriptionType The PrimaryBeamDescription value to which descriptionType is to be set.
 
 
+
         """
 
         self._descriptionType = PrimaryBeamDescription(descriptionType)
@@ -1247,6 +1358,7 @@ class CalPrimaryBeamRow:
         """
         Set imageChannelNumber with the specified int []  value.
         imageChannelNumber The int []  value to which imageChannelNumber is to be set.
+
 
 
         """
@@ -1290,6 +1402,7 @@ class CalPrimaryBeamRow:
         """
         Set imageNominalFrequency with the specified Frequency []  value.
         imageNominalFrequency The Frequency []  value to which imageNominalFrequency is to be set.
+
         The value of imageNominalFrequency can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1336,6 +1449,7 @@ class CalPrimaryBeamRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1366,6 +1480,7 @@ class CalPrimaryBeamRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

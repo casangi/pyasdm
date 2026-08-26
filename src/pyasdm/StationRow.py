@@ -66,6 +66,16 @@ class StationRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -140,25 +150,55 @@ class StationRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("stationId", self._stationId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("name", self._name)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("position", self._position)
+
+        result += "\n   "
 
         result += Parser.valueToXML("type", StationType.name(self._type))
 
         if self._timeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("time", self._time)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "StationTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -185,28 +225,28 @@ class StationRow:
 
         # intrinsic attribute values
 
-        stationIdNode = rowdom.getElementsByTagName("stationId")[0]
+        stationIdNode = self._getFirstNodeByTagName(rowdom, "stationId", True)
 
-        self._stationId = Tag(stationIdNode.firstChild.data.strip())
+        self._stationId = Tag(self._getXMLNodeChildText(stationIdNode))
 
-        nameNode = rowdom.getElementsByTagName("name")[0]
+        nameNode = self._getFirstNodeByTagName(rowdom, "name", True)
 
-        self._name = str(nameNode.firstChild.data.strip())
+        self._name = str(self._getXMLNodeChildText(nameNode))
 
-        positionNode = rowdom.getElementsByTagName("position")[0]
+        positionNode = self._getFirstNodeByTagName(rowdom, "position", True)
 
-        positionStr = positionNode.firstChild.data.strip()
+        positionStr = self._getXMLNodeChildText(positionNode)
 
         self._position = Parser.stringListToLists(positionStr, Length, "Station", True)
 
-        typeNode = rowdom.getElementsByTagName("type")[0]
+        typeNode = self._getFirstNodeByTagName(rowdom, "type", True)
 
-        self._type = StationType.newStationType(typeNode.firstChild.data.strip())
+        self._type = StationType.newStationType(self._getXMLNodeChildText(typeNode))
 
-        timeNode = rowdom.getElementsByTagName("time")
-        if len(timeNode) > 0:
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", False)
+        if timeNode:
 
-            self._time = ArrayTime(timeNode[0].firstChild.data.strip())
+            self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
             self._timeExists = True
 
@@ -330,6 +370,7 @@ class StationRow:
         """
         Set stationId with the specified Tag value.
         stationId The Tag value to which stationId is to be set.
+
         The value of stationId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -361,6 +402,7 @@ class StationRow:
         name The str value to which name is to be set.
 
 
+
         """
 
         self._name = str(name)
@@ -381,6 +423,7 @@ class StationRow:
         """
         Set position with the specified Length []  value.
         position The Length []  value to which position is to be set.
+
         The value of position can be anything allowed by the Length []  constructor.
 
         """
@@ -426,6 +469,7 @@ class StationRow:
         type The StationType value to which type is to be set.
 
 
+
         """
 
         self._type = StationType(type)
@@ -461,6 +505,7 @@ class StationRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """

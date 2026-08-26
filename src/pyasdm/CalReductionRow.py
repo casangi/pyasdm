@@ -66,6 +66,16 @@ class CalReductionRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -154,39 +164,82 @@ class CalReductionRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numApplied", self._numApplied)
+
+        result += "\n   "
 
         result += Parser.listValueToXML(
             "appliedCalibrations", self._appliedCalibrations
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numParam", self._numParam)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("paramSet", self._paramSet)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numInvalidConditions", self._numInvalidConditions)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "invalidConditions", self._invalidConditions
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeReduced", self._timeReduced)
+
+        result += "\n   "
 
         result += Parser.valueToXML("messages", self._messages)
 
+        result += "\n   "
+
         result += Parser.valueToXML("software", self._software)
+
+        result += "\n   "
 
         result += Parser.valueToXML("softwareVersion", self._softwareVersion)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalReductionTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -213,64 +266,70 @@ class CalReductionRow:
 
         # intrinsic attribute values
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
-        numAppliedNode = rowdom.getElementsByTagName("numApplied")[0]
+        numAppliedNode = self._getFirstNodeByTagName(rowdom, "numApplied", True)
 
-        self._numApplied = int(numAppliedNode.firstChild.data.strip())
+        self._numApplied = int(self._getXMLNodeChildText(numAppliedNode))
 
-        appliedCalibrationsNode = rowdom.getElementsByTagName("appliedCalibrations")[0]
+        appliedCalibrationsNode = self._getFirstNodeByTagName(
+            rowdom, "appliedCalibrations", True
+        )
 
-        appliedCalibrationsStr = appliedCalibrationsNode.firstChild.data.strip()
+        appliedCalibrationsStr = self._getXMLNodeChildText(appliedCalibrationsNode)
 
         self._appliedCalibrations = Parser.stringListToLists(
             appliedCalibrationsStr, str, "CalReduction", False
         )
 
-        numParamNode = rowdom.getElementsByTagName("numParam")[0]
+        numParamNode = self._getFirstNodeByTagName(rowdom, "numParam", True)
 
-        self._numParam = int(numParamNode.firstChild.data.strip())
+        self._numParam = int(self._getXMLNodeChildText(numParamNode))
 
-        paramSetNode = rowdom.getElementsByTagName("paramSet")[0]
+        paramSetNode = self._getFirstNodeByTagName(rowdom, "paramSet", True)
 
-        paramSetStr = paramSetNode.firstChild.data.strip()
+        paramSetStr = self._getXMLNodeChildText(paramSetNode)
 
         self._paramSet = Parser.stringListToLists(
             paramSetStr, str, "CalReduction", False
         )
 
-        numInvalidConditionsNode = rowdom.getElementsByTagName("numInvalidConditions")[
-            0
-        ]
-
-        self._numInvalidConditions = int(
-            numInvalidConditionsNode.firstChild.data.strip()
+        numInvalidConditionsNode = self._getFirstNodeByTagName(
+            rowdom, "numInvalidConditions", True
         )
 
-        invalidConditionsNode = rowdom.getElementsByTagName("invalidConditions")[0]
+        self._numInvalidConditions = int(
+            self._getXMLNodeChildText(numInvalidConditionsNode)
+        )
 
-        invalidConditionsStr = invalidConditionsNode.firstChild.data.strip()
+        invalidConditionsNode = self._getFirstNodeByTagName(
+            rowdom, "invalidConditions", True
+        )
+
+        invalidConditionsStr = self._getXMLNodeChildText(invalidConditionsNode)
         self._invalidConditions = Parser.stringListToLists(
             invalidConditionsStr, InvalidatingCondition, "CalReduction", False
         )
 
-        timeReducedNode = rowdom.getElementsByTagName("timeReduced")[0]
+        timeReducedNode = self._getFirstNodeByTagName(rowdom, "timeReduced", True)
 
-        self._timeReduced = ArrayTime(timeReducedNode.firstChild.data.strip())
+        self._timeReduced = ArrayTime(self._getXMLNodeChildText(timeReducedNode))
 
-        messagesNode = rowdom.getElementsByTagName("messages")[0]
+        messagesNode = self._getFirstNodeByTagName(rowdom, "messages", True)
 
-        self._messages = str(messagesNode.firstChild.data.strip())
+        self._messages = str(self._getXMLNodeChildText(messagesNode))
 
-        softwareNode = rowdom.getElementsByTagName("software")[0]
+        softwareNode = self._getFirstNodeByTagName(rowdom, "software", True)
 
-        self._software = str(softwareNode.firstChild.data.strip())
+        self._software = str(self._getXMLNodeChildText(softwareNode))
 
-        softwareVersionNode = rowdom.getElementsByTagName("softwareVersion")[0]
+        softwareVersionNode = self._getFirstNodeByTagName(
+            rowdom, "softwareVersion", True
+        )
 
-        self._softwareVersion = str(softwareVersionNode.firstChild.data.strip())
+        self._softwareVersion = str(self._getXMLNodeChildText(softwareVersionNode))
 
         # from link values, if any
 
@@ -480,6 +539,7 @@ class CalReductionRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -511,6 +571,7 @@ class CalReductionRow:
         numApplied The int value to which numApplied is to be set.
 
 
+
         """
 
         self._numApplied = int(numApplied)
@@ -531,6 +592,7 @@ class CalReductionRow:
         """
         Set appliedCalibrations with the specified str []  value.
         appliedCalibrations The str []  value to which appliedCalibrations is to be set.
+
 
 
         """
@@ -576,6 +638,7 @@ class CalReductionRow:
         numParam The int value to which numParam is to be set.
 
 
+
         """
 
         self._numParam = int(numParam)
@@ -596,6 +659,7 @@ class CalReductionRow:
         """
         Set paramSet with the specified str []  value.
         paramSet The str []  value to which paramSet is to be set.
+
 
 
         """
@@ -641,6 +705,7 @@ class CalReductionRow:
         numInvalidConditions The int value to which numInvalidConditions is to be set.
 
 
+
         """
 
         self._numInvalidConditions = int(numInvalidConditions)
@@ -661,6 +726,7 @@ class CalReductionRow:
         """
         Set invalidConditions with the specified InvalidatingCondition []  value.
         invalidConditions The InvalidatingCondition []  value to which invalidConditions is to be set.
+
 
 
         """
@@ -705,6 +771,7 @@ class CalReductionRow:
         """
         Set timeReduced with the specified ArrayTime value.
         timeReduced The ArrayTime value to which timeReduced is to be set.
+
         The value of timeReduced can be anything allowed by the ArrayTime constructor.
 
         """
@@ -729,6 +796,7 @@ class CalReductionRow:
         messages The str value to which messages is to be set.
 
 
+
         """
 
         self._messages = str(messages)
@@ -751,6 +819,7 @@ class CalReductionRow:
         software The str value to which software is to be set.
 
 
+
         """
 
         self._software = str(software)
@@ -771,6 +840,7 @@ class CalReductionRow:
         """
         Set softwareVersion with the specified str value.
         softwareVersion The str value to which softwareVersion is to be set.
+
 
 
         """

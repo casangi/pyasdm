@@ -69,6 +69,16 @@ class PolarizationRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -128,21 +138,50 @@ class PolarizationRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("polarizationId", self._polarizationId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numCorr", self._numCorr)
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("corrType", self._corrType)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("corrProduct", self._corrProduct)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "PolarizationTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -169,24 +208,24 @@ class PolarizationRow:
 
         # intrinsic attribute values
 
-        polarizationIdNode = rowdom.getElementsByTagName("polarizationId")[0]
+        polarizationIdNode = self._getFirstNodeByTagName(rowdom, "polarizationId", True)
 
-        self._polarizationId = Tag(polarizationIdNode.firstChild.data.strip())
+        self._polarizationId = Tag(self._getXMLNodeChildText(polarizationIdNode))
 
-        numCorrNode = rowdom.getElementsByTagName("numCorr")[0]
+        numCorrNode = self._getFirstNodeByTagName(rowdom, "numCorr", True)
 
-        self._numCorr = int(numCorrNode.firstChild.data.strip())
+        self._numCorr = int(self._getXMLNodeChildText(numCorrNode))
 
-        corrTypeNode = rowdom.getElementsByTagName("corrType")[0]
+        corrTypeNode = self._getFirstNodeByTagName(rowdom, "corrType", True)
 
-        corrTypeStr = corrTypeNode.firstChild.data.strip()
+        corrTypeStr = self._getXMLNodeChildText(corrTypeNode)
         self._corrType = Parser.stringListToLists(
             corrTypeStr, StokesParameter, "Polarization", False
         )
 
-        corrProductNode = rowdom.getElementsByTagName("corrProduct")[0]
+        corrProductNode = self._getFirstNodeByTagName(rowdom, "corrProduct", True)
 
-        corrProductStr = corrProductNode.firstChild.data.strip()
+        corrProductStr = self._getXMLNodeChildText(corrProductNode)
         self._corrProduct = Parser.stringListToLists(
             corrProductStr, PolarizationType, "Polarization", False
         )
@@ -322,6 +361,7 @@ class PolarizationRow:
         """
         Set polarizationId with the specified Tag value.
         polarizationId The Tag value to which polarizationId is to be set.
+
         The value of polarizationId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -353,6 +393,7 @@ class PolarizationRow:
         numCorr The int value to which numCorr is to be set.
 
 
+
         """
 
         self._numCorr = int(numCorr)
@@ -373,6 +414,7 @@ class PolarizationRow:
         """
         Set corrType with the specified StokesParameter []  value.
         corrType The StokesParameter []  value to which corrType is to be set.
+
 
 
         """
@@ -416,6 +458,7 @@ class PolarizationRow:
         """
         Set corrProduct with the specified PolarizationType []  []  value.
         corrProduct The PolarizationType []  []  value to which corrProduct is to be set.
+
 
 
         """

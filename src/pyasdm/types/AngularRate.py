@@ -24,6 +24,7 @@
 #
 
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class AngularRate:
@@ -147,7 +148,7 @@ class AngularRate:
         """
         Return the value of this angular rate as a string in units of radians per second.
         """
-        return str(self.get())
+        return pyasdm.Parser.doubleToString(self.get())
 
     @staticmethod
     def values(items):

@@ -78,6 +78,16 @@ class ConfigDescriptionRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -271,75 +281,128 @@ class ConfigDescriptionRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAntenna", self._numAntenna)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numDataDescription", self._numDataDescription)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numFeed", self._numFeed)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "correlationMode", CorrelationMode.name(self._correlationMode)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML(
             "configDescriptionId", self._configDescriptionId
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "numAtmPhaseCorrection", self._numAtmPhaseCorrection
         )
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML(
             "atmPhaseCorrection", self._atmPhaseCorrection
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "processorType", ProcessorType.name(self._processorType)
         )
 
         if self._phasedArrayListExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("phasedArrayList", self._phasedArrayList)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "spectralType", SpectralResolutionType.name(self._spectralType)
         )
 
         if self._numAssocValuesExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAssocValues", self._numAssocValues)
 
         if self._assocNatureExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("assocNature", self._assocNature)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("antennaId", self._antennaId)
 
         if self._assocConfigDescriptionIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "assocConfigDescriptionId", self._assocConfigDescriptionId
             )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML(
             "dataDescriptionId", self._dataDescriptionId
         )
 
+        result += "\n   "
+
         result += Parser.listValueToXML("feedId", self._feedId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("processorId", self._processorId)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("switchCycleId", self._switchCycleId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ConfigDescriptionTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -368,53 +431,67 @@ class ConfigDescriptionRow:
 
         # intrinsic attribute values
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", True)
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
-        numDataDescriptionNode = rowdom.getElementsByTagName("numDataDescription")[0]
+        numDataDescriptionNode = self._getFirstNodeByTagName(
+            rowdom, "numDataDescription", True
+        )
 
-        self._numDataDescription = int(numDataDescriptionNode.firstChild.data.strip())
+        self._numDataDescription = int(
+            self._getXMLNodeChildText(numDataDescriptionNode)
+        )
 
-        numFeedNode = rowdom.getElementsByTagName("numFeed")[0]
+        numFeedNode = self._getFirstNodeByTagName(rowdom, "numFeed", True)
 
-        self._numFeed = int(numFeedNode.firstChild.data.strip())
+        self._numFeed = int(self._getXMLNodeChildText(numFeedNode))
 
-        correlationModeNode = rowdom.getElementsByTagName("correlationMode")[0]
+        correlationModeNode = self._getFirstNodeByTagName(
+            rowdom, "correlationMode", True
+        )
 
         self._correlationMode = CorrelationMode.newCorrelationMode(
-            correlationModeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(correlationModeNode)
         )
 
-        configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
+        configDescriptionIdNode = self._getFirstNodeByTagName(
+            rowdom, "configDescriptionId", True
+        )
 
-        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data.strip())
+        self._configDescriptionId = Tag(
+            self._getXMLNodeChildText(configDescriptionIdNode)
+        )
 
-        numAtmPhaseCorrectionNode = rowdom.getElementsByTagName(
-            "numAtmPhaseCorrection"
-        )[0]
+        numAtmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "numAtmPhaseCorrection", True
+        )
 
         self._numAtmPhaseCorrection = int(
-            numAtmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(numAtmPhaseCorrectionNode)
         )
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
-        atmPhaseCorrectionStr = atmPhaseCorrectionNode.firstChild.data.strip()
+        atmPhaseCorrectionStr = self._getXMLNodeChildText(atmPhaseCorrectionNode)
         self._atmPhaseCorrection = Parser.stringListToLists(
             atmPhaseCorrectionStr, AtmPhaseCorrection, "ConfigDescription", False
         )
 
-        processorTypeNode = rowdom.getElementsByTagName("processorType")[0]
+        processorTypeNode = self._getFirstNodeByTagName(rowdom, "processorType", True)
 
         self._processorType = ProcessorType.newProcessorType(
-            processorTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(processorTypeNode)
         )
 
-        phasedArrayListNode = rowdom.getElementsByTagName("phasedArrayList")
-        if len(phasedArrayListNode) > 0:
+        phasedArrayListNode = self._getFirstNodeByTagName(
+            rowdom, "phasedArrayList", False
+        )
+        if phasedArrayListNode:
 
-            phasedArrayListStr = phasedArrayListNode[0].firstChild.data.strip()
+            phasedArrayListStr = self._getXMLNodeChildText(phasedArrayListNode)
 
             self._phasedArrayList = Parser.stringListToLists(
                 phasedArrayListStr, int, "ConfigDescription", False
@@ -422,23 +499,25 @@ class ConfigDescriptionRow:
 
             self._phasedArrayListExists = True
 
-        spectralTypeNode = rowdom.getElementsByTagName("spectralType")[0]
+        spectralTypeNode = self._getFirstNodeByTagName(rowdom, "spectralType", True)
 
         self._spectralType = SpectralResolutionType.newSpectralResolutionType(
-            spectralTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(spectralTypeNode)
         )
 
-        numAssocValuesNode = rowdom.getElementsByTagName("numAssocValues")
-        if len(numAssocValuesNode) > 0:
+        numAssocValuesNode = self._getFirstNodeByTagName(
+            rowdom, "numAssocValues", False
+        )
+        if numAssocValuesNode:
 
-            self._numAssocValues = int(numAssocValuesNode[0].firstChild.data.strip())
+            self._numAssocValues = int(self._getXMLNodeChildText(numAssocValuesNode))
 
             self._numAssocValuesExists = True
 
-        assocNatureNode = rowdom.getElementsByTagName("assocNature")
-        if len(assocNatureNode) > 0:
+        assocNatureNode = self._getFirstNodeByTagName(rowdom, "assocNature", False)
+        if assocNatureNode:
 
-            assocNatureStr = assocNatureNode[0].firstChild.data.strip()
+            assocNatureStr = self._getXMLNodeChildText(assocNatureNode)
             self._assocNature = Parser.stringListToLists(
                 assocNatureStr, SpectralResolutionType, "ConfigDescription", False
             )
@@ -447,22 +526,22 @@ class ConfigDescriptionRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        antennaIdStr = antennaIdNode.firstChild.data.strip()
+        antennaIdStr = self._getXMLNodeChildText(antennaIdNode)
 
         self._antennaId = Parser.stringListToLists(
             antennaIdStr, Tag, "ConfigDescription", True
         )
 
-        assocConfigDescriptionIdNode = rowdom.getElementsByTagName(
-            "assocConfigDescriptionId"
+        assocConfigDescriptionIdNode = self._getFirstNodeByTagName(
+            rowdom, "assocConfigDescriptionId", False
         )
-        if len(assocConfigDescriptionIdNode) > 0:
+        if assocConfigDescriptionIdNode:
 
-            assocConfigDescriptionIdStr = assocConfigDescriptionIdNode[
-                0
-            ].firstChild.data.strip()
+            assocConfigDescriptionIdStr = self._getXMLNodeChildText(
+                assocConfigDescriptionIdNode
+            )
 
             self._assocConfigDescriptionId = Parser.stringListToLists(
                 assocConfigDescriptionIdStr, Tag, "ConfigDescription", True
@@ -470,29 +549,31 @@ class ConfigDescriptionRow:
 
             self._assocConfigDescriptionIdExists = True
 
-        dataDescriptionIdNode = rowdom.getElementsByTagName("dataDescriptionId")[0]
+        dataDescriptionIdNode = self._getFirstNodeByTagName(
+            rowdom, "dataDescriptionId", True
+        )
 
-        dataDescriptionIdStr = dataDescriptionIdNode.firstChild.data.strip()
+        dataDescriptionIdStr = self._getXMLNodeChildText(dataDescriptionIdNode)
 
         self._dataDescriptionId = Parser.stringListToLists(
             dataDescriptionIdStr, Tag, "ConfigDescription", True
         )
 
-        feedIdNode = rowdom.getElementsByTagName("feedId")[0]
+        feedIdNode = self._getFirstNodeByTagName(rowdom, "feedId", True)
 
-        feedIdStr = feedIdNode.firstChild.data.strip()
+        feedIdStr = self._getXMLNodeChildText(feedIdNode)
 
         self._feedId = Parser.stringListToLists(
             feedIdStr, int, "ConfigDescription", False
         )
 
-        processorIdNode = rowdom.getElementsByTagName("processorId")[0]
+        processorIdNode = self._getFirstNodeByTagName(rowdom, "processorId", True)
 
-        self._processorId = Tag(processorIdNode.firstChild.data.strip())
+        self._processorId = Tag(self._getXMLNodeChildText(processorIdNode))
 
-        switchCycleIdNode = rowdom.getElementsByTagName("switchCycleId")[0]
+        switchCycleIdNode = self._getFirstNodeByTagName(rowdom, "switchCycleId", True)
 
-        switchCycleIdStr = switchCycleIdNode.firstChild.data.strip()
+        switchCycleIdStr = self._getXMLNodeChildText(switchCycleIdNode)
 
         self._switchCycleId = Parser.stringListToLists(
             switchCycleIdStr, Tag, "ConfigDescription", True
@@ -820,6 +901,7 @@ class ConfigDescriptionRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -840,6 +922,7 @@ class ConfigDescriptionRow:
         """
         Set numDataDescription with the specified int value.
         numDataDescription The int value to which numDataDescription is to be set.
+
 
 
         """
@@ -864,6 +947,7 @@ class ConfigDescriptionRow:
         numFeed The int value to which numFeed is to be set.
 
 
+
         """
 
         self._numFeed = int(numFeed)
@@ -884,6 +968,7 @@ class ConfigDescriptionRow:
         """
         Set correlationMode with the specified CorrelationMode value.
         correlationMode The CorrelationMode value to which correlationMode is to be set.
+
 
 
         """
@@ -907,6 +992,7 @@ class ConfigDescriptionRow:
         """
         Set configDescriptionId with the specified Tag value.
         configDescriptionId The Tag value to which configDescriptionId is to be set.
+
         The value of configDescriptionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -938,6 +1024,7 @@ class ConfigDescriptionRow:
         numAtmPhaseCorrection The int value to which numAtmPhaseCorrection is to be set.
 
 
+
         """
 
         self._numAtmPhaseCorrection = int(numAtmPhaseCorrection)
@@ -958,6 +1045,7 @@ class ConfigDescriptionRow:
         """
         Set atmPhaseCorrection with the specified AtmPhaseCorrection []  value.
         atmPhaseCorrection The AtmPhaseCorrection []  value to which atmPhaseCorrection is to be set.
+
 
 
         """
@@ -1003,6 +1091,7 @@ class ConfigDescriptionRow:
         processorType The ProcessorType value to which processorType is to be set.
 
 
+
         """
 
         self._processorType = ProcessorType(processorType)
@@ -1037,6 +1126,7 @@ class ConfigDescriptionRow:
         """
         Set phasedArrayList with the specified int []  value.
         phasedArrayList The int []  value to which phasedArrayList is to be set.
+
 
 
         """
@@ -1090,6 +1180,7 @@ class ConfigDescriptionRow:
         spectralType The SpectralResolutionType value to which spectralType is to be set.
 
 
+
         """
 
         self._spectralType = SpectralResolutionType(spectralType)
@@ -1124,6 +1215,7 @@ class ConfigDescriptionRow:
         """
         Set numAssocValues with the specified int value.
         numAssocValues The int value to which numAssocValues is to be set.
+
 
 
         """
@@ -1168,6 +1260,7 @@ class ConfigDescriptionRow:
         """
         Set assocNature with the specified SpectralResolutionType []  value.
         assocNature The SpectralResolutionType []  value to which assocNature is to be set.
+
 
 
         """
@@ -1221,6 +1314,7 @@ class ConfigDescriptionRow:
         """
         Set antennaId with the specified Tag []  value.
         antennaId The Tag []  value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1278,6 +1372,7 @@ class ConfigDescriptionRow:
         """
         Set assocConfigDescriptionId with the specified Tag []  value.
         assocConfigDescriptionId The Tag []  value to which assocConfigDescriptionId is to be set.
+
         The value of assocConfigDescriptionId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1329,6 +1424,7 @@ class ConfigDescriptionRow:
         """
         Set dataDescriptionId with the specified Tag []  value.
         dataDescriptionId The Tag []  value to which dataDescriptionId is to be set.
+
         The value of dataDescriptionId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1374,6 +1470,7 @@ class ConfigDescriptionRow:
         feedId The int []  value to which feedId is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1416,6 +1513,7 @@ class ConfigDescriptionRow:
         """
         Set processorId with the specified Tag value.
         processorId The Tag value to which processorId is to be set.
+
         The value of processorId can be anything allowed by the Tag constructor.
 
         """
@@ -1438,6 +1536,7 @@ class ConfigDescriptionRow:
         """
         Set switchCycleId with the specified Tag []  value.
         switchCycleId The Tag []  value to which switchCycleId is to be set.
+
         The value of switchCycleId can be anything allowed by the Tag []  constructor.
 
         """

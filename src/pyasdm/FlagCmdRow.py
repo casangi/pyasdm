@@ -63,6 +63,16 @@ class FlagCmdRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -132,27 +142,62 @@ class FlagCmdRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("type", self._type)
 
+        result += "\n   "
+
         result += Parser.valueToXML("reason", self._reason)
+
+        result += "\n   "
 
         result += Parser.valueToXML("level", self._level)
 
+        result += "\n   "
+
         result += Parser.valueToXML("severity", self._severity)
 
+        result += "\n   "
+
         result += Parser.valueToXML("applied", self._applied)
+
+        result += "\n   "
 
         result += Parser.valueToXML("command", self._command)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "FlagCmdTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -179,33 +224,35 @@ class FlagCmdRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        typeNode = rowdom.getElementsByTagName("type")[0]
+        typeNode = self._getFirstNodeByTagName(rowdom, "type", True)
 
-        self._type = str(typeNode.firstChild.data.strip())
+        self._type = str(self._getXMLNodeChildText(typeNode))
 
-        reasonNode = rowdom.getElementsByTagName("reason")[0]
+        reasonNode = self._getFirstNodeByTagName(rowdom, "reason", True)
 
-        self._reason = str(reasonNode.firstChild.data.strip())
+        self._reason = str(self._getXMLNodeChildText(reasonNode))
 
-        levelNode = rowdom.getElementsByTagName("level")[0]
+        levelNode = self._getFirstNodeByTagName(rowdom, "level", True)
 
-        self._level = int(levelNode.firstChild.data.strip())
+        self._level = int(self._getXMLNodeChildText(levelNode))
 
-        severityNode = rowdom.getElementsByTagName("severity")[0]
+        severityNode = self._getFirstNodeByTagName(rowdom, "severity", True)
 
-        self._severity = int(severityNode.firstChild.data.strip())
+        self._severity = int(self._getXMLNodeChildText(severityNode))
 
-        appliedNode = rowdom.getElementsByTagName("applied")[0]
+        appliedNode = self._getFirstNodeByTagName(rowdom, "applied", True)
 
-        self._applied = bool(appliedNode.firstChild.data.strip())
+        self._applied = bool(self._getXMLNodeChildText(appliedNode))
 
-        commandNode = rowdom.getElementsByTagName("command")[0]
+        commandNode = self._getFirstNodeByTagName(rowdom, "command", True)
 
-        self._command = str(commandNode.firstChild.data.strip())
+        self._command = str(self._getXMLNodeChildText(commandNode))
 
         # from link values, if any
 
@@ -343,6 +390,7 @@ class FlagCmdRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -374,6 +422,7 @@ class FlagCmdRow:
         type The str value to which type is to be set.
 
 
+
         """
 
         self._type = str(type)
@@ -394,6 +443,7 @@ class FlagCmdRow:
         """
         Set reason with the specified str value.
         reason The str value to which reason is to be set.
+
 
 
         """
@@ -418,6 +468,7 @@ class FlagCmdRow:
         level The int value to which level is to be set.
 
 
+
         """
 
         self._level = int(level)
@@ -438,6 +489,7 @@ class FlagCmdRow:
         """
         Set severity with the specified int value.
         severity The int value to which severity is to be set.
+
 
 
         """
@@ -462,6 +514,7 @@ class FlagCmdRow:
         applied The bool value to which applied is to be set.
 
 
+
         """
 
         self._applied = bool(applied)
@@ -482,6 +535,7 @@ class FlagCmdRow:
         """
         Set command with the specified str value.
         command The str value to which command is to be set.
+
 
 
         """

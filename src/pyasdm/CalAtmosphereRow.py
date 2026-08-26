@@ -75,6 +75,16 @@ class CalAtmosphereRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -111,7 +121,9 @@ class CalAtmosphereRow:
 
         self._numReceptor = 0
 
-        self._forwardEffSpectrum = []  # this is a list of float []  []
+        self._forwardEffSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._frequencyRange = []  # this is a list of Frequency []
 
@@ -125,9 +137,13 @@ class CalAtmosphereRow:
 
         self._polarizationTypes = []  # this is a list of PolarizationType []
 
-        self._powerSkySpectrum = []  # this is a list of float []  []
+        self._powerSkySpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
-        self._powerLoadSpectrum = []  # this is a list of float []  []  []
+        self._powerLoadSpectrum = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
         self._syscalType = SyscalMethod.from_int(0)
 
@@ -137,7 +153,9 @@ class CalAtmosphereRow:
 
         self._tSysSpectrum = []  # this is a list of Temperature []  []
 
-        self._tauSpectrum = []  # this is a list of float []  []
+        self._tauSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._tAtm = []  # this is a list of Temperature []
 
@@ -145,7 +163,7 @@ class CalAtmosphereRow:
 
         self._tSys = []  # this is a list of Temperature []
 
-        self._tau = []  # this is a list of float []
+        self._tau = []  # this is a list of float []  saved as single precision
 
         self._water = []  # this is a list of Length []
 
@@ -153,27 +171,35 @@ class CalAtmosphereRow:
 
         self._alphaSpectrumExists = False
 
-        self._alphaSpectrum = []  # this is a list of float []  []
+        self._alphaSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._forwardEfficiencyExists = False
 
-        self._forwardEfficiency = []  # this is a list of float []
+        self._forwardEfficiency = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._forwardEfficiencyErrorExists = False
 
-        self._forwardEfficiencyError = []  # this is a list of float []
+        self._forwardEfficiencyError = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._sbGainExists = False
 
-        self._sbGain = []  # this is a list of float []
+        self._sbGain = []  # this is a list of float []  saved as single precision
 
         self._sbGainErrorExists = False
 
-        self._sbGainError = []  # this is a list of float []
+        self._sbGainError = []  # this is a list of float []  saved as single precision
 
         self._sbGainSpectrumExists = False
 
-        self._sbGainSpectrum = []  # this is a list of float []  []
+        self._sbGainSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         # extrinsic attributes
 
@@ -346,115 +372,206 @@ class CalAtmosphereRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numFreq", self._numFreq)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numLoad", self._numLoad)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
-        result += Parser.listValueToXML("forwardEffSpectrum", self._forwardEffSpectrum)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML(
+            "forwardEffSpectrum", self._forwardEffSpectrum
+        )
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("groundPressure", self._groundPressure)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "groundRelHumidity", self._groundRelHumidity
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML(
             "frequencySpectrum", self._frequencySpectrum
         )
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "groundTemperature", self._groundTemperature
         )
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
-        result += Parser.listValueToXML("powerSkySpectrum", self._powerSkySpectrum)
+        result += "\n   "
 
-        result += Parser.listValueToXML("powerLoadSpectrum", self._powerLoadSpectrum)
+        result += Parser.floatListValueToXML("powerSkySpectrum", self._powerSkySpectrum)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML(
+            "powerLoadSpectrum", self._powerLoadSpectrum
+        )
+
+        result += "\n   "
 
         result += Parser.valueToXML("syscalType", SyscalMethod.name(self._syscalType))
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("tAtmSpectrum", self._tAtmSpectrum)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("tRecSpectrum", self._tRecSpectrum)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("tSysSpectrum", self._tSysSpectrum)
 
-        result += Parser.listValueToXML("tauSpectrum", self._tauSpectrum)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("tauSpectrum", self._tauSpectrum)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("tAtm", self._tAtm)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("tRec", self._tRec)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("tSys", self._tSys)
 
-        result += Parser.listValueToXML("tau", self._tau)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("tau", self._tau)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("water", self._water)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("waterError", self._waterError)
 
         if self._alphaSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("alphaSpectrum", self._alphaSpectrum)
+            result += Parser.floatListValueToXML("alphaSpectrum", self._alphaSpectrum)
 
         if self._forwardEfficiencyExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "forwardEfficiency", self._forwardEfficiency
             )
 
         if self._forwardEfficiencyErrorExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.doubleListValueToXML(
                 "forwardEfficiencyError", self._forwardEfficiencyError
             )
 
         if self._sbGainExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("sbGain", self._sbGain)
+            result += Parser.floatListValueToXML("sbGain", self._sbGain)
 
         if self._sbGainErrorExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("sbGainError", self._sbGainError)
+            result += Parser.floatListValueToXML("sbGainError", self._sbGainError)
 
         if self._sbGainSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("sbGainSpectrum", self._sbGainSpectrum)
+            result += Parser.floatListValueToXML("sbGainSpectrum", self._sbGainSpectrum)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalAtmosphereTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -481,191 +598,205 @@ class CalAtmosphereRow:
 
         # intrinsic attribute values
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", True)
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        numFreqNode = rowdom.getElementsByTagName("numFreq")[0]
+        numFreqNode = self._getFirstNodeByTagName(rowdom, "numFreq", True)
 
-        self._numFreq = int(numFreqNode.firstChild.data.strip())
+        self._numFreq = int(self._getXMLNodeChildText(numFreqNode))
 
-        numLoadNode = rowdom.getElementsByTagName("numLoad")[0]
+        numLoadNode = self._getFirstNodeByTagName(rowdom, "numLoad", True)
 
-        self._numLoad = int(numLoadNode.firstChild.data.strip())
+        self._numLoad = int(self._getXMLNodeChildText(numLoadNode))
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        forwardEffSpectrumNode = rowdom.getElementsByTagName("forwardEffSpectrum")[0]
+        forwardEffSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "forwardEffSpectrum", True
+        )
 
-        forwardEffSpectrumStr = forwardEffSpectrumNode.firstChild.data.strip()
+        forwardEffSpectrumStr = self._getXMLNodeChildText(forwardEffSpectrumNode)
 
         self._forwardEffSpectrum = Parser.stringListToLists(
             forwardEffSpectrumStr, float, "CalAtmosphere", False
         )
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalAtmosphere", True
         )
 
-        groundPressureNode = rowdom.getElementsByTagName("groundPressure")[0]
+        groundPressureNode = self._getFirstNodeByTagName(rowdom, "groundPressure", True)
 
-        self._groundPressure = Pressure(groundPressureNode.firstChild.data.strip())
+        self._groundPressure = Pressure(self._getXMLNodeChildText(groundPressureNode))
 
-        groundRelHumidityNode = rowdom.getElementsByTagName("groundRelHumidity")[0]
-
-        self._groundRelHumidity = Humidity(
-            groundRelHumidityNode.firstChild.data.strip()
+        groundRelHumidityNode = self._getFirstNodeByTagName(
+            rowdom, "groundRelHumidity", True
         )
 
-        frequencySpectrumNode = rowdom.getElementsByTagName("frequencySpectrum")[0]
+        self._groundRelHumidity = Humidity(
+            self._getXMLNodeChildText(groundRelHumidityNode)
+        )
 
-        frequencySpectrumStr = frequencySpectrumNode.firstChild.data.strip()
+        frequencySpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "frequencySpectrum", True
+        )
+
+        frequencySpectrumStr = self._getXMLNodeChildText(frequencySpectrumNode)
 
         self._frequencySpectrum = Parser.stringListToLists(
             frequencySpectrumStr, Frequency, "CalAtmosphere", True
         )
 
-        groundTemperatureNode = rowdom.getElementsByTagName("groundTemperature")[0]
-
-        self._groundTemperature = Temperature(
-            groundTemperatureNode.firstChild.data.strip()
+        groundTemperatureNode = self._getFirstNodeByTagName(
+            rowdom, "groundTemperature", True
         )
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        self._groundTemperature = Temperature(
+            self._getXMLNodeChildText(groundTemperatureNode)
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
+
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalAtmosphere", False
         )
 
-        powerSkySpectrumNode = rowdom.getElementsByTagName("powerSkySpectrum")[0]
+        powerSkySpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "powerSkySpectrum", True
+        )
 
-        powerSkySpectrumStr = powerSkySpectrumNode.firstChild.data.strip()
+        powerSkySpectrumStr = self._getXMLNodeChildText(powerSkySpectrumNode)
 
         self._powerSkySpectrum = Parser.stringListToLists(
             powerSkySpectrumStr, float, "CalAtmosphere", False
         )
 
-        powerLoadSpectrumNode = rowdom.getElementsByTagName("powerLoadSpectrum")[0]
+        powerLoadSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "powerLoadSpectrum", True
+        )
 
-        powerLoadSpectrumStr = powerLoadSpectrumNode.firstChild.data.strip()
+        powerLoadSpectrumStr = self._getXMLNodeChildText(powerLoadSpectrumNode)
 
         self._powerLoadSpectrum = Parser.stringListToLists(
             powerLoadSpectrumStr, float, "CalAtmosphere", False
         )
 
-        syscalTypeNode = rowdom.getElementsByTagName("syscalType")[0]
+        syscalTypeNode = self._getFirstNodeByTagName(rowdom, "syscalType", True)
 
         self._syscalType = SyscalMethod.newSyscalMethod(
-            syscalTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(syscalTypeNode)
         )
 
-        tAtmSpectrumNode = rowdom.getElementsByTagName("tAtmSpectrum")[0]
+        tAtmSpectrumNode = self._getFirstNodeByTagName(rowdom, "tAtmSpectrum", True)
 
-        tAtmSpectrumStr = tAtmSpectrumNode.firstChild.data.strip()
+        tAtmSpectrumStr = self._getXMLNodeChildText(tAtmSpectrumNode)
 
         self._tAtmSpectrum = Parser.stringListToLists(
             tAtmSpectrumStr, Temperature, "CalAtmosphere", True
         )
 
-        tRecSpectrumNode = rowdom.getElementsByTagName("tRecSpectrum")[0]
+        tRecSpectrumNode = self._getFirstNodeByTagName(rowdom, "tRecSpectrum", True)
 
-        tRecSpectrumStr = tRecSpectrumNode.firstChild.data.strip()
+        tRecSpectrumStr = self._getXMLNodeChildText(tRecSpectrumNode)
 
         self._tRecSpectrum = Parser.stringListToLists(
             tRecSpectrumStr, Temperature, "CalAtmosphere", True
         )
 
-        tSysSpectrumNode = rowdom.getElementsByTagName("tSysSpectrum")[0]
+        tSysSpectrumNode = self._getFirstNodeByTagName(rowdom, "tSysSpectrum", True)
 
-        tSysSpectrumStr = tSysSpectrumNode.firstChild.data.strip()
+        tSysSpectrumStr = self._getXMLNodeChildText(tSysSpectrumNode)
 
         self._tSysSpectrum = Parser.stringListToLists(
             tSysSpectrumStr, Temperature, "CalAtmosphere", True
         )
 
-        tauSpectrumNode = rowdom.getElementsByTagName("tauSpectrum")[0]
+        tauSpectrumNode = self._getFirstNodeByTagName(rowdom, "tauSpectrum", True)
 
-        tauSpectrumStr = tauSpectrumNode.firstChild.data.strip()
+        tauSpectrumStr = self._getXMLNodeChildText(tauSpectrumNode)
 
         self._tauSpectrum = Parser.stringListToLists(
             tauSpectrumStr, float, "CalAtmosphere", False
         )
 
-        tAtmNode = rowdom.getElementsByTagName("tAtm")[0]
+        tAtmNode = self._getFirstNodeByTagName(rowdom, "tAtm", True)
 
-        tAtmStr = tAtmNode.firstChild.data.strip()
+        tAtmStr = self._getXMLNodeChildText(tAtmNode)
 
         self._tAtm = Parser.stringListToLists(
             tAtmStr, Temperature, "CalAtmosphere", True
         )
 
-        tRecNode = rowdom.getElementsByTagName("tRec")[0]
+        tRecNode = self._getFirstNodeByTagName(rowdom, "tRec", True)
 
-        tRecStr = tRecNode.firstChild.data.strip()
+        tRecStr = self._getXMLNodeChildText(tRecNode)
 
         self._tRec = Parser.stringListToLists(
             tRecStr, Temperature, "CalAtmosphere", True
         )
 
-        tSysNode = rowdom.getElementsByTagName("tSys")[0]
+        tSysNode = self._getFirstNodeByTagName(rowdom, "tSys", True)
 
-        tSysStr = tSysNode.firstChild.data.strip()
+        tSysStr = self._getXMLNodeChildText(tSysNode)
 
         self._tSys = Parser.stringListToLists(
             tSysStr, Temperature, "CalAtmosphere", True
         )
 
-        tauNode = rowdom.getElementsByTagName("tau")[0]
+        tauNode = self._getFirstNodeByTagName(rowdom, "tau", True)
 
-        tauStr = tauNode.firstChild.data.strip()
+        tauStr = self._getXMLNodeChildText(tauNode)
 
         self._tau = Parser.stringListToLists(tauStr, float, "CalAtmosphere", False)
 
-        waterNode = rowdom.getElementsByTagName("water")[0]
+        waterNode = self._getFirstNodeByTagName(rowdom, "water", True)
 
-        waterStr = waterNode.firstChild.data.strip()
+        waterStr = self._getXMLNodeChildText(waterNode)
 
         self._water = Parser.stringListToLists(waterStr, Length, "CalAtmosphere", True)
 
-        waterErrorNode = rowdom.getElementsByTagName("waterError")[0]
+        waterErrorNode = self._getFirstNodeByTagName(rowdom, "waterError", True)
 
-        waterErrorStr = waterErrorNode.firstChild.data.strip()
+        waterErrorStr = self._getXMLNodeChildText(waterErrorNode)
 
         self._waterError = Parser.stringListToLists(
             waterErrorStr, Length, "CalAtmosphere", True
         )
 
-        alphaSpectrumNode = rowdom.getElementsByTagName("alphaSpectrum")
-        if len(alphaSpectrumNode) > 0:
+        alphaSpectrumNode = self._getFirstNodeByTagName(rowdom, "alphaSpectrum", False)
+        if alphaSpectrumNode:
 
-            alphaSpectrumStr = alphaSpectrumNode[0].firstChild.data.strip()
+            alphaSpectrumStr = self._getXMLNodeChildText(alphaSpectrumNode)
 
             self._alphaSpectrum = Parser.stringListToLists(
                 alphaSpectrumStr, float, "CalAtmosphere", False
@@ -673,10 +804,12 @@ class CalAtmosphereRow:
 
             self._alphaSpectrumExists = True
 
-        forwardEfficiencyNode = rowdom.getElementsByTagName("forwardEfficiency")
-        if len(forwardEfficiencyNode) > 0:
+        forwardEfficiencyNode = self._getFirstNodeByTagName(
+            rowdom, "forwardEfficiency", False
+        )
+        if forwardEfficiencyNode:
 
-            forwardEfficiencyStr = forwardEfficiencyNode[0].firstChild.data.strip()
+            forwardEfficiencyStr = self._getXMLNodeChildText(forwardEfficiencyNode)
 
             self._forwardEfficiency = Parser.stringListToLists(
                 forwardEfficiencyStr, float, "CalAtmosphere", False
@@ -684,14 +817,14 @@ class CalAtmosphereRow:
 
             self._forwardEfficiencyExists = True
 
-        forwardEfficiencyErrorNode = rowdom.getElementsByTagName(
-            "forwardEfficiencyError"
+        forwardEfficiencyErrorNode = self._getFirstNodeByTagName(
+            rowdom, "forwardEfficiencyError", False
         )
-        if len(forwardEfficiencyErrorNode) > 0:
+        if forwardEfficiencyErrorNode:
 
-            forwardEfficiencyErrorStr = forwardEfficiencyErrorNode[
-                0
-            ].firstChild.data.strip()
+            forwardEfficiencyErrorStr = self._getXMLNodeChildText(
+                forwardEfficiencyErrorNode
+            )
 
             self._forwardEfficiencyError = Parser.stringListToLists(
                 forwardEfficiencyErrorStr, float, "CalAtmosphere", False
@@ -699,10 +832,10 @@ class CalAtmosphereRow:
 
             self._forwardEfficiencyErrorExists = True
 
-        sbGainNode = rowdom.getElementsByTagName("sbGain")
-        if len(sbGainNode) > 0:
+        sbGainNode = self._getFirstNodeByTagName(rowdom, "sbGain", False)
+        if sbGainNode:
 
-            sbGainStr = sbGainNode[0].firstChild.data.strip()
+            sbGainStr = self._getXMLNodeChildText(sbGainNode)
 
             self._sbGain = Parser.stringListToLists(
                 sbGainStr, float, "CalAtmosphere", False
@@ -710,10 +843,10 @@ class CalAtmosphereRow:
 
             self._sbGainExists = True
 
-        sbGainErrorNode = rowdom.getElementsByTagName("sbGainError")
-        if len(sbGainErrorNode) > 0:
+        sbGainErrorNode = self._getFirstNodeByTagName(rowdom, "sbGainError", False)
+        if sbGainErrorNode:
 
-            sbGainErrorStr = sbGainErrorNode[0].firstChild.data.strip()
+            sbGainErrorStr = self._getXMLNodeChildText(sbGainErrorNode)
 
             self._sbGainError = Parser.stringListToLists(
                 sbGainErrorStr, float, "CalAtmosphere", False
@@ -721,10 +854,12 @@ class CalAtmosphereRow:
 
             self._sbGainErrorExists = True
 
-        sbGainSpectrumNode = rowdom.getElementsByTagName("sbGainSpectrum")
-        if len(sbGainSpectrumNode) > 0:
+        sbGainSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "sbGainSpectrum", False
+        )
+        if sbGainSpectrumNode:
 
-            sbGainSpectrumStr = sbGainSpectrumNode[0].firstChild.data.strip()
+            sbGainSpectrumStr = self._getXMLNodeChildText(sbGainSpectrumNode)
 
             self._sbGainSpectrum = Parser.stringListToLists(
                 sbGainSpectrumStr, float, "CalAtmosphere", False
@@ -734,13 +869,13 @@ class CalAtmosphereRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -891,7 +1026,7 @@ class CalAtmosphereRow:
             eos.writeInt(len(self._forwardEfficiencyError))
             for i in range(len(self._forwardEfficiencyError)):
 
-                eos.writeFloat(self._forwardEfficiencyError[i])
+                eos.writeDouble(self._forwardEfficiencyError[i])
 
         eos.writeBool(self._sbGainExists)
         if self._sbGainExists:
@@ -1260,7 +1395,7 @@ class CalAtmosphereRow:
             forwardEfficiencyErrorDim1 = eis.readInt()
             thisList = []
             for i in range(forwardEfficiencyErrorDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._forwardEfficiencyError = thisList
 
@@ -1407,6 +1542,7 @@ class CalAtmosphereRow:
         receiverBand The ReceiverBand value to which receiverBand is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1434,6 +1570,7 @@ class CalAtmosphereRow:
         """
         Set antennaName with the specified str value.
         antennaName The str value to which antennaName is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1465,6 +1602,7 @@ class CalAtmosphereRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1493,6 +1631,7 @@ class CalAtmosphereRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1516,6 +1655,7 @@ class CalAtmosphereRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1540,6 +1680,7 @@ class CalAtmosphereRow:
         numFreq The int value to which numFreq is to be set.
 
 
+
         """
 
         self._numFreq = int(numFreq)
@@ -1560,6 +1701,7 @@ class CalAtmosphereRow:
         """
         Set numLoad with the specified int value.
         numLoad The int value to which numLoad is to be set.
+
 
 
         """
@@ -1584,6 +1726,7 @@ class CalAtmosphereRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1604,6 +1747,9 @@ class CalAtmosphereRow:
         """
         Set forwardEffSpectrum with the specified float []  []  value.
         forwardEffSpectrum The float []  []  value to which forwardEffSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1647,6 +1793,7 @@ class CalAtmosphereRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1691,6 +1838,7 @@ class CalAtmosphereRow:
         """
         Set groundPressure with the specified Pressure value.
         groundPressure The Pressure value to which groundPressure is to be set.
+
         The value of groundPressure can be anything allowed by the Pressure constructor.
 
         """
@@ -1714,6 +1862,7 @@ class CalAtmosphereRow:
         """
         Set groundRelHumidity with the specified Humidity value.
         groundRelHumidity The Humidity value to which groundRelHumidity is to be set.
+
         The value of groundRelHumidity can be anything allowed by the Humidity constructor.
 
         """
@@ -1736,6 +1885,7 @@ class CalAtmosphereRow:
         """
         Set frequencySpectrum with the specified Frequency []  value.
         frequencySpectrum The Frequency []  value to which frequencySpectrum is to be set.
+
         The value of frequencySpectrum can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1780,6 +1930,7 @@ class CalAtmosphereRow:
         """
         Set groundTemperature with the specified Temperature value.
         groundTemperature The Temperature value to which groundTemperature is to be set.
+
         The value of groundTemperature can be anything allowed by the Temperature constructor.
 
         """
@@ -1802,6 +1953,7 @@ class CalAtmosphereRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1846,6 +1998,9 @@ class CalAtmosphereRow:
         Set powerSkySpectrum with the specified float []  []  value.
         powerSkySpectrum The float []  []  value to which powerSkySpectrum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1888,6 +2043,9 @@ class CalAtmosphereRow:
         """
         Set powerLoadSpectrum with the specified float []  []  []  value.
         powerLoadSpectrum The float []  []  []  value to which powerLoadSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1933,6 +2091,7 @@ class CalAtmosphereRow:
         syscalType The SyscalMethod value to which syscalType is to be set.
 
 
+
         """
 
         self._syscalType = SyscalMethod(syscalType)
@@ -1953,6 +2112,7 @@ class CalAtmosphereRow:
         """
         Set tAtmSpectrum with the specified Temperature []  []  value.
         tAtmSpectrum The Temperature []  []  value to which tAtmSpectrum is to be set.
+
         The value of tAtmSpectrum can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -1996,6 +2156,7 @@ class CalAtmosphereRow:
         """
         Set tRecSpectrum with the specified Temperature []  []  value.
         tRecSpectrum The Temperature []  []  value to which tRecSpectrum is to be set.
+
         The value of tRecSpectrum can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -2039,6 +2200,7 @@ class CalAtmosphereRow:
         """
         Set tSysSpectrum with the specified Temperature []  []  value.
         tSysSpectrum The Temperature []  []  value to which tSysSpectrum is to be set.
+
         The value of tSysSpectrum can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -2083,6 +2245,9 @@ class CalAtmosphereRow:
         Set tauSpectrum with the specified float []  []  value.
         tauSpectrum The float []  []  value to which tauSpectrum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -2125,6 +2290,7 @@ class CalAtmosphereRow:
         """
         Set tAtm with the specified Temperature []  value.
         tAtm The Temperature []  value to which tAtm is to be set.
+
         The value of tAtm can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2168,6 +2334,7 @@ class CalAtmosphereRow:
         """
         Set tRec with the specified Temperature []  value.
         tRec The Temperature []  value to which tRec is to be set.
+
         The value of tRec can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2211,6 +2378,7 @@ class CalAtmosphereRow:
         """
         Set tSys with the specified Temperature []  value.
         tSys The Temperature []  value to which tSys is to be set.
+
         The value of tSys can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2255,6 +2423,9 @@ class CalAtmosphereRow:
         Set tau with the specified float []  value.
         tau The float []  value to which tau is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -2297,6 +2468,7 @@ class CalAtmosphereRow:
         """
         Set water with the specified Length []  value.
         water The Length []  value to which water is to be set.
+
         The value of water can be anything allowed by the Length []  constructor.
 
         """
@@ -2340,6 +2512,7 @@ class CalAtmosphereRow:
         """
         Set waterError with the specified Length []  value.
         waterError The Length []  value to which waterError is to be set.
+
         The value of waterError can be anything allowed by the Length []  constructor.
 
         """
@@ -2397,6 +2570,9 @@ class CalAtmosphereRow:
         """
         Set alphaSpectrum with the specified float []  []  value.
         alphaSpectrum The float []  []  value to which alphaSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -2463,6 +2639,9 @@ class CalAtmosphereRow:
         Set forwardEfficiency with the specified float []  value.
         forwardEfficiency The float []  value to which forwardEfficiency is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -2527,6 +2706,9 @@ class CalAtmosphereRow:
         """
         Set forwardEfficiencyError with the specified float []  value.
         forwardEfficiencyError The float []  value to which forwardEfficiencyError is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -2593,6 +2775,9 @@ class CalAtmosphereRow:
         Set sbGain with the specified float []  value.
         sbGain The float []  value to which sbGain is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -2657,6 +2842,9 @@ class CalAtmosphereRow:
         """
         Set sbGainError with the specified float []  value.
         sbGainError The float []  value to which sbGainError is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -2723,6 +2911,9 @@ class CalAtmosphereRow:
         Set sbGainSpectrum with the specified float []  []  value.
         sbGainSpectrum The float []  []  value to which sbGainSpectrum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -2776,6 +2967,7 @@ class CalAtmosphereRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -2806,6 +2998,7 @@ class CalAtmosphereRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

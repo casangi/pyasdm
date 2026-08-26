@@ -63,6 +63,16 @@ class WeatherRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -285,77 +295,116 @@ class WeatherRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
         if self._pressureExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("pressure", self._pressure)
 
         if self._relHumidityExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("relHumidity", self._relHumidity)
 
         if self._temperatureExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("temperature", self._temperature)
 
         if self._windDirectionExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("windDirection", self._windDirection)
 
         if self._windSpeedExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("windSpeed", self._windSpeed)
 
         if self._windMaxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("windMax", self._windMax)
 
         if self._dewPointExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("dewPoint", self._dewPoint)
 
         if self._numLayerExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numLayer", self._numLayer)
 
         if self._layerHeightExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("layerHeight", self._layerHeight)
 
         if self._temperatureProfileExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "temperatureProfile", self._temperatureProfile
             )
 
         if self._cloudMonitorExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("cloudMonitor", self._cloudMonitor)
 
         if self._numWVRExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numWVR", self._numWVR)
 
         if self._wvrTempExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("wvrTemp", self._wvrTemp)
 
         if self._waterExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("water", self._water)
+            result += Parser.doubleValueToXML("water", self._water)
 
         # extrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("stationId", self._stationId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "WeatherTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -382,70 +431,72 @@ class WeatherRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        pressureNode = rowdom.getElementsByTagName("pressure")
-        if len(pressureNode) > 0:
+        pressureNode = self._getFirstNodeByTagName(rowdom, "pressure", False)
+        if pressureNode:
 
-            self._pressure = Pressure(pressureNode[0].firstChild.data.strip())
+            self._pressure = Pressure(self._getXMLNodeChildText(pressureNode))
 
             self._pressureExists = True
 
-        relHumidityNode = rowdom.getElementsByTagName("relHumidity")
-        if len(relHumidityNode) > 0:
+        relHumidityNode = self._getFirstNodeByTagName(rowdom, "relHumidity", False)
+        if relHumidityNode:
 
-            self._relHumidity = Humidity(relHumidityNode[0].firstChild.data.strip())
+            self._relHumidity = Humidity(self._getXMLNodeChildText(relHumidityNode))
 
             self._relHumidityExists = True
 
-        temperatureNode = rowdom.getElementsByTagName("temperature")
-        if len(temperatureNode) > 0:
+        temperatureNode = self._getFirstNodeByTagName(rowdom, "temperature", False)
+        if temperatureNode:
 
-            self._temperature = Temperature(temperatureNode[0].firstChild.data.strip())
+            self._temperature = Temperature(self._getXMLNodeChildText(temperatureNode))
 
             self._temperatureExists = True
 
-        windDirectionNode = rowdom.getElementsByTagName("windDirection")
-        if len(windDirectionNode) > 0:
+        windDirectionNode = self._getFirstNodeByTagName(rowdom, "windDirection", False)
+        if windDirectionNode:
 
-            self._windDirection = Angle(windDirectionNode[0].firstChild.data.strip())
+            self._windDirection = Angle(self._getXMLNodeChildText(windDirectionNode))
 
             self._windDirectionExists = True
 
-        windSpeedNode = rowdom.getElementsByTagName("windSpeed")
-        if len(windSpeedNode) > 0:
+        windSpeedNode = self._getFirstNodeByTagName(rowdom, "windSpeed", False)
+        if windSpeedNode:
 
-            self._windSpeed = Speed(windSpeedNode[0].firstChild.data.strip())
+            self._windSpeed = Speed(self._getXMLNodeChildText(windSpeedNode))
 
             self._windSpeedExists = True
 
-        windMaxNode = rowdom.getElementsByTagName("windMax")
-        if len(windMaxNode) > 0:
+        windMaxNode = self._getFirstNodeByTagName(rowdom, "windMax", False)
+        if windMaxNode:
 
-            self._windMax = Speed(windMaxNode[0].firstChild.data.strip())
+            self._windMax = Speed(self._getXMLNodeChildText(windMaxNode))
 
             self._windMaxExists = True
 
-        dewPointNode = rowdom.getElementsByTagName("dewPoint")
-        if len(dewPointNode) > 0:
+        dewPointNode = self._getFirstNodeByTagName(rowdom, "dewPoint", False)
+        if dewPointNode:
 
-            self._dewPoint = Temperature(dewPointNode[0].firstChild.data.strip())
+            self._dewPoint = Temperature(self._getXMLNodeChildText(dewPointNode))
 
             self._dewPointExists = True
 
-        numLayerNode = rowdom.getElementsByTagName("numLayer")
-        if len(numLayerNode) > 0:
+        numLayerNode = self._getFirstNodeByTagName(rowdom, "numLayer", False)
+        if numLayerNode:
 
-            self._numLayer = int(numLayerNode[0].firstChild.data.strip())
+            self._numLayer = int(self._getXMLNodeChildText(numLayerNode))
 
             self._numLayerExists = True
 
-        layerHeightNode = rowdom.getElementsByTagName("layerHeight")
-        if len(layerHeightNode) > 0:
+        layerHeightNode = self._getFirstNodeByTagName(rowdom, "layerHeight", False)
+        if layerHeightNode:
 
-            layerHeightStr = layerHeightNode[0].firstChild.data.strip()
+            layerHeightStr = self._getXMLNodeChildText(layerHeightNode)
 
             self._layerHeight = Parser.stringListToLists(
                 layerHeightStr, Length, "Weather", True
@@ -453,10 +504,12 @@ class WeatherRow:
 
             self._layerHeightExists = True
 
-        temperatureProfileNode = rowdom.getElementsByTagName("temperatureProfile")
-        if len(temperatureProfileNode) > 0:
+        temperatureProfileNode = self._getFirstNodeByTagName(
+            rowdom, "temperatureProfile", False
+        )
+        if temperatureProfileNode:
 
-            temperatureProfileStr = temperatureProfileNode[0].firstChild.data.strip()
+            temperatureProfileStr = self._getXMLNodeChildText(temperatureProfileNode)
 
             self._temperatureProfile = Parser.stringListToLists(
                 temperatureProfileStr, Temperature, "Weather", True
@@ -464,26 +517,26 @@ class WeatherRow:
 
             self._temperatureProfileExists = True
 
-        cloudMonitorNode = rowdom.getElementsByTagName("cloudMonitor")
-        if len(cloudMonitorNode) > 0:
+        cloudMonitorNode = self._getFirstNodeByTagName(rowdom, "cloudMonitor", False)
+        if cloudMonitorNode:
 
             self._cloudMonitor = Temperature(
-                cloudMonitorNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(cloudMonitorNode)
             )
 
             self._cloudMonitorExists = True
 
-        numWVRNode = rowdom.getElementsByTagName("numWVR")
-        if len(numWVRNode) > 0:
+        numWVRNode = self._getFirstNodeByTagName(rowdom, "numWVR", False)
+        if numWVRNode:
 
-            self._numWVR = int(numWVRNode[0].firstChild.data.strip())
+            self._numWVR = int(self._getXMLNodeChildText(numWVRNode))
 
             self._numWVRExists = True
 
-        wvrTempNode = rowdom.getElementsByTagName("wvrTemp")
-        if len(wvrTempNode) > 0:
+        wvrTempNode = self._getFirstNodeByTagName(rowdom, "wvrTemp", False)
+        if wvrTempNode:
 
-            wvrTempStr = wvrTempNode[0].firstChild.data.strip()
+            wvrTempStr = self._getXMLNodeChildText(wvrTempNode)
 
             self._wvrTemp = Parser.stringListToLists(
                 wvrTempStr, Temperature, "Weather", True
@@ -491,18 +544,18 @@ class WeatherRow:
 
             self._wvrTempExists = True
 
-        waterNode = rowdom.getElementsByTagName("water")
-        if len(waterNode) > 0:
+        waterNode = self._getFirstNodeByTagName(rowdom, "water", False)
+        if waterNode:
 
-            self._water = float(waterNode[0].firstChild.data.strip())
+            self._water = float(self._getXMLNodeChildText(waterNode))
 
             self._waterExists = True
 
         # extrinsic attribute values
 
-        stationIdNode = rowdom.getElementsByTagName("stationId")[0]
+        stationIdNode = self._getFirstNodeByTagName(rowdom, "stationId", True)
 
-        self._stationId = Tag(stationIdNode.firstChild.data.strip())
+        self._stationId = Tag(self._getXMLNodeChildText(stationIdNode))
 
         # from link values, if any
 
@@ -583,7 +636,7 @@ class WeatherRow:
         eos.writeBool(self._waterExists)
         if self._waterExists:
 
-            eos.writeFloat(self._water)
+            eos.writeDouble(self._water)
 
     @staticmethod
     def stationIdFromBin(row, eis):
@@ -739,7 +792,7 @@ class WeatherRow:
         row._waterExists = eis.readBool()
         if row._waterExists:
 
-            row._water = eis.readFloat()
+            row._water = eis.readDouble()
 
     @staticmethod
     def initFromBinMethods():
@@ -810,6 +863,7 @@ class WeatherRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -854,6 +908,7 @@ class WeatherRow:
         """
         Set pressure with the specified Pressure value.
         pressure The Pressure value to which pressure is to be set.
+
         The value of pressure can be anything allowed by the Pressure constructor.
 
         """
@@ -899,6 +954,7 @@ class WeatherRow:
         """
         Set relHumidity with the specified Humidity value.
         relHumidity The Humidity value to which relHumidity is to be set.
+
         The value of relHumidity can be anything allowed by the Humidity constructor.
 
         """
@@ -944,6 +1000,7 @@ class WeatherRow:
         """
         Set temperature with the specified Temperature value.
         temperature The Temperature value to which temperature is to be set.
+
         The value of temperature can be anything allowed by the Temperature constructor.
 
         """
@@ -989,6 +1046,7 @@ class WeatherRow:
         """
         Set windDirection with the specified Angle value.
         windDirection The Angle value to which windDirection is to be set.
+
         The value of windDirection can be anything allowed by the Angle constructor.
 
         """
@@ -1034,6 +1092,7 @@ class WeatherRow:
         """
         Set windSpeed with the specified Speed value.
         windSpeed The Speed value to which windSpeed is to be set.
+
         The value of windSpeed can be anything allowed by the Speed constructor.
 
         """
@@ -1079,6 +1138,7 @@ class WeatherRow:
         """
         Set windMax with the specified Speed value.
         windMax The Speed value to which windMax is to be set.
+
         The value of windMax can be anything allowed by the Speed constructor.
 
         """
@@ -1124,6 +1184,7 @@ class WeatherRow:
         """
         Set dewPoint with the specified Temperature value.
         dewPoint The Temperature value to which dewPoint is to be set.
+
         The value of dewPoint can be anything allowed by the Temperature constructor.
 
         """
@@ -1170,6 +1231,7 @@ class WeatherRow:
         numLayer The int value to which numLayer is to be set.
 
 
+
         """
 
         self._numLayer = int(numLayer)
@@ -1212,6 +1274,7 @@ class WeatherRow:
         """
         Set layerHeight with the specified Length []  value.
         layerHeight The Length []  value to which layerHeight is to be set.
+
         The value of layerHeight can be anything allowed by the Length []  constructor.
 
         """
@@ -1277,6 +1340,7 @@ class WeatherRow:
         """
         Set temperatureProfile with the specified Temperature []  value.
         temperatureProfile The Temperature []  value to which temperatureProfile is to be set.
+
         The value of temperatureProfile can be anything allowed by the Temperature []  constructor.
 
         """
@@ -1343,6 +1407,7 @@ class WeatherRow:
         """
         Set cloudMonitor with the specified Temperature value.
         cloudMonitor The Temperature value to which cloudMonitor is to be set.
+
         The value of cloudMonitor can be anything allowed by the Temperature constructor.
 
         """
@@ -1389,6 +1454,7 @@ class WeatherRow:
         numWVR The int value to which numWVR is to be set.
 
 
+
         """
 
         self._numWVR = int(numWVR)
@@ -1431,6 +1497,7 @@ class WeatherRow:
         """
         Set wvrTemp with the specified Temperature []  value.
         wvrTemp The Temperature []  value to which wvrTemp is to be set.
+
         The value of wvrTemp can be anything allowed by the Temperature []  constructor.
 
         """
@@ -1497,6 +1564,9 @@ class WeatherRow:
         Set water with the specified float value.
         water The float value to which water is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1529,6 +1599,7 @@ class WeatherRow:
         """
         Set stationId with the specified Tag value.
         stationId The Tag value to which stationId is to be set.
+
         The value of stationId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

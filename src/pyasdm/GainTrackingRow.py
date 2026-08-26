@@ -66,6 +66,16 @@ class GainTrackingRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -90,7 +100,7 @@ class GainTrackingRow:
 
         self._numReceptor = 0
 
-        self._attenuator = []  # this is a list of float []
+        self._attenuator = []  # this is a list of float []  saved as single precision
 
         self._polarizationType = []  # this is a list of PolarizationType []
 
@@ -104,7 +114,7 @@ class GainTrackingRow:
 
         self._attFreqExists = False
 
-        self._attFreq = []  # this is a list of float []
+        self._attFreq = []  # this is a list of float []  saved as double precision
 
         self._attSpectrumExists = False
 
@@ -189,45 +199,84 @@ class GainTrackingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
-        result += Parser.listValueToXML("attenuator", self._attenuator)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("attenuator", self._attenuator)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("polarizationType", self._polarizationType)
 
         if self._samplingLevelExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("samplingLevel", self._samplingLevel)
+            result += Parser.floatValueToXML("samplingLevel", self._samplingLevel)
 
         if self._numAttFreqExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAttFreq", self._numAttFreq)
 
         if self._attFreqExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("attFreq", self._attFreq)
+            result += Parser.doubleListValueToXML("attFreq", self._attFreq)
 
         if self._attSpectrumExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("attSpectrum", self._attSpectrum)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("feedId", self._feedId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "GainTrackingTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -254,47 +303,51 @@ class GainTrackingRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        attenuatorNode = rowdom.getElementsByTagName("attenuator")[0]
+        attenuatorNode = self._getFirstNodeByTagName(rowdom, "attenuator", True)
 
-        attenuatorStr = attenuatorNode.firstChild.data.strip()
+        attenuatorStr = self._getXMLNodeChildText(attenuatorNode)
 
         self._attenuator = Parser.stringListToLists(
             attenuatorStr, float, "GainTracking", False
         )
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", True
+        )
 
-        polarizationTypeStr = polarizationTypeNode.firstChild.data.strip()
+        polarizationTypeStr = self._getXMLNodeChildText(polarizationTypeNode)
         self._polarizationType = Parser.stringListToLists(
             polarizationTypeStr, PolarizationType, "GainTracking", False
         )
 
-        samplingLevelNode = rowdom.getElementsByTagName("samplingLevel")
-        if len(samplingLevelNode) > 0:
+        samplingLevelNode = self._getFirstNodeByTagName(rowdom, "samplingLevel", False)
+        if samplingLevelNode:
 
-            self._samplingLevel = float(samplingLevelNode[0].firstChild.data.strip())
+            self._samplingLevel = float(self._getXMLNodeChildText(samplingLevelNode))
 
             self._samplingLevelExists = True
 
-        numAttFreqNode = rowdom.getElementsByTagName("numAttFreq")
-        if len(numAttFreqNode) > 0:
+        numAttFreqNode = self._getFirstNodeByTagName(rowdom, "numAttFreq", False)
+        if numAttFreqNode:
 
-            self._numAttFreq = int(numAttFreqNode[0].firstChild.data.strip())
+            self._numAttFreq = int(self._getXMLNodeChildText(numAttFreqNode))
 
             self._numAttFreqExists = True
 
-        attFreqNode = rowdom.getElementsByTagName("attFreq")
-        if len(attFreqNode) > 0:
+        attFreqNode = self._getFirstNodeByTagName(rowdom, "attFreq", False)
+        if attFreqNode:
 
-            attFreqStr = attFreqNode[0].firstChild.data.strip()
+            attFreqStr = self._getXMLNodeChildText(attFreqNode)
 
             self._attFreq = Parser.stringListToLists(
                 attFreqStr, float, "GainTracking", False
@@ -302,10 +355,10 @@ class GainTrackingRow:
 
             self._attFreqExists = True
 
-        attSpectrumNode = rowdom.getElementsByTagName("attSpectrum")
-        if len(attSpectrumNode) > 0:
+        attSpectrumNode = self._getFirstNodeByTagName(rowdom, "attSpectrum", False)
+        if attSpectrumNode:
 
-            attSpectrumStr = attSpectrumNode[0].firstChild.data.strip()
+            attSpectrumStr = self._getXMLNodeChildText(attSpectrumNode)
 
             self._attSpectrum = Parser.stringListToLists(
                 attSpectrumStr, Complex, "GainTracking", True
@@ -315,17 +368,19 @@ class GainTrackingRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        feedIdNode = rowdom.getElementsByTagName("feedId")[0]
+        feedIdNode = self._getFirstNodeByTagName(rowdom, "feedId", True)
 
-        self._feedId = int(feedIdNode.firstChild.data.strip())
+        self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
@@ -370,7 +425,7 @@ class GainTrackingRow:
             eos.writeInt(len(self._attFreq))
             for i in range(len(self._attFreq)):
 
-                eos.writeFloat(self._attFreq[i])
+                eos.writeDouble(self._attFreq[i])
 
         eos.writeBool(self._attSpectrumExists)
         if self._attSpectrumExists:
@@ -474,7 +529,7 @@ class GainTrackingRow:
             attFreqDim1 = eis.readInt()
             thisList = []
             for i in range(attFreqDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._attFreq = thisList
 
@@ -552,6 +607,7 @@ class GainTrackingRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -583,6 +639,7 @@ class GainTrackingRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -603,6 +660,9 @@ class GainTrackingRow:
         """
         Set attenuator with the specified float []  value.
         attenuator The float []  value to which attenuator is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -646,6 +706,7 @@ class GainTrackingRow:
         """
         Set polarizationType with the specified PolarizationType []  value.
         polarizationType The PolarizationType []  value to which polarizationType is to be set.
+
 
 
         """
@@ -704,6 +765,9 @@ class GainTrackingRow:
         Set samplingLevel with the specified float value.
         samplingLevel The float value to which samplingLevel is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -749,6 +813,7 @@ class GainTrackingRow:
         numAttFreq The int value to which numAttFreq is to be set.
 
 
+
         """
 
         self._numAttFreq = int(numAttFreq)
@@ -791,6 +856,9 @@ class GainTrackingRow:
         """
         Set attFreq with the specified float []  value.
         attFreq The float []  value to which attFreq is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -856,6 +924,7 @@ class GainTrackingRow:
         """
         Set attSpectrum with the specified Complex []  value.
         attSpectrum The Complex []  value to which attSpectrum is to be set.
+
         The value of attSpectrum can be anything allowed by the Complex []  constructor.
 
         """
@@ -910,6 +979,7 @@ class GainTrackingRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -941,6 +1011,7 @@ class GainTrackingRow:
         feedId The int value to which feedId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -969,6 +1040,7 @@ class GainTrackingRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

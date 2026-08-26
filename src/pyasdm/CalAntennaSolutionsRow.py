@@ -75,6 +75,16 @@ class CalAntennaSolutionsRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -121,13 +131,15 @@ class CalAntennaSolutionsRow:
 
         self._correctionValidity = None
 
-        self._phaseAnt = []  # this is a list of float []
+        self._phaseAnt = []  # this is a list of float []  saved as single precision
 
-        self._phaseAntRMS = []  # this is a list of float []
+        self._phaseAntRMS = []  # this is a list of float []  saved as single precision
 
-        self._amplitudeAnt = []  # this is a list of float []
+        self._amplitudeAnt = []  # this is a list of float []  saved as single precision
 
-        self._amplitudeAntRMS = []  # this is a list of float []
+        self._amplitudeAntRMS = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         # extrinsic attributes
 
@@ -217,63 +229,124 @@ class CalAntennaSolutionsRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.valueToXML("refAntennaName", self._refAntennaName)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("direction", self._direction)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("integrationTime", self._integrationTime)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("correctionValidity", self._correctionValidity)
 
-        result += Parser.listValueToXML("phaseAnt", self._phaseAnt)
+        result += "\n   "
 
-        result += Parser.listValueToXML("phaseAntRMS", self._phaseAntRMS)
+        result += Parser.floatListValueToXML("phaseAnt", self._phaseAnt)
 
-        result += Parser.listValueToXML("amplitudeAnt", self._amplitudeAnt)
+        result += "\n   "
 
-        result += Parser.listValueToXML("amplitudeAntRMS", self._amplitudeAntRMS)
+        result += Parser.floatListValueToXML("phaseAntRMS", self._phaseAntRMS)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("amplitudeAnt", self._amplitudeAnt)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("amplitudeAntRMS", self._amplitudeAntRMS)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalAntennaSolutionsTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -303,102 +376,114 @@ class CalAntennaSolutionsRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", True)
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
+        refAntennaNameNode = self._getFirstNodeByTagName(rowdom, "refAntennaName", True)
 
-        self._refAntennaName = str(refAntennaNameNode.firstChild.data.strip())
+        self._refAntennaName = str(self._getXMLNodeChildText(refAntennaNameNode))
 
-        directionNode = rowdom.getElementsByTagName("direction")[0]
+        directionNode = self._getFirstNodeByTagName(rowdom, "direction", True)
 
-        directionStr = directionNode.firstChild.data.strip()
+        directionStr = self._getXMLNodeChildText(directionNode)
 
         self._direction = Parser.stringListToLists(
             directionStr, Angle, "CalAntennaSolutions", True
         )
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalAntennaSolutions", True
         )
 
-        integrationTimeNode = rowdom.getElementsByTagName("integrationTime")[0]
+        integrationTimeNode = self._getFirstNodeByTagName(
+            rowdom, "integrationTime", True
+        )
 
-        self._integrationTime = Interval(integrationTimeNode.firstChild.data.strip())
+        self._integrationTime = Interval(self._getXMLNodeChildText(integrationTimeNode))
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalAntennaSolutions", False
         )
 
-        correctionValidityNode = rowdom.getElementsByTagName("correctionValidity")[0]
+        correctionValidityNode = self._getFirstNodeByTagName(
+            rowdom, "correctionValidity", True
+        )
 
-        self._correctionValidity = bool(correctionValidityNode.firstChild.data.strip())
+        self._correctionValidity = bool(
+            self._getXMLNodeChildText(correctionValidityNode)
+        )
 
-        phaseAntNode = rowdom.getElementsByTagName("phaseAnt")[0]
+        phaseAntNode = self._getFirstNodeByTagName(rowdom, "phaseAnt", True)
 
-        phaseAntStr = phaseAntNode.firstChild.data.strip()
+        phaseAntStr = self._getXMLNodeChildText(phaseAntNode)
 
         self._phaseAnt = Parser.stringListToLists(
             phaseAntStr, float, "CalAntennaSolutions", False
         )
 
-        phaseAntRMSNode = rowdom.getElementsByTagName("phaseAntRMS")[0]
+        phaseAntRMSNode = self._getFirstNodeByTagName(rowdom, "phaseAntRMS", True)
 
-        phaseAntRMSStr = phaseAntRMSNode.firstChild.data.strip()
+        phaseAntRMSStr = self._getXMLNodeChildText(phaseAntRMSNode)
 
         self._phaseAntRMS = Parser.stringListToLists(
             phaseAntRMSStr, float, "CalAntennaSolutions", False
         )
 
-        amplitudeAntNode = rowdom.getElementsByTagName("amplitudeAnt")[0]
+        amplitudeAntNode = self._getFirstNodeByTagName(rowdom, "amplitudeAnt", True)
 
-        amplitudeAntStr = amplitudeAntNode.firstChild.data.strip()
+        amplitudeAntStr = self._getXMLNodeChildText(amplitudeAntNode)
 
         self._amplitudeAnt = Parser.stringListToLists(
             amplitudeAntStr, float, "CalAntennaSolutions", False
         )
 
-        amplitudeAntRMSNode = rowdom.getElementsByTagName("amplitudeAntRMS")[0]
+        amplitudeAntRMSNode = self._getFirstNodeByTagName(
+            rowdom, "amplitudeAntRMS", True
+        )
 
-        amplitudeAntRMSStr = amplitudeAntRMSNode.firstChild.data.strip()
+        amplitudeAntRMSStr = self._getXMLNodeChildText(amplitudeAntRMSNode)
 
         self._amplitudeAntRMS = Parser.stringListToLists(
             amplitudeAntRMSStr, float, "CalAntennaSolutions", False
@@ -406,17 +491,19 @@ class CalAntennaSolutionsRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
@@ -750,6 +837,7 @@ class CalAntennaSolutionsRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -777,6 +865,7 @@ class CalAntennaSolutionsRow:
         """
         Set atmPhaseCorrection with the specified AtmPhaseCorrection value.
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -808,6 +897,7 @@ class CalAntennaSolutionsRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -835,6 +925,7 @@ class CalAntennaSolutionsRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -865,6 +956,7 @@ class CalAntennaSolutionsRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -888,6 +980,7 @@ class CalAntennaSolutionsRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -912,6 +1005,7 @@ class CalAntennaSolutionsRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -934,6 +1028,7 @@ class CalAntennaSolutionsRow:
         refAntennaName The str value to which refAntennaName is to be set.
 
 
+
         """
 
         self._refAntennaName = str(refAntennaName)
@@ -954,6 +1049,7 @@ class CalAntennaSolutionsRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -997,6 +1093,7 @@ class CalAntennaSolutionsRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1041,6 +1138,7 @@ class CalAntennaSolutionsRow:
         """
         Set integrationTime with the specified Interval value.
         integrationTime The Interval value to which integrationTime is to be set.
+
         The value of integrationTime can be anything allowed by the Interval constructor.
 
         """
@@ -1063,6 +1161,7 @@ class CalAntennaSolutionsRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1108,6 +1207,7 @@ class CalAntennaSolutionsRow:
         correctionValidity The bool value to which correctionValidity is to be set.
 
 
+
         """
 
         self._correctionValidity = bool(correctionValidity)
@@ -1128,6 +1228,9 @@ class CalAntennaSolutionsRow:
         """
         Set phaseAnt with the specified float []  value.
         phaseAnt The float []  value to which phaseAnt is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1172,6 +1275,9 @@ class CalAntennaSolutionsRow:
         Set phaseAntRMS with the specified float []  value.
         phaseAntRMS The float []  value to which phaseAntRMS is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1215,6 +1321,9 @@ class CalAntennaSolutionsRow:
         Set amplitudeAnt with the specified float []  value.
         amplitudeAnt The float []  value to which amplitudeAnt is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1257,6 +1366,9 @@ class CalAntennaSolutionsRow:
         """
         Set amplitudeAntRMS with the specified float []  value.
         amplitudeAntRMS The float []  value to which amplitudeAntRMS is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1303,6 +1415,7 @@ class CalAntennaSolutionsRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1333,6 +1446,7 @@ class CalAntennaSolutionsRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1363,6 +1477,7 @@ class CalAntennaSolutionsRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

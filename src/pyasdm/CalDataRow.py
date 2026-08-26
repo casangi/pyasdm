@@ -75,6 +75,16 @@ class CalDataRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -236,59 +246,102 @@ class CalDataRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "startTimeObserved", self._startTimeObserved
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endTimeObserved", self._endTimeObserved)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockUID", self._execBlockUID)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "calDataType", CalDataOrigin.name(self._calDataType)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("calType", CalType.name(self._calType))
 
+        result += "\n   "
+
         result += Parser.valueToXML("numScan", self._numScan)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("scanSet", self._scanSet)
 
         if self._assocCalDataIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("assocCalDataId", self._assocCalDataId)
 
         if self._assocCalNatureExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "assocCalNature", AssociatedCalNature.name(self._assocCalNature)
             )
 
         if self._fieldNameExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("fieldName", self._fieldName)
 
         if self._sourceNameExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("sourceName", self._sourceName)
 
         if self._sourceCodeExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("sourceCode", self._sourceCode)
 
         if self._scanIntentExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("scanIntent", self._scanIntent)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalDataTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -315,64 +368,74 @@ class CalDataRow:
 
         # intrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        startTimeObservedNode = rowdom.getElementsByTagName("startTimeObserved")[0]
-
-        self._startTimeObserved = ArrayTime(
-            startTimeObservedNode.firstChild.data.strip()
+        startTimeObservedNode = self._getFirstNodeByTagName(
+            rowdom, "startTimeObserved", True
         )
 
-        endTimeObservedNode = rowdom.getElementsByTagName("endTimeObserved")[0]
+        self._startTimeObserved = ArrayTime(
+            self._getXMLNodeChildText(startTimeObservedNode)
+        )
 
-        self._endTimeObserved = ArrayTime(endTimeObservedNode.firstChild.data.strip())
+        endTimeObservedNode = self._getFirstNodeByTagName(
+            rowdom, "endTimeObserved", True
+        )
 
-        execBlockUIDNode = rowdom.getElementsByTagName("execBlockUID")[0]
+        self._endTimeObserved = ArrayTime(
+            self._getXMLNodeChildText(endTimeObservedNode)
+        )
+
+        execBlockUIDNode = self._getFirstNodeByTagName(rowdom, "execBlockUID", True)
 
         self._execBlockUID = EntityRef(execBlockUIDNode.toxml())
 
-        calDataTypeNode = rowdom.getElementsByTagName("calDataType")[0]
+        calDataTypeNode = self._getFirstNodeByTagName(rowdom, "calDataType", True)
 
         self._calDataType = CalDataOrigin.newCalDataOrigin(
-            calDataTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(calDataTypeNode)
         )
 
-        calTypeNode = rowdom.getElementsByTagName("calType")[0]
+        calTypeNode = self._getFirstNodeByTagName(rowdom, "calType", True)
 
-        self._calType = CalType.newCalType(calTypeNode.firstChild.data.strip())
+        self._calType = CalType.newCalType(self._getXMLNodeChildText(calTypeNode))
 
-        numScanNode = rowdom.getElementsByTagName("numScan")[0]
+        numScanNode = self._getFirstNodeByTagName(rowdom, "numScan", True)
 
-        self._numScan = int(numScanNode.firstChild.data.strip())
+        self._numScan = int(self._getXMLNodeChildText(numScanNode))
 
-        scanSetNode = rowdom.getElementsByTagName("scanSet")[0]
+        scanSetNode = self._getFirstNodeByTagName(rowdom, "scanSet", True)
 
-        scanSetStr = scanSetNode.firstChild.data.strip()
+        scanSetStr = self._getXMLNodeChildText(scanSetNode)
 
         self._scanSet = Parser.stringListToLists(scanSetStr, int, "CalData", False)
 
-        assocCalDataIdNode = rowdom.getElementsByTagName("assocCalDataId")
-        if len(assocCalDataIdNode) > 0:
+        assocCalDataIdNode = self._getFirstNodeByTagName(
+            rowdom, "assocCalDataId", False
+        )
+        if assocCalDataIdNode:
 
-            self._assocCalDataId = Tag(assocCalDataIdNode[0].firstChild.data.strip())
+            self._assocCalDataId = Tag(self._getXMLNodeChildText(assocCalDataIdNode))
 
             self._assocCalDataIdExists = True
 
-        assocCalNatureNode = rowdom.getElementsByTagName("assocCalNature")
-        if len(assocCalNatureNode) > 0:
+        assocCalNatureNode = self._getFirstNodeByTagName(
+            rowdom, "assocCalNature", False
+        )
+        if assocCalNatureNode:
 
             self._assocCalNature = AssociatedCalNature.newAssociatedCalNature(
-                assocCalNatureNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(assocCalNatureNode)
             )
 
             self._assocCalNatureExists = True
 
-        fieldNameNode = rowdom.getElementsByTagName("fieldName")
-        if len(fieldNameNode) > 0:
+        fieldNameNode = self._getFirstNodeByTagName(rowdom, "fieldName", False)
+        if fieldNameNode:
 
-            fieldNameStr = fieldNameNode[0].firstChild.data.strip()
+            fieldNameStr = self._getXMLNodeChildText(fieldNameNode)
 
             self._fieldName = Parser.stringListToLists(
                 fieldNameStr, str, "CalData", False
@@ -380,10 +443,10 @@ class CalDataRow:
 
             self._fieldNameExists = True
 
-        sourceNameNode = rowdom.getElementsByTagName("sourceName")
-        if len(sourceNameNode) > 0:
+        sourceNameNode = self._getFirstNodeByTagName(rowdom, "sourceName", False)
+        if sourceNameNode:
 
-            sourceNameStr = sourceNameNode[0].firstChild.data.strip()
+            sourceNameStr = self._getXMLNodeChildText(sourceNameNode)
 
             self._sourceName = Parser.stringListToLists(
                 sourceNameStr, str, "CalData", False
@@ -391,10 +454,10 @@ class CalDataRow:
 
             self._sourceNameExists = True
 
-        sourceCodeNode = rowdom.getElementsByTagName("sourceCode")
-        if len(sourceCodeNode) > 0:
+        sourceCodeNode = self._getFirstNodeByTagName(rowdom, "sourceCode", False)
+        if sourceCodeNode:
 
-            sourceCodeStr = sourceCodeNode[0].firstChild.data.strip()
+            sourceCodeStr = self._getXMLNodeChildText(sourceCodeNode)
 
             self._sourceCode = Parser.stringListToLists(
                 sourceCodeStr, str, "CalData", False
@@ -402,10 +465,10 @@ class CalDataRow:
 
             self._sourceCodeExists = True
 
-        scanIntentNode = rowdom.getElementsByTagName("scanIntent")
-        if len(scanIntentNode) > 0:
+        scanIntentNode = self._getFirstNodeByTagName(rowdom, "scanIntent", False)
+        if scanIntentNode:
 
-            scanIntentStr = scanIntentNode[0].firstChild.data.strip()
+            scanIntentStr = self._getXMLNodeChildText(scanIntentNode)
             self._scanIntent = Parser.stringListToLists(
                 scanIntentStr, ScanIntent, "CalData", False
             )
@@ -696,6 +759,7 @@ class CalDataRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -726,6 +790,7 @@ class CalDataRow:
         """
         Set startTimeObserved with the specified ArrayTime value.
         startTimeObserved The ArrayTime value to which startTimeObserved is to be set.
+
         The value of startTimeObserved can be anything allowed by the ArrayTime constructor.
 
         """
@@ -749,6 +814,7 @@ class CalDataRow:
         """
         Set endTimeObserved with the specified ArrayTime value.
         endTimeObserved The ArrayTime value to which endTimeObserved is to be set.
+
         The value of endTimeObserved can be anything allowed by the ArrayTime constructor.
 
         """
@@ -772,6 +838,7 @@ class CalDataRow:
         """
         Set execBlockUID with the specified EntityRef value.
         execBlockUID The EntityRef value to which execBlockUID is to be set.
+
         The value of execBlockUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -796,6 +863,7 @@ class CalDataRow:
         calDataType The CalDataOrigin value to which calDataType is to be set.
 
 
+
         """
 
         self._calDataType = CalDataOrigin(calDataType)
@@ -816,6 +884,7 @@ class CalDataRow:
         """
         Set calType with the specified CalType value.
         calType The CalType value to which calType is to be set.
+
 
 
         """
@@ -840,6 +909,7 @@ class CalDataRow:
         numScan The int value to which numScan is to be set.
 
 
+
         """
 
         self._numScan = int(numScan)
@@ -860,6 +930,7 @@ class CalDataRow:
         """
         Set scanSet with the specified int []  value.
         scanSet The int []  value to which scanSet is to be set.
+
 
 
         """
@@ -918,6 +989,7 @@ class CalDataRow:
         """
         Set assocCalDataId with the specified Tag value.
         assocCalDataId The Tag value to which assocCalDataId is to be set.
+
         The value of assocCalDataId can be anything allowed by the Tag constructor.
 
         """
@@ -964,6 +1036,7 @@ class CalDataRow:
         assocCalNature The AssociatedCalNature value to which assocCalNature is to be set.
 
 
+
         """
 
         self._assocCalNature = AssociatedCalNature(assocCalNature)
@@ -1006,6 +1079,7 @@ class CalDataRow:
         """
         Set fieldName with the specified str []  value.
         fieldName The str []  value to which fieldName is to be set.
+
 
 
         """
@@ -1073,6 +1147,7 @@ class CalDataRow:
         sourceName The str []  value to which sourceName is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1138,6 +1213,7 @@ class CalDataRow:
         sourceCode The str []  value to which sourceCode is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1201,6 +1277,7 @@ class CalDataRow:
         """
         Set scanIntent with the specified ScanIntent []  value.
         scanIntent The ScanIntent []  value to which scanIntent is to be set.
+
 
 
         """

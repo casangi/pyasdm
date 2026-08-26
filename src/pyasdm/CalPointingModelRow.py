@@ -75,6 +75,16 @@ class CalPointingModelRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -113,9 +123,9 @@ class CalPointingModelRow:
 
         self._coeffName = []  # this is a list of str []
 
-        self._coeffVal = []  # this is a list of float []
+        self._coeffVal = []  # this is a list of float []  saved as single precision
 
-        self._coeffError = []  # this is a list of float []
+        self._coeffError = []  # this is a list of float []  saved as single precision
 
         self._coeffFixed = []  # this is a list of bool []
 
@@ -235,65 +245,124 @@ class CalPointingModelRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "pointingModelMode", PointingModelMode.name(self._pointingModelMode)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "polarizationType", PolarizationType.name(self._polarizationType)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numCoeff", self._numCoeff)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("coeffName", self._coeffName)
 
-        result += Parser.listValueToXML("coeffVal", self._coeffVal)
+        result += "\n   "
 
-        result += Parser.listValueToXML("coeffError", self._coeffError)
+        result += Parser.floatListValueToXML("coeffVal", self._coeffVal)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("coeffError", self._coeffError)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("coeffFixed", self._coeffFixed)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("azimuthRMS", self._azimuthRMS)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("elevationRms", self._elevationRms)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("skyRMS", self._skyRMS)
 
-        result += Parser.valueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("reducedChiSquared", self._reducedChiSquared)
 
         if self._numObsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numObs", self._numObs)
 
         if self._coeffFormulaExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("coeffFormula", self._coeffFormula)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalPointingModelTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -322,105 +391,113 @@ class CalPointingModelRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+        antennaMakeNode = self._getFirstNodeByTagName(rowdom, "antennaMake", True)
 
         self._antennaMake = AntennaMake.newAntennaMake(
-            antennaMakeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaMakeNode)
         )
 
-        pointingModelModeNode = rowdom.getElementsByTagName("pointingModelMode")[0]
+        pointingModelModeNode = self._getFirstNodeByTagName(
+            rowdom, "pointingModelMode", True
+        )
 
         self._pointingModelMode = PointingModelMode.newPointingModelMode(
-            pointingModelModeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(pointingModelModeNode)
         )
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", True
+        )
 
         self._polarizationType = PolarizationType.newPolarizationType(
-            polarizationTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(polarizationTypeNode)
         )
 
-        numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
+        numCoeffNode = self._getFirstNodeByTagName(rowdom, "numCoeff", True)
 
-        self._numCoeff = int(numCoeffNode.firstChild.data.strip())
+        self._numCoeff = int(self._getXMLNodeChildText(numCoeffNode))
 
-        coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
+        coeffNameNode = self._getFirstNodeByTagName(rowdom, "coeffName", True)
 
-        coeffNameStr = coeffNameNode.firstChild.data.strip()
+        coeffNameStr = self._getXMLNodeChildText(coeffNameNode)
 
         self._coeffName = Parser.stringListToLists(
             coeffNameStr, str, "CalPointingModel", False
         )
 
-        coeffValNode = rowdom.getElementsByTagName("coeffVal")[0]
+        coeffValNode = self._getFirstNodeByTagName(rowdom, "coeffVal", True)
 
-        coeffValStr = coeffValNode.firstChild.data.strip()
+        coeffValStr = self._getXMLNodeChildText(coeffValNode)
 
         self._coeffVal = Parser.stringListToLists(
             coeffValStr, float, "CalPointingModel", False
         )
 
-        coeffErrorNode = rowdom.getElementsByTagName("coeffError")[0]
+        coeffErrorNode = self._getFirstNodeByTagName(rowdom, "coeffError", True)
 
-        coeffErrorStr = coeffErrorNode.firstChild.data.strip()
+        coeffErrorStr = self._getXMLNodeChildText(coeffErrorNode)
 
         self._coeffError = Parser.stringListToLists(
             coeffErrorStr, float, "CalPointingModel", False
         )
 
-        coeffFixedNode = rowdom.getElementsByTagName("coeffFixed")[0]
+        coeffFixedNode = self._getFirstNodeByTagName(rowdom, "coeffFixed", True)
 
-        coeffFixedStr = coeffFixedNode.firstChild.data.strip()
+        coeffFixedStr = self._getXMLNodeChildText(coeffFixedNode)
 
         self._coeffFixed = Parser.stringListToLists(
             coeffFixedStr, bool, "CalPointingModel", False
         )
 
-        azimuthRMSNode = rowdom.getElementsByTagName("azimuthRMS")[0]
+        azimuthRMSNode = self._getFirstNodeByTagName(rowdom, "azimuthRMS", True)
 
-        self._azimuthRMS = Angle(azimuthRMSNode.firstChild.data.strip())
+        self._azimuthRMS = Angle(self._getXMLNodeChildText(azimuthRMSNode))
 
-        elevationRmsNode = rowdom.getElementsByTagName("elevationRms")[0]
+        elevationRmsNode = self._getFirstNodeByTagName(rowdom, "elevationRms", True)
 
-        self._elevationRms = Angle(elevationRmsNode.firstChild.data.strip())
+        self._elevationRms = Angle(self._getXMLNodeChildText(elevationRmsNode))
 
-        skyRMSNode = rowdom.getElementsByTagName("skyRMS")[0]
+        skyRMSNode = self._getFirstNodeByTagName(rowdom, "skyRMS", True)
 
-        self._skyRMS = Angle(skyRMSNode.firstChild.data.strip())
+        self._skyRMS = Angle(self._getXMLNodeChildText(skyRMSNode))
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
-        self._reducedChiSquared = float(reducedChiSquaredNode.firstChild.data.strip())
+        self._reducedChiSquared = float(
+            self._getXMLNodeChildText(reducedChiSquaredNode)
+        )
 
-        numObsNode = rowdom.getElementsByTagName("numObs")
-        if len(numObsNode) > 0:
+        numObsNode = self._getFirstNodeByTagName(rowdom, "numObs", False)
+        if numObsNode:
 
-            self._numObs = int(numObsNode[0].firstChild.data.strip())
+            self._numObs = int(self._getXMLNodeChildText(numObsNode))
 
             self._numObsExists = True
 
-        coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")
-        if len(coeffFormulaNode) > 0:
+        coeffFormulaNode = self._getFirstNodeByTagName(rowdom, "coeffFormula", False)
+        if coeffFormulaNode:
 
-            coeffFormulaStr = coeffFormulaNode[0].firstChild.data.strip()
+            coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode)
 
             self._coeffFormula = Parser.stringListToLists(
                 coeffFormulaStr, str, "CalPointingModel", False
@@ -430,13 +507,13 @@ class CalPointingModelRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -491,7 +568,7 @@ class CalPointingModelRow:
 
         self._skyRMS.toBin(eos)
 
-        eos.writeFloat(self._reducedChiSquared)
+        eos.writeDouble(self._reducedChiSquared)
 
         eos.writeBool(self._numObsExists)
         if self._numObsExists:
@@ -668,7 +745,7 @@ class CalPointingModelRow:
         Set the reducedChiSquared in row from the EndianInput (eis) instance.
         """
 
-        row._reducedChiSquared = eis.readFloat()
+        row._reducedChiSquared = eis.readDouble()
 
     @staticmethod
     def numObsFromBin(row, eis):
@@ -775,6 +852,7 @@ class CalPointingModelRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -802,6 +880,7 @@ class CalPointingModelRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -832,6 +911,7 @@ class CalPointingModelRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -855,6 +935,7 @@ class CalPointingModelRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -879,6 +960,7 @@ class CalPointingModelRow:
         antennaMake The AntennaMake value to which antennaMake is to be set.
 
 
+
         """
 
         self._antennaMake = AntennaMake(antennaMake)
@@ -899,6 +981,7 @@ class CalPointingModelRow:
         """
         Set pointingModelMode with the specified PointingModelMode value.
         pointingModelMode The PointingModelMode value to which pointingModelMode is to be set.
+
 
 
         """
@@ -923,6 +1006,7 @@ class CalPointingModelRow:
         polarizationType The PolarizationType value to which polarizationType is to be set.
 
 
+
         """
 
         self._polarizationType = PolarizationType(polarizationType)
@@ -945,6 +1029,7 @@ class CalPointingModelRow:
         numCoeff The int value to which numCoeff is to be set.
 
 
+
         """
 
         self._numCoeff = int(numCoeff)
@@ -965,6 +1050,7 @@ class CalPointingModelRow:
         """
         Set coeffName with the specified str []  value.
         coeffName The str []  value to which coeffName is to be set.
+
 
 
         """
@@ -1009,6 +1095,9 @@ class CalPointingModelRow:
         Set coeffVal with the specified float []  value.
         coeffVal The float []  value to which coeffVal is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1051,6 +1140,9 @@ class CalPointingModelRow:
         """
         Set coeffError with the specified float []  value.
         coeffError The float []  value to which coeffError is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1096,6 +1188,7 @@ class CalPointingModelRow:
         coeffFixed The bool []  value to which coeffFixed is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1138,6 +1231,7 @@ class CalPointingModelRow:
         """
         Set azimuthRMS with the specified Angle value.
         azimuthRMS The Angle value to which azimuthRMS is to be set.
+
         The value of azimuthRMS can be anything allowed by the Angle constructor.
 
         """
@@ -1161,6 +1255,7 @@ class CalPointingModelRow:
         """
         Set elevationRms with the specified Angle value.
         elevationRms The Angle value to which elevationRms is to be set.
+
         The value of elevationRms can be anything allowed by the Angle constructor.
 
         """
@@ -1184,6 +1279,7 @@ class CalPointingModelRow:
         """
         Set skyRMS with the specified Angle value.
         skyRMS The Angle value to which skyRMS is to be set.
+
         The value of skyRMS can be anything allowed by the Angle constructor.
 
         """
@@ -1206,6 +1302,9 @@ class CalPointingModelRow:
         """
         Set reducedChiSquared with the specified float value.
         reducedChiSquared The float value to which reducedChiSquared is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1242,6 +1341,7 @@ class CalPointingModelRow:
         """
         Set numObs with the specified int value.
         numObs The int value to which numObs is to be set.
+
 
 
         """
@@ -1286,6 +1386,7 @@ class CalPointingModelRow:
         """
         Set coeffFormula with the specified str []  value.
         coeffFormula The str []  value to which coeffFormula is to be set.
+
 
 
         """
@@ -1340,6 +1441,7 @@ class CalPointingModelRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1370,6 +1472,7 @@ class CalPointingModelRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

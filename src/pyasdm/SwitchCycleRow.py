@@ -66,6 +66,16 @@ class SwitchCycleRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -90,7 +100,7 @@ class SwitchCycleRow:
 
         self._numStep = 0
 
-        self._weightArray = []  # this is a list of float []
+        self._weightArray = []  # this is a list of float []  saved as single precision
 
         self._dirOffsetArray = []  # this is a list of Angle []  []
 
@@ -162,33 +172,47 @@ class SwitchCycleRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("switchCycleId", self._switchCycleId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numStep", self._numStep)
 
-        result += Parser.listValueToXML("weightArray", self._weightArray)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("weightArray", self._weightArray)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("dirOffsetArray", self._dirOffsetArray)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "freqOffsetArray", self._freqOffsetArray
         )
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "stepDurationArray", self._stepDurationArray
         )
 
         if self._directionCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "directionCode", DirectionReferenceCode.name(self._directionCode)
             )
 
         if self._directionEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "directionEquinox", self._directionEquinox
@@ -196,7 +220,28 @@ class SwitchCycleRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SwitchCycleTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -223,60 +268,66 @@ class SwitchCycleRow:
 
         # intrinsic attribute values
 
-        switchCycleIdNode = rowdom.getElementsByTagName("switchCycleId")[0]
+        switchCycleIdNode = self._getFirstNodeByTagName(rowdom, "switchCycleId", True)
 
-        self._switchCycleId = Tag(switchCycleIdNode.firstChild.data.strip())
+        self._switchCycleId = Tag(self._getXMLNodeChildText(switchCycleIdNode))
 
-        numStepNode = rowdom.getElementsByTagName("numStep")[0]
+        numStepNode = self._getFirstNodeByTagName(rowdom, "numStep", True)
 
-        self._numStep = int(numStepNode.firstChild.data.strip())
+        self._numStep = int(self._getXMLNodeChildText(numStepNode))
 
-        weightArrayNode = rowdom.getElementsByTagName("weightArray")[0]
+        weightArrayNode = self._getFirstNodeByTagName(rowdom, "weightArray", True)
 
-        weightArrayStr = weightArrayNode.firstChild.data.strip()
+        weightArrayStr = self._getXMLNodeChildText(weightArrayNode)
 
         self._weightArray = Parser.stringListToLists(
             weightArrayStr, float, "SwitchCycle", False
         )
 
-        dirOffsetArrayNode = rowdom.getElementsByTagName("dirOffsetArray")[0]
+        dirOffsetArrayNode = self._getFirstNodeByTagName(rowdom, "dirOffsetArray", True)
 
-        dirOffsetArrayStr = dirOffsetArrayNode.firstChild.data.strip()
+        dirOffsetArrayStr = self._getXMLNodeChildText(dirOffsetArrayNode)
 
         self._dirOffsetArray = Parser.stringListToLists(
             dirOffsetArrayStr, Angle, "SwitchCycle", True
         )
 
-        freqOffsetArrayNode = rowdom.getElementsByTagName("freqOffsetArray")[0]
+        freqOffsetArrayNode = self._getFirstNodeByTagName(
+            rowdom, "freqOffsetArray", True
+        )
 
-        freqOffsetArrayStr = freqOffsetArrayNode.firstChild.data.strip()
+        freqOffsetArrayStr = self._getXMLNodeChildText(freqOffsetArrayNode)
 
         self._freqOffsetArray = Parser.stringListToLists(
             freqOffsetArrayStr, Frequency, "SwitchCycle", True
         )
 
-        stepDurationArrayNode = rowdom.getElementsByTagName("stepDurationArray")[0]
+        stepDurationArrayNode = self._getFirstNodeByTagName(
+            rowdom, "stepDurationArray", True
+        )
 
-        stepDurationArrayStr = stepDurationArrayNode.firstChild.data.strip()
+        stepDurationArrayStr = self._getXMLNodeChildText(stepDurationArrayNode)
 
         self._stepDurationArray = Parser.stringListToLists(
             stepDurationArrayStr, Interval, "SwitchCycle", True
         )
 
-        directionCodeNode = rowdom.getElementsByTagName("directionCode")
-        if len(directionCodeNode) > 0:
+        directionCodeNode = self._getFirstNodeByTagName(rowdom, "directionCode", False)
+        if directionCodeNode:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionCodeNode)
             )
 
             self._directionCodeExists = True
 
-        directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
-        if len(directionEquinoxNode) > 0:
+        directionEquinoxNode = self._getFirstNodeByTagName(
+            rowdom, "directionEquinox", False
+        )
+        if directionEquinoxNode:
 
             self._directionEquinox = ArrayTime(
-                directionEquinoxNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionEquinoxNode)
             )
 
             self._directionEquinoxExists = True
@@ -447,6 +498,7 @@ class SwitchCycleRow:
         """
         Set switchCycleId with the specified Tag value.
         switchCycleId The Tag value to which switchCycleId is to be set.
+
         The value of switchCycleId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -478,6 +530,7 @@ class SwitchCycleRow:
         numStep The int value to which numStep is to be set.
 
 
+
         """
 
         self._numStep = int(numStep)
@@ -498,6 +551,9 @@ class SwitchCycleRow:
         """
         Set weightArray with the specified float []  value.
         weightArray The float []  value to which weightArray is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -541,6 +597,7 @@ class SwitchCycleRow:
         """
         Set dirOffsetArray with the specified Angle []  []  value.
         dirOffsetArray The Angle []  []  value to which dirOffsetArray is to be set.
+
         The value of dirOffsetArray can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -584,6 +641,7 @@ class SwitchCycleRow:
         """
         Set freqOffsetArray with the specified Frequency []  value.
         freqOffsetArray The Frequency []  value to which freqOffsetArray is to be set.
+
         The value of freqOffsetArray can be anything allowed by the Frequency []  constructor.
 
         """
@@ -627,6 +685,7 @@ class SwitchCycleRow:
         """
         Set stepDurationArray with the specified Interval []  value.
         stepDurationArray The Interval []  value to which stepDurationArray is to be set.
+
         The value of stepDurationArray can be anything allowed by the Interval []  constructor.
 
         """
@@ -686,6 +745,7 @@ class SwitchCycleRow:
         directionCode The DirectionReferenceCode value to which directionCode is to be set.
 
 
+
         """
 
         self._directionCode = DirectionReferenceCode(directionCode)
@@ -729,6 +789,7 @@ class SwitchCycleRow:
         """
         Set directionEquinox with the specified ArrayTime value.
         directionEquinox The ArrayTime value to which directionEquinox is to be set.
+
         The value of directionEquinox can be anything allowed by the ArrayTime constructor.
 
         """

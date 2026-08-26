@@ -66,6 +66,16 @@ class CalSeeingRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -200,55 +210,103 @@ class CalSeeingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("integrationTime", self._integrationTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numBaseLengths", self._numBaseLengths)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "baselineLengths", self._baselineLengths
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("phaseRMS", self._phaseRMS)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("seeing", self._seeing)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("seeingError", self._seeingError)
 
         if self._exponentExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("exponent", self._exponent)
+            result += Parser.floatValueToXML("exponent", self._exponent)
 
         if self._outerScaleExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("outerScale", self._outerScale)
 
         if self._outerScaleRMSExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("outerScaleRMS", self._outerScaleRMS)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalSeeingTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -275,88 +333,94 @@ class CalSeeingRow:
 
         # intrinsic attribute values
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
-
-        self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
+        )
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
+
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalSeeing", True
         )
 
-        integrationTimeNode = rowdom.getElementsByTagName("integrationTime")[0]
+        integrationTimeNode = self._getFirstNodeByTagName(
+            rowdom, "integrationTime", True
+        )
 
-        self._integrationTime = Interval(integrationTimeNode.firstChild.data.strip())
+        self._integrationTime = Interval(self._getXMLNodeChildText(integrationTimeNode))
 
-        numBaseLengthsNode = rowdom.getElementsByTagName("numBaseLengths")[0]
+        numBaseLengthsNode = self._getFirstNodeByTagName(rowdom, "numBaseLengths", True)
 
-        self._numBaseLengths = int(numBaseLengthsNode.firstChild.data.strip())
+        self._numBaseLengths = int(self._getXMLNodeChildText(numBaseLengthsNode))
 
-        baselineLengthsNode = rowdom.getElementsByTagName("baselineLengths")[0]
+        baselineLengthsNode = self._getFirstNodeByTagName(
+            rowdom, "baselineLengths", True
+        )
 
-        baselineLengthsStr = baselineLengthsNode.firstChild.data.strip()
+        baselineLengthsStr = self._getXMLNodeChildText(baselineLengthsNode)
 
         self._baselineLengths = Parser.stringListToLists(
             baselineLengthsStr, Length, "CalSeeing", True
         )
 
-        phaseRMSNode = rowdom.getElementsByTagName("phaseRMS")[0]
+        phaseRMSNode = self._getFirstNodeByTagName(rowdom, "phaseRMS", True)
 
-        phaseRMSStr = phaseRMSNode.firstChild.data.strip()
+        phaseRMSStr = self._getXMLNodeChildText(phaseRMSNode)
 
         self._phaseRMS = Parser.stringListToLists(phaseRMSStr, Angle, "CalSeeing", True)
 
-        seeingNode = rowdom.getElementsByTagName("seeing")[0]
+        seeingNode = self._getFirstNodeByTagName(rowdom, "seeing", True)
 
-        self._seeing = Angle(seeingNode.firstChild.data.strip())
+        self._seeing = Angle(self._getXMLNodeChildText(seeingNode))
 
-        seeingErrorNode = rowdom.getElementsByTagName("seeingError")[0]
+        seeingErrorNode = self._getFirstNodeByTagName(rowdom, "seeingError", True)
 
-        self._seeingError = Angle(seeingErrorNode.firstChild.data.strip())
+        self._seeingError = Angle(self._getXMLNodeChildText(seeingErrorNode))
 
-        exponentNode = rowdom.getElementsByTagName("exponent")
-        if len(exponentNode) > 0:
+        exponentNode = self._getFirstNodeByTagName(rowdom, "exponent", False)
+        if exponentNode:
 
-            self._exponent = float(exponentNode[0].firstChild.data.strip())
+            self._exponent = float(self._getXMLNodeChildText(exponentNode))
 
             self._exponentExists = True
 
-        outerScaleNode = rowdom.getElementsByTagName("outerScale")
-        if len(outerScaleNode) > 0:
+        outerScaleNode = self._getFirstNodeByTagName(rowdom, "outerScale", False)
+        if outerScaleNode:
 
-            self._outerScale = Length(outerScaleNode[0].firstChild.data.strip())
+            self._outerScale = Length(self._getXMLNodeChildText(outerScaleNode))
 
             self._outerScaleExists = True
 
-        outerScaleRMSNode = rowdom.getElementsByTagName("outerScaleRMS")
-        if len(outerScaleRMSNode) > 0:
+        outerScaleRMSNode = self._getFirstNodeByTagName(rowdom, "outerScaleRMS", False)
+        if outerScaleRMSNode:
 
-            self._outerScaleRMS = Angle(outerScaleRMSNode[0].firstChild.data.strip())
+            self._outerScaleRMS = Angle(self._getXMLNodeChildText(outerScaleRMSNode))
 
             self._outerScaleRMSExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -599,6 +663,7 @@ class CalSeeingRow:
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -627,6 +692,7 @@ class CalSeeingRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -650,6 +716,7 @@ class CalSeeingRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -672,6 +739,7 @@ class CalSeeingRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -716,6 +784,7 @@ class CalSeeingRow:
         """
         Set integrationTime with the specified Interval value.
         integrationTime The Interval value to which integrationTime is to be set.
+
         The value of integrationTime can be anything allowed by the Interval constructor.
 
         """
@@ -740,6 +809,7 @@ class CalSeeingRow:
         numBaseLengths The int value to which numBaseLengths is to be set.
 
 
+
         """
 
         self._numBaseLengths = int(numBaseLengths)
@@ -760,6 +830,7 @@ class CalSeeingRow:
         """
         Set baselineLengths with the specified Length []  value.
         baselineLengths The Length []  value to which baselineLengths is to be set.
+
         The value of baselineLengths can be anything allowed by the Length []  constructor.
 
         """
@@ -803,6 +874,7 @@ class CalSeeingRow:
         """
         Set phaseRMS with the specified Angle []  value.
         phaseRMS The Angle []  value to which phaseRMS is to be set.
+
         The value of phaseRMS can be anything allowed by the Angle []  constructor.
 
         """
@@ -847,6 +919,7 @@ class CalSeeingRow:
         """
         Set seeing with the specified Angle value.
         seeing The Angle value to which seeing is to be set.
+
         The value of seeing can be anything allowed by the Angle constructor.
 
         """
@@ -870,6 +943,7 @@ class CalSeeingRow:
         """
         Set seeingError with the specified Angle value.
         seeingError The Angle value to which seeingError is to be set.
+
         The value of seeingError can be anything allowed by the Angle constructor.
 
         """
@@ -906,6 +980,9 @@ class CalSeeingRow:
         """
         Set exponent with the specified float value.
         exponent The float value to which exponent is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -951,6 +1028,7 @@ class CalSeeingRow:
         """
         Set outerScale with the specified Length value.
         outerScale The Length value to which outerScale is to be set.
+
         The value of outerScale can be anything allowed by the Length constructor.
 
         """
@@ -996,6 +1074,7 @@ class CalSeeingRow:
         """
         Set outerScaleRMS with the specified Angle value.
         outerScaleRMS The Angle value to which outerScaleRMS is to be set.
+
         The value of outerScaleRMS can be anything allowed by the Angle constructor.
 
         """
@@ -1029,6 +1108,7 @@ class CalSeeingRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1059,6 +1139,7 @@ class CalSeeingRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

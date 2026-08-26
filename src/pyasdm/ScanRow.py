@@ -78,6 +78,16 @@ class ScanRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -236,59 +246,104 @@ class ScanRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("scanNumber", self._scanNumber)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startTime", self._startTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endTime", self._endTime)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numIntent", self._numIntent)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numSubscan", self._numSubscan)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("scanIntent", self._scanIntent)
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("calDataType", self._calDataType)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("calibrationOnLine", self._calibrationOnLine)
 
         if self._calibrationFunctionExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML(
                 "calibrationFunction", self._calibrationFunction
             )
 
         if self._calibrationSetExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("calibrationSet", self._calibrationSet)
 
         if self._calPatternExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("calPattern", self._calPattern)
 
         if self._numFieldExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numField", self._numField)
 
         if self._fieldNameExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("fieldName", self._fieldName)
 
         if self._sourceNameExists:
+            result += "\n   "
 
             result += Parser.valueToXML("sourceName", self._sourceName)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ScanTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -315,106 +370,112 @@ class ScanRow:
 
         # intrinsic attribute values
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", True)
 
-        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
+        self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
-        startTimeNode = rowdom.getElementsByTagName("startTime")[0]
+        startTimeNode = self._getFirstNodeByTagName(rowdom, "startTime", True)
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
+        self._startTime = ArrayTime(self._getXMLNodeChildText(startTimeNode))
 
-        endTimeNode = rowdom.getElementsByTagName("endTime")[0]
+        endTimeNode = self._getFirstNodeByTagName(rowdom, "endTime", True)
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
+        self._endTime = ArrayTime(self._getXMLNodeChildText(endTimeNode))
 
-        numIntentNode = rowdom.getElementsByTagName("numIntent")[0]
+        numIntentNode = self._getFirstNodeByTagName(rowdom, "numIntent", True)
 
-        self._numIntent = int(numIntentNode.firstChild.data.strip())
+        self._numIntent = int(self._getXMLNodeChildText(numIntentNode))
 
-        numSubscanNode = rowdom.getElementsByTagName("numSubscan")[0]
+        numSubscanNode = self._getFirstNodeByTagName(rowdom, "numSubscan", True)
 
-        self._numSubscan = int(numSubscanNode.firstChild.data.strip())
+        self._numSubscan = int(self._getXMLNodeChildText(numSubscanNode))
 
-        scanIntentNode = rowdom.getElementsByTagName("scanIntent")[0]
+        scanIntentNode = self._getFirstNodeByTagName(rowdom, "scanIntent", True)
 
-        scanIntentStr = scanIntentNode.firstChild.data.strip()
+        scanIntentStr = self._getXMLNodeChildText(scanIntentNode)
         self._scanIntent = Parser.stringListToLists(
             scanIntentStr, ScanIntent, "Scan", False
         )
 
-        calDataTypeNode = rowdom.getElementsByTagName("calDataType")[0]
+        calDataTypeNode = self._getFirstNodeByTagName(rowdom, "calDataType", True)
 
-        calDataTypeStr = calDataTypeNode.firstChild.data.strip()
+        calDataTypeStr = self._getXMLNodeChildText(calDataTypeNode)
         self._calDataType = Parser.stringListToLists(
             calDataTypeStr, CalDataOrigin, "Scan", False
         )
 
-        calibrationOnLineNode = rowdom.getElementsByTagName("calibrationOnLine")[0]
+        calibrationOnLineNode = self._getFirstNodeByTagName(
+            rowdom, "calibrationOnLine", True
+        )
 
-        calibrationOnLineStr = calibrationOnLineNode.firstChild.data.strip()
+        calibrationOnLineStr = self._getXMLNodeChildText(calibrationOnLineNode)
 
         self._calibrationOnLine = Parser.stringListToLists(
             calibrationOnLineStr, bool, "Scan", False
         )
 
-        calibrationFunctionNode = rowdom.getElementsByTagName("calibrationFunction")
-        if len(calibrationFunctionNode) > 0:
+        calibrationFunctionNode = self._getFirstNodeByTagName(
+            rowdom, "calibrationFunction", False
+        )
+        if calibrationFunctionNode:
 
-            calibrationFunctionStr = calibrationFunctionNode[0].firstChild.data.strip()
+            calibrationFunctionStr = self._getXMLNodeChildText(calibrationFunctionNode)
             self._calibrationFunction = Parser.stringListToLists(
                 calibrationFunctionStr, CalibrationFunction, "Scan", False
             )
 
             self._calibrationFunctionExists = True
 
-        calibrationSetNode = rowdom.getElementsByTagName("calibrationSet")
-        if len(calibrationSetNode) > 0:
+        calibrationSetNode = self._getFirstNodeByTagName(
+            rowdom, "calibrationSet", False
+        )
+        if calibrationSetNode:
 
-            calibrationSetStr = calibrationSetNode[0].firstChild.data.strip()
+            calibrationSetStr = self._getXMLNodeChildText(calibrationSetNode)
             self._calibrationSet = Parser.stringListToLists(
                 calibrationSetStr, CalibrationSet, "Scan", False
             )
 
             self._calibrationSetExists = True
 
-        calPatternNode = rowdom.getElementsByTagName("calPattern")
-        if len(calPatternNode) > 0:
+        calPatternNode = self._getFirstNodeByTagName(rowdom, "calPattern", False)
+        if calPatternNode:
 
-            calPatternStr = calPatternNode[0].firstChild.data.strip()
+            calPatternStr = self._getXMLNodeChildText(calPatternNode)
             self._calPattern = Parser.stringListToLists(
                 calPatternStr, AntennaMotionPattern, "Scan", False
             )
 
             self._calPatternExists = True
 
-        numFieldNode = rowdom.getElementsByTagName("numField")
-        if len(numFieldNode) > 0:
+        numFieldNode = self._getFirstNodeByTagName(rowdom, "numField", False)
+        if numFieldNode:
 
-            self._numField = int(numFieldNode[0].firstChild.data.strip())
+            self._numField = int(self._getXMLNodeChildText(numFieldNode))
 
             self._numFieldExists = True
 
-        fieldNameNode = rowdom.getElementsByTagName("fieldName")
-        if len(fieldNameNode) > 0:
+        fieldNameNode = self._getFirstNodeByTagName(rowdom, "fieldName", False)
+        if fieldNameNode:
 
-            fieldNameStr = fieldNameNode[0].firstChild.data.strip()
+            fieldNameStr = self._getXMLNodeChildText(fieldNameNode)
 
             self._fieldName = Parser.stringListToLists(fieldNameStr, str, "Scan", False)
 
             self._fieldNameExists = True
 
-        sourceNameNode = rowdom.getElementsByTagName("sourceName")
-        if len(sourceNameNode) > 0:
+        sourceNameNode = self._getFirstNodeByTagName(rowdom, "sourceName", False)
+        if sourceNameNode:
 
-            self._sourceName = str(sourceNameNode[0].firstChild.data.strip())
+            self._sourceName = str(self._getXMLNodeChildText(sourceNameNode))
 
             self._sourceNameExists = True
 
         # extrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
         # from link values, if any
 
@@ -728,6 +789,7 @@ class ScanRow:
         scanNumber The int value to which scanNumber is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -756,6 +818,7 @@ class ScanRow:
         """
         Set startTime with the specified ArrayTime value.
         startTime The ArrayTime value to which startTime is to be set.
+
         The value of startTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -779,6 +842,7 @@ class ScanRow:
         """
         Set endTime with the specified ArrayTime value.
         endTime The ArrayTime value to which endTime is to be set.
+
         The value of endTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -803,6 +867,7 @@ class ScanRow:
         numIntent The int value to which numIntent is to be set.
 
 
+
         """
 
         self._numIntent = int(numIntent)
@@ -825,6 +890,7 @@ class ScanRow:
         numSubscan The int value to which numSubscan is to be set.
 
 
+
         """
 
         self._numSubscan = int(numSubscan)
@@ -845,6 +911,7 @@ class ScanRow:
         """
         Set scanIntent with the specified ScanIntent []  value.
         scanIntent The ScanIntent []  value to which scanIntent is to be set.
+
 
 
         """
@@ -890,6 +957,7 @@ class ScanRow:
         calDataType The CalDataOrigin []  value to which calDataType is to be set.
 
 
+
         """
 
         # value must be a list
@@ -931,6 +999,7 @@ class ScanRow:
         """
         Set calibrationOnLine with the specified bool []  value.
         calibrationOnLine The bool []  value to which calibrationOnLine is to be set.
+
 
 
         """
@@ -988,6 +1057,7 @@ class ScanRow:
         """
         Set calibrationFunction with the specified CalibrationFunction []  value.
         calibrationFunction The CalibrationFunction []  value to which calibrationFunction is to be set.
+
 
 
         """
@@ -1055,6 +1125,7 @@ class ScanRow:
         calibrationSet The CalibrationSet []  value to which calibrationSet is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1118,6 +1189,7 @@ class ScanRow:
         """
         Set calPattern with the specified AntennaMotionPattern []  value.
         calPattern The AntennaMotionPattern []  value to which calPattern is to be set.
+
 
 
         """
@@ -1185,6 +1257,7 @@ class ScanRow:
         numField The int value to which numField is to be set.
 
 
+
         """
 
         self._numField = int(numField)
@@ -1227,6 +1300,7 @@ class ScanRow:
         """
         Set fieldName with the specified str []  value.
         fieldName The str []  value to which fieldName is to be set.
+
 
 
         """
@@ -1294,6 +1368,7 @@ class ScanRow:
         sourceName The str value to which sourceName is to be set.
 
 
+
         """
 
         self._sourceName = str(sourceName)
@@ -1325,6 +1400,7 @@ class ScanRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

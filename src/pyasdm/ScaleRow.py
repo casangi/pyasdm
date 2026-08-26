@@ -75,6 +75,16 @@ class ScaleRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -152,27 +162,58 @@ class ScaleRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("scaleId", self._scaleId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("timeScale", TimeScale.name(self._timeScale))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "crossDataScale", DataScale.name(self._crossDataScale)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "autoDataScale", DataScale.name(self._autoDataScale)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML("weightType", WeightType.name(self._weightType))
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ScaleTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -199,30 +240,32 @@ class ScaleRow:
 
         # intrinsic attribute values
 
-        scaleIdNode = rowdom.getElementsByTagName("scaleId")[0]
+        scaleIdNode = self._getFirstNodeByTagName(rowdom, "scaleId", True)
 
-        self._scaleId = Tag(scaleIdNode.firstChild.data.strip())
+        self._scaleId = Tag(self._getXMLNodeChildText(scaleIdNode))
 
-        timeScaleNode = rowdom.getElementsByTagName("timeScale")[0]
+        timeScaleNode = self._getFirstNodeByTagName(rowdom, "timeScale", True)
 
-        self._timeScale = TimeScale.newTimeScale(timeScaleNode.firstChild.data.strip())
+        self._timeScale = TimeScale.newTimeScale(
+            self._getXMLNodeChildText(timeScaleNode)
+        )
 
-        crossDataScaleNode = rowdom.getElementsByTagName("crossDataScale")[0]
+        crossDataScaleNode = self._getFirstNodeByTagName(rowdom, "crossDataScale", True)
 
         self._crossDataScale = DataScale.newDataScale(
-            crossDataScaleNode.firstChild.data.strip()
+            self._getXMLNodeChildText(crossDataScaleNode)
         )
 
-        autoDataScaleNode = rowdom.getElementsByTagName("autoDataScale")[0]
+        autoDataScaleNode = self._getFirstNodeByTagName(rowdom, "autoDataScale", True)
 
         self._autoDataScale = DataScale.newDataScale(
-            autoDataScaleNode.firstChild.data.strip()
+            self._getXMLNodeChildText(autoDataScaleNode)
         )
 
-        weightTypeNode = rowdom.getElementsByTagName("weightType")[0]
+        weightTypeNode = self._getFirstNodeByTagName(rowdom, "weightType", True)
 
         self._weightType = WeightType.newWeightType(
-            weightTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(weightTypeNode)
         )
 
         # from link values, if any
@@ -339,6 +382,7 @@ class ScaleRow:
         """
         Set scaleId with the specified Tag value.
         scaleId The Tag value to which scaleId is to be set.
+
         The value of scaleId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -370,6 +414,7 @@ class ScaleRow:
         timeScale The TimeScale value to which timeScale is to be set.
 
 
+
         """
 
         self._timeScale = TimeScale(timeScale)
@@ -390,6 +435,7 @@ class ScaleRow:
         """
         Set crossDataScale with the specified DataScale value.
         crossDataScale The DataScale value to which crossDataScale is to be set.
+
 
 
         """
@@ -414,6 +460,7 @@ class ScaleRow:
         autoDataScale The DataScale value to which autoDataScale is to be set.
 
 
+
         """
 
         self._autoDataScale = DataScale(autoDataScale)
@@ -434,6 +481,7 @@ class ScaleRow:
         """
         Set weightType with the specified WeightType value.
         weightType The WeightType value to which weightType is to be set.
+
 
 
         """

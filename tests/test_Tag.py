@@ -2,6 +2,7 @@ import unittest
 from pyasdm.types.Tag import Tag
 from pyasdm.types.TagType import TagType
 
+
 class tag_test(unittest.TestCase):
 
     def setUp(self):
@@ -52,10 +53,10 @@ class tag_test(unittest.TestCase):
         ok = False
         try:
             # 3 arguments isn't a thing
-            badTag = Tag(1,2,3)
+            badTag = Tag(1, 2, 3)
         except ValueError as exc:
             ok = True
-        self.assertTrue(ok,"Tag constructor accepted 3 arguments!")
+        self.assertTrue(ok, "Tag constructor accepted 3 arguments!")
 
         ok = False
         try:
@@ -63,23 +64,25 @@ class tag_test(unittest.TestCase):
             badTag = Tag("1")
         except ValueError as exc:
             ok = True
-        self.assertTrue(ok,"Tag constructor accepted a string value as an argument")
+        self.assertTrue(ok, "Tag constructor accepted a string value as an argument")
 
         ok = False
         try:
             # 2 arguments, first is not an int
-            badTag = Tag(1.0,TagType.DataDescription)
+            badTag = Tag(1.0, TagType.DataDescription)
         except ValueError as exc:
             ok = True
-        self.assertTrue(ok,"Tag constructor acccepted a float as first of 2 arguments")
-        
+        self.assertTrue(ok, "Tag constructor acccepted a float as first of 2 arguments")
+
         ok = False
         try:
             # 2 arguments, second is not a TagType
-            badTag = Tag(1.0,"DataDescription")
+            badTag = Tag(1.0, "DataDescription")
         except ValueError as exc:
             ok = True
-        self.assertTrue(ok,"Tag constructor acccepted a string as second of 2 arguments")
+        self.assertTrue(
+            ok, "Tag constructor acccepted a string as second of 2 arguments"
+        )
 
         ok = False
         try:
@@ -87,7 +90,7 @@ class tag_test(unittest.TestCase):
             badTag = Tag.parseString("DataDescription10")
         except:
             ok = True
-        self.assertTrue(ok,"parseString parsed an invalid string - DataDescription10")
+        self.assertTrue(ok, "parseString parsed an invalid string - DataDescription10")
 
         ok = False
         try:
@@ -95,7 +98,9 @@ class tag_test(unittest.TestCase):
             badTag = Tag.parseString("Data_Description_10")
         except:
             ok = True
-        self.assertTrue(ok,"parseString parsed an invalid string - Data_Description_10")
+        self.assertTrue(
+            ok, "parseString parsed an invalid string - Data_Description_10"
+        )
 
         ok = False
         try:
@@ -103,9 +108,11 @@ class tag_test(unittest.TestCase):
             badTag = Tag.parseString("DataDescriptions_10")
         except:
             ok = True
-        self.assertTrue(ok,"parseString parsed an invalid string - DataDescriptions_10")
+        self.assertTrue(
+            ok, "parseString parsed an invalid string - DataDescriptions_10"
+        )
+
 
 if __name__ == "__main__":
-    
-    unittest.main()
 
+    unittest.main()

@@ -72,6 +72,16 @@ class CalHolographyRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -304,93 +314,160 @@ class CalHolographyRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "ambientTemperature", self._ambientTemperature
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("focusPosition", self._focusPosition)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
-        result += Parser.valueToXML("illuminationTaper", self._illuminationTaper)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("illuminationTaper", self._illuminationTaper)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numPanelModes", self._numPanelModes)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("beamMapUID", self._beamMapUID)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("rawRMS", self._rawRMS)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("weightedRMS", self._weightedRMS)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("surfaceMapUID", self._surfaceMapUID)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("direction", self._direction)
 
         if self._numScrewExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numScrew", self._numScrew)
 
         if self._screwNameExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("screwName", self._screwName)
 
         if self._screwMotionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("screwMotion", self._screwMotion)
 
         if self._screwMotionErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "screwMotionError", self._screwMotionError
             )
 
         if self._gravCorrectionExists:
+            result += "\n   "
 
             result += Parser.valueToXML("gravCorrection", self._gravCorrection)
 
         if self._gravOptRangeExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("gravOptRange", self._gravOptRange)
 
         if self._tempCorrectionExists:
+            result += "\n   "
 
             result += Parser.valueToXML("tempCorrection", self._tempCorrection)
 
         if self._tempOptRangeExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("tempOptRange", self._tempOptRange)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalHolographyTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -417,106 +494,114 @@ class CalHolographyRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+        antennaMakeNode = self._getFirstNodeByTagName(rowdom, "antennaMake", True)
 
         self._antennaMake = AntennaMake.newAntennaMake(
-            antennaMakeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaMakeNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        ambientTemperatureNode = rowdom.getElementsByTagName("ambientTemperature")[0]
+        ambientTemperatureNode = self._getFirstNodeByTagName(
+            rowdom, "ambientTemperature", True
+        )
 
         self._ambientTemperature = Temperature(
-            ambientTemperatureNode.firstChild.data.strip()
+            self._getXMLNodeChildText(ambientTemperatureNode)
         )
 
-        focusPositionNode = rowdom.getElementsByTagName("focusPosition")[0]
+        focusPositionNode = self._getFirstNodeByTagName(rowdom, "focusPosition", True)
 
-        focusPositionStr = focusPositionNode.firstChild.data.strip()
+        focusPositionStr = self._getXMLNodeChildText(focusPositionNode)
 
         self._focusPosition = Parser.stringListToLists(
             focusPositionStr, Length, "CalHolography", True
         )
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalHolography", True
         )
 
-        illuminationTaperNode = rowdom.getElementsByTagName("illuminationTaper")[0]
+        illuminationTaperNode = self._getFirstNodeByTagName(
+            rowdom, "illuminationTaper", True
+        )
 
-        self._illuminationTaper = float(illuminationTaperNode.firstChild.data.strip())
+        self._illuminationTaper = float(
+            self._getXMLNodeChildText(illuminationTaperNode)
+        )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalHolography", False
         )
 
-        numPanelModesNode = rowdom.getElementsByTagName("numPanelModes")[0]
+        numPanelModesNode = self._getFirstNodeByTagName(rowdom, "numPanelModes", True)
 
-        self._numPanelModes = int(numPanelModesNode.firstChild.data.strip())
+        self._numPanelModes = int(self._getXMLNodeChildText(numPanelModesNode))
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        beamMapUIDNode = rowdom.getElementsByTagName("beamMapUID")[0]
+        beamMapUIDNode = self._getFirstNodeByTagName(rowdom, "beamMapUID", True)
 
         self._beamMapUID = EntityRef(beamMapUIDNode.toxml())
 
-        rawRMSNode = rowdom.getElementsByTagName("rawRMS")[0]
+        rawRMSNode = self._getFirstNodeByTagName(rowdom, "rawRMS", True)
 
-        self._rawRMS = Length(rawRMSNode.firstChild.data.strip())
+        self._rawRMS = Length(self._getXMLNodeChildText(rawRMSNode))
 
-        weightedRMSNode = rowdom.getElementsByTagName("weightedRMS")[0]
+        weightedRMSNode = self._getFirstNodeByTagName(rowdom, "weightedRMS", True)
 
-        self._weightedRMS = Length(weightedRMSNode.firstChild.data.strip())
+        self._weightedRMS = Length(self._getXMLNodeChildText(weightedRMSNode))
 
-        surfaceMapUIDNode = rowdom.getElementsByTagName("surfaceMapUID")[0]
+        surfaceMapUIDNode = self._getFirstNodeByTagName(rowdom, "surfaceMapUID", True)
 
         self._surfaceMapUID = EntityRef(surfaceMapUIDNode.toxml())
 
-        directionNode = rowdom.getElementsByTagName("direction")[0]
+        directionNode = self._getFirstNodeByTagName(rowdom, "direction", True)
 
-        directionStr = directionNode.firstChild.data.strip()
+        directionStr = self._getXMLNodeChildText(directionNode)
 
         self._direction = Parser.stringListToLists(
             directionStr, Angle, "CalHolography", True
         )
 
-        numScrewNode = rowdom.getElementsByTagName("numScrew")
-        if len(numScrewNode) > 0:
+        numScrewNode = self._getFirstNodeByTagName(rowdom, "numScrew", False)
+        if numScrewNode:
 
-            self._numScrew = int(numScrewNode[0].firstChild.data.strip())
+            self._numScrew = int(self._getXMLNodeChildText(numScrewNode))
 
             self._numScrewExists = True
 
-        screwNameNode = rowdom.getElementsByTagName("screwName")
-        if len(screwNameNode) > 0:
+        screwNameNode = self._getFirstNodeByTagName(rowdom, "screwName", False)
+        if screwNameNode:
 
-            screwNameStr = screwNameNode[0].firstChild.data.strip()
+            screwNameStr = self._getXMLNodeChildText(screwNameNode)
 
             self._screwName = Parser.stringListToLists(
                 screwNameStr, str, "CalHolography", False
@@ -524,10 +609,10 @@ class CalHolographyRow:
 
             self._screwNameExists = True
 
-        screwMotionNode = rowdom.getElementsByTagName("screwMotion")
-        if len(screwMotionNode) > 0:
+        screwMotionNode = self._getFirstNodeByTagName(rowdom, "screwMotion", False)
+        if screwMotionNode:
 
-            screwMotionStr = screwMotionNode[0].firstChild.data.strip()
+            screwMotionStr = self._getXMLNodeChildText(screwMotionNode)
 
             self._screwMotion = Parser.stringListToLists(
                 screwMotionStr, Length, "CalHolography", True
@@ -535,10 +620,12 @@ class CalHolographyRow:
 
             self._screwMotionExists = True
 
-        screwMotionErrorNode = rowdom.getElementsByTagName("screwMotionError")
-        if len(screwMotionErrorNode) > 0:
+        screwMotionErrorNode = self._getFirstNodeByTagName(
+            rowdom, "screwMotionError", False
+        )
+        if screwMotionErrorNode:
 
-            screwMotionErrorStr = screwMotionErrorNode[0].firstChild.data.strip()
+            screwMotionErrorStr = self._getXMLNodeChildText(screwMotionErrorNode)
 
             self._screwMotionError = Parser.stringListToLists(
                 screwMotionErrorStr, Length, "CalHolography", True
@@ -546,17 +633,19 @@ class CalHolographyRow:
 
             self._screwMotionErrorExists = True
 
-        gravCorrectionNode = rowdom.getElementsByTagName("gravCorrection")
-        if len(gravCorrectionNode) > 0:
+        gravCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "gravCorrection", False
+        )
+        if gravCorrectionNode:
 
-            self._gravCorrection = bool(gravCorrectionNode[0].firstChild.data.strip())
+            self._gravCorrection = bool(self._getXMLNodeChildText(gravCorrectionNode))
 
             self._gravCorrectionExists = True
 
-        gravOptRangeNode = rowdom.getElementsByTagName("gravOptRange")
-        if len(gravOptRangeNode) > 0:
+        gravOptRangeNode = self._getFirstNodeByTagName(rowdom, "gravOptRange", False)
+        if gravOptRangeNode:
 
-            gravOptRangeStr = gravOptRangeNode[0].firstChild.data.strip()
+            gravOptRangeStr = self._getXMLNodeChildText(gravOptRangeNode)
 
             self._gravOptRange = Parser.stringListToLists(
                 gravOptRangeStr, Angle, "CalHolography", True
@@ -564,17 +653,19 @@ class CalHolographyRow:
 
             self._gravOptRangeExists = True
 
-        tempCorrectionNode = rowdom.getElementsByTagName("tempCorrection")
-        if len(tempCorrectionNode) > 0:
+        tempCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "tempCorrection", False
+        )
+        if tempCorrectionNode:
 
-            self._tempCorrection = bool(tempCorrectionNode[0].firstChild.data.strip())
+            self._tempCorrection = bool(self._getXMLNodeChildText(tempCorrectionNode))
 
             self._tempCorrectionExists = True
 
-        tempOptRangeNode = rowdom.getElementsByTagName("tempOptRange")
-        if len(tempOptRangeNode) > 0:
+        tempOptRangeNode = self._getFirstNodeByTagName(rowdom, "tempOptRange", False)
+        if tempOptRangeNode:
 
-            tempOptRangeStr = tempOptRangeNode[0].firstChild.data.strip()
+            tempOptRangeStr = self._getXMLNodeChildText(tempOptRangeNode)
 
             self._tempOptRange = Parser.stringListToLists(
                 tempOptRangeStr, Temperature, "CalHolography", True
@@ -584,13 +675,13 @@ class CalHolographyRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -617,7 +708,7 @@ class CalHolographyRow:
 
         Frequency.listToBin(self._frequencyRange, eos)
 
-        eos.writeFloat(self._illuminationTaper)
+        eos.writeDouble(self._illuminationTaper)
 
         eos.writeInt(self._numReceptor)
 
@@ -761,7 +852,7 @@ class CalHolographyRow:
         Set the illuminationTaper in row from the EndianInput (eis) instance.
         """
 
-        row._illuminationTaper = eis.readFloat()
+        row._illuminationTaper = eis.readDouble()
 
     @staticmethod
     def numReceptorFromBin(row, eis):
@@ -1008,6 +1099,7 @@ class CalHolographyRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1037,6 +1129,7 @@ class CalHolographyRow:
         antennaMake The AntennaMake value to which antennaMake is to be set.
 
 
+
         """
 
         self._antennaMake = AntennaMake(antennaMake)
@@ -1058,6 +1151,7 @@ class CalHolographyRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1081,6 +1175,7 @@ class CalHolographyRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1104,6 +1199,7 @@ class CalHolographyRow:
         """
         Set ambientTemperature with the specified Temperature value.
         ambientTemperature The Temperature value to which ambientTemperature is to be set.
+
         The value of ambientTemperature can be anything allowed by the Temperature constructor.
 
         """
@@ -1126,6 +1222,7 @@ class CalHolographyRow:
         """
         Set focusPosition with the specified Length []  value.
         focusPosition The Length []  value to which focusPosition is to be set.
+
         The value of focusPosition can be anything allowed by the Length []  constructor.
 
         """
@@ -1169,6 +1266,7 @@ class CalHolographyRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1213,6 +1311,9 @@ class CalHolographyRow:
         Set illuminationTaper with the specified float value.
         illuminationTaper The float value to which illuminationTaper is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1236,6 +1337,7 @@ class CalHolographyRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1256,6 +1358,7 @@ class CalHolographyRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1301,6 +1404,7 @@ class CalHolographyRow:
         numPanelModes The int value to which numPanelModes is to be set.
 
 
+
         """
 
         self._numPanelModes = int(numPanelModes)
@@ -1321,6 +1425,7 @@ class CalHolographyRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         """
@@ -1344,6 +1449,7 @@ class CalHolographyRow:
         """
         Set beamMapUID with the specified EntityRef value.
         beamMapUID The EntityRef value to which beamMapUID is to be set.
+
         The value of beamMapUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1367,6 +1473,7 @@ class CalHolographyRow:
         """
         Set rawRMS with the specified Length value.
         rawRMS The Length value to which rawRMS is to be set.
+
         The value of rawRMS can be anything allowed by the Length constructor.
 
         """
@@ -1390,6 +1497,7 @@ class CalHolographyRow:
         """
         Set weightedRMS with the specified Length value.
         weightedRMS The Length value to which weightedRMS is to be set.
+
         The value of weightedRMS can be anything allowed by the Length constructor.
 
         """
@@ -1413,6 +1521,7 @@ class CalHolographyRow:
         """
         Set surfaceMapUID with the specified EntityRef value.
         surfaceMapUID The EntityRef value to which surfaceMapUID is to be set.
+
         The value of surfaceMapUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1435,6 +1544,7 @@ class CalHolographyRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1494,6 +1604,7 @@ class CalHolographyRow:
         numScrew The int value to which numScrew is to be set.
 
 
+
         """
 
         self._numScrew = int(numScrew)
@@ -1536,6 +1647,7 @@ class CalHolographyRow:
         """
         Set screwName with the specified str []  value.
         screwName The str []  value to which screwName is to be set.
+
 
 
         """
@@ -1601,6 +1713,7 @@ class CalHolographyRow:
         """
         Set screwMotion with the specified Length []  value.
         screwMotion The Length []  value to which screwMotion is to be set.
+
         The value of screwMotion can be anything allowed by the Length []  constructor.
 
         """
@@ -1666,6 +1779,7 @@ class CalHolographyRow:
         """
         Set screwMotionError with the specified Length []  value.
         screwMotionError The Length []  value to which screwMotionError is to be set.
+
         The value of screwMotionError can be anything allowed by the Length []  constructor.
 
         """
@@ -1733,6 +1847,7 @@ class CalHolographyRow:
         gravCorrection The bool value to which gravCorrection is to be set.
 
 
+
         """
 
         self._gravCorrection = bool(gravCorrection)
@@ -1775,6 +1890,7 @@ class CalHolographyRow:
         """
         Set gravOptRange with the specified Angle []  value.
         gravOptRange The Angle []  value to which gravOptRange is to be set.
+
         The value of gravOptRange can be anything allowed by the Angle []  constructor.
 
         """
@@ -1842,6 +1958,7 @@ class CalHolographyRow:
         tempCorrection The bool value to which tempCorrection is to be set.
 
 
+
         """
 
         self._tempCorrection = bool(tempCorrection)
@@ -1884,6 +2001,7 @@ class CalHolographyRow:
         """
         Set tempOptRange with the specified Temperature []  value.
         tempOptRange The Temperature []  value to which tempOptRange is to be set.
+
         The value of tempOptRange can be anything allowed by the Temperature []  constructor.
 
         """
@@ -1938,6 +2056,7 @@ class CalHolographyRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1968,6 +2087,7 @@ class CalHolographyRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

@@ -63,6 +63,16 @@ class ExecBlockRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -305,95 +315,167 @@ class ExecBlockRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startTime", self._startTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endTime", self._endTime)
+
+        result += "\n   "
 
         result += Parser.valueToXML("execBlockNum", self._execBlockNum)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockUID", self._execBlockUID)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("projectUID", self._projectUID)
 
+        result += "\n   "
+
         result += Parser.valueToXML("configName", self._configName)
+
+        result += "\n   "
 
         result += Parser.valueToXML("telescopeName", self._telescopeName)
 
+        result += "\n   "
+
         result += Parser.valueToXML("observerName", self._observerName)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numObservingLog", self._numObservingLog)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("observingLog", self._observingLog)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("sessionReference", self._sessionReference)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("baseRangeMin", self._baseRangeMin)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("baseRangeMax", self._baseRangeMax)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("baseRmsMinor", self._baseRmsMinor)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("baseRmsMajor", self._baseRmsMajor)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("basePa", self._basePa)
 
+        result += "\n   "
+
         result += Parser.valueToXML("aborted", self._aborted)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numAntenna", self._numAntenna)
 
         if self._releaseDateExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("releaseDate", self._releaseDate)
 
         if self._schedulerModeExists:
+            result += "\n   "
 
             result += Parser.valueToXML("schedulerMode", self._schedulerMode)
 
         if self._siteAltitudeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("siteAltitude", self._siteAltitude)
 
         if self._siteLongitudeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("siteLongitude", self._siteLongitude)
 
         if self._siteLatitudeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("siteLatitude", self._siteLatitude)
 
         if self._observingScriptExists:
+            result += "\n   "
 
             result += Parser.valueToXML("observingScript", self._observingScript)
 
         if self._observingScriptUIDExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "observingScriptUID", self._observingScriptUID
             )
 
         if self._arrayNameExists:
+            result += "\n   "
 
             result += Parser.valueToXML("arrayName", self._arrayName)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("sBSummaryId", self._sBSummaryId)
 
         if self._scaleIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("scaleId", self._scaleId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ExecBlockTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -420,160 +502,168 @@ class ExecBlockRow:
 
         # intrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
-        startTimeNode = rowdom.getElementsByTagName("startTime")[0]
+        startTimeNode = self._getFirstNodeByTagName(rowdom, "startTime", True)
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
+        self._startTime = ArrayTime(self._getXMLNodeChildText(startTimeNode))
 
-        endTimeNode = rowdom.getElementsByTagName("endTime")[0]
+        endTimeNode = self._getFirstNodeByTagName(rowdom, "endTime", True)
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
+        self._endTime = ArrayTime(self._getXMLNodeChildText(endTimeNode))
 
-        execBlockNumNode = rowdom.getElementsByTagName("execBlockNum")[0]
+        execBlockNumNode = self._getFirstNodeByTagName(rowdom, "execBlockNum", True)
 
-        self._execBlockNum = int(execBlockNumNode.firstChild.data.strip())
+        self._execBlockNum = int(self._getXMLNodeChildText(execBlockNumNode))
 
-        execBlockUIDNode = rowdom.getElementsByTagName("execBlockUID")[0]
+        execBlockUIDNode = self._getFirstNodeByTagName(rowdom, "execBlockUID", True)
 
         self._execBlockUID = EntityRef(execBlockUIDNode.toxml())
 
-        projectUIDNode = rowdom.getElementsByTagName("projectUID")[0]
+        projectUIDNode = self._getFirstNodeByTagName(rowdom, "projectUID", True)
 
         self._projectUID = EntityRef(projectUIDNode.toxml())
 
-        configNameNode = rowdom.getElementsByTagName("configName")[0]
+        configNameNode = self._getFirstNodeByTagName(rowdom, "configName", True)
 
-        self._configName = str(configNameNode.firstChild.data.strip())
+        self._configName = str(self._getXMLNodeChildText(configNameNode))
 
-        telescopeNameNode = rowdom.getElementsByTagName("telescopeName")[0]
+        telescopeNameNode = self._getFirstNodeByTagName(rowdom, "telescopeName", True)
 
-        self._telescopeName = str(telescopeNameNode.firstChild.data.strip())
+        self._telescopeName = str(self._getXMLNodeChildText(telescopeNameNode))
 
-        observerNameNode = rowdom.getElementsByTagName("observerName")[0]
+        observerNameNode = self._getFirstNodeByTagName(rowdom, "observerName", True)
 
-        self._observerName = str(observerNameNode.firstChild.data.strip())
+        self._observerName = str(self._getXMLNodeChildText(observerNameNode))
 
-        numObservingLogNode = rowdom.getElementsByTagName("numObservingLog")[0]
+        numObservingLogNode = self._getFirstNodeByTagName(
+            rowdom, "numObservingLog", True
+        )
 
-        self._numObservingLog = int(numObservingLogNode.firstChild.data.strip())
+        self._numObservingLog = int(self._getXMLNodeChildText(numObservingLogNode))
 
-        observingLogNode = rowdom.getElementsByTagName("observingLog")[0]
+        observingLogNode = self._getFirstNodeByTagName(rowdom, "observingLog", True)
 
-        observingLogStr = observingLogNode.firstChild.data.strip()
+        observingLogStr = self._getXMLNodeChildText(observingLogNode)
 
         self._observingLog = Parser.stringListToLists(
             observingLogStr, str, "ExecBlock", False
         )
 
-        sessionReferenceNode = rowdom.getElementsByTagName("sessionReference")[0]
+        sessionReferenceNode = self._getFirstNodeByTagName(
+            rowdom, "sessionReference", True
+        )
 
         self._sessionReference = EntityRef(sessionReferenceNode.toxml())
 
-        baseRangeMinNode = rowdom.getElementsByTagName("baseRangeMin")[0]
+        baseRangeMinNode = self._getFirstNodeByTagName(rowdom, "baseRangeMin", True)
 
-        self._baseRangeMin = Length(baseRangeMinNode.firstChild.data.strip())
+        self._baseRangeMin = Length(self._getXMLNodeChildText(baseRangeMinNode))
 
-        baseRangeMaxNode = rowdom.getElementsByTagName("baseRangeMax")[0]
+        baseRangeMaxNode = self._getFirstNodeByTagName(rowdom, "baseRangeMax", True)
 
-        self._baseRangeMax = Length(baseRangeMaxNode.firstChild.data.strip())
+        self._baseRangeMax = Length(self._getXMLNodeChildText(baseRangeMaxNode))
 
-        baseRmsMinorNode = rowdom.getElementsByTagName("baseRmsMinor")[0]
+        baseRmsMinorNode = self._getFirstNodeByTagName(rowdom, "baseRmsMinor", True)
 
-        self._baseRmsMinor = Length(baseRmsMinorNode.firstChild.data.strip())
+        self._baseRmsMinor = Length(self._getXMLNodeChildText(baseRmsMinorNode))
 
-        baseRmsMajorNode = rowdom.getElementsByTagName("baseRmsMajor")[0]
+        baseRmsMajorNode = self._getFirstNodeByTagName(rowdom, "baseRmsMajor", True)
 
-        self._baseRmsMajor = Length(baseRmsMajorNode.firstChild.data.strip())
+        self._baseRmsMajor = Length(self._getXMLNodeChildText(baseRmsMajorNode))
 
-        basePaNode = rowdom.getElementsByTagName("basePa")[0]
+        basePaNode = self._getFirstNodeByTagName(rowdom, "basePa", True)
 
-        self._basePa = Angle(basePaNode.firstChild.data.strip())
+        self._basePa = Angle(self._getXMLNodeChildText(basePaNode))
 
-        abortedNode = rowdom.getElementsByTagName("aborted")[0]
+        abortedNode = self._getFirstNodeByTagName(rowdom, "aborted", True)
 
-        self._aborted = bool(abortedNode.firstChild.data.strip())
+        self._aborted = bool(self._getXMLNodeChildText(abortedNode))
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", True)
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
-        releaseDateNode = rowdom.getElementsByTagName("releaseDate")
-        if len(releaseDateNode) > 0:
+        releaseDateNode = self._getFirstNodeByTagName(rowdom, "releaseDate", False)
+        if releaseDateNode:
 
-            self._releaseDate = ArrayTime(releaseDateNode[0].firstChild.data.strip())
+            self._releaseDate = ArrayTime(self._getXMLNodeChildText(releaseDateNode))
 
             self._releaseDateExists = True
 
-        schedulerModeNode = rowdom.getElementsByTagName("schedulerMode")
-        if len(schedulerModeNode) > 0:
+        schedulerModeNode = self._getFirstNodeByTagName(rowdom, "schedulerMode", False)
+        if schedulerModeNode:
 
-            self._schedulerMode = str(schedulerModeNode[0].firstChild.data.strip())
+            self._schedulerMode = str(self._getXMLNodeChildText(schedulerModeNode))
 
             self._schedulerModeExists = True
 
-        siteAltitudeNode = rowdom.getElementsByTagName("siteAltitude")
-        if len(siteAltitudeNode) > 0:
+        siteAltitudeNode = self._getFirstNodeByTagName(rowdom, "siteAltitude", False)
+        if siteAltitudeNode:
 
-            self._siteAltitude = Length(siteAltitudeNode[0].firstChild.data.strip())
+            self._siteAltitude = Length(self._getXMLNodeChildText(siteAltitudeNode))
 
             self._siteAltitudeExists = True
 
-        siteLongitudeNode = rowdom.getElementsByTagName("siteLongitude")
-        if len(siteLongitudeNode) > 0:
+        siteLongitudeNode = self._getFirstNodeByTagName(rowdom, "siteLongitude", False)
+        if siteLongitudeNode:
 
-            self._siteLongitude = Angle(siteLongitudeNode[0].firstChild.data.strip())
+            self._siteLongitude = Angle(self._getXMLNodeChildText(siteLongitudeNode))
 
             self._siteLongitudeExists = True
 
-        siteLatitudeNode = rowdom.getElementsByTagName("siteLatitude")
-        if len(siteLatitudeNode) > 0:
+        siteLatitudeNode = self._getFirstNodeByTagName(rowdom, "siteLatitude", False)
+        if siteLatitudeNode:
 
-            self._siteLatitude = Angle(siteLatitudeNode[0].firstChild.data.strip())
+            self._siteLatitude = Angle(self._getXMLNodeChildText(siteLatitudeNode))
 
             self._siteLatitudeExists = True
 
-        observingScriptNode = rowdom.getElementsByTagName("observingScript")
-        if len(observingScriptNode) > 0:
+        observingScriptNode = self._getFirstNodeByTagName(
+            rowdom, "observingScript", False
+        )
+        if observingScriptNode:
 
-            self._observingScript = str(observingScriptNode[0].firstChild.data.strip())
+            self._observingScript = str(self._getXMLNodeChildText(observingScriptNode))
 
             self._observingScriptExists = True
 
-        observingScriptUIDNode = rowdom.getElementsByTagName("observingScriptUID")
-        if len(observingScriptUIDNode) > 0:
+        observingScriptUIDNode = self._getFirstNodeByTagName(
+            rowdom, "observingScriptUID", False
+        )
+        if observingScriptUIDNode:
 
             self._observingScriptUID = EntityRef(
-                observingScriptUIDNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(observingScriptUIDNode)
             )
 
             self._observingScriptUIDExists = True
 
-        arrayNameNode = rowdom.getElementsByTagName("arrayName")
-        if len(arrayNameNode) > 0:
+        arrayNameNode = self._getFirstNodeByTagName(rowdom, "arrayName", False)
+        if arrayNameNode:
 
-            self._arrayName = str(arrayNameNode[0].firstChild.data.strip())
+            self._arrayName = str(self._getXMLNodeChildText(arrayNameNode))
 
             self._arrayNameExists = True
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        antennaIdStr = antennaIdNode.firstChild.data.strip()
+        antennaIdStr = self._getXMLNodeChildText(antennaIdNode)
 
         self._antennaId = Parser.stringListToLists(antennaIdStr, Tag, "ExecBlock", True)
 
-        sBSummaryIdNode = rowdom.getElementsByTagName("sBSummaryId")[0]
+        sBSummaryIdNode = self._getFirstNodeByTagName(rowdom, "sBSummaryId", True)
 
-        self._sBSummaryId = Tag(sBSummaryIdNode.firstChild.data.strip())
+        self._sBSummaryId = Tag(self._getXMLNodeChildText(sBSummaryIdNode))
 
-        scaleIdNode = rowdom.getElementsByTagName("scaleId")
-        if len(scaleIdNode) > 0:
+        scaleIdNode = self._getFirstNodeByTagName(rowdom, "scaleId", False)
+        if scaleIdNode:
 
-            self._scaleId = Tag(scaleIdNode[0].firstChild.data.strip())
+            self._scaleId = Tag(self._getXMLNodeChildText(scaleIdNode))
 
             self._scaleIdExists = True
 
@@ -1020,6 +1110,7 @@ class ExecBlockRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1050,6 +1141,7 @@ class ExecBlockRow:
         """
         Set startTime with the specified ArrayTime value.
         startTime The ArrayTime value to which startTime is to be set.
+
         The value of startTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1073,6 +1165,7 @@ class ExecBlockRow:
         """
         Set endTime with the specified ArrayTime value.
         endTime The ArrayTime value to which endTime is to be set.
+
         The value of endTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1097,6 +1190,7 @@ class ExecBlockRow:
         execBlockNum The int value to which execBlockNum is to be set.
 
 
+
         """
 
         self._execBlockNum = int(execBlockNum)
@@ -1118,6 +1212,7 @@ class ExecBlockRow:
         """
         Set execBlockUID with the specified EntityRef value.
         execBlockUID The EntityRef value to which execBlockUID is to be set.
+
         The value of execBlockUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1141,6 +1236,7 @@ class ExecBlockRow:
         """
         Set projectUID with the specified EntityRef value.
         projectUID The EntityRef value to which projectUID is to be set.
+
         The value of projectUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1165,6 +1261,7 @@ class ExecBlockRow:
         configName The str value to which configName is to be set.
 
 
+
         """
 
         self._configName = str(configName)
@@ -1185,6 +1282,7 @@ class ExecBlockRow:
         """
         Set telescopeName with the specified str value.
         telescopeName The str value to which telescopeName is to be set.
+
 
 
         """
@@ -1209,6 +1307,7 @@ class ExecBlockRow:
         observerName The str value to which observerName is to be set.
 
 
+
         """
 
         self._observerName = str(observerName)
@@ -1231,6 +1330,7 @@ class ExecBlockRow:
         numObservingLog The int value to which numObservingLog is to be set.
 
 
+
         """
 
         self._numObservingLog = int(numObservingLog)
@@ -1251,6 +1351,7 @@ class ExecBlockRow:
         """
         Set observingLog with the specified str []  value.
         observingLog The str []  value to which observingLog is to be set.
+
 
 
         """
@@ -1295,6 +1396,7 @@ class ExecBlockRow:
         """
         Set sessionReference with the specified EntityRef value.
         sessionReference The EntityRef value to which sessionReference is to be set.
+
         The value of sessionReference can be anything allowed by the EntityRef constructor.
 
         """
@@ -1318,6 +1420,7 @@ class ExecBlockRow:
         """
         Set baseRangeMin with the specified Length value.
         baseRangeMin The Length value to which baseRangeMin is to be set.
+
         The value of baseRangeMin can be anything allowed by the Length constructor.
 
         """
@@ -1341,6 +1444,7 @@ class ExecBlockRow:
         """
         Set baseRangeMax with the specified Length value.
         baseRangeMax The Length value to which baseRangeMax is to be set.
+
         The value of baseRangeMax can be anything allowed by the Length constructor.
 
         """
@@ -1364,6 +1468,7 @@ class ExecBlockRow:
         """
         Set baseRmsMinor with the specified Length value.
         baseRmsMinor The Length value to which baseRmsMinor is to be set.
+
         The value of baseRmsMinor can be anything allowed by the Length constructor.
 
         """
@@ -1387,6 +1492,7 @@ class ExecBlockRow:
         """
         Set baseRmsMajor with the specified Length value.
         baseRmsMajor The Length value to which baseRmsMajor is to be set.
+
         The value of baseRmsMajor can be anything allowed by the Length constructor.
 
         """
@@ -1410,6 +1516,7 @@ class ExecBlockRow:
         """
         Set basePa with the specified Angle value.
         basePa The Angle value to which basePa is to be set.
+
         The value of basePa can be anything allowed by the Angle constructor.
 
         """
@@ -1434,6 +1541,7 @@ class ExecBlockRow:
         aborted The bool value to which aborted is to be set.
 
 
+
         """
 
         self._aborted = bool(aborted)
@@ -1454,6 +1562,7 @@ class ExecBlockRow:
         """
         Set numAntenna with the specified int value.
         numAntenna The int value to which numAntenna is to be set.
+
 
 
         """
@@ -1491,6 +1600,7 @@ class ExecBlockRow:
         """
         Set releaseDate with the specified ArrayTime value.
         releaseDate The ArrayTime value to which releaseDate is to be set.
+
         The value of releaseDate can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1537,6 +1647,7 @@ class ExecBlockRow:
         schedulerMode The str value to which schedulerMode is to be set.
 
 
+
         """
 
         self._schedulerMode = str(schedulerMode)
@@ -1580,6 +1691,7 @@ class ExecBlockRow:
         """
         Set siteAltitude with the specified Length value.
         siteAltitude The Length value to which siteAltitude is to be set.
+
         The value of siteAltitude can be anything allowed by the Length constructor.
 
         """
@@ -1625,6 +1737,7 @@ class ExecBlockRow:
         """
         Set siteLongitude with the specified Angle value.
         siteLongitude The Angle value to which siteLongitude is to be set.
+
         The value of siteLongitude can be anything allowed by the Angle constructor.
 
         """
@@ -1670,6 +1783,7 @@ class ExecBlockRow:
         """
         Set siteLatitude with the specified Angle value.
         siteLatitude The Angle value to which siteLatitude is to be set.
+
         The value of siteLatitude can be anything allowed by the Angle constructor.
 
         """
@@ -1716,6 +1830,7 @@ class ExecBlockRow:
         observingScript The str value to which observingScript is to be set.
 
 
+
         """
 
         self._observingScript = str(observingScript)
@@ -1759,6 +1874,7 @@ class ExecBlockRow:
         """
         Set observingScriptUID with the specified EntityRef value.
         observingScriptUID The EntityRef value to which observingScriptUID is to be set.
+
         The value of observingScriptUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -1805,6 +1921,7 @@ class ExecBlockRow:
         arrayName The str value to which arrayName is to be set.
 
 
+
         """
 
         self._arrayName = str(arrayName)
@@ -1835,6 +1952,7 @@ class ExecBlockRow:
         """
         Set antennaId with the specified Tag []  value.
         antennaId The Tag []  value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1879,6 +1997,7 @@ class ExecBlockRow:
         """
         Set sBSummaryId with the specified Tag value.
         sBSummaryId The Tag value to which sBSummaryId is to be set.
+
         The value of sBSummaryId can be anything allowed by the Tag constructor.
 
         """
@@ -1916,6 +2035,7 @@ class ExecBlockRow:
         """
         Set scaleId with the specified Tag value.
         scaleId The Tag value to which scaleId is to be set.
+
         The value of scaleId can be anything allowed by the Tag constructor.
 
         """

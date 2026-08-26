@@ -63,6 +63,16 @@ class DataDescriptionRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -130,9 +140,11 @@ class DataDescriptionRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "dataDescriptionId", self._dataDescriptionId
@@ -140,17 +152,43 @@ class DataDescriptionRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("polOrHoloId", self._polOrHoloId)
 
         if self._pulsarIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("pulsarId", self._pulsarId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "DataDescriptionTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -179,26 +217,30 @@ class DataDescriptionRow:
 
         # intrinsic attribute values
 
-        dataDescriptionIdNode = rowdom.getElementsByTagName("dataDescriptionId")[0]
+        dataDescriptionIdNode = self._getFirstNodeByTagName(
+            rowdom, "dataDescriptionId", True
+        )
 
-        self._dataDescriptionId = Tag(dataDescriptionIdNode.firstChild.data.strip())
+        self._dataDescriptionId = Tag(self._getXMLNodeChildText(dataDescriptionIdNode))
 
         # extrinsic attribute values
 
-        polOrHoloIdNode = rowdom.getElementsByTagName("polOrHoloId")[0]
+        polOrHoloIdNode = self._getFirstNodeByTagName(rowdom, "polOrHoloId", True)
 
-        self._polOrHoloId = Tag(polOrHoloIdNode.firstChild.data.strip())
+        self._polOrHoloId = Tag(self._getXMLNodeChildText(polOrHoloIdNode))
 
-        pulsarIdNode = rowdom.getElementsByTagName("pulsarId")
-        if len(pulsarIdNode) > 0:
+        pulsarIdNode = self._getFirstNodeByTagName(rowdom, "pulsarId", False)
+        if pulsarIdNode:
 
-            self._pulsarId = Tag(pulsarIdNode[0].firstChild.data.strip())
+            self._pulsarId = Tag(self._getXMLNodeChildText(pulsarIdNode))
 
             self._pulsarIdExists = True
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
@@ -311,6 +353,7 @@ class DataDescriptionRow:
         """
         Set dataDescriptionId with the specified Tag value.
         dataDescriptionId The Tag value to which dataDescriptionId is to be set.
+
         The value of dataDescriptionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -343,6 +386,7 @@ class DataDescriptionRow:
         """
         Set polOrHoloId with the specified Tag value.
         polOrHoloId The Tag value to which polOrHoloId is to be set.
+
         The value of polOrHoloId can be anything allowed by the Tag constructor.
 
         """
@@ -380,6 +424,7 @@ class DataDescriptionRow:
         """
         Set pulsarId with the specified Tag value.
         pulsarId The Tag value to which pulsarId is to be set.
+
         The value of pulsarId can be anything allowed by the Tag constructor.
 
         """
@@ -411,6 +456,7 @@ class DataDescriptionRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         """

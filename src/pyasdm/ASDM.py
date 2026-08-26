@@ -381,6 +381,16 @@ class ASDM:
     # consuming for large tables.
     _checkRowUniqueness = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     def __init__(self, checkRowUniqueness=False):
         """
         Create an empty ASDM with empty instances
@@ -1531,6 +1541,7 @@ class ASDM:
         """
         Set timeOfCreation with the specified ArrayTime value.
         timeOfCreation The ArrayTime value to which timeOfCreation is to be set.
+
         The value of timeOfCreation can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1555,6 +1566,7 @@ class ASDM:
         version The int value to which version is to be set.
 
 
+
         """
 
         self._version = int(version)
@@ -1575,6 +1587,7 @@ class ASDM:
         """
         Set xmlnsPrefix with the specified str value.
         xmlnsPrefix The str value to which xmlnsPrefix is to be set.
+
 
 
         """
@@ -1925,7 +1938,7 @@ class ASDM:
                         "More than one TimeOfCreation found", "ASDM"
                     )
                 # strip off any leading and trailing whitespace
-                asdmToC = ArrayTime(thisNode.firstChild.data.strip())
+                asdmToC = ArrayTime(self._getXMLNodeChildText(thisNode))
             elif nodeName == "startTimeDurationInXML":
                 if hasStartTimeDurationInXML:
                     # it's already been seen
@@ -1957,7 +1970,7 @@ class ASDM:
                                 "More than one Name seen for the same Table", "ASDM"
                             )
                         # strip off any leading and trailing whitespace
-                        tabName = thisTabNode.firstChild.data.strip()
+                        tabName = self._getXMLNodeChildText(thisTabNode)
                     elif tabNodeName == "NumberRows":
                         if tabSize is not None:
                             raise ConversionException(
@@ -1965,7 +1978,7 @@ class ASDM:
                                 "ASDM",
                             )
                         # it's not necessary to strip the leading and trailing whitepspace, conversion to an int won't care
-                        tabSize = int(thisTabNode.firstChild.data)
+                        tabSize = int(self._getXMLNodeChildText(thisTabNode))
                     elif tabNodeName == "Entity":
                         if tabEntity is not None:
                             raise ConversionException(

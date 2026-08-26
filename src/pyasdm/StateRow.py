@@ -66,6 +66,16 @@ class StateRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -143,29 +153,61 @@ class StateRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("stateId", self._stateId)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "calDeviceName", CalibrationDevice.name(self._calDeviceName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("sig", self._sig)
 
+        result += "\n   "
+
         result += Parser.valueToXML("ref", self._ref)
+
+        result += "\n   "
 
         result += Parser.valueToXML("onSky", self._onSky)
 
         if self._weightExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("weight", self._weight)
+            result += Parser.floatValueToXML("weight", self._weight)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "StateTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -192,32 +234,32 @@ class StateRow:
 
         # intrinsic attribute values
 
-        stateIdNode = rowdom.getElementsByTagName("stateId")[0]
+        stateIdNode = self._getFirstNodeByTagName(rowdom, "stateId", True)
 
-        self._stateId = Tag(stateIdNode.firstChild.data.strip())
+        self._stateId = Tag(self._getXMLNodeChildText(stateIdNode))
 
-        calDeviceNameNode = rowdom.getElementsByTagName("calDeviceName")[0]
+        calDeviceNameNode = self._getFirstNodeByTagName(rowdom, "calDeviceName", True)
 
         self._calDeviceName = CalibrationDevice.newCalibrationDevice(
-            calDeviceNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(calDeviceNameNode)
         )
 
-        sigNode = rowdom.getElementsByTagName("sig")[0]
+        sigNode = self._getFirstNodeByTagName(rowdom, "sig", True)
 
-        self._sig = bool(sigNode.firstChild.data.strip())
+        self._sig = bool(self._getXMLNodeChildText(sigNode))
 
-        refNode = rowdom.getElementsByTagName("ref")[0]
+        refNode = self._getFirstNodeByTagName(rowdom, "ref", True)
 
-        self._ref = bool(refNode.firstChild.data.strip())
+        self._ref = bool(self._getXMLNodeChildText(refNode))
 
-        onSkyNode = rowdom.getElementsByTagName("onSky")[0]
+        onSkyNode = self._getFirstNodeByTagName(rowdom, "onSky", True)
 
-        self._onSky = bool(onSkyNode.firstChild.data.strip())
+        self._onSky = bool(self._getXMLNodeChildText(onSkyNode))
 
-        weightNode = rowdom.getElementsByTagName("weight")
-        if len(weightNode) > 0:
+        weightNode = self._getFirstNodeByTagName(rowdom, "weight", False)
+        if weightNode:
 
-            self._weight = float(weightNode[0].firstChild.data.strip())
+            self._weight = float(self._getXMLNodeChildText(weightNode))
 
             self._weightExists = True
 
@@ -352,6 +394,7 @@ class StateRow:
         """
         Set stateId with the specified Tag value.
         stateId The Tag value to which stateId is to be set.
+
         The value of stateId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -383,6 +426,7 @@ class StateRow:
         calDeviceName The CalibrationDevice value to which calDeviceName is to be set.
 
 
+
         """
 
         self._calDeviceName = CalibrationDevice(calDeviceName)
@@ -403,6 +447,7 @@ class StateRow:
         """
         Set sig with the specified bool value.
         sig The bool value to which sig is to be set.
+
 
 
         """
@@ -427,6 +472,7 @@ class StateRow:
         ref The bool value to which ref is to be set.
 
 
+
         """
 
         self._ref = bool(ref)
@@ -447,6 +493,7 @@ class StateRow:
         """
         Set onSky with the specified bool value.
         onSky The bool value to which onSky is to be set.
+
 
 
         """
@@ -483,6 +530,9 @@ class StateRow:
         """
         Set weight with the specified float value.
         weight The float value to which weight is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """

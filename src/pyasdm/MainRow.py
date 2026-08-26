@@ -68,6 +68,16 @@ class MainRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -173,45 +183,92 @@ class MainRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("time", self._time)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAntenna", self._numAntenna)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "timeSampling", TimeSampling.name(self._timeSampling)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("interval", self._interval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numIntegration", self._numIntegration)
 
+        result += "\n   "
+
         result += Parser.valueToXML("scanNumber", self._scanNumber)
+
+        result += "\n   "
 
         result += Parser.valueToXML("subscanNumber", self._subscanNumber)
 
+        result += "\n   "
+
         result += Parser.valueToXML("dataSize", self._dataSize)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("dataUID", self._dataUID)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML(
             "configDescriptionId", self._configDescriptionId
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("fieldId", self._fieldId)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("stateId", self._stateId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "MainTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -238,61 +295,65 @@ class MainRow:
 
         # intrinsic attribute values
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
-        self._time = ArrayTime(timeNode.firstChild.data.strip())
+        self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", True)
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
-        timeSamplingNode = rowdom.getElementsByTagName("timeSampling")[0]
+        timeSamplingNode = self._getFirstNodeByTagName(rowdom, "timeSampling", True)
 
         self._timeSampling = TimeSampling.newTimeSampling(
-            timeSamplingNode.firstChild.data.strip()
+            self._getXMLNodeChildText(timeSamplingNode)
         )
 
-        intervalNode = rowdom.getElementsByTagName("interval")[0]
+        intervalNode = self._getFirstNodeByTagName(rowdom, "interval", True)
 
-        self._interval = Interval(intervalNode.firstChild.data.strip())
+        self._interval = Interval(self._getXMLNodeChildText(intervalNode))
 
-        numIntegrationNode = rowdom.getElementsByTagName("numIntegration")[0]
+        numIntegrationNode = self._getFirstNodeByTagName(rowdom, "numIntegration", True)
 
-        self._numIntegration = int(numIntegrationNode.firstChild.data.strip())
+        self._numIntegration = int(self._getXMLNodeChildText(numIntegrationNode))
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", True)
 
-        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
+        self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
-        subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
+        subscanNumberNode = self._getFirstNodeByTagName(rowdom, "subscanNumber", True)
 
-        self._subscanNumber = int(subscanNumberNode.firstChild.data.strip())
+        self._subscanNumber = int(self._getXMLNodeChildText(subscanNumberNode))
 
-        dataSizeNode = rowdom.getElementsByTagName("dataSize")[0]
+        dataSizeNode = self._getFirstNodeByTagName(rowdom, "dataSize", True)
 
-        self._dataSize = int(dataSizeNode.firstChild.data.strip())
+        self._dataSize = int(self._getXMLNodeChildText(dataSizeNode))
 
-        dataUIDNode = rowdom.getElementsByTagName("dataUID")[0]
+        dataUIDNode = self._getFirstNodeByTagName(rowdom, "dataUID", True)
 
         self._dataUID = EntityRef(dataUIDNode.toxml())
 
         # extrinsic attribute values
 
-        configDescriptionIdNode = rowdom.getElementsByTagName("configDescriptionId")[0]
+        configDescriptionIdNode = self._getFirstNodeByTagName(
+            rowdom, "configDescriptionId", True
+        )
 
-        self._configDescriptionId = Tag(configDescriptionIdNode.firstChild.data.strip())
+        self._configDescriptionId = Tag(
+            self._getXMLNodeChildText(configDescriptionIdNode)
+        )
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
-        fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
+        fieldIdNode = self._getFirstNodeByTagName(rowdom, "fieldId", True)
 
-        self._fieldId = Tag(fieldIdNode.firstChild.data.strip())
+        self._fieldId = Tag(self._getXMLNodeChildText(fieldIdNode))
 
-        stateIdNode = rowdom.getElementsByTagName("stateId")[0]
+        stateIdNode = self._getFirstNodeByTagName(rowdom, "stateId", True)
 
-        stateIdStr = stateIdNode.firstChild.data.strip()
+        stateIdStr = self._getXMLNodeChildText(stateIdNode)
 
         self._stateId = Parser.stringListToLists(stateIdStr, Tag, "Main", True)
 
@@ -498,6 +559,7 @@ class MainRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -529,6 +591,7 @@ class MainRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -549,6 +612,7 @@ class MainRow:
         """
         Set timeSampling with the specified TimeSampling value.
         timeSampling The TimeSampling value to which timeSampling is to be set.
+
 
 
         """
@@ -572,6 +636,7 @@ class MainRow:
         """
         Set interval with the specified Interval value.
         interval The Interval value to which interval is to be set.
+
         The value of interval can be anything allowed by the Interval constructor.
 
         """
@@ -596,6 +661,7 @@ class MainRow:
         numIntegration The int value to which numIntegration is to be set.
 
 
+
         """
 
         self._numIntegration = int(numIntegration)
@@ -616,6 +682,7 @@ class MainRow:
         """
         Set scanNumber with the specified int value.
         scanNumber The int value to which scanNumber is to be set.
+
 
 
         """
@@ -640,6 +707,7 @@ class MainRow:
         subscanNumber The int value to which subscanNumber is to be set.
 
 
+
         """
 
         self._subscanNumber = int(subscanNumber)
@@ -660,6 +728,7 @@ class MainRow:
         """
         Set dataSize with the specified int value.
         dataSize The int value to which dataSize is to be set.
+
 
 
         """
@@ -683,6 +752,7 @@ class MainRow:
         """
         Set dataUID with the specified EntityRef value.
         dataUID The EntityRef value to which dataUID is to be set.
+
         The value of dataUID can be anything allowed by the EntityRef constructor.
 
         """
@@ -726,6 +796,7 @@ class MainRow:
         """
         Set configDescriptionId with the specified Tag value.
         configDescriptionId The Tag value to which configDescriptionId is to be set.
+
         The value of configDescriptionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -756,6 +827,7 @@ class MainRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         """
@@ -779,6 +851,7 @@ class MainRow:
         """
         Set fieldId with the specified Tag value.
         fieldId The Tag value to which fieldId is to be set.
+
         The value of fieldId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -808,6 +881,7 @@ class MainRow:
         """
         Set stateId with the specified Tag []  value.
         stateId The Tag []  value to which stateId is to be set.
+
         The value of stateId can be anything allowed by the Tag []  constructor.
 
         """

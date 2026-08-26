@@ -66,6 +66,16 @@ class DopplerRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -129,23 +139,52 @@ class DopplerRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("dopplerId", self._dopplerId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("transitionIndex", self._transitionIndex)
+
+        result += "\n   "
 
         result += Parser.valueToXML("velDef", DopplerReferenceCode.name(self._velDef))
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("sourceId", self._sourceId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "DopplerTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -172,25 +211,27 @@ class DopplerRow:
 
         # intrinsic attribute values
 
-        dopplerIdNode = rowdom.getElementsByTagName("dopplerId")[0]
+        dopplerIdNode = self._getFirstNodeByTagName(rowdom, "dopplerId", True)
 
-        self._dopplerId = int(dopplerIdNode.firstChild.data.strip())
+        self._dopplerId = int(self._getXMLNodeChildText(dopplerIdNode))
 
-        transitionIndexNode = rowdom.getElementsByTagName("transitionIndex")[0]
+        transitionIndexNode = self._getFirstNodeByTagName(
+            rowdom, "transitionIndex", True
+        )
 
-        self._transitionIndex = int(transitionIndexNode.firstChild.data.strip())
+        self._transitionIndex = int(self._getXMLNodeChildText(transitionIndexNode))
 
-        velDefNode = rowdom.getElementsByTagName("velDef")[0]
+        velDefNode = self._getFirstNodeByTagName(rowdom, "velDef", True)
 
         self._velDef = DopplerReferenceCode.newDopplerReferenceCode(
-            velDefNode.firstChild.data.strip()
+            self._getXMLNodeChildText(velDefNode)
         )
 
         # extrinsic attribute values
 
-        sourceIdNode = rowdom.getElementsByTagName("sourceId")[0]
+        sourceIdNode = self._getFirstNodeByTagName(rowdom, "sourceId", True)
 
-        self._sourceId = int(sourceIdNode.firstChild.data.strip())
+        self._sourceId = int(self._getXMLNodeChildText(sourceIdNode))
 
         # from link values, if any
 
@@ -296,6 +337,7 @@ class DopplerRow:
         dopplerId The int value to which dopplerId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -325,6 +367,7 @@ class DopplerRow:
         transitionIndex The int value to which transitionIndex is to be set.
 
 
+
         """
 
         self._transitionIndex = int(transitionIndex)
@@ -345,6 +388,7 @@ class DopplerRow:
         """
         Set velDef with the specified DopplerReferenceCode value.
         velDef The DopplerReferenceCode value to which velDef is to be set.
+
 
 
         """
@@ -369,6 +413,7 @@ class DopplerRow:
         """
         Set sourceId with the specified int value.
         sourceId The int value to which sourceId is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

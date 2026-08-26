@@ -66,6 +66,16 @@ class FlagRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -247,59 +257,79 @@ class FlagRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("flagId", self._flagId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startTime", self._startTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endTime", self._endTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("reason", self._reason)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numAntenna", self._numAntenna)
 
         if self._numPolarizationTypeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "numPolarizationType", self._numPolarizationType
             )
 
         if self._numSpectralWindowExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numSpectralWindow", self._numSpectralWindow)
 
         if self._numPairedAntennaExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numPairedAntenna", self._numPairedAntenna)
 
         if self._numChanExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numChan", self._numChan)
 
         if self._polarizationTypeExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML(
                 "polarizationType", self._polarizationType
             )
 
         if self._channelExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("channel", self._channel)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("antennaId", self._antennaId)
 
         if self._pairedAntennaIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "pairedAntennaId", self._pairedAntennaId
             )
 
         if self._spectralWindowIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "spectralWindowId", self._spectralWindowId
@@ -307,7 +337,28 @@ class FlagRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "FlagTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -334,74 +385,82 @@ class FlagRow:
 
         # intrinsic attribute values
 
-        flagIdNode = rowdom.getElementsByTagName("flagId")[0]
+        flagIdNode = self._getFirstNodeByTagName(rowdom, "flagId", True)
 
-        self._flagId = Tag(flagIdNode.firstChild.data.strip())
+        self._flagId = Tag(self._getXMLNodeChildText(flagIdNode))
 
-        startTimeNode = rowdom.getElementsByTagName("startTime")[0]
+        startTimeNode = self._getFirstNodeByTagName(rowdom, "startTime", True)
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
+        self._startTime = ArrayTime(self._getXMLNodeChildText(startTimeNode))
 
-        endTimeNode = rowdom.getElementsByTagName("endTime")[0]
+        endTimeNode = self._getFirstNodeByTagName(rowdom, "endTime", True)
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
+        self._endTime = ArrayTime(self._getXMLNodeChildText(endTimeNode))
 
-        reasonNode = rowdom.getElementsByTagName("reason")[0]
+        reasonNode = self._getFirstNodeByTagName(rowdom, "reason", True)
 
-        self._reason = str(reasonNode.firstChild.data.strip())
+        self._reason = str(self._getXMLNodeChildText(reasonNode))
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", True)
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
-        numPolarizationTypeNode = rowdom.getElementsByTagName("numPolarizationType")
-        if len(numPolarizationTypeNode) > 0:
+        numPolarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "numPolarizationType", False
+        )
+        if numPolarizationTypeNode:
 
             self._numPolarizationType = int(
-                numPolarizationTypeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(numPolarizationTypeNode)
             )
 
             self._numPolarizationTypeExists = True
 
-        numSpectralWindowNode = rowdom.getElementsByTagName("numSpectralWindow")
-        if len(numSpectralWindowNode) > 0:
+        numSpectralWindowNode = self._getFirstNodeByTagName(
+            rowdom, "numSpectralWindow", False
+        )
+        if numSpectralWindowNode:
 
             self._numSpectralWindow = int(
-                numSpectralWindowNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(numSpectralWindowNode)
             )
 
             self._numSpectralWindowExists = True
 
-        numPairedAntennaNode = rowdom.getElementsByTagName("numPairedAntenna")
-        if len(numPairedAntennaNode) > 0:
+        numPairedAntennaNode = self._getFirstNodeByTagName(
+            rowdom, "numPairedAntenna", False
+        )
+        if numPairedAntennaNode:
 
             self._numPairedAntenna = int(
-                numPairedAntennaNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(numPairedAntennaNode)
             )
 
             self._numPairedAntennaExists = True
 
-        numChanNode = rowdom.getElementsByTagName("numChan")
-        if len(numChanNode) > 0:
+        numChanNode = self._getFirstNodeByTagName(rowdom, "numChan", False)
+        if numChanNode:
 
-            self._numChan = int(numChanNode[0].firstChild.data.strip())
+            self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
             self._numChanExists = True
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")
-        if len(polarizationTypeNode) > 0:
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", False
+        )
+        if polarizationTypeNode:
 
-            polarizationTypeStr = polarizationTypeNode[0].firstChild.data.strip()
+            polarizationTypeStr = self._getXMLNodeChildText(polarizationTypeNode)
             self._polarizationType = Parser.stringListToLists(
                 polarizationTypeStr, PolarizationType, "Flag", False
             )
 
             self._polarizationTypeExists = True
 
-        channelNode = rowdom.getElementsByTagName("channel")
-        if len(channelNode) > 0:
+        channelNode = self._getFirstNodeByTagName(rowdom, "channel", False)
+        if channelNode:
 
-            channelStr = channelNode[0].firstChild.data.strip()
+            channelStr = self._getXMLNodeChildText(channelNode)
 
             self._channel = Parser.stringListToLists(channelStr, int, "Flag", False)
 
@@ -409,16 +468,18 @@ class FlagRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        antennaIdStr = antennaIdNode.firstChild.data.strip()
+        antennaIdStr = self._getXMLNodeChildText(antennaIdNode)
 
         self._antennaId = Parser.stringListToLists(antennaIdStr, Tag, "Flag", True)
 
-        pairedAntennaIdNode = rowdom.getElementsByTagName("pairedAntennaId")
-        if len(pairedAntennaIdNode) > 0:
+        pairedAntennaIdNode = self._getFirstNodeByTagName(
+            rowdom, "pairedAntennaId", False
+        )
+        if pairedAntennaIdNode:
 
-            pairedAntennaIdStr = pairedAntennaIdNode[0].firstChild.data.strip()
+            pairedAntennaIdStr = self._getXMLNodeChildText(pairedAntennaIdNode)
 
             self._pairedAntennaId = Parser.stringListToLists(
                 pairedAntennaIdStr, Tag, "Flag", True
@@ -426,10 +487,12 @@ class FlagRow:
 
             self._pairedAntennaIdExists = True
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")
-        if len(spectralWindowIdNode) > 0:
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", False
+        )
+        if spectralWindowIdNode:
 
-            spectralWindowIdStr = spectralWindowIdNode[0].firstChild.data.strip()
+            spectralWindowIdStr = self._getXMLNodeChildText(spectralWindowIdNode)
 
             self._spectralWindowId = Parser.stringListToLists(
                 spectralWindowIdStr, Tag, "Flag", True
@@ -719,6 +782,7 @@ class FlagRow:
         """
         Set flagId with the specified Tag value.
         flagId The Tag value to which flagId is to be set.
+
         The value of flagId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -749,6 +813,7 @@ class FlagRow:
         """
         Set startTime with the specified ArrayTime value.
         startTime The ArrayTime value to which startTime is to be set.
+
         The value of startTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -772,6 +837,7 @@ class FlagRow:
         """
         Set endTime with the specified ArrayTime value.
         endTime The ArrayTime value to which endTime is to be set.
+
         The value of endTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -796,6 +862,7 @@ class FlagRow:
         reason The str value to which reason is to be set.
 
 
+
         """
 
         self._reason = str(reason)
@@ -816,6 +883,7 @@ class FlagRow:
         """
         Set numAntenna with the specified int value.
         numAntenna The int value to which numAntenna is to be set.
+
 
 
         """
@@ -852,6 +920,7 @@ class FlagRow:
         """
         Set numPolarizationType with the specified int value.
         numPolarizationType The int value to which numPolarizationType is to be set.
+
 
 
         """
@@ -898,6 +967,7 @@ class FlagRow:
         numSpectralWindow The int value to which numSpectralWindow is to be set.
 
 
+
         """
 
         self._numSpectralWindow = int(numSpectralWindow)
@@ -940,6 +1010,7 @@ class FlagRow:
         """
         Set numPairedAntenna with the specified int value.
         numPairedAntenna The int value to which numPairedAntenna is to be set.
+
 
 
         """
@@ -986,6 +1057,7 @@ class FlagRow:
         numChan The int value to which numChan is to be set.
 
 
+
         """
 
         self._numChan = int(numChan)
@@ -1028,6 +1100,7 @@ class FlagRow:
         """
         Set polarizationType with the specified PolarizationType []  value.
         polarizationType The PolarizationType []  value to which polarizationType is to be set.
+
 
 
         """
@@ -1095,6 +1168,7 @@ class FlagRow:
         channel The int []  []  value to which channel is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1146,6 +1220,7 @@ class FlagRow:
         """
         Set antennaId with the specified Tag []  value.
         antennaId The Tag []  value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1203,6 +1278,7 @@ class FlagRow:
         """
         Set pairedAntennaId with the specified Tag []  value.
         pairedAntennaId The Tag []  value to which pairedAntennaId is to be set.
+
         The value of pairedAntennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -1268,6 +1344,7 @@ class FlagRow:
         """
         Set spectralWindowId with the specified Tag []  value.
         spectralWindowId The Tag []  value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag []  constructor.
 
         """

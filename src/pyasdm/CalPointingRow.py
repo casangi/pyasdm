@@ -81,6 +81,16 @@ class CalPointingRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -135,7 +145,9 @@ class CalPointingRow:
 
         self._collOffsetTied = []  # this is a list of bool []  []
 
-        self._reducedChiSquared = []  # this is a list of float []
+        self._reducedChiSquared = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._averagedPolarizationsExists = False
 
@@ -397,125 +409,176 @@ class CalPointingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "ambientTemperature", self._ambientTemperature
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("direction", self._direction)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "pointingModelMode", PointingModelMode.name(self._pointingModelMode)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "pointingMethod", PointingMethod.name(self._pointingMethod)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML(
             "collOffsetRelative", self._collOffsetRelative
         )
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "collOffsetAbsolute", self._collOffsetAbsolute
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("collError", self._collError)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("collOffsetTied", self._collOffsetTied)
 
-        result += Parser.listValueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML(
+            "reducedChiSquared", self._reducedChiSquared
+        )
 
         if self._averagedPolarizationsExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "averagedPolarizations", self._averagedPolarizations
             )
 
         if self._beamPAExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("beamPA", self._beamPA)
 
         if self._beamPAErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("beamPAError", self._beamPAError)
 
         if self._beamPAWasFixedExists:
+            result += "\n   "
 
             result += Parser.valueToXML("beamPAWasFixed", self._beamPAWasFixed)
 
         if self._beamWidthExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("beamWidth", self._beamWidth)
 
         if self._beamWidthErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "beamWidthError", self._beamWidthError
             )
 
         if self._beamWidthWasFixedExists:
+            result += "\n   "
 
             result += Parser.listValueToXML(
                 "beamWidthWasFixed", self._beamWidthWasFixed
             )
 
         if self._offIntensityExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("offIntensity", self._offIntensity)
 
         if self._offIntensityErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "offIntensityError", self._offIntensityError
             )
 
         if self._offIntensityWasFixedExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "offIntensityWasFixed", self._offIntensityWasFixed
             )
 
         if self._peakIntensityExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "peakIntensity", self._peakIntensity
             )
 
         if self._peakIntensityErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "peakIntensityError", self._peakIntensityError
             )
 
         if self._peakIntensityWasFixedExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "peakIntensityWasFixed", self._peakIntensityWasFixed
@@ -523,13 +586,38 @@ class CalPointingRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalPointingTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -556,134 +644,150 @@ class CalPointingRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        ambientTemperatureNode = rowdom.getElementsByTagName("ambientTemperature")[0]
+        ambientTemperatureNode = self._getFirstNodeByTagName(
+            rowdom, "ambientTemperature", True
+        )
 
         self._ambientTemperature = Temperature(
-            ambientTemperatureNode.firstChild.data.strip()
+            self._getXMLNodeChildText(ambientTemperatureNode)
         )
 
-        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+        antennaMakeNode = self._getFirstNodeByTagName(rowdom, "antennaMake", True)
 
         self._antennaMake = AntennaMake.newAntennaMake(
-            antennaMakeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaMakeNode)
         )
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        directionNode = rowdom.getElementsByTagName("direction")[0]
+        directionNode = self._getFirstNodeByTagName(rowdom, "direction", True)
 
-        directionStr = directionNode.firstChild.data.strip()
+        directionStr = self._getXMLNodeChildText(directionNode)
 
         self._direction = Parser.stringListToLists(
             directionStr, Angle, "CalPointing", True
         )
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalPointing", True
         )
 
-        pointingModelModeNode = rowdom.getElementsByTagName("pointingModelMode")[0]
+        pointingModelModeNode = self._getFirstNodeByTagName(
+            rowdom, "pointingModelMode", True
+        )
 
         self._pointingModelMode = PointingModelMode.newPointingModelMode(
-            pointingModelModeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(pointingModelModeNode)
         )
 
-        pointingMethodNode = rowdom.getElementsByTagName("pointingMethod")[0]
+        pointingMethodNode = self._getFirstNodeByTagName(rowdom, "pointingMethod", True)
 
         self._pointingMethod = PointingMethod.newPointingMethod(
-            pointingMethodNode.firstChild.data.strip()
+            self._getXMLNodeChildText(pointingMethodNode)
         )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalPointing", False
         )
 
-        collOffsetRelativeNode = rowdom.getElementsByTagName("collOffsetRelative")[0]
+        collOffsetRelativeNode = self._getFirstNodeByTagName(
+            rowdom, "collOffsetRelative", True
+        )
 
-        collOffsetRelativeStr = collOffsetRelativeNode.firstChild.data.strip()
+        collOffsetRelativeStr = self._getXMLNodeChildText(collOffsetRelativeNode)
 
         self._collOffsetRelative = Parser.stringListToLists(
             collOffsetRelativeStr, Angle, "CalPointing", True
         )
 
-        collOffsetAbsoluteNode = rowdom.getElementsByTagName("collOffsetAbsolute")[0]
+        collOffsetAbsoluteNode = self._getFirstNodeByTagName(
+            rowdom, "collOffsetAbsolute", True
+        )
 
-        collOffsetAbsoluteStr = collOffsetAbsoluteNode.firstChild.data.strip()
+        collOffsetAbsoluteStr = self._getXMLNodeChildText(collOffsetAbsoluteNode)
 
         self._collOffsetAbsolute = Parser.stringListToLists(
             collOffsetAbsoluteStr, Angle, "CalPointing", True
         )
 
-        collErrorNode = rowdom.getElementsByTagName("collError")[0]
+        collErrorNode = self._getFirstNodeByTagName(rowdom, "collError", True)
 
-        collErrorStr = collErrorNode.firstChild.data.strip()
+        collErrorStr = self._getXMLNodeChildText(collErrorNode)
 
         self._collError = Parser.stringListToLists(
             collErrorStr, Angle, "CalPointing", True
         )
 
-        collOffsetTiedNode = rowdom.getElementsByTagName("collOffsetTied")[0]
+        collOffsetTiedNode = self._getFirstNodeByTagName(rowdom, "collOffsetTied", True)
 
-        collOffsetTiedStr = collOffsetTiedNode.firstChild.data.strip()
+        collOffsetTiedStr = self._getXMLNodeChildText(collOffsetTiedNode)
 
         self._collOffsetTied = Parser.stringListToLists(
             collOffsetTiedStr, bool, "CalPointing", False
         )
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+        reducedChiSquaredStr = self._getXMLNodeChildText(reducedChiSquaredNode)
 
         self._reducedChiSquared = Parser.stringListToLists(
             reducedChiSquaredStr, float, "CalPointing", False
         )
 
-        averagedPolarizationsNode = rowdom.getElementsByTagName("averagedPolarizations")
-        if len(averagedPolarizationsNode) > 0:
+        averagedPolarizationsNode = self._getFirstNodeByTagName(
+            rowdom, "averagedPolarizations", False
+        )
+        if averagedPolarizationsNode:
 
             self._averagedPolarizations = bool(
-                averagedPolarizationsNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(averagedPolarizationsNode)
             )
 
             self._averagedPolarizationsExists = True
 
-        beamPANode = rowdom.getElementsByTagName("beamPA")
-        if len(beamPANode) > 0:
+        beamPANode = self._getFirstNodeByTagName(rowdom, "beamPA", False)
+        if beamPANode:
 
-            beamPAStr = beamPANode[0].firstChild.data.strip()
+            beamPAStr = self._getXMLNodeChildText(beamPANode)
 
             self._beamPA = Parser.stringListToLists(
                 beamPAStr, Angle, "CalPointing", True
@@ -691,10 +795,10 @@ class CalPointingRow:
 
             self._beamPAExists = True
 
-        beamPAErrorNode = rowdom.getElementsByTagName("beamPAError")
-        if len(beamPAErrorNode) > 0:
+        beamPAErrorNode = self._getFirstNodeByTagName(rowdom, "beamPAError", False)
+        if beamPAErrorNode:
 
-            beamPAErrorStr = beamPAErrorNode[0].firstChild.data.strip()
+            beamPAErrorStr = self._getXMLNodeChildText(beamPAErrorNode)
 
             self._beamPAError = Parser.stringListToLists(
                 beamPAErrorStr, Angle, "CalPointing", True
@@ -702,17 +806,19 @@ class CalPointingRow:
 
             self._beamPAErrorExists = True
 
-        beamPAWasFixedNode = rowdom.getElementsByTagName("beamPAWasFixed")
-        if len(beamPAWasFixedNode) > 0:
+        beamPAWasFixedNode = self._getFirstNodeByTagName(
+            rowdom, "beamPAWasFixed", False
+        )
+        if beamPAWasFixedNode:
 
-            self._beamPAWasFixed = bool(beamPAWasFixedNode[0].firstChild.data.strip())
+            self._beamPAWasFixed = bool(self._getXMLNodeChildText(beamPAWasFixedNode))
 
             self._beamPAWasFixedExists = True
 
-        beamWidthNode = rowdom.getElementsByTagName("beamWidth")
-        if len(beamWidthNode) > 0:
+        beamWidthNode = self._getFirstNodeByTagName(rowdom, "beamWidth", False)
+        if beamWidthNode:
 
-            beamWidthStr = beamWidthNode[0].firstChild.data.strip()
+            beamWidthStr = self._getXMLNodeChildText(beamWidthNode)
 
             self._beamWidth = Parser.stringListToLists(
                 beamWidthStr, Angle, "CalPointing", True
@@ -720,10 +826,12 @@ class CalPointingRow:
 
             self._beamWidthExists = True
 
-        beamWidthErrorNode = rowdom.getElementsByTagName("beamWidthError")
-        if len(beamWidthErrorNode) > 0:
+        beamWidthErrorNode = self._getFirstNodeByTagName(
+            rowdom, "beamWidthError", False
+        )
+        if beamWidthErrorNode:
 
-            beamWidthErrorStr = beamWidthErrorNode[0].firstChild.data.strip()
+            beamWidthErrorStr = self._getXMLNodeChildText(beamWidthErrorNode)
 
             self._beamWidthError = Parser.stringListToLists(
                 beamWidthErrorStr, Angle, "CalPointing", True
@@ -731,10 +839,12 @@ class CalPointingRow:
 
             self._beamWidthErrorExists = True
 
-        beamWidthWasFixedNode = rowdom.getElementsByTagName("beamWidthWasFixed")
-        if len(beamWidthWasFixedNode) > 0:
+        beamWidthWasFixedNode = self._getFirstNodeByTagName(
+            rowdom, "beamWidthWasFixed", False
+        )
+        if beamWidthWasFixedNode:
 
-            beamWidthWasFixedStr = beamWidthWasFixedNode[0].firstChild.data.strip()
+            beamWidthWasFixedStr = self._getXMLNodeChildText(beamWidthWasFixedNode)
 
             self._beamWidthWasFixed = Parser.stringListToLists(
                 beamWidthWasFixedStr, bool, "CalPointing", False
@@ -742,10 +852,10 @@ class CalPointingRow:
 
             self._beamWidthWasFixedExists = True
 
-        offIntensityNode = rowdom.getElementsByTagName("offIntensity")
-        if len(offIntensityNode) > 0:
+        offIntensityNode = self._getFirstNodeByTagName(rowdom, "offIntensity", False)
+        if offIntensityNode:
 
-            offIntensityStr = offIntensityNode[0].firstChild.data.strip()
+            offIntensityStr = self._getXMLNodeChildText(offIntensityNode)
 
             self._offIntensity = Parser.stringListToLists(
                 offIntensityStr, Temperature, "CalPointing", True
@@ -753,10 +863,12 @@ class CalPointingRow:
 
             self._offIntensityExists = True
 
-        offIntensityErrorNode = rowdom.getElementsByTagName("offIntensityError")
-        if len(offIntensityErrorNode) > 0:
+        offIntensityErrorNode = self._getFirstNodeByTagName(
+            rowdom, "offIntensityError", False
+        )
+        if offIntensityErrorNode:
 
-            offIntensityErrorStr = offIntensityErrorNode[0].firstChild.data.strip()
+            offIntensityErrorStr = self._getXMLNodeChildText(offIntensityErrorNode)
 
             self._offIntensityError = Parser.stringListToLists(
                 offIntensityErrorStr, Temperature, "CalPointing", True
@@ -764,19 +876,21 @@ class CalPointingRow:
 
             self._offIntensityErrorExists = True
 
-        offIntensityWasFixedNode = rowdom.getElementsByTagName("offIntensityWasFixed")
-        if len(offIntensityWasFixedNode) > 0:
+        offIntensityWasFixedNode = self._getFirstNodeByTagName(
+            rowdom, "offIntensityWasFixed", False
+        )
+        if offIntensityWasFixedNode:
 
             self._offIntensityWasFixed = bool(
-                offIntensityWasFixedNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(offIntensityWasFixedNode)
             )
 
             self._offIntensityWasFixedExists = True
 
-        peakIntensityNode = rowdom.getElementsByTagName("peakIntensity")
-        if len(peakIntensityNode) > 0:
+        peakIntensityNode = self._getFirstNodeByTagName(rowdom, "peakIntensity", False)
+        if peakIntensityNode:
 
-            peakIntensityStr = peakIntensityNode[0].firstChild.data.strip()
+            peakIntensityStr = self._getXMLNodeChildText(peakIntensityNode)
 
             self._peakIntensity = Parser.stringListToLists(
                 peakIntensityStr, Temperature, "CalPointing", True
@@ -784,10 +898,12 @@ class CalPointingRow:
 
             self._peakIntensityExists = True
 
-        peakIntensityErrorNode = rowdom.getElementsByTagName("peakIntensityError")
-        if len(peakIntensityErrorNode) > 0:
+        peakIntensityErrorNode = self._getFirstNodeByTagName(
+            rowdom, "peakIntensityError", False
+        )
+        if peakIntensityErrorNode:
 
-            peakIntensityErrorStr = peakIntensityErrorNode[0].firstChild.data.strip()
+            peakIntensityErrorStr = self._getXMLNodeChildText(peakIntensityErrorNode)
 
             self._peakIntensityError = Parser.stringListToLists(
                 peakIntensityErrorStr, Temperature, "CalPointing", True
@@ -795,24 +911,26 @@ class CalPointingRow:
 
             self._peakIntensityErrorExists = True
 
-        peakIntensityWasFixedNode = rowdom.getElementsByTagName("peakIntensityWasFixed")
-        if len(peakIntensityWasFixedNode) > 0:
+        peakIntensityWasFixedNode = self._getFirstNodeByTagName(
+            rowdom, "peakIntensityWasFixed", False
+        )
+        if peakIntensityWasFixedNode:
 
             self._peakIntensityWasFixed = bool(
-                peakIntensityWasFixedNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(peakIntensityWasFixedNode)
             )
 
             self._peakIntensityWasFixedExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -876,7 +994,7 @@ class CalPointingRow:
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
 
-            eos.writeFloat(self._reducedChiSquared[i])
+            eos.writeDouble(self._reducedChiSquared[i])
 
         eos.writeBool(self._averagedPolarizationsExists)
         if self._averagedPolarizationsExists:
@@ -1121,7 +1239,7 @@ class CalPointingRow:
         reducedChiSquaredDim1 = eis.readInt()
         thisList = []
         for i in range(reducedChiSquaredDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._reducedChiSquared = thisList
 
@@ -1353,6 +1471,7 @@ class CalPointingRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1380,6 +1499,7 @@ class CalPointingRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1410,6 +1530,7 @@ class CalPointingRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1433,6 +1554,7 @@ class CalPointingRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1456,6 +1578,7 @@ class CalPointingRow:
         """
         Set ambientTemperature with the specified Temperature value.
         ambientTemperature The Temperature value to which ambientTemperature is to be set.
+
         The value of ambientTemperature can be anything allowed by the Temperature constructor.
 
         """
@@ -1480,6 +1603,7 @@ class CalPointingRow:
         antennaMake The AntennaMake value to which antennaMake is to be set.
 
 
+
         """
 
         self._antennaMake = AntennaMake(antennaMake)
@@ -1502,6 +1626,7 @@ class CalPointingRow:
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
 
 
+
         """
 
         self._atmPhaseCorrection = AtmPhaseCorrection(atmPhaseCorrection)
@@ -1522,6 +1647,7 @@ class CalPointingRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1565,6 +1691,7 @@ class CalPointingRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1610,6 +1737,7 @@ class CalPointingRow:
         pointingModelMode The PointingModelMode value to which pointingModelMode is to be set.
 
 
+
         """
 
         self._pointingModelMode = PointingModelMode(pointingModelMode)
@@ -1630,6 +1758,7 @@ class CalPointingRow:
         """
         Set pointingMethod with the specified PointingMethod value.
         pointingMethod The PointingMethod value to which pointingMethod is to be set.
+
 
 
         """
@@ -1654,6 +1783,7 @@ class CalPointingRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1674,6 +1804,7 @@ class CalPointingRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1717,6 +1848,7 @@ class CalPointingRow:
         """
         Set collOffsetRelative with the specified Angle []  []  value.
         collOffsetRelative The Angle []  []  value to which collOffsetRelative is to be set.
+
         The value of collOffsetRelative can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1760,6 +1892,7 @@ class CalPointingRow:
         """
         Set collOffsetAbsolute with the specified Angle []  []  value.
         collOffsetAbsolute The Angle []  []  value to which collOffsetAbsolute is to be set.
+
         The value of collOffsetAbsolute can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1803,6 +1936,7 @@ class CalPointingRow:
         """
         Set collError with the specified Angle []  []  value.
         collError The Angle []  []  value to which collError is to be set.
+
         The value of collError can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1848,6 +1982,7 @@ class CalPointingRow:
         collOffsetTied The bool []  []  value to which collOffsetTied is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1889,6 +2024,9 @@ class CalPointingRow:
         """
         Set reducedChiSquared with the specified float []  value.
         reducedChiSquared The float []  value to which reducedChiSquared is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1948,6 +2086,7 @@ class CalPointingRow:
         averagedPolarizations The bool value to which averagedPolarizations is to be set.
 
 
+
         """
 
         self._averagedPolarizations = bool(averagedPolarizations)
@@ -1990,6 +2129,7 @@ class CalPointingRow:
         """
         Set beamPA with the specified Angle []  value.
         beamPA The Angle []  value to which beamPA is to be set.
+
         The value of beamPA can be anything allowed by the Angle []  constructor.
 
         """
@@ -2055,6 +2195,7 @@ class CalPointingRow:
         """
         Set beamPAError with the specified Angle []  value.
         beamPAError The Angle []  value to which beamPAError is to be set.
+
         The value of beamPAError can be anything allowed by the Angle []  constructor.
 
         """
@@ -2122,6 +2263,7 @@ class CalPointingRow:
         beamPAWasFixed The bool value to which beamPAWasFixed is to be set.
 
 
+
         """
 
         self._beamPAWasFixed = bool(beamPAWasFixed)
@@ -2164,6 +2306,7 @@ class CalPointingRow:
         """
         Set beamWidth with the specified Angle []  []  value.
         beamWidth The Angle []  []  value to which beamWidth is to be set.
+
         The value of beamWidth can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -2229,6 +2372,7 @@ class CalPointingRow:
         """
         Set beamWidthError with the specified Angle []  []  value.
         beamWidthError The Angle []  []  value to which beamWidthError is to be set.
+
         The value of beamWidthError can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -2296,6 +2440,7 @@ class CalPointingRow:
         beamWidthWasFixed The bool []  value to which beamWidthWasFixed is to be set.
 
 
+
         """
 
         # value must be a list
@@ -2359,6 +2504,7 @@ class CalPointingRow:
         """
         Set offIntensity with the specified Temperature []  value.
         offIntensity The Temperature []  value to which offIntensity is to be set.
+
         The value of offIntensity can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2424,6 +2570,7 @@ class CalPointingRow:
         """
         Set offIntensityError with the specified Temperature []  value.
         offIntensityError The Temperature []  value to which offIntensityError is to be set.
+
         The value of offIntensityError can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2491,6 +2638,7 @@ class CalPointingRow:
         offIntensityWasFixed The bool value to which offIntensityWasFixed is to be set.
 
 
+
         """
 
         self._offIntensityWasFixed = bool(offIntensityWasFixed)
@@ -2533,6 +2681,7 @@ class CalPointingRow:
         """
         Set peakIntensity with the specified Temperature []  value.
         peakIntensity The Temperature []  value to which peakIntensity is to be set.
+
         The value of peakIntensity can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2598,6 +2747,7 @@ class CalPointingRow:
         """
         Set peakIntensityError with the specified Temperature []  value.
         peakIntensityError The Temperature []  value to which peakIntensityError is to be set.
+
         The value of peakIntensityError can be anything allowed by the Temperature []  constructor.
 
         """
@@ -2665,6 +2815,7 @@ class CalPointingRow:
         peakIntensityWasFixed The bool value to which peakIntensityWasFixed is to be set.
 
 
+
         """
 
         self._peakIntensityWasFixed = bool(peakIntensityWasFixed)
@@ -2696,6 +2847,7 @@ class CalPointingRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -2726,6 +2878,7 @@ class CalPointingRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

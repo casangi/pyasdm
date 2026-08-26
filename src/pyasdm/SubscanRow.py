@@ -72,6 +72,16 @@ class SubscanRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -186,35 +196,53 @@ class SubscanRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("scanNumber", self._scanNumber)
+
+        result += "\n   "
 
         result += Parser.valueToXML("subscanNumber", self._subscanNumber)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startTime", self._startTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endTime", self._endTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("fieldName", self._fieldName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "subscanIntent", SubscanIntent.name(self._subscanIntent)
         )
 
         if self._subscanModeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "subscanMode", SwitchingMode.name(self._subscanMode)
             )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numIntegration", self._numIntegration)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("numSubintegration", self._numSubintegration)
 
         if self._correlatorCalibrationExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "correlatorCalibration",
@@ -223,11 +251,34 @@ class SubscanRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SubscanTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -254,59 +305,63 @@ class SubscanRow:
 
         # intrinsic attribute values
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")[0]
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", True)
 
-        self._scanNumber = int(scanNumberNode.firstChild.data.strip())
+        self._scanNumber = int(self._getXMLNodeChildText(scanNumberNode))
 
-        subscanNumberNode = rowdom.getElementsByTagName("subscanNumber")[0]
+        subscanNumberNode = self._getFirstNodeByTagName(rowdom, "subscanNumber", True)
 
-        self._subscanNumber = int(subscanNumberNode.firstChild.data.strip())
+        self._subscanNumber = int(self._getXMLNodeChildText(subscanNumberNode))
 
-        startTimeNode = rowdom.getElementsByTagName("startTime")[0]
+        startTimeNode = self._getFirstNodeByTagName(rowdom, "startTime", True)
 
-        self._startTime = ArrayTime(startTimeNode.firstChild.data.strip())
+        self._startTime = ArrayTime(self._getXMLNodeChildText(startTimeNode))
 
-        endTimeNode = rowdom.getElementsByTagName("endTime")[0]
+        endTimeNode = self._getFirstNodeByTagName(rowdom, "endTime", True)
 
-        self._endTime = ArrayTime(endTimeNode.firstChild.data.strip())
+        self._endTime = ArrayTime(self._getXMLNodeChildText(endTimeNode))
 
-        fieldNameNode = rowdom.getElementsByTagName("fieldName")[0]
+        fieldNameNode = self._getFirstNodeByTagName(rowdom, "fieldName", True)
 
-        self._fieldName = str(fieldNameNode.firstChild.data.strip())
+        self._fieldName = str(self._getXMLNodeChildText(fieldNameNode))
 
-        subscanIntentNode = rowdom.getElementsByTagName("subscanIntent")[0]
+        subscanIntentNode = self._getFirstNodeByTagName(rowdom, "subscanIntent", True)
 
         self._subscanIntent = SubscanIntent.newSubscanIntent(
-            subscanIntentNode.firstChild.data.strip()
+            self._getXMLNodeChildText(subscanIntentNode)
         )
 
-        subscanModeNode = rowdom.getElementsByTagName("subscanMode")
-        if len(subscanModeNode) > 0:
+        subscanModeNode = self._getFirstNodeByTagName(rowdom, "subscanMode", False)
+        if subscanModeNode:
 
             self._subscanMode = SwitchingMode.newSwitchingMode(
-                subscanModeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(subscanModeNode)
             )
 
             self._subscanModeExists = True
 
-        numIntegrationNode = rowdom.getElementsByTagName("numIntegration")[0]
+        numIntegrationNode = self._getFirstNodeByTagName(rowdom, "numIntegration", True)
 
-        self._numIntegration = int(numIntegrationNode.firstChild.data.strip())
+        self._numIntegration = int(self._getXMLNodeChildText(numIntegrationNode))
 
-        numSubintegrationNode = rowdom.getElementsByTagName("numSubintegration")[0]
+        numSubintegrationNode = self._getFirstNodeByTagName(
+            rowdom, "numSubintegration", True
+        )
 
-        numSubintegrationStr = numSubintegrationNode.firstChild.data.strip()
+        numSubintegrationStr = self._getXMLNodeChildText(numSubintegrationNode)
 
         self._numSubintegration = Parser.stringListToLists(
             numSubintegrationStr, int, "Subscan", False
         )
 
-        correlatorCalibrationNode = rowdom.getElementsByTagName("correlatorCalibration")
-        if len(correlatorCalibrationNode) > 0:
+        correlatorCalibrationNode = self._getFirstNodeByTagName(
+            rowdom, "correlatorCalibration", False
+        )
+        if correlatorCalibrationNode:
 
             self._correlatorCalibration = (
                 CorrelatorCalibration.newCorrelatorCalibration(
-                    correlatorCalibrationNode[0].firstChild.data.strip()
+                    self._getXMLNodeChildText(correlatorCalibrationNode)
                 )
             )
 
@@ -314,9 +369,9 @@ class SubscanRow:
 
         # extrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
         # from link values, if any
 
@@ -520,6 +575,7 @@ class SubscanRow:
         scanNumber The int value to which scanNumber is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -547,6 +603,7 @@ class SubscanRow:
         """
         Set subscanNumber with the specified int value.
         subscanNumber The int value to which subscanNumber is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -577,6 +634,7 @@ class SubscanRow:
         """
         Set startTime with the specified ArrayTime value.
         startTime The ArrayTime value to which startTime is to be set.
+
         The value of startTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -600,6 +658,7 @@ class SubscanRow:
         """
         Set endTime with the specified ArrayTime value.
         endTime The ArrayTime value to which endTime is to be set.
+
         The value of endTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -624,6 +683,7 @@ class SubscanRow:
         fieldName The str value to which fieldName is to be set.
 
 
+
         """
 
         self._fieldName = str(fieldName)
@@ -644,6 +704,7 @@ class SubscanRow:
         """
         Set subscanIntent with the specified SubscanIntent value.
         subscanIntent The SubscanIntent value to which subscanIntent is to be set.
+
 
 
         """
@@ -682,6 +743,7 @@ class SubscanRow:
         subscanMode The SwitchingMode value to which subscanMode is to be set.
 
 
+
         """
 
         self._subscanMode = SwitchingMode(subscanMode)
@@ -712,6 +774,7 @@ class SubscanRow:
         numIntegration The int value to which numIntegration is to be set.
 
 
+
         """
 
         self._numIntegration = int(numIntegration)
@@ -732,6 +795,7 @@ class SubscanRow:
         """
         Set numSubintegration with the specified int []  value.
         numSubintegration The int []  value to which numSubintegration is to be set.
+
 
 
         """
@@ -791,6 +855,7 @@ class SubscanRow:
         correlatorCalibration The CorrelatorCalibration value to which correlatorCalibration is to be set.
 
 
+
         """
 
         self._correlatorCalibration = CorrelatorCalibration(correlatorCalibration)
@@ -822,6 +887,7 @@ class SubscanRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

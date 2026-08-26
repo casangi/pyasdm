@@ -63,6 +63,16 @@ class PulsarRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -99,7 +109,7 @@ class PulsarRow:
 
         self._phasePolyExists = False
 
-        self._phasePoly = []  # this is a list of float []
+        self._phasePoly = []  # this is a list of float []  saved as double precision
 
         self._timeSpanExists = False
 
@@ -107,11 +117,13 @@ class PulsarRow:
 
         self._startPhaseBinExists = False
 
-        self._startPhaseBin = []  # this is a list of float []
+        self._startPhaseBin = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._endPhaseBinExists = False
 
-        self._endPhaseBin = []  # this is a list of float []
+        self._endPhaseBin = []  # this is a list of float []  saved as single precision
 
         self._dispersionMeasureExists = False
 
@@ -211,51 +223,91 @@ class PulsarRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("pulsarId", self._pulsarId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("refTime", self._refTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("refPulseFreq", self._refPulseFreq)
 
-        result += Parser.valueToXML("refPhase", self._refPhase)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("refPhase", self._refPhase)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numBin", self._numBin)
 
         if self._numPolyExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numPoly", self._numPoly)
 
         if self._phasePolyExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("phasePoly", self._phasePoly)
+            result += Parser.doubleListValueToXML("phasePoly", self._phasePoly)
 
         if self._timeSpanExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("timeSpan", self._timeSpan)
 
         if self._startPhaseBinExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("startPhaseBin", self._startPhaseBin)
+            result += Parser.floatListValueToXML("startPhaseBin", self._startPhaseBin)
 
         if self._endPhaseBinExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("endPhaseBin", self._endPhaseBin)
+            result += Parser.floatListValueToXML("endPhaseBin", self._endPhaseBin)
 
         if self._dispersionMeasureExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("dispersionMeasure", self._dispersionMeasure)
+            result += Parser.doubleValueToXML(
+                "dispersionMeasure", self._dispersionMeasure
+            )
 
         if self._refFrequencyExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("refFrequency", self._refFrequency)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "PulsarTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -282,37 +334,37 @@ class PulsarRow:
 
         # intrinsic attribute values
 
-        pulsarIdNode = rowdom.getElementsByTagName("pulsarId")[0]
+        pulsarIdNode = self._getFirstNodeByTagName(rowdom, "pulsarId", True)
 
-        self._pulsarId = Tag(pulsarIdNode.firstChild.data.strip())
+        self._pulsarId = Tag(self._getXMLNodeChildText(pulsarIdNode))
 
-        refTimeNode = rowdom.getElementsByTagName("refTime")[0]
+        refTimeNode = self._getFirstNodeByTagName(rowdom, "refTime", True)
 
-        self._refTime = ArrayTime(refTimeNode.firstChild.data.strip())
+        self._refTime = ArrayTime(self._getXMLNodeChildText(refTimeNode))
 
-        refPulseFreqNode = rowdom.getElementsByTagName("refPulseFreq")[0]
+        refPulseFreqNode = self._getFirstNodeByTagName(rowdom, "refPulseFreq", True)
 
-        self._refPulseFreq = Frequency(refPulseFreqNode.firstChild.data.strip())
+        self._refPulseFreq = Frequency(self._getXMLNodeChildText(refPulseFreqNode))
 
-        refPhaseNode = rowdom.getElementsByTagName("refPhase")[0]
+        refPhaseNode = self._getFirstNodeByTagName(rowdom, "refPhase", True)
 
-        self._refPhase = float(refPhaseNode.firstChild.data.strip())
+        self._refPhase = float(self._getXMLNodeChildText(refPhaseNode))
 
-        numBinNode = rowdom.getElementsByTagName("numBin")[0]
+        numBinNode = self._getFirstNodeByTagName(rowdom, "numBin", True)
 
-        self._numBin = int(numBinNode.firstChild.data.strip())
+        self._numBin = int(self._getXMLNodeChildText(numBinNode))
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")
-        if len(numPolyNode) > 0:
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", False)
+        if numPolyNode:
 
-            self._numPoly = int(numPolyNode[0].firstChild.data.strip())
+            self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
             self._numPolyExists = True
 
-        phasePolyNode = rowdom.getElementsByTagName("phasePoly")
-        if len(phasePolyNode) > 0:
+        phasePolyNode = self._getFirstNodeByTagName(rowdom, "phasePoly", False)
+        if phasePolyNode:
 
-            phasePolyStr = phasePolyNode[0].firstChild.data.strip()
+            phasePolyStr = self._getXMLNodeChildText(phasePolyNode)
 
             self._phasePoly = Parser.stringListToLists(
                 phasePolyStr, float, "Pulsar", False
@@ -320,17 +372,17 @@ class PulsarRow:
 
             self._phasePolyExists = True
 
-        timeSpanNode = rowdom.getElementsByTagName("timeSpan")
-        if len(timeSpanNode) > 0:
+        timeSpanNode = self._getFirstNodeByTagName(rowdom, "timeSpan", False)
+        if timeSpanNode:
 
-            self._timeSpan = Interval(timeSpanNode[0].firstChild.data.strip())
+            self._timeSpan = Interval(self._getXMLNodeChildText(timeSpanNode))
 
             self._timeSpanExists = True
 
-        startPhaseBinNode = rowdom.getElementsByTagName("startPhaseBin")
-        if len(startPhaseBinNode) > 0:
+        startPhaseBinNode = self._getFirstNodeByTagName(rowdom, "startPhaseBin", False)
+        if startPhaseBinNode:
 
-            startPhaseBinStr = startPhaseBinNode[0].firstChild.data.strip()
+            startPhaseBinStr = self._getXMLNodeChildText(startPhaseBinNode)
 
             self._startPhaseBin = Parser.stringListToLists(
                 startPhaseBinStr, float, "Pulsar", False
@@ -338,10 +390,10 @@ class PulsarRow:
 
             self._startPhaseBinExists = True
 
-        endPhaseBinNode = rowdom.getElementsByTagName("endPhaseBin")
-        if len(endPhaseBinNode) > 0:
+        endPhaseBinNode = self._getFirstNodeByTagName(rowdom, "endPhaseBin", False)
+        if endPhaseBinNode:
 
-            endPhaseBinStr = endPhaseBinNode[0].firstChild.data.strip()
+            endPhaseBinStr = self._getXMLNodeChildText(endPhaseBinNode)
 
             self._endPhaseBin = Parser.stringListToLists(
                 endPhaseBinStr, float, "Pulsar", False
@@ -349,19 +401,21 @@ class PulsarRow:
 
             self._endPhaseBinExists = True
 
-        dispersionMeasureNode = rowdom.getElementsByTagName("dispersionMeasure")
-        if len(dispersionMeasureNode) > 0:
+        dispersionMeasureNode = self._getFirstNodeByTagName(
+            rowdom, "dispersionMeasure", False
+        )
+        if dispersionMeasureNode:
 
             self._dispersionMeasure = float(
-                dispersionMeasureNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(dispersionMeasureNode)
             )
 
             self._dispersionMeasureExists = True
 
-        refFrequencyNode = rowdom.getElementsByTagName("refFrequency")
-        if len(refFrequencyNode) > 0:
+        refFrequencyNode = self._getFirstNodeByTagName(rowdom, "refFrequency", False)
+        if refFrequencyNode:
 
-            self._refFrequency = Frequency(refFrequencyNode[0].firstChild.data.strip())
+            self._refFrequency = Frequency(self._getXMLNodeChildText(refFrequencyNode))
 
             self._refFrequencyExists = True
 
@@ -378,7 +432,7 @@ class PulsarRow:
 
         self._refPulseFreq.toBin(eos)
 
-        eos.writeFloat(self._refPhase)
+        eos.writeDouble(self._refPhase)
 
         eos.writeInt(self._numBin)
 
@@ -393,7 +447,7 @@ class PulsarRow:
             eos.writeInt(len(self._phasePoly))
             for i in range(len(self._phasePoly)):
 
-                eos.writeFloat(self._phasePoly[i])
+                eos.writeDouble(self._phasePoly[i])
 
         eos.writeBool(self._timeSpanExists)
         if self._timeSpanExists:
@@ -419,7 +473,7 @@ class PulsarRow:
         eos.writeBool(self._dispersionMeasureExists)
         if self._dispersionMeasureExists:
 
-            eos.writeFloat(self._dispersionMeasure)
+            eos.writeDouble(self._dispersionMeasure)
 
         eos.writeBool(self._refFrequencyExists)
         if self._refFrequencyExists:
@@ -456,7 +510,7 @@ class PulsarRow:
         Set the refPhase in row from the EndianInput (eis) instance.
         """
 
-        row._refPhase = eis.readFloat()
+        row._refPhase = eis.readDouble()
 
     @staticmethod
     def numBinFromBin(row, eis):
@@ -487,7 +541,7 @@ class PulsarRow:
             phasePolyDim1 = eis.readInt()
             thisList = []
             for i in range(phasePolyDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._phasePoly = thisList
 
@@ -539,7 +593,7 @@ class PulsarRow:
         row._dispersionMeasureExists = eis.readBool()
         if row._dispersionMeasureExists:
 
-            row._dispersionMeasure = eis.readFloat()
+            row._dispersionMeasure = eis.readDouble()
 
     @staticmethod
     def refFrequencyFromBin(row, eis):
@@ -616,6 +670,7 @@ class PulsarRow:
         """
         Set pulsarId with the specified Tag value.
         pulsarId The Tag value to which pulsarId is to be set.
+
         The value of pulsarId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -646,6 +701,7 @@ class PulsarRow:
         """
         Set refTime with the specified ArrayTime value.
         refTime The ArrayTime value to which refTime is to be set.
+
         The value of refTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -669,6 +725,7 @@ class PulsarRow:
         """
         Set refPulseFreq with the specified Frequency value.
         refPulseFreq The Frequency value to which refPulseFreq is to be set.
+
         The value of refPulseFreq can be anything allowed by the Frequency constructor.
 
         """
@@ -692,6 +749,9 @@ class PulsarRow:
         Set refPhase with the specified float value.
         refPhase The float value to which refPhase is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -713,6 +773,7 @@ class PulsarRow:
         """
         Set numBin with the specified int value.
         numBin The int value to which numBin is to be set.
+
 
 
         """
@@ -749,6 +810,7 @@ class PulsarRow:
         """
         Set numPoly with the specified int value.
         numPoly The int value to which numPoly is to be set.
+
 
 
         """
@@ -793,6 +855,9 @@ class PulsarRow:
         """
         Set phasePoly with the specified float []  value.
         phasePoly The float []  value to which phasePoly is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -859,6 +924,7 @@ class PulsarRow:
         """
         Set timeSpan with the specified Interval value.
         timeSpan The Interval value to which timeSpan is to be set.
+
         The value of timeSpan can be anything allowed by the Interval constructor.
 
         """
@@ -903,6 +969,9 @@ class PulsarRow:
         """
         Set startPhaseBin with the specified float []  value.
         startPhaseBin The float []  value to which startPhaseBin is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -969,6 +1038,9 @@ class PulsarRow:
         Set endPhaseBin with the specified float []  value.
         endPhaseBin The float []  value to which endPhaseBin is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1034,6 +1106,9 @@ class PulsarRow:
         Set dispersionMeasure with the specified float value.
         dispersionMeasure The float value to which dispersionMeasure is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1078,6 +1153,7 @@ class PulsarRow:
         """
         Set refFrequency with the specified Frequency value.
         refFrequency The Frequency value to which refFrequency is to be set.
+
         The value of refFrequency can be anything allowed by the Frequency constructor.
 
         """

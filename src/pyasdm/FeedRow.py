@@ -66,6 +66,16 @@ class FeedRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -92,7 +102,9 @@ class FeedRow:
 
         self._numReceptor = 0
 
-        self._beamOffset = []  # this is a list of float []  []
+        self._beamOffset = (
+            []
+        )  # this is a list of float []  []  saved as double precision
 
         self._focusReference = []  # this is a list of Length []  []
 
@@ -124,7 +136,9 @@ class FeedRow:
 
         self._skyCouplingSpectrumExists = False
 
-        self._skyCouplingSpectrum = []  # this is a list of float []
+        self._skyCouplingSpectrum = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._receiverGenerationExists = False
 
@@ -263,59 +277,83 @@ class FeedRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("feedId", self._feedId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
-        result += Parser.listValueToXML("beamOffset", self._beamOffset)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("beamOffset", self._beamOffset)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("focusReference", self._focusReference)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("polResponse", self._polResponse)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("receptorAngle", self._receptorAngle)
 
         if self._feedNumExists:
+            result += "\n   "
 
             result += Parser.valueToXML("feedNum", self._feedNum)
 
         if self._illumOffsetExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("illumOffset", self._illumOffset)
 
         if self._positionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("position", self._position)
 
         if self._skyCouplingExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("skyCoupling", self._skyCoupling)
+            result += Parser.floatValueToXML("skyCoupling", self._skyCoupling)
 
         if self._numChanExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numChan", self._numChan)
 
         if self._skyCouplingSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "skyCouplingSpectrum", self._skyCouplingSpectrum
             )
 
         if self._receiverGenerationExists:
+            result += "\n   "
 
             result += Parser.valueToXML("receiverGeneration", self._receiverGeneration)
 
         if self._digitizerOffsetExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "digitizerOffset", self._digitizerOffset
@@ -323,15 +361,42 @@ class FeedRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("receiverId", self._receiverId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "FeedTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -358,66 +423,70 @@ class FeedRow:
 
         # intrinsic attribute values
 
-        feedIdNode = rowdom.getElementsByTagName("feedId")[0]
+        feedIdNode = self._getFirstNodeByTagName(rowdom, "feedId", True)
 
-        self._feedId = int(feedIdNode.firstChild.data.strip())
+        self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        beamOffsetNode = rowdom.getElementsByTagName("beamOffset")[0]
+        beamOffsetNode = self._getFirstNodeByTagName(rowdom, "beamOffset", True)
 
-        beamOffsetStr = beamOffsetNode.firstChild.data.strip()
+        beamOffsetStr = self._getXMLNodeChildText(beamOffsetNode)
 
         self._beamOffset = Parser.stringListToLists(beamOffsetStr, float, "Feed", False)
 
-        focusReferenceNode = rowdom.getElementsByTagName("focusReference")[0]
+        focusReferenceNode = self._getFirstNodeByTagName(rowdom, "focusReference", True)
 
-        focusReferenceStr = focusReferenceNode.firstChild.data.strip()
+        focusReferenceStr = self._getXMLNodeChildText(focusReferenceNode)
 
         self._focusReference = Parser.stringListToLists(
             focusReferenceStr, Length, "Feed", True
         )
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "Feed", False
         )
 
-        polResponseNode = rowdom.getElementsByTagName("polResponse")[0]
+        polResponseNode = self._getFirstNodeByTagName(rowdom, "polResponse", True)
 
-        polResponseStr = polResponseNode.firstChild.data.strip()
+        polResponseStr = self._getXMLNodeChildText(polResponseNode)
 
         self._polResponse = Parser.stringListToLists(
             polResponseStr, Complex, "Feed", True
         )
 
-        receptorAngleNode = rowdom.getElementsByTagName("receptorAngle")[0]
+        receptorAngleNode = self._getFirstNodeByTagName(rowdom, "receptorAngle", True)
 
-        receptorAngleStr = receptorAngleNode.firstChild.data.strip()
+        receptorAngleStr = self._getXMLNodeChildText(receptorAngleNode)
 
         self._receptorAngle = Parser.stringListToLists(
             receptorAngleStr, Angle, "Feed", True
         )
 
-        feedNumNode = rowdom.getElementsByTagName("feedNum")
-        if len(feedNumNode) > 0:
+        feedNumNode = self._getFirstNodeByTagName(rowdom, "feedNum", False)
+        if feedNumNode:
 
-            self._feedNum = int(feedNumNode[0].firstChild.data.strip())
+            self._feedNum = int(self._getXMLNodeChildText(feedNumNode))
 
             self._feedNumExists = True
 
-        illumOffsetNode = rowdom.getElementsByTagName("illumOffset")
-        if len(illumOffsetNode) > 0:
+        illumOffsetNode = self._getFirstNodeByTagName(rowdom, "illumOffset", False)
+        if illumOffsetNode:
 
-            illumOffsetStr = illumOffsetNode[0].firstChild.data.strip()
+            illumOffsetStr = self._getXMLNodeChildText(illumOffsetNode)
 
             self._illumOffset = Parser.stringListToLists(
                 illumOffsetStr, Length, "Feed", True
@@ -425,33 +494,35 @@ class FeedRow:
 
             self._illumOffsetExists = True
 
-        positionNode = rowdom.getElementsByTagName("position")
-        if len(positionNode) > 0:
+        positionNode = self._getFirstNodeByTagName(rowdom, "position", False)
+        if positionNode:
 
-            positionStr = positionNode[0].firstChild.data.strip()
+            positionStr = self._getXMLNodeChildText(positionNode)
 
             self._position = Parser.stringListToLists(positionStr, Length, "Feed", True)
 
             self._positionExists = True
 
-        skyCouplingNode = rowdom.getElementsByTagName("skyCoupling")
-        if len(skyCouplingNode) > 0:
+        skyCouplingNode = self._getFirstNodeByTagName(rowdom, "skyCoupling", False)
+        if skyCouplingNode:
 
-            self._skyCoupling = float(skyCouplingNode[0].firstChild.data.strip())
+            self._skyCoupling = float(self._getXMLNodeChildText(skyCouplingNode))
 
             self._skyCouplingExists = True
 
-        numChanNode = rowdom.getElementsByTagName("numChan")
-        if len(numChanNode) > 0:
+        numChanNode = self._getFirstNodeByTagName(rowdom, "numChan", False)
+        if numChanNode:
 
-            self._numChan = int(numChanNode[0].firstChild.data.strip())
+            self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
             self._numChanExists = True
 
-        skyCouplingSpectrumNode = rowdom.getElementsByTagName("skyCouplingSpectrum")
-        if len(skyCouplingSpectrumNode) > 0:
+        skyCouplingSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "skyCouplingSpectrum", False
+        )
+        if skyCouplingSpectrumNode:
 
-            skyCouplingSpectrumStr = skyCouplingSpectrumNode[0].firstChild.data.strip()
+            skyCouplingSpectrumStr = self._getXMLNodeChildText(skyCouplingSpectrumNode)
 
             self._skyCouplingSpectrum = Parser.stringListToLists(
                 skyCouplingSpectrumStr, float, "Feed", False
@@ -459,39 +530,45 @@ class FeedRow:
 
             self._skyCouplingSpectrumExists = True
 
-        receiverGenerationNode = rowdom.getElementsByTagName("receiverGeneration")
-        if len(receiverGenerationNode) > 0:
+        receiverGenerationNode = self._getFirstNodeByTagName(
+            rowdom, "receiverGeneration", False
+        )
+        if receiverGenerationNode:
 
             self._receiverGeneration = int(
-                receiverGenerationNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(receiverGenerationNode)
             )
 
             self._receiverGenerationExists = True
 
-        digitizerOffsetNode = rowdom.getElementsByTagName("digitizerOffset")
-        if len(digitizerOffsetNode) > 0:
+        digitizerOffsetNode = self._getFirstNodeByTagName(
+            rowdom, "digitizerOffset", False
+        )
+        if digitizerOffsetNode:
 
             self._digitizerOffset = Frequency(
-                digitizerOffsetNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(digitizerOffsetNode)
             )
 
             self._digitizerOffsetExists = True
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
+        receiverIdNode = self._getFirstNodeByTagName(rowdom, "receiverId", True)
 
-        receiverIdStr = receiverIdNode.firstChild.data.strip()
+        receiverIdStr = self._getXMLNodeChildText(receiverIdNode)
 
         self._receiverId = Parser.stringListToLists(receiverIdStr, int, "Feed", False)
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
@@ -521,7 +598,7 @@ class FeedRow:
         eos.writeInt(beamOffset_dims[1])
         for i in range(beamOffset_dims[0]):
             for j in range(beamOffset_dims[1]):
-                eos.writeFloat(self._beamOffset[i][j])
+                eos.writeDouble(self._beamOffset[i][j])
 
         Length.listToBin(self._focusReference, eos)
 
@@ -634,7 +711,7 @@ class FeedRow:
         for i in range(beamOffsetDim1):
             thisList_j = []
             for j in range(beamOffsetDim2):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
         row._beamOffset = thisList
@@ -846,6 +923,7 @@ class FeedRow:
         feedId The int value to which feedId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -874,6 +952,7 @@ class FeedRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -905,6 +984,7 @@ class FeedRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -925,6 +1005,9 @@ class FeedRow:
         """
         Set beamOffset with the specified float []  []  value.
         beamOffset The float []  []  value to which beamOffset is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -968,6 +1051,7 @@ class FeedRow:
         """
         Set focusReference with the specified Length []  []  value.
         focusReference The Length []  []  value to which focusReference is to be set.
+
         The value of focusReference can be anything allowed by the Length []  []  constructor.
 
         """
@@ -1013,6 +1097,7 @@ class FeedRow:
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1054,6 +1139,7 @@ class FeedRow:
         """
         Set polResponse with the specified Complex []  []  value.
         polResponse The Complex []  []  value to which polResponse is to be set.
+
         The value of polResponse can be anything allowed by the Complex []  []  constructor.
 
         """
@@ -1097,6 +1183,7 @@ class FeedRow:
         """
         Set receptorAngle with the specified Angle []  value.
         receptorAngle The Angle []  value to which receptorAngle is to be set.
+
         The value of receptorAngle can be anything allowed by the Angle []  constructor.
 
         """
@@ -1156,6 +1243,7 @@ class FeedRow:
         feedNum The int value to which feedNum is to be set.
 
 
+
         """
 
         self._feedNum = int(feedNum)
@@ -1198,6 +1286,7 @@ class FeedRow:
         """
         Set illumOffset with the specified Length []  value.
         illumOffset The Length []  value to which illumOffset is to be set.
+
         The value of illumOffset can be anything allowed by the Length []  constructor.
 
         """
@@ -1263,6 +1352,7 @@ class FeedRow:
         """
         Set position with the specified Length []  value.
         position The Length []  value to which position is to be set.
+
         The value of position can be anything allowed by the Length []  constructor.
 
         """
@@ -1329,6 +1419,9 @@ class FeedRow:
         Set skyCoupling with the specified float value.
         skyCoupling The float value to which skyCoupling is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1374,6 +1467,7 @@ class FeedRow:
         numChan The int value to which numChan is to be set.
 
 
+
         """
 
         self._numChan = int(numChan)
@@ -1416,6 +1510,9 @@ class FeedRow:
         """
         Set skyCouplingSpectrum with the specified float []  value.
         skyCouplingSpectrum The float []  value to which skyCouplingSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1483,6 +1580,7 @@ class FeedRow:
         receiverGeneration The int value to which receiverGeneration is to be set.
 
 
+
         """
 
         self._receiverGeneration = int(receiverGeneration)
@@ -1526,6 +1624,7 @@ class FeedRow:
         """
         Set digitizerOffset with the specified Frequency value.
         digitizerOffset The Frequency value to which digitizerOffset is to be set.
+
         The value of digitizerOffset can be anything allowed by the Frequency constructor.
 
         """
@@ -1559,6 +1658,7 @@ class FeedRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1588,6 +1688,7 @@ class FeedRow:
         """
         Set receiverId with the specified int []  value.
         receiverId The int []  value to which receiverId is to be set.
+
 
 
         """
@@ -1632,6 +1733,7 @@ class FeedRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

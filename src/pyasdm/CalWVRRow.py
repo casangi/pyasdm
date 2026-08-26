@@ -66,6 +66,16 @@ class CalWVRRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -108,13 +118,15 @@ class CalWVRRow:
 
         self._numPoly = 0
 
-        self._pathCoeff = []  # this is a list of float []  []  []
+        self._pathCoeff = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
         self._polyFreqLimits = []  # this is a list of Frequency []
 
-        self._wetPath = []  # this is a list of float []
+        self._wetPath = []  # this is a list of float []  saved as single precision
 
-        self._dryPath = []  # this is a list of float []
+        self._dryPath = []  # this is a list of float []  saved as single precision
 
         self._water = Length()
 
@@ -205,55 +217,113 @@ class CalWVRRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("wvrMethod", WVRMethod.name(self._wvrMethod))
+
+        result += "\n   "
 
         result += Parser.valueToXML("antennaName", self._antennaName)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numInputAntennas", self._numInputAntennas)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("inputAntennaNames", self._inputAntennaNames)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numChan", self._numChan)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("chanFreq", self._chanFreq)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("chanWidth", self._chanWidth)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("refTemp", self._refTemp)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numPoly", self._numPoly)
 
-        result += Parser.listValueToXML("pathCoeff", self._pathCoeff)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("pathCoeff", self._pathCoeff)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("polyFreqLimits", self._polyFreqLimits)
 
-        result += Parser.listValueToXML("wetPath", self._wetPath)
+        result += "\n   "
 
-        result += Parser.listValueToXML("dryPath", self._dryPath)
+        result += Parser.floatListValueToXML("wetPath", self._wetPath)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("dryPath", self._dryPath)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("water", self._water)
 
         if self._tauBaselineExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("tauBaseline", self._tauBaseline)
+            result += Parser.floatValueToXML("tauBaseline", self._tauBaseline)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalWVRTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -280,112 +350,118 @@ class CalWVRRow:
 
         # intrinsic attribute values
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        wvrMethodNode = rowdom.getElementsByTagName("wvrMethod")[0]
+        wvrMethodNode = self._getFirstNodeByTagName(rowdom, "wvrMethod", True)
 
-        self._wvrMethod = WVRMethod.newWVRMethod(wvrMethodNode.firstChild.data.strip())
+        self._wvrMethod = WVRMethod.newWVRMethod(
+            self._getXMLNodeChildText(wvrMethodNode)
+        )
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        numInputAntennasNode = rowdom.getElementsByTagName("numInputAntennas")[0]
+        numInputAntennasNode = self._getFirstNodeByTagName(
+            rowdom, "numInputAntennas", True
+        )
 
-        self._numInputAntennas = int(numInputAntennasNode.firstChild.data.strip())
+        self._numInputAntennas = int(self._getXMLNodeChildText(numInputAntennasNode))
 
-        inputAntennaNamesNode = rowdom.getElementsByTagName("inputAntennaNames")[0]
+        inputAntennaNamesNode = self._getFirstNodeByTagName(
+            rowdom, "inputAntennaNames", True
+        )
 
-        inputAntennaNamesStr = inputAntennaNamesNode.firstChild.data.strip()
+        inputAntennaNamesStr = self._getXMLNodeChildText(inputAntennaNamesNode)
 
         self._inputAntennaNames = Parser.stringListToLists(
             inputAntennaNamesStr, str, "CalWVR", False
         )
 
-        numChanNode = rowdom.getElementsByTagName("numChan")[0]
+        numChanNode = self._getFirstNodeByTagName(rowdom, "numChan", True)
 
-        self._numChan = int(numChanNode.firstChild.data.strip())
+        self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
-        chanFreqNode = rowdom.getElementsByTagName("chanFreq")[0]
+        chanFreqNode = self._getFirstNodeByTagName(rowdom, "chanFreq", True)
 
-        chanFreqStr = chanFreqNode.firstChild.data.strip()
+        chanFreqStr = self._getXMLNodeChildText(chanFreqNode)
 
         self._chanFreq = Parser.stringListToLists(
             chanFreqStr, Frequency, "CalWVR", True
         )
 
-        chanWidthNode = rowdom.getElementsByTagName("chanWidth")[0]
+        chanWidthNode = self._getFirstNodeByTagName(rowdom, "chanWidth", True)
 
-        chanWidthStr = chanWidthNode.firstChild.data.strip()
+        chanWidthStr = self._getXMLNodeChildText(chanWidthNode)
 
         self._chanWidth = Parser.stringListToLists(
             chanWidthStr, Frequency, "CalWVR", True
         )
 
-        refTempNode = rowdom.getElementsByTagName("refTemp")[0]
+        refTempNode = self._getFirstNodeByTagName(rowdom, "refTemp", True)
 
-        refTempStr = refTempNode.firstChild.data.strip()
+        refTempStr = self._getXMLNodeChildText(refTempNode)
 
         self._refTemp = Parser.stringListToLists(
             refTempStr, Temperature, "CalWVR", True
         )
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", True)
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
-        pathCoeffNode = rowdom.getElementsByTagName("pathCoeff")[0]
+        pathCoeffNode = self._getFirstNodeByTagName(rowdom, "pathCoeff", True)
 
-        pathCoeffStr = pathCoeffNode.firstChild.data.strip()
+        pathCoeffStr = self._getXMLNodeChildText(pathCoeffNode)
 
         self._pathCoeff = Parser.stringListToLists(pathCoeffStr, float, "CalWVR", False)
 
-        polyFreqLimitsNode = rowdom.getElementsByTagName("polyFreqLimits")[0]
+        polyFreqLimitsNode = self._getFirstNodeByTagName(rowdom, "polyFreqLimits", True)
 
-        polyFreqLimitsStr = polyFreqLimitsNode.firstChild.data.strip()
+        polyFreqLimitsStr = self._getXMLNodeChildText(polyFreqLimitsNode)
 
         self._polyFreqLimits = Parser.stringListToLists(
             polyFreqLimitsStr, Frequency, "CalWVR", True
         )
 
-        wetPathNode = rowdom.getElementsByTagName("wetPath")[0]
+        wetPathNode = self._getFirstNodeByTagName(rowdom, "wetPath", True)
 
-        wetPathStr = wetPathNode.firstChild.data.strip()
+        wetPathStr = self._getXMLNodeChildText(wetPathNode)
 
         self._wetPath = Parser.stringListToLists(wetPathStr, float, "CalWVR", False)
 
-        dryPathNode = rowdom.getElementsByTagName("dryPath")[0]
+        dryPathNode = self._getFirstNodeByTagName(rowdom, "dryPath", True)
 
-        dryPathStr = dryPathNode.firstChild.data.strip()
+        dryPathStr = self._getXMLNodeChildText(dryPathNode)
 
         self._dryPath = Parser.stringListToLists(dryPathStr, float, "CalWVR", False)
 
-        waterNode = rowdom.getElementsByTagName("water")[0]
+        waterNode = self._getFirstNodeByTagName(rowdom, "water", True)
 
-        self._water = Length(waterNode.firstChild.data.strip())
+        self._water = Length(self._getXMLNodeChildText(waterNode))
 
-        tauBaselineNode = rowdom.getElementsByTagName("tauBaseline")
-        if len(tauBaselineNode) > 0:
+        tauBaselineNode = self._getFirstNodeByTagName(rowdom, "tauBaseline", False)
+        if tauBaselineNode:
 
-            self._tauBaseline = float(tauBaselineNode[0].firstChild.data.strip())
+            self._tauBaseline = float(self._getXMLNodeChildText(tauBaselineNode))
 
             self._tauBaselineExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -711,6 +787,7 @@ class CalWVRRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -734,6 +811,7 @@ class CalWVRRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -758,6 +836,7 @@ class CalWVRRow:
         wvrMethod The WVRMethod value to which wvrMethod is to be set.
 
 
+
         """
 
         self._wvrMethod = WVRMethod(wvrMethod)
@@ -778,6 +857,7 @@ class CalWVRRow:
         """
         Set antennaName with the specified str value.
         antennaName The str value to which antennaName is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -809,6 +889,7 @@ class CalWVRRow:
         numInputAntennas The int value to which numInputAntennas is to be set.
 
 
+
         """
 
         self._numInputAntennas = int(numInputAntennas)
@@ -829,6 +910,7 @@ class CalWVRRow:
         """
         Set inputAntennaNames with the specified str []  value.
         inputAntennaNames The str []  value to which inputAntennaNames is to be set.
+
 
 
         """
@@ -874,6 +956,7 @@ class CalWVRRow:
         numChan The int value to which numChan is to be set.
 
 
+
         """
 
         self._numChan = int(numChan)
@@ -894,6 +977,7 @@ class CalWVRRow:
         """
         Set chanFreq with the specified Frequency []  value.
         chanFreq The Frequency []  value to which chanFreq is to be set.
+
         The value of chanFreq can be anything allowed by the Frequency []  constructor.
 
         """
@@ -937,6 +1021,7 @@ class CalWVRRow:
         """
         Set chanWidth with the specified Frequency []  value.
         chanWidth The Frequency []  value to which chanWidth is to be set.
+
         The value of chanWidth can be anything allowed by the Frequency []  constructor.
 
         """
@@ -980,6 +1065,7 @@ class CalWVRRow:
         """
         Set refTemp with the specified Temperature []  []  value.
         refTemp The Temperature []  []  value to which refTemp is to be set.
+
         The value of refTemp can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -1025,6 +1111,7 @@ class CalWVRRow:
         numPoly The int value to which numPoly is to be set.
 
 
+
         """
 
         self._numPoly = int(numPoly)
@@ -1045,6 +1132,9 @@ class CalWVRRow:
         """
         Set pathCoeff with the specified float []  []  []  value.
         pathCoeff The float []  []  []  value to which pathCoeff is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1088,6 +1178,7 @@ class CalWVRRow:
         """
         Set polyFreqLimits with the specified Frequency []  value.
         polyFreqLimits The Frequency []  value to which polyFreqLimits is to be set.
+
         The value of polyFreqLimits can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1132,6 +1223,9 @@ class CalWVRRow:
         Set wetPath with the specified float []  value.
         wetPath The float []  value to which wetPath is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1174,6 +1268,9 @@ class CalWVRRow:
         """
         Set dryPath with the specified float []  value.
         dryPath The float []  value to which dryPath is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1218,6 +1315,7 @@ class CalWVRRow:
         """
         Set water with the specified Length value.
         water The Length value to which water is to be set.
+
         The value of water can be anything allowed by the Length constructor.
 
         """
@@ -1255,6 +1353,9 @@ class CalWVRRow:
         Set tauBaseline with the specified float value.
         tauBaseline The float value to which tauBaseline is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1287,6 +1388,7 @@ class CalWVRRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1317,6 +1419,7 @@ class CalWVRRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

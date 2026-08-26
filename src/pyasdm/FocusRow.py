@@ -63,6 +63,16 @@ class FocusRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -158,27 +168,37 @@ class FocusRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("focusTracking", self._focusTracking)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("focusOffset", self._focusOffset)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "focusRotationOffset", self._focusRotationOffset
         )
 
         if self._measuredFocusPositionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "measuredFocusPosition", self._measuredFocusPosition
             )
 
         if self._measuredFocusRotationExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "measuredFocusRotation", self._measuredFocusRotation
@@ -186,13 +206,38 @@ class FocusRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("focusModelId", self._focusModelId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "FocusTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -219,36 +264,42 @@ class FocusRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        focusTrackingNode = rowdom.getElementsByTagName("focusTracking")[0]
+        focusTrackingNode = self._getFirstNodeByTagName(rowdom, "focusTracking", True)
 
-        self._focusTracking = bool(focusTrackingNode.firstChild.data.strip())
+        self._focusTracking = bool(self._getXMLNodeChildText(focusTrackingNode))
 
-        focusOffsetNode = rowdom.getElementsByTagName("focusOffset")[0]
+        focusOffsetNode = self._getFirstNodeByTagName(rowdom, "focusOffset", True)
 
-        focusOffsetStr = focusOffsetNode.firstChild.data.strip()
+        focusOffsetStr = self._getXMLNodeChildText(focusOffsetNode)
 
         self._focusOffset = Parser.stringListToLists(
             focusOffsetStr, Length, "Focus", True
         )
 
-        focusRotationOffsetNode = rowdom.getElementsByTagName("focusRotationOffset")[0]
+        focusRotationOffsetNode = self._getFirstNodeByTagName(
+            rowdom, "focusRotationOffset", True
+        )
 
-        focusRotationOffsetStr = focusRotationOffsetNode.firstChild.data.strip()
+        focusRotationOffsetStr = self._getXMLNodeChildText(focusRotationOffsetNode)
 
         self._focusRotationOffset = Parser.stringListToLists(
             focusRotationOffsetStr, Angle, "Focus", True
         )
 
-        measuredFocusPositionNode = rowdom.getElementsByTagName("measuredFocusPosition")
-        if len(measuredFocusPositionNode) > 0:
+        measuredFocusPositionNode = self._getFirstNodeByTagName(
+            rowdom, "measuredFocusPosition", False
+        )
+        if measuredFocusPositionNode:
 
-            measuredFocusPositionStr = measuredFocusPositionNode[
-                0
-            ].firstChild.data.strip()
+            measuredFocusPositionStr = self._getXMLNodeChildText(
+                measuredFocusPositionNode
+            )
 
             self._measuredFocusPosition = Parser.stringListToLists(
                 measuredFocusPositionStr, Length, "Focus", True
@@ -256,12 +307,14 @@ class FocusRow:
 
             self._measuredFocusPositionExists = True
 
-        measuredFocusRotationNode = rowdom.getElementsByTagName("measuredFocusRotation")
-        if len(measuredFocusRotationNode) > 0:
+        measuredFocusRotationNode = self._getFirstNodeByTagName(
+            rowdom, "measuredFocusRotation", False
+        )
+        if measuredFocusRotationNode:
 
-            measuredFocusRotationStr = measuredFocusRotationNode[
-                0
-            ].firstChild.data.strip()
+            measuredFocusRotationStr = self._getXMLNodeChildText(
+                measuredFocusRotationNode
+            )
 
             self._measuredFocusRotation = Parser.stringListToLists(
                 measuredFocusRotationStr, Angle, "Focus", True
@@ -271,13 +324,13 @@ class FocusRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        focusModelIdNode = rowdom.getElementsByTagName("focusModelId")[0]
+        focusModelIdNode = self._getFirstNodeByTagName(rowdom, "focusModelId", True)
 
-        self._focusModelId = int(focusModelIdNode.firstChild.data.strip())
+        self._focusModelId = int(self._getXMLNodeChildText(focusModelIdNode))
 
         # from link values, if any
 
@@ -437,6 +490,7 @@ class FocusRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -468,6 +522,7 @@ class FocusRow:
         focusTracking The bool value to which focusTracking is to be set.
 
 
+
         """
 
         self._focusTracking = bool(focusTracking)
@@ -488,6 +543,7 @@ class FocusRow:
         """
         Set focusOffset with the specified Length []  value.
         focusOffset The Length []  value to which focusOffset is to be set.
+
         The value of focusOffset can be anything allowed by the Length []  constructor.
 
         """
@@ -531,6 +587,7 @@ class FocusRow:
         """
         Set focusRotationOffset with the specified Angle []  value.
         focusRotationOffset The Angle []  value to which focusRotationOffset is to be set.
+
         The value of focusRotationOffset can be anything allowed by the Angle []  constructor.
 
         """
@@ -588,6 +645,7 @@ class FocusRow:
         """
         Set measuredFocusPosition with the specified Length []  value.
         measuredFocusPosition The Length []  value to which measuredFocusPosition is to be set.
+
         The value of measuredFocusPosition can be anything allowed by the Length []  constructor.
 
         """
@@ -653,6 +711,7 @@ class FocusRow:
         """
         Set measuredFocusRotation with the specified Angle []  value.
         measuredFocusRotation The Angle []  value to which measuredFocusRotation is to be set.
+
         The value of measuredFocusRotation can be anything allowed by the Angle []  constructor.
 
         """
@@ -707,6 +766,7 @@ class FocusRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -736,6 +796,7 @@ class FocusRow:
         """
         Set focusModelId with the specified int value.
         focusModelId The int value to which focusModelId is to be set.
+
 
 
         """

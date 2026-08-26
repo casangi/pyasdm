@@ -81,6 +81,16 @@ class CalBandpassRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -129,9 +139,13 @@ class CalBandpassRow:
 
         self._polarizationTypes = []  # this is a list of PolarizationType []
 
-        self._curve = []  # this is a list of float []  []  []
+        self._curve = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
-        self._reducedChiSquared = []  # this is a list of float []
+        self._reducedChiSquared = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._numBaselineExists = False
 
@@ -143,7 +157,7 @@ class CalBandpassRow:
 
         self._rmsExists = False
 
-        self._rms = []  # this is a list of float []  []
+        self._rms = []  # this is a list of float []  []  saved as single precision
 
         self._frequencyRangeExists = False
 
@@ -167,7 +181,9 @@ class CalBandpassRow:
 
         self._spectrumExists = False
 
-        self._spectrum = []  # this is a list of float []  []  []
+        self._spectrum = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
         # extrinsic attributes
 
@@ -335,101 +351,169 @@ class CalBandpassRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("sideband", NetSideband.name(self._sideband))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("typeCurve", CalCurveType.name(self._typeCurve))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAntenna", self._numAntenna)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPoly", self._numPoly)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("antennaNames", self._antennaNames)
 
+        result += "\n   "
+
         result += Parser.valueToXML("refAntennaName", self._refAntennaName)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("freqLimits", self._freqLimits)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
-        result += Parser.listValueToXML("curve", self._curve)
+        result += "\n   "
 
-        result += Parser.listValueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += Parser.floatListValueToXML("curve", self._curve)
+
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML(
+            "reducedChiSquared", self._reducedChiSquared
+        )
 
         if self._numBaselineExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numBaseline", self._numBaseline)
 
         if self._numFreqExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numFreq", self._numFreq)
 
         if self._rmsExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("rms", self._rms)
+            result += Parser.floatListValueToXML("rms", self._rms)
 
         if self._frequencyRangeExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "frequencyRange", self._frequencyRange
             )
 
         if self._numSpectralWindowExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numSpectralWindow", self._numSpectralWindow)
 
         if self._chanFreqStartExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "chanFreqStart", self._chanFreqStart
             )
 
         if self._chanFreqStepExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("chanFreqStep", self._chanFreqStep)
 
         if self._numSpectralWindowChanExists:
+            result += "\n   "
 
             result += Parser.listValueToXML(
                 "numSpectralWindowChan", self._numSpectralWindowChan
             )
 
         if self._spectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("spectrum", self._spectrum)
+            result += Parser.floatListValueToXML("spectrum", self._spectrum)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalBandpassTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -456,124 +540,132 @@ class CalBandpassRow:
 
         # intrinsic attribute values
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", True)
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
-        sidebandNode = rowdom.getElementsByTagName("sideband")[0]
+        sidebandNode = self._getFirstNodeByTagName(rowdom, "sideband", True)
 
         self._sideband = NetSideband.newNetSideband(
-            sidebandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(sidebandNode)
         )
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        typeCurveNode = rowdom.getElementsByTagName("typeCurve")[0]
+        typeCurveNode = self._getFirstNodeByTagName(rowdom, "typeCurve", True)
 
         self._typeCurve = CalCurveType.newCalCurveType(
-            typeCurveNode.firstChild.data.strip()
+            self._getXMLNodeChildText(typeCurveNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", True)
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", True)
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        antennaNamesNode = rowdom.getElementsByTagName("antennaNames")[0]
+        antennaNamesNode = self._getFirstNodeByTagName(rowdom, "antennaNames", True)
 
-        antennaNamesStr = antennaNamesNode.firstChild.data.strip()
+        antennaNamesStr = self._getXMLNodeChildText(antennaNamesNode)
 
         self._antennaNames = Parser.stringListToLists(
             antennaNamesStr, str, "CalBandpass", False
         )
 
-        refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
+        refAntennaNameNode = self._getFirstNodeByTagName(rowdom, "refAntennaName", True)
 
-        self._refAntennaName = str(refAntennaNameNode.firstChild.data.strip())
+        self._refAntennaName = str(self._getXMLNodeChildText(refAntennaNameNode))
 
-        freqLimitsNode = rowdom.getElementsByTagName("freqLimits")[0]
+        freqLimitsNode = self._getFirstNodeByTagName(rowdom, "freqLimits", True)
 
-        freqLimitsStr = freqLimitsNode.firstChild.data.strip()
+        freqLimitsStr = self._getXMLNodeChildText(freqLimitsNode)
 
         self._freqLimits = Parser.stringListToLists(
             freqLimitsStr, Frequency, "CalBandpass", True
         )
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalBandpass", False
         )
 
-        curveNode = rowdom.getElementsByTagName("curve")[0]
+        curveNode = self._getFirstNodeByTagName(rowdom, "curve", True)
 
-        curveStr = curveNode.firstChild.data.strip()
+        curveStr = self._getXMLNodeChildText(curveNode)
 
         self._curve = Parser.stringListToLists(curveStr, float, "CalBandpass", False)
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+        reducedChiSquaredStr = self._getXMLNodeChildText(reducedChiSquaredNode)
 
         self._reducedChiSquared = Parser.stringListToLists(
             reducedChiSquaredStr, float, "CalBandpass", False
         )
 
-        numBaselineNode = rowdom.getElementsByTagName("numBaseline")
-        if len(numBaselineNode) > 0:
+        numBaselineNode = self._getFirstNodeByTagName(rowdom, "numBaseline", False)
+        if numBaselineNode:
 
-            self._numBaseline = int(numBaselineNode[0].firstChild.data.strip())
+            self._numBaseline = int(self._getXMLNodeChildText(numBaselineNode))
 
             self._numBaselineExists = True
 
-        numFreqNode = rowdom.getElementsByTagName("numFreq")
-        if len(numFreqNode) > 0:
+        numFreqNode = self._getFirstNodeByTagName(rowdom, "numFreq", False)
+        if numFreqNode:
 
-            self._numFreq = int(numFreqNode[0].firstChild.data.strip())
+            self._numFreq = int(self._getXMLNodeChildText(numFreqNode))
 
             self._numFreqExists = True
 
-        rmsNode = rowdom.getElementsByTagName("rms")
-        if len(rmsNode) > 0:
+        rmsNode = self._getFirstNodeByTagName(rowdom, "rms", False)
+        if rmsNode:
 
-            rmsStr = rmsNode[0].firstChild.data.strip()
+            rmsStr = self._getXMLNodeChildText(rmsNode)
 
             self._rms = Parser.stringListToLists(rmsStr, float, "CalBandpass", False)
 
             self._rmsExists = True
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")
-        if len(frequencyRangeNode) > 0:
+        frequencyRangeNode = self._getFirstNodeByTagName(
+            rowdom, "frequencyRange", False
+        )
+        if frequencyRangeNode:
 
-            frequencyRangeStr = frequencyRangeNode[0].firstChild.data.strip()
+            frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
             self._frequencyRange = Parser.stringListToLists(
                 frequencyRangeStr, Frequency, "CalBandpass", True
@@ -581,19 +673,21 @@ class CalBandpassRow:
 
             self._frequencyRangeExists = True
 
-        numSpectralWindowNode = rowdom.getElementsByTagName("numSpectralWindow")
-        if len(numSpectralWindowNode) > 0:
+        numSpectralWindowNode = self._getFirstNodeByTagName(
+            rowdom, "numSpectralWindow", False
+        )
+        if numSpectralWindowNode:
 
             self._numSpectralWindow = int(
-                numSpectralWindowNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(numSpectralWindowNode)
             )
 
             self._numSpectralWindowExists = True
 
-        chanFreqStartNode = rowdom.getElementsByTagName("chanFreqStart")
-        if len(chanFreqStartNode) > 0:
+        chanFreqStartNode = self._getFirstNodeByTagName(rowdom, "chanFreqStart", False)
+        if chanFreqStartNode:
 
-            chanFreqStartStr = chanFreqStartNode[0].firstChild.data.strip()
+            chanFreqStartStr = self._getXMLNodeChildText(chanFreqStartNode)
 
             self._chanFreqStart = Parser.stringListToLists(
                 chanFreqStartStr, Frequency, "CalBandpass", True
@@ -601,10 +695,10 @@ class CalBandpassRow:
 
             self._chanFreqStartExists = True
 
-        chanFreqStepNode = rowdom.getElementsByTagName("chanFreqStep")
-        if len(chanFreqStepNode) > 0:
+        chanFreqStepNode = self._getFirstNodeByTagName(rowdom, "chanFreqStep", False)
+        if chanFreqStepNode:
 
-            chanFreqStepStr = chanFreqStepNode[0].firstChild.data.strip()
+            chanFreqStepStr = self._getXMLNodeChildText(chanFreqStepNode)
 
             self._chanFreqStep = Parser.stringListToLists(
                 chanFreqStepStr, Frequency, "CalBandpass", True
@@ -612,12 +706,14 @@ class CalBandpassRow:
 
             self._chanFreqStepExists = True
 
-        numSpectralWindowChanNode = rowdom.getElementsByTagName("numSpectralWindowChan")
-        if len(numSpectralWindowChanNode) > 0:
+        numSpectralWindowChanNode = self._getFirstNodeByTagName(
+            rowdom, "numSpectralWindowChan", False
+        )
+        if numSpectralWindowChanNode:
 
-            numSpectralWindowChanStr = numSpectralWindowChanNode[
-                0
-            ].firstChild.data.strip()
+            numSpectralWindowChanStr = self._getXMLNodeChildText(
+                numSpectralWindowChanNode
+            )
 
             self._numSpectralWindowChan = Parser.stringListToLists(
                 numSpectralWindowChanStr, int, "CalBandpass", False
@@ -625,10 +721,10 @@ class CalBandpassRow:
 
             self._numSpectralWindowChanExists = True
 
-        spectrumNode = rowdom.getElementsByTagName("spectrum")
-        if len(spectrumNode) > 0:
+        spectrumNode = self._getFirstNodeByTagName(rowdom, "spectrum", False)
+        if spectrumNode:
 
-            spectrumStr = spectrumNode[0].firstChild.data.strip()
+            spectrumStr = self._getXMLNodeChildText(spectrumNode)
 
             self._spectrum = Parser.stringListToLists(
                 spectrumStr, float, "CalBandpass", False
@@ -638,13 +734,13 @@ class CalBandpassRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -709,7 +805,7 @@ class CalBandpassRow:
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
 
-            eos.writeFloat(self._reducedChiSquared[i])
+            eos.writeDouble(self._reducedChiSquared[i])
 
         eos.writeBool(self._numBaselineExists)
         if self._numBaselineExists:
@@ -951,7 +1047,7 @@ class CalBandpassRow:
         reducedChiSquaredDim1 = eis.readInt()
         thisList = []
         for i in range(reducedChiSquaredDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._reducedChiSquared = thisList
 
@@ -1155,6 +1251,7 @@ class CalBandpassRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1182,6 +1279,7 @@ class CalBandpassRow:
         """
         Set sideband with the specified NetSideband value.
         sideband The NetSideband value to which sideband is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1213,6 +1311,7 @@ class CalBandpassRow:
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1240,6 +1339,7 @@ class CalBandpassRow:
         """
         Set typeCurve with the specified CalCurveType value.
         typeCurve The CalCurveType value to which typeCurve is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1271,6 +1371,7 @@ class CalBandpassRow:
         receiverBand The ReceiverBand value to which receiverBand is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1299,6 +1400,7 @@ class CalBandpassRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1322,6 +1424,7 @@ class CalBandpassRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1346,6 +1449,7 @@ class CalBandpassRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -1366,6 +1470,7 @@ class CalBandpassRow:
         """
         Set numPoly with the specified int value.
         numPoly The int value to which numPoly is to be set.
+
 
 
         """
@@ -1390,6 +1495,7 @@ class CalBandpassRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1410,6 +1516,7 @@ class CalBandpassRow:
         """
         Set antennaNames with the specified str []  value.
         antennaNames The str []  value to which antennaNames is to be set.
+
 
 
         """
@@ -1455,6 +1562,7 @@ class CalBandpassRow:
         refAntennaName The str value to which refAntennaName is to be set.
 
 
+
         """
 
         self._refAntennaName = str(refAntennaName)
@@ -1475,6 +1583,7 @@ class CalBandpassRow:
         """
         Set freqLimits with the specified Frequency []  value.
         freqLimits The Frequency []  value to which freqLimits is to be set.
+
         The value of freqLimits can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1520,6 +1629,7 @@ class CalBandpassRow:
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1561,6 +1671,9 @@ class CalBandpassRow:
         """
         Set curve with the specified float []  []  []  value.
         curve The float []  []  []  value to which curve is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1604,6 +1717,9 @@ class CalBandpassRow:
         """
         Set reducedChiSquared with the specified float []  value.
         reducedChiSquared The float []  value to which reducedChiSquared is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1663,6 +1779,7 @@ class CalBandpassRow:
         numBaseline The int value to which numBaseline is to be set.
 
 
+
         """
 
         self._numBaseline = int(numBaseline)
@@ -1707,6 +1824,7 @@ class CalBandpassRow:
         numFreq The int value to which numFreq is to be set.
 
 
+
         """
 
         self._numFreq = int(numFreq)
@@ -1749,6 +1867,9 @@ class CalBandpassRow:
         """
         Set rms with the specified float []  []  value.
         rms The float []  []  value to which rms is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1814,6 +1935,7 @@ class CalBandpassRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1881,6 +2003,7 @@ class CalBandpassRow:
         numSpectralWindow The int value to which numSpectralWindow is to be set.
 
 
+
         """
 
         self._numSpectralWindow = int(numSpectralWindow)
@@ -1923,6 +2046,7 @@ class CalBandpassRow:
         """
         Set chanFreqStart with the specified Frequency []  value.
         chanFreqStart The Frequency []  value to which chanFreqStart is to be set.
+
         The value of chanFreqStart can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1988,6 +2112,7 @@ class CalBandpassRow:
         """
         Set chanFreqStep with the specified Frequency []  value.
         chanFreqStep The Frequency []  value to which chanFreqStep is to be set.
+
         The value of chanFreqStep can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2055,6 +2180,7 @@ class CalBandpassRow:
         numSpectralWindowChan The int []  value to which numSpectralWindowChan is to be set.
 
 
+
         """
 
         # value must be a list
@@ -2119,6 +2245,9 @@ class CalBandpassRow:
         Set spectrum with the specified float []  []  []  value.
         spectrum The float []  []  []  value to which spectrum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -2172,6 +2301,7 @@ class CalBandpassRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -2202,6 +2332,7 @@ class CalBandpassRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

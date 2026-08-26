@@ -24,6 +24,7 @@
 #
 
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class Flux:
@@ -147,7 +148,7 @@ class Flux:
         """
         Return the value of this flux as a String in units of Janskys.
         """
-        return str(self.get())
+        return pyasdm.Parser.doubleToString(self.get())
 
     @staticmethod
     def values(items):

@@ -24,6 +24,7 @@
 #
 
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class Frequency:
@@ -204,7 +205,7 @@ class Frequency:
         """
         Return the value of this frequency as a string in the default units of Hertz.
         """
-        return str(self.get())
+        return pyasdm.Parser.doubleToString(self.get())
 
     @staticmethod
     def values(items):

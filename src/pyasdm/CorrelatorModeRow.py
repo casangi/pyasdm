@@ -78,6 +78,16 @@ class CorrelatorModeRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -183,33 +193,54 @@ class CorrelatorModeRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("correlatorModeId", self._correlatorModeId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numBaseband", self._numBaseband)
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("basebandNames", self._basebandNames)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("basebandConfig", self._basebandConfig)
 
+        result += "\n   "
+
         result += Parser.valueToXML("accumMode", AccumMode.name(self._accumMode))
+
+        result += "\n   "
 
         result += Parser.valueToXML("binMode", self._binMode)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numAxes", self._numAxes)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("axesOrderArray", self._axesOrderArray)
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("filterMode", self._filterMode)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "correlatorName", CorrelatorName.name(self._correlatorName)
         )
 
         if self._correlatorSoftwareVersionExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "correlatorSoftwareVersion", self._correlatorSoftwareVersion
@@ -217,7 +248,28 @@ class CorrelatorModeRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CorrelatorModeTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -246,68 +298,72 @@ class CorrelatorModeRow:
 
         # intrinsic attribute values
 
-        correlatorModeIdNode = rowdom.getElementsByTagName("correlatorModeId")[0]
+        correlatorModeIdNode = self._getFirstNodeByTagName(
+            rowdom, "correlatorModeId", True
+        )
 
-        self._correlatorModeId = Tag(correlatorModeIdNode.firstChild.data.strip())
+        self._correlatorModeId = Tag(self._getXMLNodeChildText(correlatorModeIdNode))
 
-        numBasebandNode = rowdom.getElementsByTagName("numBaseband")[0]
+        numBasebandNode = self._getFirstNodeByTagName(rowdom, "numBaseband", True)
 
-        self._numBaseband = int(numBasebandNode.firstChild.data.strip())
+        self._numBaseband = int(self._getXMLNodeChildText(numBasebandNode))
 
-        basebandNamesNode = rowdom.getElementsByTagName("basebandNames")[0]
+        basebandNamesNode = self._getFirstNodeByTagName(rowdom, "basebandNames", True)
 
-        basebandNamesStr = basebandNamesNode.firstChild.data.strip()
+        basebandNamesStr = self._getXMLNodeChildText(basebandNamesNode)
         self._basebandNames = Parser.stringListToLists(
             basebandNamesStr, BasebandName, "CorrelatorMode", False
         )
 
-        basebandConfigNode = rowdom.getElementsByTagName("basebandConfig")[0]
+        basebandConfigNode = self._getFirstNodeByTagName(rowdom, "basebandConfig", True)
 
-        basebandConfigStr = basebandConfigNode.firstChild.data.strip()
+        basebandConfigStr = self._getXMLNodeChildText(basebandConfigNode)
 
         self._basebandConfig = Parser.stringListToLists(
             basebandConfigStr, int, "CorrelatorMode", False
         )
 
-        accumModeNode = rowdom.getElementsByTagName("accumMode")[0]
+        accumModeNode = self._getFirstNodeByTagName(rowdom, "accumMode", True)
 
-        self._accumMode = AccumMode.newAccumMode(accumModeNode.firstChild.data.strip())
+        self._accumMode = AccumMode.newAccumMode(
+            self._getXMLNodeChildText(accumModeNode)
+        )
 
-        binModeNode = rowdom.getElementsByTagName("binMode")[0]
+        binModeNode = self._getFirstNodeByTagName(rowdom, "binMode", True)
 
-        self._binMode = int(binModeNode.firstChild.data.strip())
+        self._binMode = int(self._getXMLNodeChildText(binModeNode))
 
-        numAxesNode = rowdom.getElementsByTagName("numAxes")[0]
+        numAxesNode = self._getFirstNodeByTagName(rowdom, "numAxes", True)
 
-        self._numAxes = int(numAxesNode.firstChild.data.strip())
+        self._numAxes = int(self._getXMLNodeChildText(numAxesNode))
 
-        axesOrderArrayNode = rowdom.getElementsByTagName("axesOrderArray")[0]
+        axesOrderArrayNode = self._getFirstNodeByTagName(rowdom, "axesOrderArray", True)
 
-        axesOrderArrayStr = axesOrderArrayNode.firstChild.data.strip()
+        axesOrderArrayStr = self._getXMLNodeChildText(axesOrderArrayNode)
         self._axesOrderArray = Parser.stringListToLists(
             axesOrderArrayStr, AxisName, "CorrelatorMode", False
         )
 
-        filterModeNode = rowdom.getElementsByTagName("filterMode")[0]
+        filterModeNode = self._getFirstNodeByTagName(rowdom, "filterMode", True)
 
-        filterModeStr = filterModeNode.firstChild.data.strip()
+        filterModeStr = self._getXMLNodeChildText(filterModeNode)
         self._filterMode = Parser.stringListToLists(
             filterModeStr, FilterMode, "CorrelatorMode", False
         )
 
-        correlatorNameNode = rowdom.getElementsByTagName("correlatorName")[0]
+        correlatorNameNode = self._getFirstNodeByTagName(rowdom, "correlatorName", True)
 
         self._correlatorName = CorrelatorName.newCorrelatorName(
-            correlatorNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(correlatorNameNode)
         )
 
-        correlatorSoftwareVersionNode = rowdom.getElementsByTagName(
-            "correlatorSoftwareVersion"
+        correlatorSoftwareVersionNode = self._getFirstNodeByTagName(
+            rowdom, "correlatorSoftwareVersion", False
         )
-        if len(correlatorSoftwareVersionNode) > 0:
+        if correlatorSoftwareVersionNode:
 
             self._correlatorSoftwareVersion = str(
-                correlatorSoftwareVersionNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(correlatorSoftwareVersionNode)
             )
 
             self._correlatorSoftwareVersionExists = True
@@ -532,6 +588,7 @@ class CorrelatorModeRow:
         """
         Set correlatorModeId with the specified Tag value.
         correlatorModeId The Tag value to which correlatorModeId is to be set.
+
         The value of correlatorModeId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -563,6 +620,7 @@ class CorrelatorModeRow:
         numBaseband The int value to which numBaseband is to be set.
 
 
+
         """
 
         self._numBaseband = int(numBaseband)
@@ -583,6 +641,7 @@ class CorrelatorModeRow:
         """
         Set basebandNames with the specified BasebandName []  value.
         basebandNames The BasebandName []  value to which basebandNames is to be set.
+
 
 
         """
@@ -628,6 +687,7 @@ class CorrelatorModeRow:
         basebandConfig The int []  value to which basebandConfig is to be set.
 
 
+
         """
 
         # value must be a list
@@ -671,6 +731,7 @@ class CorrelatorModeRow:
         accumMode The AccumMode value to which accumMode is to be set.
 
 
+
         """
 
         self._accumMode = AccumMode(accumMode)
@@ -691,6 +752,7 @@ class CorrelatorModeRow:
         """
         Set binMode with the specified int value.
         binMode The int value to which binMode is to be set.
+
 
 
         """
@@ -715,6 +777,7 @@ class CorrelatorModeRow:
         numAxes The int value to which numAxes is to be set.
 
 
+
         """
 
         self._numAxes = int(numAxes)
@@ -735,6 +798,7 @@ class CorrelatorModeRow:
         """
         Set axesOrderArray with the specified AxisName []  value.
         axesOrderArray The AxisName []  value to which axesOrderArray is to be set.
+
 
 
         """
@@ -780,6 +844,7 @@ class CorrelatorModeRow:
         filterMode The FilterMode []  value to which filterMode is to be set.
 
 
+
         """
 
         # value must be a list
@@ -823,6 +888,7 @@ class CorrelatorModeRow:
         correlatorName The CorrelatorName value to which correlatorName is to be set.
 
 
+
         """
 
         self._correlatorName = CorrelatorName(correlatorName)
@@ -857,6 +923,7 @@ class CorrelatorModeRow:
         """
         Set correlatorSoftwareVersion with the specified str value.
         correlatorSoftwareVersion The str value to which correlatorSoftwareVersion is to be set.
+
 
 
         """

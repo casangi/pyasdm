@@ -75,6 +75,16 @@ class CalCurveRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -119,9 +129,13 @@ class CalCurveRow:
 
         self._polarizationTypes = []  # this is a list of PolarizationType []
 
-        self._curve = []  # this is a list of float []  []  []
+        self._curve = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
-        self._reducedChiSquared = []  # this is a list of float []
+        self._reducedChiSquared = (
+            []
+        )  # this is a list of float []  saved as double precision
 
         self._numBaselineExists = False
 
@@ -129,7 +143,7 @@ class CalCurveRow:
 
         self._rmsExists = False
 
-        self._rms = []  # this is a list of float []  []
+        self._rms = []  # this is a list of float []  []  saved as single precision
 
         # extrinsic attributes
 
@@ -224,61 +238,118 @@ class CalCurveRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("typeCurve", CalCurveType.name(self._typeCurve))
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numAntenna", self._numAntenna)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numPoly", self._numPoly)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("antennaNames", self._antennaNames)
 
+        result += "\n   "
+
         result += Parser.valueToXML("refAntennaName", self._refAntennaName)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
-        result += Parser.listValueToXML("curve", self._curve)
+        result += "\n   "
 
-        result += Parser.listValueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += Parser.floatListValueToXML("curve", self._curve)
+
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML(
+            "reducedChiSquared", self._reducedChiSquared
+        )
 
         if self._numBaselineExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numBaseline", self._numBaseline)
 
         if self._rmsExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("rms", self._rms)
+            result += Parser.floatListValueToXML("rms", self._rms)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalCurveTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -305,96 +376,102 @@ class CalCurveRow:
 
         # intrinsic attribute values
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        typeCurveNode = rowdom.getElementsByTagName("typeCurve")[0]
+        typeCurveNode = self._getFirstNodeByTagName(rowdom, "typeCurve", True)
 
         self._typeCurve = CalCurveType.newCalCurveType(
-            typeCurveNode.firstChild.data.strip()
+            self._getXMLNodeChildText(typeCurveNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalCurve", True
         )
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")[0]
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", True)
 
-        self._numAntenna = int(numAntennaNode.firstChild.data.strip())
+        self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", True)
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        antennaNamesNode = rowdom.getElementsByTagName("antennaNames")[0]
+        antennaNamesNode = self._getFirstNodeByTagName(rowdom, "antennaNames", True)
 
-        antennaNamesStr = antennaNamesNode.firstChild.data.strip()
+        antennaNamesStr = self._getXMLNodeChildText(antennaNamesNode)
 
         self._antennaNames = Parser.stringListToLists(
             antennaNamesStr, str, "CalCurve", False
         )
 
-        refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
+        refAntennaNameNode = self._getFirstNodeByTagName(rowdom, "refAntennaName", True)
 
-        self._refAntennaName = str(refAntennaNameNode.firstChild.data.strip())
+        self._refAntennaName = str(self._getXMLNodeChildText(refAntennaNameNode))
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalCurve", False
         )
 
-        curveNode = rowdom.getElementsByTagName("curve")[0]
+        curveNode = self._getFirstNodeByTagName(rowdom, "curve", True)
 
-        curveStr = curveNode.firstChild.data.strip()
+        curveStr = self._getXMLNodeChildText(curveNode)
 
         self._curve = Parser.stringListToLists(curveStr, float, "CalCurve", False)
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+        reducedChiSquaredStr = self._getXMLNodeChildText(reducedChiSquaredNode)
 
         self._reducedChiSquared = Parser.stringListToLists(
             reducedChiSquaredStr, float, "CalCurve", False
         )
 
-        numBaselineNode = rowdom.getElementsByTagName("numBaseline")
-        if len(numBaselineNode) > 0:
+        numBaselineNode = self._getFirstNodeByTagName(rowdom, "numBaseline", False)
+        if numBaselineNode:
 
-            self._numBaseline = int(numBaselineNode[0].firstChild.data.strip())
+            self._numBaseline = int(self._getXMLNodeChildText(numBaselineNode))
 
             self._numBaselineExists = True
 
-        rmsNode = rowdom.getElementsByTagName("rms")
-        if len(rmsNode) > 0:
+        rmsNode = self._getFirstNodeByTagName(rowdom, "rms", False)
+        if rmsNode:
 
-            rmsStr = rmsNode[0].firstChild.data.strip()
+            rmsStr = self._getXMLNodeChildText(rmsNode)
 
             self._rms = Parser.stringListToLists(rmsStr, float, "CalCurve", False)
 
@@ -402,13 +479,13 @@ class CalCurveRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -469,7 +546,7 @@ class CalCurveRow:
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
 
-            eos.writeFloat(self._reducedChiSquared[i])
+            eos.writeDouble(self._reducedChiSquared[i])
 
         eos.writeBool(self._numBaselineExists)
         if self._numBaselineExists:
@@ -644,7 +721,7 @@ class CalCurveRow:
         reducedChiSquaredDim1 = eis.readInt()
         thisList = []
         for i in range(reducedChiSquaredDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._reducedChiSquared = thisList
 
@@ -749,6 +826,7 @@ class CalCurveRow:
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -776,6 +854,7 @@ class CalCurveRow:
         """
         Set typeCurve with the specified CalCurveType value.
         typeCurve The CalCurveType value to which typeCurve is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -807,6 +886,7 @@ class CalCurveRow:
         receiverBand The ReceiverBand value to which receiverBand is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -835,6 +915,7 @@ class CalCurveRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -858,6 +939,7 @@ class CalCurveRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -880,6 +962,7 @@ class CalCurveRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -925,6 +1008,7 @@ class CalCurveRow:
         numAntenna The int value to which numAntenna is to be set.
 
 
+
         """
 
         self._numAntenna = int(numAntenna)
@@ -945,6 +1029,7 @@ class CalCurveRow:
         """
         Set numPoly with the specified int value.
         numPoly The int value to which numPoly is to be set.
+
 
 
         """
@@ -969,6 +1054,7 @@ class CalCurveRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -989,6 +1075,7 @@ class CalCurveRow:
         """
         Set antennaNames with the specified str []  value.
         antennaNames The str []  value to which antennaNames is to be set.
+
 
 
         """
@@ -1034,6 +1121,7 @@ class CalCurveRow:
         refAntennaName The str value to which refAntennaName is to be set.
 
 
+
         """
 
         self._refAntennaName = str(refAntennaName)
@@ -1054,6 +1142,7 @@ class CalCurveRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -1098,6 +1187,9 @@ class CalCurveRow:
         Set curve with the specified float []  []  []  value.
         curve The float []  []  []  value to which curve is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1140,6 +1232,9 @@ class CalCurveRow:
         """
         Set reducedChiSquared with the specified float []  value.
         reducedChiSquared The float []  value to which reducedChiSquared is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1199,6 +1294,7 @@ class CalCurveRow:
         numBaseline The int value to which numBaseline is to be set.
 
 
+
         """
 
         self._numBaseline = int(numBaseline)
@@ -1241,6 +1337,9 @@ class CalCurveRow:
         """
         Set rms with the specified float []  []  value.
         rms The float []  []  value to which rms is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1295,6 +1394,7 @@ class CalCurveRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1325,6 +1425,7 @@ class CalCurveRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

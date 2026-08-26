@@ -24,6 +24,7 @@
 #
 
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class Complex:
@@ -215,7 +216,11 @@ class Complex:
         Return the value of this complex number as a string of the form "x y",
         where x and y are strings representing the numbers.
         """
-        return str(self._re) + " " + str(self._im)
+        return (
+            asdm.Parser.doubleToString(self._re)
+            + " "
+            + asdm.Parser.doubleToString(self._im)
+        )
 
     @staticmethod
     def rvalues(items):

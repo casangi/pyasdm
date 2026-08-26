@@ -66,6 +66,16 @@ class FieldRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -235,63 +245,104 @@ class FieldRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("fieldId", self._fieldId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("fieldName", self._fieldName)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numPoly", self._numPoly)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("delayDir", self._delayDir)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("phaseDir", self._phaseDir)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("referenceDir", self._referenceDir)
 
         if self._timeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("time", self._time)
 
         if self._codeExists:
+            result += "\n   "
 
             result += Parser.valueToXML("code", self._code)
 
         if self._directionCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "directionCode", DirectionReferenceCode.name(self._directionCode)
             )
 
         if self._directionEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "directionEquinox", self._directionEquinox
             )
 
         if self._assocNatureExists:
+            result += "\n   "
 
             result += Parser.valueToXML("assocNature", self._assocNature)
 
         # extrinsic attributes
 
         if self._assocFieldIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("assocFieldId", self._assocFieldId)
 
         if self._ephemerisIdExists:
+            result += "\n   "
 
             result += Parser.valueToXML("ephemerisId", self._ephemerisId)
 
         if self._sourceIdExists:
+            result += "\n   "
 
             result += Parser.valueToXML("sourceId", self._sourceId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "FieldTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -318,97 +369,99 @@ class FieldRow:
 
         # intrinsic attribute values
 
-        fieldIdNode = rowdom.getElementsByTagName("fieldId")[0]
+        fieldIdNode = self._getFirstNodeByTagName(rowdom, "fieldId", True)
 
-        self._fieldId = Tag(fieldIdNode.firstChild.data.strip())
+        self._fieldId = Tag(self._getXMLNodeChildText(fieldIdNode))
 
-        fieldNameNode = rowdom.getElementsByTagName("fieldName")[0]
+        fieldNameNode = self._getFirstNodeByTagName(rowdom, "fieldName", True)
 
-        self._fieldName = str(fieldNameNode.firstChild.data.strip())
+        self._fieldName = str(self._getXMLNodeChildText(fieldNameNode))
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", True)
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
-        delayDirNode = rowdom.getElementsByTagName("delayDir")[0]
+        delayDirNode = self._getFirstNodeByTagName(rowdom, "delayDir", True)
 
-        delayDirStr = delayDirNode.firstChild.data.strip()
+        delayDirStr = self._getXMLNodeChildText(delayDirNode)
 
         self._delayDir = Parser.stringListToLists(delayDirStr, Angle, "Field", True)
 
-        phaseDirNode = rowdom.getElementsByTagName("phaseDir")[0]
+        phaseDirNode = self._getFirstNodeByTagName(rowdom, "phaseDir", True)
 
-        phaseDirStr = phaseDirNode.firstChild.data.strip()
+        phaseDirStr = self._getXMLNodeChildText(phaseDirNode)
 
         self._phaseDir = Parser.stringListToLists(phaseDirStr, Angle, "Field", True)
 
-        referenceDirNode = rowdom.getElementsByTagName("referenceDir")[0]
+        referenceDirNode = self._getFirstNodeByTagName(rowdom, "referenceDir", True)
 
-        referenceDirStr = referenceDirNode.firstChild.data.strip()
+        referenceDirStr = self._getXMLNodeChildText(referenceDirNode)
 
         self._referenceDir = Parser.stringListToLists(
             referenceDirStr, Angle, "Field", True
         )
 
-        timeNode = rowdom.getElementsByTagName("time")
-        if len(timeNode) > 0:
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", False)
+        if timeNode:
 
-            self._time = ArrayTime(timeNode[0].firstChild.data.strip())
+            self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
             self._timeExists = True
 
-        codeNode = rowdom.getElementsByTagName("code")
-        if len(codeNode) > 0:
+        codeNode = self._getFirstNodeByTagName(rowdom, "code", False)
+        if codeNode:
 
-            self._code = str(codeNode[0].firstChild.data.strip())
+            self._code = str(self._getXMLNodeChildText(codeNode))
 
             self._codeExists = True
 
-        directionCodeNode = rowdom.getElementsByTagName("directionCode")
-        if len(directionCodeNode) > 0:
+        directionCodeNode = self._getFirstNodeByTagName(rowdom, "directionCode", False)
+        if directionCodeNode:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionCodeNode)
             )
 
             self._directionCodeExists = True
 
-        directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
-        if len(directionEquinoxNode) > 0:
+        directionEquinoxNode = self._getFirstNodeByTagName(
+            rowdom, "directionEquinox", False
+        )
+        if directionEquinoxNode:
 
             self._directionEquinox = ArrayTime(
-                directionEquinoxNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionEquinoxNode)
             )
 
             self._directionEquinoxExists = True
 
-        assocNatureNode = rowdom.getElementsByTagName("assocNature")
-        if len(assocNatureNode) > 0:
+        assocNatureNode = self._getFirstNodeByTagName(rowdom, "assocNature", False)
+        if assocNatureNode:
 
-            self._assocNature = str(assocNatureNode[0].firstChild.data.strip())
+            self._assocNature = str(self._getXMLNodeChildText(assocNatureNode))
 
             self._assocNatureExists = True
 
         # extrinsic attribute values
 
-        assocFieldIdNode = rowdom.getElementsByTagName("assocFieldId")
-        if len(assocFieldIdNode) > 0:
+        assocFieldIdNode = self._getFirstNodeByTagName(rowdom, "assocFieldId", False)
+        if assocFieldIdNode:
 
-            self._assocFieldId = Tag(assocFieldIdNode[0].firstChild.data.strip())
+            self._assocFieldId = Tag(self._getXMLNodeChildText(assocFieldIdNode))
 
             self._assocFieldIdExists = True
 
-        ephemerisIdNode = rowdom.getElementsByTagName("ephemerisId")
-        if len(ephemerisIdNode) > 0:
+        ephemerisIdNode = self._getFirstNodeByTagName(rowdom, "ephemerisId", False)
+        if ephemerisIdNode:
 
-            self._ephemerisId = int(ephemerisIdNode[0].firstChild.data.strip())
+            self._ephemerisId = int(self._getXMLNodeChildText(ephemerisIdNode))
 
             self._ephemerisIdExists = True
 
-        sourceIdNode = rowdom.getElementsByTagName("sourceId")
-        if len(sourceIdNode) > 0:
+        sourceIdNode = self._getFirstNodeByTagName(rowdom, "sourceId", False)
+        if sourceIdNode:
 
-            self._sourceId = int(sourceIdNode[0].firstChild.data.strip())
+            self._sourceId = int(self._getXMLNodeChildText(sourceIdNode))
 
             self._sourceIdExists = True
 
@@ -666,6 +719,7 @@ class FieldRow:
         """
         Set fieldId with the specified Tag value.
         fieldId The Tag value to which fieldId is to be set.
+
         The value of fieldId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -697,6 +751,7 @@ class FieldRow:
         fieldName The str value to which fieldName is to be set.
 
 
+
         """
 
         self._fieldName = str(fieldName)
@@ -719,6 +774,7 @@ class FieldRow:
         numPoly The int value to which numPoly is to be set.
 
 
+
         """
 
         self._numPoly = int(numPoly)
@@ -739,6 +795,7 @@ class FieldRow:
         """
         Set delayDir with the specified Angle []  []  value.
         delayDir The Angle []  []  value to which delayDir is to be set.
+
         The value of delayDir can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -782,6 +839,7 @@ class FieldRow:
         """
         Set phaseDir with the specified Angle []  []  value.
         phaseDir The Angle []  []  value to which phaseDir is to be set.
+
         The value of phaseDir can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -825,6 +883,7 @@ class FieldRow:
         """
         Set referenceDir with the specified Angle []  []  value.
         referenceDir The Angle []  []  value to which referenceDir is to be set.
+
         The value of referenceDir can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -883,6 +942,7 @@ class FieldRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """
@@ -929,6 +989,7 @@ class FieldRow:
         code The str value to which code is to be set.
 
 
+
         """
 
         self._code = str(code)
@@ -971,6 +1032,7 @@ class FieldRow:
         """
         Set directionCode with the specified DirectionReferenceCode value.
         directionCode The DirectionReferenceCode value to which directionCode is to be set.
+
 
 
         """
@@ -1016,6 +1078,7 @@ class FieldRow:
         """
         Set directionEquinox with the specified ArrayTime value.
         directionEquinox The ArrayTime value to which directionEquinox is to be set.
+
         The value of directionEquinox can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1060,6 +1123,7 @@ class FieldRow:
         """
         Set assocNature with the specified str value.
         assocNature The str value to which assocNature is to be set.
+
 
 
         """
@@ -1107,6 +1171,7 @@ class FieldRow:
         """
         Set assocFieldId with the specified Tag value.
         assocFieldId The Tag value to which assocFieldId is to be set.
+
         The value of assocFieldId can be anything allowed by the Tag constructor.
 
         """
@@ -1153,6 +1218,7 @@ class FieldRow:
         ephemerisId The int value to which ephemerisId is to be set.
 
 
+
         """
 
         self._ephemerisId = int(ephemerisId)
@@ -1195,6 +1261,7 @@ class FieldRow:
         """
         Set sourceId with the specified int value.
         sourceId The int value to which sourceId is to be set.
+
 
 
         """

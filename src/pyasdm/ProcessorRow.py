@@ -69,6 +69,16 @@ class ProcessorRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -134,17 +144,25 @@ class ProcessorRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("processorId", self._processorId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("modeId", self._modeId)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "processorType", ProcessorType.name(self._processorType)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "processorSubType", ProcessorSubType.name(self._processorSubType)
@@ -152,7 +170,28 @@ class ProcessorRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ProcessorTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -179,24 +218,26 @@ class ProcessorRow:
 
         # intrinsic attribute values
 
-        processorIdNode = rowdom.getElementsByTagName("processorId")[0]
+        processorIdNode = self._getFirstNodeByTagName(rowdom, "processorId", True)
 
-        self._processorId = Tag(processorIdNode.firstChild.data.strip())
+        self._processorId = Tag(self._getXMLNodeChildText(processorIdNode))
 
-        modeIdNode = rowdom.getElementsByTagName("modeId")[0]
+        modeIdNode = self._getFirstNodeByTagName(rowdom, "modeId", True)
 
-        self._modeId = Tag(modeIdNode.firstChild.data.strip())
+        self._modeId = Tag(self._getXMLNodeChildText(modeIdNode))
 
-        processorTypeNode = rowdom.getElementsByTagName("processorType")[0]
+        processorTypeNode = self._getFirstNodeByTagName(rowdom, "processorType", True)
 
         self._processorType = ProcessorType.newProcessorType(
-            processorTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(processorTypeNode)
         )
 
-        processorSubTypeNode = rowdom.getElementsByTagName("processorSubType")[0]
+        processorSubTypeNode = self._getFirstNodeByTagName(
+            rowdom, "processorSubType", True
+        )
 
         self._processorSubType = ProcessorSubType.newProcessorSubType(
-            processorSubTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(processorSubTypeNode)
         )
 
         # from link values, if any
@@ -302,6 +343,7 @@ class ProcessorRow:
         """
         Set processorId with the specified Tag value.
         processorId The Tag value to which processorId is to be set.
+
         The value of processorId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -332,6 +374,7 @@ class ProcessorRow:
         """
         Set modeId with the specified Tag value.
         modeId The Tag value to which modeId is to be set.
+
         The value of modeId can be anything allowed by the Tag constructor.
 
         """
@@ -356,6 +399,7 @@ class ProcessorRow:
         processorType The ProcessorType value to which processorType is to be set.
 
 
+
         """
 
         self._processorType = ProcessorType(processorType)
@@ -376,6 +420,7 @@ class ProcessorRow:
         """
         Set processorSubType with the specified ProcessorSubType value.
         processorSubType The ProcessorSubType value to which processorSubType is to be set.
+
 
 
         """

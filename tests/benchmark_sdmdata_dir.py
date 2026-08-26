@@ -13,12 +13,19 @@ from pathlib import Path
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Run benchmark_asdm on each directory in sdmdir_path")
+    parser = argparse.ArgumentParser(
+        description="Run benchmark_asdm on each directory in sdmdir_path"
+    )
 
-    parser.add_argument("sdmdir_path", type=str, help="The path to a directory containing SDMs")
+    parser.add_argument(
+        "sdmdir_path", type=str, help="The path to a directory containing SDMs"
+    )
 
-    parser.add_argument("--skip_uniqueness", action="store_true", 
-                        help="Skip uniqueness checking (default: False)")
+    parser.add_argument(
+        "--skip_uniqueness",
+        action="store_true",
+        help="Skip uniqueness checking (default: False)",
+    )
 
     args = parser.parse_args()
 
@@ -28,7 +35,9 @@ if __name__ == "__main__":
         print(f"{sdmdir_path} is not a directory, existing")
         sys.exit(1)
 
-    print(f"Benchmarking using all directories in {sdmdir_path} and skip_uniqueness is {args.skip_uniqueness}")
+    print(
+        f"Benchmarking using all directories in {sdmdir_path} and skip_uniqueness is {args.skip_uniqueness}"
+    )
 
     root = Path(sdmdir_path)
 

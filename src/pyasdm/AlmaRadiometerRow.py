@@ -63,6 +63,16 @@ class AlmaRadiometerRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -139,19 +149,23 @@ class AlmaRadiometerRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("almaRadiometerId", self._almaRadiometerId)
 
         if self._numAntennaExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAntenna", self._numAntenna)
 
         # extrinsic attributes
 
         if self._spectralWindowIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "spectralWindowId", self._spectralWindowId
@@ -159,7 +173,28 @@ class AlmaRadiometerRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "AlmaRadiometerTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -188,23 +223,27 @@ class AlmaRadiometerRow:
 
         # intrinsic attribute values
 
-        almaRadiometerIdNode = rowdom.getElementsByTagName("almaRadiometerId")[0]
+        almaRadiometerIdNode = self._getFirstNodeByTagName(
+            rowdom, "almaRadiometerId", True
+        )
 
-        self._almaRadiometerId = Tag(almaRadiometerIdNode.firstChild.data.strip())
+        self._almaRadiometerId = Tag(self._getXMLNodeChildText(almaRadiometerIdNode))
 
-        numAntennaNode = rowdom.getElementsByTagName("numAntenna")
-        if len(numAntennaNode) > 0:
+        numAntennaNode = self._getFirstNodeByTagName(rowdom, "numAntenna", False)
+        if numAntennaNode:
 
-            self._numAntenna = int(numAntennaNode[0].firstChild.data.strip())
+            self._numAntenna = int(self._getXMLNodeChildText(numAntennaNode))
 
             self._numAntennaExists = True
 
         # extrinsic attribute values
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")
-        if len(spectralWindowIdNode) > 0:
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", False
+        )
+        if spectralWindowIdNode:
 
-            spectralWindowIdStr = spectralWindowIdNode[0].firstChild.data.strip()
+            spectralWindowIdStr = self._getXMLNodeChildText(spectralWindowIdNode)
 
             self._spectralWindowId = Parser.stringListToLists(
                 spectralWindowIdStr, Tag, "AlmaRadiometer", True
@@ -315,6 +354,7 @@ class AlmaRadiometerRow:
         """
         Set almaRadiometerId with the specified Tag value.
         almaRadiometerId The Tag value to which almaRadiometerId is to be set.
+
         The value of almaRadiometerId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -358,6 +398,7 @@ class AlmaRadiometerRow:
         """
         Set numAntenna with the specified int value.
         numAntenna The int value to which numAntenna is to be set.
+
 
 
         """
@@ -404,6 +445,7 @@ class AlmaRadiometerRow:
         """
         Set spectralWindowId with the specified Tag []  value.
         spectralWindowId The Tag []  value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag []  constructor.
 
         """

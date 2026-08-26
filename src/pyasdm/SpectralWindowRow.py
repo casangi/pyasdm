@@ -84,6 +84,16 @@ class SpectralWindowRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -586,160 +596,205 @@ class SpectralWindowRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("netSideband", NetSideband.name(self._netSideband))
+
+        result += "\n   "
 
         result += Parser.valueToXML("numChan", self._numChan)
 
         if self._numBinExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numBin", self._numBin)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("refFreq", self._refFreq)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "sidebandProcessingMode",
             SidebandProcessingMode.name(self._sidebandProcessingMode),
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("totBandwidth", self._totBandwidth)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "windowFunction", WindowFunction.name(self._windowFunction)
         )
 
         if self._chanFreqStartExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("chanFreqStart", self._chanFreqStart)
 
         if self._chanFreqStepExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("chanFreqStep", self._chanFreqStep)
 
         if self._chanFreqArrayExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "chanFreqArray", self._chanFreqArray
             )
 
         if self._chanWidthExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("chanWidth", self._chanWidth)
 
         if self._chanWidthArrayExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "chanWidthArray", self._chanWidthArray
             )
 
         if self._correlationBitExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "correlationBit", CorrelationBit.name(self._correlationBit)
             )
 
         if self._effectiveBwExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("effectiveBw", self._effectiveBw)
 
         if self._effectiveBwArrayExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "effectiveBwArray", self._effectiveBwArray
             )
 
         if self._freqGroupExists:
+            result += "\n   "
 
             result += Parser.valueToXML("freqGroup", self._freqGroup)
 
         if self._freqGroupNameExists:
+            result += "\n   "
 
             result += Parser.valueToXML("freqGroupName", self._freqGroupName)
 
         if self._lineArrayExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("lineArray", self._lineArray)
 
         if self._measFreqRefExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "measFreqRef", FrequencyReferenceCode.name(self._measFreqRef)
             )
 
         if self._nameExists:
+            result += "\n   "
 
             result += Parser.valueToXML("name", self._name)
 
         if self._oversamplingExists:
+            result += "\n   "
 
             result += Parser.valueToXML("oversampling", self._oversampling)
 
         if self._quantizationExists:
+            result += "\n   "
 
             result += Parser.valueToXML("quantization", self._quantization)
 
         if self._refChanExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("refChan", self._refChan)
+            result += Parser.doubleValueToXML("refChan", self._refChan)
 
         if self._resolutionExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("resolution", self._resolution)
 
         if self._resolutionArrayExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "resolutionArray", self._resolutionArray
             )
 
         if self._numAssocValuesExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numAssocValues", self._numAssocValues)
 
         if self._assocNatureExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("assocNature", self._assocNature)
 
         if self._numFactorExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numFactor", self._numFactor)
 
         if self._numBinFactorsExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("numBinFactors", self._numBinFactors)
 
         if self._numOrigFreqSliceExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numOrigFreqSlice", self._numOrigFreqSlice)
 
         if self._originatingFrequencySlicesExists:
+            result += "\n   "
 
             result += Parser.listValueToXML(
                 "originatingFrequencySlices", self._originatingFrequencySlices
             )
 
         if self._quantizationBitsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("quantizationBits", self._quantizationBits)
 
         if self._numRequantStageExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numRequantStage", self._numRequantStage)
 
         if self._requantizationExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("requantization", self._requantization)
 
         if self._requantizationBitsExists:
+            result += "\n   "
 
             result += Parser.listValueToXML(
                 "requantizationBits", self._requantizationBits
@@ -748,16 +803,19 @@ class SpectralWindowRow:
         # extrinsic attributes
 
         if self._assocSpectralWindowIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "assocSpectralWindowId", self._assocSpectralWindowId
             )
 
         if self._dopplerIdExists:
+            result += "\n   "
 
             result += Parser.valueToXML("dopplerId", self._dopplerId)
 
         if self._imageSpectralWindowIdExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "imageSpectralWindowId", self._imageSpectralWindowId
@@ -765,7 +823,28 @@ class SpectralWindowRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SpectralWindowTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -794,75 +873,77 @@ class SpectralWindowRow:
 
         # intrinsic attribute values
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", True)
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
-        netSidebandNode = rowdom.getElementsByTagName("netSideband")[0]
+        netSidebandNode = self._getFirstNodeByTagName(rowdom, "netSideband", True)
 
         self._netSideband = NetSideband.newNetSideband(
-            netSidebandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(netSidebandNode)
         )
 
-        numChanNode = rowdom.getElementsByTagName("numChan")[0]
+        numChanNode = self._getFirstNodeByTagName(rowdom, "numChan", True)
 
-        self._numChan = int(numChanNode.firstChild.data.strip())
+        self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
-        numBinNode = rowdom.getElementsByTagName("numBin")
-        if len(numBinNode) > 0:
+        numBinNode = self._getFirstNodeByTagName(rowdom, "numBin", False)
+        if numBinNode:
 
-            self._numBin = int(numBinNode[0].firstChild.data.strip())
+            self._numBin = int(self._getXMLNodeChildText(numBinNode))
 
             self._numBinExists = True
 
-        refFreqNode = rowdom.getElementsByTagName("refFreq")[0]
+        refFreqNode = self._getFirstNodeByTagName(rowdom, "refFreq", True)
 
-        self._refFreq = Frequency(refFreqNode.firstChild.data.strip())
+        self._refFreq = Frequency(self._getXMLNodeChildText(refFreqNode))
 
-        sidebandProcessingModeNode = rowdom.getElementsByTagName(
-            "sidebandProcessingMode"
-        )[0]
+        sidebandProcessingModeNode = self._getFirstNodeByTagName(
+            rowdom, "sidebandProcessingMode", True
+        )
 
         self._sidebandProcessingMode = SidebandProcessingMode.newSidebandProcessingMode(
-            sidebandProcessingModeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(sidebandProcessingModeNode)
         )
 
-        totBandwidthNode = rowdom.getElementsByTagName("totBandwidth")[0]
+        totBandwidthNode = self._getFirstNodeByTagName(rowdom, "totBandwidth", True)
 
-        self._totBandwidth = Frequency(totBandwidthNode.firstChild.data.strip())
+        self._totBandwidth = Frequency(self._getXMLNodeChildText(totBandwidthNode))
 
-        windowFunctionNode = rowdom.getElementsByTagName("windowFunction")[0]
+        windowFunctionNode = self._getFirstNodeByTagName(rowdom, "windowFunction", True)
 
         self._windowFunction = WindowFunction.newWindowFunction(
-            windowFunctionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(windowFunctionNode)
         )
 
-        chanFreqStartNode = rowdom.getElementsByTagName("chanFreqStart")
-        if len(chanFreqStartNode) > 0:
+        chanFreqStartNode = self._getFirstNodeByTagName(rowdom, "chanFreqStart", False)
+        if chanFreqStartNode:
 
             self._chanFreqStart = Frequency(
-                chanFreqStartNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(chanFreqStartNode)
             )
 
             self._chanFreqStartExists = True
 
-        chanFreqStepNode = rowdom.getElementsByTagName("chanFreqStep")
-        if len(chanFreqStepNode) > 0:
+        chanFreqStepNode = self._getFirstNodeByTagName(rowdom, "chanFreqStep", False)
+        if chanFreqStepNode:
 
-            self._chanFreqStep = Frequency(chanFreqStepNode[0].firstChild.data.strip())
+            self._chanFreqStep = Frequency(self._getXMLNodeChildText(chanFreqStepNode))
 
             self._chanFreqStepExists = True
 
-        chanFreqArrayNode = rowdom.getElementsByTagName("chanFreqArray")
-        if len(chanFreqArrayNode) > 0:
+        chanFreqArrayNode = self._getFirstNodeByTagName(rowdom, "chanFreqArray", False)
+        if chanFreqArrayNode:
 
-            chanFreqArrayStr = chanFreqArrayNode[0].firstChild.data.strip()
+            chanFreqArrayStr = self._getXMLNodeChildText(chanFreqArrayNode)
 
             self._chanFreqArray = Parser.stringListToLists(
                 chanFreqArrayStr, Frequency, "SpectralWindow", True
@@ -870,17 +951,19 @@ class SpectralWindowRow:
 
             self._chanFreqArrayExists = True
 
-        chanWidthNode = rowdom.getElementsByTagName("chanWidth")
-        if len(chanWidthNode) > 0:
+        chanWidthNode = self._getFirstNodeByTagName(rowdom, "chanWidth", False)
+        if chanWidthNode:
 
-            self._chanWidth = Frequency(chanWidthNode[0].firstChild.data.strip())
+            self._chanWidth = Frequency(self._getXMLNodeChildText(chanWidthNode))
 
             self._chanWidthExists = True
 
-        chanWidthArrayNode = rowdom.getElementsByTagName("chanWidthArray")
-        if len(chanWidthArrayNode) > 0:
+        chanWidthArrayNode = self._getFirstNodeByTagName(
+            rowdom, "chanWidthArray", False
+        )
+        if chanWidthArrayNode:
 
-            chanWidthArrayStr = chanWidthArrayNode[0].firstChild.data.strip()
+            chanWidthArrayStr = self._getXMLNodeChildText(chanWidthArrayNode)
 
             self._chanWidthArray = Parser.stringListToLists(
                 chanWidthArrayStr, Frequency, "SpectralWindow", True
@@ -888,26 +971,30 @@ class SpectralWindowRow:
 
             self._chanWidthArrayExists = True
 
-        correlationBitNode = rowdom.getElementsByTagName("correlationBit")
-        if len(correlationBitNode) > 0:
+        correlationBitNode = self._getFirstNodeByTagName(
+            rowdom, "correlationBit", False
+        )
+        if correlationBitNode:
 
             self._correlationBit = CorrelationBit.newCorrelationBit(
-                correlationBitNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(correlationBitNode)
             )
 
             self._correlationBitExists = True
 
-        effectiveBwNode = rowdom.getElementsByTagName("effectiveBw")
-        if len(effectiveBwNode) > 0:
+        effectiveBwNode = self._getFirstNodeByTagName(rowdom, "effectiveBw", False)
+        if effectiveBwNode:
 
-            self._effectiveBw = Frequency(effectiveBwNode[0].firstChild.data.strip())
+            self._effectiveBw = Frequency(self._getXMLNodeChildText(effectiveBwNode))
 
             self._effectiveBwExists = True
 
-        effectiveBwArrayNode = rowdom.getElementsByTagName("effectiveBwArray")
-        if len(effectiveBwArrayNode) > 0:
+        effectiveBwArrayNode = self._getFirstNodeByTagName(
+            rowdom, "effectiveBwArray", False
+        )
+        if effectiveBwArrayNode:
 
-            effectiveBwArrayStr = effectiveBwArrayNode[0].firstChild.data.strip()
+            effectiveBwArrayStr = self._getXMLNodeChildText(effectiveBwArrayNode)
 
             self._effectiveBwArray = Parser.stringListToLists(
                 effectiveBwArrayStr, Frequency, "SpectralWindow", True
@@ -915,24 +1002,24 @@ class SpectralWindowRow:
 
             self._effectiveBwArrayExists = True
 
-        freqGroupNode = rowdom.getElementsByTagName("freqGroup")
-        if len(freqGroupNode) > 0:
+        freqGroupNode = self._getFirstNodeByTagName(rowdom, "freqGroup", False)
+        if freqGroupNode:
 
-            self._freqGroup = int(freqGroupNode[0].firstChild.data.strip())
+            self._freqGroup = int(self._getXMLNodeChildText(freqGroupNode))
 
             self._freqGroupExists = True
 
-        freqGroupNameNode = rowdom.getElementsByTagName("freqGroupName")
-        if len(freqGroupNameNode) > 0:
+        freqGroupNameNode = self._getFirstNodeByTagName(rowdom, "freqGroupName", False)
+        if freqGroupNameNode:
 
-            self._freqGroupName = str(freqGroupNameNode[0].firstChild.data.strip())
+            self._freqGroupName = str(self._getXMLNodeChildText(freqGroupNameNode))
 
             self._freqGroupNameExists = True
 
-        lineArrayNode = rowdom.getElementsByTagName("lineArray")
-        if len(lineArrayNode) > 0:
+        lineArrayNode = self._getFirstNodeByTagName(rowdom, "lineArray", False)
+        if lineArrayNode:
 
-            lineArrayStr = lineArrayNode[0].firstChild.data.strip()
+            lineArrayStr = self._getXMLNodeChildText(lineArrayNode)
 
             self._lineArray = Parser.stringListToLists(
                 lineArrayStr, bool, "SpectralWindow", False
@@ -940,54 +1027,56 @@ class SpectralWindowRow:
 
             self._lineArrayExists = True
 
-        measFreqRefNode = rowdom.getElementsByTagName("measFreqRef")
-        if len(measFreqRefNode) > 0:
+        measFreqRefNode = self._getFirstNodeByTagName(rowdom, "measFreqRef", False)
+        if measFreqRefNode:
 
             self._measFreqRef = FrequencyReferenceCode.newFrequencyReferenceCode(
-                measFreqRefNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(measFreqRefNode)
             )
 
             self._measFreqRefExists = True
 
-        nameNode = rowdom.getElementsByTagName("name")
-        if len(nameNode) > 0:
+        nameNode = self._getFirstNodeByTagName(rowdom, "name", False)
+        if nameNode:
 
-            self._name = str(nameNode[0].firstChild.data.strip())
+            self._name = str(self._getXMLNodeChildText(nameNode))
 
             self._nameExists = True
 
-        oversamplingNode = rowdom.getElementsByTagName("oversampling")
-        if len(oversamplingNode) > 0:
+        oversamplingNode = self._getFirstNodeByTagName(rowdom, "oversampling", False)
+        if oversamplingNode:
 
-            self._oversampling = bool(oversamplingNode[0].firstChild.data.strip())
+            self._oversampling = bool(self._getXMLNodeChildText(oversamplingNode))
 
             self._oversamplingExists = True
 
-        quantizationNode = rowdom.getElementsByTagName("quantization")
-        if len(quantizationNode) > 0:
+        quantizationNode = self._getFirstNodeByTagName(rowdom, "quantization", False)
+        if quantizationNode:
 
-            self._quantization = bool(quantizationNode[0].firstChild.data.strip())
+            self._quantization = bool(self._getXMLNodeChildText(quantizationNode))
 
             self._quantizationExists = True
 
-        refChanNode = rowdom.getElementsByTagName("refChan")
-        if len(refChanNode) > 0:
+        refChanNode = self._getFirstNodeByTagName(rowdom, "refChan", False)
+        if refChanNode:
 
-            self._refChan = float(refChanNode[0].firstChild.data.strip())
+            self._refChan = float(self._getXMLNodeChildText(refChanNode))
 
             self._refChanExists = True
 
-        resolutionNode = rowdom.getElementsByTagName("resolution")
-        if len(resolutionNode) > 0:
+        resolutionNode = self._getFirstNodeByTagName(rowdom, "resolution", False)
+        if resolutionNode:
 
-            self._resolution = Frequency(resolutionNode[0].firstChild.data.strip())
+            self._resolution = Frequency(self._getXMLNodeChildText(resolutionNode))
 
             self._resolutionExists = True
 
-        resolutionArrayNode = rowdom.getElementsByTagName("resolutionArray")
-        if len(resolutionArrayNode) > 0:
+        resolutionArrayNode = self._getFirstNodeByTagName(
+            rowdom, "resolutionArray", False
+        )
+        if resolutionArrayNode:
 
-            resolutionArrayStr = resolutionArrayNode[0].firstChild.data.strip()
+            resolutionArrayStr = self._getXMLNodeChildText(resolutionArrayNode)
 
             self._resolutionArray = Parser.stringListToLists(
                 resolutionArrayStr, Frequency, "SpectralWindow", True
@@ -995,34 +1084,36 @@ class SpectralWindowRow:
 
             self._resolutionArrayExists = True
 
-        numAssocValuesNode = rowdom.getElementsByTagName("numAssocValues")
-        if len(numAssocValuesNode) > 0:
+        numAssocValuesNode = self._getFirstNodeByTagName(
+            rowdom, "numAssocValues", False
+        )
+        if numAssocValuesNode:
 
-            self._numAssocValues = int(numAssocValuesNode[0].firstChild.data.strip())
+            self._numAssocValues = int(self._getXMLNodeChildText(numAssocValuesNode))
 
             self._numAssocValuesExists = True
 
-        assocNatureNode = rowdom.getElementsByTagName("assocNature")
-        if len(assocNatureNode) > 0:
+        assocNatureNode = self._getFirstNodeByTagName(rowdom, "assocNature", False)
+        if assocNatureNode:
 
-            assocNatureStr = assocNatureNode[0].firstChild.data.strip()
+            assocNatureStr = self._getXMLNodeChildText(assocNatureNode)
             self._assocNature = Parser.stringListToLists(
                 assocNatureStr, SpectralResolutionType, "SpectralWindow", False
             )
 
             self._assocNatureExists = True
 
-        numFactorNode = rowdom.getElementsByTagName("numFactor")
-        if len(numFactorNode) > 0:
+        numFactorNode = self._getFirstNodeByTagName(rowdom, "numFactor", False)
+        if numFactorNode:
 
-            self._numFactor = int(numFactorNode[0].firstChild.data.strip())
+            self._numFactor = int(self._getXMLNodeChildText(numFactorNode))
 
             self._numFactorExists = True
 
-        numBinFactorsNode = rowdom.getElementsByTagName("numBinFactors")
-        if len(numBinFactorsNode) > 0:
+        numBinFactorsNode = self._getFirstNodeByTagName(rowdom, "numBinFactors", False)
+        if numBinFactorsNode:
 
-            numBinFactorsStr = numBinFactorsNode[0].firstChild.data.strip()
+            numBinFactorsStr = self._getXMLNodeChildText(numBinFactorsNode)
 
             self._numBinFactors = Parser.stringListToLists(
                 numBinFactorsStr, int, "SpectralWindow", False
@@ -1030,23 +1121,25 @@ class SpectralWindowRow:
 
             self._numBinFactorsExists = True
 
-        numOrigFreqSliceNode = rowdom.getElementsByTagName("numOrigFreqSlice")
-        if len(numOrigFreqSliceNode) > 0:
+        numOrigFreqSliceNode = self._getFirstNodeByTagName(
+            rowdom, "numOrigFreqSlice", False
+        )
+        if numOrigFreqSliceNode:
 
             self._numOrigFreqSlice = int(
-                numOrigFreqSliceNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(numOrigFreqSliceNode)
             )
 
             self._numOrigFreqSliceExists = True
 
-        originatingFrequencySlicesNode = rowdom.getElementsByTagName(
-            "originatingFrequencySlices"
+        originatingFrequencySlicesNode = self._getFirstNodeByTagName(
+            rowdom, "originatingFrequencySlices", False
         )
-        if len(originatingFrequencySlicesNode) > 0:
+        if originatingFrequencySlicesNode:
 
-            originatingFrequencySlicesStr = originatingFrequencySlicesNode[
-                0
-            ].firstChild.data.strip()
+            originatingFrequencySlicesStr = self._getXMLNodeChildText(
+                originatingFrequencySlicesNode
+            )
 
             self._originatingFrequencySlices = Parser.stringListToLists(
                 originatingFrequencySlicesStr, int, "SpectralWindow", False
@@ -1054,26 +1147,32 @@ class SpectralWindowRow:
 
             self._originatingFrequencySlicesExists = True
 
-        quantizationBitsNode = rowdom.getElementsByTagName("quantizationBits")
-        if len(quantizationBitsNode) > 0:
+        quantizationBitsNode = self._getFirstNodeByTagName(
+            rowdom, "quantizationBits", False
+        )
+        if quantizationBitsNode:
 
             self._quantizationBits = int(
-                quantizationBitsNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(quantizationBitsNode)
             )
 
             self._quantizationBitsExists = True
 
-        numRequantStageNode = rowdom.getElementsByTagName("numRequantStage")
-        if len(numRequantStageNode) > 0:
+        numRequantStageNode = self._getFirstNodeByTagName(
+            rowdom, "numRequantStage", False
+        )
+        if numRequantStageNode:
 
-            self._numRequantStage = int(numRequantStageNode[0].firstChild.data.strip())
+            self._numRequantStage = int(self._getXMLNodeChildText(numRequantStageNode))
 
             self._numRequantStageExists = True
 
-        requantizationNode = rowdom.getElementsByTagName("requantization")
-        if len(requantizationNode) > 0:
+        requantizationNode = self._getFirstNodeByTagName(
+            rowdom, "requantization", False
+        )
+        if requantizationNode:
 
-            requantizationStr = requantizationNode[0].firstChild.data.strip()
+            requantizationStr = self._getXMLNodeChildText(requantizationNode)
 
             self._requantization = Parser.stringListToLists(
                 requantizationStr, bool, "SpectralWindow", False
@@ -1081,10 +1180,12 @@ class SpectralWindowRow:
 
             self._requantizationExists = True
 
-        requantizationBitsNode = rowdom.getElementsByTagName("requantizationBits")
-        if len(requantizationBitsNode) > 0:
+        requantizationBitsNode = self._getFirstNodeByTagName(
+            rowdom, "requantizationBits", False
+        )
+        if requantizationBitsNode:
 
-            requantizationBitsStr = requantizationBitsNode[0].firstChild.data.strip()
+            requantizationBitsStr = self._getXMLNodeChildText(requantizationBitsNode)
 
             self._requantizationBits = Parser.stringListToLists(
                 requantizationBitsStr, int, "SpectralWindow", False
@@ -1094,12 +1195,14 @@ class SpectralWindowRow:
 
         # extrinsic attribute values
 
-        assocSpectralWindowIdNode = rowdom.getElementsByTagName("assocSpectralWindowId")
-        if len(assocSpectralWindowIdNode) > 0:
+        assocSpectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "assocSpectralWindowId", False
+        )
+        if assocSpectralWindowIdNode:
 
-            assocSpectralWindowIdStr = assocSpectralWindowIdNode[
-                0
-            ].firstChild.data.strip()
+            assocSpectralWindowIdStr = self._getXMLNodeChildText(
+                assocSpectralWindowIdNode
+            )
 
             self._assocSpectralWindowId = Parser.stringListToLists(
                 assocSpectralWindowIdStr, Tag, "SpectralWindow", True
@@ -1107,18 +1210,20 @@ class SpectralWindowRow:
 
             self._assocSpectralWindowIdExists = True
 
-        dopplerIdNode = rowdom.getElementsByTagName("dopplerId")
-        if len(dopplerIdNode) > 0:
+        dopplerIdNode = self._getFirstNodeByTagName(rowdom, "dopplerId", False)
+        if dopplerIdNode:
 
-            self._dopplerId = int(dopplerIdNode[0].firstChild.data.strip())
+            self._dopplerId = int(self._getXMLNodeChildText(dopplerIdNode))
 
             self._dopplerIdExists = True
 
-        imageSpectralWindowIdNode = rowdom.getElementsByTagName("imageSpectralWindowId")
-        if len(imageSpectralWindowIdNode) > 0:
+        imageSpectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "imageSpectralWindowId", False
+        )
+        if imageSpectralWindowIdNode:
 
             self._imageSpectralWindowId = Tag(
-                imageSpectralWindowIdNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(imageSpectralWindowIdNode)
             )
 
             self._imageSpectralWindowIdExists = True
@@ -1232,7 +1337,7 @@ class SpectralWindowRow:
         eos.writeBool(self._refChanExists)
         if self._refChanExists:
 
-            eos.writeFloat(self._refChan)
+            eos.writeDouble(self._refChan)
 
         eos.writeBool(self._resolutionExists)
         if self._resolutionExists:
@@ -1561,7 +1666,7 @@ class SpectralWindowRow:
         row._refChanExists = eis.readBool()
         if row._refChanExists:
 
-            row._refChan = eis.readFloat()
+            row._refChan = eis.readDouble()
 
     @staticmethod
     def resolutionFromBin(row, eis):
@@ -1841,6 +1946,7 @@ class SpectralWindowRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1872,6 +1978,7 @@ class SpectralWindowRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         """
 
         self._basebandName = BasebandName(basebandName)
@@ -1894,6 +2001,7 @@ class SpectralWindowRow:
         netSideband The NetSideband value to which netSideband is to be set.
 
 
+
         """
 
         self._netSideband = NetSideband(netSideband)
@@ -1914,6 +2022,7 @@ class SpectralWindowRow:
         """
         Set numChan with the specified int value.
         numChan The int value to which numChan is to be set.
+
 
 
         """
@@ -1952,6 +2061,7 @@ class SpectralWindowRow:
         numBin The int value to which numBin is to be set.
 
 
+
         """
 
         self._numBin = int(numBin)
@@ -1981,6 +2091,7 @@ class SpectralWindowRow:
         """
         Set refFreq with the specified Frequency value.
         refFreq The Frequency value to which refFreq is to be set.
+
         The value of refFreq can be anything allowed by the Frequency constructor.
 
         """
@@ -2005,6 +2116,7 @@ class SpectralWindowRow:
         sidebandProcessingMode The SidebandProcessingMode value to which sidebandProcessingMode is to be set.
 
 
+
         """
 
         self._sidebandProcessingMode = SidebandProcessingMode(sidebandProcessingMode)
@@ -2026,6 +2138,7 @@ class SpectralWindowRow:
         """
         Set totBandwidth with the specified Frequency value.
         totBandwidth The Frequency value to which totBandwidth is to be set.
+
         The value of totBandwidth can be anything allowed by the Frequency constructor.
 
         """
@@ -2048,6 +2161,7 @@ class SpectralWindowRow:
         """
         Set windowFunction with the specified WindowFunction value.
         windowFunction The WindowFunction value to which windowFunction is to be set.
+
 
 
         """
@@ -2085,6 +2199,7 @@ class SpectralWindowRow:
         """
         Set chanFreqStart with the specified Frequency value.
         chanFreqStart The Frequency value to which chanFreqStart is to be set.
+
         The value of chanFreqStart can be anything allowed by the Frequency constructor.
 
         """
@@ -2130,6 +2245,7 @@ class SpectralWindowRow:
         """
         Set chanFreqStep with the specified Frequency value.
         chanFreqStep The Frequency value to which chanFreqStep is to be set.
+
         The value of chanFreqStep can be anything allowed by the Frequency constructor.
 
         """
@@ -2174,6 +2290,7 @@ class SpectralWindowRow:
         """
         Set chanFreqArray with the specified Frequency []  value.
         chanFreqArray The Frequency []  value to which chanFreqArray is to be set.
+
         The value of chanFreqArray can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2240,6 +2357,7 @@ class SpectralWindowRow:
         """
         Set chanWidth with the specified Frequency value.
         chanWidth The Frequency value to which chanWidth is to be set.
+
         The value of chanWidth can be anything allowed by the Frequency constructor.
 
         """
@@ -2284,6 +2402,7 @@ class SpectralWindowRow:
         """
         Set chanWidthArray with the specified Frequency []  value.
         chanWidthArray The Frequency []  value to which chanWidthArray is to be set.
+
         The value of chanWidthArray can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2351,6 +2470,7 @@ class SpectralWindowRow:
         correlationBit The CorrelationBit value to which correlationBit is to be set.
 
 
+
         """
 
         self._correlationBit = CorrelationBit(correlationBit)
@@ -2394,6 +2514,7 @@ class SpectralWindowRow:
         """
         Set effectiveBw with the specified Frequency value.
         effectiveBw The Frequency value to which effectiveBw is to be set.
+
         The value of effectiveBw can be anything allowed by the Frequency constructor.
 
         """
@@ -2438,6 +2559,7 @@ class SpectralWindowRow:
         """
         Set effectiveBwArray with the specified Frequency []  value.
         effectiveBwArray The Frequency []  value to which effectiveBwArray is to be set.
+
         The value of effectiveBwArray can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2505,6 +2627,7 @@ class SpectralWindowRow:
         freqGroup The int value to which freqGroup is to be set.
 
 
+
         """
 
         self._freqGroup = int(freqGroup)
@@ -2549,6 +2672,7 @@ class SpectralWindowRow:
         freqGroupName The str value to which freqGroupName is to be set.
 
 
+
         """
 
         self._freqGroupName = str(freqGroupName)
@@ -2591,6 +2715,7 @@ class SpectralWindowRow:
         """
         Set lineArray with the specified bool []  value.
         lineArray The bool []  value to which lineArray is to be set.
+
 
 
         """
@@ -2658,6 +2783,7 @@ class SpectralWindowRow:
         measFreqRef The FrequencyReferenceCode value to which measFreqRef is to be set.
 
 
+
         """
 
         self._measFreqRef = FrequencyReferenceCode(measFreqRef)
@@ -2700,6 +2826,7 @@ class SpectralWindowRow:
         """
         Set name with the specified str value.
         name The str value to which name is to be set.
+
 
 
         """
@@ -2746,6 +2873,7 @@ class SpectralWindowRow:
         oversampling The bool value to which oversampling is to be set.
 
 
+
         """
 
         self._oversampling = bool(oversampling)
@@ -2788,6 +2916,7 @@ class SpectralWindowRow:
         """
         Set quantization with the specified bool value.
         quantization The bool value to which quantization is to be set.
+
 
 
         """
@@ -2833,6 +2962,9 @@ class SpectralWindowRow:
         Set refChan with the specified float value.
         refChan The float value to which refChan is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -2877,6 +3009,7 @@ class SpectralWindowRow:
         """
         Set resolution with the specified Frequency value.
         resolution The Frequency value to which resolution is to be set.
+
         The value of resolution can be anything allowed by the Frequency constructor.
 
         """
@@ -2921,6 +3054,7 @@ class SpectralWindowRow:
         """
         Set resolutionArray with the specified Frequency []  value.
         resolutionArray The Frequency []  value to which resolutionArray is to be set.
+
         The value of resolutionArray can be anything allowed by the Frequency []  constructor.
 
         """
@@ -2988,6 +3122,7 @@ class SpectralWindowRow:
         numAssocValues The int value to which numAssocValues is to be set.
 
 
+
         """
 
         self._numAssocValues = int(numAssocValues)
@@ -3030,6 +3165,7 @@ class SpectralWindowRow:
         """
         Set assocNature with the specified SpectralResolutionType []  value.
         assocNature The SpectralResolutionType []  value to which assocNature is to be set.
+
 
 
         """
@@ -3097,6 +3233,7 @@ class SpectralWindowRow:
         numFactor The int value to which numFactor is to be set.
 
 
+
         """
 
         self._numFactor = int(numFactor)
@@ -3139,6 +3276,7 @@ class SpectralWindowRow:
         """
         Set numBinFactors with the specified int []  value.
         numBinFactors The int []  value to which numBinFactors is to be set.
+
 
 
         """
@@ -3206,6 +3344,7 @@ class SpectralWindowRow:
         numOrigFreqSlice The int value to which numOrigFreqSlice is to be set.
 
 
+
         """
 
         self._numOrigFreqSlice = int(numOrigFreqSlice)
@@ -3248,6 +3387,7 @@ class SpectralWindowRow:
         """
         Set originatingFrequencySlices with the specified int []  value.
         originatingFrequencySlices The int []  value to which originatingFrequencySlices is to be set.
+
 
 
         """
@@ -3315,6 +3455,7 @@ class SpectralWindowRow:
         quantizationBits The int value to which quantizationBits is to be set.
 
 
+
         """
 
         self._quantizationBits = int(quantizationBits)
@@ -3359,6 +3500,7 @@ class SpectralWindowRow:
         numRequantStage The int value to which numRequantStage is to be set.
 
 
+
         """
 
         self._numRequantStage = int(numRequantStage)
@@ -3401,6 +3543,7 @@ class SpectralWindowRow:
         """
         Set requantization with the specified bool []  value.
         requantization The bool []  value to which requantization is to be set.
+
 
 
         """
@@ -3468,6 +3611,7 @@ class SpectralWindowRow:
         requantizationBits The int []  value to which requantizationBits is to be set.
 
 
+
         """
 
         # value must be a list
@@ -3533,6 +3677,7 @@ class SpectralWindowRow:
         """
         Set assocSpectralWindowId with the specified Tag []  value.
         assocSpectralWindowId The Tag []  value to which assocSpectralWindowId is to be set.
+
         The value of assocSpectralWindowId can be anything allowed by the Tag []  constructor.
 
         """
@@ -3600,6 +3745,7 @@ class SpectralWindowRow:
         dopplerId The int value to which dopplerId is to be set.
 
 
+
         """
 
         self._dopplerId = int(dopplerId)
@@ -3643,6 +3789,7 @@ class SpectralWindowRow:
         """
         Set imageSpectralWindowId with the specified Tag value.
         imageSpectralWindowId The Tag value to which imageSpectralWindowId is to be set.
+
         The value of imageSpectralWindowId can be anything allowed by the Tag constructor.
 
         """

@@ -63,6 +63,16 @@ class VLAWVRRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -87,9 +97,9 @@ class VLAWVRRow:
 
         self._numChan = 0
 
-        self._hiValues = []  # this is a list of float []
+        self._hiValues = []  # this is a list of float []  saved as single precision
 
-        self._loValues = []  # this is a list of float []
+        self._loValues = []  # this is a list of float []  saved as single precision
 
         self._chanFreqCenterExists = False
 
@@ -166,39 +176,73 @@ class VLAWVRRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numChan", self._numChan)
 
-        result += Parser.listValueToXML("hiValues", self._hiValues)
+        result += "\n   "
 
-        result += Parser.listValueToXML("loValues", self._loValues)
+        result += Parser.floatListValueToXML("hiValues", self._hiValues)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("loValues", self._loValues)
 
         if self._chanFreqCenterExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "chanFreqCenter", self._chanFreqCenter
             )
 
         if self._chanWidthExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("chanWidth", self._chanWidth)
 
         if self._wvrIdExists:
+            result += "\n   "
 
             result += Parser.valueToXML("wvrId", self._wvrId)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "VLAWVRTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -225,30 +269,34 @@ class VLAWVRRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        numChanNode = rowdom.getElementsByTagName("numChan")[0]
+        numChanNode = self._getFirstNodeByTagName(rowdom, "numChan", True)
 
-        self._numChan = int(numChanNode.firstChild.data.strip())
+        self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
-        hiValuesNode = rowdom.getElementsByTagName("hiValues")[0]
+        hiValuesNode = self._getFirstNodeByTagName(rowdom, "hiValues", True)
 
-        hiValuesStr = hiValuesNode.firstChild.data.strip()
+        hiValuesStr = self._getXMLNodeChildText(hiValuesNode)
 
         self._hiValues = Parser.stringListToLists(hiValuesStr, float, "VLAWVR", False)
 
-        loValuesNode = rowdom.getElementsByTagName("loValues")[0]
+        loValuesNode = self._getFirstNodeByTagName(rowdom, "loValues", True)
 
-        loValuesStr = loValuesNode.firstChild.data.strip()
+        loValuesStr = self._getXMLNodeChildText(loValuesNode)
 
         self._loValues = Parser.stringListToLists(loValuesStr, float, "VLAWVR", False)
 
-        chanFreqCenterNode = rowdom.getElementsByTagName("chanFreqCenter")
-        if len(chanFreqCenterNode) > 0:
+        chanFreqCenterNode = self._getFirstNodeByTagName(
+            rowdom, "chanFreqCenter", False
+        )
+        if chanFreqCenterNode:
 
-            chanFreqCenterStr = chanFreqCenterNode[0].firstChild.data.strip()
+            chanFreqCenterStr = self._getXMLNodeChildText(chanFreqCenterNode)
 
             self._chanFreqCenter = Parser.stringListToLists(
                 chanFreqCenterStr, Frequency, "VLAWVR", True
@@ -256,10 +304,10 @@ class VLAWVRRow:
 
             self._chanFreqCenterExists = True
 
-        chanWidthNode = rowdom.getElementsByTagName("chanWidth")
-        if len(chanWidthNode) > 0:
+        chanWidthNode = self._getFirstNodeByTagName(rowdom, "chanWidth", False)
+        if chanWidthNode:
 
-            chanWidthStr = chanWidthNode[0].firstChild.data.strip()
+            chanWidthStr = self._getXMLNodeChildText(chanWidthNode)
 
             self._chanWidth = Parser.stringListToLists(
                 chanWidthStr, Frequency, "VLAWVR", True
@@ -267,18 +315,18 @@ class VLAWVRRow:
 
             self._chanWidthExists = True
 
-        wvrIdNode = rowdom.getElementsByTagName("wvrId")
-        if len(wvrIdNode) > 0:
+        wvrIdNode = self._getFirstNodeByTagName(rowdom, "wvrId", False)
+        if wvrIdNode:
 
-            self._wvrId = str(wvrIdNode[0].firstChild.data.strip())
+            self._wvrId = str(self._getXMLNodeChildText(wvrIdNode))
 
             self._wvrIdExists = True
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
         # from link values, if any
 
@@ -459,6 +507,7 @@ class VLAWVRRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -490,6 +539,7 @@ class VLAWVRRow:
         numChan The int value to which numChan is to be set.
 
 
+
         """
 
         self._numChan = int(numChan)
@@ -510,6 +560,9 @@ class VLAWVRRow:
         """
         Set hiValues with the specified float []  value.
         hiValues The float []  value to which hiValues is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -553,6 +606,9 @@ class VLAWVRRow:
         """
         Set loValues with the specified float []  value.
         loValues The float []  value to which loValues is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -610,6 +666,7 @@ class VLAWVRRow:
         """
         Set chanFreqCenter with the specified Frequency []  value.
         chanFreqCenter The Frequency []  value to which chanFreqCenter is to be set.
+
         The value of chanFreqCenter can be anything allowed by the Frequency []  constructor.
 
         """
@@ -675,6 +732,7 @@ class VLAWVRRow:
         """
         Set chanWidth with the specified Frequency []  value.
         chanWidth The Frequency []  value to which chanWidth is to be set.
+
         The value of chanWidth can be anything allowed by the Frequency []  constructor.
 
         """
@@ -742,6 +800,7 @@ class VLAWVRRow:
         wvrId The str value to which wvrId is to be set.
 
 
+
         """
 
         self._wvrId = str(wvrId)
@@ -773,6 +832,7 @@ class VLAWVRRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

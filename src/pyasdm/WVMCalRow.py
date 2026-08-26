@@ -66,6 +66,16 @@ class WVMCalRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -98,7 +108,9 @@ class WVMCalRow:
 
         self._numPoly = 0
 
-        self._pathCoeff = []  # this is a list of float []  []  []
+        self._pathCoeff = (
+            []
+        )  # this is a list of float []  []  []  saved as single precision
 
         self._refTemp = []  # this is a list of Temperature []  []
 
@@ -166,37 +178,80 @@ class WVMCalRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("wvrMethod", WVRMethod.name(self._wvrMethod))
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("polyFreqLimits", self._polyFreqLimits)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numInputAntenna", self._numInputAntenna)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numChan", self._numChan)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numPoly", self._numPoly)
 
-        result += Parser.listValueToXML("pathCoeff", self._pathCoeff)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("pathCoeff", self._pathCoeff)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("refTemp", self._refTemp)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("inputAntennaId", self._inputAntennaId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "WVMCalTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -223,43 +278,49 @@ class WVMCalRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        wvrMethodNode = rowdom.getElementsByTagName("wvrMethod")[0]
+        wvrMethodNode = self._getFirstNodeByTagName(rowdom, "wvrMethod", True)
 
-        self._wvrMethod = WVRMethod.newWVRMethod(wvrMethodNode.firstChild.data.strip())
+        self._wvrMethod = WVRMethod.newWVRMethod(
+            self._getXMLNodeChildText(wvrMethodNode)
+        )
 
-        polyFreqLimitsNode = rowdom.getElementsByTagName("polyFreqLimits")[0]
+        polyFreqLimitsNode = self._getFirstNodeByTagName(rowdom, "polyFreqLimits", True)
 
-        polyFreqLimitsStr = polyFreqLimitsNode.firstChild.data.strip()
+        polyFreqLimitsStr = self._getXMLNodeChildText(polyFreqLimitsNode)
 
         self._polyFreqLimits = Parser.stringListToLists(
             polyFreqLimitsStr, Frequency, "WVMCal", True
         )
 
-        numInputAntennaNode = rowdom.getElementsByTagName("numInputAntenna")[0]
+        numInputAntennaNode = self._getFirstNodeByTagName(
+            rowdom, "numInputAntenna", True
+        )
 
-        self._numInputAntenna = int(numInputAntennaNode.firstChild.data.strip())
+        self._numInputAntenna = int(self._getXMLNodeChildText(numInputAntennaNode))
 
-        numChanNode = rowdom.getElementsByTagName("numChan")[0]
+        numChanNode = self._getFirstNodeByTagName(rowdom, "numChan", True)
 
-        self._numChan = int(numChanNode.firstChild.data.strip())
+        self._numChan = int(self._getXMLNodeChildText(numChanNode))
 
-        numPolyNode = rowdom.getElementsByTagName("numPoly")[0]
+        numPolyNode = self._getFirstNodeByTagName(rowdom, "numPoly", True)
 
-        self._numPoly = int(numPolyNode.firstChild.data.strip())
+        self._numPoly = int(self._getXMLNodeChildText(numPolyNode))
 
-        pathCoeffNode = rowdom.getElementsByTagName("pathCoeff")[0]
+        pathCoeffNode = self._getFirstNodeByTagName(rowdom, "pathCoeff", True)
 
-        pathCoeffStr = pathCoeffNode.firstChild.data.strip()
+        pathCoeffStr = self._getXMLNodeChildText(pathCoeffNode)
 
         self._pathCoeff = Parser.stringListToLists(pathCoeffStr, float, "WVMCal", False)
 
-        refTempNode = rowdom.getElementsByTagName("refTemp")[0]
+        refTempNode = self._getFirstNodeByTagName(rowdom, "refTemp", True)
 
-        refTempStr = refTempNode.firstChild.data.strip()
+        refTempStr = self._getXMLNodeChildText(refTempNode)
 
         self._refTemp = Parser.stringListToLists(
             refTempStr, Temperature, "WVMCal", True
@@ -267,21 +328,23 @@ class WVMCalRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        inputAntennaIdNode = rowdom.getElementsByTagName("inputAntennaId")[0]
+        inputAntennaIdNode = self._getFirstNodeByTagName(rowdom, "inputAntennaId", True)
 
-        inputAntennaIdStr = inputAntennaIdNode.firstChild.data.strip()
+        inputAntennaIdStr = self._getXMLNodeChildText(inputAntennaIdNode)
 
         self._inputAntennaId = Parser.stringListToLists(
             inputAntennaIdStr, Tag, "WVMCal", True
         )
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
@@ -489,6 +552,7 @@ class WVMCalRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -520,6 +584,7 @@ class WVMCalRow:
         wvrMethod The WVRMethod value to which wvrMethod is to be set.
 
 
+
         """
 
         self._wvrMethod = WVRMethod(wvrMethod)
@@ -540,6 +605,7 @@ class WVMCalRow:
         """
         Set polyFreqLimits with the specified Frequency []  value.
         polyFreqLimits The Frequency []  value to which polyFreqLimits is to be set.
+
         The value of polyFreqLimits can be anything allowed by the Frequency []  constructor.
 
         """
@@ -585,6 +651,7 @@ class WVMCalRow:
         numInputAntenna The int value to which numInputAntenna is to be set.
 
 
+
         """
 
         self._numInputAntenna = int(numInputAntenna)
@@ -605,6 +672,7 @@ class WVMCalRow:
         """
         Set numChan with the specified int value.
         numChan The int value to which numChan is to be set.
+
 
 
         """
@@ -629,6 +697,7 @@ class WVMCalRow:
         numPoly The int value to which numPoly is to be set.
 
 
+
         """
 
         self._numPoly = int(numPoly)
@@ -649,6 +718,9 @@ class WVMCalRow:
         """
         Set pathCoeff with the specified float []  []  []  value.
         pathCoeff The float []  []  []  value to which pathCoeff is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -692,6 +764,7 @@ class WVMCalRow:
         """
         Set refTemp with the specified Temperature []  []  value.
         refTemp The Temperature []  []  value to which refTemp is to be set.
+
         The value of refTemp can be anything allowed by the Temperature []  []  constructor.
 
         """
@@ -738,6 +811,7 @@ class WVMCalRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -767,6 +841,7 @@ class WVMCalRow:
         """
         Set inputAntennaId with the specified Tag []  value.
         inputAntennaId The Tag []  value to which inputAntennaId is to be set.
+
         The value of inputAntennaId can be anything allowed by the Tag []  constructor.
 
         """
@@ -811,6 +886,7 @@ class WVMCalRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

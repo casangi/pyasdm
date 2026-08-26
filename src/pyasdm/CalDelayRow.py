@@ -78,6 +78,16 @@ class CalDelayRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -114,15 +124,17 @@ class CalDelayRow:
 
         self._numReceptor = 0
 
-        self._delayError = []  # this is a list of float []
+        self._delayError = []  # this is a list of float []  saved as double precision
 
-        self._delayOffset = []  # this is a list of float []
+        self._delayOffset = []  # this is a list of float []  saved as double precision
 
         self._polarizationTypes = []  # this is a list of PolarizationType []
 
-        self._reducedChiSquared = []  # this is a list of float []
+        self._reducedChiSquared = (
+            []
+        )  # this is a list of float []  saved as double precision
 
-        self._appliedDelay = []  # this is a list of float []
+        self._appliedDelay = []  # this is a list of float []  saved as double precision
 
         self._crossDelayOffsetExists = False
 
@@ -273,79 +285,140 @@ class CalDelayRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("refAntennaName", self._refAntennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
-        result += Parser.listValueToXML("delayError", self._delayError)
+        result += "\n   "
 
-        result += Parser.listValueToXML("delayOffset", self._delayOffset)
+        result += Parser.doubleListValueToXML("delayError", self._delayError)
+
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("delayOffset", self._delayOffset)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
-        result += Parser.listValueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += "\n   "
 
-        result += Parser.listValueToXML("appliedDelay", self._appliedDelay)
+        result += Parser.doubleListValueToXML(
+            "reducedChiSquared", self._reducedChiSquared
+        )
+
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("appliedDelay", self._appliedDelay)
 
         if self._crossDelayOffsetExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("crossDelayOffset", self._crossDelayOffset)
+            result += Parser.doubleValueToXML(
+                "crossDelayOffset", self._crossDelayOffset
+            )
 
         if self._crossDelayOffsetErrorExists:
+            result += "\n   "
 
-            result += Parser.valueToXML(
+            result += Parser.doubleValueToXML(
                 "crossDelayOffsetError", self._crossDelayOffsetError
             )
 
         if self._numSidebandExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numSideband", self._numSideband)
 
         if self._refFreqExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("refFreq", self._refFreq)
 
         if self._refFreqPhaseExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("refFreqPhase", self._refFreqPhase)
 
         if self._sidebandsExists:
+            result += "\n   "
 
             result += Parser.listEnumValueToXML("sidebands", self._sidebands)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalDelayTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -372,112 +445,122 @@ class CalDelayRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", True)
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        refAntennaNameNode = rowdom.getElementsByTagName("refAntennaName")[0]
+        refAntennaNameNode = self._getFirstNodeByTagName(rowdom, "refAntennaName", True)
 
-        self._refAntennaName = str(refAntennaNameNode.firstChild.data.strip())
+        self._refAntennaName = str(self._getXMLNodeChildText(refAntennaNameNode))
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        delayErrorNode = rowdom.getElementsByTagName("delayError")[0]
+        delayErrorNode = self._getFirstNodeByTagName(rowdom, "delayError", True)
 
-        delayErrorStr = delayErrorNode.firstChild.data.strip()
+        delayErrorStr = self._getXMLNodeChildText(delayErrorNode)
 
         self._delayError = Parser.stringListToLists(
             delayErrorStr, float, "CalDelay", False
         )
 
-        delayOffsetNode = rowdom.getElementsByTagName("delayOffset")[0]
+        delayOffsetNode = self._getFirstNodeByTagName(rowdom, "delayOffset", True)
 
-        delayOffsetStr = delayOffsetNode.firstChild.data.strip()
+        delayOffsetStr = self._getXMLNodeChildText(delayOffsetNode)
 
         self._delayOffset = Parser.stringListToLists(
             delayOffsetStr, float, "CalDelay", False
         )
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalDelay", False
         )
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
-        reducedChiSquaredStr = reducedChiSquaredNode.firstChild.data.strip()
+        reducedChiSquaredStr = self._getXMLNodeChildText(reducedChiSquaredNode)
 
         self._reducedChiSquared = Parser.stringListToLists(
             reducedChiSquaredStr, float, "CalDelay", False
         )
 
-        appliedDelayNode = rowdom.getElementsByTagName("appliedDelay")[0]
+        appliedDelayNode = self._getFirstNodeByTagName(rowdom, "appliedDelay", True)
 
-        appliedDelayStr = appliedDelayNode.firstChild.data.strip()
+        appliedDelayStr = self._getXMLNodeChildText(appliedDelayNode)
 
         self._appliedDelay = Parser.stringListToLists(
             appliedDelayStr, float, "CalDelay", False
         )
 
-        crossDelayOffsetNode = rowdom.getElementsByTagName("crossDelayOffset")
-        if len(crossDelayOffsetNode) > 0:
+        crossDelayOffsetNode = self._getFirstNodeByTagName(
+            rowdom, "crossDelayOffset", False
+        )
+        if crossDelayOffsetNode:
 
             self._crossDelayOffset = float(
-                crossDelayOffsetNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(crossDelayOffsetNode)
             )
 
             self._crossDelayOffsetExists = True
 
-        crossDelayOffsetErrorNode = rowdom.getElementsByTagName("crossDelayOffsetError")
-        if len(crossDelayOffsetErrorNode) > 0:
+        crossDelayOffsetErrorNode = self._getFirstNodeByTagName(
+            rowdom, "crossDelayOffsetError", False
+        )
+        if crossDelayOffsetErrorNode:
 
             self._crossDelayOffsetError = float(
-                crossDelayOffsetErrorNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(crossDelayOffsetErrorNode)
             )
 
             self._crossDelayOffsetErrorExists = True
 
-        numSidebandNode = rowdom.getElementsByTagName("numSideband")
-        if len(numSidebandNode) > 0:
+        numSidebandNode = self._getFirstNodeByTagName(rowdom, "numSideband", False)
+        if numSidebandNode:
 
-            self._numSideband = int(numSidebandNode[0].firstChild.data.strip())
+            self._numSideband = int(self._getXMLNodeChildText(numSidebandNode))
 
             self._numSidebandExists = True
 
-        refFreqNode = rowdom.getElementsByTagName("refFreq")
-        if len(refFreqNode) > 0:
+        refFreqNode = self._getFirstNodeByTagName(rowdom, "refFreq", False)
+        if refFreqNode:
 
-            refFreqStr = refFreqNode[0].firstChild.data.strip()
+            refFreqStr = self._getXMLNodeChildText(refFreqNode)
 
             self._refFreq = Parser.stringListToLists(
                 refFreqStr, Frequency, "CalDelay", True
@@ -485,10 +568,10 @@ class CalDelayRow:
 
             self._refFreqExists = True
 
-        refFreqPhaseNode = rowdom.getElementsByTagName("refFreqPhase")
-        if len(refFreqPhaseNode) > 0:
+        refFreqPhaseNode = self._getFirstNodeByTagName(rowdom, "refFreqPhase", False)
+        if refFreqPhaseNode:
 
-            refFreqPhaseStr = refFreqPhaseNode[0].firstChild.data.strip()
+            refFreqPhaseStr = self._getXMLNodeChildText(refFreqPhaseNode)
 
             self._refFreqPhase = Parser.stringListToLists(
                 refFreqPhaseStr, Angle, "CalDelay", True
@@ -496,10 +579,10 @@ class CalDelayRow:
 
             self._refFreqPhaseExists = True
 
-        sidebandsNode = rowdom.getElementsByTagName("sidebands")
-        if len(sidebandsNode) > 0:
+        sidebandsNode = self._getFirstNodeByTagName(rowdom, "sidebands", False)
+        if sidebandsNode:
 
-            sidebandsStr = sidebandsNode[0].firstChild.data.strip()
+            sidebandsStr = self._getXMLNodeChildText(sidebandsNode)
             self._sidebands = Parser.stringListToLists(
                 sidebandsStr, ReceiverSideband, "CalDelay", False
             )
@@ -508,13 +591,13 @@ class CalDelayRow:
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -546,12 +629,12 @@ class CalDelayRow:
         eos.writeInt(len(self._delayError))
         for i in range(len(self._delayError)):
 
-            eos.writeFloat(self._delayError[i])
+            eos.writeDouble(self._delayError[i])
 
         eos.writeInt(len(self._delayOffset))
         for i in range(len(self._delayOffset)):
 
-            eos.writeFloat(self._delayOffset[i])
+            eos.writeDouble(self._delayOffset[i])
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
@@ -561,22 +644,22 @@ class CalDelayRow:
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
 
-            eos.writeFloat(self._reducedChiSquared[i])
+            eos.writeDouble(self._reducedChiSquared[i])
 
         eos.writeInt(len(self._appliedDelay))
         for i in range(len(self._appliedDelay)):
 
-            eos.writeFloat(self._appliedDelay[i])
+            eos.writeDouble(self._appliedDelay[i])
 
         eos.writeBool(self._crossDelayOffsetExists)
         if self._crossDelayOffsetExists:
 
-            eos.writeFloat(self._crossDelayOffset)
+            eos.writeDouble(self._crossDelayOffset)
 
         eos.writeBool(self._crossDelayOffsetErrorExists)
         if self._crossDelayOffsetErrorExists:
 
-            eos.writeFloat(self._crossDelayOffsetError)
+            eos.writeDouble(self._crossDelayOffsetError)
 
         eos.writeBool(self._numSidebandExists)
         if self._numSidebandExists:
@@ -690,7 +773,7 @@ class CalDelayRow:
         delayErrorDim1 = eis.readInt()
         thisList = []
         for i in range(delayErrorDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._delayError = thisList
 
@@ -703,7 +786,7 @@ class CalDelayRow:
         delayOffsetDim1 = eis.readInt()
         thisList = []
         for i in range(delayOffsetDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._delayOffset = thisList
 
@@ -729,7 +812,7 @@ class CalDelayRow:
         reducedChiSquaredDim1 = eis.readInt()
         thisList = []
         for i in range(reducedChiSquaredDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._reducedChiSquared = thisList
 
@@ -742,7 +825,7 @@ class CalDelayRow:
         appliedDelayDim1 = eis.readInt()
         thisList = []
         for i in range(appliedDelayDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._appliedDelay = thisList
 
@@ -754,7 +837,7 @@ class CalDelayRow:
         row._crossDelayOffsetExists = eis.readBool()
         if row._crossDelayOffsetExists:
 
-            row._crossDelayOffset = eis.readFloat()
+            row._crossDelayOffset = eis.readDouble()
 
     @staticmethod
     def crossDelayOffsetErrorFromBin(row, eis):
@@ -764,7 +847,7 @@ class CalDelayRow:
         row._crossDelayOffsetErrorExists = eis.readBool()
         if row._crossDelayOffsetErrorExists:
 
-            row._crossDelayOffsetError = eis.readFloat()
+            row._crossDelayOffsetError = eis.readDouble()
 
     @staticmethod
     def numSidebandFromBin(row, eis):
@@ -888,6 +971,7 @@ class CalDelayRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -915,6 +999,7 @@ class CalDelayRow:
         """
         Set atmPhaseCorrection with the specified AtmPhaseCorrection value.
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -946,6 +1031,7 @@ class CalDelayRow:
         basebandName The BasebandName value to which basebandName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -973,6 +1059,7 @@ class CalDelayRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1003,6 +1090,7 @@ class CalDelayRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1026,6 +1114,7 @@ class CalDelayRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1050,6 +1139,7 @@ class CalDelayRow:
         refAntennaName The str value to which refAntennaName is to be set.
 
 
+
         """
 
         self._refAntennaName = str(refAntennaName)
@@ -1072,6 +1162,7 @@ class CalDelayRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -1092,6 +1183,9 @@ class CalDelayRow:
         """
         Set delayError with the specified float []  value.
         delayError The float []  value to which delayError is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1135,6 +1229,9 @@ class CalDelayRow:
         """
         Set delayOffset with the specified float []  value.
         delayOffset The float []  value to which delayOffset is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1180,6 +1277,7 @@ class CalDelayRow:
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1221,6 +1319,9 @@ class CalDelayRow:
         """
         Set reducedChiSquared with the specified float []  value.
         reducedChiSquared The float []  value to which reducedChiSquared is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1264,6 +1365,9 @@ class CalDelayRow:
         """
         Set appliedDelay with the specified float []  value.
         appliedDelay The float []  value to which appliedDelay is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1322,6 +1426,9 @@ class CalDelayRow:
         Set crossDelayOffset with the specified float value.
         crossDelayOffset The float value to which crossDelayOffset is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1365,6 +1472,9 @@ class CalDelayRow:
         """
         Set crossDelayOffsetError with the specified float value.
         crossDelayOffsetError The float value to which crossDelayOffsetError is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1411,6 +1521,7 @@ class CalDelayRow:
         numSideband The int value to which numSideband is to be set.
 
 
+
         """
 
         self._numSideband = int(numSideband)
@@ -1453,6 +1564,7 @@ class CalDelayRow:
         """
         Set refFreq with the specified Frequency []  value.
         refFreq The Frequency []  value to which refFreq is to be set.
+
         The value of refFreq can be anything allowed by the Frequency []  constructor.
 
         """
@@ -1518,6 +1630,7 @@ class CalDelayRow:
         """
         Set refFreqPhase with the specified Angle []  value.
         refFreqPhase The Angle []  value to which refFreqPhase is to be set.
+
         The value of refFreqPhase can be anything allowed by the Angle []  constructor.
 
         """
@@ -1585,6 +1698,7 @@ class CalDelayRow:
         sidebands The ReceiverSideband []  value to which sidebands is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1637,6 +1751,7 @@ class CalDelayRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1667,6 +1782,7 @@ class CalDelayRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

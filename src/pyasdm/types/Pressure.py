@@ -24,6 +24,7 @@
 #
 
 import pyasdm.utils
+import pyasdm.Parser
 
 
 class Pressure:
@@ -147,7 +148,7 @@ class Pressure:
         """
         Return the value of this pressure as a String in units of hectopascals.
         """
-        return str(self.get())
+        return pyasdm.Parser.doubleToString(self.get())
 
     @staticmethod
     def values(items):

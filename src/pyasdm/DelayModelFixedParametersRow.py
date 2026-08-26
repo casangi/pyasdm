@@ -63,6 +63,16 @@ class DelayModelFixedParametersRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -322,93 +332,141 @@ class DelayModelFixedParametersRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "delayModelFixedParametersId", self._delayModelFixedParametersId
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("delayModelVersion", self._delayModelVersion)
 
         if self._gaussConstantExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("gaussConstant", self._gaussConstant)
 
         if self._newtonianConstantExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("newtonianConstant", self._newtonianConstant)
+            result += Parser.doubleValueToXML(
+                "newtonianConstant", self._newtonianConstant
+            )
 
         if self._gravityExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("gravity", self._gravity)
+            result += Parser.doubleValueToXML("gravity", self._gravity)
 
         if self._earthFlatteningExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("earthFlattening", self._earthFlattening)
+            result += Parser.doubleValueToXML("earthFlattening", self._earthFlattening)
 
         if self._earthRadiusExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("earthRadius", self._earthRadius)
 
         if self._moonEarthMassRatioExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("moonEarthMassRatio", self._moonEarthMassRatio)
+            result += Parser.doubleValueToXML(
+                "moonEarthMassRatio", self._moonEarthMassRatio
+            )
 
         if self._ephemerisEpochExists:
+            result += "\n   "
 
             result += Parser.valueToXML("ephemerisEpoch", self._ephemerisEpoch)
 
         if self._earthTideLagExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("earthTideLag", self._earthTideLag)
+            result += Parser.doubleValueToXML("earthTideLag", self._earthTideLag)
 
         if self._earthGMExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("earthGM", self._earthGM)
+            result += Parser.doubleValueToXML("earthGM", self._earthGM)
 
         if self._moonGMExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("moonGM", self._moonGM)
+            result += Parser.doubleValueToXML("moonGM", self._moonGM)
 
         if self._sunGMExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("sunGM", self._sunGM)
+            result += Parser.doubleValueToXML("sunGM", self._sunGM)
 
         if self._loveNumberHExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("loveNumberH", self._loveNumberH)
+            result += Parser.doubleValueToXML("loveNumberH", self._loveNumberH)
 
         if self._loveNumberLExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("loveNumberL", self._loveNumberL)
+            result += Parser.doubleValueToXML("loveNumberL", self._loveNumberL)
 
         if self._precessionConstantExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "precessionConstant", self._precessionConstant
             )
 
         if self._lightTime1AUExists:
+            result += "\n   "
 
-            result += Parser.valueToXML("lightTime1AU", self._lightTime1AU)
+            result += Parser.doubleValueToXML("lightTime1AU", self._lightTime1AU)
 
         if self._speedOfLightExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("speedOfLight", self._speedOfLight)
 
         if self._delayModelFlagsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("delayModelFlags", self._delayModelFlags)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "DelayModelFixedParametersTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -438,152 +496,166 @@ class DelayModelFixedParametersRow:
 
         # intrinsic attribute values
 
-        delayModelFixedParametersIdNode = rowdom.getElementsByTagName(
-            "delayModelFixedParametersId"
-        )[0]
-
-        self._delayModelFixedParametersId = Tag(
-            delayModelFixedParametersIdNode.firstChild.data.strip()
+        delayModelFixedParametersIdNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelFixedParametersId", True
         )
 
-        delayModelVersionNode = rowdom.getElementsByTagName("delayModelVersion")[0]
+        self._delayModelFixedParametersId = Tag(
+            self._getXMLNodeChildText(delayModelFixedParametersIdNode)
+        )
 
-        self._delayModelVersion = str(delayModelVersionNode.firstChild.data.strip())
+        delayModelVersionNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelVersion", True
+        )
 
-        gaussConstantNode = rowdom.getElementsByTagName("gaussConstant")
-        if len(gaussConstantNode) > 0:
+        self._delayModelVersion = str(self._getXMLNodeChildText(delayModelVersionNode))
+
+        gaussConstantNode = self._getFirstNodeByTagName(rowdom, "gaussConstant", False)
+        if gaussConstantNode:
 
             self._gaussConstant = AngularRate(
-                gaussConstantNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(gaussConstantNode)
             )
 
             self._gaussConstantExists = True
 
-        newtonianConstantNode = rowdom.getElementsByTagName("newtonianConstant")
-        if len(newtonianConstantNode) > 0:
+        newtonianConstantNode = self._getFirstNodeByTagName(
+            rowdom, "newtonianConstant", False
+        )
+        if newtonianConstantNode:
 
             self._newtonianConstant = float(
-                newtonianConstantNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(newtonianConstantNode)
             )
 
             self._newtonianConstantExists = True
 
-        gravityNode = rowdom.getElementsByTagName("gravity")
-        if len(gravityNode) > 0:
+        gravityNode = self._getFirstNodeByTagName(rowdom, "gravity", False)
+        if gravityNode:
 
-            self._gravity = float(gravityNode[0].firstChild.data.strip())
+            self._gravity = float(self._getXMLNodeChildText(gravityNode))
 
             self._gravityExists = True
 
-        earthFlatteningNode = rowdom.getElementsByTagName("earthFlattening")
-        if len(earthFlatteningNode) > 0:
+        earthFlatteningNode = self._getFirstNodeByTagName(
+            rowdom, "earthFlattening", False
+        )
+        if earthFlatteningNode:
 
             self._earthFlattening = float(
-                earthFlatteningNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(earthFlatteningNode)
             )
 
             self._earthFlatteningExists = True
 
-        earthRadiusNode = rowdom.getElementsByTagName("earthRadius")
-        if len(earthRadiusNode) > 0:
+        earthRadiusNode = self._getFirstNodeByTagName(rowdom, "earthRadius", False)
+        if earthRadiusNode:
 
-            self._earthRadius = Length(earthRadiusNode[0].firstChild.data.strip())
+            self._earthRadius = Length(self._getXMLNodeChildText(earthRadiusNode))
 
             self._earthRadiusExists = True
 
-        moonEarthMassRatioNode = rowdom.getElementsByTagName("moonEarthMassRatio")
-        if len(moonEarthMassRatioNode) > 0:
+        moonEarthMassRatioNode = self._getFirstNodeByTagName(
+            rowdom, "moonEarthMassRatio", False
+        )
+        if moonEarthMassRatioNode:
 
             self._moonEarthMassRatio = float(
-                moonEarthMassRatioNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(moonEarthMassRatioNode)
             )
 
             self._moonEarthMassRatioExists = True
 
-        ephemerisEpochNode = rowdom.getElementsByTagName("ephemerisEpoch")
-        if len(ephemerisEpochNode) > 0:
+        ephemerisEpochNode = self._getFirstNodeByTagName(
+            rowdom, "ephemerisEpoch", False
+        )
+        if ephemerisEpochNode:
 
-            self._ephemerisEpoch = str(ephemerisEpochNode[0].firstChild.data.strip())
+            self._ephemerisEpoch = str(self._getXMLNodeChildText(ephemerisEpochNode))
 
             self._ephemerisEpochExists = True
 
-        earthTideLagNode = rowdom.getElementsByTagName("earthTideLag")
-        if len(earthTideLagNode) > 0:
+        earthTideLagNode = self._getFirstNodeByTagName(rowdom, "earthTideLag", False)
+        if earthTideLagNode:
 
-            self._earthTideLag = float(earthTideLagNode[0].firstChild.data.strip())
+            self._earthTideLag = float(self._getXMLNodeChildText(earthTideLagNode))
 
             self._earthTideLagExists = True
 
-        earthGMNode = rowdom.getElementsByTagName("earthGM")
-        if len(earthGMNode) > 0:
+        earthGMNode = self._getFirstNodeByTagName(rowdom, "earthGM", False)
+        if earthGMNode:
 
-            self._earthGM = float(earthGMNode[0].firstChild.data.strip())
+            self._earthGM = float(self._getXMLNodeChildText(earthGMNode))
 
             self._earthGMExists = True
 
-        moonGMNode = rowdom.getElementsByTagName("moonGM")
-        if len(moonGMNode) > 0:
+        moonGMNode = self._getFirstNodeByTagName(rowdom, "moonGM", False)
+        if moonGMNode:
 
-            self._moonGM = float(moonGMNode[0].firstChild.data.strip())
+            self._moonGM = float(self._getXMLNodeChildText(moonGMNode))
 
             self._moonGMExists = True
 
-        sunGMNode = rowdom.getElementsByTagName("sunGM")
-        if len(sunGMNode) > 0:
+        sunGMNode = self._getFirstNodeByTagName(rowdom, "sunGM", False)
+        if sunGMNode:
 
-            self._sunGM = float(sunGMNode[0].firstChild.data.strip())
+            self._sunGM = float(self._getXMLNodeChildText(sunGMNode))
 
             self._sunGMExists = True
 
-        loveNumberHNode = rowdom.getElementsByTagName("loveNumberH")
-        if len(loveNumberHNode) > 0:
+        loveNumberHNode = self._getFirstNodeByTagName(rowdom, "loveNumberH", False)
+        if loveNumberHNode:
 
-            self._loveNumberH = float(loveNumberHNode[0].firstChild.data.strip())
+            self._loveNumberH = float(self._getXMLNodeChildText(loveNumberHNode))
 
             self._loveNumberHExists = True
 
-        loveNumberLNode = rowdom.getElementsByTagName("loveNumberL")
-        if len(loveNumberLNode) > 0:
+        loveNumberLNode = self._getFirstNodeByTagName(rowdom, "loveNumberL", False)
+        if loveNumberLNode:
 
-            self._loveNumberL = float(loveNumberLNode[0].firstChild.data.strip())
+            self._loveNumberL = float(self._getXMLNodeChildText(loveNumberLNode))
 
             self._loveNumberLExists = True
 
-        precessionConstantNode = rowdom.getElementsByTagName("precessionConstant")
-        if len(precessionConstantNode) > 0:
+        precessionConstantNode = self._getFirstNodeByTagName(
+            rowdom, "precessionConstant", False
+        )
+        if precessionConstantNode:
 
             self._precessionConstant = AngularRate(
-                precessionConstantNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(precessionConstantNode)
             )
 
             self._precessionConstantExists = True
 
-        lightTime1AUNode = rowdom.getElementsByTagName("lightTime1AU")
-        if len(lightTime1AUNode) > 0:
+        lightTime1AUNode = self._getFirstNodeByTagName(rowdom, "lightTime1AU", False)
+        if lightTime1AUNode:
 
-            self._lightTime1AU = float(lightTime1AUNode[0].firstChild.data.strip())
+            self._lightTime1AU = float(self._getXMLNodeChildText(lightTime1AUNode))
 
             self._lightTime1AUExists = True
 
-        speedOfLightNode = rowdom.getElementsByTagName("speedOfLight")
-        if len(speedOfLightNode) > 0:
+        speedOfLightNode = self._getFirstNodeByTagName(rowdom, "speedOfLight", False)
+        if speedOfLightNode:
 
-            self._speedOfLight = Speed(speedOfLightNode[0].firstChild.data.strip())
+            self._speedOfLight = Speed(self._getXMLNodeChildText(speedOfLightNode))
 
             self._speedOfLightExists = True
 
-        delayModelFlagsNode = rowdom.getElementsByTagName("delayModelFlags")
-        if len(delayModelFlagsNode) > 0:
+        delayModelFlagsNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelFlags", False
+        )
+        if delayModelFlagsNode:
 
-            self._delayModelFlags = str(delayModelFlagsNode[0].firstChild.data.strip())
+            self._delayModelFlags = str(self._getXMLNodeChildText(delayModelFlagsNode))
 
             self._delayModelFlagsExists = True
 
         # extrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
         # from link values, if any
 
@@ -606,17 +678,17 @@ class DelayModelFixedParametersRow:
         eos.writeBool(self._newtonianConstantExists)
         if self._newtonianConstantExists:
 
-            eos.writeFloat(self._newtonianConstant)
+            eos.writeDouble(self._newtonianConstant)
 
         eos.writeBool(self._gravityExists)
         if self._gravityExists:
 
-            eos.writeFloat(self._gravity)
+            eos.writeDouble(self._gravity)
 
         eos.writeBool(self._earthFlatteningExists)
         if self._earthFlatteningExists:
 
-            eos.writeFloat(self._earthFlattening)
+            eos.writeDouble(self._earthFlattening)
 
         eos.writeBool(self._earthRadiusExists)
         if self._earthRadiusExists:
@@ -626,7 +698,7 @@ class DelayModelFixedParametersRow:
         eos.writeBool(self._moonEarthMassRatioExists)
         if self._moonEarthMassRatioExists:
 
-            eos.writeFloat(self._moonEarthMassRatio)
+            eos.writeDouble(self._moonEarthMassRatio)
 
         eos.writeBool(self._ephemerisEpochExists)
         if self._ephemerisEpochExists:
@@ -636,32 +708,32 @@ class DelayModelFixedParametersRow:
         eos.writeBool(self._earthTideLagExists)
         if self._earthTideLagExists:
 
-            eos.writeFloat(self._earthTideLag)
+            eos.writeDouble(self._earthTideLag)
 
         eos.writeBool(self._earthGMExists)
         if self._earthGMExists:
 
-            eos.writeFloat(self._earthGM)
+            eos.writeDouble(self._earthGM)
 
         eos.writeBool(self._moonGMExists)
         if self._moonGMExists:
 
-            eos.writeFloat(self._moonGM)
+            eos.writeDouble(self._moonGM)
 
         eos.writeBool(self._sunGMExists)
         if self._sunGMExists:
 
-            eos.writeFloat(self._sunGM)
+            eos.writeDouble(self._sunGM)
 
         eos.writeBool(self._loveNumberHExists)
         if self._loveNumberHExists:
 
-            eos.writeFloat(self._loveNumberH)
+            eos.writeDouble(self._loveNumberH)
 
         eos.writeBool(self._loveNumberLExists)
         if self._loveNumberLExists:
 
-            eos.writeFloat(self._loveNumberL)
+            eos.writeDouble(self._loveNumberL)
 
         eos.writeBool(self._precessionConstantExists)
         if self._precessionConstantExists:
@@ -671,7 +743,7 @@ class DelayModelFixedParametersRow:
         eos.writeBool(self._lightTime1AUExists)
         if self._lightTime1AUExists:
 
-            eos.writeFloat(self._lightTime1AU)
+            eos.writeDouble(self._lightTime1AU)
 
         eos.writeBool(self._speedOfLightExists)
         if self._speedOfLightExists:
@@ -725,7 +797,7 @@ class DelayModelFixedParametersRow:
         row._newtonianConstantExists = eis.readBool()
         if row._newtonianConstantExists:
 
-            row._newtonianConstant = eis.readFloat()
+            row._newtonianConstant = eis.readDouble()
 
     @staticmethod
     def gravityFromBin(row, eis):
@@ -735,7 +807,7 @@ class DelayModelFixedParametersRow:
         row._gravityExists = eis.readBool()
         if row._gravityExists:
 
-            row._gravity = eis.readFloat()
+            row._gravity = eis.readDouble()
 
     @staticmethod
     def earthFlatteningFromBin(row, eis):
@@ -745,7 +817,7 @@ class DelayModelFixedParametersRow:
         row._earthFlatteningExists = eis.readBool()
         if row._earthFlatteningExists:
 
-            row._earthFlattening = eis.readFloat()
+            row._earthFlattening = eis.readDouble()
 
     @staticmethod
     def earthRadiusFromBin(row, eis):
@@ -765,7 +837,7 @@ class DelayModelFixedParametersRow:
         row._moonEarthMassRatioExists = eis.readBool()
         if row._moonEarthMassRatioExists:
 
-            row._moonEarthMassRatio = eis.readFloat()
+            row._moonEarthMassRatio = eis.readDouble()
 
     @staticmethod
     def ephemerisEpochFromBin(row, eis):
@@ -785,7 +857,7 @@ class DelayModelFixedParametersRow:
         row._earthTideLagExists = eis.readBool()
         if row._earthTideLagExists:
 
-            row._earthTideLag = eis.readFloat()
+            row._earthTideLag = eis.readDouble()
 
     @staticmethod
     def earthGMFromBin(row, eis):
@@ -795,7 +867,7 @@ class DelayModelFixedParametersRow:
         row._earthGMExists = eis.readBool()
         if row._earthGMExists:
 
-            row._earthGM = eis.readFloat()
+            row._earthGM = eis.readDouble()
 
     @staticmethod
     def moonGMFromBin(row, eis):
@@ -805,7 +877,7 @@ class DelayModelFixedParametersRow:
         row._moonGMExists = eis.readBool()
         if row._moonGMExists:
 
-            row._moonGM = eis.readFloat()
+            row._moonGM = eis.readDouble()
 
     @staticmethod
     def sunGMFromBin(row, eis):
@@ -815,7 +887,7 @@ class DelayModelFixedParametersRow:
         row._sunGMExists = eis.readBool()
         if row._sunGMExists:
 
-            row._sunGM = eis.readFloat()
+            row._sunGM = eis.readDouble()
 
     @staticmethod
     def loveNumberHFromBin(row, eis):
@@ -825,7 +897,7 @@ class DelayModelFixedParametersRow:
         row._loveNumberHExists = eis.readBool()
         if row._loveNumberHExists:
 
-            row._loveNumberH = eis.readFloat()
+            row._loveNumberH = eis.readDouble()
 
     @staticmethod
     def loveNumberLFromBin(row, eis):
@@ -835,7 +907,7 @@ class DelayModelFixedParametersRow:
         row._loveNumberLExists = eis.readBool()
         if row._loveNumberLExists:
 
-            row._loveNumberL = eis.readFloat()
+            row._loveNumberL = eis.readDouble()
 
     @staticmethod
     def precessionConstantFromBin(row, eis):
@@ -855,7 +927,7 @@ class DelayModelFixedParametersRow:
         row._lightTime1AUExists = eis.readBool()
         if row._lightTime1AUExists:
 
-            row._lightTime1AU = eis.readFloat()
+            row._lightTime1AU = eis.readDouble()
 
     @staticmethod
     def speedOfLightFromBin(row, eis):
@@ -974,6 +1046,7 @@ class DelayModelFixedParametersRow:
         """
         Set delayModelFixedParametersId with the specified Tag value.
         delayModelFixedParametersId The Tag value to which delayModelFixedParametersId is to be set.
+
         The value of delayModelFixedParametersId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1003,6 +1076,7 @@ class DelayModelFixedParametersRow:
         """
         Set delayModelVersion with the specified str value.
         delayModelVersion The str value to which delayModelVersion is to be set.
+
 
 
         """
@@ -1040,6 +1114,7 @@ class DelayModelFixedParametersRow:
         """
         Set gaussConstant with the specified AngularRate value.
         gaussConstant The AngularRate value to which gaussConstant is to be set.
+
         The value of gaussConstant can be anything allowed by the AngularRate constructor.
 
         """
@@ -1085,6 +1160,9 @@ class DelayModelFixedParametersRow:
         Set newtonianConstant with the specified float value.
         newtonianConstant The float value to which newtonianConstant is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1128,6 +1206,9 @@ class DelayModelFixedParametersRow:
         """
         Set gravity with the specified float value.
         gravity The float value to which gravity is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1173,6 +1254,9 @@ class DelayModelFixedParametersRow:
         Set earthFlattening with the specified float value.
         earthFlattening The float value to which earthFlattening is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1217,6 +1301,7 @@ class DelayModelFixedParametersRow:
         """
         Set earthRadius with the specified Length value.
         earthRadius The Length value to which earthRadius is to be set.
+
         The value of earthRadius can be anything allowed by the Length constructor.
 
         """
@@ -1261,6 +1346,9 @@ class DelayModelFixedParametersRow:
         """
         Set moonEarthMassRatio with the specified float value.
         moonEarthMassRatio The float value to which moonEarthMassRatio is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1307,6 +1395,7 @@ class DelayModelFixedParametersRow:
         ephemerisEpoch The str value to which ephemerisEpoch is to be set.
 
 
+
         """
 
         self._ephemerisEpoch = str(ephemerisEpoch)
@@ -1349,6 +1438,9 @@ class DelayModelFixedParametersRow:
         """
         Set earthTideLag with the specified float value.
         earthTideLag The float value to which earthTideLag is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1394,6 +1486,9 @@ class DelayModelFixedParametersRow:
         Set earthGM with the specified float value.
         earthGM The float value to which earthGM is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1437,6 +1532,9 @@ class DelayModelFixedParametersRow:
         """
         Set moonGM with the specified float value.
         moonGM The float value to which moonGM is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1482,6 +1580,9 @@ class DelayModelFixedParametersRow:
         Set sunGM with the specified float value.
         sunGM The float value to which sunGM is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1525,6 +1626,9 @@ class DelayModelFixedParametersRow:
         """
         Set loveNumberH with the specified float value.
         loveNumberH The float value to which loveNumberH is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1570,6 +1674,9 @@ class DelayModelFixedParametersRow:
         Set loveNumberL with the specified float value.
         loveNumberL The float value to which loveNumberL is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1614,6 +1721,7 @@ class DelayModelFixedParametersRow:
         """
         Set precessionConstant with the specified AngularRate value.
         precessionConstant The AngularRate value to which precessionConstant is to be set.
+
         The value of precessionConstant can be anything allowed by the AngularRate constructor.
 
         """
@@ -1659,6 +1767,9 @@ class DelayModelFixedParametersRow:
         Set lightTime1AU with the specified float value.
         lightTime1AU The float value to which lightTime1AU is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1703,6 +1814,7 @@ class DelayModelFixedParametersRow:
         """
         Set speedOfLight with the specified Speed value.
         speedOfLight The Speed value to which speedOfLight is to be set.
+
         The value of speedOfLight can be anything allowed by the Speed constructor.
 
         """
@@ -1749,6 +1861,7 @@ class DelayModelFixedParametersRow:
         delayModelFlags The str value to which delayModelFlags is to be set.
 
 
+
         """
 
         self._delayModelFlags = str(delayModelFlags)
@@ -1780,6 +1893,7 @@ class DelayModelFixedParametersRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         """

@@ -653,15 +653,14 @@ class CalAmpliTable:
         """
         result = ""
         result += '<?xml version="1.0" encoding="ISO-8859-1"?> '
-        result += '<CalAmpliTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:clmpl="http://Alma/XASDM/CalAmpliTable" xsi:schemaLocation="http://Alma/XASDM/CalAmpliTable http://almaobservatory.org/XML/XASDM/4/CalAmpliTable.xsd" schemaVersion="4" schemaRevision="-1">\n'
-        result += self._entity.toXML()
+        result += '\n<CalAmpliTable xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:clmpl="http://Alma/XASDM/CalAmpliTable" xsi:schemaLocation="http://Alma/XASDM/CalAmpliTable http://almaobservatory.org/XML/XASDM/4/CalAmpliTable.xsd" schemaVersion="4" schemaRevision="-1">'
+        result += "\n " + self._entity.toXML()
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
-        result += "<Container" + s[1:]
+        result += "\n <Container" + s[1:]
         for thisRow in self._privateRows:
-            result += thisRow.toXML()
-            result += " "
-        result += "</CalAmpliTable>"
+            result += "\n" + thisRow.toXML()
+        result += "\n</CalAmpliTable>"
         return result
 
     def fromXML(self, xmlstr):
@@ -887,21 +886,27 @@ class CalAmpliTable:
                 "--MIME_boundary\nContent-Type: binary/octet-stream\nContent-ID: <content.bin>\n\n"
             ).encode()
         )
+        # alternative seen in some bin tables (possibly only eVLA)
+        xmlPartMIMEHeaderAlt = bytes(str("Content-ID: <header.xml>\r\n\r\n").encode())
 
         # follow the Java example and grab the first 10000 bytes, which will always contain the header
         headerBytes = byteStream.read(10000)
 
         # Detect the XML header.
         loc0 = headerBytes.find(xmlPartMIMEHeader)
-        # c++ code also looks for a string with an additional CRLF after each newline if the above fails, but Java
-        # doesn't and even c++ doesn't follow that up when failing to find the binPartMIMEHeader, so go with the Java example
         if loc0 < 0:
-            byteStream.close()
-            raise ConversionException(
-                "Failed to detect the begining of the XML header.", "CalAmpli"
-            )
-
-        loc0 += len(xmlPartMIMEHeader)
+            # try the alternative
+            loc0 = headerBytes.find(xmlPartMIMEHeaderAlt)
+            if loc0 < 0:
+                # nothing else to try
+                byteStream.close()
+                raise ConversionException(
+                    "Failed to detect the begining of the XML header.", "CalAmpli"
+                )
+            else:
+                loc0 += len(xmlPartMIMEHeaderAlt)
+        else:
+            loc0 += len(xmlPartMIMEHeader)
 
         # Look for the string announcing the binary part.
         loc1 = headerBytes.find(binPartMIMEHeader, loc0)
@@ -1051,8 +1056,13 @@ class CalAmpliTable:
 
         # the number of rows
         numRows = eis.readInt()
+        if numRows == -1:
+            # when this happens (used by eVLA, I believe) use the expected size from ASDM.xml
+            numRows = self._container.getExpectedTableSize("CalAmpli")
 
-        # c++ checks numRows against what is reported in the ASDM for this table, this is what Java does
+        # c++ reports an error when numRows is != -1 and does not agree with the value in the ASDM.xml
+        # Java just uses numRows (but doesn't cover the case when numRows == -1)
+        # do not check or report any difference here but cover the numRows==-1 case above
         try:
             for i in range(numRows):
                 self.checkAndAdd(

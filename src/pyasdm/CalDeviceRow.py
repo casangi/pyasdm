@@ -66,6 +66,16 @@ class CalDeviceRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -98,15 +108,17 @@ class CalDeviceRow:
 
         self._calEffExists = False
 
-        self._calEff = []  # this is a list of float []  []
+        self._calEff = []  # this is a list of float []  []  saved as single precision
 
         self._noiseCalExists = False
 
-        self._noiseCal = []  # this is a list of float []
+        self._noiseCal = []  # this is a list of float []  saved as double precision
 
         self._coupledNoiseCalExists = False
 
-        self._coupledNoiseCal = []  # this is a list of float []  []
+        self._coupledNoiseCal = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._temperatureLoadExists = False
 
@@ -198,33 +210,46 @@ class CalDeviceRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numCalload", self._numCalload)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("calLoadNames", self._calLoadNames)
 
         if self._numReceptorExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numReceptor", self._numReceptor)
 
         if self._calEffExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("calEff", self._calEff)
+            result += Parser.floatListValueToXML("calEff", self._calEff)
 
         if self._noiseCalExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("noiseCal", self._noiseCal)
+            result += Parser.doubleListValueToXML("noiseCal", self._noiseCal)
 
         if self._coupledNoiseCalExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("coupledNoiseCal", self._coupledNoiseCal)
+            result += Parser.floatListValueToXML(
+                "coupledNoiseCal", self._coupledNoiseCal
+            )
 
         if self._temperatureLoadExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "temperatureLoad", self._temperatureLoad
@@ -232,15 +257,42 @@ class CalDeviceRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("feedId", self._feedId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalDeviceTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -267,32 +319,34 @@ class CalDeviceRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        numCalloadNode = rowdom.getElementsByTagName("numCalload")[0]
+        numCalloadNode = self._getFirstNodeByTagName(rowdom, "numCalload", True)
 
-        self._numCalload = int(numCalloadNode.firstChild.data.strip())
+        self._numCalload = int(self._getXMLNodeChildText(numCalloadNode))
 
-        calLoadNamesNode = rowdom.getElementsByTagName("calLoadNames")[0]
+        calLoadNamesNode = self._getFirstNodeByTagName(rowdom, "calLoadNames", True)
 
-        calLoadNamesStr = calLoadNamesNode.firstChild.data.strip()
+        calLoadNamesStr = self._getXMLNodeChildText(calLoadNamesNode)
         self._calLoadNames = Parser.stringListToLists(
             calLoadNamesStr, CalibrationDevice, "CalDevice", False
         )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")
-        if len(numReceptorNode) > 0:
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", False)
+        if numReceptorNode:
 
-            self._numReceptor = int(numReceptorNode[0].firstChild.data.strip())
+            self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
             self._numReceptorExists = True
 
-        calEffNode = rowdom.getElementsByTagName("calEff")
-        if len(calEffNode) > 0:
+        calEffNode = self._getFirstNodeByTagName(rowdom, "calEff", False)
+        if calEffNode:
 
-            calEffStr = calEffNode[0].firstChild.data.strip()
+            calEffStr = self._getXMLNodeChildText(calEffNode)
 
             self._calEff = Parser.stringListToLists(
                 calEffStr, float, "CalDevice", False
@@ -300,10 +354,10 @@ class CalDeviceRow:
 
             self._calEffExists = True
 
-        noiseCalNode = rowdom.getElementsByTagName("noiseCal")
-        if len(noiseCalNode) > 0:
+        noiseCalNode = self._getFirstNodeByTagName(rowdom, "noiseCal", False)
+        if noiseCalNode:
 
-            noiseCalStr = noiseCalNode[0].firstChild.data.strip()
+            noiseCalStr = self._getXMLNodeChildText(noiseCalNode)
 
             self._noiseCal = Parser.stringListToLists(
                 noiseCalStr, float, "CalDevice", False
@@ -311,10 +365,12 @@ class CalDeviceRow:
 
             self._noiseCalExists = True
 
-        coupledNoiseCalNode = rowdom.getElementsByTagName("coupledNoiseCal")
-        if len(coupledNoiseCalNode) > 0:
+        coupledNoiseCalNode = self._getFirstNodeByTagName(
+            rowdom, "coupledNoiseCal", False
+        )
+        if coupledNoiseCalNode:
 
-            coupledNoiseCalStr = coupledNoiseCalNode[0].firstChild.data.strip()
+            coupledNoiseCalStr = self._getXMLNodeChildText(coupledNoiseCalNode)
 
             self._coupledNoiseCal = Parser.stringListToLists(
                 coupledNoiseCalStr, float, "CalDevice", False
@@ -322,10 +378,12 @@ class CalDeviceRow:
 
             self._coupledNoiseCalExists = True
 
-        temperatureLoadNode = rowdom.getElementsByTagName("temperatureLoad")
-        if len(temperatureLoadNode) > 0:
+        temperatureLoadNode = self._getFirstNodeByTagName(
+            rowdom, "temperatureLoad", False
+        )
+        if temperatureLoadNode:
 
-            temperatureLoadStr = temperatureLoadNode[0].firstChild.data.strip()
+            temperatureLoadStr = self._getXMLNodeChildText(temperatureLoadNode)
 
             self._temperatureLoad = Parser.stringListToLists(
                 temperatureLoadStr, Temperature, "CalDevice", True
@@ -335,17 +393,19 @@ class CalDeviceRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        feedIdNode = rowdom.getElementsByTagName("feedId")[0]
+        feedIdNode = self._getFirstNodeByTagName(rowdom, "feedId", True)
 
-        self._feedId = int(feedIdNode.firstChild.data.strip())
+        self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
@@ -396,7 +456,7 @@ class CalDeviceRow:
             eos.writeInt(len(self._noiseCal))
             for i in range(len(self._noiseCal)):
 
-                eos.writeFloat(self._noiseCal[i])
+                eos.writeDouble(self._noiseCal[i])
 
         eos.writeBool(self._coupledNoiseCalExists)
         if self._coupledNoiseCalExists:
@@ -512,7 +572,7 @@ class CalDeviceRow:
             noiseCalDim1 = eis.readInt()
             thisList = []
             for i in range(noiseCalDim1):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList.append(thisValue)
             row._noiseCal = thisList
 
@@ -609,6 +669,7 @@ class CalDeviceRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -640,6 +701,7 @@ class CalDeviceRow:
         numCalload The int value to which numCalload is to be set.
 
 
+
         """
 
         self._numCalload = int(numCalload)
@@ -660,6 +722,7 @@ class CalDeviceRow:
         """
         Set calLoadNames with the specified CalibrationDevice []  value.
         calLoadNames The CalibrationDevice []  value to which calLoadNames is to be set.
+
 
 
         """
@@ -719,6 +782,7 @@ class CalDeviceRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -761,6 +825,9 @@ class CalDeviceRow:
         """
         Set calEff with the specified float []  []  value.
         calEff The float []  []  value to which calEff is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -827,6 +894,9 @@ class CalDeviceRow:
         Set noiseCal with the specified float []  value.
         noiseCal The float []  value to which noiseCal is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -892,6 +962,9 @@ class CalDeviceRow:
         Set coupledNoiseCal with the specified float []  []  value.
         coupledNoiseCal The float []  []  value to which coupledNoiseCal is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -956,6 +1029,7 @@ class CalDeviceRow:
         """
         Set temperatureLoad with the specified Temperature []  value.
         temperatureLoad The Temperature []  value to which temperatureLoad is to be set.
+
         The value of temperatureLoad can be anything allowed by the Temperature []  constructor.
 
         """
@@ -1010,6 +1084,7 @@ class CalDeviceRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1041,6 +1116,7 @@ class CalDeviceRow:
         feedId The int value to which feedId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1069,6 +1145,7 @@ class CalDeviceRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

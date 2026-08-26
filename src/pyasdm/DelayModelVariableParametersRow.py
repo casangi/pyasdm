@@ -69,6 +69,16 @@ class DelayModelVariableParametersRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -103,7 +113,7 @@ class DelayModelVariableParametersRow:
 
         self._earthRotationRate = AngularRate()
 
-        self._polarOffsets = []  # this is a list of float []
+        self._polarOffsets = []  # this is a list of float []  saved as double precision
 
         self._polarOffsetsType = DifferenceType.from_int(0)
 
@@ -227,63 +237,88 @@ class DelayModelVariableParametersRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "delayModelVariableParametersId", self._delayModelVariableParametersId
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("time", self._time)
 
-        result += Parser.valueToXML("ut1_utc", self._ut1_utc)
+        result += "\n   "
 
-        result += Parser.valueToXML("iat_utc", self._iat_utc)
+        result += Parser.doubleValueToXML("ut1_utc", self._ut1_utc)
+
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("iat_utc", self._iat_utc)
+
+        result += "\n   "
 
         result += Parser.valueToXML("timeType", DifferenceType.name(self._timeType))
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("gstAtUt0", self._gstAtUt0)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "earthRotationRate", self._earthRotationRate
         )
 
-        result += Parser.listValueToXML("polarOffsets", self._polarOffsets)
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("polarOffsets", self._polarOffsets)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "polarOffsetsType", DifferenceType.name(self._polarOffsetsType)
         )
 
         if self._nutationInLongitudeExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "nutationInLongitude", self._nutationInLongitude
             )
 
         if self._nutationInLongitudeRateExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "nutationInLongitudeRate", self._nutationInLongitudeRate
             )
 
         if self._nutationInObliquityExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "nutationInObliquity", self._nutationInObliquity
             )
 
         if self._nutationInObliquityRateExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "nutationInObliquityRate", self._nutationInObliquityRate
             )
 
         if self._delayModelVersionExists:
+            result += "\n   "
 
             result += Parser.valueToXML("delayModelVersion", self._delayModelVersion)
 
         # extrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "delayModelFixedParametersId", self._delayModelFixedParametersId
@@ -291,7 +326,28 @@ class DelayModelVariableParametersRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "DelayModelVariableParametersTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -321,113 +377,123 @@ class DelayModelVariableParametersRow:
 
         # intrinsic attribute values
 
-        delayModelVariableParametersIdNode = rowdom.getElementsByTagName(
-            "delayModelVariableParametersId"
-        )[0]
+        delayModelVariableParametersIdNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelVariableParametersId", True
+        )
 
         self._delayModelVariableParametersId = Tag(
-            delayModelVariableParametersIdNode.firstChild.data.strip()
+            self._getXMLNodeChildText(delayModelVariableParametersIdNode)
         )
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
-        self._time = ArrayTime(timeNode.firstChild.data.strip())
+        self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
-        ut1_utcNode = rowdom.getElementsByTagName("ut1_utc")[0]
+        ut1_utcNode = self._getFirstNodeByTagName(rowdom, "ut1_utc", True)
 
-        self._ut1_utc = float(ut1_utcNode.firstChild.data.strip())
+        self._ut1_utc = float(self._getXMLNodeChildText(ut1_utcNode))
 
-        iat_utcNode = rowdom.getElementsByTagName("iat_utc")[0]
+        iat_utcNode = self._getFirstNodeByTagName(rowdom, "iat_utc", True)
 
-        self._iat_utc = float(iat_utcNode.firstChild.data.strip())
+        self._iat_utc = float(self._getXMLNodeChildText(iat_utcNode))
 
-        timeTypeNode = rowdom.getElementsByTagName("timeType")[0]
+        timeTypeNode = self._getFirstNodeByTagName(rowdom, "timeType", True)
 
         self._timeType = DifferenceType.newDifferenceType(
-            timeTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(timeTypeNode)
         )
 
-        gstAtUt0Node = rowdom.getElementsByTagName("gstAtUt0")[0]
+        gstAtUt0Node = self._getFirstNodeByTagName(rowdom, "gstAtUt0", True)
 
-        self._gstAtUt0 = Angle(gstAtUt0Node.firstChild.data.strip())
+        self._gstAtUt0 = Angle(self._getXMLNodeChildText(gstAtUt0Node))
 
-        earthRotationRateNode = rowdom.getElementsByTagName("earthRotationRate")[0]
+        earthRotationRateNode = self._getFirstNodeByTagName(
+            rowdom, "earthRotationRate", True
+        )
 
         self._earthRotationRate = AngularRate(
-            earthRotationRateNode.firstChild.data.strip()
+            self._getXMLNodeChildText(earthRotationRateNode)
         )
 
-        polarOffsetsNode = rowdom.getElementsByTagName("polarOffsets")[0]
+        polarOffsetsNode = self._getFirstNodeByTagName(rowdom, "polarOffsets", True)
 
-        polarOffsetsStr = polarOffsetsNode.firstChild.data.strip()
+        polarOffsetsStr = self._getXMLNodeChildText(polarOffsetsNode)
 
         self._polarOffsets = Parser.stringListToLists(
             polarOffsetsStr, float, "DelayModelVariableParameters", False
         )
 
-        polarOffsetsTypeNode = rowdom.getElementsByTagName("polarOffsetsType")[0]
-
-        self._polarOffsetsType = DifferenceType.newDifferenceType(
-            polarOffsetsTypeNode.firstChild.data.strip()
+        polarOffsetsTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarOffsetsType", True
         )
 
-        nutationInLongitudeNode = rowdom.getElementsByTagName("nutationInLongitude")
-        if len(nutationInLongitudeNode) > 0:
+        self._polarOffsetsType = DifferenceType.newDifferenceType(
+            self._getXMLNodeChildText(polarOffsetsTypeNode)
+        )
+
+        nutationInLongitudeNode = self._getFirstNodeByTagName(
+            rowdom, "nutationInLongitude", False
+        )
+        if nutationInLongitudeNode:
 
             self._nutationInLongitude = Angle(
-                nutationInLongitudeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(nutationInLongitudeNode)
             )
 
             self._nutationInLongitudeExists = True
 
-        nutationInLongitudeRateNode = rowdom.getElementsByTagName(
-            "nutationInLongitudeRate"
+        nutationInLongitudeRateNode = self._getFirstNodeByTagName(
+            rowdom, "nutationInLongitudeRate", False
         )
-        if len(nutationInLongitudeRateNode) > 0:
+        if nutationInLongitudeRateNode:
 
             self._nutationInLongitudeRate = AngularRate(
-                nutationInLongitudeRateNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(nutationInLongitudeRateNode)
             )
 
             self._nutationInLongitudeRateExists = True
 
-        nutationInObliquityNode = rowdom.getElementsByTagName("nutationInObliquity")
-        if len(nutationInObliquityNode) > 0:
+        nutationInObliquityNode = self._getFirstNodeByTagName(
+            rowdom, "nutationInObliquity", False
+        )
+        if nutationInObliquityNode:
 
             self._nutationInObliquity = Angle(
-                nutationInObliquityNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(nutationInObliquityNode)
             )
 
             self._nutationInObliquityExists = True
 
-        nutationInObliquityRateNode = rowdom.getElementsByTagName(
-            "nutationInObliquityRate"
+        nutationInObliquityRateNode = self._getFirstNodeByTagName(
+            rowdom, "nutationInObliquityRate", False
         )
-        if len(nutationInObliquityRateNode) > 0:
+        if nutationInObliquityRateNode:
 
             self._nutationInObliquityRate = AngularRate(
-                nutationInObliquityRateNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(nutationInObliquityRateNode)
             )
 
             self._nutationInObliquityRateExists = True
 
-        delayModelVersionNode = rowdom.getElementsByTagName("delayModelVersion")
-        if len(delayModelVersionNode) > 0:
+        delayModelVersionNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelVersion", False
+        )
+        if delayModelVersionNode:
 
             self._delayModelVersion = str(
-                delayModelVersionNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(delayModelVersionNode)
             )
 
             self._delayModelVersionExists = True
 
         # extrinsic attribute values
 
-        delayModelFixedParametersIdNode = rowdom.getElementsByTagName(
-            "delayModelFixedParametersId"
-        )[0]
+        delayModelFixedParametersIdNode = self._getFirstNodeByTagName(
+            rowdom, "delayModelFixedParametersId", True
+        )
 
         self._delayModelFixedParametersId = Tag(
-            delayModelFixedParametersIdNode.firstChild.data.strip()
+            self._getXMLNodeChildText(delayModelFixedParametersIdNode)
         )
 
         # from link values, if any
@@ -441,9 +507,9 @@ class DelayModelVariableParametersRow:
 
         self._time.toBin(eos)
 
-        eos.writeFloat(self._ut1_utc)
+        eos.writeDouble(self._ut1_utc)
 
-        eos.writeFloat(self._iat_utc)
+        eos.writeDouble(self._iat_utc)
 
         eos.writeString(str(self._timeType))
 
@@ -454,7 +520,7 @@ class DelayModelVariableParametersRow:
         eos.writeInt(len(self._polarOffsets))
         for i in range(len(self._polarOffsets)):
 
-            eos.writeFloat(self._polarOffsets[i])
+            eos.writeDouble(self._polarOffsets[i])
 
         eos.writeString(str(self._polarOffsetsType))
 
@@ -507,7 +573,7 @@ class DelayModelVariableParametersRow:
         Set the ut1_utc in row from the EndianInput (eis) instance.
         """
 
-        row._ut1_utc = eis.readFloat()
+        row._ut1_utc = eis.readDouble()
 
     @staticmethod
     def iat_utcFromBin(row, eis):
@@ -515,7 +581,7 @@ class DelayModelVariableParametersRow:
         Set the iat_utc in row from the EndianInput (eis) instance.
         """
 
-        row._iat_utc = eis.readFloat()
+        row._iat_utc = eis.readDouble()
 
     @staticmethod
     def timeTypeFromBin(row, eis):
@@ -550,7 +616,7 @@ class DelayModelVariableParametersRow:
         polarOffsetsDim1 = eis.readInt()
         thisList = []
         for i in range(polarOffsetsDim1):
-            thisValue = eis.readFloat()
+            thisValue = eis.readDouble()
             thisList.append(thisValue)
         row._polarOffsets = thisList
 
@@ -708,6 +774,7 @@ class DelayModelVariableParametersRow:
         """
         Set delayModelVariableParametersId with the specified Tag value.
         delayModelVariableParametersId The Tag value to which delayModelVariableParametersId is to be set.
+
         The value of delayModelVariableParametersId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -738,6 +805,7 @@ class DelayModelVariableParametersRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         """
@@ -761,6 +829,9 @@ class DelayModelVariableParametersRow:
         Set ut1_utc with the specified float value.
         ut1_utc The float value to which ut1_utc is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -782,6 +853,9 @@ class DelayModelVariableParametersRow:
         """
         Set iat_utc with the specified float value.
         iat_utc The float value to which iat_utc is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -806,6 +880,7 @@ class DelayModelVariableParametersRow:
         timeType The DifferenceType value to which timeType is to be set.
 
 
+
         """
 
         self._timeType = DifferenceType(timeType)
@@ -827,6 +902,7 @@ class DelayModelVariableParametersRow:
         """
         Set gstAtUt0 with the specified Angle value.
         gstAtUt0 The Angle value to which gstAtUt0 is to be set.
+
         The value of gstAtUt0 can be anything allowed by the Angle constructor.
 
         """
@@ -850,6 +926,7 @@ class DelayModelVariableParametersRow:
         """
         Set earthRotationRate with the specified AngularRate value.
         earthRotationRate The AngularRate value to which earthRotationRate is to be set.
+
         The value of earthRotationRate can be anything allowed by the AngularRate constructor.
 
         """
@@ -872,6 +949,9 @@ class DelayModelVariableParametersRow:
         """
         Set polarOffsets with the specified float []  value.
         polarOffsets The float []  value to which polarOffsets is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -917,6 +997,7 @@ class DelayModelVariableParametersRow:
         polarOffsetsType The DifferenceType value to which polarOffsetsType is to be set.
 
 
+
         """
 
         self._polarOffsetsType = DifferenceType(polarOffsetsType)
@@ -952,6 +1033,7 @@ class DelayModelVariableParametersRow:
         """
         Set nutationInLongitude with the specified Angle value.
         nutationInLongitude The Angle value to which nutationInLongitude is to be set.
+
         The value of nutationInLongitude can be anything allowed by the Angle constructor.
 
         """
@@ -997,6 +1079,7 @@ class DelayModelVariableParametersRow:
         """
         Set nutationInLongitudeRate with the specified AngularRate value.
         nutationInLongitudeRate The AngularRate value to which nutationInLongitudeRate is to be set.
+
         The value of nutationInLongitudeRate can be anything allowed by the AngularRate constructor.
 
         """
@@ -1042,6 +1125,7 @@ class DelayModelVariableParametersRow:
         """
         Set nutationInObliquity with the specified Angle value.
         nutationInObliquity The Angle value to which nutationInObliquity is to be set.
+
         The value of nutationInObliquity can be anything allowed by the Angle constructor.
 
         """
@@ -1087,6 +1171,7 @@ class DelayModelVariableParametersRow:
         """
         Set nutationInObliquityRate with the specified AngularRate value.
         nutationInObliquityRate The AngularRate value to which nutationInObliquityRate is to be set.
+
         The value of nutationInObliquityRate can be anything allowed by the AngularRate constructor.
 
         """
@@ -1133,6 +1218,7 @@ class DelayModelVariableParametersRow:
         delayModelVersion The str value to which delayModelVersion is to be set.
 
 
+
         """
 
         self._delayModelVersion = str(delayModelVersion)
@@ -1164,6 +1250,7 @@ class DelayModelVariableParametersRow:
         """
         Set delayModelFixedParametersId with the specified Tag value.
         delayModelFixedParametersId The Tag value to which delayModelFixedParametersId is to be set.
+
         The value of delayModelFixedParametersId can be anything allowed by the Tag constructor.
 
         """

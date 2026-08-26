@@ -63,6 +63,16 @@ class HistoryRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -142,33 +152,72 @@ class HistoryRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("time", self._time)
+
+        result += "\n   "
 
         result += Parser.valueToXML("message", self._message)
 
+        result += "\n   "
+
         result += Parser.valueToXML("priority", self._priority)
+
+        result += "\n   "
 
         result += Parser.valueToXML("origin", self._origin)
 
+        result += "\n   "
+
         result += Parser.valueToXML("objectId", self._objectId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("application", self._application)
 
+        result += "\n   "
+
         result += Parser.valueToXML("cliCommand", self._cliCommand)
+
+        result += "\n   "
 
         result += Parser.valueToXML("appParms", self._appParms)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("execBlockId", self._execBlockId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "HistoryTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -195,43 +244,43 @@ class HistoryRow:
 
         # intrinsic attribute values
 
-        timeNode = rowdom.getElementsByTagName("time")[0]
+        timeNode = self._getFirstNodeByTagName(rowdom, "time", True)
 
-        self._time = ArrayTime(timeNode.firstChild.data.strip())
+        self._time = ArrayTime(self._getXMLNodeChildText(timeNode))
 
-        messageNode = rowdom.getElementsByTagName("message")[0]
+        messageNode = self._getFirstNodeByTagName(rowdom, "message", True)
 
-        self._message = str(messageNode.firstChild.data.strip())
+        self._message = str(self._getXMLNodeChildText(messageNode))
 
-        priorityNode = rowdom.getElementsByTagName("priority")[0]
+        priorityNode = self._getFirstNodeByTagName(rowdom, "priority", True)
 
-        self._priority = str(priorityNode.firstChild.data.strip())
+        self._priority = str(self._getXMLNodeChildText(priorityNode))
 
-        originNode = rowdom.getElementsByTagName("origin")[0]
+        originNode = self._getFirstNodeByTagName(rowdom, "origin", True)
 
-        self._origin = str(originNode.firstChild.data.strip())
+        self._origin = str(self._getXMLNodeChildText(originNode))
 
-        objectIdNode = rowdom.getElementsByTagName("objectId")[0]
+        objectIdNode = self._getFirstNodeByTagName(rowdom, "objectId", True)
 
-        self._objectId = str(objectIdNode.firstChild.data.strip())
+        self._objectId = str(self._getXMLNodeChildText(objectIdNode))
 
-        applicationNode = rowdom.getElementsByTagName("application")[0]
+        applicationNode = self._getFirstNodeByTagName(rowdom, "application", True)
 
-        self._application = str(applicationNode.firstChild.data.strip())
+        self._application = str(self._getXMLNodeChildText(applicationNode))
 
-        cliCommandNode = rowdom.getElementsByTagName("cliCommand")[0]
+        cliCommandNode = self._getFirstNodeByTagName(rowdom, "cliCommand", True)
 
-        self._cliCommand = str(cliCommandNode.firstChild.data.strip())
+        self._cliCommand = str(self._getXMLNodeChildText(cliCommandNode))
 
-        appParmsNode = rowdom.getElementsByTagName("appParms")[0]
+        appParmsNode = self._getFirstNodeByTagName(rowdom, "appParms", True)
 
-        self._appParms = str(appParmsNode.firstChild.data.strip())
+        self._appParms = str(self._getXMLNodeChildText(appParmsNode))
 
         # extrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")[0]
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", True)
 
-        self._execBlockId = Tag(execBlockIdNode.firstChild.data.strip())
+        self._execBlockId = Tag(self._getXMLNodeChildText(execBlockIdNode))
 
         # from link values, if any
 
@@ -391,6 +440,7 @@ class HistoryRow:
         """
         Set time with the specified ArrayTime value.
         time The ArrayTime value to which time is to be set.
+
         The value of time can be anything allowed by the ArrayTime constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -422,6 +472,7 @@ class HistoryRow:
         message The str value to which message is to be set.
 
 
+
         """
 
         self._message = str(message)
@@ -442,6 +493,7 @@ class HistoryRow:
         """
         Set priority with the specified str value.
         priority The str value to which priority is to be set.
+
 
 
         """
@@ -466,6 +518,7 @@ class HistoryRow:
         origin The str value to which origin is to be set.
 
 
+
         """
 
         self._origin = str(origin)
@@ -486,6 +539,7 @@ class HistoryRow:
         """
         Set objectId with the specified str value.
         objectId The str value to which objectId is to be set.
+
 
 
         """
@@ -510,6 +564,7 @@ class HistoryRow:
         application The str value to which application is to be set.
 
 
+
         """
 
         self._application = str(application)
@@ -532,6 +587,7 @@ class HistoryRow:
         cliCommand The str value to which cliCommand is to be set.
 
 
+
         """
 
         self._cliCommand = str(cliCommand)
@@ -552,6 +608,7 @@ class HistoryRow:
         """
         Set appParms with the specified str value.
         appParms The str value to which appParms is to be set.
+
 
 
         """
@@ -577,6 +634,7 @@ class HistoryRow:
         """
         Set execBlockId with the specified Tag value.
         execBlockId The Tag value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

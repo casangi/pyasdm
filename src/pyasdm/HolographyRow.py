@@ -66,6 +66,16 @@ class HolographyRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -128,23 +138,54 @@ class HolographyRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("holographyId", self._holographyId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("distance", self._distance)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("focus", self._focus)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numCorr", self._numCorr)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("type", self._type)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "HolographyTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -171,25 +212,25 @@ class HolographyRow:
 
         # intrinsic attribute values
 
-        holographyIdNode = rowdom.getElementsByTagName("holographyId")[0]
+        holographyIdNode = self._getFirstNodeByTagName(rowdom, "holographyId", True)
 
-        self._holographyId = Tag(holographyIdNode.firstChild.data.strip())
+        self._holographyId = Tag(self._getXMLNodeChildText(holographyIdNode))
 
-        distanceNode = rowdom.getElementsByTagName("distance")[0]
+        distanceNode = self._getFirstNodeByTagName(rowdom, "distance", True)
 
-        self._distance = Length(distanceNode.firstChild.data.strip())
+        self._distance = Length(self._getXMLNodeChildText(distanceNode))
 
-        focusNode = rowdom.getElementsByTagName("focus")[0]
+        focusNode = self._getFirstNodeByTagName(rowdom, "focus", True)
 
-        self._focus = Length(focusNode.firstChild.data.strip())
+        self._focus = Length(self._getXMLNodeChildText(focusNode))
 
-        numCorrNode = rowdom.getElementsByTagName("numCorr")[0]
+        numCorrNode = self._getFirstNodeByTagName(rowdom, "numCorr", True)
 
-        self._numCorr = int(numCorrNode.firstChild.data.strip())
+        self._numCorr = int(self._getXMLNodeChildText(numCorrNode))
 
-        typeNode = rowdom.getElementsByTagName("type")[0]
+        typeNode = self._getFirstNodeByTagName(rowdom, "type", True)
 
-        typeStr = typeNode.firstChild.data.strip()
+        typeStr = self._getXMLNodeChildText(typeNode)
         self._type = Parser.stringListToLists(
             typeStr, HolographyChannelType, "Holography", False
         )
@@ -316,6 +357,7 @@ class HolographyRow:
         """
         Set holographyId with the specified Tag value.
         holographyId The Tag value to which holographyId is to be set.
+
         The value of holographyId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -346,6 +388,7 @@ class HolographyRow:
         """
         Set distance with the specified Length value.
         distance The Length value to which distance is to be set.
+
         The value of distance can be anything allowed by the Length constructor.
 
         """
@@ -369,6 +412,7 @@ class HolographyRow:
         """
         Set focus with the specified Length value.
         focus The Length value to which focus is to be set.
+
         The value of focus can be anything allowed by the Length constructor.
 
         """
@@ -393,6 +437,7 @@ class HolographyRow:
         numCorr The int value to which numCorr is to be set.
 
 
+
         """
 
         self._numCorr = int(numCorr)
@@ -413,6 +458,7 @@ class HolographyRow:
         """
         Set type with the specified HolographyChannelType []  value.
         type The HolographyChannelType []  value to which type is to be set.
+
 
 
         """

@@ -69,6 +69,16 @@ class PointingModelRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -95,7 +105,7 @@ class PointingModelRow:
 
         self._coeffName = []  # this is a list of str []
 
-        self._coeffVal = []  # this is a list of float []
+        self._coeffVal = []  # this is a list of float []  saved as single precision
 
         self._polarizationType = PolarizationType.from_int(0)
 
@@ -171,41 +181,81 @@ class PointingModelRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("pointingModelId", self._pointingModelId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numCoeff", self._numCoeff)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("coeffName", self._coeffName)
 
-        result += Parser.listValueToXML("coeffVal", self._coeffVal)
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("coeffVal", self._coeffVal)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "polarizationType", PolarizationType.name(self._polarizationType)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("assocNature", self._assocNature)
 
         if self._coeffFormulaExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("coeffFormula", self._coeffFormula)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("assocPointingModelId", self._assocPointingModelId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "PointingModelTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -232,50 +282,54 @@ class PointingModelRow:
 
         # intrinsic attribute values
 
-        pointingModelIdNode = rowdom.getElementsByTagName("pointingModelId")[0]
+        pointingModelIdNode = self._getFirstNodeByTagName(
+            rowdom, "pointingModelId", True
+        )
 
-        self._pointingModelId = int(pointingModelIdNode.firstChild.data.strip())
+        self._pointingModelId = int(self._getXMLNodeChildText(pointingModelIdNode))
 
-        numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
+        numCoeffNode = self._getFirstNodeByTagName(rowdom, "numCoeff", True)
 
-        self._numCoeff = int(numCoeffNode.firstChild.data.strip())
+        self._numCoeff = int(self._getXMLNodeChildText(numCoeffNode))
 
-        coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
+        coeffNameNode = self._getFirstNodeByTagName(rowdom, "coeffName", True)
 
-        coeffNameStr = coeffNameNode.firstChild.data.strip()
+        coeffNameStr = self._getXMLNodeChildText(coeffNameNode)
 
         self._coeffName = Parser.stringListToLists(
             coeffNameStr, str, "PointingModel", False
         )
 
-        coeffValNode = rowdom.getElementsByTagName("coeffVal")[0]
+        coeffValNode = self._getFirstNodeByTagName(rowdom, "coeffVal", True)
 
-        coeffValStr = coeffValNode.firstChild.data.strip()
+        coeffValStr = self._getXMLNodeChildText(coeffValNode)
 
         self._coeffVal = Parser.stringListToLists(
             coeffValStr, float, "PointingModel", False
         )
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", True
+        )
 
         self._polarizationType = PolarizationType.newPolarizationType(
-            polarizationTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(polarizationTypeNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        assocNatureNode = rowdom.getElementsByTagName("assocNature")[0]
+        assocNatureNode = self._getFirstNodeByTagName(rowdom, "assocNature", True)
 
-        self._assocNature = str(assocNatureNode.firstChild.data.strip())
+        self._assocNature = str(self._getXMLNodeChildText(assocNatureNode))
 
-        coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")
-        if len(coeffFormulaNode) > 0:
+        coeffFormulaNode = self._getFirstNodeByTagName(rowdom, "coeffFormula", False)
+        if coeffFormulaNode:
 
-            coeffFormulaStr = coeffFormulaNode[0].firstChild.data.strip()
+            coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode)
 
             self._coeffFormula = Parser.stringListToLists(
                 coeffFormulaStr, str, "PointingModel", False
@@ -285,16 +339,16 @@ class PointingModelRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        assocPointingModelIdNode = rowdom.getElementsByTagName("assocPointingModelId")[
-            0
-        ]
+        assocPointingModelIdNode = self._getFirstNodeByTagName(
+            rowdom, "assocPointingModelId", True
+        )
 
         self._assocPointingModelId = int(
-            assocPointingModelIdNode.firstChild.data.strip()
+            self._getXMLNodeChildText(assocPointingModelIdNode)
         )
 
         # from link values, if any
@@ -499,6 +553,7 @@ class PointingModelRow:
         pointingModelId The int value to which pointingModelId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -528,6 +583,7 @@ class PointingModelRow:
         numCoeff The int value to which numCoeff is to be set.
 
 
+
         """
 
         self._numCoeff = int(numCoeff)
@@ -548,6 +604,7 @@ class PointingModelRow:
         """
         Set coeffName with the specified str []  value.
         coeffName The str []  value to which coeffName is to be set.
+
 
 
         """
@@ -591,6 +648,9 @@ class PointingModelRow:
         """
         Set coeffVal with the specified float []  value.
         coeffVal The float []  value to which coeffVal is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -636,6 +696,7 @@ class PointingModelRow:
         polarizationType The PolarizationType value to which polarizationType is to be set.
 
 
+
         """
 
         self._polarizationType = PolarizationType(polarizationType)
@@ -658,6 +719,7 @@ class PointingModelRow:
         receiverBand The ReceiverBand value to which receiverBand is to be set.
 
 
+
         """
 
         self._receiverBand = ReceiverBand(receiverBand)
@@ -678,6 +740,7 @@ class PointingModelRow:
         """
         Set assocNature with the specified str value.
         assocNature The str value to which assocNature is to be set.
+
 
 
         """
@@ -714,6 +777,7 @@ class PointingModelRow:
         """
         Set coeffFormula with the specified str []  value.
         coeffFormula The str []  value to which coeffFormula is to be set.
+
 
 
         """
@@ -768,6 +832,7 @@ class PointingModelRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -797,6 +862,7 @@ class PointingModelRow:
         """
         Set assocPointingModelId with the specified int value.
         assocPointingModelId The int value to which assocPointingModelId is to be set.
+
 
 
         """

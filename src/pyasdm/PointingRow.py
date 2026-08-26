@@ -66,6 +66,16 @@ class PointingRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -239,41 +249,64 @@ class PointingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numSample", self._numSample)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("encoder", self._encoder)
+
+        result += "\n   "
 
         result += Parser.valueToXML("pointingTracking", self._pointingTracking)
 
+        result += "\n   "
+
         result += Parser.valueToXML("usePolynomials", self._usePolynomials)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeOrigin", self._timeOrigin)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numTerm", self._numTerm)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "pointingDirection", self._pointingDirection
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("target", self._target)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("offset", self._offset)
 
         if self._overTheTopExists:
+            result += "\n   "
 
             result += Parser.valueToXML("overTheTop", self._overTheTop)
 
         if self._sourceOffsetExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("sourceOffset", self._sourceOffset)
 
         if self._sourceOffsetReferenceCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "sourceOffsetReferenceCode",
@@ -281,18 +314,21 @@ class PointingRow:
             )
 
         if self._sourceOffsetEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "sourceOffsetEquinox", self._sourceOffsetEquinox
             )
 
         if self._sampledTimeIntervalExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "sampledTimeInterval", self._sampledTimeInterval
             )
 
         if self._atmosphericCorrectionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "atmosphericCorrection", self._atmosphericCorrection
@@ -300,13 +336,38 @@ class PointingRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("pointingModelId", self._pointingModelId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "PointingTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -333,67 +394,73 @@ class PointingRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
+        )
 
-        numSampleNode = rowdom.getElementsByTagName("numSample")[0]
+        numSampleNode = self._getFirstNodeByTagName(rowdom, "numSample", True)
 
-        self._numSample = int(numSampleNode.firstChild.data.strip())
+        self._numSample = int(self._getXMLNodeChildText(numSampleNode))
 
-        encoderNode = rowdom.getElementsByTagName("encoder")[0]
+        encoderNode = self._getFirstNodeByTagName(rowdom, "encoder", True)
 
-        encoderStr = encoderNode.firstChild.data.strip()
+        encoderStr = self._getXMLNodeChildText(encoderNode)
 
         self._encoder = Parser.stringListToLists(encoderStr, Angle, "Pointing", True)
 
-        pointingTrackingNode = rowdom.getElementsByTagName("pointingTracking")[0]
+        pointingTrackingNode = self._getFirstNodeByTagName(
+            rowdom, "pointingTracking", True
+        )
 
-        self._pointingTracking = bool(pointingTrackingNode.firstChild.data.strip())
+        self._pointingTracking = bool(self._getXMLNodeChildText(pointingTrackingNode))
 
-        usePolynomialsNode = rowdom.getElementsByTagName("usePolynomials")[0]
+        usePolynomialsNode = self._getFirstNodeByTagName(rowdom, "usePolynomials", True)
 
-        self._usePolynomials = bool(usePolynomialsNode.firstChild.data.strip())
+        self._usePolynomials = bool(self._getXMLNodeChildText(usePolynomialsNode))
 
-        timeOriginNode = rowdom.getElementsByTagName("timeOrigin")[0]
+        timeOriginNode = self._getFirstNodeByTagName(rowdom, "timeOrigin", True)
 
-        self._timeOrigin = ArrayTime(timeOriginNode.firstChild.data.strip())
+        self._timeOrigin = ArrayTime(self._getXMLNodeChildText(timeOriginNode))
 
-        numTermNode = rowdom.getElementsByTagName("numTerm")[0]
+        numTermNode = self._getFirstNodeByTagName(rowdom, "numTerm", True)
 
-        self._numTerm = int(numTermNode.firstChild.data.strip())
+        self._numTerm = int(self._getXMLNodeChildText(numTermNode))
 
-        pointingDirectionNode = rowdom.getElementsByTagName("pointingDirection")[0]
+        pointingDirectionNode = self._getFirstNodeByTagName(
+            rowdom, "pointingDirection", True
+        )
 
-        pointingDirectionStr = pointingDirectionNode.firstChild.data.strip()
+        pointingDirectionStr = self._getXMLNodeChildText(pointingDirectionNode)
 
         self._pointingDirection = Parser.stringListToLists(
             pointingDirectionStr, Angle, "Pointing", True
         )
 
-        targetNode = rowdom.getElementsByTagName("target")[0]
+        targetNode = self._getFirstNodeByTagName(rowdom, "target", True)
 
-        targetStr = targetNode.firstChild.data.strip()
+        targetStr = self._getXMLNodeChildText(targetNode)
 
         self._target = Parser.stringListToLists(targetStr, Angle, "Pointing", True)
 
-        offsetNode = rowdom.getElementsByTagName("offset")[0]
+        offsetNode = self._getFirstNodeByTagName(rowdom, "offset", True)
 
-        offsetStr = offsetNode.firstChild.data.strip()
+        offsetStr = self._getXMLNodeChildText(offsetNode)
 
         self._offset = Parser.stringListToLists(offsetStr, Angle, "Pointing", True)
 
-        overTheTopNode = rowdom.getElementsByTagName("overTheTop")
-        if len(overTheTopNode) > 0:
+        overTheTopNode = self._getFirstNodeByTagName(rowdom, "overTheTop", False)
+        if overTheTopNode:
 
-            self._overTheTop = bool(overTheTopNode[0].firstChild.data.strip())
+            self._overTheTop = bool(self._getXMLNodeChildText(overTheTopNode))
 
             self._overTheTopExists = True
 
-        sourceOffsetNode = rowdom.getElementsByTagName("sourceOffset")
-        if len(sourceOffsetNode) > 0:
+        sourceOffsetNode = self._getFirstNodeByTagName(rowdom, "sourceOffset", False)
+        if sourceOffsetNode:
 
-            sourceOffsetStr = sourceOffsetNode[0].firstChild.data.strip()
+            sourceOffsetStr = self._getXMLNodeChildText(sourceOffsetNode)
 
             self._sourceOffset = Parser.stringListToLists(
                 sourceOffsetStr, Angle, "Pointing", True
@@ -401,32 +468,36 @@ class PointingRow:
 
             self._sourceOffsetExists = True
 
-        sourceOffsetReferenceCodeNode = rowdom.getElementsByTagName(
-            "sourceOffsetReferenceCode"
+        sourceOffsetReferenceCodeNode = self._getFirstNodeByTagName(
+            rowdom, "sourceOffsetReferenceCode", False
         )
-        if len(sourceOffsetReferenceCodeNode) > 0:
+        if sourceOffsetReferenceCodeNode:
 
             self._sourceOffsetReferenceCode = (
                 DirectionReferenceCode.newDirectionReferenceCode(
-                    sourceOffsetReferenceCodeNode[0].firstChild.data.strip()
+                    self._getXMLNodeChildText(sourceOffsetReferenceCodeNode)
                 )
             )
 
             self._sourceOffsetReferenceCodeExists = True
 
-        sourceOffsetEquinoxNode = rowdom.getElementsByTagName("sourceOffsetEquinox")
-        if len(sourceOffsetEquinoxNode) > 0:
+        sourceOffsetEquinoxNode = self._getFirstNodeByTagName(
+            rowdom, "sourceOffsetEquinox", False
+        )
+        if sourceOffsetEquinoxNode:
 
             self._sourceOffsetEquinox = ArrayTime(
-                sourceOffsetEquinoxNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(sourceOffsetEquinoxNode)
             )
 
             self._sourceOffsetEquinoxExists = True
 
-        sampledTimeIntervalNode = rowdom.getElementsByTagName("sampledTimeInterval")
-        if len(sampledTimeIntervalNode) > 0:
+        sampledTimeIntervalNode = self._getFirstNodeByTagName(
+            rowdom, "sampledTimeInterval", False
+        )
+        if sampledTimeIntervalNode:
 
-            sampledTimeIntervalStr = sampledTimeIntervalNode[0].firstChild.data.strip()
+            sampledTimeIntervalStr = self._getXMLNodeChildText(sampledTimeIntervalNode)
 
             self._sampledTimeInterval = Parser.stringListToLists(
                 sampledTimeIntervalStr, ArrayTimeInterval, "Pointing", True
@@ -434,12 +505,14 @@ class PointingRow:
 
             self._sampledTimeIntervalExists = True
 
-        atmosphericCorrectionNode = rowdom.getElementsByTagName("atmosphericCorrection")
-        if len(atmosphericCorrectionNode) > 0:
+        atmosphericCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmosphericCorrection", False
+        )
+        if atmosphericCorrectionNode:
 
-            atmosphericCorrectionStr = atmosphericCorrectionNode[
-                0
-            ].firstChild.data.strip()
+            atmosphericCorrectionStr = self._getXMLNodeChildText(
+                atmosphericCorrectionNode
+            )
 
             self._atmosphericCorrection = Parser.stringListToLists(
                 atmosphericCorrectionStr, Angle, "Pointing", True
@@ -449,13 +522,15 @@ class PointingRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        pointingModelIdNode = rowdom.getElementsByTagName("pointingModelId")[0]
+        pointingModelIdNode = self._getFirstNodeByTagName(
+            rowdom, "pointingModelId", True
+        )
 
-        self._pointingModelId = int(pointingModelIdNode.firstChild.data.strip())
+        self._pointingModelId = int(self._getXMLNodeChildText(pointingModelIdNode))
 
         # from link values, if any
 
@@ -751,6 +826,7 @@ class PointingRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -782,6 +858,7 @@ class PointingRow:
         numSample The int value to which numSample is to be set.
 
 
+
         """
 
         self._numSample = int(numSample)
@@ -802,6 +879,7 @@ class PointingRow:
         """
         Set encoder with the specified Angle []  []  value.
         encoder The Angle []  []  value to which encoder is to be set.
+
         The value of encoder can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -847,6 +925,7 @@ class PointingRow:
         pointingTracking The bool value to which pointingTracking is to be set.
 
 
+
         """
 
         self._pointingTracking = bool(pointingTracking)
@@ -867,6 +946,7 @@ class PointingRow:
         """
         Set usePolynomials with the specified bool value.
         usePolynomials The bool value to which usePolynomials is to be set.
+
 
 
         """
@@ -890,6 +970,7 @@ class PointingRow:
         """
         Set timeOrigin with the specified ArrayTime value.
         timeOrigin The ArrayTime value to which timeOrigin is to be set.
+
         The value of timeOrigin can be anything allowed by the ArrayTime constructor.
 
         """
@@ -914,6 +995,7 @@ class PointingRow:
         numTerm The int value to which numTerm is to be set.
 
 
+
         """
 
         self._numTerm = int(numTerm)
@@ -934,6 +1016,7 @@ class PointingRow:
         """
         Set pointingDirection with the specified Angle []  []  value.
         pointingDirection The Angle []  []  value to which pointingDirection is to be set.
+
         The value of pointingDirection can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -977,6 +1060,7 @@ class PointingRow:
         """
         Set target with the specified Angle []  []  value.
         target The Angle []  []  value to which target is to be set.
+
         The value of target can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1020,6 +1104,7 @@ class PointingRow:
         """
         Set offset with the specified Angle []  []  value.
         offset The Angle []  []  value to which offset is to be set.
+
         The value of offset can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1079,6 +1164,7 @@ class PointingRow:
         overTheTop The bool value to which overTheTop is to be set.
 
 
+
         """
 
         self._overTheTop = bool(overTheTop)
@@ -1121,6 +1207,7 @@ class PointingRow:
         """
         Set sourceOffset with the specified Angle []  []  value.
         sourceOffset The Angle []  []  value to which sourceOffset is to be set.
+
         The value of sourceOffset can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1188,6 +1275,7 @@ class PointingRow:
         sourceOffsetReferenceCode The DirectionReferenceCode value to which sourceOffsetReferenceCode is to be set.
 
 
+
         """
 
         self._sourceOffsetReferenceCode = DirectionReferenceCode(
@@ -1233,6 +1321,7 @@ class PointingRow:
         """
         Set sourceOffsetEquinox with the specified ArrayTime value.
         sourceOffsetEquinox The ArrayTime value to which sourceOffsetEquinox is to be set.
+
         The value of sourceOffsetEquinox can be anything allowed by the ArrayTime constructor.
 
         """
@@ -1277,6 +1366,7 @@ class PointingRow:
         """
         Set sampledTimeInterval with the specified ArrayTimeInterval []  value.
         sampledTimeInterval The ArrayTimeInterval []  value to which sampledTimeInterval is to be set.
+
         The value of sampledTimeInterval can be anything allowed by the ArrayTimeInterval []  constructor.
 
         """
@@ -1342,6 +1432,7 @@ class PointingRow:
         """
         Set atmosphericCorrection with the specified Angle []  []  value.
         atmosphericCorrection The Angle []  []  value to which atmosphericCorrection is to be set.
+
         The value of atmosphericCorrection can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1396,6 +1487,7 @@ class PointingRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1425,6 +1517,7 @@ class PointingRow:
         """
         Set pointingModelId with the specified int value.
         pointingModelId The int value to which pointingModelId is to be set.
+
 
 
         """

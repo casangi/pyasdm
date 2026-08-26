@@ -72,6 +72,16 @@ class CalFocusModelRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -112,9 +122,9 @@ class CalFocusModelRow:
 
         self._coeffFormula = []  # this is a list of str []
 
-        self._coeffValue = []  # this is a list of float []
+        self._coeffValue = []  # this is a list of float []  saved as single precision
 
-        self._coeffError = []  # this is a list of float []
+        self._coeffError = []  # this is a list of float []  saved as single precision
 
         self._coeffFixed = []  # this is a list of bool []
 
@@ -205,55 +215,112 @@ class CalFocusModelRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "polarizationType", PolarizationType.name(self._polarizationType)
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaMake", AntennaMake.name(self._antennaMake))
+
+        result += "\n   "
 
         result += Parser.valueToXML("numCoeff", self._numCoeff)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numSourceObs", self._numSourceObs)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("coeffName", self._coeffName)
 
+        result += "\n   "
+
         result += Parser.listValueToXML("coeffFormula", self._coeffFormula)
 
-        result += Parser.listValueToXML("coeffValue", self._coeffValue)
+        result += "\n   "
 
-        result += Parser.listValueToXML("coeffError", self._coeffError)
+        result += Parser.floatListValueToXML("coeffValue", self._coeffValue)
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML("coeffError", self._coeffError)
+
+        result += "\n   "
 
         result += Parser.listValueToXML("coeffFixed", self._coeffFixed)
 
+        result += "\n   "
+
         result += Parser.valueToXML("focusModel", self._focusModel)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML("focusRMS", self._focusRMS)
 
-        result += Parser.valueToXML("reducedChiSquared", self._reducedChiSquared)
+        result += "\n   "
+
+        result += Parser.doubleValueToXML("reducedChiSquared", self._reducedChiSquared)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalFocusModelTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -280,109 +347,115 @@ class CalFocusModelRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        polarizationTypeNode = rowdom.getElementsByTagName("polarizationType")[0]
+        polarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationType", True
+        )
 
         self._polarizationType = PolarizationType.newPolarizationType(
-            polarizationTypeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(polarizationTypeNode)
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        antennaMakeNode = rowdom.getElementsByTagName("antennaMake")[0]
+        antennaMakeNode = self._getFirstNodeByTagName(rowdom, "antennaMake", True)
 
         self._antennaMake = AntennaMake.newAntennaMake(
-            antennaMakeNode.firstChild.data.strip()
+            self._getXMLNodeChildText(antennaMakeNode)
         )
 
-        numCoeffNode = rowdom.getElementsByTagName("numCoeff")[0]
+        numCoeffNode = self._getFirstNodeByTagName(rowdom, "numCoeff", True)
 
-        self._numCoeff = int(numCoeffNode.firstChild.data.strip())
+        self._numCoeff = int(self._getXMLNodeChildText(numCoeffNode))
 
-        numSourceObsNode = rowdom.getElementsByTagName("numSourceObs")[0]
+        numSourceObsNode = self._getFirstNodeByTagName(rowdom, "numSourceObs", True)
 
-        self._numSourceObs = int(numSourceObsNode.firstChild.data.strip())
+        self._numSourceObs = int(self._getXMLNodeChildText(numSourceObsNode))
 
-        coeffNameNode = rowdom.getElementsByTagName("coeffName")[0]
+        coeffNameNode = self._getFirstNodeByTagName(rowdom, "coeffName", True)
 
-        coeffNameStr = coeffNameNode.firstChild.data.strip()
+        coeffNameStr = self._getXMLNodeChildText(coeffNameNode)
 
         self._coeffName = Parser.stringListToLists(
             coeffNameStr, str, "CalFocusModel", False
         )
 
-        coeffFormulaNode = rowdom.getElementsByTagName("coeffFormula")[0]
+        coeffFormulaNode = self._getFirstNodeByTagName(rowdom, "coeffFormula", True)
 
-        coeffFormulaStr = coeffFormulaNode.firstChild.data.strip()
+        coeffFormulaStr = self._getXMLNodeChildText(coeffFormulaNode)
 
         self._coeffFormula = Parser.stringListToLists(
             coeffFormulaStr, str, "CalFocusModel", False
         )
 
-        coeffValueNode = rowdom.getElementsByTagName("coeffValue")[0]
+        coeffValueNode = self._getFirstNodeByTagName(rowdom, "coeffValue", True)
 
-        coeffValueStr = coeffValueNode.firstChild.data.strip()
+        coeffValueStr = self._getXMLNodeChildText(coeffValueNode)
 
         self._coeffValue = Parser.stringListToLists(
             coeffValueStr, float, "CalFocusModel", False
         )
 
-        coeffErrorNode = rowdom.getElementsByTagName("coeffError")[0]
+        coeffErrorNode = self._getFirstNodeByTagName(rowdom, "coeffError", True)
 
-        coeffErrorStr = coeffErrorNode.firstChild.data.strip()
+        coeffErrorStr = self._getXMLNodeChildText(coeffErrorNode)
 
         self._coeffError = Parser.stringListToLists(
             coeffErrorStr, float, "CalFocusModel", False
         )
 
-        coeffFixedNode = rowdom.getElementsByTagName("coeffFixed")[0]
+        coeffFixedNode = self._getFirstNodeByTagName(rowdom, "coeffFixed", True)
 
-        coeffFixedStr = coeffFixedNode.firstChild.data.strip()
+        coeffFixedStr = self._getXMLNodeChildText(coeffFixedNode)
 
         self._coeffFixed = Parser.stringListToLists(
             coeffFixedStr, bool, "CalFocusModel", False
         )
 
-        focusModelNode = rowdom.getElementsByTagName("focusModel")[0]
+        focusModelNode = self._getFirstNodeByTagName(rowdom, "focusModel", True)
 
-        self._focusModel = str(focusModelNode.firstChild.data.strip())
+        self._focusModel = str(self._getXMLNodeChildText(focusModelNode))
 
-        focusRMSNode = rowdom.getElementsByTagName("focusRMS")[0]
+        focusRMSNode = self._getFirstNodeByTagName(rowdom, "focusRMS", True)
 
-        focusRMSStr = focusRMSNode.firstChild.data.strip()
+        focusRMSStr = self._getXMLNodeChildText(focusRMSNode)
 
         self._focusRMS = Parser.stringListToLists(
             focusRMSStr, Length, "CalFocusModel", True
         )
 
-        reducedChiSquaredNode = rowdom.getElementsByTagName("reducedChiSquared")[0]
+        reducedChiSquaredNode = self._getFirstNodeByTagName(
+            rowdom, "reducedChiSquared", True
+        )
 
-        self._reducedChiSquared = float(reducedChiSquaredNode.firstChild.data.strip())
+        self._reducedChiSquared = float(
+            self._getXMLNodeChildText(reducedChiSquaredNode)
+        )
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -440,7 +513,7 @@ class CalFocusModelRow:
 
         Length.listToBin(self._focusRMS, eos)
 
-        eos.writeFloat(self._reducedChiSquared)
+        eos.writeDouble(self._reducedChiSquared)
 
     @staticmethod
     def antennaNameFromBin(row, eis):
@@ -609,7 +682,7 @@ class CalFocusModelRow:
         Set the reducedChiSquared in row from the EndianInput (eis) instance.
         """
 
-        row._reducedChiSquared = eis.readFloat()
+        row._reducedChiSquared = eis.readDouble()
 
     @staticmethod
     def initFromBinMethods():
@@ -682,6 +755,7 @@ class CalFocusModelRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -709,6 +783,7 @@ class CalFocusModelRow:
         """
         Set receiverBand with the specified ReceiverBand value.
         receiverBand The ReceiverBand value to which receiverBand is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -740,6 +815,7 @@ class CalFocusModelRow:
         polarizationType The PolarizationType value to which polarizationType is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -768,6 +844,7 @@ class CalFocusModelRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -791,6 +868,7 @@ class CalFocusModelRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -815,6 +893,7 @@ class CalFocusModelRow:
         antennaMake The AntennaMake value to which antennaMake is to be set.
 
 
+
         """
 
         self._antennaMake = AntennaMake(antennaMake)
@@ -835,6 +914,7 @@ class CalFocusModelRow:
         """
         Set numCoeff with the specified int value.
         numCoeff The int value to which numCoeff is to be set.
+
 
 
         """
@@ -859,6 +939,7 @@ class CalFocusModelRow:
         numSourceObs The int value to which numSourceObs is to be set.
 
 
+
         """
 
         self._numSourceObs = int(numSourceObs)
@@ -879,6 +960,7 @@ class CalFocusModelRow:
         """
         Set coeffName with the specified str []  value.
         coeffName The str []  value to which coeffName is to be set.
+
 
 
         """
@@ -924,6 +1006,7 @@ class CalFocusModelRow:
         coeffFormula The str []  value to which coeffFormula is to be set.
 
 
+
         """
 
         # value must be a list
@@ -965,6 +1048,9 @@ class CalFocusModelRow:
         """
         Set coeffValue with the specified float []  value.
         coeffValue The float []  value to which coeffValue is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1008,6 +1094,9 @@ class CalFocusModelRow:
         """
         Set coeffError with the specified float []  value.
         coeffError The float []  value to which coeffError is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1053,6 +1142,7 @@ class CalFocusModelRow:
         coeffFixed The bool []  value to which coeffFixed is to be set.
 
 
+
         """
 
         # value must be a list
@@ -1096,6 +1186,7 @@ class CalFocusModelRow:
         focusModel The str value to which focusModel is to be set.
 
 
+
         """
 
         self._focusModel = str(focusModel)
@@ -1116,6 +1207,7 @@ class CalFocusModelRow:
         """
         Set focusRMS with the specified Length []  value.
         focusRMS The Length []  value to which focusRMS is to be set.
+
         The value of focusRMS can be anything allowed by the Length []  constructor.
 
         """
@@ -1160,6 +1252,9 @@ class CalFocusModelRow:
         Set reducedChiSquared with the specified float value.
         reducedChiSquared The float value to which reducedChiSquared is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1184,6 +1279,7 @@ class CalFocusModelRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1214,6 +1310,7 @@ class CalFocusModelRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

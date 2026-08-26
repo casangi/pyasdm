@@ -75,6 +75,16 @@ class CalAmpliRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -113,9 +123,13 @@ class CalAmpliRow:
 
         self._frequencyRange = []  # this is a list of Frequency []
 
-        self._apertureEfficiency = []  # this is a list of float []
+        self._apertureEfficiency = (
+            []
+        )  # this is a list of float []  saved as single precision
 
-        self._apertureEfficiencyError = []  # this is a list of float []
+        self._apertureEfficiencyError = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._correctionValidityExists = False
 
@@ -198,55 +212,105 @@ class CalAmpliRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("antennaName", self._antennaName)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "atmPhaseCorrection", AtmPhaseCorrection.name(self._atmPhaseCorrection)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "receiverBand", ReceiverBand.name(self._receiverBand)
         )
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "basebandName", BasebandName.name(self._basebandName)
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("numReceptor", self._numReceptor)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML(
             "polarizationTypes", self._polarizationTypes
         )
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("frequencyRange", self._frequencyRange)
 
-        result += Parser.listValueToXML("apertureEfficiency", self._apertureEfficiency)
+        result += "\n   "
 
-        result += Parser.listValueToXML(
+        result += Parser.floatListValueToXML(
+            "apertureEfficiency", self._apertureEfficiency
+        )
+
+        result += "\n   "
+
+        result += Parser.floatListValueToXML(
             "apertureEfficiencyError", self._apertureEfficiencyError
         )
 
         if self._correctionValidityExists:
+            result += "\n   "
 
             result += Parser.valueToXML("correctionValidity", self._correctionValidity)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalAmpliTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -273,91 +337,101 @@ class CalAmpliRow:
 
         # intrinsic attribute values
 
-        antennaNameNode = rowdom.getElementsByTagName("antennaName")[0]
+        antennaNameNode = self._getFirstNodeByTagName(rowdom, "antennaName", True)
 
-        self._antennaName = str(antennaNameNode.firstChild.data.strip())
+        self._antennaName = str(self._getXMLNodeChildText(antennaNameNode))
 
-        atmPhaseCorrectionNode = rowdom.getElementsByTagName("atmPhaseCorrection")[0]
+        atmPhaseCorrectionNode = self._getFirstNodeByTagName(
+            rowdom, "atmPhaseCorrection", True
+        )
 
         self._atmPhaseCorrection = AtmPhaseCorrection.newAtmPhaseCorrection(
-            atmPhaseCorrectionNode.firstChild.data.strip()
+            self._getXMLNodeChildText(atmPhaseCorrectionNode)
         )
 
-        receiverBandNode = rowdom.getElementsByTagName("receiverBand")[0]
+        receiverBandNode = self._getFirstNodeByTagName(rowdom, "receiverBand", True)
 
         self._receiverBand = ReceiverBand.newReceiverBand(
-            receiverBandNode.firstChild.data.strip()
+            self._getXMLNodeChildText(receiverBandNode)
         )
 
-        basebandNameNode = rowdom.getElementsByTagName("basebandName")[0]
+        basebandNameNode = self._getFirstNodeByTagName(rowdom, "basebandName", True)
 
         self._basebandName = BasebandName.newBasebandName(
-            basebandNameNode.firstChild.data.strip()
+            self._getXMLNodeChildText(basebandNameNode)
         )
 
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
 
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
 
-        polarizationTypesNode = rowdom.getElementsByTagName("polarizationTypes")[0]
+        polarizationTypesNode = self._getFirstNodeByTagName(
+            rowdom, "polarizationTypes", True
+        )
 
-        polarizationTypesStr = polarizationTypesNode.firstChild.data.strip()
+        polarizationTypesStr = self._getXMLNodeChildText(polarizationTypesNode)
         self._polarizationTypes = Parser.stringListToLists(
             polarizationTypesStr, PolarizationType, "CalAmpli", False
         )
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        frequencyRangeNode = rowdom.getElementsByTagName("frequencyRange")[0]
+        frequencyRangeNode = self._getFirstNodeByTagName(rowdom, "frequencyRange", True)
 
-        frequencyRangeStr = frequencyRangeNode.firstChild.data.strip()
+        frequencyRangeStr = self._getXMLNodeChildText(frequencyRangeNode)
 
         self._frequencyRange = Parser.stringListToLists(
             frequencyRangeStr, Frequency, "CalAmpli", True
         )
 
-        apertureEfficiencyNode = rowdom.getElementsByTagName("apertureEfficiency")[0]
+        apertureEfficiencyNode = self._getFirstNodeByTagName(
+            rowdom, "apertureEfficiency", True
+        )
 
-        apertureEfficiencyStr = apertureEfficiencyNode.firstChild.data.strip()
+        apertureEfficiencyStr = self._getXMLNodeChildText(apertureEfficiencyNode)
 
         self._apertureEfficiency = Parser.stringListToLists(
             apertureEfficiencyStr, float, "CalAmpli", False
         )
 
-        apertureEfficiencyErrorNode = rowdom.getElementsByTagName(
-            "apertureEfficiencyError"
-        )[0]
+        apertureEfficiencyErrorNode = self._getFirstNodeByTagName(
+            rowdom, "apertureEfficiencyError", True
+        )
 
-        apertureEfficiencyErrorStr = apertureEfficiencyErrorNode.firstChild.data.strip()
+        apertureEfficiencyErrorStr = self._getXMLNodeChildText(
+            apertureEfficiencyErrorNode
+        )
 
         self._apertureEfficiencyError = Parser.stringListToLists(
             apertureEfficiencyErrorStr, float, "CalAmpli", False
         )
 
-        correctionValidityNode = rowdom.getElementsByTagName("correctionValidity")
-        if len(correctionValidityNode) > 0:
+        correctionValidityNode = self._getFirstNodeByTagName(
+            rowdom, "correctionValidity", False
+        )
+        if correctionValidityNode:
 
             self._correctionValidity = bool(
-                correctionValidityNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(correctionValidityNode)
             )
 
             self._correctionValidityExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -605,6 +679,7 @@ class CalAmpliRow:
         antennaName The str value to which antennaName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -632,6 +707,7 @@ class CalAmpliRow:
         """
         Set atmPhaseCorrection with the specified AtmPhaseCorrection value.
         atmPhaseCorrection The AtmPhaseCorrection value to which atmPhaseCorrection is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -663,6 +739,7 @@ class CalAmpliRow:
         receiverBand The ReceiverBand value to which receiverBand is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -690,6 +767,7 @@ class CalAmpliRow:
         """
         Set basebandName with the specified BasebandName value.
         basebandName The BasebandName value to which basebandName is to be set.
+
 
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -721,6 +799,7 @@ class CalAmpliRow:
         numReceptor The int value to which numReceptor is to be set.
 
 
+
         """
 
         self._numReceptor = int(numReceptor)
@@ -741,6 +820,7 @@ class CalAmpliRow:
         """
         Set polarizationTypes with the specified PolarizationType []  value.
         polarizationTypes The PolarizationType []  value to which polarizationTypes is to be set.
+
 
 
         """
@@ -785,6 +865,7 @@ class CalAmpliRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -808,6 +889,7 @@ class CalAmpliRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -830,6 +912,7 @@ class CalAmpliRow:
         """
         Set frequencyRange with the specified Frequency []  value.
         frequencyRange The Frequency []  value to which frequencyRange is to be set.
+
         The value of frequencyRange can be anything allowed by the Frequency []  constructor.
 
         """
@@ -874,6 +957,9 @@ class CalAmpliRow:
         Set apertureEfficiency with the specified float []  value.
         apertureEfficiency The float []  value to which apertureEfficiency is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -916,6 +1002,9 @@ class CalAmpliRow:
         """
         Set apertureEfficiencyError with the specified float []  value.
         apertureEfficiencyError The float []  value to which apertureEfficiencyError is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -975,6 +1064,7 @@ class CalAmpliRow:
         correctionValidity The bool value to which correctionValidity is to be set.
 
 
+
         """
 
         self._correctionValidity = bool(correctionValidity)
@@ -1006,6 +1096,7 @@ class CalAmpliRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1036,6 +1127,7 @@ class CalAmpliRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

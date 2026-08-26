@@ -75,6 +75,16 @@ class CalFluxRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -109,9 +119,11 @@ class CalFluxRow:
 
         self._fluxMethod = FluxCalibrationMethod.from_int(0)
 
-        self._flux = []  # this is a list of float []  []
+        self._flux = []  # this is a list of float []  []  saved as double precision
 
-        self._fluxError = []  # this is a list of float []  []
+        self._fluxError = (
+            []
+        )  # this is a list of float []  []  saved as double precision
 
         self._stokes = []  # this is a list of StokesParameter []
 
@@ -281,67 +293,95 @@ class CalFluxRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("sourceName", self._sourceName)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("startValidTime", self._startValidTime)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("endValidTime", self._endValidTime)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numFrequencyRanges", self._numFrequencyRanges)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numStokes", self._numStokes)
+
+        result += "\n   "
 
         result += Parser.listExtendedValueToXML(
             "frequencyRanges", self._frequencyRanges
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML(
             "fluxMethod", FluxCalibrationMethod.name(self._fluxMethod)
         )
 
-        result += Parser.listValueToXML("flux", self._flux)
+        result += "\n   "
 
-        result += Parser.listValueToXML("fluxError", self._fluxError)
+        result += Parser.doubleListValueToXML("flux", self._flux)
+
+        result += "\n   "
+
+        result += Parser.doubleListValueToXML("fluxError", self._fluxError)
+
+        result += "\n   "
 
         result += Parser.listEnumValueToXML("stokes", self._stokes)
 
         if self._directionExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("direction", self._direction)
 
         if self._directionCodeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "directionCode", DirectionReferenceCode.name(self._directionCode)
             )
 
         if self._directionEquinoxExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML(
                 "directionEquinox", self._directionEquinox
             )
 
         if self._PAExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("PA", self._PA)
 
         if self._PAErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("PAError", self._PAError)
 
         if self._sizeExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("size", self._size)
 
         if self._sizeErrorExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("sizeError", self._sizeError)
 
         if self._sourceModelExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "sourceModel", SourceModel.name(self._sourceModel)
@@ -349,13 +389,38 @@ class CalFluxRow:
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("calDataId", self._calDataId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("calReductionId", self._calReductionId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "CalFluxTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -382,65 +447,71 @@ class CalFluxRow:
 
         # intrinsic attribute values
 
-        sourceNameNode = rowdom.getElementsByTagName("sourceName")[0]
+        sourceNameNode = self._getFirstNodeByTagName(rowdom, "sourceName", True)
 
-        self._sourceName = str(sourceNameNode.firstChild.data.strip())
+        self._sourceName = str(self._getXMLNodeChildText(sourceNameNode))
 
-        startValidTimeNode = rowdom.getElementsByTagName("startValidTime")[0]
+        startValidTimeNode = self._getFirstNodeByTagName(rowdom, "startValidTime", True)
 
-        self._startValidTime = ArrayTime(startValidTimeNode.firstChild.data.strip())
+        self._startValidTime = ArrayTime(self._getXMLNodeChildText(startValidTimeNode))
 
-        endValidTimeNode = rowdom.getElementsByTagName("endValidTime")[0]
+        endValidTimeNode = self._getFirstNodeByTagName(rowdom, "endValidTime", True)
 
-        self._endValidTime = ArrayTime(endValidTimeNode.firstChild.data.strip())
+        self._endValidTime = ArrayTime(self._getXMLNodeChildText(endValidTimeNode))
 
-        numFrequencyRangesNode = rowdom.getElementsByTagName("numFrequencyRanges")[0]
+        numFrequencyRangesNode = self._getFirstNodeByTagName(
+            rowdom, "numFrequencyRanges", True
+        )
 
-        self._numFrequencyRanges = int(numFrequencyRangesNode.firstChild.data.strip())
+        self._numFrequencyRanges = int(
+            self._getXMLNodeChildText(numFrequencyRangesNode)
+        )
 
-        numStokesNode = rowdom.getElementsByTagName("numStokes")[0]
+        numStokesNode = self._getFirstNodeByTagName(rowdom, "numStokes", True)
 
-        self._numStokes = int(numStokesNode.firstChild.data.strip())
+        self._numStokes = int(self._getXMLNodeChildText(numStokesNode))
 
-        frequencyRangesNode = rowdom.getElementsByTagName("frequencyRanges")[0]
+        frequencyRangesNode = self._getFirstNodeByTagName(
+            rowdom, "frequencyRanges", True
+        )
 
-        frequencyRangesStr = frequencyRangesNode.firstChild.data.strip()
+        frequencyRangesStr = self._getXMLNodeChildText(frequencyRangesNode)
 
         self._frequencyRanges = Parser.stringListToLists(
             frequencyRangesStr, Frequency, "CalFlux", True
         )
 
-        fluxMethodNode = rowdom.getElementsByTagName("fluxMethod")[0]
+        fluxMethodNode = self._getFirstNodeByTagName(rowdom, "fluxMethod", True)
 
         self._fluxMethod = FluxCalibrationMethod.newFluxCalibrationMethod(
-            fluxMethodNode.firstChild.data.strip()
+            self._getXMLNodeChildText(fluxMethodNode)
         )
 
-        fluxNode = rowdom.getElementsByTagName("flux")[0]
+        fluxNode = self._getFirstNodeByTagName(rowdom, "flux", True)
 
-        fluxStr = fluxNode.firstChild.data.strip()
+        fluxStr = self._getXMLNodeChildText(fluxNode)
 
         self._flux = Parser.stringListToLists(fluxStr, float, "CalFlux", False)
 
-        fluxErrorNode = rowdom.getElementsByTagName("fluxError")[0]
+        fluxErrorNode = self._getFirstNodeByTagName(rowdom, "fluxError", True)
 
-        fluxErrorStr = fluxErrorNode.firstChild.data.strip()
+        fluxErrorStr = self._getXMLNodeChildText(fluxErrorNode)
 
         self._fluxError = Parser.stringListToLists(
             fluxErrorStr, float, "CalFlux", False
         )
 
-        stokesNode = rowdom.getElementsByTagName("stokes")[0]
+        stokesNode = self._getFirstNodeByTagName(rowdom, "stokes", True)
 
-        stokesStr = stokesNode.firstChild.data.strip()
+        stokesStr = self._getXMLNodeChildText(stokesNode)
         self._stokes = Parser.stringListToLists(
             stokesStr, StokesParameter, "CalFlux", False
         )
 
-        directionNode = rowdom.getElementsByTagName("direction")
-        if len(directionNode) > 0:
+        directionNode = self._getFirstNodeByTagName(rowdom, "direction", False)
+        if directionNode:
 
-            directionStr = directionNode[0].firstChild.data.strip()
+            directionStr = self._getXMLNodeChildText(directionNode)
 
             self._direction = Parser.stringListToLists(
                 directionStr, Angle, "CalFlux", True
@@ -448,55 +519,57 @@ class CalFluxRow:
 
             self._directionExists = True
 
-        directionCodeNode = rowdom.getElementsByTagName("directionCode")
-        if len(directionCodeNode) > 0:
+        directionCodeNode = self._getFirstNodeByTagName(rowdom, "directionCode", False)
+        if directionCodeNode:
 
             self._directionCode = DirectionReferenceCode.newDirectionReferenceCode(
-                directionCodeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionCodeNode)
             )
 
             self._directionCodeExists = True
 
-        directionEquinoxNode = rowdom.getElementsByTagName("directionEquinox")
-        if len(directionEquinoxNode) > 0:
+        directionEquinoxNode = self._getFirstNodeByTagName(
+            rowdom, "directionEquinox", False
+        )
+        if directionEquinoxNode:
 
             self._directionEquinox = Angle(
-                directionEquinoxNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(directionEquinoxNode)
             )
 
             self._directionEquinoxExists = True
 
-        PANode = rowdom.getElementsByTagName("PA")
-        if len(PANode) > 0:
+        PANode = self._getFirstNodeByTagName(rowdom, "PA", False)
+        if PANode:
 
-            PAStr = PANode[0].firstChild.data.strip()
+            PAStr = self._getXMLNodeChildText(PANode)
 
             self._PA = Parser.stringListToLists(PAStr, Angle, "CalFlux", True)
 
             self._PAExists = True
 
-        PAErrorNode = rowdom.getElementsByTagName("PAError")
-        if len(PAErrorNode) > 0:
+        PAErrorNode = self._getFirstNodeByTagName(rowdom, "PAError", False)
+        if PAErrorNode:
 
-            PAErrorStr = PAErrorNode[0].firstChild.data.strip()
+            PAErrorStr = self._getXMLNodeChildText(PAErrorNode)
 
             self._PAError = Parser.stringListToLists(PAErrorStr, Angle, "CalFlux", True)
 
             self._PAErrorExists = True
 
-        sizeNode = rowdom.getElementsByTagName("size")
-        if len(sizeNode) > 0:
+        sizeNode = self._getFirstNodeByTagName(rowdom, "size", False)
+        if sizeNode:
 
-            sizeStr = sizeNode[0].firstChild.data.strip()
+            sizeStr = self._getXMLNodeChildText(sizeNode)
 
             self._size = Parser.stringListToLists(sizeStr, Angle, "CalFlux", True)
 
             self._sizeExists = True
 
-        sizeErrorNode = rowdom.getElementsByTagName("sizeError")
-        if len(sizeErrorNode) > 0:
+        sizeErrorNode = self._getFirstNodeByTagName(rowdom, "sizeError", False)
+        if sizeErrorNode:
 
-            sizeErrorStr = sizeErrorNode[0].firstChild.data.strip()
+            sizeErrorStr = self._getXMLNodeChildText(sizeErrorNode)
 
             self._sizeError = Parser.stringListToLists(
                 sizeErrorStr, Angle, "CalFlux", True
@@ -504,24 +577,24 @@ class CalFluxRow:
 
             self._sizeErrorExists = True
 
-        sourceModelNode = rowdom.getElementsByTagName("sourceModel")
-        if len(sourceModelNode) > 0:
+        sourceModelNode = self._getFirstNodeByTagName(rowdom, "sourceModel", False)
+        if sourceModelNode:
 
             self._sourceModel = SourceModel.newSourceModel(
-                sourceModelNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(sourceModelNode)
             )
 
             self._sourceModelExists = True
 
         # extrinsic attribute values
 
-        calDataIdNode = rowdom.getElementsByTagName("calDataId")[0]
+        calDataIdNode = self._getFirstNodeByTagName(rowdom, "calDataId", True)
 
-        self._calDataId = Tag(calDataIdNode.firstChild.data.strip())
+        self._calDataId = Tag(self._getXMLNodeChildText(calDataIdNode))
 
-        calReductionIdNode = rowdom.getElementsByTagName("calReductionId")[0]
+        calReductionIdNode = self._getFirstNodeByTagName(rowdom, "calReductionId", True)
 
-        self._calReductionId = Tag(calReductionIdNode.firstChild.data.strip())
+        self._calReductionId = Tag(self._getXMLNodeChildText(calReductionIdNode))
 
         # from link values, if any
 
@@ -559,7 +632,7 @@ class CalFluxRow:
         eos.writeInt(flux_dims[1])
         for i in range(flux_dims[0]):
             for j in range(flux_dims[1]):
-                eos.writeFloat(self._flux[i][j])
+                eos.writeDouble(self._flux[i][j])
 
         # null array case, unsure if this is possible but this should work
         if self._fluxError is None:
@@ -572,7 +645,7 @@ class CalFluxRow:
         eos.writeInt(fluxError_dims[1])
         for i in range(fluxError_dims[0]):
             for j in range(fluxError_dims[1]):
-                eos.writeFloat(self._fluxError[i][j])
+                eos.writeDouble(self._fluxError[i][j])
 
         eos.writeInt(len(self._stokes))
         for i in range(len(self._stokes)):
@@ -703,7 +776,7 @@ class CalFluxRow:
         for i in range(fluxDim1):
             thisList_j = []
             for j in range(fluxDim2):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
         row._flux = thisList
@@ -720,7 +793,7 @@ class CalFluxRow:
         for i in range(fluxErrorDim1):
             thisList_j = []
             for j in range(fluxErrorDim2):
-                thisValue = eis.readFloat()
+                thisValue = eis.readDouble()
                 thisList_j.append(thisValue)
             thisList.append(thisList_j)
         row._fluxError = thisList
@@ -892,6 +965,7 @@ class CalFluxRow:
         sourceName The str value to which sourceName is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -920,6 +994,7 @@ class CalFluxRow:
         """
         Set startValidTime with the specified ArrayTime value.
         startValidTime The ArrayTime value to which startValidTime is to be set.
+
         The value of startValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -943,6 +1018,7 @@ class CalFluxRow:
         """
         Set endValidTime with the specified ArrayTime value.
         endValidTime The ArrayTime value to which endValidTime is to be set.
+
         The value of endValidTime can be anything allowed by the ArrayTime constructor.
 
         """
@@ -967,6 +1043,7 @@ class CalFluxRow:
         numFrequencyRanges The int value to which numFrequencyRanges is to be set.
 
 
+
         """
 
         self._numFrequencyRanges = int(numFrequencyRanges)
@@ -989,6 +1066,7 @@ class CalFluxRow:
         numStokes The int value to which numStokes is to be set.
 
 
+
         """
 
         self._numStokes = int(numStokes)
@@ -1009,6 +1087,7 @@ class CalFluxRow:
         """
         Set frequencyRanges with the specified Frequency []  []  value.
         frequencyRanges The Frequency []  []  value to which frequencyRanges is to be set.
+
         The value of frequencyRanges can be anything allowed by the Frequency []  []  constructor.
 
         """
@@ -1054,6 +1133,7 @@ class CalFluxRow:
         fluxMethod The FluxCalibrationMethod value to which fluxMethod is to be set.
 
 
+
         """
 
         self._fluxMethod = FluxCalibrationMethod(fluxMethod)
@@ -1074,6 +1154,9 @@ class CalFluxRow:
         """
         Set flux with the specified float []  []  value.
         flux The float []  []  value to which flux is to be set.
+
+        The values are saved as double precision floats.
+
 
 
         """
@@ -1118,6 +1201,9 @@ class CalFluxRow:
         Set fluxError with the specified float []  []  value.
         fluxError The float []  []  value to which fluxError is to be set.
 
+        The values are saved as double precision floats.
+
+
 
         """
 
@@ -1160,6 +1246,7 @@ class CalFluxRow:
         """
         Set stokes with the specified StokesParameter []  value.
         stokes The StokesParameter []  value to which stokes is to be set.
+
 
 
         """
@@ -1217,6 +1304,7 @@ class CalFluxRow:
         """
         Set direction with the specified Angle []  value.
         direction The Angle []  value to which direction is to be set.
+
         The value of direction can be anything allowed by the Angle []  constructor.
 
         """
@@ -1284,6 +1372,7 @@ class CalFluxRow:
         directionCode The DirectionReferenceCode value to which directionCode is to be set.
 
 
+
         """
 
         self._directionCode = DirectionReferenceCode(directionCode)
@@ -1327,6 +1416,7 @@ class CalFluxRow:
         """
         Set directionEquinox with the specified Angle value.
         directionEquinox The Angle value to which directionEquinox is to be set.
+
         The value of directionEquinox can be anything allowed by the Angle constructor.
 
         """
@@ -1371,6 +1461,7 @@ class CalFluxRow:
         """
         Set PA with the specified Angle []  []  value.
         PA The Angle []  []  value to which PA is to be set.
+
         The value of PA can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1436,6 +1527,7 @@ class CalFluxRow:
         """
         Set PAError with the specified Angle []  []  value.
         PAError The Angle []  []  value to which PAError is to be set.
+
         The value of PAError can be anything allowed by the Angle []  []  constructor.
 
         """
@@ -1501,6 +1593,7 @@ class CalFluxRow:
         """
         Set size with the specified Angle []  []  []  value.
         size The Angle []  []  []  value to which size is to be set.
+
         The value of size can be anything allowed by the Angle []  []  []  constructor.
 
         """
@@ -1566,6 +1659,7 @@ class CalFluxRow:
         """
         Set sizeError with the specified Angle []  []  []  value.
         sizeError The Angle []  []  []  value to which sizeError is to be set.
+
         The value of sizeError can be anything allowed by the Angle []  []  []  constructor.
 
         """
@@ -1633,6 +1727,7 @@ class CalFluxRow:
         sourceModel The SourceModel value to which sourceModel is to be set.
 
 
+
         """
 
         self._sourceModel = SourceModel(sourceModel)
@@ -1664,6 +1759,7 @@ class CalFluxRow:
         """
         Set calDataId with the specified Tag value.
         calDataId The Tag value to which calDataId is to be set.
+
         The value of calDataId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1694,6 +1790,7 @@ class CalFluxRow:
         """
         Set calReductionId with the specified Tag value.
         calReductionId The Tag value to which calReductionId is to be set.
+
         The value of calReductionId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

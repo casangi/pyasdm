@@ -63,6 +63,16 @@ class ModulationRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -158,39 +168,76 @@ class ModulationRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("receiverId", self._receiverId)
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML(
             "localOscillatorOffset", self._localOscillatorOffset
         )
 
+        result += "\n   "
+
         result += Parser.valueToXML("walsh180enabled", self._walsh180enabled)
+
+        result += "\n   "
 
         result += Parser.valueToXML("walsh90enabled", self._walsh90enabled)
 
         if self._walsh180indexExists:
+            result += "\n   "
 
             result += Parser.valueToXML("walsh180index", self._walsh180index)
 
         if self._walsh90indexExists:
+            result += "\n   "
 
             result += Parser.valueToXML("walsh90index", self._walsh90index)
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ModulationTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -217,53 +264,59 @@ class ModulationRow:
 
         # intrinsic attribute values
 
-        receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
+        receiverIdNode = self._getFirstNodeByTagName(rowdom, "receiverId", True)
 
-        self._receiverId = int(receiverIdNode.firstChild.data.strip())
+        self._receiverId = int(self._getXMLNodeChildText(receiverIdNode))
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
-
-        localOscillatorOffsetNode = rowdom.getElementsByTagName(
-            "localOscillatorOffset"
-        )[0]
-
-        self._localOscillatorOffset = Frequency(
-            localOscillatorOffsetNode.firstChild.data.strip()
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        walsh180enabledNode = rowdom.getElementsByTagName("walsh180enabled")[0]
+        localOscillatorOffsetNode = self._getFirstNodeByTagName(
+            rowdom, "localOscillatorOffset", True
+        )
 
-        self._walsh180enabled = bool(walsh180enabledNode.firstChild.data.strip())
+        self._localOscillatorOffset = Frequency(
+            self._getXMLNodeChildText(localOscillatorOffsetNode)
+        )
 
-        walsh90enabledNode = rowdom.getElementsByTagName("walsh90enabled")[0]
+        walsh180enabledNode = self._getFirstNodeByTagName(
+            rowdom, "walsh180enabled", True
+        )
 
-        self._walsh90enabled = bool(walsh90enabledNode.firstChild.data.strip())
+        self._walsh180enabled = bool(self._getXMLNodeChildText(walsh180enabledNode))
 
-        walsh180indexNode = rowdom.getElementsByTagName("walsh180index")
-        if len(walsh180indexNode) > 0:
+        walsh90enabledNode = self._getFirstNodeByTagName(rowdom, "walsh90enabled", True)
 
-            self._walsh180index = int(walsh180indexNode[0].firstChild.data.strip())
+        self._walsh90enabled = bool(self._getXMLNodeChildText(walsh90enabledNode))
+
+        walsh180indexNode = self._getFirstNodeByTagName(rowdom, "walsh180index", False)
+        if walsh180indexNode:
+
+            self._walsh180index = int(self._getXMLNodeChildText(walsh180indexNode))
 
             self._walsh180indexExists = True
 
-        walsh90indexNode = rowdom.getElementsByTagName("walsh90index")
-        if len(walsh90indexNode) > 0:
+        walsh90indexNode = self._getFirstNodeByTagName(rowdom, "walsh90index", False)
+        if walsh90indexNode:
 
-            self._walsh90index = int(walsh90indexNode[0].firstChild.data.strip())
+            self._walsh90index = int(self._getXMLNodeChildText(walsh90indexNode))
 
             self._walsh90indexExists = True
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
@@ -437,6 +490,7 @@ class ModulationRow:
         receiverId The int value to which receiverId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -465,6 +519,7 @@ class ModulationRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -495,6 +550,7 @@ class ModulationRow:
         """
         Set localOscillatorOffset with the specified Frequency value.
         localOscillatorOffset The Frequency value to which localOscillatorOffset is to be set.
+
         The value of localOscillatorOffset can be anything allowed by the Frequency constructor.
 
         """
@@ -519,6 +575,7 @@ class ModulationRow:
         walsh180enabled The bool value to which walsh180enabled is to be set.
 
 
+
         """
 
         self._walsh180enabled = bool(walsh180enabled)
@@ -539,6 +596,7 @@ class ModulationRow:
         """
         Set walsh90enabled with the specified bool value.
         walsh90enabled The bool value to which walsh90enabled is to be set.
+
 
 
         """
@@ -575,6 +633,7 @@ class ModulationRow:
         """
         Set walsh180index with the specified int value.
         walsh180index The int value to which walsh180index is to be set.
+
 
 
         """
@@ -621,6 +680,7 @@ class ModulationRow:
         walsh90index The int value to which walsh90index is to be set.
 
 
+
         """
 
         self._walsh90index = int(walsh90index)
@@ -652,6 +712,7 @@ class ModulationRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -682,6 +743,7 @@ class ModulationRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

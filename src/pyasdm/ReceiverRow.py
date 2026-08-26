@@ -72,6 +72,16 @@ class ReceiverRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -161,37 +171,76 @@ class ReceiverRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.valueToXML("receiverId", self._receiverId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
 
+        result += "\n   "
+
         result += Parser.valueToXML("name", self._name)
 
+        result += "\n   "
+
         result += Parser.valueToXML("numLO", self._numLO)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "frequencyBand", ReceiverBand.name(self._frequencyBand)
         )
 
+        result += "\n   "
+
         result += Parser.listExtendedValueToXML("freqLO", self._freqLO)
+
+        result += "\n   "
 
         result += Parser.valueToXML(
             "receiverSideband", ReceiverSideband.name(self._receiverSideband)
         )
 
+        result += "\n   "
+
         result += Parser.listEnumValueToXML("sidebandLO", self._sidebandLO)
 
         # extrinsic attributes
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "ReceiverTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -218,52 +267,58 @@ class ReceiverRow:
 
         # intrinsic attribute values
 
-        receiverIdNode = rowdom.getElementsByTagName("receiverId")[0]
+        receiverIdNode = self._getFirstNodeByTagName(rowdom, "receiverId", True)
 
-        self._receiverId = int(receiverIdNode.firstChild.data.strip())
+        self._receiverId = int(self._getXMLNodeChildText(receiverIdNode))
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
-
-        nameNode = rowdom.getElementsByTagName("name")[0]
-
-        self._name = str(nameNode.firstChild.data.strip())
-
-        numLONode = rowdom.getElementsByTagName("numLO")[0]
-
-        self._numLO = int(numLONode.firstChild.data.strip())
-
-        frequencyBandNode = rowdom.getElementsByTagName("frequencyBand")[0]
-
-        self._frequencyBand = ReceiverBand.newReceiverBand(
-            frequencyBandNode.firstChild.data.strip()
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
         )
 
-        freqLONode = rowdom.getElementsByTagName("freqLO")[0]
+        nameNode = self._getFirstNodeByTagName(rowdom, "name", True)
 
-        freqLOStr = freqLONode.firstChild.data.strip()
+        self._name = str(self._getXMLNodeChildText(nameNode))
+
+        numLONode = self._getFirstNodeByTagName(rowdom, "numLO", True)
+
+        self._numLO = int(self._getXMLNodeChildText(numLONode))
+
+        frequencyBandNode = self._getFirstNodeByTagName(rowdom, "frequencyBand", True)
+
+        self._frequencyBand = ReceiverBand.newReceiverBand(
+            self._getXMLNodeChildText(frequencyBandNode)
+        )
+
+        freqLONode = self._getFirstNodeByTagName(rowdom, "freqLO", True)
+
+        freqLOStr = self._getXMLNodeChildText(freqLONode)
 
         self._freqLO = Parser.stringListToLists(freqLOStr, Frequency, "Receiver", True)
 
-        receiverSidebandNode = rowdom.getElementsByTagName("receiverSideband")[0]
-
-        self._receiverSideband = ReceiverSideband.newReceiverSideband(
-            receiverSidebandNode.firstChild.data.strip()
+        receiverSidebandNode = self._getFirstNodeByTagName(
+            rowdom, "receiverSideband", True
         )
 
-        sidebandLONode = rowdom.getElementsByTagName("sidebandLO")[0]
+        self._receiverSideband = ReceiverSideband.newReceiverSideband(
+            self._getXMLNodeChildText(receiverSidebandNode)
+        )
 
-        sidebandLOStr = sidebandLONode.firstChild.data.strip()
+        sidebandLONode = self._getFirstNodeByTagName(rowdom, "sidebandLO", True)
+
+        sidebandLOStr = self._getXMLNodeChildText(sidebandLONode)
         self._sidebandLO = Parser.stringListToLists(
             sidebandLOStr, NetSideband, "Receiver", False
         )
 
         # extrinsic attribute values
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
@@ -432,6 +487,7 @@ class ReceiverRow:
         receiverId The int value to which receiverId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -460,6 +516,7 @@ class ReceiverRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -491,6 +548,7 @@ class ReceiverRow:
         name The str value to which name is to be set.
 
 
+
         """
 
         self._name = str(name)
@@ -511,6 +569,7 @@ class ReceiverRow:
         """
         Set numLO with the specified int value.
         numLO The int value to which numLO is to be set.
+
 
 
         """
@@ -535,6 +594,7 @@ class ReceiverRow:
         frequencyBand The ReceiverBand value to which frequencyBand is to be set.
 
 
+
         """
 
         self._frequencyBand = ReceiverBand(frequencyBand)
@@ -555,6 +615,7 @@ class ReceiverRow:
         """
         Set freqLO with the specified Frequency []  value.
         freqLO The Frequency []  value to which freqLO is to be set.
+
         The value of freqLO can be anything allowed by the Frequency []  constructor.
 
         """
@@ -600,6 +661,7 @@ class ReceiverRow:
         receiverSideband The ReceiverSideband value to which receiverSideband is to be set.
 
 
+
         """
 
         self._receiverSideband = ReceiverSideband(receiverSideband)
@@ -620,6 +682,7 @@ class ReceiverRow:
         """
         Set sidebandLO with the specified NetSideband []  value.
         sidebandLO The NetSideband []  value to which sidebandLO is to be set.
+
 
 
         """
@@ -666,6 +729,7 @@ class ReceiverRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.

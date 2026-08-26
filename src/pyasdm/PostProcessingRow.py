@@ -66,6 +66,16 @@ class PostProcessingRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -216,31 +226,40 @@ class PostProcessingRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("postProcessingId", self._postProcessingId)
+
+        result += "\n   "
 
         result += Parser.valueToXML("intent", PostProcessingIntent.name(self._intent))
 
         if self._descriptionExists:
+            result += "\n   "
 
             result += Parser.valueToXML("description", self._description)
 
         if self._numSpectralWindowExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numSpectralWindow", self._numSpectralWindow)
 
         if self._numScanExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numScan", self._numScan)
 
         if self._scanNumberExists:
+            result += "\n   "
 
             result += Parser.listValueToXML("scanNumber", self._scanNumber)
 
         if self._calibrationStrategyExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "calibrationStrategy", self._calibrationStrategy
@@ -249,10 +268,12 @@ class PostProcessingRow:
         # extrinsic attributes
 
         if self._execBlockIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML("execBlockId", self._execBlockId)
 
         if self._spectralWindowIdExists:
+            result += "\n   "
 
             result += Parser.listExtendedValueToXML(
                 "spectralWindowId", self._spectralWindowId
@@ -260,7 +281,28 @@ class PostProcessingRow:
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "PostProcessingTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -289,43 +331,47 @@ class PostProcessingRow:
 
         # intrinsic attribute values
 
-        postProcessingIdNode = rowdom.getElementsByTagName("postProcessingId")[0]
-
-        self._postProcessingId = Tag(postProcessingIdNode.firstChild.data.strip())
-
-        intentNode = rowdom.getElementsByTagName("intent")[0]
-
-        self._intent = PostProcessingIntent.newPostProcessingIntent(
-            intentNode.firstChild.data.strip()
+        postProcessingIdNode = self._getFirstNodeByTagName(
+            rowdom, "postProcessingId", True
         )
 
-        descriptionNode = rowdom.getElementsByTagName("description")
-        if len(descriptionNode) > 0:
+        self._postProcessingId = Tag(self._getXMLNodeChildText(postProcessingIdNode))
 
-            self._description = str(descriptionNode[0].firstChild.data.strip())
+        intentNode = self._getFirstNodeByTagName(rowdom, "intent", True)
+
+        self._intent = PostProcessingIntent.newPostProcessingIntent(
+            self._getXMLNodeChildText(intentNode)
+        )
+
+        descriptionNode = self._getFirstNodeByTagName(rowdom, "description", False)
+        if descriptionNode:
+
+            self._description = str(self._getXMLNodeChildText(descriptionNode))
 
             self._descriptionExists = True
 
-        numSpectralWindowNode = rowdom.getElementsByTagName("numSpectralWindow")
-        if len(numSpectralWindowNode) > 0:
+        numSpectralWindowNode = self._getFirstNodeByTagName(
+            rowdom, "numSpectralWindow", False
+        )
+        if numSpectralWindowNode:
 
             self._numSpectralWindow = int(
-                numSpectralWindowNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(numSpectralWindowNode)
             )
 
             self._numSpectralWindowExists = True
 
-        numScanNode = rowdom.getElementsByTagName("numScan")
-        if len(numScanNode) > 0:
+        numScanNode = self._getFirstNodeByTagName(rowdom, "numScan", False)
+        if numScanNode:
 
-            self._numScan = int(numScanNode[0].firstChild.data.strip())
+            self._numScan = int(self._getXMLNodeChildText(numScanNode))
 
             self._numScanExists = True
 
-        scanNumberNode = rowdom.getElementsByTagName("scanNumber")
-        if len(scanNumberNode) > 0:
+        scanNumberNode = self._getFirstNodeByTagName(rowdom, "scanNumber", False)
+        if scanNumberNode:
 
-            scanNumberStr = scanNumberNode[0].firstChild.data.strip()
+            scanNumberStr = self._getXMLNodeChildText(scanNumberNode)
 
             self._scanNumber = Parser.stringListToLists(
                 scanNumberStr, int, "PostProcessing", False
@@ -333,21 +379,23 @@ class PostProcessingRow:
 
             self._scanNumberExists = True
 
-        calibrationStrategyNode = rowdom.getElementsByTagName("calibrationStrategy")
-        if len(calibrationStrategyNode) > 0:
+        calibrationStrategyNode = self._getFirstNodeByTagName(
+            rowdom, "calibrationStrategy", False
+        )
+        if calibrationStrategyNode:
 
             self._calibrationStrategy = str(
-                calibrationStrategyNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(calibrationStrategyNode)
             )
 
             self._calibrationStrategyExists = True
 
         # extrinsic attribute values
 
-        execBlockIdNode = rowdom.getElementsByTagName("execBlockId")
-        if len(execBlockIdNode) > 0:
+        execBlockIdNode = self._getFirstNodeByTagName(rowdom, "execBlockId", False)
+        if execBlockIdNode:
 
-            execBlockIdStr = execBlockIdNode[0].firstChild.data.strip()
+            execBlockIdStr = self._getXMLNodeChildText(execBlockIdNode)
 
             self._execBlockId = Parser.stringListToLists(
                 execBlockIdStr, Tag, "PostProcessing", True
@@ -355,10 +403,12 @@ class PostProcessingRow:
 
             self._execBlockIdExists = True
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")
-        if len(spectralWindowIdNode) > 0:
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", False
+        )
+        if spectralWindowIdNode:
 
-            spectralWindowIdStr = spectralWindowIdNode[0].firstChild.data.strip()
+            spectralWindowIdStr = self._getXMLNodeChildText(spectralWindowIdNode)
 
             self._spectralWindowId = Parser.stringListToLists(
                 spectralWindowIdStr, Tag, "PostProcessing", True
@@ -572,6 +622,7 @@ class PostProcessingRow:
         """
         Set postProcessingId with the specified Tag value.
         postProcessingId The Tag value to which postProcessingId is to be set.
+
         The value of postProcessingId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -601,6 +652,7 @@ class PostProcessingRow:
         """
         Set intent with the specified PostProcessingIntent value.
         intent The PostProcessingIntent value to which intent is to be set.
+
 
 
         """
@@ -637,6 +689,7 @@ class PostProcessingRow:
         """
         Set description with the specified str value.
         description The str value to which description is to be set.
+
 
 
         """
@@ -683,6 +736,7 @@ class PostProcessingRow:
         numSpectralWindow The int value to which numSpectralWindow is to be set.
 
 
+
         """
 
         self._numSpectralWindow = int(numSpectralWindow)
@@ -727,6 +781,7 @@ class PostProcessingRow:
         numScan The int value to which numScan is to be set.
 
 
+
         """
 
         self._numScan = int(numScan)
@@ -769,6 +824,7 @@ class PostProcessingRow:
         """
         Set scanNumber with the specified int []  value.
         scanNumber The int []  value to which scanNumber is to be set.
+
 
 
         """
@@ -836,6 +892,7 @@ class PostProcessingRow:
         calibrationStrategy The str value to which calibrationStrategy is to be set.
 
 
+
         """
 
         self._calibrationStrategy = str(calibrationStrategy)
@@ -880,6 +937,7 @@ class PostProcessingRow:
         """
         Set execBlockId with the specified Tag []  value.
         execBlockId The Tag []  value to which execBlockId is to be set.
+
         The value of execBlockId can be anything allowed by the Tag []  constructor.
 
         """
@@ -945,6 +1003,7 @@ class PostProcessingRow:
         """
         Set spectralWindowId with the specified Tag []  value.
         spectralWindowId The Tag []  value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag []  constructor.
 
         """

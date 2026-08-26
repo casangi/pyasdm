@@ -63,6 +63,16 @@ class SysPowerRow:
     # whether this row has been added to the table or not.
     _hasBeenAdded = False
 
+    # utility function to safely extract the stripped text of the first child of
+    # an XML node, returns an empty string if the node doesn't have any data there
+    @staticmethod
+    def _getXMLNodeChildText(xmlNode):
+        """Returns the stripped text of the first child of xmlNode if it exists, otherwise an empty string"""
+        result = ""
+        if xmlNode and xmlNode.firstChild and xmlNode.firstChild.data:
+            result = xmlNode.firstChild.data.strip()
+        return result
+
     # internal attribute values appear later, with their getters and setters
 
     def __init__(self, table, row=None):
@@ -89,15 +99,21 @@ class SysPowerRow:
 
         self._switchedPowerDifferenceExists = False
 
-        self._switchedPowerDifference = []  # this is a list of float []
+        self._switchedPowerDifference = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._switchedPowerSumExists = False
 
-        self._switchedPowerSum = []  # this is a list of float []
+        self._switchedPowerSum = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._requantizerGainExists = False
 
-        self._requantizerGain = []  # this is a list of float []
+        self._requantizerGain = (
+            []
+        )  # this is a list of float []  saved as single precision
 
         self._numChannelsExists = False
 
@@ -117,15 +133,21 @@ class SysPowerRow:
 
         self._switchedPowerDifferenceSpectrumExists = False
 
-        self._switchedPowerDifferenceSpectrum = []  # this is a list of float []  []
+        self._switchedPowerDifferenceSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._switchedPowerSumSpectrumExists = False
 
-        self._switchedPowerSumSpectrum = []  # this is a list of float []  []
+        self._switchedPowerSumSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         self._requantizerGainSpectrumExists = False
 
-        self._requantizerGainSpectrum = []  # this is a list of float []  []
+        self._requantizerGainSpectrum = (
+            []
+        )  # this is a list of float []  []  saved as single precision
 
         # extrinsic attributes
 
@@ -260,75 +282,120 @@ class SysPowerRow:
         """
         result = ""
 
-        result += "<row> \n"
+        result += "  <row>"
 
         # intrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("timeInterval", self._timeInterval)
+
+        result += "\n   "
 
         result += Parser.valueToXML("numReceptor", self._numReceptor)
 
         if self._switchedPowerDifferenceExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "switchedPowerDifference", self._switchedPowerDifference
             )
 
         if self._switchedPowerSumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("switchedPowerSum", self._switchedPowerSum)
+            result += Parser.floatListValueToXML(
+                "switchedPowerSum", self._switchedPowerSum
+            )
 
         if self._requantizerGainExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML("requantizerGain", self._requantizerGain)
+            result += Parser.floatListValueToXML(
+                "requantizerGain", self._requantizerGain
+            )
 
         if self._numChannelsExists:
+            result += "\n   "
 
             result += Parser.valueToXML("numChannels", self._numChannels)
 
         if self._numPolarizationTypeExists:
+            result += "\n   "
 
             result += Parser.valueToXML(
                 "numPolarizationType", self._numPolarizationType
             )
 
         if self._chanFreqStartExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("chanFreqStart", self._chanFreqStart)
 
         if self._chanFreqStepExists:
+            result += "\n   "
 
             result += Parser.extendedValueToXML("chanFreqStep", self._chanFreqStep)
 
         if self._switchedPowerDifferenceSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "switchedPowerDifferenceSpectrum", self._switchedPowerDifferenceSpectrum
             )
 
         if self._switchedPowerSumSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "switchedPowerSumSpectrum", self._switchedPowerSumSpectrum
             )
 
         if self._requantizerGainSpectrumExists:
+            result += "\n   "
 
-            result += Parser.listValueToXML(
+            result += Parser.floatListValueToXML(
                 "requantizerGainSpectrum", self._requantizerGainSpectrum
             )
 
         # extrinsic attributes
 
+        result += "\n   "
+
         result += Parser.extendedValueToXML("antennaId", self._antennaId)
 
+        result += "\n   "
+
         result += Parser.valueToXML("feedId", self._feedId)
+
+        result += "\n   "
 
         result += Parser.extendedValueToXML("spectralWindowId", self._spectralWindowId)
 
         # links, if any
 
-        result += "</row>\n"
+        result += "</row>"
+        return result
+
+    @staticmethod
+    def _getFirstNodeByTagName(rowdom, tagname, required):
+        """
+        return the first node in rowdom of the elements using tagname.
+
+        If tagname is a required field (required=True) then a
+        ConversionException is raised if that tagname is not present.
+        Otherwise a None is returned if the tagname is not present.
+        """
+        result = None
+        elementNodes = rowdom.getElementsByTagName(tagname)
+        if len(elementNodes) > 0:
+            result = elementNodes[0]
+        else:
+            if required:
+                raise ConversionException(
+                    f"missing required field '{tagname}' in at least one row",
+                    "SysPowerTable",
+                )
         return result
 
     def setFromXML(self, xmlrow):
@@ -355,22 +422,24 @@ class SysPowerRow:
 
         # intrinsic attribute values
 
-        timeIntervalNode = rowdom.getElementsByTagName("timeInterval")[0]
+        timeIntervalNode = self._getFirstNodeByTagName(rowdom, "timeInterval", True)
 
-        self._timeInterval = ArrayTimeInterval(timeIntervalNode.firstChild.data.strip())
-
-        numReceptorNode = rowdom.getElementsByTagName("numReceptor")[0]
-
-        self._numReceptor = int(numReceptorNode.firstChild.data.strip())
-
-        switchedPowerDifferenceNode = rowdom.getElementsByTagName(
-            "switchedPowerDifference"
+        self._timeInterval = ArrayTimeInterval(
+            self._getXMLNodeChildText(timeIntervalNode)
         )
-        if len(switchedPowerDifferenceNode) > 0:
 
-            switchedPowerDifferenceStr = switchedPowerDifferenceNode[
-                0
-            ].firstChild.data.strip()
+        numReceptorNode = self._getFirstNodeByTagName(rowdom, "numReceptor", True)
+
+        self._numReceptor = int(self._getXMLNodeChildText(numReceptorNode))
+
+        switchedPowerDifferenceNode = self._getFirstNodeByTagName(
+            rowdom, "switchedPowerDifference", False
+        )
+        if switchedPowerDifferenceNode:
+
+            switchedPowerDifferenceStr = self._getXMLNodeChildText(
+                switchedPowerDifferenceNode
+            )
 
             self._switchedPowerDifference = Parser.stringListToLists(
                 switchedPowerDifferenceStr, float, "SysPower", False
@@ -378,10 +447,12 @@ class SysPowerRow:
 
             self._switchedPowerDifferenceExists = True
 
-        switchedPowerSumNode = rowdom.getElementsByTagName("switchedPowerSum")
-        if len(switchedPowerSumNode) > 0:
+        switchedPowerSumNode = self._getFirstNodeByTagName(
+            rowdom, "switchedPowerSum", False
+        )
+        if switchedPowerSumNode:
 
-            switchedPowerSumStr = switchedPowerSumNode[0].firstChild.data.strip()
+            switchedPowerSumStr = self._getXMLNodeChildText(switchedPowerSumNode)
 
             self._switchedPowerSum = Parser.stringListToLists(
                 switchedPowerSumStr, float, "SysPower", False
@@ -389,10 +460,12 @@ class SysPowerRow:
 
             self._switchedPowerSumExists = True
 
-        requantizerGainNode = rowdom.getElementsByTagName("requantizerGain")
-        if len(requantizerGainNode) > 0:
+        requantizerGainNode = self._getFirstNodeByTagName(
+            rowdom, "requantizerGain", False
+        )
+        if requantizerGainNode:
 
-            requantizerGainStr = requantizerGainNode[0].firstChild.data.strip()
+            requantizerGainStr = self._getXMLNodeChildText(requantizerGainNode)
 
             self._requantizerGain = Parser.stringListToLists(
                 requantizerGainStr, float, "SysPower", False
@@ -400,46 +473,48 @@ class SysPowerRow:
 
             self._requantizerGainExists = True
 
-        numChannelsNode = rowdom.getElementsByTagName("numChannels")
-        if len(numChannelsNode) > 0:
+        numChannelsNode = self._getFirstNodeByTagName(rowdom, "numChannels", False)
+        if numChannelsNode:
 
-            self._numChannels = int(numChannelsNode[0].firstChild.data.strip())
+            self._numChannels = int(self._getXMLNodeChildText(numChannelsNode))
 
             self._numChannelsExists = True
 
-        numPolarizationTypeNode = rowdom.getElementsByTagName("numPolarizationType")
-        if len(numPolarizationTypeNode) > 0:
+        numPolarizationTypeNode = self._getFirstNodeByTagName(
+            rowdom, "numPolarizationType", False
+        )
+        if numPolarizationTypeNode:
 
             self._numPolarizationType = int(
-                numPolarizationTypeNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(numPolarizationTypeNode)
             )
 
             self._numPolarizationTypeExists = True
 
-        chanFreqStartNode = rowdom.getElementsByTagName("chanFreqStart")
-        if len(chanFreqStartNode) > 0:
+        chanFreqStartNode = self._getFirstNodeByTagName(rowdom, "chanFreqStart", False)
+        if chanFreqStartNode:
 
             self._chanFreqStart = Frequency(
-                chanFreqStartNode[0].firstChild.data.strip()
+                self._getXMLNodeChildText(chanFreqStartNode)
             )
 
             self._chanFreqStartExists = True
 
-        chanFreqStepNode = rowdom.getElementsByTagName("chanFreqStep")
-        if len(chanFreqStepNode) > 0:
+        chanFreqStepNode = self._getFirstNodeByTagName(rowdom, "chanFreqStep", False)
+        if chanFreqStepNode:
 
-            self._chanFreqStep = Frequency(chanFreqStepNode[0].firstChild.data.strip())
+            self._chanFreqStep = Frequency(self._getXMLNodeChildText(chanFreqStepNode))
 
             self._chanFreqStepExists = True
 
-        switchedPowerDifferenceSpectrumNode = rowdom.getElementsByTagName(
-            "switchedPowerDifferenceSpectrum"
+        switchedPowerDifferenceSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "switchedPowerDifferenceSpectrum", False
         )
-        if len(switchedPowerDifferenceSpectrumNode) > 0:
+        if switchedPowerDifferenceSpectrumNode:
 
-            switchedPowerDifferenceSpectrumStr = switchedPowerDifferenceSpectrumNode[
-                0
-            ].firstChild.data.strip()
+            switchedPowerDifferenceSpectrumStr = self._getXMLNodeChildText(
+                switchedPowerDifferenceSpectrumNode
+            )
 
             self._switchedPowerDifferenceSpectrum = Parser.stringListToLists(
                 switchedPowerDifferenceSpectrumStr, float, "SysPower", False
@@ -447,14 +522,14 @@ class SysPowerRow:
 
             self._switchedPowerDifferenceSpectrumExists = True
 
-        switchedPowerSumSpectrumNode = rowdom.getElementsByTagName(
-            "switchedPowerSumSpectrum"
+        switchedPowerSumSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "switchedPowerSumSpectrum", False
         )
-        if len(switchedPowerSumSpectrumNode) > 0:
+        if switchedPowerSumSpectrumNode:
 
-            switchedPowerSumSpectrumStr = switchedPowerSumSpectrumNode[
-                0
-            ].firstChild.data.strip()
+            switchedPowerSumSpectrumStr = self._getXMLNodeChildText(
+                switchedPowerSumSpectrumNode
+            )
 
             self._switchedPowerSumSpectrum = Parser.stringListToLists(
                 switchedPowerSumSpectrumStr, float, "SysPower", False
@@ -462,14 +537,14 @@ class SysPowerRow:
 
             self._switchedPowerSumSpectrumExists = True
 
-        requantizerGainSpectrumNode = rowdom.getElementsByTagName(
-            "requantizerGainSpectrum"
+        requantizerGainSpectrumNode = self._getFirstNodeByTagName(
+            rowdom, "requantizerGainSpectrum", False
         )
-        if len(requantizerGainSpectrumNode) > 0:
+        if requantizerGainSpectrumNode:
 
-            requantizerGainSpectrumStr = requantizerGainSpectrumNode[
-                0
-            ].firstChild.data.strip()
+            requantizerGainSpectrumStr = self._getXMLNodeChildText(
+                requantizerGainSpectrumNode
+            )
 
             self._requantizerGainSpectrum = Parser.stringListToLists(
                 requantizerGainSpectrumStr, float, "SysPower", False
@@ -479,17 +554,19 @@ class SysPowerRow:
 
         # extrinsic attribute values
 
-        antennaIdNode = rowdom.getElementsByTagName("antennaId")[0]
+        antennaIdNode = self._getFirstNodeByTagName(rowdom, "antennaId", True)
 
-        self._antennaId = Tag(antennaIdNode.firstChild.data.strip())
+        self._antennaId = Tag(self._getXMLNodeChildText(antennaIdNode))
 
-        feedIdNode = rowdom.getElementsByTagName("feedId")[0]
+        feedIdNode = self._getFirstNodeByTagName(rowdom, "feedId", True)
 
-        self._feedId = int(feedIdNode.firstChild.data.strip())
+        self._feedId = int(self._getXMLNodeChildText(feedIdNode))
 
-        spectralWindowIdNode = rowdom.getElementsByTagName("spectralWindowId")[0]
+        spectralWindowIdNode = self._getFirstNodeByTagName(
+            rowdom, "spectralWindowId", True
+        )
 
-        self._spectralWindowId = Tag(spectralWindowIdNode.firstChild.data.strip())
+        self._spectralWindowId = Tag(self._getXMLNodeChildText(spectralWindowIdNode))
 
         # from link values, if any
 
@@ -864,6 +941,7 @@ class SysPowerRow:
         """
         Set timeInterval with the specified ArrayTimeInterval value.
         timeInterval The ArrayTimeInterval value to which timeInterval is to be set.
+
         The value of timeInterval can be anything allowed by the ArrayTimeInterval constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -893,6 +971,7 @@ class SysPowerRow:
         """
         Set numReceptor with the specified int value.
         numReceptor The int value to which numReceptor is to be set.
+
 
 
         """
@@ -929,6 +1008,9 @@ class SysPowerRow:
         """
         Set switchedPowerDifference with the specified float []  value.
         switchedPowerDifference The float []  value to which switchedPowerDifference is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -995,6 +1077,9 @@ class SysPowerRow:
         Set switchedPowerSum with the specified float []  value.
         switchedPowerSum The float []  value to which switchedPowerSum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1059,6 +1144,9 @@ class SysPowerRow:
         """
         Set requantizerGain with the specified float []  value.
         requantizerGain The float []  value to which requantizerGain is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1126,6 +1214,7 @@ class SysPowerRow:
         numChannels The int value to which numChannels is to be set.
 
 
+
         """
 
         self._numChannels = int(numChannels)
@@ -1168,6 +1257,7 @@ class SysPowerRow:
         """
         Set numPolarizationType with the specified int value.
         numPolarizationType The int value to which numPolarizationType is to be set.
+
 
 
         """
@@ -1213,6 +1303,7 @@ class SysPowerRow:
         """
         Set chanFreqStart with the specified Frequency value.
         chanFreqStart The Frequency value to which chanFreqStart is to be set.
+
         The value of chanFreqStart can be anything allowed by the Frequency constructor.
 
         """
@@ -1258,6 +1349,7 @@ class SysPowerRow:
         """
         Set chanFreqStep with the specified Frequency value.
         chanFreqStep The Frequency value to which chanFreqStep is to be set.
+
         The value of chanFreqStep can be anything allowed by the Frequency constructor.
 
         """
@@ -1302,6 +1394,9 @@ class SysPowerRow:
         """
         Set switchedPowerDifferenceSpectrum with the specified float []  []  value.
         switchedPowerDifferenceSpectrum The float []  []  value to which switchedPowerDifferenceSpectrum is to be set.
+
+        The values are saved as single precision floats.
+
 
 
         """
@@ -1374,6 +1469,9 @@ class SysPowerRow:
         Set switchedPowerSumSpectrum with the specified float []  []  value.
         switchedPowerSumSpectrum The float []  []  value to which switchedPowerSumSpectrum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1439,6 +1537,9 @@ class SysPowerRow:
         Set requantizerGainSpectrum with the specified float []  []  value.
         requantizerGainSpectrum The float []  []  value to which requantizerGainSpectrum is to be set.
 
+        The values are saved as single precision floats.
+
+
 
         """
 
@@ -1492,6 +1593,7 @@ class SysPowerRow:
         """
         Set antennaId with the specified Tag value.
         antennaId The Tag value to which antennaId is to be set.
+
         The value of antennaId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
@@ -1523,6 +1625,7 @@ class SysPowerRow:
         feedId The int value to which feedId is to be set.
 
 
+
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
 
         """
@@ -1551,6 +1654,7 @@ class SysPowerRow:
         """
         Set spectralWindowId with the specified Tag value.
         spectralWindowId The Tag value to which spectralWindowId is to be set.
+
         The value of spectralWindowId can be anything allowed by the Tag constructor.
 
         Raises a ValueError If an attempt is made to change a part of the key after is has been added to the table.
