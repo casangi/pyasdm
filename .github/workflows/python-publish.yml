@@ -1,0 +1,16 @@
+# .github/workflows/python-publish.yml
+# Publishes pyasdm to PyPI whenever a GitHub release is created.
+# Uses the same shared NRAO template as XRADIO. See release.md for the release procedure.
+name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  call-publish:
+    uses: nrao/gh-actions-templates-public/.github/workflows/python-publish-cngi-template.yml@main
+    with:
+      pypi-url: "https://pypi.org/project/pyasdm"
+    secrets:
+      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }} # Explicit pass instead of inherit
