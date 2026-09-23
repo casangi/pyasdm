@@ -194,8 +194,6 @@ class CalBandpassTable:
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # archive as bin not used by python implementation
-    # _archiveAsBin = True # If True archive binary else archive XML
     _fileAsBin = True  # If True file binary else file XML
 
     # A data structure to store the CalBandpassRow s.

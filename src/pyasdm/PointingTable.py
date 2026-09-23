@@ -158,8 +158,6 @@ class PointingTable:
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # archive as bin not used by python implementation
-    # _archiveAsBin = True # If True archive binary else archive XML
     _fileAsBin = True  # If True file binary else file XML
 
     # A data structure to store the PointingRow s.
@@ -290,23 +288,6 @@ class PointingTable:
         Returns the tolerance as a  Angle
         """
         return self._atmosphericCorrectionEqTolerance
-
-    # Use a file as cache file for binaries since usually these file are huge
-    # TBD - this is almost certainly wrong
-    _fd = None
-
-    from io import TextIOWrapper
-
-    def _setTmpFile(self, tmpFile):
-        if not isinstance(tmpFile, TextIOWRapper):
-            raise ValueError("tmpFile must be an open file (TextIOWrapper)")
-        self._fd = tmpFile
-
-    # Use a counter instead of holding a data structure, the rows will be written to the tmp file
-    _rowsCounter = 0
-
-    def increaseRowsCounter(self):
-        self._rowsCounter += 1
 
     def getKeyName(self):
         """
@@ -484,9 +465,6 @@ class PointingTable:
 
         self._version = 0
 
-        self._fd = None
-        self._rowsCounter = 0
-
     def setNotPresentInMemory(self):
         """
         Set the state to indicate it is not present in memory and needs to be loaded before being used.
@@ -544,9 +522,7 @@ class PointingTable:
         """
         Return the number of rows in the table.
         """
-        if self._rowsCounter == 0 and len(self._privateRows) != 0:
-            return len(self._privateRows)
-        return self._rowsCounter
+        return len(self._privateRows)
 
     def getName(self):
         """
