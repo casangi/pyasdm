@@ -1,8 +1,9 @@
 # Releasing pyasdm
 
 pyasdm is published to PyPI by the GitHub Actions workflow in
-`.github/workflows/python-publish.yml`. The workflow runs whenever a GitHub
-release is created and calls the shared NRAO template
+`.github/workflows/python-publish.yml`. The workflow publishes whenever a
+GitHub release is published (pull requests and merges to main only build the
+distributions as a check) and calls the shared NRAO template
 `nrao/gh-actions-templates-public/.github/workflows/python-publish-cngi-template.yml`,
 the same template XRADIO uses. The template builds a source distribution and
 wheel with `python -m build` and uploads them to PyPI with the `PYPI_TOKEN`
@@ -87,10 +88,9 @@ user asks for them explicitly with `pip install --pre pyasdm` or
 
 ## Troubleshooting
 
-- The workflow only runs for the `created` release event. Editing an
-  existing release, or converting a draft to published later, may not
-  trigger it. If nothing runs, delete the release and its tag and create the
-  release again.
+- The workflow publishes on the `published` release event, so publishing a
+  saved draft also triggers it. Editing an existing release does not. If
+  nothing runs, delete the release and its tag and publish the release again.
 - A version can only be uploaded to PyPI once. If the upload succeeded but
   something is wrong with the package, bump to a new version (for example
   `0.1.1`) and release again. Do not try to reuse a version number.
