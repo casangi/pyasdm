@@ -499,6 +499,7 @@ class BDFReader:
             actualDurations components, skipping the loading of data, flags, etc.
             For the not included (not loaded) components, the "present", "type" and
             other fields will be populated but the "arr" field will be left empty.
+            If an empty set is given, none of the binary component arrays are loaded.
 
         Returns
         -------
@@ -1115,7 +1116,8 @@ class BDFReader:
         sdmDataSubsetHeaderDOM : xml.dom.minidom.Element (DOM element)
             XML DOM containing metadata including crossData type info
         loadOnlyComponents : set of str or None
-            Component names to load; if None, load all
+            Names of the binary components to load; if None, load all.
+            If empty, none are loaded
 
         Returns
         -------
@@ -1245,7 +1247,7 @@ class BDFReader:
                 componentDesc["present"] = True
                 componentDesc["startsAt"] = self.position()
                 dt = componentDesc["np_type"]
-                if not loadOnlyComponents or componentName in loadOnlyComponents:
+                if loadOnlyComponents is None or componentName in loadOnlyComponents:
                     if spwId is None:
                         componentDesc["arr"] = np.fromfile(
                             self._f, dtype=dt, count=numberOfElementsToRead
@@ -1284,7 +1286,7 @@ class BDFReader:
                     % (binaryPartName.decode("utf-8"), numberOfBytesToRead)
                 )
 
-            if loadOnlyComponents and actualReadSkipped:
+            if actualReadSkipped:
                 self._f.seek(numberOfBytesToRead, os.SEEK_CUR)
                 nReadBytes = numberOfBytesToRead
 
@@ -1425,7 +1427,8 @@ class BDFReader:
         Parameters
         ----------
         loadOnlyComponents : set of str or None
-            Component names to load; if None, load all components
+            Names of the components to load; if None, load all components. If empty, none
+            are loaded
 
         Returns
         -------
