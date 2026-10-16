@@ -1,11 +1,23 @@
 # .github/workflows/python-publish.yml
-# Publishes pyasdm to PyPI whenever a GitHub release is created.
+# Publishes pyasdm to PyPI whenever a GitHub release is published.
 # Uses the same shared NRAO template as XRADIO. See release.md for the release procedure.
+# Pull requests and merges to main also build the sdist/wheel as a check; the
+# template's publish job only runs for a release (tag ref).
 name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
 
 on:
   release:
-    types: [created]
+    types: [published]
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
 
 jobs:
   call-publish:
