@@ -141,20 +141,32 @@ class Entity:
         return self._entityId.validate(str(self._entityId))
 
     @staticmethod
-    def fromBin(ein):
+    def fromBin(eis):
         """
         Create and return an Entity from an EndianInput instance.
         """
         # I don't trust the order that these might be evaluated if done in
         # the entity constructor
 
-        idString = ein.readString()
-        idEncrypted = ein.readString()
-        idTypeName = ein.readString()
-        version = ein.readString()
-        instanceVers = ein.readString()
+        idString = eis.readString()
+        idEncrypted = eis.readString()
+        idTypeName = eis.readString()
+        version = eis.readString()
+        instanceVers = eis.readString()
         entity = Entity(idString, idEncrypted, idTypeName, version, instanceVers)
         return entity
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip an Entity from an EndianInput instance.
+        """
+        # 5 strings
+        eis.skipString()
+        eis.skipString()
+        eis.skipString()
+        eis.skipString()
+        eis.skipString()
 
     def toBin(self, eout):
         """

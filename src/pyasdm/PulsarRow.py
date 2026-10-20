@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -480,6 +484,8 @@ class PulsarRow:
 
             self._refFrequency.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def pulsarIdFromBin(row, eis):
         """
@@ -625,6 +631,151 @@ class PulsarRow:
         _fromBinMethods["dispersionMeasure"] = PulsarRow.dispersionMeasureFromBin
         _fromBinMethods["refFrequency"] = PulsarRow.refFrequencyFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipPulsarIdFromBin(eis):
+        """
+        Skip the pulsarId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipRefTimeFromBin(eis):
+        """
+        Skip the refTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipRefPulseFreqFromBin(eis):
+        """
+        Skip the refPulseFreq in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipRefPhaseFromBin(eis):
+        """
+        Skip the refPhase in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipDouble()
+
+    @staticmethod
+    def skipNumBinFromBin(eis):
+        """
+        Skip the numBin in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumPolyFromBin(eis):
+        """
+        Skip the optional numPoly in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipPhasePolyFromBin(eis):
+        """
+        Skip the optional phasePoly in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            phasePolyDim1 = eis.readInt()
+            for _ in range(phasePolyDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipTimeSpanFromBin(eis):
+        """
+        Skip the optional timeSpan in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Interval.skipBin(eis)
+
+    @staticmethod
+    def skipStartPhaseBinFromBin(eis):
+        """
+        Skip the optional startPhaseBin in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            startPhaseBinDim1 = eis.readInt()
+            for _ in range(startPhaseBinDim1):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipEndPhaseBinFromBin(eis):
+        """
+        Skip the optional endPhaseBin in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            endPhaseBinDim1 = eis.readInt()
+            for _ in range(endPhaseBinDim1):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipDispersionMeasureFromBin(eis):
+        """
+        Skip the optional dispersionMeasure in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipRefFrequencyFromBin(eis):
+        """
+        Skip the optional refFrequency in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["pulsarId"] = PulsarRow.skipPulsarIdFromBin
+        _skipBinMethods["refTime"] = PulsarRow.skipRefTimeFromBin
+        _skipBinMethods["refPulseFreq"] = PulsarRow.skipRefPulseFreqFromBin
+        _skipBinMethods["refPhase"] = PulsarRow.skipRefPhaseFromBin
+        _skipBinMethods["numBin"] = PulsarRow.skipNumBinFromBin
+
+        _skipBinMethods["numPoly"] = PulsarRow.skipNumPolyFromBin
+        _skipBinMethods["phasePoly"] = PulsarRow.skipPhasePolyFromBin
+        _skipBinMethods["timeSpan"] = PulsarRow.skipTimeSpanFromBin
+        _skipBinMethods["startPhaseBin"] = PulsarRow.skipStartPhaseBinFromBin
+        _skipBinMethods["endPhaseBin"] = PulsarRow.skipEndPhaseBinFromBin
+        _skipBinMethods["dispersionMeasure"] = PulsarRow.skipDispersionMeasureFromBin
+        _skipBinMethods["refFrequency"] = PulsarRow.skipRefFrequencyFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -651,7 +802,30 @@ class PulsarRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Pulsar",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute pulsarId
 
@@ -1236,5 +1410,8 @@ class PulsarRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 PulsarRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+PulsarRow.initSkipBinMethods()

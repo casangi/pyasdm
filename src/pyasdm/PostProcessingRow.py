@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.PostProcessingIntent import PostProcessingIntent
 
@@ -465,6 +469,8 @@ class PostProcessingRow:
 
             Tag.listToBin(self._execBlockId, eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def postProcessingIdFromBin(row, eis):
         """
@@ -577,6 +583,129 @@ class PostProcessingRow:
         _fromBinMethods["spectralWindowId"] = PostProcessingRow.spectralWindowIdFromBin
         _fromBinMethods["execBlockId"] = PostProcessingRow.execBlockIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipPostProcessingIdFromBin(eis):
+        """
+        Skip the postProcessingId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipIntentFromBin(eis):
+        """
+        Skip the intent in row from the EndianInput (eis) instance.
+        """
+
+        # PostProcessingIntent stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipDescriptionFromBin(eis):
+        """
+        Skip the optional description in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipNumSpectralWindowFromBin(eis):
+        """
+        Skip the optional numSpectralWindow in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipNumScanFromBin(eis):
+        """
+        Skip the optional numScan in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipScanNumberFromBin(eis):
+        """
+        Skip the optional scanNumber in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            scanNumberDim1 = eis.readInt()
+            for _ in range(scanNumberDim1):
+                eis.skipInt()
+
+    @staticmethod
+    def skipCalibrationStrategyFromBin(eis):
+        """
+        Skip the optional calibrationStrategy in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the optional spectralWindowId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipExecBlockIdFromBin(eis):
+        """
+        Skip the optional execBlockId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["postProcessingId"] = (
+            PostProcessingRow.skipPostProcessingIdFromBin
+        )
+        _skipBinMethods["intent"] = PostProcessingRow.skipIntentFromBin
+
+        _skipBinMethods["description"] = PostProcessingRow.skipDescriptionFromBin
+        _skipBinMethods["numSpectralWindow"] = (
+            PostProcessingRow.skipNumSpectralWindowFromBin
+        )
+        _skipBinMethods["numScan"] = PostProcessingRow.skipNumScanFromBin
+        _skipBinMethods["scanNumber"] = PostProcessingRow.skipScanNumberFromBin
+        _skipBinMethods["calibrationStrategy"] = (
+            PostProcessingRow.skipCalibrationStrategyFromBin
+        )
+        _skipBinMethods["spectralWindowId"] = (
+            PostProcessingRow.skipSpectralWindowIdFromBin
+        )
+        _skipBinMethods["execBlockId"] = PostProcessingRow.skipExecBlockIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -603,7 +732,30 @@ class PostProcessingRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " PostProcessing",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute postProcessingId
 
@@ -1188,5 +1340,8 @@ class PostProcessingRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 PostProcessingRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+PostProcessingRow.initSkipBinMethods()

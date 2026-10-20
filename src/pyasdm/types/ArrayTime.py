@@ -116,7 +116,8 @@ class ArrayTime(Interval):
                 modifiedJulianDay = int(args[0])
                 secondsInADay = float(args[1])
                 self.set(
-                    modifiedJulainDay * 8640000000000 + int(secondsInADay * 100000000.0)
+                    modifiedJulianDay * 86400000000000
+                    + int(secondsInADay * 100000000.0)
                 )
             elif len(args) == 3:
                 # year, month, day
@@ -666,6 +667,14 @@ class ArrayTime(Interval):
         return ArrayTime(eis.readLongLong())
 
     @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of an ArrayTime
+        from an EndianInput instance
+        """
+        eis.skipLongLong()
+
+    @staticmethod
     def from1Bin(eis):
         """
         Read the binary representation of 1D list of ArrayTime
@@ -680,6 +689,18 @@ class ArrayTime(Interval):
             result.append(ArrayTime.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1Bin(eis):
+        """
+        Skip the binary representation of a 1D list of ArrayTime
+        from an EndianInput instance
+        The leading integer giving the shape of the list is always read.
+        """
+
+        ndim = eis.readInt()
+        for _ in range(ndim):
+            ArrayTime.skipBin(eis)
 
     @staticmethod
     def from2Bin(eis):
@@ -701,6 +722,20 @@ class ArrayTime(Interval):
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2Bin(eis):
+        """
+        Skip the binary representation of a 2D list of ArrayTime
+        from an EndianInput instance
+        The leading integers giving the shape of the list are always read.
+        """
+
+        ndim1 = eis.readInt()
+        ndim2 = eis.readInt()
+        for _ in range(ndim1):
+            for _ in range(ndim2):
+                ArrayTime.skipBin(eis)
 
     @staticmethod
     def from3Bin(eis):
@@ -726,6 +761,22 @@ class ArrayTime(Interval):
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3Bin(eis):
+        """
+        Skip the binary representation of a 3D list of ArrayTime
+        from an EndianInput instance
+        The leading integers giving the shape of the list are always read.
+        """
+
+        ndim1 = eis.readInt()
+        ndim2 = eis.readInt()
+        ndim3 = eis.readInt()
+        for _ in range(ndim1):
+            for _ in range(ndim2):
+                for _ in range(ndim3):
+                    ArrayTime.skipBin(eis)
 
     # utcCorrection not implemented here, the table of leap seconds by JD has not
     # been updated in some time and does not appear to be used anywhere

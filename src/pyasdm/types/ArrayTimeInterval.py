@@ -86,7 +86,7 @@ class ArrayTimeInterval:
 
         if start is None:
             if duration is not None:
-                raise ("duration must be None when start is None")
+                raise ValueError("duration must be None when start is None")
             return
 
         if isinstance(start, ArrayTimeInterval):
@@ -118,7 +118,8 @@ class ArrayTimeInterval:
                     self._duration = Interval(l2)
                 else:
                     # midpoint and duration
-                    self._start = ArrayTime(int(l1 - l2 / 2))
+                    # use integer division
+                    self._start = ArrayTime(l1 - l2 // 2)
                     self._duration = Interval(l2)
             except Exception as exc:
                 raise ValueError(
@@ -136,7 +137,7 @@ class ArrayTimeInterval:
                 self._duration = Interval(duration)
             elif isinstance(duration, ArrayTime):
                 # duration is the end of the interval
-                if duration_.ge(start_):
+                if duration.ge(start):
                     self._duration.set(duration.get() - self._start.get())
                 else:
                     self._duration.set(0)
@@ -237,8 +238,11 @@ class ArrayTimeInterval:
         return the midpoint of this ArrayTimeInterval as an ArrayTIme.
 
         The midpoint is defind as start + duration / 2
+
+        Use integer division for best precision and to get the result as
+        integers.
         """
-        return ArrayTime(int(self._start.get() + self._duration.get() / 2))
+        return ArrayTime(self._start.get() + self._duration.get() // 2)
 
     def getStartInMJD(self):
         """
@@ -549,62 +553,111 @@ class ArrayTimeInterval:
         if ArrayTimeInterval.readStartTimeDurationInBin():
             return ArrayTimeInterval(l1, l2)
         else:
-            # ensure that the division here results in an integer
-            return ArrayTimeInterval(int((l1 - l2) / 2), l2)
+            # use integer division
+            return ArrayTimeInterval((l1 - l2 // 2), l2)
 
-    # static method
-    def from1DBin(ein):
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of an ArrayTimeInteval
+        from an EndianIntpu instance.
+        """
+        # two long integers
+        eis.skipLong()
+        eis.skipLong()
+
+    @staticmethod
+    def from1DBin(eis):
         """
         Read the binary representations of a 1D array of ArrayTimeInterval
         from an EndianInput instance to set a 1D list of  ArrayTimeInterval.
         return a 1D list of ArrayTimeInterval
         """
-        ndim = ein.readInt()
+        ndim = eis.readInt()
         result = []
         for i in range(ndim):
-            result.append(ArrayTimeInterval.fromBin(ein))
+            result.append(ArrayTimeInterval.fromBin(eis))
 
         return result
 
-    # static method
-    def from2DBin(ein):
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip the binary representations of a 1D array of ArrayTimeInterval
+        from an EndianInput instance
+        The integer giving the shape of the array is always read.
+        """
+        ndim = eis.readInt()
+        for _ in range(ndim):
+            ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def from2DBin(eis):
         """
         Read the binary representations of a 2D array of ArrayTimeInterval
         from an EndianInput instance to set a 2D list of  ArrayTimeInterval.
         return a 1D list of ArrayTimeInterval
         """
-        ndim1 = ein.readInt()
-        ndim2 = ein.readInt()
+        ndim1 = eis.readInt()
+        ndim2 = eis.readInt()
         result = []
         for i in range(ndim1):
             innerList = []
             for j in range(ndim2):
-                innerList.append(ArrayTimeInterval.fromBin(ein))
+                innerList.append(ArrayTimeInterval.fromBin(eis))
             result.append(innerList)
 
         return result
 
-    # static method
-    def from3DBin(ein):
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip the binary representations of a 2D array of ArrayTimeInterval
+        from an EndianInput instance
+        The integers giving the shape of the array are always read.
+        """
+        ndim1 = eis.readInt()
+        ndim2 = eis.readInt()
+        for _ in range(ndim1):
+            for _ in range(ndim2):
+                ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def from3DBin(eis):
         """
         Read the binary representations of a 3D array of ArrayTimeInterval
         from an EndianInput instance to set a 3D list of  ArrayTimeInterval.
         return a 3D list of ArrayTimeInterval
         """
-        ndim1 = ein.readInt()
-        ndim2 = ein.readInt()
-        ndim3 = ein.readInt()
+        ndim1 = eis.readInt()
+        ndim2 = eis.readInt()
+        ndim3 = eis.readInt()
         result = []
         for i in range(ndim1):
             middleList = []
             for j in range(ndim2):
                 innerList = []
                 for k in range(ndim3):
-                    innerList.append(ArrayTimeInterval.fromBin(ein))
+                    innerList.append(ArrayTimeInterval.fromBin(eis))
                 middleList.append(innerList)
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip the binary representations of a 3D array of ArrayTimeInterval
+        from an EndianInput instance
+        The integers giving the shape of the array are always read.
+        """
+        ndim1 = eis.readInt()
+        ndim2 = eis.readInt()
+        ndim3 = eis.readInt()
+        for _ in range(ndim1):
+            for _ in range(ndim2):
+                for _ in range(ndim3):
+                    ArrayTimeInterval.skipBin(eis)
 
     @staticmethod
     def getInstance(stringList):
@@ -629,7 +682,7 @@ class ArrayTimeInterval:
         intVal2 = int(stringList[1])
 
         if not ArrayTimeInterval.readStartTimeDurationInXML():
-            # it's the midpoint, correct it to the start time, it must still be an integer
-            intVal1 = intVal1 - int(intVal2 / 2)
+            # it's the midpoint, correct it to the start time, use integer division
+            intVal1 = intVal1 - intVal2 // 2
 
         return (ArrayTimeInterval(intVal1, intVal2), stringList[2:])

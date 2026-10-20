@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.InvalidatingCondition import InvalidatingCondition
 
@@ -369,6 +373,8 @@ class CalReductionRow:
 
         eos.writeStr(self._softwareVersion)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def calReductionIdFromBin(row, eis):
         """
@@ -494,6 +500,127 @@ class CalReductionRow:
         _fromBinMethods["software"] = CalReductionRow.softwareFromBin
         _fromBinMethods["softwareVersion"] = CalReductionRow.softwareVersionFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNumAppliedFromBin(eis):
+        """
+        Skip the numApplied in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipAppliedCalibrationsFromBin(eis):
+        """
+        Skip the appliedCalibrations in row from the EndianInput (eis) instance.
+        """
+
+        appliedCalibrationsDim1 = eis.readInt()
+        for _ in range(appliedCalibrationsDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipNumParamFromBin(eis):
+        """
+        Skip the numParam in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipParamSetFromBin(eis):
+        """
+        Skip the paramSet in row from the EndianInput (eis) instance.
+        """
+
+        paramSetDim1 = eis.readInt()
+        for _ in range(paramSetDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipNumInvalidConditionsFromBin(eis):
+        """
+        Skip the numInvalidConditions in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipInvalidConditionsFromBin(eis):
+        """
+        Skip the invalidConditions in row from the EndianInput (eis) instance.
+        """
+
+        invalidConditionsDim1 = eis.readInt()
+        for _ in range(invalidConditionsDim1):
+            # InvalidatingCondition stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipTimeReducedFromBin(eis):
+        """
+        Skip the timeReduced in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipMessagesFromBin(eis):
+        """
+        Skip the messages in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipSoftwareFromBin(eis):
+        """
+        Skip the software in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipSoftwareVersionFromBin(eis):
+        """
+        Skip the softwareVersion in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["calReductionId"] = CalReductionRow.skipCalReductionIdFromBin
+        _skipBinMethods["numApplied"] = CalReductionRow.skipNumAppliedFromBin
+        _skipBinMethods["appliedCalibrations"] = (
+            CalReductionRow.skipAppliedCalibrationsFromBin
+        )
+        _skipBinMethods["numParam"] = CalReductionRow.skipNumParamFromBin
+        _skipBinMethods["paramSet"] = CalReductionRow.skipParamSetFromBin
+        _skipBinMethods["numInvalidConditions"] = (
+            CalReductionRow.skipNumInvalidConditionsFromBin
+        )
+        _skipBinMethods["invalidConditions"] = (
+            CalReductionRow.skipInvalidConditionsFromBin
+        )
+        _skipBinMethods["timeReduced"] = CalReductionRow.skipTimeReducedFromBin
+        _skipBinMethods["messages"] = CalReductionRow.skipMessagesFromBin
+        _skipBinMethods["software"] = CalReductionRow.skipSoftwareFromBin
+        _skipBinMethods["softwareVersion"] = CalReductionRow.skipSoftwareVersionFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -520,7 +647,30 @@ class CalReductionRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalReduction",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute calReductionId
 
@@ -1025,5 +1175,8 @@ class CalReductionRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalReductionRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalReductionRow.initSkipBinMethods()

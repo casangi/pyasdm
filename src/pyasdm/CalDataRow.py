@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.CalDataOrigin import CalDataOrigin
 
@@ -543,6 +547,8 @@ class CalDataRow:
 
                 eos.writeString(str(self._scanIntent[i]))
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def calDataIdFromBin(row, eis):
         """
@@ -714,6 +720,174 @@ class CalDataRow:
         _fromBinMethods["sourceCode"] = CalDataRow.sourceCodeFromBin
         _fromBinMethods["scanIntent"] = CalDataRow.scanIntentFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartTimeObservedFromBin(eis):
+        """
+        Skip the startTimeObserved in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndTimeObservedFromBin(eis):
+        """
+        Skip the endTimeObserved in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipExecBlockUIDFromBin(eis):
+        """
+        Skip the execBlockUID in row from the EndianInput (eis) instance.
+        """
+
+        EntityRef.skipBin(eis)
+
+    @staticmethod
+    def skipCalDataTypeFromBin(eis):
+        """
+        Skip the calDataType in row from the EndianInput (eis) instance.
+        """
+
+        # CalDataOrigin stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipCalTypeFromBin(eis):
+        """
+        Skip the calType in row from the EndianInput (eis) instance.
+        """
+
+        # CalType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipNumScanFromBin(eis):
+        """
+        Skip the numScan in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipScanSetFromBin(eis):
+        """
+        Skip the scanSet in row from the EndianInput (eis) instance.
+        """
+
+        scanSetDim1 = eis.readInt()
+        for _ in range(scanSetDim1):
+            eis.skipInt()
+
+    @staticmethod
+    def skipAssocCalDataIdFromBin(eis):
+        """
+        Skip the optional assocCalDataId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skipBin(eis)
+
+    @staticmethod
+    def skipAssocCalNatureFromBin(eis):
+        """
+        Skip the optional assocCalNature in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # AssociatedCalNature stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipFieldNameFromBin(eis):
+        """
+        Skip the optional fieldName in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            fieldNameDim1 = eis.readInt()
+            for _ in range(fieldNameDim1):
+                eis.skipStr()
+
+    @staticmethod
+    def skipSourceNameFromBin(eis):
+        """
+        Skip the optional sourceName in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            sourceNameDim1 = eis.readInt()
+            for _ in range(sourceNameDim1):
+                eis.skipStr()
+
+    @staticmethod
+    def skipSourceCodeFromBin(eis):
+        """
+        Skip the optional sourceCode in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            sourceCodeDim1 = eis.readInt()
+            for _ in range(sourceCodeDim1):
+                eis.skipStr()
+
+    @staticmethod
+    def skipScanIntentFromBin(eis):
+        """
+        Skip the optional scanIntent in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            scanIntentDim1 = eis.readInt()
+            for _ in range(scanIntentDim1):
+                # ScanIntent stored as a string
+                eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["calDataId"] = CalDataRow.skipCalDataIdFromBin
+        _skipBinMethods["startTimeObserved"] = CalDataRow.skipStartTimeObservedFromBin
+        _skipBinMethods["endTimeObserved"] = CalDataRow.skipEndTimeObservedFromBin
+        _skipBinMethods["execBlockUID"] = CalDataRow.skipExecBlockUIDFromBin
+        _skipBinMethods["calDataType"] = CalDataRow.skipCalDataTypeFromBin
+        _skipBinMethods["calType"] = CalDataRow.skipCalTypeFromBin
+        _skipBinMethods["numScan"] = CalDataRow.skipNumScanFromBin
+        _skipBinMethods["scanSet"] = CalDataRow.skipScanSetFromBin
+
+        _skipBinMethods["assocCalDataId"] = CalDataRow.skipAssocCalDataIdFromBin
+        _skipBinMethods["assocCalNature"] = CalDataRow.skipAssocCalNatureFromBin
+        _skipBinMethods["fieldName"] = CalDataRow.skipFieldNameFromBin
+        _skipBinMethods["sourceName"] = CalDataRow.skipSourceNameFromBin
+        _skipBinMethods["sourceCode"] = CalDataRow.skipSourceCodeFromBin
+        _skipBinMethods["scanIntent"] = CalDataRow.skipScanIntentFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -740,7 +914,30 @@ class CalDataRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalData",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute calDataId
 
@@ -1434,5 +1631,8 @@ class CalDataRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalDataRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalDataRow.initSkipBinMethods()

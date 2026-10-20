@@ -21,7 +21,7 @@ class entity_test(unittest.TestCase):
         # this should produce an exception
         ok = False
         try:
-            s = src(eNull)
+            s = str(eNull)
         except Exception as exp:
             ok = True
         self.assertTrue(ok)

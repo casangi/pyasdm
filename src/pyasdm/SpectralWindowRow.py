@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.BasebandName import BasebandName
 
@@ -1429,6 +1433,8 @@ class SpectralWindowRow:
 
             eos.writeInt(self._dopplerId)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def spectralWindowIdFromBin(row, eis):
         """
@@ -1901,6 +1907,513 @@ class SpectralWindowRow:
         )
         _fromBinMethods["dopplerId"] = SpectralWindowRow.dopplerIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipBasebandNameFromBin(eis):
+        """
+        Skip the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        # BasebandName stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipNetSidebandFromBin(eis):
+        """
+        Skip the netSideband in row from the EndianInput (eis) instance.
+        """
+
+        # NetSideband stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipNumChanFromBin(eis):
+        """
+        Skip the numChan in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipRefFreqFromBin(eis):
+        """
+        Skip the refFreq in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipSidebandProcessingModeFromBin(eis):
+        """
+        Skip the sidebandProcessingMode in row from the EndianInput (eis) instance.
+        """
+
+        # SidebandProcessingMode stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipTotBandwidthFromBin(eis):
+        """
+        Skip the totBandwidth in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipWindowFunctionFromBin(eis):
+        """
+        Skip the windowFunction in row from the EndianInput (eis) instance.
+        """
+
+        # WindowFunction stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipNumBinFromBin(eis):
+        """
+        Skip the optional numBin in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipChanFreqStartFromBin(eis):
+        """
+        Skip the optional chanFreqStart in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipChanFreqStepFromBin(eis):
+        """
+        Skip the optional chanFreqStep in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipChanFreqArrayFromBin(eis):
+        """
+        Skip the optional chanFreqArray in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipChanWidthFromBin(eis):
+        """
+        Skip the optional chanWidth in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipChanWidthArrayFromBin(eis):
+        """
+        Skip the optional chanWidthArray in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipCorrelationBitFromBin(eis):
+        """
+        Skip the optional correlationBit in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # CorrelationBit stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipEffectiveBwFromBin(eis):
+        """
+        Skip the optional effectiveBw in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipEffectiveBwArrayFromBin(eis):
+        """
+        Skip the optional effectiveBwArray in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipFreqGroupFromBin(eis):
+        """
+        Skip the optional freqGroup in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipFreqGroupNameFromBin(eis):
+        """
+        Skip the optional freqGroupName in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipLineArrayFromBin(eis):
+        """
+        Skip the optional lineArray in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            lineArrayDim1 = eis.readInt()
+            for _ in range(lineArrayDim1):
+                eis.skipBool()
+
+    @staticmethod
+    def skipMeasFreqRefFromBin(eis):
+        """
+        Skip the optional measFreqRef in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # FrequencyReferenceCode stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipNameFromBin(eis):
+        """
+        Skip the optional name in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipOversamplingFromBin(eis):
+        """
+        Skip the optional oversampling in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipQuantizationFromBin(eis):
+        """
+        Skip the optional quantization in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipRefChanFromBin(eis):
+        """
+        Skip the optional refChan in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipResolutionFromBin(eis):
+        """
+        Skip the optional resolution in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipResolutionArrayFromBin(eis):
+        """
+        Skip the optional resolutionArray in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipNumAssocValuesFromBin(eis):
+        """
+        Skip the optional numAssocValues in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipAssocNatureFromBin(eis):
+        """
+        Skip the optional assocNature in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            assocNatureDim1 = eis.readInt()
+            for _ in range(assocNatureDim1):
+                # SpectralResolutionType stored as a string
+                eis.skipString()
+
+    @staticmethod
+    def skipNumFactorFromBin(eis):
+        """
+        Skip the optional numFactor in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipNumBinFactorsFromBin(eis):
+        """
+        Skip the optional numBinFactors in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            numBinFactorsDim1 = eis.readInt()
+            for _ in range(numBinFactorsDim1):
+                eis.skipInt()
+
+    @staticmethod
+    def skipNumOrigFreqSliceFromBin(eis):
+        """
+        Skip the optional numOrigFreqSlice in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipOriginatingFrequencySlicesFromBin(eis):
+        """
+        Skip the optional originatingFrequencySlices in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            originatingFrequencySlicesDim1 = eis.readInt()
+            for _ in range(originatingFrequencySlicesDim1):
+                eis.skipInt()
+
+    @staticmethod
+    def skipQuantizationBitsFromBin(eis):
+        """
+        Skip the optional quantizationBits in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipNumRequantStageFromBin(eis):
+        """
+        Skip the optional numRequantStage in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipRequantizationFromBin(eis):
+        """
+        Skip the optional requantization in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            requantizationDim1 = eis.readInt()
+            for _ in range(requantizationDim1):
+                eis.skipBool()
+
+    @staticmethod
+    def skipRequantizationBitsFromBin(eis):
+        """
+        Skip the optional requantizationBits in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            requantizationBitsDim1 = eis.readInt()
+            for _ in range(requantizationBitsDim1):
+                eis.skipInt()
+
+    @staticmethod
+    def skipAssocSpectralWindowIdFromBin(eis):
+        """
+        Skip the optional assocSpectralWindowId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipImageSpectralWindowIdFromBin(eis):
+        """
+        Skip the optional imageSpectralWindowId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skipBin(eis)
+
+    @staticmethod
+    def skipDopplerIdFromBin(eis):
+        """
+        Skip the optional dopplerId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["spectralWindowId"] = (
+            SpectralWindowRow.skipSpectralWindowIdFromBin
+        )
+        _skipBinMethods["basebandName"] = SpectralWindowRow.skipBasebandNameFromBin
+        _skipBinMethods["netSideband"] = SpectralWindowRow.skipNetSidebandFromBin
+        _skipBinMethods["numChan"] = SpectralWindowRow.skipNumChanFromBin
+        _skipBinMethods["refFreq"] = SpectralWindowRow.skipRefFreqFromBin
+        _skipBinMethods["sidebandProcessingMode"] = (
+            SpectralWindowRow.skipSidebandProcessingModeFromBin
+        )
+        _skipBinMethods["totBandwidth"] = SpectralWindowRow.skipTotBandwidthFromBin
+        _skipBinMethods["windowFunction"] = SpectralWindowRow.skipWindowFunctionFromBin
+
+        _skipBinMethods["numBin"] = SpectralWindowRow.skipNumBinFromBin
+        _skipBinMethods["chanFreqStart"] = SpectralWindowRow.skipChanFreqStartFromBin
+        _skipBinMethods["chanFreqStep"] = SpectralWindowRow.skipChanFreqStepFromBin
+        _skipBinMethods["chanFreqArray"] = SpectralWindowRow.skipChanFreqArrayFromBin
+        _skipBinMethods["chanWidth"] = SpectralWindowRow.skipChanWidthFromBin
+        _skipBinMethods["chanWidthArray"] = SpectralWindowRow.skipChanWidthArrayFromBin
+        _skipBinMethods["correlationBit"] = SpectralWindowRow.skipCorrelationBitFromBin
+        _skipBinMethods["effectiveBw"] = SpectralWindowRow.skipEffectiveBwFromBin
+        _skipBinMethods["effectiveBwArray"] = (
+            SpectralWindowRow.skipEffectiveBwArrayFromBin
+        )
+        _skipBinMethods["freqGroup"] = SpectralWindowRow.skipFreqGroupFromBin
+        _skipBinMethods["freqGroupName"] = SpectralWindowRow.skipFreqGroupNameFromBin
+        _skipBinMethods["lineArray"] = SpectralWindowRow.skipLineArrayFromBin
+        _skipBinMethods["measFreqRef"] = SpectralWindowRow.skipMeasFreqRefFromBin
+        _skipBinMethods["name"] = SpectralWindowRow.skipNameFromBin
+        _skipBinMethods["oversampling"] = SpectralWindowRow.skipOversamplingFromBin
+        _skipBinMethods["quantization"] = SpectralWindowRow.skipQuantizationFromBin
+        _skipBinMethods["refChan"] = SpectralWindowRow.skipRefChanFromBin
+        _skipBinMethods["resolution"] = SpectralWindowRow.skipResolutionFromBin
+        _skipBinMethods["resolutionArray"] = (
+            SpectralWindowRow.skipResolutionArrayFromBin
+        )
+        _skipBinMethods["numAssocValues"] = SpectralWindowRow.skipNumAssocValuesFromBin
+        _skipBinMethods["assocNature"] = SpectralWindowRow.skipAssocNatureFromBin
+        _skipBinMethods["numFactor"] = SpectralWindowRow.skipNumFactorFromBin
+        _skipBinMethods["numBinFactors"] = SpectralWindowRow.skipNumBinFactorsFromBin
+        _skipBinMethods["numOrigFreqSlice"] = (
+            SpectralWindowRow.skipNumOrigFreqSliceFromBin
+        )
+        _skipBinMethods["originatingFrequencySlices"] = (
+            SpectralWindowRow.skipOriginatingFrequencySlicesFromBin
+        )
+        _skipBinMethods["quantizationBits"] = (
+            SpectralWindowRow.skipQuantizationBitsFromBin
+        )
+        _skipBinMethods["numRequantStage"] = (
+            SpectralWindowRow.skipNumRequantStageFromBin
+        )
+        _skipBinMethods["requantization"] = SpectralWindowRow.skipRequantizationFromBin
+        _skipBinMethods["requantizationBits"] = (
+            SpectralWindowRow.skipRequantizationBitsFromBin
+        )
+        _skipBinMethods["assocSpectralWindowId"] = (
+            SpectralWindowRow.skipAssocSpectralWindowIdFromBin
+        )
+        _skipBinMethods["imageSpectralWindowId"] = (
+            SpectralWindowRow.skipImageSpectralWindowIdFromBin
+        )
+        _skipBinMethods["dopplerId"] = SpectralWindowRow.skipDopplerIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -1927,7 +2440,30 @@ class SpectralWindowRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SpectralWindow",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute spectralWindowId
 
@@ -4012,5 +4548,8 @@ class SpectralWindowRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 SpectralWindowRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+SpectralWindowRow.initSkipBinMethods()

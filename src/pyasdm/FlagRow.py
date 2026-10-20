@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.PolarizationType import PolarizationType
 
@@ -573,6 +577,8 @@ class FlagRow:
 
             Tag.listToBin(self._spectralWindowId, eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def flagIdFromBin(row, eis):
         """
@@ -737,6 +743,173 @@ class FlagRow:
         _fromBinMethods["pairedAntennaId"] = FlagRow.pairedAntennaIdFromBin
         _fromBinMethods["spectralWindowId"] = FlagRow.spectralWindowIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipFlagIdFromBin(eis):
+        """
+        Skip the flagId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartTimeFromBin(eis):
+        """
+        Skip the startTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndTimeFromBin(eis):
+        """
+        Skip the endTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipReasonFromBin(eis):
+        """
+        Skip the reason in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipNumAntennaFromBin(eis):
+        """
+        Skip the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipNumPolarizationTypeFromBin(eis):
+        """
+        Skip the optional numPolarizationType in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipNumSpectralWindowFromBin(eis):
+        """
+        Skip the optional numSpectralWindow in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipNumPairedAntennaFromBin(eis):
+        """
+        Skip the optional numPairedAntenna in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipNumChanFromBin(eis):
+        """
+        Skip the optional numChan in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipPolarizationTypeFromBin(eis):
+        """
+        Skip the optional polarizationType in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            polarizationTypeDim1 = eis.readInt()
+            for _ in range(polarizationTypeDim1):
+                # PolarizationType stored as a string
+                eis.skipString()
+
+    @staticmethod
+    def skipChannelFromBin(eis):
+        """
+        Skip the optional channel in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            channelDim1 = eis.readInt()
+            channelDim2 = eis.readInt()
+            for _ in range(channelDim1):
+                for _ in range(channelDim2):
+                    eis.skipInt()
+
+    @staticmethod
+    def skipPairedAntennaIdFromBin(eis):
+        """
+        Skip the optional pairedAntennaId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the optional spectralWindowId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["flagId"] = FlagRow.skipFlagIdFromBin
+        _skipBinMethods["startTime"] = FlagRow.skipStartTimeFromBin
+        _skipBinMethods["endTime"] = FlagRow.skipEndTimeFromBin
+        _skipBinMethods["reason"] = FlagRow.skipReasonFromBin
+        _skipBinMethods["numAntenna"] = FlagRow.skipNumAntennaFromBin
+        _skipBinMethods["antennaId"] = FlagRow.skipAntennaIdFromBin
+
+        _skipBinMethods["numPolarizationType"] = FlagRow.skipNumPolarizationTypeFromBin
+        _skipBinMethods["numSpectralWindow"] = FlagRow.skipNumSpectralWindowFromBin
+        _skipBinMethods["numPairedAntenna"] = FlagRow.skipNumPairedAntennaFromBin
+        _skipBinMethods["numChan"] = FlagRow.skipNumChanFromBin
+        _skipBinMethods["polarizationType"] = FlagRow.skipPolarizationTypeFromBin
+        _skipBinMethods["channel"] = FlagRow.skipChannelFromBin
+        _skipBinMethods["pairedAntennaId"] = FlagRow.skipPairedAntennaIdFromBin
+        _skipBinMethods["spectralWindowId"] = FlagRow.skipSpectralWindowIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -763,7 +936,30 @@ class FlagRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Flag",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute flagId
 
@@ -1626,5 +1822,8 @@ class FlagRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 FlagRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+FlagRow.initSkipBinMethods()

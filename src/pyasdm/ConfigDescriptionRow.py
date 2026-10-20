@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.CorrelationMode import CorrelationMode
 
@@ -646,6 +650,8 @@ class ConfigDescriptionRow:
 
             Tag.listToBin(self._assocConfigDescriptionId, eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def configDescriptionIdFromBin(row, eis):
         """
@@ -855,6 +861,221 @@ class ConfigDescriptionRow:
             ConfigDescriptionRow.assocConfigDescriptionIdFromBin
         )
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipConfigDescriptionIdFromBin(eis):
+        """
+        Skip the configDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNumAntennaFromBin(eis):
+        """
+        Skip the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumDataDescriptionFromBin(eis):
+        """
+        Skip the numDataDescription in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumFeedFromBin(eis):
+        """
+        Skip the numFeed in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipCorrelationModeFromBin(eis):
+        """
+        Skip the correlationMode in row from the EndianInput (eis) instance.
+        """
+
+        # CorrelationMode stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipNumAtmPhaseCorrectionFromBin(eis):
+        """
+        Skip the numAtmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipAtmPhaseCorrectionFromBin(eis):
+        """
+        Skip the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        atmPhaseCorrectionDim1 = eis.readInt()
+        for _ in range(atmPhaseCorrectionDim1):
+            # AtmPhaseCorrection stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipProcessorTypeFromBin(eis):
+        """
+        Skip the processorType in row from the EndianInput (eis) instance.
+        """
+
+        # ProcessorType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipSpectralTypeFromBin(eis):
+        """
+        Skip the spectralType in row from the EndianInput (eis) instance.
+        """
+
+        # SpectralResolutionType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipFeedIdFromBin(eis):
+        """
+        Skip the feedId in row from the EndianInput (eis) instance.
+        """
+
+        unusedLength = eis.readInt()
+        for _ in range(unusedLength):
+            eis.skipInt()
+
+    @staticmethod
+    def skipSwitchCycleIdFromBin(eis):
+        """
+        Skip the switchCycleId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipDataDescriptionIdFromBin(eis):
+        """
+        Skip the dataDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipProcessorIdFromBin(eis):
+        """
+        Skip the processorId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipPhasedArrayListFromBin(eis):
+        """
+        Skip the optional phasedArrayList in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            phasedArrayListDim1 = eis.readInt()
+            for _ in range(phasedArrayListDim1):
+                eis.skipInt()
+
+    @staticmethod
+    def skipNumAssocValuesFromBin(eis):
+        """
+        Skip the optional numAssocValues in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipAssocNatureFromBin(eis):
+        """
+        Skip the optional assocNature in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            assocNatureDim1 = eis.readInt()
+            for _ in range(assocNatureDim1):
+                # SpectralResolutionType stored as a string
+                eis.skipString()
+
+    @staticmethod
+    def skipAssocConfigDescriptionIdFromBin(eis):
+        """
+        Skip the optional assocConfigDescriptionId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["configDescriptionId"] = (
+            ConfigDescriptionRow.skipConfigDescriptionIdFromBin
+        )
+        _skipBinMethods["numAntenna"] = ConfigDescriptionRow.skipNumAntennaFromBin
+        _skipBinMethods["numDataDescription"] = (
+            ConfigDescriptionRow.skipNumDataDescriptionFromBin
+        )
+        _skipBinMethods["numFeed"] = ConfigDescriptionRow.skipNumFeedFromBin
+        _skipBinMethods["correlationMode"] = (
+            ConfigDescriptionRow.skipCorrelationModeFromBin
+        )
+        _skipBinMethods["numAtmPhaseCorrection"] = (
+            ConfigDescriptionRow.skipNumAtmPhaseCorrectionFromBin
+        )
+        _skipBinMethods["atmPhaseCorrection"] = (
+            ConfigDescriptionRow.skipAtmPhaseCorrectionFromBin
+        )
+        _skipBinMethods["processorType"] = ConfigDescriptionRow.skipProcessorTypeFromBin
+        _skipBinMethods["spectralType"] = ConfigDescriptionRow.skipSpectralTypeFromBin
+        _skipBinMethods["antennaId"] = ConfigDescriptionRow.skipAntennaIdFromBin
+        _skipBinMethods["feedId"] = ConfigDescriptionRow.skipFeedIdFromBin
+        _skipBinMethods["switchCycleId"] = ConfigDescriptionRow.skipSwitchCycleIdFromBin
+        _skipBinMethods["dataDescriptionId"] = (
+            ConfigDescriptionRow.skipDataDescriptionIdFromBin
+        )
+        _skipBinMethods["processorId"] = ConfigDescriptionRow.skipProcessorIdFromBin
+
+        _skipBinMethods["phasedArrayList"] = (
+            ConfigDescriptionRow.skipPhasedArrayListFromBin
+        )
+        _skipBinMethods["numAssocValues"] = (
+            ConfigDescriptionRow.skipNumAssocValuesFromBin
+        )
+        _skipBinMethods["assocNature"] = ConfigDescriptionRow.skipAssocNatureFromBin
+        _skipBinMethods["assocConfigDescriptionId"] = (
+            ConfigDescriptionRow.skipAssocConfigDescriptionIdFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -881,7 +1102,30 @@ class ConfigDescriptionRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " ConfigDescription",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute numAntenna
 
@@ -2063,5 +2307,8 @@ class ConfigDescriptionRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 ConfigDescriptionRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+ConfigDescriptionRow.initSkipBinMethods()

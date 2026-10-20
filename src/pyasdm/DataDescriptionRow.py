@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -260,6 +264,8 @@ class DataDescriptionRow:
 
             self._pulsarId.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def dataDescriptionIdFromBin(row, eis):
         """
@@ -308,6 +314,59 @@ class DataDescriptionRow:
 
         _fromBinMethods["pulsarId"] = DataDescriptionRow.pulsarIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipDataDescriptionIdFromBin(eis):
+        """
+        Skip the dataDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipPolOrHoloIdFromBin(eis):
+        """
+        Skip the polOrHoloId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipPulsarIdFromBin(eis):
+        """
+        Skip the optional pulsarId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["dataDescriptionId"] = (
+            DataDescriptionRow.skipDataDescriptionIdFromBin
+        )
+        _skipBinMethods["polOrHoloId"] = DataDescriptionRow.skipPolOrHoloIdFromBin
+        _skipBinMethods["spectralWindowId"] = (
+            DataDescriptionRow.skipSpectralWindowIdFromBin
+        )
+
+        _skipBinMethods["pulsarId"] = DataDescriptionRow.skipPulsarIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -334,7 +393,30 @@ class DataDescriptionRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " DataDescription",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute dataDescriptionId
 
@@ -541,5 +623,8 @@ class DataDescriptionRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 DataDescriptionRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+DataDescriptionRow.initSkipBinMethods()

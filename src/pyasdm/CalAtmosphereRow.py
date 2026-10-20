@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -1060,6 +1064,8 @@ class CalAtmosphereRow:
                 for j in range(sbGainSpectrum_dims[1]):
                     eos.writeFloat(self._sbGainSpectrum[i][j])
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaNameFromBin(row, eis):
         """
@@ -1496,6 +1502,418 @@ class CalAtmosphereRow:
         _fromBinMethods["sbGainError"] = CalAtmosphereRow.sbGainErrorFromBin
         _fromBinMethods["sbGainSpectrum"] = CalAtmosphereRow.sbGainSpectrumFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaNameFromBin(eis):
+        """
+        Skip the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipReceiverBandFromBin(eis):
+        """
+        Skip the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverBand stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipBasebandNameFromBin(eis):
+        """
+        Skip the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        # BasebandName stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipNumFreqFromBin(eis):
+        """
+        Skip the numFreq in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumLoadFromBin(eis):
+        """
+        Skip the numLoad in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumReceptorFromBin(eis):
+        """
+        Skip the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipForwardEffSpectrumFromBin(eis):
+        """
+        Skip the forwardEffSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        forwardEffSpectrumDim1 = eis.readInt()
+        forwardEffSpectrumDim2 = eis.readInt()
+        for _ in range(forwardEffSpectrumDim1):
+            for _ in range(forwardEffSpectrumDim2):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipFrequencyRangeFromBin(eis):
+        """
+        Skip the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipGroundPressureFromBin(eis):
+        """
+        Skip the groundPressure in row from the EndianInput (eis) instance.
+        """
+
+        Pressure.skipBin(eis)
+
+    @staticmethod
+    def skipGroundRelHumidityFromBin(eis):
+        """
+        Skip the groundRelHumidity in row from the EndianInput (eis) instance.
+        """
+
+        Humidity.skipBin(eis)
+
+    @staticmethod
+    def skipFrequencySpectrumFromBin(eis):
+        """
+        Skip the frequencySpectrum in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipGroundTemperatureFromBin(eis):
+        """
+        Skip the groundTemperature in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skipBin(eis)
+
+    @staticmethod
+    def skipPolarizationTypesFromBin(eis):
+        """
+        Skip the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        for _ in range(polarizationTypesDim1):
+            # PolarizationType stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipPowerSkySpectrumFromBin(eis):
+        """
+        Skip the powerSkySpectrum in row from the EndianInput (eis) instance.
+        """
+
+        powerSkySpectrumDim1 = eis.readInt()
+        powerSkySpectrumDim2 = eis.readInt()
+        for _ in range(powerSkySpectrumDim1):
+            for _ in range(powerSkySpectrumDim2):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipPowerLoadSpectrumFromBin(eis):
+        """
+        Skip the powerLoadSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        powerLoadSpectrumDim1 = eis.readInt()
+        powerLoadSpectrumDim2 = eis.readInt()
+        powerLoadSpectrumDim3 = eis.readInt()
+        for _ in range(powerLoadSpectrumDim1):
+            for _ in range(powerLoadSpectrumDim2):
+                for _ in range(powerLoadSpectrumDim3):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipSyscalTypeFromBin(eis):
+        """
+        Skip the syscalType in row from the EndianInput (eis) instance.
+        """
+
+        # SyscalMethod stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipTAtmSpectrumFromBin(eis):
+        """
+        Skip the tAtmSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skip2DBin(eis)
+
+    @staticmethod
+    def skipTRecSpectrumFromBin(eis):
+        """
+        Skip the tRecSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skip2DBin(eis)
+
+    @staticmethod
+    def skipTSysSpectrumFromBin(eis):
+        """
+        Skip the tSysSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skip2DBin(eis)
+
+    @staticmethod
+    def skipTauSpectrumFromBin(eis):
+        """
+        Skip the tauSpectrum in row from the EndianInput (eis) instance.
+        """
+
+        tauSpectrumDim1 = eis.readInt()
+        tauSpectrumDim2 = eis.readInt()
+        for _ in range(tauSpectrumDim1):
+            for _ in range(tauSpectrumDim2):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipTAtmFromBin(eis):
+        """
+        Skip the tAtm in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def skipTRecFromBin(eis):
+        """
+        Skip the tRec in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def skipTSysFromBin(eis):
+        """
+        Skip the tSys in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def skipTauFromBin(eis):
+        """
+        Skip the tau in row from the EndianInput (eis) instance.
+        """
+
+        tauDim1 = eis.readInt()
+        for _ in range(tauDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipWaterFromBin(eis):
+        """
+        Skip the water in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipWaterErrorFromBin(eis):
+        """
+        Skip the waterError in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipAlphaSpectrumFromBin(eis):
+        """
+        Skip the optional alphaSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            alphaSpectrumDim1 = eis.readInt()
+            alphaSpectrumDim2 = eis.readInt()
+            for _ in range(alphaSpectrumDim1):
+                for _ in range(alphaSpectrumDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipForwardEfficiencyFromBin(eis):
+        """
+        Skip the optional forwardEfficiency in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            forwardEfficiencyDim1 = eis.readInt()
+            for _ in range(forwardEfficiencyDim1):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipForwardEfficiencyErrorFromBin(eis):
+        """
+        Skip the optional forwardEfficiencyError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            forwardEfficiencyErrorDim1 = eis.readInt()
+            for _ in range(forwardEfficiencyErrorDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipSbGainFromBin(eis):
+        """
+        Skip the optional sbGain in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            sbGainDim1 = eis.readInt()
+            for _ in range(sbGainDim1):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipSbGainErrorFromBin(eis):
+        """
+        Skip the optional sbGainError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            sbGainErrorDim1 = eis.readInt()
+            for _ in range(sbGainErrorDim1):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipSbGainSpectrumFromBin(eis):
+        """
+        Skip the optional sbGainSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            sbGainSpectrumDim1 = eis.readInt()
+            sbGainSpectrumDim2 = eis.readInt()
+            for _ in range(sbGainSpectrumDim1):
+                for _ in range(sbGainSpectrumDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaName"] = CalAtmosphereRow.skipAntennaNameFromBin
+        _skipBinMethods["receiverBand"] = CalAtmosphereRow.skipReceiverBandFromBin
+        _skipBinMethods["basebandName"] = CalAtmosphereRow.skipBasebandNameFromBin
+        _skipBinMethods["calDataId"] = CalAtmosphereRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalAtmosphereRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalAtmosphereRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalAtmosphereRow.skipEndValidTimeFromBin
+        _skipBinMethods["numFreq"] = CalAtmosphereRow.skipNumFreqFromBin
+        _skipBinMethods["numLoad"] = CalAtmosphereRow.skipNumLoadFromBin
+        _skipBinMethods["numReceptor"] = CalAtmosphereRow.skipNumReceptorFromBin
+        _skipBinMethods["forwardEffSpectrum"] = (
+            CalAtmosphereRow.skipForwardEffSpectrumFromBin
+        )
+        _skipBinMethods["frequencyRange"] = CalAtmosphereRow.skipFrequencyRangeFromBin
+        _skipBinMethods["groundPressure"] = CalAtmosphereRow.skipGroundPressureFromBin
+        _skipBinMethods["groundRelHumidity"] = (
+            CalAtmosphereRow.skipGroundRelHumidityFromBin
+        )
+        _skipBinMethods["frequencySpectrum"] = (
+            CalAtmosphereRow.skipFrequencySpectrumFromBin
+        )
+        _skipBinMethods["groundTemperature"] = (
+            CalAtmosphereRow.skipGroundTemperatureFromBin
+        )
+        _skipBinMethods["polarizationTypes"] = (
+            CalAtmosphereRow.skipPolarizationTypesFromBin
+        )
+        _skipBinMethods["powerSkySpectrum"] = (
+            CalAtmosphereRow.skipPowerSkySpectrumFromBin
+        )
+        _skipBinMethods["powerLoadSpectrum"] = (
+            CalAtmosphereRow.skipPowerLoadSpectrumFromBin
+        )
+        _skipBinMethods["syscalType"] = CalAtmosphereRow.skipSyscalTypeFromBin
+        _skipBinMethods["tAtmSpectrum"] = CalAtmosphereRow.skipTAtmSpectrumFromBin
+        _skipBinMethods["tRecSpectrum"] = CalAtmosphereRow.skipTRecSpectrumFromBin
+        _skipBinMethods["tSysSpectrum"] = CalAtmosphereRow.skipTSysSpectrumFromBin
+        _skipBinMethods["tauSpectrum"] = CalAtmosphereRow.skipTauSpectrumFromBin
+        _skipBinMethods["tAtm"] = CalAtmosphereRow.skipTAtmFromBin
+        _skipBinMethods["tRec"] = CalAtmosphereRow.skipTRecFromBin
+        _skipBinMethods["tSys"] = CalAtmosphereRow.skipTSysFromBin
+        _skipBinMethods["tau"] = CalAtmosphereRow.skipTauFromBin
+        _skipBinMethods["water"] = CalAtmosphereRow.skipWaterFromBin
+        _skipBinMethods["waterError"] = CalAtmosphereRow.skipWaterErrorFromBin
+
+        _skipBinMethods["alphaSpectrum"] = CalAtmosphereRow.skipAlphaSpectrumFromBin
+        _skipBinMethods["forwardEfficiency"] = (
+            CalAtmosphereRow.skipForwardEfficiencyFromBin
+        )
+        _skipBinMethods["forwardEfficiencyError"] = (
+            CalAtmosphereRow.skipForwardEfficiencyErrorFromBin
+        )
+        _skipBinMethods["sbGain"] = CalAtmosphereRow.skipSbGainFromBin
+        _skipBinMethods["sbGainError"] = CalAtmosphereRow.skipSbGainErrorFromBin
+        _skipBinMethods["sbGainSpectrum"] = CalAtmosphereRow.skipSbGainSpectrumFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -1522,7 +1940,30 @@ class CalAtmosphereRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalAtmosphere",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute receiverBand
 
@@ -3772,5 +4213,8 @@ class CalAtmosphereRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalAtmosphereRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalAtmosphereRow.initSkipBinMethods()

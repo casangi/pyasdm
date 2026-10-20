@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.DirectionReferenceCode import DirectionReferenceCode
 
@@ -364,6 +368,8 @@ class SwitchCycleRow:
 
             self._directionEquinox.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def switchCycleIdFromBin(row, eis):
         """
@@ -453,6 +459,99 @@ class SwitchCycleRow:
         _fromBinMethods["directionCode"] = SwitchCycleRow.directionCodeFromBin
         _fromBinMethods["directionEquinox"] = SwitchCycleRow.directionEquinoxFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipSwitchCycleIdFromBin(eis):
+        """
+        Skip the switchCycleId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNumStepFromBin(eis):
+        """
+        Skip the numStep in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipWeightArrayFromBin(eis):
+        """
+        Skip the weightArray in row from the EndianInput (eis) instance.
+        """
+
+        weightArrayDim1 = eis.readInt()
+        for _ in range(weightArrayDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipDirOffsetArrayFromBin(eis):
+        """
+        Skip the dirOffsetArray in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipFreqOffsetArrayFromBin(eis):
+        """
+        Skip the freqOffsetArray in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipStepDurationArrayFromBin(eis):
+        """
+        Skip the stepDurationArray in row from the EndianInput (eis) instance.
+        """
+
+        Interval.skip1DBin(eis)
+
+    @staticmethod
+    def skipDirectionCodeFromBin(eis):
+        """
+        Skip the optional directionCode in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # DirectionReferenceCode stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipDirectionEquinoxFromBin(eis):
+        """
+        Skip the optional directionEquinox in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["switchCycleId"] = SwitchCycleRow.skipSwitchCycleIdFromBin
+        _skipBinMethods["numStep"] = SwitchCycleRow.skipNumStepFromBin
+        _skipBinMethods["weightArray"] = SwitchCycleRow.skipWeightArrayFromBin
+        _skipBinMethods["dirOffsetArray"] = SwitchCycleRow.skipDirOffsetArrayFromBin
+        _skipBinMethods["freqOffsetArray"] = SwitchCycleRow.skipFreqOffsetArrayFromBin
+        _skipBinMethods["stepDurationArray"] = (
+            SwitchCycleRow.skipStepDurationArrayFromBin
+        )
+
+        _skipBinMethods["directionCode"] = SwitchCycleRow.skipDirectionCodeFromBin
+        _skipBinMethods["directionEquinox"] = SwitchCycleRow.skipDirectionEquinoxFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -479,7 +578,30 @@ class SwitchCycleRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SwitchCycle",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute switchCycleId
 
@@ -961,5 +1083,8 @@ class SwitchCycleRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 SwitchCycleRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+SwitchCycleRow.initSkipBinMethods()

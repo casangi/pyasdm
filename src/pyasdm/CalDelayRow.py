@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
 
@@ -684,6 +688,8 @@ class CalDelayRow:
 
                 eos.writeString(str(self._sidebands[i]))
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaNameFromBin(row, eis):
         """
@@ -925,6 +931,244 @@ class CalDelayRow:
         _fromBinMethods["refFreqPhase"] = CalDelayRow.refFreqPhaseFromBin
         _fromBinMethods["sidebands"] = CalDelayRow.sidebandsFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaNameFromBin(eis):
+        """
+        Skip the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipAtmPhaseCorrectionFromBin(eis):
+        """
+        Skip the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        # AtmPhaseCorrection stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipBasebandNameFromBin(eis):
+        """
+        Skip the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        # BasebandName stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipReceiverBandFromBin(eis):
+        """
+        Skip the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverBand stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipRefAntennaNameFromBin(eis):
+        """
+        Skip the refAntennaName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipNumReceptorFromBin(eis):
+        """
+        Skip the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipDelayErrorFromBin(eis):
+        """
+        Skip the delayError in row from the EndianInput (eis) instance.
+        """
+
+        delayErrorDim1 = eis.readInt()
+        for _ in range(delayErrorDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipDelayOffsetFromBin(eis):
+        """
+        Skip the delayOffset in row from the EndianInput (eis) instance.
+        """
+
+        delayOffsetDim1 = eis.readInt()
+        for _ in range(delayOffsetDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipPolarizationTypesFromBin(eis):
+        """
+        Skip the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        for _ in range(polarizationTypesDim1):
+            # PolarizationType stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipReducedChiSquaredFromBin(eis):
+        """
+        Skip the reducedChiSquared in row from the EndianInput (eis) instance.
+        """
+
+        reducedChiSquaredDim1 = eis.readInt()
+        for _ in range(reducedChiSquaredDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipAppliedDelayFromBin(eis):
+        """
+        Skip the appliedDelay in row from the EndianInput (eis) instance.
+        """
+
+        appliedDelayDim1 = eis.readInt()
+        for _ in range(appliedDelayDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipCrossDelayOffsetFromBin(eis):
+        """
+        Skip the optional crossDelayOffset in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipCrossDelayOffsetErrorFromBin(eis):
+        """
+        Skip the optional crossDelayOffsetError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipNumSidebandFromBin(eis):
+        """
+        Skip the optional numSideband in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipRefFreqFromBin(eis):
+        """
+        Skip the optional refFreq in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipRefFreqPhaseFromBin(eis):
+        """
+        Skip the optional refFreqPhase in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip1DBin(eis)
+
+    @staticmethod
+    def skipSidebandsFromBin(eis):
+        """
+        Skip the optional sidebands in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            sidebandsDim1 = eis.readInt()
+            for _ in range(sidebandsDim1):
+                # ReceiverSideband stored as a string
+                eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaName"] = CalDelayRow.skipAntennaNameFromBin
+        _skipBinMethods["atmPhaseCorrection"] = (
+            CalDelayRow.skipAtmPhaseCorrectionFromBin
+        )
+        _skipBinMethods["basebandName"] = CalDelayRow.skipBasebandNameFromBin
+        _skipBinMethods["receiverBand"] = CalDelayRow.skipReceiverBandFromBin
+        _skipBinMethods["calDataId"] = CalDelayRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalDelayRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalDelayRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalDelayRow.skipEndValidTimeFromBin
+        _skipBinMethods["refAntennaName"] = CalDelayRow.skipRefAntennaNameFromBin
+        _skipBinMethods["numReceptor"] = CalDelayRow.skipNumReceptorFromBin
+        _skipBinMethods["delayError"] = CalDelayRow.skipDelayErrorFromBin
+        _skipBinMethods["delayOffset"] = CalDelayRow.skipDelayOffsetFromBin
+        _skipBinMethods["polarizationTypes"] = CalDelayRow.skipPolarizationTypesFromBin
+        _skipBinMethods["reducedChiSquared"] = CalDelayRow.skipReducedChiSquaredFromBin
+        _skipBinMethods["appliedDelay"] = CalDelayRow.skipAppliedDelayFromBin
+
+        _skipBinMethods["crossDelayOffset"] = CalDelayRow.skipCrossDelayOffsetFromBin
+        _skipBinMethods["crossDelayOffsetError"] = (
+            CalDelayRow.skipCrossDelayOffsetErrorFromBin
+        )
+        _skipBinMethods["numSideband"] = CalDelayRow.skipNumSidebandFromBin
+        _skipBinMethods["refFreq"] = CalDelayRow.skipRefFreqFromBin
+        _skipBinMethods["refFreqPhase"] = CalDelayRow.skipRefFreqPhaseFromBin
+        _skipBinMethods["sidebands"] = CalDelayRow.skipSidebandsFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -951,7 +1195,30 @@ class CalDelayRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalDelay",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute antennaName
 
@@ -2035,5 +2302,8 @@ class CalDelayRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalDelayRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalDelayRow.initSkipBinMethods()

@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -275,6 +279,8 @@ class FlagCmdRow:
 
         eos.writeStr(self._command)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def timeIntervalFromBin(row, eis):
         """
@@ -345,6 +351,78 @@ class FlagCmdRow:
         _fromBinMethods["applied"] = FlagCmdRow.appliedFromBin
         _fromBinMethods["command"] = FlagCmdRow.commandFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipTypeFromBin(eis):
+        """
+        Skip the type in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipReasonFromBin(eis):
+        """
+        Skip the reason in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipLevelFromBin(eis):
+        """
+        Skip the level in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipSeverityFromBin(eis):
+        """
+        Skip the severity in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipAppliedFromBin(eis):
+        """
+        Skip the applied in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipBool()
+
+    @staticmethod
+    def skipCommandFromBin(eis):
+        """
+        Skip the command in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["timeInterval"] = FlagCmdRow.skipTimeIntervalFromBin
+        _skipBinMethods["type"] = FlagCmdRow.skipTypeFromBin
+        _skipBinMethods["reason"] = FlagCmdRow.skipReasonFromBin
+        _skipBinMethods["level"] = FlagCmdRow.skipLevelFromBin
+        _skipBinMethods["severity"] = FlagCmdRow.skipSeverityFromBin
+        _skipBinMethods["applied"] = FlagCmdRow.skipAppliedFromBin
+        _skipBinMethods["command"] = FlagCmdRow.skipCommandFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -371,7 +449,60 @@ class FlagCmdRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " FlagCmd",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order. Only timeInterval
+        in the FlagCmd row is read. The timeInterval is returned.
+        """
+        global _skipBinMethods
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " FlagCmd",
+                )
+            if attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(self._eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return timeInterval
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -630,5 +761,8 @@ class FlagCmdRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 FlagCmdRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+FlagCmdRow.initSkipBinMethods()

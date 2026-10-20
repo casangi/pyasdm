@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.FluxCalibrationMethod import FluxCalibrationMethod
 
@@ -692,6 +696,8 @@ class CalFluxRow:
 
             eos.writeString(str(self._sourceModel))
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def sourceNameFromBin(row, eis):
         """
@@ -919,6 +925,234 @@ class CalFluxRow:
         _fromBinMethods["sizeError"] = CalFluxRow.sizeErrorFromBin
         _fromBinMethods["sourceModel"] = CalFluxRow.sourceModelFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipSourceNameFromBin(eis):
+        """
+        Skip the sourceName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipNumFrequencyRangesFromBin(eis):
+        """
+        Skip the numFrequencyRanges in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumStokesFromBin(eis):
+        """
+        Skip the numStokes in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipFrequencyRangesFromBin(eis):
+        """
+        Skip the frequencyRanges in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip2DBin(eis)
+
+    @staticmethod
+    def skipFluxMethodFromBin(eis):
+        """
+        Skip the fluxMethod in row from the EndianInput (eis) instance.
+        """
+
+        # FluxCalibrationMethod stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipFluxFromBin(eis):
+        """
+        Skip the flux in row from the EndianInput (eis) instance.
+        """
+
+        fluxDim1 = eis.readInt()
+        fluxDim2 = eis.readInt()
+        for _ in range(fluxDim1):
+            for _ in range(fluxDim2):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipFluxErrorFromBin(eis):
+        """
+        Skip the fluxError in row from the EndianInput (eis) instance.
+        """
+
+        fluxErrorDim1 = eis.readInt()
+        fluxErrorDim2 = eis.readInt()
+        for _ in range(fluxErrorDim1):
+            for _ in range(fluxErrorDim2):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipStokesFromBin(eis):
+        """
+        Skip the stokes in row from the EndianInput (eis) instance.
+        """
+
+        stokesDim1 = eis.readInt()
+        for _ in range(stokesDim1):
+            # StokesParameter stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipDirectionFromBin(eis):
+        """
+        Skip the optional direction in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip1DBin(eis)
+
+    @staticmethod
+    def skipDirectionCodeFromBin(eis):
+        """
+        Skip the optional directionCode in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # DirectionReferenceCode stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipDirectionEquinoxFromBin(eis):
+        """
+        Skip the optional directionEquinox in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skipBin(eis)
+
+    @staticmethod
+    def skipPAFromBin(eis):
+        """
+        Skip the optional PA in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipPAErrorFromBin(eis):
+        """
+        Skip the optional PAError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipSizeFromBin(eis):
+        """
+        Skip the optional size in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip3DBin(eis)
+
+    @staticmethod
+    def skipSizeErrorFromBin(eis):
+        """
+        Skip the optional sizeError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip3DBin(eis)
+
+    @staticmethod
+    def skipSourceModelFromBin(eis):
+        """
+        Skip the optional sourceModel in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # SourceModel stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["sourceName"] = CalFluxRow.skipSourceNameFromBin
+        _skipBinMethods["calDataId"] = CalFluxRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalFluxRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalFluxRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalFluxRow.skipEndValidTimeFromBin
+        _skipBinMethods["numFrequencyRanges"] = CalFluxRow.skipNumFrequencyRangesFromBin
+        _skipBinMethods["numStokes"] = CalFluxRow.skipNumStokesFromBin
+        _skipBinMethods["frequencyRanges"] = CalFluxRow.skipFrequencyRangesFromBin
+        _skipBinMethods["fluxMethod"] = CalFluxRow.skipFluxMethodFromBin
+        _skipBinMethods["flux"] = CalFluxRow.skipFluxFromBin
+        _skipBinMethods["fluxError"] = CalFluxRow.skipFluxErrorFromBin
+        _skipBinMethods["stokes"] = CalFluxRow.skipStokesFromBin
+
+        _skipBinMethods["direction"] = CalFluxRow.skipDirectionFromBin
+        _skipBinMethods["directionCode"] = CalFluxRow.skipDirectionCodeFromBin
+        _skipBinMethods["directionEquinox"] = CalFluxRow.skipDirectionEquinoxFromBin
+        _skipBinMethods["PA"] = CalFluxRow.skipPAFromBin
+        _skipBinMethods["PAError"] = CalFluxRow.skipPAErrorFromBin
+        _skipBinMethods["size"] = CalFluxRow.skipSizeFromBin
+        _skipBinMethods["sizeError"] = CalFluxRow.skipSizeErrorFromBin
+        _skipBinMethods["sourceModel"] = CalFluxRow.skipSourceModelFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -945,7 +1179,30 @@ class CalFluxRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalFlux",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute sourceName
 
@@ -2080,5 +2337,8 @@ class CalFluxRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalFluxRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalFluxRow.initSkipBinMethods()

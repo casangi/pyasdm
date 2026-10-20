@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.AntennaMake import AntennaMake
 
@@ -362,6 +366,8 @@ class AntennaRow:
 
             self._assocAntennaId.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -462,6 +468,111 @@ class AntennaRow:
 
         _fromBinMethods["assocAntennaId"] = AntennaRow.assocAntennaIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNameFromBin(eis):
+        """
+        Skip the name in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipAntennaMakeFromBin(eis):
+        """
+        Skip the antennaMake in row from the EndianInput (eis) instance.
+        """
+
+        # AntennaMake stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipAntennaTypeFromBin(eis):
+        """
+        Skip the antennaType in row from the EndianInput (eis) instance.
+        """
+
+        # AntennaType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipDishDiameterFromBin(eis):
+        """
+        Skip the dishDiameter in row from the EndianInput (eis) instance.
+        """
+
+        Length.skipBin(eis)
+
+    @staticmethod
+    def skipPositionFromBin(eis):
+        """
+        Skip the position in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipOffsetFromBin(eis):
+        """
+        Skip the offset in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipTimeFromBin(eis):
+        """
+        Skip the time in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipStationIdFromBin(eis):
+        """
+        Skip the stationId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipAssocAntennaIdFromBin(eis):
+        """
+        Skip the optional assocAntennaId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = AntennaRow.skipAntennaIdFromBin
+        _skipBinMethods["name"] = AntennaRow.skipNameFromBin
+        _skipBinMethods["antennaMake"] = AntennaRow.skipAntennaMakeFromBin
+        _skipBinMethods["antennaType"] = AntennaRow.skipAntennaTypeFromBin
+        _skipBinMethods["dishDiameter"] = AntennaRow.skipDishDiameterFromBin
+        _skipBinMethods["position"] = AntennaRow.skipPositionFromBin
+        _skipBinMethods["offset"] = AntennaRow.skipOffsetFromBin
+        _skipBinMethods["time"] = AntennaRow.skipTimeFromBin
+        _skipBinMethods["stationId"] = AntennaRow.skipStationIdFromBin
+
+        _skipBinMethods["assocAntennaId"] = AntennaRow.skipAssocAntennaIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -488,7 +599,30 @@ class AntennaRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Antenna",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute antennaId
 
@@ -988,5 +1122,8 @@ class AntennaRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 AntennaRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+AntennaRow.initSkipBinMethods()

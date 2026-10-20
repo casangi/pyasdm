@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -755,6 +759,8 @@ class DelayModelFixedParametersRow:
 
             eos.writeStr(self._delayModelFlags)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def delayModelFixedParametersIdFromBin(row, eis):
         """
@@ -1001,6 +1007,279 @@ class DelayModelFixedParametersRow:
             DelayModelFixedParametersRow.delayModelFlagsFromBin
         )
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipDelayModelFixedParametersIdFromBin(eis):
+        """
+        Skip the delayModelFixedParametersId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipDelayModelVersionFromBin(eis):
+        """
+        Skip the delayModelVersion in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipExecBlockIdFromBin(eis):
+        """
+        Skip the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipGaussConstantFromBin(eis):
+        """
+        Skip the optional gaussConstant in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            AngularRate.skipBin(eis)
+
+    @staticmethod
+    def skipNewtonianConstantFromBin(eis):
+        """
+        Skip the optional newtonianConstant in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipGravityFromBin(eis):
+        """
+        Skip the optional gravity in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipEarthFlatteningFromBin(eis):
+        """
+        Skip the optional earthFlattening in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipEarthRadiusFromBin(eis):
+        """
+        Skip the optional earthRadius in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skipBin(eis)
+
+    @staticmethod
+    def skipMoonEarthMassRatioFromBin(eis):
+        """
+        Skip the optional moonEarthMassRatio in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipEphemerisEpochFromBin(eis):
+        """
+        Skip the optional ephemerisEpoch in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipEarthTideLagFromBin(eis):
+        """
+        Skip the optional earthTideLag in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipEarthGMFromBin(eis):
+        """
+        Skip the optional earthGM in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipMoonGMFromBin(eis):
+        """
+        Skip the optional moonGM in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipSunGMFromBin(eis):
+        """
+        Skip the optional sunGM in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipLoveNumberHFromBin(eis):
+        """
+        Skip the optional loveNumberH in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipLoveNumberLFromBin(eis):
+        """
+        Skip the optional loveNumberL in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipPrecessionConstantFromBin(eis):
+        """
+        Skip the optional precessionConstant in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            AngularRate.skipBin(eis)
+
+    @staticmethod
+    def skipLightTime1AUFromBin(eis):
+        """
+        Skip the optional lightTime1AU in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipSpeedOfLightFromBin(eis):
+        """
+        Skip the optional speedOfLight in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Speed.skipBin(eis)
+
+    @staticmethod
+    def skipDelayModelFlagsFromBin(eis):
+        """
+        Skip the optional delayModelFlags in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["delayModelFixedParametersId"] = (
+            DelayModelFixedParametersRow.skipDelayModelFixedParametersIdFromBin
+        )
+        _skipBinMethods["delayModelVersion"] = (
+            DelayModelFixedParametersRow.skipDelayModelVersionFromBin
+        )
+        _skipBinMethods["execBlockId"] = (
+            DelayModelFixedParametersRow.skipExecBlockIdFromBin
+        )
+
+        _skipBinMethods["gaussConstant"] = (
+            DelayModelFixedParametersRow.skipGaussConstantFromBin
+        )
+        _skipBinMethods["newtonianConstant"] = (
+            DelayModelFixedParametersRow.skipNewtonianConstantFromBin
+        )
+        _skipBinMethods["gravity"] = DelayModelFixedParametersRow.skipGravityFromBin
+        _skipBinMethods["earthFlattening"] = (
+            DelayModelFixedParametersRow.skipEarthFlatteningFromBin
+        )
+        _skipBinMethods["earthRadius"] = (
+            DelayModelFixedParametersRow.skipEarthRadiusFromBin
+        )
+        _skipBinMethods["moonEarthMassRatio"] = (
+            DelayModelFixedParametersRow.skipMoonEarthMassRatioFromBin
+        )
+        _skipBinMethods["ephemerisEpoch"] = (
+            DelayModelFixedParametersRow.skipEphemerisEpochFromBin
+        )
+        _skipBinMethods["earthTideLag"] = (
+            DelayModelFixedParametersRow.skipEarthTideLagFromBin
+        )
+        _skipBinMethods["earthGM"] = DelayModelFixedParametersRow.skipEarthGMFromBin
+        _skipBinMethods["moonGM"] = DelayModelFixedParametersRow.skipMoonGMFromBin
+        _skipBinMethods["sunGM"] = DelayModelFixedParametersRow.skipSunGMFromBin
+        _skipBinMethods["loveNumberH"] = (
+            DelayModelFixedParametersRow.skipLoveNumberHFromBin
+        )
+        _skipBinMethods["loveNumberL"] = (
+            DelayModelFixedParametersRow.skipLoveNumberLFromBin
+        )
+        _skipBinMethods["precessionConstant"] = (
+            DelayModelFixedParametersRow.skipPrecessionConstantFromBin
+        )
+        _skipBinMethods["lightTime1AU"] = (
+            DelayModelFixedParametersRow.skipLightTime1AUFromBin
+        )
+        _skipBinMethods["speedOfLight"] = (
+            DelayModelFixedParametersRow.skipSpeedOfLightFromBin
+        )
+        _skipBinMethods["delayModelFlags"] = (
+            DelayModelFixedParametersRow.skipDelayModelFlagsFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -1027,7 +1306,30 @@ class DelayModelFixedParametersRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " DelayModelFixedParameters",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute delayModelFixedParametersId
 
@@ -1951,5 +2253,8 @@ class DelayModelFixedParametersRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 DelayModelFixedParametersRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+DelayModelFixedParametersRow.initSkipBinMethods()

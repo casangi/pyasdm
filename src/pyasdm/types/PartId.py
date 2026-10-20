@@ -94,6 +94,13 @@ class PartId:
         """
         return PartId(eis.readString())
 
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of a PartId from an EndianInput stream
+        """
+        eis.readString()
+
     def equals(self, other):
         return isinstance(other, PartId) and (other._id == self._id)
 

@@ -169,7 +169,7 @@ class Length:
             return self._length / 1000.0
         if units == self.CENTIMETER:
             return self._length * 100.0
-        if units == MILLIMETER:
+        if units == self.MILLIMETER:
             return self._length * 1000.0
 
         raise ValueError(str(units) + " is not an alllowable unit.")
@@ -343,13 +343,21 @@ class Length:
     @staticmethod
     def fromBin(eis):
         """
-        Read the binary representation of an Length, in meters,
+        Read the binary representation of a Length, in meters,
         from an EndianInput instance and use the read value to set a
         Length.
 
         return a Length
         """
         return Length(eis.readDouble())
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of a Length
+        from an EndianInput
+        """
+        eis.readDouble()
 
     @staticmethod
     def from1DBin(eis):
@@ -363,6 +371,16 @@ class Length:
             result.append(Length.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Length values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Length.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -380,6 +398,18 @@ class Length:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Length values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Length.skipBin(eis)
 
     @staticmethod
     def from3Dbin(eis):
@@ -401,6 +431,20 @@ class Length:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Length values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Length.skipBin(eis)
 
     def equals(self, otherLength):
         """
@@ -500,7 +544,7 @@ class Length:
         if not isinstance(otherLength, length):
             raise ValueError("otherLength must be a length")
 
-        self._length -= otherLengthx._length
+        self._length -= otherLength._length
         return self
 
     def __mul__(self, factor):
@@ -511,7 +555,7 @@ class Length:
         self._length *= factor
         return self
 
-    def __truediv__(factor):
+    def __truediv__(self, factor):
         """
         Divide this length by some factor, (this / factor).
         Return this length after division.

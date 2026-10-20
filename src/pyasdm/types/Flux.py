@@ -218,7 +218,7 @@ class Flux:
 
         # only check the first value
         if (len(fluxList) > 0) and not isinstance(fluxList[0], Flux):
-            raise (ValueError("fluxList is not a list of Flux"))
+            raise ValueError("fluxList is not a list of Flux")
 
         for thisFlux in fluxList:
             thisFlux.toBin(eos)
@@ -289,13 +289,21 @@ class Flux:
     @staticmethod
     def fromBin(eis):
         """
-        Read the binary representation of an Flux, in Janskys,
+        Read the binary representation of a Flux, in Janskys,
         from an EndianInput instance and use the read value to set a
         Flux.
 
         return a Flux
         """
         return Flux(eis.readDouble())
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of a Flux
+        from an EndianInput instance
+        """
+        eis.skipDouble()
 
     @staticmethod
     def from1DBin(eis):
@@ -309,6 +317,16 @@ class Flux:
             result.append(Flux.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Flux values from an
+        EndianInput
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Flux.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -326,6 +344,18 @@ class Flux:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Flux values from an
+        EndianInput
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Flux.skipBin(eis)
 
     @staticmethod
     def from3DBin(eis):
@@ -347,6 +377,20 @@ class Flux:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Flux values from an
+        EndianInput
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Flux.skipBin(eis)
 
     def equals(self, otherFlux):
         """
@@ -384,7 +428,7 @@ class Flux:
         than, equal to, or greater than the specified other Flux.
         """
         if not isinstance(otherFlux, Flux):
-            raise ("Attempt to compare a Flux to a non-Flux.")
+            raise ValueError("Attempt to compare a Flux to a non-Flux.")
 
         result = 0
         if self._flux < otherFlux._flux:

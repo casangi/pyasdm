@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.BasebandName import BasebandName
 
@@ -711,6 +715,8 @@ class CalAppPhaseRow:
 
                 eos.writeFloat(self._phaseSupports[i])
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def basebandNameFromBin(row, eis):
         """
@@ -1018,6 +1024,300 @@ class CalAppPhaseRow:
         _fromBinMethods["numSupports"] = CalAppPhaseRow.numSupportsFromBin
         _fromBinMethods["phaseSupports"] = CalAppPhaseRow.phaseSupportsFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipBasebandNameFromBin(eis):
+        """
+        Skip the basebandName in row from the EndianInput (eis) instance.
+        """
+
+        # BasebandName stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipScanNumberFromBin(eis):
+        """
+        Skip the scanNumber in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipAdjustTimeFromBin(eis):
+        """
+        Skip the adjustTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipAdjustTokenFromBin(eis):
+        """
+        Skip the adjustToken in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipPhasingModeFromBin(eis):
+        """
+        Skip the phasingMode in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipNumPhasedAntennasFromBin(eis):
+        """
+        Skip the numPhasedAntennas in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipPhasedAntennasFromBin(eis):
+        """
+        Skip the phasedAntennas in row from the EndianInput (eis) instance.
+        """
+
+        phasedAntennasDim1 = eis.readInt()
+        for _ in range(phasedAntennasDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipRefAntennaIndexFromBin(eis):
+        """
+        Skip the refAntennaIndex in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipCandRefAntennaIndexFromBin(eis):
+        """
+        Skip the candRefAntennaIndex in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipPhasePackingFromBin(eis):
+        """
+        Skip the phasePacking in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipNumReceptorsFromBin(eis):
+        """
+        Skip the numReceptors in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumChannelsFromBin(eis):
+        """
+        Skip the numChannels in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumPhaseValuesFromBin(eis):
+        """
+        Skip the numPhaseValues in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipPhaseValuesFromBin(eis):
+        """
+        Skip the phaseValues in row from the EndianInput (eis) instance.
+        """
+
+        phaseValuesDim1 = eis.readInt()
+        for _ in range(phaseValuesDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipNumCompareFromBin(eis):
+        """
+        Skip the numCompare in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumEfficienciesFromBin(eis):
+        """
+        Skip the numEfficiencies in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipCompareArrayFromBin(eis):
+        """
+        Skip the compareArray in row from the EndianInput (eis) instance.
+        """
+
+        compareArrayDim1 = eis.readInt()
+        for _ in range(compareArrayDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipEfficiencyIndicesFromBin(eis):
+        """
+        Skip the efficiencyIndices in row from the EndianInput (eis) instance.
+        """
+
+        efficiencyIndicesDim1 = eis.readInt()
+        for _ in range(efficiencyIndicesDim1):
+            eis.skipInt()
+
+    @staticmethod
+    def skipEfficienciesFromBin(eis):
+        """
+        Skip the efficiencies in row from the EndianInput (eis) instance.
+        """
+
+        efficienciesDim1 = eis.readInt()
+        efficienciesDim2 = eis.readInt()
+        for _ in range(efficienciesDim1):
+            for _ in range(efficienciesDim2):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipQualityFromBin(eis):
+        """
+        Skip the quality in row from the EndianInput (eis) instance.
+        """
+
+        qualityDim1 = eis.readInt()
+        for _ in range(qualityDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipPhasedSumAntennaFromBin(eis):
+        """
+        Skip the phasedSumAntenna in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipTypeSupportsFromBin(eis):
+        """
+        Skip the optional typeSupports in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipNumSupportsFromBin(eis):
+        """
+        Skip the optional numSupports in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipPhaseSupportsFromBin(eis):
+        """
+        Skip the optional phaseSupports in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            phaseSupportsDim1 = eis.readInt()
+            for _ in range(phaseSupportsDim1):
+                eis.skipFloat()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["basebandName"] = CalAppPhaseRow.skipBasebandNameFromBin
+        _skipBinMethods["scanNumber"] = CalAppPhaseRow.skipScanNumberFromBin
+        _skipBinMethods["calDataId"] = CalAppPhaseRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalAppPhaseRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalAppPhaseRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalAppPhaseRow.skipEndValidTimeFromBin
+        _skipBinMethods["adjustTime"] = CalAppPhaseRow.skipAdjustTimeFromBin
+        _skipBinMethods["adjustToken"] = CalAppPhaseRow.skipAdjustTokenFromBin
+        _skipBinMethods["phasingMode"] = CalAppPhaseRow.skipPhasingModeFromBin
+        _skipBinMethods["numPhasedAntennas"] = (
+            CalAppPhaseRow.skipNumPhasedAntennasFromBin
+        )
+        _skipBinMethods["phasedAntennas"] = CalAppPhaseRow.skipPhasedAntennasFromBin
+        _skipBinMethods["refAntennaIndex"] = CalAppPhaseRow.skipRefAntennaIndexFromBin
+        _skipBinMethods["candRefAntennaIndex"] = (
+            CalAppPhaseRow.skipCandRefAntennaIndexFromBin
+        )
+        _skipBinMethods["phasePacking"] = CalAppPhaseRow.skipPhasePackingFromBin
+        _skipBinMethods["numReceptors"] = CalAppPhaseRow.skipNumReceptorsFromBin
+        _skipBinMethods["numChannels"] = CalAppPhaseRow.skipNumChannelsFromBin
+        _skipBinMethods["numPhaseValues"] = CalAppPhaseRow.skipNumPhaseValuesFromBin
+        _skipBinMethods["phaseValues"] = CalAppPhaseRow.skipPhaseValuesFromBin
+        _skipBinMethods["numCompare"] = CalAppPhaseRow.skipNumCompareFromBin
+        _skipBinMethods["numEfficiencies"] = CalAppPhaseRow.skipNumEfficienciesFromBin
+        _skipBinMethods["compareArray"] = CalAppPhaseRow.skipCompareArrayFromBin
+        _skipBinMethods["efficiencyIndices"] = (
+            CalAppPhaseRow.skipEfficiencyIndicesFromBin
+        )
+        _skipBinMethods["efficiencies"] = CalAppPhaseRow.skipEfficienciesFromBin
+        _skipBinMethods["quality"] = CalAppPhaseRow.skipQualityFromBin
+        _skipBinMethods["phasedSumAntenna"] = CalAppPhaseRow.skipPhasedSumAntennaFromBin
+
+        _skipBinMethods["typeSupports"] = CalAppPhaseRow.skipTypeSupportsFromBin
+        _skipBinMethods["numSupports"] = CalAppPhaseRow.skipNumSupportsFromBin
+        _skipBinMethods["phaseSupports"] = CalAppPhaseRow.skipPhaseSupportsFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -1044,7 +1344,30 @@ class CalAppPhaseRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalAppPhase",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute basebandName
 
@@ -2337,5 +2660,8 @@ class CalAppPhaseRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalAppPhaseRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalAppPhaseRow.initSkipBinMethods()

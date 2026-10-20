@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
 
@@ -468,6 +472,8 @@ class CalSeeingRow:
 
             self._outerScaleRMS.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def atmPhaseCorrectionFromBin(row, eis):
         """
@@ -617,6 +623,163 @@ class CalSeeingRow:
         _fromBinMethods["outerScale"] = CalSeeingRow.outerScaleFromBin
         _fromBinMethods["outerScaleRMS"] = CalSeeingRow.outerScaleRMSFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAtmPhaseCorrectionFromBin(eis):
+        """
+        Skip the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        # AtmPhaseCorrection stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipFrequencyRangeFromBin(eis):
+        """
+        Skip the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipIntegrationTimeFromBin(eis):
+        """
+        Skip the integrationTime in row from the EndianInput (eis) instance.
+        """
+
+        Interval.skipBin(eis)
+
+    @staticmethod
+    def skipNumBaseLengthsFromBin(eis):
+        """
+        Skip the numBaseLengths in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipBaselineLengthsFromBin(eis):
+        """
+        Skip the baselineLengths in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipPhaseRMSFromBin(eis):
+        """
+        Skip the phaseRMS in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip1DBin(eis)
+
+    @staticmethod
+    def skipSeeingFromBin(eis):
+        """
+        Skip the seeing in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skipBin(eis)
+
+    @staticmethod
+    def skipSeeingErrorFromBin(eis):
+        """
+        Skip the seeingError in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skipBin(eis)
+
+    @staticmethod
+    def skipExponentFromBin(eis):
+        """
+        Skip the optional exponent in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipFloat()
+
+    @staticmethod
+    def skipOuterScaleFromBin(eis):
+        """
+        Skip the optional outerScale in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skipBin(eis)
+
+    @staticmethod
+    def skipOuterScaleRMSFromBin(eis):
+        """
+        Skip the optional outerScaleRMS in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["atmPhaseCorrection"] = (
+            CalSeeingRow.skipAtmPhaseCorrectionFromBin
+        )
+        _skipBinMethods["calDataId"] = CalSeeingRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalSeeingRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalSeeingRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalSeeingRow.skipEndValidTimeFromBin
+        _skipBinMethods["frequencyRange"] = CalSeeingRow.skipFrequencyRangeFromBin
+        _skipBinMethods["integrationTime"] = CalSeeingRow.skipIntegrationTimeFromBin
+        _skipBinMethods["numBaseLengths"] = CalSeeingRow.skipNumBaseLengthsFromBin
+        _skipBinMethods["baselineLengths"] = CalSeeingRow.skipBaselineLengthsFromBin
+        _skipBinMethods["phaseRMS"] = CalSeeingRow.skipPhaseRMSFromBin
+        _skipBinMethods["seeing"] = CalSeeingRow.skipSeeingFromBin
+        _skipBinMethods["seeingError"] = CalSeeingRow.skipSeeingErrorFromBin
+
+        _skipBinMethods["exponent"] = CalSeeingRow.skipExponentFromBin
+        _skipBinMethods["outerScale"] = CalSeeingRow.skipOuterScaleFromBin
+        _skipBinMethods["outerScaleRMS"] = CalSeeingRow.skipOuterScaleRMSFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -643,7 +806,30 @@ class CalSeeingRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalSeeing",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute atmPhaseCorrection
 
@@ -1373,5 +1559,8 @@ class CalSeeingRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalSeeingRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalSeeingRow.initSkipBinMethods()

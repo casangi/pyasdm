@@ -99,11 +99,18 @@ class EntityId:
         return self._id
 
     @staticmethod
-    def fromBin(ein):
+    def fromBin(eis):
         """
         Create and return an EntityId from an EndianInput instance.
         """
-        return EntityId(ein.readString())
+        return EntityId(eis.readString())
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip an EntityId (string) from an EndianInput instance.
+        """
+        eis.readString()
 
     def toBin(self, eout):
         """

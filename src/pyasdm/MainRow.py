@@ -46,6 +46,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.TimeSampling import TimeSampling
 
@@ -390,6 +394,8 @@ class MainRow:
 
         self._execBlockId.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def timeFromBin(row, eis):
         """
@@ -514,6 +520,133 @@ class MainRow:
         _fromBinMethods["stateId"] = MainRow.stateIdFromBin
         _fromBinMethods["execBlockId"] = MainRow.execBlockIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipTimeFromBin(eis):
+        """
+        Skip the time in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipConfigDescriptionIdFromBin(eis):
+        """
+        Skip the configDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipFieldIdFromBin(eis):
+        """
+        Skip the fieldId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNumAntennaFromBin(eis):
+        """
+        Skip the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipTimeSamplingFromBin(eis):
+        """
+        Skip the timeSampling in row from the EndianInput (eis) instance.
+        """
+
+        # TimeSampling stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipIntervalFromBin(eis):
+        """
+        Skip the interval in row from the EndianInput (eis) instance.
+        """
+
+        Interval.skipBin(eis)
+
+    @staticmethod
+    def skipNumIntegrationFromBin(eis):
+        """
+        Skip the numIntegration in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipScanNumberFromBin(eis):
+        """
+        Skip the scanNumber in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipSubscanNumberFromBin(eis):
+        """
+        Skip the subscanNumber in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipDataSizeFromBin(eis):
+        """
+        Skip the dataSize in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipDataUIDFromBin(eis):
+        """
+        Skip the dataUID in row from the EndianInput (eis) instance.
+        """
+
+        EntityRef.skipBin(eis)
+
+    @staticmethod
+    def skipStateIdFromBin(eis):
+        """
+        Skip the stateId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipExecBlockIdFromBin(eis):
+        """
+        Skip the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["time"] = MainRow.skipTimeFromBin
+        _skipBinMethods["configDescriptionId"] = MainRow.skipConfigDescriptionIdFromBin
+        _skipBinMethods["fieldId"] = MainRow.skipFieldIdFromBin
+        _skipBinMethods["numAntenna"] = MainRow.skipNumAntennaFromBin
+        _skipBinMethods["timeSampling"] = MainRow.skipTimeSamplingFromBin
+        _skipBinMethods["interval"] = MainRow.skipIntervalFromBin
+        _skipBinMethods["numIntegration"] = MainRow.skipNumIntegrationFromBin
+        _skipBinMethods["scanNumber"] = MainRow.skipScanNumberFromBin
+        _skipBinMethods["subscanNumber"] = MainRow.skipSubscanNumberFromBin
+        _skipBinMethods["dataSize"] = MainRow.skipDataSizeFromBin
+        _skipBinMethods["dataUID"] = MainRow.skipDataUIDFromBin
+        _skipBinMethods["stateId"] = MainRow.skipStateIdFromBin
+        _skipBinMethods["execBlockId"] = MainRow.skipExecBlockIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -540,7 +673,75 @@ class MainRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Main",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order. Only values
+        necessary to understand that row plus the context values appropriate
+        for the Main row are read. The context tuple that is returned is
+        (time, configDescriptionId, fieldId)
+        """
+        global _skipBinMethods
+
+        time = None
+
+        configDescriptionId = None
+
+        fieldId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Main",
+                )
+
+            if attributeName == "time":
+
+                time = ArrayTime.fromBin(eis)
+
+            elif attributeName == "configDescriptionId":
+
+                configDescriptionId = Tag.fromBin(eis)
+
+            elif attributeName == "fieldId":
+
+                fieldId = Tag.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (time, configDescriptionId, fieldId)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute time
 
@@ -1151,5 +1352,8 @@ class MainRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 MainRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+MainRow.initSkipBinMethods()

@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -361,6 +365,8 @@ class FocusRow:
 
             Angle.listToBin(self._measuredFocusRotation, eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -445,6 +451,98 @@ class FocusRow:
         _fromBinMethods["measuredFocusPosition"] = FocusRow.measuredFocusPositionFromBin
         _fromBinMethods["measuredFocusRotation"] = FocusRow.measuredFocusRotationFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipFocusTrackingFromBin(eis):
+        """
+        Skip the focusTracking in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipBool()
+
+    @staticmethod
+    def skipFocusOffsetFromBin(eis):
+        """
+        Skip the focusOffset in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipFocusRotationOffsetFromBin(eis):
+        """
+        Skip the focusRotationOffset in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip1DBin(eis)
+
+    @staticmethod
+    def skipFocusModelIdFromBin(eis):
+        """
+        Skip the focusModelId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipMeasuredFocusPositionFromBin(eis):
+        """
+        Skip the optional measuredFocusPosition in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipMeasuredFocusRotationFromBin(eis):
+        """
+        Skip the optional measuredFocusRotation in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = FocusRow.skipAntennaIdFromBin
+        _skipBinMethods["timeInterval"] = FocusRow.skipTimeIntervalFromBin
+        _skipBinMethods["focusTracking"] = FocusRow.skipFocusTrackingFromBin
+        _skipBinMethods["focusOffset"] = FocusRow.skipFocusOffsetFromBin
+        _skipBinMethods["focusRotationOffset"] = FocusRow.skipFocusRotationOffsetFromBin
+        _skipBinMethods["focusModelId"] = FocusRow.skipFocusModelIdFromBin
+
+        _skipBinMethods["measuredFocusPosition"] = (
+            FocusRow.skipMeasuredFocusPositionFromBin
+        )
+        _skipBinMethods["measuredFocusRotation"] = (
+            FocusRow.skipMeasuredFocusRotationFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -471,7 +569,69 @@ class FocusRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Focus",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order. Only values
+        necessary to understand that row plus the context values appropriate
+        for the Focus row are read. The context tuple that is returned is
+        (antennaId, timeInterval)
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Focus",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, timeInterval)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -937,5 +1097,8 @@ class FocusRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 FocusRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+FocusRow.initSkipBinMethods()

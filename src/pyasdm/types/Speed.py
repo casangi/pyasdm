@@ -218,7 +218,7 @@ class Speed:
 
         # only check the first value
         if (len(speedList) > 0) and not isinstance(speedList[0], Speed):
-            raise (ValueError("speedList is not a list of Speed"))
+            raise ValueError("speedList is not a list of Speed")
 
         for thisSpeed in speedList:
             thisSpeed.toBin(eos)
@@ -289,13 +289,22 @@ class Speed:
     @staticmethod
     def fromBin(eis):
         """
-        Read the binary representation of an Speed, in meters per second,
+        Read the binary representation of a Speed, in meters per second,
         from an EndianInput instance and use the read value to set a
         Speed.
 
         return an Speed
         """
-        return Speed(eis.readDouble())
+        thisVal = eis.readDouble()
+        return Speed(thisVal)
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of a Speed
+        from an EndianInput instance
+        """
+        eis.readDouble()
 
     @staticmethod
     def from1DBin(eis):
@@ -309,6 +318,16 @@ class Speed:
             result.append(Speed.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Speed values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Speed.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -326,6 +345,18 @@ class Speed:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Speed values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Speed.skipBin(eis)
 
     @staticmethod
     def from3Dbin(eis):
@@ -347,6 +378,20 @@ class Speed:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Speed values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Speed.skipBin(eis)
 
     def equals(self, otherSpeed):
         """
@@ -384,7 +429,7 @@ class Speed:
         than, equal to, or greater than the specified other Speed.
         """
         if not isinstance(otherSpeed, Speed):
-            raise ("Attempt to compare a Speed to a non-Speed.")
+            raise ValueError("Attempt to compare a Speed to a non-Speed.")
 
         result = 0
         if self._speed < otherSpeed._speed:

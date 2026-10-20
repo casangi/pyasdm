@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.StationType import StationType
 
@@ -270,6 +274,8 @@ class StationRow:
 
             self._time.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def stationIdFromBin(row, eis):
         """
@@ -325,6 +331,65 @@ class StationRow:
 
         _fromBinMethods["time"] = StationRow.timeFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipStationIdFromBin(eis):
+        """
+        Skip the stationId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNameFromBin(eis):
+        """
+        Skip the name in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipPositionFromBin(eis):
+        """
+        Skip the position in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipTypeFromBin(eis):
+        """
+        Skip the type in row from the EndianInput (eis) instance.
+        """
+
+        # StationType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipTimeFromBin(eis):
+        """
+        Skip the optional time in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["stationId"] = StationRow.skipStationIdFromBin
+        _skipBinMethods["name"] = StationRow.skipNameFromBin
+        _skipBinMethods["position"] = StationRow.skipPositionFromBin
+        _skipBinMethods["type"] = StationRow.skipTypeFromBin
+
+        _skipBinMethods["time"] = StationRow.skipTimeFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -351,7 +416,30 @@ class StationRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Station",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute stationId
 
@@ -589,5 +677,8 @@ class StationRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 StationRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+StationRow.initSkipBinMethods()

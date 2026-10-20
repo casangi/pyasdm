@@ -147,6 +147,16 @@ class EntityRef:
         return EntityRef(str(entityId), str(partId), typeName, instanceVersion)
 
     @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of an EntityRef from an EndianInput
+        """
+        EntityId.skipBin(eis)
+        PartId.skipBin(eis)
+        eis.skipString()
+        eis.skipString()
+
+    @staticmethod
     def from1DBin(eis):
         """
         Read a list of EntityRef from an EndianInput instance and return
@@ -158,6 +168,15 @@ class EntityRef:
             result.append(EntityRef.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        skip a list of EntityRef from an EndianInput instance
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            EntityRef.skipBin(eis)
 
     def toXML(self):
         """
@@ -325,7 +344,7 @@ class EntityRef:
         """
         sets the instanceVersion to the given string
         """
-        self._instanceVersion = instranceVersion
+        self._instanceVersion = instanceVersion
 
     @staticmethod
     def getInstance(stringList):

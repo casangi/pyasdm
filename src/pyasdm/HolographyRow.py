@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.HolographyChannelType import HolographyChannelType
 
@@ -255,6 +259,8 @@ class HolographyRow:
 
             eos.writeString(str(self._type[i]))
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def holographyIdFromBin(row, eis):
         """
@@ -312,6 +318,63 @@ class HolographyRow:
         _fromBinMethods["numCorr"] = HolographyRow.numCorrFromBin
         _fromBinMethods["type"] = HolographyRow.typeFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipHolographyIdFromBin(eis):
+        """
+        Skip the holographyId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipDistanceFromBin(eis):
+        """
+        Skip the distance in row from the EndianInput (eis) instance.
+        """
+
+        Length.skipBin(eis)
+
+    @staticmethod
+    def skipFocusFromBin(eis):
+        """
+        Skip the focus in row from the EndianInput (eis) instance.
+        """
+
+        Length.skipBin(eis)
+
+    @staticmethod
+    def skipNumCorrFromBin(eis):
+        """
+        Skip the numCorr in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipTypeFromBin(eis):
+        """
+        Skip the type in row from the EndianInput (eis) instance.
+        """
+
+        typeDim1 = eis.readInt()
+        for _ in range(typeDim1):
+            # HolographyChannelType stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["holographyId"] = HolographyRow.skipHolographyIdFromBin
+        _skipBinMethods["distance"] = HolographyRow.skipDistanceFromBin
+        _skipBinMethods["focus"] = HolographyRow.skipFocusFromBin
+        _skipBinMethods["numCorr"] = HolographyRow.skipNumCorrFromBin
+        _skipBinMethods["type"] = HolographyRow.skipTypeFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -338,7 +401,30 @@ class HolographyRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Holography",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute holographyId
 
@@ -566,5 +652,8 @@ class HolographyRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 HolographyRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+HolographyRow.initSkipBinMethods()

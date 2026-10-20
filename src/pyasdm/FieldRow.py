@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.DirectionReferenceCode import DirectionReferenceCode
 
@@ -524,6 +528,8 @@ class FieldRow:
 
             self._assocFieldId.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def fieldIdFromBin(row, eis):
         """
@@ -674,6 +680,167 @@ class FieldRow:
         _fromBinMethods["sourceId"] = FieldRow.sourceIdFromBin
         _fromBinMethods["assocFieldId"] = FieldRow.assocFieldIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipFieldIdFromBin(eis):
+        """
+        Skip the fieldId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipFieldNameFromBin(eis):
+        """
+        Skip the fieldName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipNumPolyFromBin(eis):
+        """
+        Skip the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipDelayDirFromBin(eis):
+        """
+        Skip the delayDir in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipPhaseDirFromBin(eis):
+        """
+        Skip the phaseDir in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipReferenceDirFromBin(eis):
+        """
+        Skip the referenceDir in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipTimeFromBin(eis):
+        """
+        Skip the optional time in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipCodeFromBin(eis):
+        """
+        Skip the optional code in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipDirectionCodeFromBin(eis):
+        """
+        Skip the optional directionCode in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # DirectionReferenceCode stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipDirectionEquinoxFromBin(eis):
+        """
+        Skip the optional directionEquinox in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipAssocNatureFromBin(eis):
+        """
+        Skip the optional assocNature in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipEphemerisIdFromBin(eis):
+        """
+        Skip the optional ephemerisId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipSourceIdFromBin(eis):
+        """
+        Skip the optional sourceId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipAssocFieldIdFromBin(eis):
+        """
+        Skip the optional assocFieldId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["fieldId"] = FieldRow.skipFieldIdFromBin
+        _skipBinMethods["fieldName"] = FieldRow.skipFieldNameFromBin
+        _skipBinMethods["numPoly"] = FieldRow.skipNumPolyFromBin
+        _skipBinMethods["delayDir"] = FieldRow.skipDelayDirFromBin
+        _skipBinMethods["phaseDir"] = FieldRow.skipPhaseDirFromBin
+        _skipBinMethods["referenceDir"] = FieldRow.skipReferenceDirFromBin
+
+        _skipBinMethods["time"] = FieldRow.skipTimeFromBin
+        _skipBinMethods["code"] = FieldRow.skipCodeFromBin
+        _skipBinMethods["directionCode"] = FieldRow.skipDirectionCodeFromBin
+        _skipBinMethods["directionEquinox"] = FieldRow.skipDirectionEquinoxFromBin
+        _skipBinMethods["assocNature"] = FieldRow.skipAssocNatureFromBin
+        _skipBinMethods["ephemerisId"] = FieldRow.skipEphemerisIdFromBin
+        _skipBinMethods["sourceId"] = FieldRow.skipSourceIdFromBin
+        _skipBinMethods["assocFieldId"] = FieldRow.skipAssocFieldIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -700,7 +867,30 @@ class FieldRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Field",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute fieldId
 
@@ -1489,5 +1679,8 @@ class FieldRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 FieldRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+FieldRow.initSkipBinMethods()

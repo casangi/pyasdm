@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -366,6 +370,8 @@ class VLAWVRRow:
 
             eos.writeStr(self._wvrId)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -462,6 +468,101 @@ class VLAWVRRow:
         _fromBinMethods["chanWidth"] = VLAWVRRow.chanWidthFromBin
         _fromBinMethods["wvrId"] = VLAWVRRow.wvrIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipNumChanFromBin(eis):
+        """
+        Skip the numChan in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipHiValuesFromBin(eis):
+        """
+        Skip the hiValues in row from the EndianInput (eis) instance.
+        """
+
+        hiValuesDim1 = eis.readInt()
+        for _ in range(hiValuesDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipLoValuesFromBin(eis):
+        """
+        Skip the loValues in row from the EndianInput (eis) instance.
+        """
+
+        loValuesDim1 = eis.readInt()
+        for _ in range(loValuesDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipChanFreqCenterFromBin(eis):
+        """
+        Skip the optional chanFreqCenter in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipChanWidthFromBin(eis):
+        """
+        Skip the optional chanWidth in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipWvrIdFromBin(eis):
+        """
+        Skip the optional wvrId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = VLAWVRRow.skipAntennaIdFromBin
+        _skipBinMethods["timeInterval"] = VLAWVRRow.skipTimeIntervalFromBin
+        _skipBinMethods["numChan"] = VLAWVRRow.skipNumChanFromBin
+        _skipBinMethods["hiValues"] = VLAWVRRow.skipHiValuesFromBin
+        _skipBinMethods["loValues"] = VLAWVRRow.skipLoValuesFromBin
+
+        _skipBinMethods["chanFreqCenter"] = VLAWVRRow.skipChanFreqCenterFromBin
+        _skipBinMethods["chanWidth"] = VLAWVRRow.skipChanWidthFromBin
+        _skipBinMethods["wvrId"] = VLAWVRRow.skipWvrIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -488,7 +589,69 @@ class VLAWVRRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " VLAWVR",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order. Only values
+        necessary to understand that row plus the context values appropriate
+        for the VLAWVR row are read. The context tuple that is returned is
+        (antennaId, timeInterval)
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " VLAWVR",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, timeInterval)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -937,5 +1100,8 @@ class VLAWVRRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 VLAWVRRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+VLAWVRRow.initSkipBinMethods()

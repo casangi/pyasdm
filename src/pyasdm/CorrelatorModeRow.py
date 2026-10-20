@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.BasebandName import BasebandName
 
@@ -412,6 +416,8 @@ class CorrelatorModeRow:
 
             eos.writeStr(self._correlatorSoftwareVersion)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def correlatorModeIdFromBin(row, eis):
         """
@@ -543,6 +549,135 @@ class CorrelatorModeRow:
             CorrelatorModeRow.correlatorSoftwareVersionFromBin
         )
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipCorrelatorModeIdFromBin(eis):
+        """
+        Skip the correlatorModeId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNumBasebandFromBin(eis):
+        """
+        Skip the numBaseband in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipBasebandNamesFromBin(eis):
+        """
+        Skip the basebandNames in row from the EndianInput (eis) instance.
+        """
+
+        basebandNamesDim1 = eis.readInt()
+        for _ in range(basebandNamesDim1):
+            # BasebandName stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipBasebandConfigFromBin(eis):
+        """
+        Skip the basebandConfig in row from the EndianInput (eis) instance.
+        """
+
+        basebandConfigDim1 = eis.readInt()
+        for _ in range(basebandConfigDim1):
+            eis.skipInt()
+
+    @staticmethod
+    def skipAccumModeFromBin(eis):
+        """
+        Skip the accumMode in row from the EndianInput (eis) instance.
+        """
+
+        # AccumMode stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipBinModeFromBin(eis):
+        """
+        Skip the binMode in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumAxesFromBin(eis):
+        """
+        Skip the numAxes in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipAxesOrderArrayFromBin(eis):
+        """
+        Skip the axesOrderArray in row from the EndianInput (eis) instance.
+        """
+
+        axesOrderArrayDim1 = eis.readInt()
+        for _ in range(axesOrderArrayDim1):
+            # AxisName stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipFilterModeFromBin(eis):
+        """
+        Skip the filterMode in row from the EndianInput (eis) instance.
+        """
+
+        filterModeDim1 = eis.readInt()
+        for _ in range(filterModeDim1):
+            # FilterMode stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipCorrelatorNameFromBin(eis):
+        """
+        Skip the correlatorName in row from the EndianInput (eis) instance.
+        """
+
+        # CorrelatorName stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipCorrelatorSoftwareVersionFromBin(eis):
+        """
+        Skip the optional correlatorSoftwareVersion in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["correlatorModeId"] = (
+            CorrelatorModeRow.skipCorrelatorModeIdFromBin
+        )
+        _skipBinMethods["numBaseband"] = CorrelatorModeRow.skipNumBasebandFromBin
+        _skipBinMethods["basebandNames"] = CorrelatorModeRow.skipBasebandNamesFromBin
+        _skipBinMethods["basebandConfig"] = CorrelatorModeRow.skipBasebandConfigFromBin
+        _skipBinMethods["accumMode"] = CorrelatorModeRow.skipAccumModeFromBin
+        _skipBinMethods["binMode"] = CorrelatorModeRow.skipBinModeFromBin
+        _skipBinMethods["numAxes"] = CorrelatorModeRow.skipNumAxesFromBin
+        _skipBinMethods["axesOrderArray"] = CorrelatorModeRow.skipAxesOrderArrayFromBin
+        _skipBinMethods["filterMode"] = CorrelatorModeRow.skipFilterModeFromBin
+        _skipBinMethods["correlatorName"] = CorrelatorModeRow.skipCorrelatorNameFromBin
+
+        _skipBinMethods["correlatorSoftwareVersion"] = (
+            CorrelatorModeRow.skipCorrelatorSoftwareVersionFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -569,7 +704,30 @@ class CorrelatorModeRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CorrelatorMode",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute correlatorModeId
 
@@ -1117,5 +1275,8 @@ class CorrelatorModeRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CorrelatorModeRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CorrelatorModeRow.initSkipBinMethods()

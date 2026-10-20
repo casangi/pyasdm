@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.TimeScale import TimeScale
 
@@ -285,6 +289,8 @@ class ScaleRow:
 
         eos.writeString(str(self._weightType))
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def scaleIdFromBin(row, eis):
         """
@@ -337,6 +343,64 @@ class ScaleRow:
         _fromBinMethods["autoDataScale"] = ScaleRow.autoDataScaleFromBin
         _fromBinMethods["weightType"] = ScaleRow.weightTypeFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipScaleIdFromBin(eis):
+        """
+        Skip the scaleId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeScaleFromBin(eis):
+        """
+        Skip the timeScale in row from the EndianInput (eis) instance.
+        """
+
+        # TimeScale stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipCrossDataScaleFromBin(eis):
+        """
+        Skip the crossDataScale in row from the EndianInput (eis) instance.
+        """
+
+        # DataScale stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipAutoDataScaleFromBin(eis):
+        """
+        Skip the autoDataScale in row from the EndianInput (eis) instance.
+        """
+
+        # DataScale stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipWeightTypeFromBin(eis):
+        """
+        Skip the weightType in row from the EndianInput (eis) instance.
+        """
+
+        # WeightType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["scaleId"] = ScaleRow.skipScaleIdFromBin
+        _skipBinMethods["timeScale"] = ScaleRow.skipTimeScaleFromBin
+        _skipBinMethods["crossDataScale"] = ScaleRow.skipCrossDataScaleFromBin
+        _skipBinMethods["autoDataScale"] = ScaleRow.skipAutoDataScaleFromBin
+        _skipBinMethods["weightType"] = ScaleRow.skipWeightTypeFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -363,7 +427,30 @@ class ScaleRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Scale",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute scaleId
 
@@ -554,5 +641,8 @@ class ScaleRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 ScaleRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+ScaleRow.initSkipBinMethods()

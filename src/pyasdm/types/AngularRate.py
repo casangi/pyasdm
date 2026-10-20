@@ -191,7 +191,7 @@ class AngularRate:
             raise ValueError("angularRateList is not a list")
 
         # this is used to determine the number of dimensions
-        listDims = pyasdm.utils.getListDims(angleList)
+        listDims = pyasdm.utils.getListDims(angularRateList)
         ndims = len(listDims)
         if ndims == 1:
             AngularRate.listTo1DBin(angularRateList, eos)
@@ -220,7 +220,7 @@ class AngularRate:
         if (len(angularRateList) > 0) and not isinstance(
             angularRateList[0], AngularRate
         ):
-            raise (ValueError("angularRateList is not a list off AngularRate"))
+            raise ValueError("angularRateList is not a list off AngularRate")
 
         for thisAngularRate in angularRateList:
             thisAngularRate.toBin(eos)
@@ -302,6 +302,13 @@ class AngularRate:
         return AngularRate(eis.readDouble())
 
     @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of an AngularRate from an EndianInput
+        """
+        eis.skipDouble()
+
+    @staticmethod
     def from1DBin(eis):
         """
         Read a list of binary AngularRate values, in radians per second, from an
@@ -313,6 +320,16 @@ class AngularRate:
             result.append(AngularRate.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary AngularRate values from an EndianInput
+        The leading integer giving the length of the list is always read
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            AngularRate.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -330,6 +347,18 @@ class AngularRate:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary AngularRate values from an EndianInput
+        The leading integers giving the shape of the list are always read
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                AngularRate.skipBin(eis)
 
     @staticmethod
     def from3DBin(eis):
@@ -351,6 +380,20 @@ class AngularRate:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary AngularRate values from an EndianInput
+        The leading integers giving the shape of the list are always read
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    AngularRate.skipBin(eis)
 
     def equals(self, otherAngularRate):
         """
@@ -394,7 +437,7 @@ class AngularRate:
         than, equal to, or greater than the specified other AngularRate.
         """
         if not isinstance(otherAngularRate, AngularRate):
-            raise ("Attempt to compare a AngularRate to a non-AngularRate.")
+            raise ValueError("Attempt to compare a AngularRate to a non-AngularRate.")
 
         result = 0
         if self._rate < otherAngularRate._rate:

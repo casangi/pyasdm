@@ -275,7 +275,7 @@ class Frequency:
 
         # only check the first value
         if (len(frequencyList) > 0) and not isinstance(frequencyList[0], Frequency):
-            raise (ValueError("frequencyList is not a list of Frequency"))
+            raise ValueError("frequencyList is not a list of Frequency")
 
         for thisFrequency in frequencyList:
             thisFrequency.toBin(eos)
@@ -346,13 +346,21 @@ class Frequency:
     @staticmethod
     def fromBin(eis):
         """
-        Read the binary representation of an Frequency, in Hertz,
+        Read the binary representation of Frequency, in Hertz,
         from an EndianInput instance and use the read value to set a
         Frequency.
 
         return a Frequency
         """
         return Frequency(eis.readDouble())
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of a Frequency
+        from an EndianInput instance
+        """
+        eis.skipDouble()
 
     @staticmethod
     def from1DBin(eis):
@@ -366,6 +374,16 @@ class Frequency:
             result.append(Frequency.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Frequency values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Frequency.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -383,6 +401,18 @@ class Frequency:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Frequency values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Frequency.skipBin(eis)
 
     @staticmethod
     def from3DBin(eis):
@@ -404,6 +434,20 @@ class Frequency:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Frequency values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Frequency.skipBin(eis)
 
     def equals(self, otherFrequency):
         """
@@ -447,7 +491,7 @@ class Frequency:
         than, equal to, or greater than the specified other Frequency.
         """
         if not isinstance(otherFrequency, Frequency):
-            raise ("Attempt to compare a Frequency to a non-Frequency.")
+            raise ValueError("Attempt to compare a Frequency to a non-Frequency.")
 
         result = 0
         if self._frequency < otherFrequency._frequency:

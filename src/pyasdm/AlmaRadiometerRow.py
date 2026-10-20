@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -270,6 +274,8 @@ class AlmaRadiometerRow:
 
             Tag.listToBin(self._spectralWindowId, eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def almaRadiometerIdFromBin(row, eis):
         """
@@ -309,6 +315,53 @@ class AlmaRadiometerRow:
         _fromBinMethods["numAntenna"] = AlmaRadiometerRow.numAntennaFromBin
         _fromBinMethods["spectralWindowId"] = AlmaRadiometerRow.spectralWindowIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAlmaRadiometerIdFromBin(eis):
+        """
+        Skip the almaRadiometerId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNumAntennaFromBin(eis):
+        """
+        Skip the optional numAntenna in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the optional spectralWindowId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["almaRadiometerId"] = (
+            AlmaRadiometerRow.skipAlmaRadiometerIdFromBin
+        )
+
+        _skipBinMethods["numAntenna"] = AlmaRadiometerRow.skipNumAntennaFromBin
+        _skipBinMethods["spectralWindowId"] = (
+            AlmaRadiometerRow.skipSpectralWindowIdFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -335,7 +388,30 @@ class AlmaRadiometerRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " AlmaRadiometer",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute almaRadiometerId
 
@@ -559,5 +635,8 @@ class AlmaRadiometerRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 AlmaRadiometerRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+AlmaRadiometerRow.initSkipBinMethods()

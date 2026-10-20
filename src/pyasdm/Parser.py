@@ -147,6 +147,7 @@ class Parser:
                 result += str(theList[jj])
                 if isStr:
                     result += '"'
+
                 # and elements are separated by spaces
                 result += " "
         return result
@@ -398,6 +399,17 @@ class Parser:
                 + str(ListClass),
                 tableName,
             )
+
+        if ListClass is str:
+            # the split elements are surrounded by double quotes, remove them from each element
+            # but be cautious and check that they're there before removing anything
+            for i in range((ndim + 1), len(splitStr)):
+                thisVal = splitStr[i]
+                if thisVal[0] == '"' or thisVal[0] == "'":
+                    thisVal = thisVal[1:]
+                if thisVal[-1] == '"' or thisVal[0] == "'":
+                    thisVal = thisVal[:-1]
+                splitStr[i] = thisVal
         try:
             if isExtendedType:
                 newstr, result = Parser.splitStrToExtendedClassLists(

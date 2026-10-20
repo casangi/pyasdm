@@ -106,7 +106,7 @@ class EndianOutput:
         except OverflowError as exc:
             raise ValueError("is too large to convert to a single byte") from None
 
-        if not isinstance(byteValue, bytes):
+        if not isinstance(byteVal, bytes):
             raise ValueError(
                 "byteVal must be a bytes instance of an int that can be converted to a bytes as a single byte"
             )
@@ -134,8 +134,8 @@ class EndianOutput:
         Write an integer to the otuput stream as a 2-element bytes
         instance representing an unsigned integer.
         """
-        if not isinstance(shortVal, int) or shortVal < 0:
-            raise ValueError("shortVal must a postitive integer")
+        if not isinstance(uShortVal, int) or uShortVal < 0:
+            raise ValueError("uShortVal must a postitive integer")
 
         try:
             self._outStream.write(

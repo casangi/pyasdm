@@ -2665,7 +2665,7 @@ class ASDM:
                 xmlstr = f.read()
 
             if xmlstr is None:
-                raise ConversionException(filename + " is empty", "ASDM")
+                raise ConversionException(fileName + " is empty", "ASDM")
 
             self.fromXML(xmlstr)
 

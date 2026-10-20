@@ -190,7 +190,7 @@ class SourceTable:
     # The name of this table.
     _tableName = "Source"
 
-    # The list of field names that make up key 'key'.
+    # The list of field names that make up 'key'.
     _key = ["sourceId", "timeInterval", "spectralWindowId"]
 
     # the ASDM container that this table belongs to (set by constructor)
@@ -198,17 +198,46 @@ class SourceTable:
 
     _fileAsBin = False  # If True file binary else file XML
 
-    # A data structure to store the SourceRow s.
-    # In all cases we maintain a private list of SourceRow s.
-    _privateRows = []
+    # these values are only used when rows have been loaded from a binary table file
+    _eis = None  # the EndianInput stream
+    _byteStream = None  # the io.BufferedReader opened and used by _eis
+    # the list of required and optional attributes found in this table
+    _attributesSeq = []
 
-    # this table has a temporal key, an auto-incremetable key, and other key fields
-    # context is a dictionary where the key is the key without the temporal and auto
-    # incrementable fields.
-    # the value is a list of lists, where the outer list is index by the auto-incrementable
-    # key value and the inner list is the list of rows having that auto-incrementable
-    # value.
-    # Each list of rows is kept in temporal order
+    # these are used to avoid re-reading the row that was just read from a binary table file
+    _lastBinRow = None  # the most recent row read
+    _lastBinRowloc = -1  # the location in the binary table file of _lastBinRow
+
+    # If loaded from a binary source, the binary table related lists are used
+    # first when retrieving rows and then the _rowList for any additionall rows.
+    # When the binary table lists are empty then all rows come from _rowList.
+    # Rows added using the add() method are always added to _rowsList.
+    # Rows can only be added from one file and then only if no rows have previously been added.
+    # For rows added from a binary table file, only enough information to populate these lists
+    # is read and the starting location of reach row is kept here. Reading the full row requires
+    # seeking to the starting location of that row and then reading the row.
+
+    # SourceRow objects added from an XML file or using the add() method are kept here
+    _rowList = []
+
+    # binary table locations for rows added from a binary table file are kept here
+    _rowLocList = []
+
+    # this table has a temporal key attribute
+
+    # the temporal key attribute values for all rows known to this table
+    # (ArrayTimeInterval or ArrayTime) are kept here, in the order in which they were added.
+    # The element number here is the same value used in getRow to retrieve that row.
+    _rowTimesList = []
+
+    # there is an auto-incrementable key attribute along with other key attributes
+
+    # the context dictionary contains list of lists of row numbers with one set of lists of list
+    # for each unique key string excluding the temporal and auto-incrementable key attributes.
+    # For each key string, there is one list of row numbers for each auto-incrementable key value for
+    # that key string.
+    # Each list of row numbers is kept sorted by the temporal key value in ascending order.
+    # The row numbers can also be used to index _rowTimesList
     _context = {}
 
     # the Entity of this table
@@ -545,12 +574,13 @@ class SourceTable:
 
     def getKeyName(self):
         """
-        Return the list of field names that make up key key
+        Return the list of field names that make up 'key'
         as a list of strings.
         """
         return self._key
 
-    def Key(self, spectralWindowId):
+    @staticmethod
+    def Key(spectralWindowId):
         """
         Returns a string built by concatenating the ascii representation of the
         parameters values suffixed with a "_" character.
@@ -561,73 +591,120 @@ class SourceTable:
 
         return result
 
-    def insertByStartTime(self, x, rowlist):
+    def insertByStartTime(self, x, rowIndexList):
         """
         Insert a SourceRow in a list of SourceRow so that it's ordered by ascending start time.
 
-        x The SourceRow to be inserted.
-        rowlist The list where x is to be inserted.
+        x The SourceRow to be inserted or a tuple of (rowStartLoc, timeInterval) where rowStartLoc
+        is the starting location in self._eis where that row is found and timeInterval is the
+        ArrayTimeInterval for that row at that location.
+        rowIndexList The list where x is to be inserted.
 
-        The inserted row is returned. If x already exists in rowlist then it is not added and
-        the row in rowlist is returned.
+        If the row is added, then the new row index (row number) for that row is returned. If x
+        already exists in rowIndexList then it is not added and the row index found with the matching
+        information in rowIndexList is returned.
 
         If a row matching the value of the start time of timeInterval is
-        found in rowlist but the other required parameters do not have the same value
+        found in rowIndexList but the other required parameters do not have the same value
         then a DuplicateKey exception is raised.
         """
 
         # get the ArrayTime value at the start of the ArrayTimeInterval found in x
-        xTimeStart = x.getTimeInterval().getStart().get()
 
-        # work out where to add x to rowlist
-        if (len(rowlist) == 0) or (
-            xTimeStart > (rowlist[-1].getTimeInterval().getStart().get())
+        rowStartLoc = None
+        xTimeInterval = None
+        xTimeStart = None
+        addToRowLocList = False
+
+        if isinstance(x, tuple):
+            rowStartLoc, xTimeInterval = x
+            addToRowLocList = True
+            # this is the only sanity check here because this is an internal method
+            # If it gets here then it's coming from a binary table file and there
+            # can be no additional rows kept internally
+            if self.size() != len(self._rowLocList):
+                raise (
+                    ValueError(
+                        "SourceTable internal error in insertByStartTime, attempting to insert a binary table row when there are already row objects kept internally, this should never happen"
+                    )
+                )
+        else:
+            xTimeInterval = x.getTimeInterval()
+
+        xTimeStart = xTimeInterval.getStart().get()
+
+        # work out where to add x to rowIndexList
+        if (len(rowIndexList) == 0) or (
+            xTimeStart > self._rowTimesList[rowIndexList[-1]].getStart().get()
         ):
             # it belongs at the end
-            if len(rowlist) > 0:
-                lastRow = rowlist[-1]
-                # Modify the duration of lastRow if and only if the start time of x
-                # is located strictly before the end time of last.
+            if len(rowIndexList) > 0:
+                lastRowIndex = rowIndexList[-1]
+                # Modify the duration of the row at lastRowIndex if and only if the start time of x
+                # is located strictly before the end time of that row.
+                lastTimeInterval = self._rowTimesList[lastRowIndex]
                 if xTimeStart < (
-                    lastRow.getTimeInterval().getStart().get()
-                    + lastRow.getTimeInterval().getDuration().get()
+                    lastTimeInterval.getStart().get()
+                    + lastTimeInterval.getDuration().get()
                 ):
-                    lastRow.getTimeInterval().setDuration(
-                        xTimeStart - lastRow.getTimeInterval().getStart().get()
+                    # because these changes work through the reference that python maintains this
+                    # change will change the value already in the list
+                    lastTimeInterval.setDuration(
+                        xTimeStart - lastTimeInterval.getStart().get()
                     )
-            rowlist.append(x)
-        elif xTimeStart < rowlist[0].getTimeInterval().getStart().get():
+            # this information will be appended to self._rowTimesList at the end,
+            # that location is the row number for this newly added row
+            rowIndexList.append(len(self._rowTimesList))
+        elif xTimeStart < self._rowTimesList[rowIndexList[0]].getStart().get():
             # it belongs at the start
-            firstRow = rowlist[0]
-            # Modify the duration of x if and only if the start time of firstRow
+            firstRowIndex = rowIndexList[0]
+            # Modify the duration of x if and only if the start time of the row at firstRowIndex
             # is located strictly before the end time of x.
-            if firstRow.getTimeInterval().getStart().get() < (
-                xTimeStart + x.getTimeInterval().getDuration().get()
+            firstTimeInterval = self._rowTimesList[firstRowIndex]
+            if firstTimeInterval.getStart().get() < (
+                xTimeStart + xTimeInterval.getDuration().get()
             ):
-                x.getTimeInterval().setDuration(
-                    firstRow.getTimeInterval().getStart().get() - xTimeStart
+                # because these changes work through the reference that python maintains this
+                # change will change wherever xTimeInterval came from
+                xTimeInterval.setDuration(
+                    firstTimeInterval.getStart().get() - xTimeStart
                 )
-
-            rowlist.insert(0, x)
+            # this information will be appended to self._rowTimesList at the end,
+            # that location is the row number for this newly added row
+            rowIndexList.insert(0, len(self._rowTimesList))
         else:
-            # x is inserted somewhere inside rowlist; let's use a dichotomoy
+            # x is inserted somewhere inside rowIndexList; let's use a dichotomoy
             # method to find the insertion index.
 
             k0 = 0
-            k1 = len(rowlist) - 1
+            k1 = len(rowIndexList) - 1
 
             while k0 != (k1 - 1):
-                if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
-                    if rowlist[k0].equalByRequiredValue(x):
-                        # this row already exists at k0, nothing to insert or add, return that row
-                        return rowlist[k0]
+                k0TimeInterval = self._rowTimesList[rowIndexList[k0]]
+                k1TimeInterval = self._rowTimesList[rowIndexList[k1]]
+                if xTimeStart == k0TimeInterval.getStart().get():
+                    # need to get both rows in hand here to compare
+                    k0row = self.getRow(rowIndexList[k0])
+                    if not isinstance(x, SourceRow):
+                        # get the row corresponding to rowStartLoc and store it in x
+                        # so that this isn't done more than needed
+                        x = self._getRowByLoc(rowStartLoc, isadded=False)
+                    if k0row.equalByRequiredValue(x):
+                        # this row already exists at k0, nothing to insert or add, return that row index
+                        return rowIndexList[k0]
                     else:
                         # the start time matches, but the rest of the required parameters do not
                         raise DuplicateKey("DuplicateKey exception in ", "SourceTable")
-                elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
-                    if rowlist[k1].equalByRequiredValue(x):
-                        # this row already exists at k1, nothing to insert or add, return that row
-                        return rowlist[k1]
+                elif xTimeStart == k1TimeInterval.getStart().get():
+                    # need to get both rows in hand here to compare
+                    k1row = self.getRow(rowIndexList[k1])
+                    if not isinstance(x, SourceRow):
+                        # get the row corresponding to rowStartLoc and store it in x
+                        # so that this isn't done more than needed
+                        x = self._getRowByLoc(rowStartLoc, isadded=False)
+                    if k1row.equalByRequiredValue(x):
+                        # this row already exists at k1, nothing to insert or add, return that row index
+                        return rowIndexList[k1]
                     else:
                         # the start time matches, but the rest of the required parameters do not
                         raise DuplicateKey("DuplicateKey exception in ", "SourceTable")
@@ -636,42 +713,68 @@ class SourceTable:
                     newIndex = int((k0 + k1) / 2)
                     if (
                         xTimeStart
-                        <= rowlist[newIndex].getTimeInterval().getStart().get()
+                        <= self._rowTimesList[rowIndexList[newIndex]].getStart().get()
                     ):
                         k1 = newIndex
                     else:
                         k0 = newIndex
 
-            if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
-                if rowlist[k0].equalByRequiredValue(x):
-                    # this row already exists at k0, nothing to insert or add, return that row
-                    return rowlist[k0]
+            if xTimeStart == self._rowTimesList[rowIndexList[k0]].getStart().get():
+                # need to get both rows in hand here to compare
+                k0row = self.getRow(rowIndexList[k0])
+                if not isinstance(x, SourceRow):
+                    # get the row corresponding to rowStartLoc and store it in x
+                    # so that this isn't done more than needed
+                    x = self._getRowByLoc(rowStartLoc, isadded=False)
+                if k0row.equalByRequiredValue(x):
+                    # this row already exists at k0, nothing to insert or add, return that row index
+                    return rowIndexList[k0]
                 else:
                     # the start time matches, but the rest of the required paramters do not
                     raise DuplicateKey("DuplicateKey exception in ", "SourceTable")
-            elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
-                if rowlist[k1].equalByRequiredValue(x):
-                    # this row already exists at k1, nothing to insert or add, return that row
-                    return rowlist[k1]
+            elif xTimeStart == self._rowTimesList[rowIndexList[k1]].getStart().get():
+                # need to get both rows here to compare
+                k1row = self.getRow(rowIndexList[k1])
+                if not isinstance(x, SourceRow):
+                    # get the row corresponding to rowStartLoc and store it in x
+                    # so that this isn't done more than needed
+                    x = self._getRowByLoc(rowStartLoc, isadded=False)
+                if k1row.equalByRequiredValue(x):
+                    # this row already exists at k1, nothing to insert or add, return that row index
+                    return rowIndexList[k1]
                 else:
                     # the start time matches, but the rest of the required parameters do not
                     raise DuplicateKey("DuplicateKey exception in ", "SourceTable")
 
             # if it reaches here, it should be added, set the duration as appropriate for
             # insertion at k1, after k0, adjust duration of k0 as appropriate
-            rowlist[k0].getTimeInterval().setDuration(
-                xTimeStart - rowlist[k0].getTimeInterval().getStart().get()
-            )
-            x.getTimeInterval().setDuration(
-                rowlist[k0 + 1].getTimeInterval().getStart().get() - xTimeStart
-            )
-            rowlist.insert(k1, x)
 
-        # if it reaches here then x has already been addded to rowlist and it needs to be
-        # appended to privateRows and marked as added internally before being returned
-        self._privateRows.append(x)
-        x.isAdded()
-        return x
+            timeInterval0 = self._rowTimesList[rowIndexList[k0]]
+            timeInterval1 = self._rowTimesList[rowIndexList[k0 + 1]]
+
+            timeInterval0.setDuration(xTimeStart - timeInterval0.getStart().get())
+            # use XTimeInterval but pull from x again if x is a row
+            if isinstance(x, SourceRow):
+                xTimeInterval = x.getTimeInterval()
+            xTimeInterval.setDuration(timeInterval1.getStart().get() - xTimeStart)
+
+            # this information will be appended to self._rowTimesList at the end, that location is the row number for this newly added row
+            rowIndexList.insert(k1, len(self._rowTimesList))
+
+        # if it reaches here then the next element number of self._rowTimesList now appears in rowIndexList
+        # The row location or the row itself need to be added to self._rowLocList or self._row as appropriate
+        # and this time needs to be added to self._rowTimesList
+        if addToRowLocList:
+            self._rowLocList.append(rowStartLoc)
+        else:
+            self._rowList.append(x)
+            x.isAdded()
+
+        # in all cases, _rowTimesList gets xTimeInterval appended
+        self._rowTimesList.append(xTimeInterval)
+
+        # and return the element number of that newly added value
+        return len(self._rowTimesList) - 1
 
     def __init__(self, container, checkRowUniqueness=False):
         """
@@ -709,13 +812,42 @@ class SourceTable:
         self._presentInMemory = True
         self._loadInProgress = False
 
-        self._privateRows = []
+        self._eis = None
+        self._byteStream = None
+        self._attributesSeq = []
 
+        self._lastBinRow = None
+        self._lastBinRowLoc = -1
+
+        self._rowList = []
+        self._rowLocList = []
+
+        self._rowTimesList = []
         self._context = {}
 
         self._version = 0
 
         self._name2id_dict = {}
+
+    def __del__(self):
+        """
+        close any opened files used for binary table reading
+        """
+        self.close()
+
+    def close(self):
+        """
+        close any opened files used for binary table reading
+        Note: once closed this object will be useless for reading any rows found
+        in the binary table and there is no way to reset and reuse this instance
+        """
+        # closing one should close the other but there's no error in doing both so this is safest
+        #  it's not an error to close it if it was previously closed
+        if self._eis is not None:
+            self._eis.close()
+
+        if self._byteStream is not None:
+            self._byteStream.close()
 
     def setNotPresentInMemory(self):
         """
@@ -774,13 +906,21 @@ class SourceTable:
         """
         Return the number of rows in the table.
         """
-        return len(self._privateRows)
+        return len(self._rowList) + len(self._rowLocList)
 
     def getName(self):
         """
         Return the name of this table.
         """
         return self._tableName
+
+    def hasBinaryRows(self):
+        # returns True if any of the rows present are tied to a binary table and not always
+        # present in memory. Binary table rows are best retrieved individually using getRow()
+        # or in a list (which should be short) using getRowList().
+        # The get() method may be used to return all rows but for large binary table files that
+        # may exhaust all of the resources available and should be used with caution.
+        return len(self._rowLocList) > 0
 
     def __str__(self):
         """
@@ -805,6 +945,7 @@ class SourceTable:
         Append a SourceRow to the SourceTable.
 
         x A SourceRow instance.
+        returns a SourceRow which is x if a new row was added or a matching row if that row was previously added
         """
 
         if not isinstance(x, SourceRow):
@@ -822,8 +963,12 @@ class SourceTable:
         insertionId = self._name2id_dict[x.getSourceName()]
 
         # sourceId is now known from the dictionary
-        # context is a vector of vectors, sourceId index to the outer vector and
-        # timeInterval for the inner vector
+        # context is a dictionary with list of lists
+        # the key for the dictionary is the Key() value for this row and
+        # the sourceId index is an index to the outer list for that Key's list of lists and
+        # row indices are sorted by timeInterval for the inner list (each sourceId)
+        # the values in the inner list are row numbers suitable for use in getRow
+        # as well as an index to _rowTimesList
 
         keystr = self.Key(x.getSpectralWindowId())
 
@@ -831,18 +976,21 @@ class SourceTable:
         if keystr in self._context:
             if len(self._context) > insertionId:
                 # this insertionId is known to _context, get the associated list of rows
-                idList = self._context[keystr][insertionId]
+                rowIndexList = self._context[keystr][insertionId]
                 # search to see if that row is already known
-                for r in idList:
-                    if startTime.equals(r.getTimeInterval().getStart()):
-                        if r.compareRequiredValue(
+                for rowIndex in rowIndexList:
+                    # any matches will first match the corresponding time in self._rowTimesList
+                    if startTime.equals(self._rowTimesList[rowIndex].getStart()):
+                        # get the row at rowIndex so that the full comparison can be done
+                        thisRow = self.getRow(rowIndex)
+                        if thisRow.compareRequiredValue(
                             x.getCode(),
                             x.getDirection(),
                             x.getProperMotion(),
                             x.getSourceName(),
                         ):
                             # We have found a SourceRow with the same value then return it.
-                            return r
+                            return thisRow
                         else:
                             # java has the throw of a UniquenessViolationException commented out
                             # cpp doesn't even have it, so do nothing here
@@ -911,80 +1059,144 @@ class SourceTable:
         A method to append a row to its table, used by input conversion methods.
         Not indended for external use.
 
-        If this table has an autoincrementable attribute then check if
-        x verifies the rule of uniqueness and throw exception if not.
+        This method is appropriate for an auto-incrementable attribute with an
+        ArrayTimeInterval key field either with or without additional keywords.
 
-        This method is appropriate for an auto-incrementable attribute with a
-        temporal field either with or without additional keywords.
+        When skipUniquenessCheck is False the row indicated by x is used to check
+        to see if that row with that sourceId is already known
+        to this table. If it is known then a DuplicateKey exception is raised. If the
+        full row is needed for this step and x is a tuple then the row is read from the
+        binary table file.
 
         Append x to its table.
-        x The row to be appended.
-        returns  x.
+        x The row to be appended or a tuple of
+        (rowStartLocation, time, keyString,  sourceId)
+        where rowStartLocation is a location in self._eis where the row can be found,
+        time is the ArrayTimeInterval keyword value for that row, keyString
+        is the Key() appropriate for that row, and the final argument is the
+        auto incrementable attribute value for that row.
+        returns the index of the row that was inserted (the same rules as insertByStartTime
         """
-        # startTime is an ArrayTimeInterval
-        startTime = x.getTimeInterval().getStart()
 
-        # this lookup is not done with the uniqueness check is skipped
-        if not skipUniquenessCheck:
-            if (
-                self.lookup(
-                    x.getTimeInterval(),
-                    x.getSpectralWindowId(),
-                    x.getCode(),
-                    x.getDirection(),
-                    x.getProperMotion(),
-                    x.getSourceName(),
-                )
-                is not None
-            ):
-                raise UniquenessViolationException(
-                    "Uniqueness violation exception in table SourceTable"
-                )
+        keystr = None
+        sourceId = None
+        rowStartLoc = None
+        xTimeInterval = None
 
-        # this check to make sure the key is not a duplicate is only done when the uniqueness check is not skipped
-        if not skipUniquenessCheck:
-            if (
-                self.getRowByKey(
-                    x.getSourceId(), x.getTimeInterval(), x.getSpectralWindowId()
-                )
-                is not None
-            ):
-                raise DuplicateKey(
-                    "Duplicate key exception . ("
-                    + "sourceId="
-                    + x.getSourceId()
-                    + " "
-                    + "timeInterval="
-                    + x.getTimeInterval()
-                    + " "
-                    + "spectralWindowId="
-                    + x.getSpectralWindowId()
-                    + " "
-                    + ") in ",
-                    "SourceTable.",
-                )
+        if isinstance(x, tuple):
+            rowStartLoc, xTimeInterval, keystr, sourceId = x
+            # the tuple expected by insertByStartTime
+            x = (rowStartLoc, xTimeInterval)
+        else:
+            keystr = self.Key(x.getSpectralWindowId())
 
-        keystr = self.Key(x.getSpectralWindowId())
+            sourceId = x.getSourceId()
 
-        i = x.getSourceId()
-
-        # make sure keystr is known to context and that there enough elements to retrieve
-        # the list at element "i"
+        # make sure keystr is known to context
         if keystr not in self._context:
             self._context[keystr] = []
-        while len(self._context[keystr]) <= i:
+        else:
+            # this is the only case where the uniqueness check might be needed
+            if not skipUniquenessCheck:
+                if xTimeInterval is None:
+                    # then x must be a row instance and we need to get this
+                    xTimeInterval = x.getTimeInterval()
+
+                # is there a list for this sourceId
+                if sourceId < len(self._context[keystr]):
+                    # do any of these rows have the same timeInterval
+                    for rowIndex in self._context[keystr][receiverId]:
+                        if self._rowTimesList[rowIndex].equals(xTimeInterval):
+
+                            # is this a duplicate key
+                            thisRow = x
+                            if rowLocation is not None:
+                                thisRow = self._getRowByLoc(rowLocation, isadded=False)
+                            otherRow = self.getRow(rowIndex)
+                            if otherRow.equalByRequiredValue(thisRow):
+                                raise UniquenessViolation(
+                                    "Uniqueness violation exception", "SourceTable."
+                                )
+
+                        raise DuplicateKey(
+                            "Duplicate key exception . ("
+                            + "sourceId="
+                            + x.getSourceId()
+                            + " "
+                            + "timeInterval="
+                            + x.getTimeInterval()
+                            + " "
+                            + "spectralWindowId="
+                            + x.getSpectralWindowId()
+                            + " "
+                            + ") in ",
+                            "SourceTable.",
+                        )
+
+        # make sure that there are enough elements in this context for sourceId
+        while len(self._context[keystr]) <= sourceId:
             self._context[keystr].append([])
 
-        return self.insertByStartTime(x, self._context[keystr][i])
+        return self.insertByStartTime(x, self._context[keystr][sourceId])
 
     # ====> methods returning rows.
 
     def get(self):
         """
         Get all rows.
-        return all rows as list of SourceRow
+
+        NOTE: if the rows are found in a binary table file then this may be an
+        expensive operation since all of these rows will need to be read from disk and
+        exist in memory at the same time. For a large table that may be enough to exhaust all
+        resources. Use with caution.
+
+        return all rows as a list of SourceRow
         """
-        return self._privateRows
+        result = []
+        if len(self._rowLocList) > 0:
+            # any binary rows come first and must be fetched individually
+            for rowLoc in self._rowLocList:
+                result.append(self._getRowByLoc(rowLoc))
+            if len(self._rowList) > 0:
+                result = result + self._rowList
+        else:
+            result = self._rowList
+
+        return result
+
+    def getRow(self, index):
+        """
+        Return the row indicated by index, which is a row number. Rows are numbered in the order
+        they were added to the table. The index must be between 0 and (size()-1).
+
+        raises a ValueError if index is out of range for this table.
+        """
+        if (index < 0) or (index >= self.size()):
+            raise ValueError("index out of range")
+
+        result = None
+        # rows are found first in self._rowLocList then from self._rowList as needed
+        if index < len(self._rowLocList):
+            result = self._getRowByLoc(self._rowLocList[index])
+        else:
+            rowListIndex = index - len(self._rowLocList)
+            result = self._rowList[rowListIndex]
+
+        return result
+
+    def getRowList(self, indexList):
+        """
+        Return a list of rows using a list of row numbers in same order as the list.
+
+        indexList is a list of row numbers (see getRow)
+        returns a list of row instances in the same order as indexList
+        raises a ValueError if an index is out of range for this table.
+        """
+        result = []
+        for index in indexList:
+            result.append(self.getRow(index))
+
+        return result
 
     def getRowByKey(self, sourceId, timeInterval, spectralWindowId):
         """
@@ -1002,34 +1214,55 @@ class SourceTable:
 
         id = int(sourceId)
 
-        contextRows = self._context[keystr]
+        contextRowList = self._context[keystr]
         # the first list is indexed by id so it must exist for this to find a row
-        if id < len(contextRows):
-            idRows = contextRows[id]
-            for aRow in idRows:
-                if aRow.getTimeInterval().equals(timeInterval):
-                    return aRow
+        if id < len(contextRowList):
+            idRowList = contextRowList[id]
+            for thisRowIndex in idRowList:
+                if self._rowTimesList[thisRowIndex].equals(timeInterval):
+                    return self.getRow(thisRowIndex)
 
         # never found
         return None
 
-    def getRowBySourceId(self, sourceId):
+    def getRowListBySourceId(self, sourceId):
         """
-        Returns a list of rows whose key element sourceId
+        Returns a list of row numbers whose key element sourceId
         is equal to the parameter sourceId.
-        return a list of SourceRow. A returned list of size 0 means that no row has been found.
+        return a list of indices that can be used in getRowList to get a list of rows or individually
+        in getRow to get each row in turn. A returned list of size 0 means that no row has been found.
         sourceId is of type int and contains the value of
         the autoincrementable attribute that is looked up in the table.
         """
         result = []
 
         # any of the context strings could contain a list appropriate for the requested value
-        for thisKeyValue in self._context.values():
+        for thisKeyList in self._context.values():
             # if this has the requested value, that value can be used to index into this list
-            if sourceId < len(thisKeyValue):
+            if sourceId < len(thisKeyList):
                 # this value contains rows with the requested value
                 # append all of them to the result
-                result.extend(thisKeyValue[sourceId])
+                result.extend(thisKeyList[sourceId])
+
+        return result
+
+    def getRowBySourceId(self, sourceIdySourceId):
+        """
+        Returns a list of rows whose key element sourceId
+        is equal to the parameter sourceId.
+        return a list of SourceRow. A returned list of size 0 means that no row has been found.
+        sourceId is of type int and contains the value of
+        the autoincrementable attribute that is looked up in the table.
+        Note that for rows stored in a binary table file getting all of the rows in a list may be
+        and expensive operation. The getRowListBySourceId can be used
+        to get a list of row numbers that can then be used in individual calls to getRow so that all rows
+        in the list need not be in memory at the same time.
+        """
+        resultList = self.getRowListBySourceId(SourceId)
+
+        result = []
+        if len(resultList) > 0:
+            result = getRowList(resultList)
 
         return result
 
@@ -1059,26 +1292,50 @@ class SourceTable:
             # it may be found in any of the list of lists
             for thisKeyValueList in self._context.values():
                 for thisList in thisKeyValueList:
-                    for thisRow in thisList:
-                        if thisRow.getTimeInterval().contains(
-                            timeInterval
-                        ) and thisRow.compareNoAutoInc(
-                            timeInterval,
-                            spectralWindowId,
-                            code,
-                            direction,
-                            properMotion,
-                            sourceName,
-                        ):
-                            return thisRow
-
+                    for thisRowIndex in thisList:
+                        if self._rowTimesList[thisRowIndex].contains(timeInterval):
+                            # a full comparison requires thie row
+                            thisRow = self.getRow(thisRowIndex)
+                            if thisRow.compareNoAutoInc(
+                                timeInterval,
+                                spectralWindowId,
+                                code,
+                                direction,
+                                properMotion,
+                                sourceName,
+                            ):
+                                return thisRow
         return None
 
-    def getRows(self):
+    def _getRowByLoc(self, rowStartLoc, isadded=True):
         """
-        get the rows, synonymous with the get method.
+        Used when attached to a binary table. For internal use.
+
+        If the row is in the process of being added then the row
+        should not be marked as "added" yet and isadded is False. In all other cases the
+        row has been added and that needs to be set when retrieving the row.
+
+        The retrieved row is kept internally in case the same row is requested before any
+        other rows to avoid re-reading it.
+
+        Return a row using the binary table values that  start at rowStartLoc in self._eis.
         """
-        return self.get()
+        result = None
+
+        if rowStartLoc == self._lastBinRowLoc:
+            # no need to re-read it
+            result = self._lastBinRow
+        else:
+            loc = self._eis.seek(rowStartLoc)
+            result = SourceRow.fromBin(self._eis, self, self._attributesSeq)
+            if isadded:
+                result.isAdded()
+
+            # remember this, in case the same row is requested again
+            self._lastBinRow = result
+            self._lastBinRowLoc = rowStartLoc
+
+        return result
 
     # ====> conversion Methods
 
@@ -1096,7 +1353,10 @@ class SourceTable:
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
         result += "\n <Container" + s[1:]
-        for thisRow in self._privateRows:
+
+        # use self.getRow to handle binary table rows and xml rows in the correct order
+        for rowNumber in range(self.size()):
+            thisRow = self.getRow(rowNumber)
             result += "\n" + thisRow.toXML()
         result += "\n</SourceTable>"
         return result
@@ -1317,10 +1577,11 @@ class SourceTable:
             eos = EndianOutput(outBuffer, byteOrder)
             self.getEntity().toBin(eos)
             self.getContainer().getEntity().toBin(eos)
-            eos.writeInt(len(self._privateRows))
+            eos.writeInt(self.size())
 
             # and all of the rows
-            for thisRow in self._privateRows:
+            for thisRowNumber in range(self.size()):
+                thisRow = self.getRow(thisRowNumber)
                 thisRow.toBin(eos)
 
             # The closing MIME boundary
@@ -1330,18 +1591,21 @@ class SourceTable:
             # close the eos, also closes outBuffer, no penalty for doing that more than once
             eos.close()
 
-    def setFromMIME(self, byteStream):
+    def setFromMIME(self):
         """
         Extracts the binary part of a MIME message and deserialize its content
         to fill this with the result of the deserialization.
-        param byteStream the previously opened io.BufferedReader instance
-        containing the data to be extracted.
 
-        It is the responsibility of this method to close byteStream.
+        The previously opened io.BufferedReader is found at self._byteStream and
+        contains the data to be extracted.
         """
 
-        if not (isinstance(byteStream, io.BufferedReader) and byteStream.seekable()):
-            byteStream.close()
+        if not (
+            isinstance(self._byteStream, io.BufferedReader)
+            and self._byteStream.seekable()
+        ):
+            if self._byteStream is not None:
+                self._byteStream.close()
             raise ConversionException(
                 "opened byteStream is not the expected io.BufferedReader or it is not seekable, this should never happen.",
                 "Source",
@@ -1357,7 +1621,7 @@ class SourceTable:
         xmlPartMIMEHeaderAlt = bytes(str("Content-ID: <header.xml>\r\n\r\n").encode())
 
         # follow the Java example and grab the first 10000 bytes, which will always contain the header
-        headerBytes = byteStream.read(10000)
+        headerBytes = self._byteStream.read(10000)
 
         # Detect the XML header.
         loc0 = headerBytes.find(xmlPartMIMEHeader)
@@ -1366,7 +1630,7 @@ class SourceTable:
             loc0 = headerBytes.find(xmlPartMIMEHeaderAlt)
             if loc0 < 0:
                 # nothing else to try
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "Failed to detect the begining of the XML header.", "Source"
                 )
@@ -1378,7 +1642,7 @@ class SourceTable:
         # Look for the string announcing the binary part.
         loc1 = headerBytes.find(binPartMIMEHeader, loc0)
         if loc1 < 0:
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException(
                 "Failed to detect the begining of the binary part.", "Source"
             )
@@ -1388,10 +1652,10 @@ class SourceTable:
 
         xmldom = minidom.parseString(xmlHeader)
         if not xmldom.hasChildNodes():
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException("XML is not properly structured.", "Source")
 
-        attributesSeq = []
+        self._attributesSeq = []
         byteOrderStr = None
         versionStr = "-1"
 
@@ -1401,85 +1665,84 @@ class SourceTable:
             # assume Big_Endian and the default order of the elements
             byteOrderStr = "Big_Endian"
 
-            attributesSeq.append("sourceId")
+            self._attributesSeq.append("sourceId")
 
-            attributesSeq.append("timeInterval")
+            self._attributesSeq.append("timeInterval")
 
-            attributesSeq.append("spectralWindowId")
+            self._attributesSeq.append("spectralWindowId")
 
-            attributesSeq.append("code")
+            self._attributesSeq.append("code")
 
-            attributesSeq.append("direction")
+            self._attributesSeq.append("direction")
 
-            attributesSeq.append("properMotion")
+            self._attributesSeq.append("properMotion")
 
-            attributesSeq.append("sourceName")
+            self._attributesSeq.append("sourceName")
 
-            attributesSeq.append("directionCode")
+            self._attributesSeq.append("directionCode")
 
-            attributesSeq.append("directionEquinox")
+            self._attributesSeq.append("directionEquinox")
 
-            attributesSeq.append("calibrationGroup")
+            self._attributesSeq.append("calibrationGroup")
 
-            attributesSeq.append("catalog")
+            self._attributesSeq.append("catalog")
 
-            attributesSeq.append("deltaVel")
+            self._attributesSeq.append("deltaVel")
 
-            attributesSeq.append("position")
+            self._attributesSeq.append("position")
 
-            attributesSeq.append("numLines")
+            self._attributesSeq.append("numLines")
 
-            attributesSeq.append("transition")
+            self._attributesSeq.append("transition")
 
-            attributesSeq.append("restFrequency")
+            self._attributesSeq.append("restFrequency")
 
-            attributesSeq.append("sysVel")
+            self._attributesSeq.append("sysVel")
 
-            attributesSeq.append("rangeVel")
+            self._attributesSeq.append("rangeVel")
 
-            attributesSeq.append("sourceModel")
+            self._attributesSeq.append("sourceModel")
 
-            attributesSeq.append("frequencyRefCode")
+            self._attributesSeq.append("frequencyRefCode")
 
-            attributesSeq.append("numFreq")
+            self._attributesSeq.append("numFreq")
 
-            attributesSeq.append("numStokes")
+            self._attributesSeq.append("numStokes")
 
-            attributesSeq.append("frequency")
+            self._attributesSeq.append("frequency")
 
-            attributesSeq.append("frequencyInterval")
+            self._attributesSeq.append("frequencyInterval")
 
-            attributesSeq.append("stokesParameter")
+            self._attributesSeq.append("stokesParameter")
 
-            attributesSeq.append("flux")
+            self._attributesSeq.append("flux")
 
-            attributesSeq.append("fluxErr")
+            self._attributesSeq.append("fluxErr")
 
-            attributesSeq.append("positionAngle")
+            self._attributesSeq.append("positionAngle")
 
-            attributesSeq.append("positionAngleErr")
+            self._attributesSeq.append("positionAngleErr")
 
-            attributesSeq.append("size")
+            self._attributesSeq.append("size")
 
-            attributesSeq.append("sizeErr")
+            self._attributesSeq.append("sizeErr")
 
-            attributesSeq.append("velRefCode")
+            self._attributesSeq.append("velRefCode")
 
-            attributesSeq.append("dopplerVelocity")
+            self._attributesSeq.append("dopplerVelocity")
 
-            attributesSeq.append("dopplerReferenceSystem")
+            self._attributesSeq.append("dopplerReferenceSystem")
 
-            attributesSeq.append("dopplerCalcType")
+            self._attributesSeq.append("dopplerCalcType")
 
-            attributesSeq.append("parallax")
+            self._attributesSeq.append("parallax")
 
             versionStr = "2"
-
         else:
             # c++ and Java just assume it then must be a Source table
             # this is more insistant, just in case
             if hdrdom.nodeName != "SourceTable":
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "XML Header is not from the expected table.", "Source"
                 )
@@ -1492,7 +1755,7 @@ class SourceTable:
                 versionStr = hdrdom.attributes.getNamedItem("schemaVersion").value
 
             if not hdrdom.hasChildNodes():
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "THe XML header is missing all of the expected elements.", "Source"
                 )
@@ -1501,51 +1764,51 @@ class SourceTable:
             for hdrnode in hdrdom.childNodes:
                 if hdrnode.nodeName == "BulkStoreRef":
                     if byteOrderStr is not None:
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "More than one BulkStoreRef element seen. Invalid XML header.",
                             "Source",
                         )
                     if not hdrnode.hasAttributes():
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "BulkStoreRef does not contain any attributes. Invalid XML header.",
                             "Source",
                         )
                     byteOrderAttr = hdrnode.attributes.getNamedItem("byteOrder")
                     if byteOrderAttr is None:
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "byteOrder attribute not found in BulkStoreRef element. Invalid XML header.",
                             "Source",
                         )
                     byteOrderStr = byteOrderAttr.value
                 elif hdrnode.nodeName == "Attributes":
-                    if len(attributesSeq) > 0:
-                        byteStream.close()
+                    if len(self._attributesSeq) > 0:
+                        self._byteStream.close()
                         raise ConversionException(
                             "More than one Attributes node seen. Invalid XML header.",
                             "Source",
                         )
                     if not hdrnode.hasChildNodes():
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "Attributes element has no child nodes. Invalid XML header.",
                             "Source",
                         )
                     for attrnode in hdrnode.childNodes:
                         if attrnode.nodeType == attrnode.ELEMENT_NODE:
-                            attributesSeq.append(str(attrnode.nodeName))
+                            self._attributesSeq.append(str(attrnode.nodeName))
 
         if byteOrderStr is None:
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException(
                 "BulkStoreRef element not seen and this is not an older version 2 XML header. Invalid XML header.",
                 "Source",
             )
 
-        if len(attributesSeq) == 0:
-            byteStream.close()
+        if len(self._attributesSeq) == 0:
+            self._byteStream.close()
             raise ConversionException(
                 "Attributes element not seen and this is not an older version 2 XML header. Invalid XML header.",
                 "Source",
@@ -1554,18 +1817,18 @@ class SourceTable:
         byteOrder = ByteOrder(byteOrderStr)
 
         # seek to the start of the binary part
-        byteStream.seek(loc1 + len(binPartMIMEHeader))
+        self._byteStream.seek(loc1 + len(binPartMIMEHeader))
 
         # and create the class that manages that stream and returns values as requested
-        eis = EndianInput(byteStream, byteOrder)
+        self._eis = EndianInput(self._byteStream, byteOrder)
 
-        self._entity = Entity.fromBin(eis)
+        self._entity = Entity.fromBin(self._eis)
 
         # containerEntity is not used, but it is next
-        containerEntity = Entity.fromBin(eis)
+        containerEntity = Entity.fromBin(self._eis)
 
         # the number of rows
-        numRows = eis.readInt()
+        numRows = self._eis.readInt()
         if numRows == -1:
             # when this happens (used by eVLA, I believe) use the expected size from ASDM.xml
             numRows = self._container.getExpectedTableSize("Source")
@@ -1573,48 +1836,72 @@ class SourceTable:
         # c++ reports an error when numRows is != -1 and does not agree with the value in the ASDM.xml
         # Java just uses numRows (but doesn't cover the case when numRows == -1)
         # do not check or report any difference here but cover the numRows==-1 case above
+
+        # rows are not fully read here, just the starting location, the key information, and timeInterval
+        self._lastBinRow = None
+        self._lastBinRowLoc = -1
         try:
             for i in range(numRows):
-                self.checkAndAdd(
-                    SourceRow.fromBin(eis, self, attributesSeq),
-                    self._checkRowUniqueness,
+                rowStart = self._eis.tell()
+
+                # skip this row, getting only the information needed for checkAndAdd
+                sourceId, timeInterval, spectralWindowId = (
+                    SourceRow.skipWithContextFromBin(self._eis, self._attributesSeq)
                 )
-                # print("row %s added, loc = %s" % (i, eis.tell()))
+
+                keystr = self.Key(spectralWindowId)
+
+                # temporal, with auto-incremntal, other keys : 2 (Feed, Receiver, Source)
+                self.checkAndAdd(
+                    rowStart,
+                    timeInterval,
+                    keystr,
+                    sourceId,
+                    (not self._checkRowUniqueness),
+                )
+
         except DuplicateKey as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             # reraise it as a ConversionException
             raise ConversionException(str(exc), "SourceTable") from None
         except UniquenessViolationException as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             msg = "UniquenessViolationException while adding row : %s" % str(exc)
             # raise a ConversionException using this msg
             raise ConversionException(msg, "SourceTable") from None
         except Exception as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             raise ConversionException(
                 "Error while reading binary data, the exception was " + str(exc),
-                "Source",
+                "SourceTable",
             ) from None
-
-        # there is no harm in closing both
-        # print("closing")
-        eis.close()
-        byteStream.close()
-        # print("checking")
-        # print("eis : %s" % eis.closed())
-        # print("byteStream : %s" % byteStream.closed)
 
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a SourceTable as those produced  by the toFile method.
+        Reads and parses a file containing a representation of a SourceTable as those produced by the toFile method.
         This table is populated with the result of the parsing.
         param directory The name of the directory containing the file te be read and parsed.
-        raises ConversionException If any error occurs while reading the
+
+        raises ConversionException if any error occurs while reading the
         files in the directory or parsing them.
+
+        raises ConversionException if some rows are already known or if an attempt was made to read from a
+        binary table file and that resulted in an unexpected exception, leaving the object in a mixed state.
         """
+        # check if this is allowed
+        if (
+            (self.size() > 0)
+            or (self._eis is not None)
+            or (self._byteStream is not None)
+        ):
+            raise ConversionException(
+                "A table can not be set from a file once the size is > 0 or if an unexpected error happened while reading a binary table.",
+                "SourceTable",
+            )
+
         if not isinstance(directory, str):
             print("directory must be a string")
 
@@ -1643,17 +1930,23 @@ class SourceTable:
         # This uses a buffered byte stream. Created here and then
         # handed off to the setFromMIME method, which is responsible for closing it.
 
+        if self._byteStream is not None and not self._byteStream.closed:
+            raise ConversionException(
+                "The binary table file is already opened and can not be re-opened. This should never happen",
+                "SourceTable",
+            )
+
         filename = os.path.join(directory, "Source.bin")
-        byteStream = None
+        self._byteStream = None
         try:
-            byteStream = open(filename, "rb")
+            self._byteStream = open(filename, "rb")
         except Exception as exc:
             raise ConversionException(
                 "Error while opening " + filename + ". The exception was " + str(exc),
-                "Source",
+                "SourceTable",
             )
 
-        self.setFromMIME(byteStream)
+        self.setFromMIME()
 
     def setFromXMLFile(self, directory):
         """

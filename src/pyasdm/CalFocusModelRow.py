@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -515,6 +519,8 @@ class CalFocusModelRow:
 
         eos.writeDouble(self._reducedChiSquared)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaNameFromBin(row, eis):
         """
@@ -709,6 +715,194 @@ class CalFocusModelRow:
         _fromBinMethods["focusRMS"] = CalFocusModelRow.focusRMSFromBin
         _fromBinMethods["reducedChiSquared"] = CalFocusModelRow.reducedChiSquaredFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaNameFromBin(eis):
+        """
+        Skip the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipReceiverBandFromBin(eis):
+        """
+        Skip the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverBand stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipPolarizationTypeFromBin(eis):
+        """
+        Skip the polarizationType in row from the EndianInput (eis) instance.
+        """
+
+        # PolarizationType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipAntennaMakeFromBin(eis):
+        """
+        Skip the antennaMake in row from the EndianInput (eis) instance.
+        """
+
+        # AntennaMake stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipNumCoeffFromBin(eis):
+        """
+        Skip the numCoeff in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumSourceObsFromBin(eis):
+        """
+        Skip the numSourceObs in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipCoeffNameFromBin(eis):
+        """
+        Skip the coeffName in row from the EndianInput (eis) instance.
+        """
+
+        coeffNameDim1 = eis.readInt()
+        for _ in range(coeffNameDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipCoeffFormulaFromBin(eis):
+        """
+        Skip the coeffFormula in row from the EndianInput (eis) instance.
+        """
+
+        coeffFormulaDim1 = eis.readInt()
+        for _ in range(coeffFormulaDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipCoeffValueFromBin(eis):
+        """
+        Skip the coeffValue in row from the EndianInput (eis) instance.
+        """
+
+        coeffValueDim1 = eis.readInt()
+        for _ in range(coeffValueDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipCoeffErrorFromBin(eis):
+        """
+        Skip the coeffError in row from the EndianInput (eis) instance.
+        """
+
+        coeffErrorDim1 = eis.readInt()
+        for _ in range(coeffErrorDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipCoeffFixedFromBin(eis):
+        """
+        Skip the coeffFixed in row from the EndianInput (eis) instance.
+        """
+
+        coeffFixedDim1 = eis.readInt()
+        for _ in range(coeffFixedDim1):
+            eis.skipBool()
+
+    @staticmethod
+    def skipFocusModelFromBin(eis):
+        """
+        Skip the focusModel in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipFocusRMSFromBin(eis):
+        """
+        Skip the focusRMS in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipReducedChiSquaredFromBin(eis):
+        """
+        Skip the reducedChiSquared in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipDouble()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaName"] = CalFocusModelRow.skipAntennaNameFromBin
+        _skipBinMethods["receiverBand"] = CalFocusModelRow.skipReceiverBandFromBin
+        _skipBinMethods["polarizationType"] = (
+            CalFocusModelRow.skipPolarizationTypeFromBin
+        )
+        _skipBinMethods["calDataId"] = CalFocusModelRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalFocusModelRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalFocusModelRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalFocusModelRow.skipEndValidTimeFromBin
+        _skipBinMethods["antennaMake"] = CalFocusModelRow.skipAntennaMakeFromBin
+        _skipBinMethods["numCoeff"] = CalFocusModelRow.skipNumCoeffFromBin
+        _skipBinMethods["numSourceObs"] = CalFocusModelRow.skipNumSourceObsFromBin
+        _skipBinMethods["coeffName"] = CalFocusModelRow.skipCoeffNameFromBin
+        _skipBinMethods["coeffFormula"] = CalFocusModelRow.skipCoeffFormulaFromBin
+        _skipBinMethods["coeffValue"] = CalFocusModelRow.skipCoeffValueFromBin
+        _skipBinMethods["coeffError"] = CalFocusModelRow.skipCoeffErrorFromBin
+        _skipBinMethods["coeffFixed"] = CalFocusModelRow.skipCoeffFixedFromBin
+        _skipBinMethods["focusModel"] = CalFocusModelRow.skipFocusModelFromBin
+        _skipBinMethods["focusRMS"] = CalFocusModelRow.skipFocusRMSFromBin
+        _skipBinMethods["reducedChiSquared"] = (
+            CalFocusModelRow.skipReducedChiSquaredFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -735,7 +929,30 @@ class CalFocusModelRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalFocusModel",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute antennaName
 
@@ -1618,5 +1835,8 @@ class CalFocusModelRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalFocusModelRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalFocusModelRow.initSkipBinMethods()

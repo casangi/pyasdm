@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.PolarizationType import PolarizationType
 
@@ -1215,6 +1219,8 @@ class DelayModelRow:
 
             self._ionosphericDelay.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -1643,6 +1649,436 @@ class DelayModelRow:
         _fromBinMethods["delayModelVersion"] = DelayModelRow.delayModelVersionFromBin
         _fromBinMethods["ionosphericDelay"] = DelayModelRow.ionosphericDelayFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipNumPolyFromBin(eis):
+        """
+        Skip the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipPhaseDelayFromBin(eis):
+        """
+        Skip the phaseDelay in row from the EndianInput (eis) instance.
+        """
+
+        phaseDelayDim1 = eis.readInt()
+        for _ in range(phaseDelayDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipPhaseDelayRateFromBin(eis):
+        """
+        Skip the phaseDelayRate in row from the EndianInput (eis) instance.
+        """
+
+        phaseDelayRateDim1 = eis.readInt()
+        for _ in range(phaseDelayRateDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipGroupDelayFromBin(eis):
+        """
+        Skip the groupDelay in row from the EndianInput (eis) instance.
+        """
+
+        groupDelayDim1 = eis.readInt()
+        for _ in range(groupDelayDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipGroupDelayRateFromBin(eis):
+        """
+        Skip the groupDelayRate in row from the EndianInput (eis) instance.
+        """
+
+        groupDelayRateDim1 = eis.readInt()
+        for _ in range(groupDelayRateDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipFieldIdFromBin(eis):
+        """
+        Skip the fieldId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeOriginFromBin(eis):
+        """
+        Skip the optional timeOrigin in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipAtmosphericGroupDelayFromBin(eis):
+        """
+        Skip the optional atmosphericGroupDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipAtmosphericGroupDelayRateFromBin(eis):
+        """
+        Skip the optional atmosphericGroupDelayRate in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipGeometricDelayFromBin(eis):
+        """
+        Skip the optional geometricDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipGeometricDelayRateFromBin(eis):
+        """
+        Skip the optional geometricDelayRate in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipNumLOFromBin(eis):
+        """
+        Skip the optional numLO in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipLOOffsetFromBin(eis):
+        """
+        Skip the optional LOOffset in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipLOOffsetRateFromBin(eis):
+        """
+        Skip the optional LOOffsetRate in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipDispersiveDelayFromBin(eis):
+        """
+        Skip the optional dispersiveDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipDispersiveDelayRateFromBin(eis):
+        """
+        Skip the optional dispersiveDelayRate in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipAtmosphericDryDelayFromBin(eis):
+        """
+        Skip the optional atmosphericDryDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipAtmosphericWetDelayFromBin(eis):
+        """
+        Skip the optional atmosphericWetDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipPadDelayFromBin(eis):
+        """
+        Skip the optional padDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipAntennaDelayFromBin(eis):
+        """
+        Skip the optional antennaDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipNumReceptorFromBin(eis):
+        """
+        Skip the optional numReceptor in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipPolarizationTypeFromBin(eis):
+        """
+        Skip the optional polarizationType in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            polarizationTypeDim1 = eis.readInt()
+            for _ in range(polarizationTypeDim1):
+                # PolarizationType stored as a string
+                eis.skipString()
+
+    @staticmethod
+    def skipElectronicDelayFromBin(eis):
+        """
+        Skip the optional electronicDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            electronicDelayDim1 = eis.readInt()
+            for _ in range(electronicDelayDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipElectronicDelayRateFromBin(eis):
+        """
+        Skip the optional electronicDelayRate in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            electronicDelayRateDim1 = eis.readInt()
+            for _ in range(electronicDelayRateDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipReceiverDelayFromBin(eis):
+        """
+        Skip the optional receiverDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            receiverDelayDim1 = eis.readInt()
+            for _ in range(receiverDelayDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipIFDelayFromBin(eis):
+        """
+        Skip the optional IFDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            IFDelayDim1 = eis.readInt()
+            for _ in range(IFDelayDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipLODelayFromBin(eis):
+        """
+        Skip the optional LODelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            LODelayDim1 = eis.readInt()
+            for _ in range(LODelayDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipCrossPolarizationDelayFromBin(eis):
+        """
+        Skip the optional crossPolarizationDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipCenterOfArrayFromBin(eis):
+        """
+        Skip the optional centerOfArray in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipDelayModelVersionFromBin(eis):
+        """
+        Skip the optional delayModelVersion in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipIonosphericDelayFromBin(eis):
+        """
+        Skip the optional ionosphericDelay in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Interval.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = DelayModelRow.skipAntennaIdFromBin
+        _skipBinMethods["spectralWindowId"] = DelayModelRow.skipSpectralWindowIdFromBin
+        _skipBinMethods["timeInterval"] = DelayModelRow.skipTimeIntervalFromBin
+        _skipBinMethods["numPoly"] = DelayModelRow.skipNumPolyFromBin
+        _skipBinMethods["phaseDelay"] = DelayModelRow.skipPhaseDelayFromBin
+        _skipBinMethods["phaseDelayRate"] = DelayModelRow.skipPhaseDelayRateFromBin
+        _skipBinMethods["groupDelay"] = DelayModelRow.skipGroupDelayFromBin
+        _skipBinMethods["groupDelayRate"] = DelayModelRow.skipGroupDelayRateFromBin
+        _skipBinMethods["fieldId"] = DelayModelRow.skipFieldIdFromBin
+
+        _skipBinMethods["timeOrigin"] = DelayModelRow.skipTimeOriginFromBin
+        _skipBinMethods["atmosphericGroupDelay"] = (
+            DelayModelRow.skipAtmosphericGroupDelayFromBin
+        )
+        _skipBinMethods["atmosphericGroupDelayRate"] = (
+            DelayModelRow.skipAtmosphericGroupDelayRateFromBin
+        )
+        _skipBinMethods["geometricDelay"] = DelayModelRow.skipGeometricDelayFromBin
+        _skipBinMethods["geometricDelayRate"] = (
+            DelayModelRow.skipGeometricDelayRateFromBin
+        )
+        _skipBinMethods["numLO"] = DelayModelRow.skipNumLOFromBin
+        _skipBinMethods["LOOffset"] = DelayModelRow.skipLOOffsetFromBin
+        _skipBinMethods["LOOffsetRate"] = DelayModelRow.skipLOOffsetRateFromBin
+        _skipBinMethods["dispersiveDelay"] = DelayModelRow.skipDispersiveDelayFromBin
+        _skipBinMethods["dispersiveDelayRate"] = (
+            DelayModelRow.skipDispersiveDelayRateFromBin
+        )
+        _skipBinMethods["atmosphericDryDelay"] = (
+            DelayModelRow.skipAtmosphericDryDelayFromBin
+        )
+        _skipBinMethods["atmosphericWetDelay"] = (
+            DelayModelRow.skipAtmosphericWetDelayFromBin
+        )
+        _skipBinMethods["padDelay"] = DelayModelRow.skipPadDelayFromBin
+        _skipBinMethods["antennaDelay"] = DelayModelRow.skipAntennaDelayFromBin
+        _skipBinMethods["numReceptor"] = DelayModelRow.skipNumReceptorFromBin
+        _skipBinMethods["polarizationType"] = DelayModelRow.skipPolarizationTypeFromBin
+        _skipBinMethods["electronicDelay"] = DelayModelRow.skipElectronicDelayFromBin
+        _skipBinMethods["electronicDelayRate"] = (
+            DelayModelRow.skipElectronicDelayRateFromBin
+        )
+        _skipBinMethods["receiverDelay"] = DelayModelRow.skipReceiverDelayFromBin
+        _skipBinMethods["IFDelay"] = DelayModelRow.skipIFDelayFromBin
+        _skipBinMethods["LODelay"] = DelayModelRow.skipLODelayFromBin
+        _skipBinMethods["crossPolarizationDelay"] = (
+            DelayModelRow.skipCrossPolarizationDelayFromBin
+        )
+        _skipBinMethods["centerOfArray"] = DelayModelRow.skipCenterOfArrayFromBin
+        _skipBinMethods["delayModelVersion"] = (
+            DelayModelRow.skipDelayModelVersionFromBin
+        )
+        _skipBinMethods["ionosphericDelay"] = DelayModelRow.skipIonosphericDelayFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -1669,7 +2105,75 @@ class DelayModelRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " DelayModel",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order. Only values
+        necessary to understand that row plus the context values appropriate
+        for the DelayModel row are read. The context tuple that is returned is
+        (antennaId, spectralWindowId, timeInterval)
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        spectralWindowId = None
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " DelayModel",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "spectralWindowId":
+
+                spectralWindowId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, spectralWindowId, timeInterval)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -3526,5 +4030,8 @@ class DelayModelRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 DelayModelRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+DelayModelRow.initSkipBinMethods()

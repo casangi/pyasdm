@@ -32,18 +32,20 @@ def benchmarkTable(container, tableName, tableNameWidth, checkRowUniqueness):
     if thisTable.getCheckRowUniqueness() != checkRowUniqueness:
         print(f"Warning: mismatch checkRowUniqueness for {tableName}")
 
-    rows = thisTable.get()
+    if thisTable.hasBinaryRows():
+        # one at a time 
+        for i in range(thisTable.size()):
+            thisRow = thisTable.getRow(i)
+    else:
+        # they're all there, this is cheap
+        rows = thisTable.get()
 
     # this breaks the table for some uses but it keeps asizeof from going
     # through the container and finding all of the other tables
     thisTable._container = None
 
     sizeTable = None
-    # for now, skip asizeof for SysPower and Pointing, instead, use getsizeof on rows, otherwise this dies
-    if tableName in ["SysPower", "Pointing"]:
-        sizeTable = sys.getsizeof(rows)
-    else:
-        sizeTable = asizeof.asizeof(thisTable)
+    sizeTable = asizeof.asizeof(thisTable)
 
     tablePath = os.path.join(container.getDirectory(), tableName)
     tableType = "xxx"

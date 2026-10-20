@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.DirectionReferenceCode import DirectionReferenceCode
 
@@ -593,6 +597,8 @@ class PointingRow:
 
             Angle.listToBin(self._atmosphericCorrection, eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -781,6 +787,205 @@ class PointingRow:
             PointingRow.atmosphericCorrectionFromBin
         )
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipNumSampleFromBin(eis):
+        """
+        Skip the numSample in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipEncoderFromBin(eis):
+        """
+        Skip the encoder in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipPointingTrackingFromBin(eis):
+        """
+        Skip the pointingTracking in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipBool()
+
+    @staticmethod
+    def skipUsePolynomialsFromBin(eis):
+        """
+        Skip the usePolynomials in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipBool()
+
+    @staticmethod
+    def skipTimeOriginFromBin(eis):
+        """
+        Skip the timeOrigin in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipNumTermFromBin(eis):
+        """
+        Skip the numTerm in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipPointingDirectionFromBin(eis):
+        """
+        Skip the pointingDirection in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipTargetFromBin(eis):
+        """
+        Skip the target in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipOffsetFromBin(eis):
+        """
+        Skip the offset in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipPointingModelIdFromBin(eis):
+        """
+        Skip the pointingModelId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipOverTheTopFromBin(eis):
+        """
+        Skip the optional overTheTop in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipSourceOffsetFromBin(eis):
+        """
+        Skip the optional sourceOffset in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip2DBin(eis)
+
+    @staticmethod
+    def skipSourceOffsetReferenceCodeFromBin(eis):
+        """
+        Skip the optional sourceOffsetReferenceCode in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # DirectionReferenceCode stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipSourceOffsetEquinoxFromBin(eis):
+        """
+        Skip the optional sourceOffsetEquinox in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipSampledTimeIntervalFromBin(eis):
+        """
+        Skip the optional sampledTimeInterval in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            ArrayTimeInterval.skip1DBin(eis)
+
+    @staticmethod
+    def skipAtmosphericCorrectionFromBin(eis):
+        """
+        Skip the optional atmosphericCorrection in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip2DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = PointingRow.skipAntennaIdFromBin
+        _skipBinMethods["timeInterval"] = PointingRow.skipTimeIntervalFromBin
+        _skipBinMethods["numSample"] = PointingRow.skipNumSampleFromBin
+        _skipBinMethods["encoder"] = PointingRow.skipEncoderFromBin
+        _skipBinMethods["pointingTracking"] = PointingRow.skipPointingTrackingFromBin
+        _skipBinMethods["usePolynomials"] = PointingRow.skipUsePolynomialsFromBin
+        _skipBinMethods["timeOrigin"] = PointingRow.skipTimeOriginFromBin
+        _skipBinMethods["numTerm"] = PointingRow.skipNumTermFromBin
+        _skipBinMethods["pointingDirection"] = PointingRow.skipPointingDirectionFromBin
+        _skipBinMethods["target"] = PointingRow.skipTargetFromBin
+        _skipBinMethods["offset"] = PointingRow.skipOffsetFromBin
+        _skipBinMethods["pointingModelId"] = PointingRow.skipPointingModelIdFromBin
+
+        _skipBinMethods["overTheTop"] = PointingRow.skipOverTheTopFromBin
+        _skipBinMethods["sourceOffset"] = PointingRow.skipSourceOffsetFromBin
+        _skipBinMethods["sourceOffsetReferenceCode"] = (
+            PointingRow.skipSourceOffsetReferenceCodeFromBin
+        )
+        _skipBinMethods["sourceOffsetEquinox"] = (
+            PointingRow.skipSourceOffsetEquinoxFromBin
+        )
+        _skipBinMethods["sampledTimeInterval"] = (
+            PointingRow.skipSampledTimeIntervalFromBin
+        )
+        _skipBinMethods["atmosphericCorrection"] = (
+            PointingRow.skipAtmosphericCorrectionFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -807,7 +1012,69 @@ class PointingRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Pointing",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and
+        the list of attributes to be found in eis, in order, this skips one row by
+        skipping values from that EndianInput in the expected order. Only values
+        necessary to understand that row plus the context values appropriate
+        for the Pointing row are read. The context tuple that is returned is
+        (antennaId, timeInterval)
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Pointing",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, timeInterval)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1852,5 +2119,8 @@ class PointingRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 PointingRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+PointingRow.initSkipBinMethods()
