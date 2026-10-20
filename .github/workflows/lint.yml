@@ -1,0 +1,17 @@
+# Lint with ruff on every push and every pull request. Errors only (see
+# [tool.ruff.lint] in pyproject.toml): most of pyasdm is generated code, so
+# no style rules and no ruff format check.
+name: Lint
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  call-ruff:
+    uses: nrao/gh-actions-templates-public/.github/workflows/ruff-template.yml@main
+    with:
+      ruff-version: "0.16.10"
+      format-check: false

@@ -499,6 +499,8 @@ class BDFReader:
             actualDurations components, skipping the loading of data, flags, etc.
             For the not included (not loaded) components, the "present", "type" and
             other fields will be populated but the "arr" field will be left empty.
+            If an empty set is given, a ValueError exception is raised. Use
+            skipSubset() when the intention is to not load any binary component arrays.
 
         Returns
         -------
@@ -508,14 +510,35 @@ class BDFReader:
             stopTime, abortReason) and binary components (flags, actualTimes,
             actualDurations, zeroLags, autoData, crossData)
         """
-        self._checkState(self._Transitions.T_READ, "getSubset")
-        self._integrationIndex += 1
 
+        if len(loadOnlyComponents) == 0:
+            raise ValueError("loadOnlyComponents cannot be empty in getSubset. "
+                             "To skip all components use skipSubset")
+
+        self._initializeGetSubset()
         sdmSubset = self._requireSDMDataSubsetMIMEPart(loadOnlyComponents)
+        self._finalizeGetSubset()
 
-        # this line isn't used, but the file should be advanced to the next line
-        line = self._nextLine()
-        self._currentState = self._States.S_READING
+        return sdmSubset
+
+    def skipSubset(self) -> dict:
+        """
+        Returns an SDM Data Subset (one integration) as a dictionary but without loading any
+        of the binary components. All the component arrays are set to None.
+
+        Equivalent to getSubset when one does not want to load in memory any of the binary
+        components. Primarily this is useful to step through integrations and find the ones
+        that need to be loaded, such as when indexing (or slicing) over time.
+
+        Returns
+        -------
+        sdmSubset: dict
+            the same dictionary as returned by getSubset. The subset metadata is populated
+            but all the binary component arrays are set to None.
+        """
+        self._initializeGetSubset()
+        sdmSubset = self._requireSDMDataSubsetMIMEPart({})
+        self._finalizeGetSubset()
 
         return sdmSubset
 
@@ -578,6 +601,18 @@ class BDFReader:
         self._currentState = self._States.S_READING
 
         return ndarrays
+
+    def _initializeGetSubset(self):
+        """ Initialize state transition at the end of getSubset (or skipSubset)"""
+        self._checkState(self._Transitions.T_READ, "getSubset")
+        self._integrationIndex += 1
+
+
+    def _finalizeGetSubset(self):
+        """ Finalize state transition at the end of getSubset (or skipSubset)"""
+        # this line isn't used, but the file should be advanced to the next line
+        _line = self._nextLine()
+        self._currentState = self._States.S_READING
 
     # the c++ code offers nextSubsets and allRemainingSubsets methods that return
     # a reference to a vector of subsets. Here, that would be implemented by
@@ -1115,7 +1150,8 @@ class BDFReader:
         sdmDataSubsetHeaderDOM : xml.dom.minidom.Element (DOM element)
             XML DOM containing metadata including crossData type info
         loadOnlyComponents : set of str or None
-            Component names to load; if None, load all
+            Names of the binary components to load; if None, load all.
+            If empty, none are loaded
 
         Returns
         -------
@@ -1245,7 +1281,7 @@ class BDFReader:
                 componentDesc["present"] = True
                 componentDesc["startsAt"] = self.position()
                 dt = componentDesc["np_type"]
-                if not loadOnlyComponents or componentName in loadOnlyComponents:
+                if loadOnlyComponents is None or componentName in loadOnlyComponents:
                     if spwId is None:
                         componentDesc["arr"] = np.fromfile(
                             self._f, dtype=dt, count=numberOfElementsToRead
@@ -1284,7 +1320,7 @@ class BDFReader:
                     % (binaryPartName.decode("utf-8"), numberOfBytesToRead)
                 )
 
-            if loadOnlyComponents and actualReadSkipped:
+            if actualReadSkipped:
                 self._f.seek(numberOfBytesToRead, os.SEEK_CUR)
                 nReadBytes = numberOfBytesToRead
 
@@ -1425,7 +1461,8 @@ class BDFReader:
         Parameters
         ----------
         loadOnlyComponents : set of str or None
-            Component names to load; if None, load all components
+            Names of the components to load; if None, load all components. If empty, none
+            are loaded
 
         Returns
         -------
