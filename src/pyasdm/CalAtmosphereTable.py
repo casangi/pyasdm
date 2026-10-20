@@ -864,7 +864,6 @@ class CalAtmosphereTable:
             if isinstance(x, int):
                 # the full row is needed in x
                 x = self._getRowByLoc(rowStartLoc, isadded=False)
-            print(f"checking for duplicate row for {x.getAntennaName()}, {x.getReceiverBand()}, {x.getBasebandName()}, {x.getCalReductionId()}")
             if (
                 self.getRowByKey(
                     x.getAntennaName(),
@@ -970,7 +969,6 @@ class CalAtmosphereTable:
         param calReductionId.
 
         """
-        print(f"looking for {antennaName}, {receiverBand}, {basebandName}, {calDataId}, {calReductionId}")
         for rowNumber in range(self.size()):
             thisRow = self.getRow(rowNumber)
 
@@ -989,7 +987,6 @@ class CalAtmosphereTable:
             if not thisRow.getCalReductionId().equals(calReductionId):
                 continue
 
-            print(f"matching row found at :{rowNumber} : {thisRow.getAntennaName()}, {thisRow.getReceiverBand()}, {thisRow.getBasebandName()}, {thisRow.getCalDataId()}, {thisRow.getCalReductionId()}")
             return thisRow
 
         # no match found

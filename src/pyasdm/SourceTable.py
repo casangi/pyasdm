@@ -974,7 +974,7 @@ class SourceTable:
 
         # Determine the insertion index for the row x, possibly returning a row identical to x.
         if keystr in self._context:
-            if len(self._context) > insertionId:
+            if len(self._context[keystr]) > insertionId:
                 # this insertionId is known to _context, get the associated list of rows
                 rowIndexList = self._context[keystr][insertionId]
                 # search to see if that row is already known
