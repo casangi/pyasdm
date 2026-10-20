@@ -269,8 +269,6 @@ class Tag:
         for _ in range(ndim):
             Tag.skipBin(ein)
 
-        return result
-
     def toBin(self, eout):
         """
         Write this Tag to an EndianOutput instance.
