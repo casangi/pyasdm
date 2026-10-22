@@ -12,4 +12,3 @@ Currently we only provide API reference to user facing functions.
    exceptions
    types
    utils
-
