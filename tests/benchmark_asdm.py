@@ -33,7 +33,7 @@ def benchmarkTable(container, tableName, tableNameWidth, checkRowUniqueness):
         print(f"Warning: mismatch checkRowUniqueness for {tableName}")
 
     if thisTable.hasBinaryRows():
-        # one at a time 
+        # one at a time
         for i in range(thisTable.size()):
             thisRow = thisTable.getRow(i)
     else:
