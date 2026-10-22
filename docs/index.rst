@@ -70,7 +70,7 @@ Read early SDM versions
     yet available in pyasdm. Attempting to read an ASDM without a schemaVersion or with
     a schemaVersion value < 3 will raise a ConversionException. That transformation is also not
     available in the Java code (so pyasdm currently behaves as the Java code does).
-    
+
 BDF write.
     This will be added.
 

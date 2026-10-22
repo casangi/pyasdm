@@ -6,7 +6,7 @@ in the almasw code repo. Changes made here may be lost if not also
 made in the appropriate template. Generated code is clearly marked
 as generated in the code. The generated code is ugly and not very
 readable. To improve that, and to make it easy to update the copy of
-the generated code here, all of the code in this module has been 
+the generated code here, all of the code in this module has been
 run through the python [black formatter](https://pypi.org/project/black/).
 
 ## build instructions

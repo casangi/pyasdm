@@ -71,7 +71,7 @@ to disk. That's not shown in this example.::
   >>> len(mr)
   30
   >>> print(mr[0].toXML())
-  <row> 
+  <row>
   <time> 4890409738560000000 </time> <numAntenna> 30 </numAntenna> <timeSampling> INTEGRATION </timeSampling> <interval> 10080000000 </interval> <numIntegration> 5 </numIntegration> <scanNumber> 1 </scanNumber> <subscanNumber> 1 </subscanNumber> <dataSize> 9610595 </dataSize> <dataUID> <EntityRef entityId="uid://A002/X71e4ae/X328" partId="X00000000" entityTypeName="Main" documentVersion="1"/> </dataUID> <configDescriptionId> ConfigDescription_0 </configDescriptionId> <execBlockId> ExecBlock_0 </execBlockId> <fieldId> Field_0 </fieldId> <stateId> 1 30 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 State_0 </stateId> </row>
 
 This first gets the Main table. You can see that it's size is 30 rows and it's name is "Main".
@@ -120,11 +120,11 @@ enumeration there are 2 types.::
 
     >>> frow = mr[0].getFieldUsingFieldId()
     >>> print(frow.toXML())
-    <row> 
+    <row>
     <fieldId> Field_0 </fieldId> <fieldName> J1924-2914 </fieldName> <numPoly> 1 </numPoly> <delayDir> 2 1 2 5.082621016035585 -0.5103639492133764 </delayDir> <phaseDir> 2 1 2 5.082621016035585 -0.5103639492133764 </phaseDir> <referenceDir> 2 1 2 5.082621016035585 -0.5103639492133764 </referenceDir> <time> 4890409733520000000 </time> <code> none </code> <directionCode> J2000 </directionCode> <sourceId> 0 </sourceId> </row>
     >>> srow = mr[0].getStateUsingStateId(10)
     >>> print(srow.toXML())
-    <row> 
+    <row>
     <stateId> State_0 </stateId> <calDeviceName> NONE </calDeviceName> <sig> True </sig> <ref> True </ref> <onSky> True </onSky> <weight> 1.0 </weight> </row>
 
 Some fields in a row indicate a row in another table. The row class has methods that can be used to get
@@ -289,7 +289,7 @@ the size value.::
     {'present': False, 'startsAt': -1, 'arr': None, 'type': 'INT64_TYPE', 'np_type': dtype('int64')}
     >>> for t in bh.getBinaryTypes():
     ...     print('%s : %s' % (t,ss[t]['present']))
-    ... 
+    ...
     flags : True
     actualTimes : False
     actualDurations : False
@@ -418,7 +418,7 @@ this example.
     >>> carr_shaped[0,0,0]
     np.complex64(0.00048107025+3.5634832e-05j)
 
-    
+
 
 This subset also has actualTimes and actualDurations and does not have
 flags or zeroLags data.
@@ -437,7 +437,3 @@ how baseline are ordered.
 All of this illustrates the need for well-defined views that are useful for
 VIPER use. Presenting the data in such a view isn't difficult, but
 that detail obviously needs to be hidden from the user.
-
-
-    
-
