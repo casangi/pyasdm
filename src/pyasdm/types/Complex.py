@@ -406,8 +406,8 @@ class Complex:
         return a Complex
         """
         # two doubles
-        eos.skipDouble()
-        eos.skipDouble()
+        eis.skipDouble()
+        eis.skipDouble()
 
     @staticmethod
     def from1DBin(eis):

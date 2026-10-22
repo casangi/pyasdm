@@ -41,17 +41,3 @@ target-version = "py312"
 #   F63, F7  -- invalid comparisons, misplaced return/yield/break/continue
 #   F82      -- undefined names
 select = ["E9", "F63", "F7", "F82"]
-
-[tool.ruff.lint.per-file-ignores]
-# Undefined names that are real bugs (NameError at runtime), to be fixed in a
-# follow-up. ASDM.py is generated: fix it in the almasw template.
-"src/pyasdm/ASDM.py" = ["F821"]
-"src/pyasdm/EndianOutput.py" = ["F821"]
-"src/pyasdm/types/AngularRate.py" = ["F821"]
-"src/pyasdm/types/ArrayTime.py" = ["F821"]
-"src/pyasdm/types/ArrayTimeInterval.py" = ["F821"]
-"src/pyasdm/types/Complex.py" = ["F821"]
-"src/pyasdm/types/EntityRef.py" = ["F821"]
-"src/pyasdm/types/Humidity.py" = ["F821"]
-"src/pyasdm/types/Length.py" = ["F821"]
-"tests/test_Entity.py" = ["F821"]
