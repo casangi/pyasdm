@@ -37,6 +37,9 @@ import pyasdm.utils
 
 from .exceptions.ConversionException import ConversionException
 
+
+from .exceptions.NoSuchRow import NoSuchRow
+
 # All of the extended types are imported
 from pyasdm.types import *
 
@@ -952,9 +955,9 @@ class AntennaRow:
         if not self._assocAntennaIdExists:
             raise NoSuchRow("Antenna", "Antenna", True)
 
-        return self._table.getContainer().getAntenna().getRowByKey(antennaId)
+        return self._table.getContainer().getAntenna().getRowByKey(self._antennaId)
 
-    def setAssociatedAntennaLink(self, AssocAntennaId):
+    def setAssociatedAntennaLink(self, assocAntennaId):
         """
         Set the values of the link attributes needed to link this row to a row in table Antenna.
         """

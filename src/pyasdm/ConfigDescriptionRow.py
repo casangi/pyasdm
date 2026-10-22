@@ -1933,9 +1933,9 @@ class ConfigDescriptionRow:
         """
         if isinstance(id, list):
             for thisId in id:
-                feedId.append(SimplePythonType(id))
+                self._feedId.append(int(id))
         else:
-            feedId.append(SimplePythonType(id))
+            self._feedId.append(int(id))
 
     def getOneFeed(self, i):
         """

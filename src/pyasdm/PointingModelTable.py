@@ -412,7 +412,7 @@ class PointingModelTable:
             return aRow
 
         keystr = self.Key(x.getAntennaId())
-        self.autoIncrement(key, x)
+        self.autoIncrement(keystr, x)
         self._rowList.append(x)
         x.isAdded()
         return x
@@ -674,7 +674,7 @@ class PointingModelTable:
 
         return None
 
-    def getRowByPointingModelId(pointingModelId):
+    def getRowByPointingModelId(self, pointingModelId):
         """
         Returns an array of rows whose key element pointingModelId
         is equal to the parameter pointingModelId.

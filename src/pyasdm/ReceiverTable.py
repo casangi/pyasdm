@@ -626,7 +626,7 @@ class ReceiverTable:
                         # we must autoincrement receiverId and
                         # insert a new ReceiverRow with this autoincremented value.
                         # System.out.println("A row has been found with the same start time but different value , increment id")
-                        insertionId = i + 1
+                        insertionId = insertionId + 1
 
                         # And directly goto next id value
                         break

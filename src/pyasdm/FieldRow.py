@@ -37,6 +37,9 @@ import pyasdm.utils
 
 from .exceptions.ConversionException import ConversionException
 
+
+from .exceptions.InvalidAccessException import InvalidAccessException
+
 # All of the extended types are imported
 from pyasdm.types import *
 

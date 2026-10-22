@@ -409,7 +409,7 @@ class FocusModelTable:
             return aRow
 
         keystr = self.Key(x.getAntennaId())
-        self.autoIncrement(key, x)
+        self.autoIncrement(keystr, x)
         self._rowList.append(x)
         x.isAdded()
         return x
@@ -679,7 +679,7 @@ class FocusModelTable:
 
         return None
 
-    def getRowByFocusModelId(focusModelId):
+    def getRowByFocusModelId(self, focusModelId):
         """
         Returns an array of rows whose key element focusModelId
         is equal to the parameter focusModelId.

@@ -387,7 +387,7 @@ class DopplerTable:
             return aRow
 
         keystr = self.Key(x.getSourceId())
-        self.autoIncrement(key, x)
+        self.autoIncrement(keystr, x)
         self._rowList.append(x)
         x.isAdded()
         return x
@@ -591,7 +591,7 @@ class DopplerTable:
 
         return None
 
-    def getRowByDopplerId(dopplerId):
+    def getRowByDopplerId(self, dopplerId):
         """
         Returns an array of rows whose key element dopplerId
         is equal to the parameter dopplerId.

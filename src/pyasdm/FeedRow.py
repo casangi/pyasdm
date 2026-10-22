@@ -2082,9 +2082,9 @@ class FeedRow:
         """
         if isinstance(id, list):
             for thisId in id:
-                receiverId.append(SimplePythonType(id))
+                self._receiverId.append(int(id))
         else:
-            receiverId.append(SimplePythonType(id))
+            self._receiverId.append(int(id))
 
     def getOneReceiver(self, i):
         """

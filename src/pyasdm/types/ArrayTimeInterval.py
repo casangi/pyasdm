@@ -136,10 +136,12 @@ class ArrayTimeInterval:
             elif isinstance(duration, Interval):
                 self._duration = Interval(duration)
             elif isinstance(duration, ArrayTime):
-                # duration is the end of the interval
+                # duration is the end of the interval, see if that's >= the start time
                 if duration.ge(start):
+                    # the duration is the end - start
                     self._duration.set(duration.get() - self._start.get())
                 else:
+                    # 0 length duration, if the end time is before the start time assume this
                     self._duration.set(0)
             else:
                 raise ValueError(
