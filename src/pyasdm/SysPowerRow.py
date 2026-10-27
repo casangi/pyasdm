@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -683,6 +687,8 @@ class SysPowerRow:
                 for j in range(requantizerGainSpectrum_dims[1]):
                     eos.writeFloat(self._requantizerGainSpectrum[i][j])
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -896,6 +902,209 @@ class SysPowerRow:
             SysPowerRow.requantizerGainSpectrumFromBin
         )
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipFeedIdFromBin(eis):
+        """
+        Skip the feedId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipNumReceptorFromBin(eis):
+        """
+        Skip the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipSwitchedPowerDifferenceFromBin(eis):
+        """
+        Skip the optional switchedPowerDifference in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            switchedPowerDifferenceDim1 = eis.readInt()
+            for _ in range(switchedPowerDifferenceDim1):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipSwitchedPowerSumFromBin(eis):
+        """
+        Skip the optional switchedPowerSum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            switchedPowerSumDim1 = eis.readInt()
+            for _ in range(switchedPowerSumDim1):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipRequantizerGainFromBin(eis):
+        """
+        Skip the optional requantizerGain in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            requantizerGainDim1 = eis.readInt()
+            for _ in range(requantizerGainDim1):
+                eis.skipFloat()
+
+    @staticmethod
+    def skipNumChannelsFromBin(eis):
+        """
+        Skip the optional numChannels in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipNumPolarizationTypeFromBin(eis):
+        """
+        Skip the optional numPolarizationType in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipChanFreqStartFromBin(eis):
+        """
+        Skip the optional chanFreqStart in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipChanFreqStepFromBin(eis):
+        """
+        Skip the optional chanFreqStep in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Frequency.skipBin(eis)
+
+    @staticmethod
+    def skipSwitchedPowerDifferenceSpectrumFromBin(eis):
+        """
+        Skip the optional switchedPowerDifferenceSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            switchedPowerDifferenceSpectrumDim1 = eis.readInt()
+            switchedPowerDifferenceSpectrumDim2 = eis.readInt()
+            for _ in range(switchedPowerDifferenceSpectrumDim1):
+                for _ in range(switchedPowerDifferenceSpectrumDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipSwitchedPowerSumSpectrumFromBin(eis):
+        """
+        Skip the optional switchedPowerSumSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            switchedPowerSumSpectrumDim1 = eis.readInt()
+            switchedPowerSumSpectrumDim2 = eis.readInt()
+            for _ in range(switchedPowerSumSpectrumDim1):
+                for _ in range(switchedPowerSumSpectrumDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipRequantizerGainSpectrumFromBin(eis):
+        """
+        Skip the optional requantizerGainSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            requantizerGainSpectrumDim1 = eis.readInt()
+            requantizerGainSpectrumDim2 = eis.readInt()
+            for _ in range(requantizerGainSpectrumDim1):
+                for _ in range(requantizerGainSpectrumDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = SysPowerRow.skipAntennaIdFromBin
+        _skipBinMethods["spectralWindowId"] = SysPowerRow.skipSpectralWindowIdFromBin
+        _skipBinMethods["feedId"] = SysPowerRow.skipFeedIdFromBin
+        _skipBinMethods["timeInterval"] = SysPowerRow.skipTimeIntervalFromBin
+        _skipBinMethods["numReceptor"] = SysPowerRow.skipNumReceptorFromBin
+
+        _skipBinMethods["switchedPowerDifference"] = (
+            SysPowerRow.skipSwitchedPowerDifferenceFromBin
+        )
+        _skipBinMethods["switchedPowerSum"] = SysPowerRow.skipSwitchedPowerSumFromBin
+        _skipBinMethods["requantizerGain"] = SysPowerRow.skipRequantizerGainFromBin
+        _skipBinMethods["numChannels"] = SysPowerRow.skipNumChannelsFromBin
+        _skipBinMethods["numPolarizationType"] = (
+            SysPowerRow.skipNumPolarizationTypeFromBin
+        )
+        _skipBinMethods["chanFreqStart"] = SysPowerRow.skipChanFreqStartFromBin
+        _skipBinMethods["chanFreqStep"] = SysPowerRow.skipChanFreqStepFromBin
+        _skipBinMethods["switchedPowerDifferenceSpectrum"] = (
+            SysPowerRow.skipSwitchedPowerDifferenceSpectrumFromBin
+        )
+        _skipBinMethods["switchedPowerSumSpectrum"] = (
+            SysPowerRow.skipSwitchedPowerSumSpectrumFromBin
+        )
+        _skipBinMethods["requantizerGainSpectrum"] = (
+            SysPowerRow.skipRequantizerGainSpectrumFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -922,7 +1131,81 @@ class SysPowerRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SysPower",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (antennaId, spectralWindowId, feedId, timeInterval)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        spectralWindowId = None
+
+        feedId = None
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SysPower",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "spectralWindowId":
+
+                spectralWindowId = Tag.fromBin(eis)
+
+            elif attributeName == "feedId":
+
+                feedId = eis.readInt()
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, spectralWindowId, feedId, timeInterval)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1747,5 +2030,8 @@ class SysPowerRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 SysPowerRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+SysPowerRow.initSkipBinMethods()

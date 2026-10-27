@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -759,6 +763,8 @@ class SysCalRow:
                 for j in range(phaseDiffSpectrum_dims[1]):
                     eos.writeFloat(self._phaseDiffSpectrum[i][j])
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -1002,6 +1008,250 @@ class SysCalRow:
         _fromBinMethods["phaseDiffFlag"] = SysCalRow.phaseDiffFlagFromBin
         _fromBinMethods["phaseDiffSpectrum"] = SysCalRow.phaseDiffSpectrumFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipFeedIdFromBin(eis):
+        """
+        Skip the feedId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumReceptorFromBin(eis):
+        """
+        Skip the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumChanFromBin(eis):
+        """
+        Skip the numChan in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipTcalFlagFromBin(eis):
+        """
+        Skip the optional tcalFlag in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipTcalSpectrumFromBin(eis):
+        """
+        Skip the optional tcalSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip2DBin(eis)
+
+    @staticmethod
+    def skipTrxFlagFromBin(eis):
+        """
+        Skip the optional trxFlag in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipTrxSpectrumFromBin(eis):
+        """
+        Skip the optional trxSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip2DBin(eis)
+
+    @staticmethod
+    def skipTskyFlagFromBin(eis):
+        """
+        Skip the optional tskyFlag in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipTskySpectrumFromBin(eis):
+        """
+        Skip the optional tskySpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip2DBin(eis)
+
+    @staticmethod
+    def skipTsysFlagFromBin(eis):
+        """
+        Skip the optional tsysFlag in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipTsysSpectrumFromBin(eis):
+        """
+        Skip the optional tsysSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip2DBin(eis)
+
+    @staticmethod
+    def skipTantFlagFromBin(eis):
+        """
+        Skip the optional tantFlag in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipTantSpectrumFromBin(eis):
+        """
+        Skip the optional tantSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            tantSpectrumDim1 = eis.readInt()
+            tantSpectrumDim2 = eis.readInt()
+            for _ in range(tantSpectrumDim1):
+                for _ in range(tantSpectrumDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipTantTsysFlagFromBin(eis):
+        """
+        Skip the optional tantTsysFlag in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipTantTsysSpectrumFromBin(eis):
+        """
+        Skip the optional tantTsysSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            tantTsysSpectrumDim1 = eis.readInt()
+            tantTsysSpectrumDim2 = eis.readInt()
+            for _ in range(tantTsysSpectrumDim1):
+                for _ in range(tantTsysSpectrumDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipPhaseDiffFlagFromBin(eis):
+        """
+        Skip the optional phaseDiffFlag in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipPhaseDiffSpectrumFromBin(eis):
+        """
+        Skip the optional phaseDiffSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            phaseDiffSpectrumDim1 = eis.readInt()
+            phaseDiffSpectrumDim2 = eis.readInt()
+            for _ in range(phaseDiffSpectrumDim1):
+                for _ in range(phaseDiffSpectrumDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = SysCalRow.skipAntennaIdFromBin
+        _skipBinMethods["spectralWindowId"] = SysCalRow.skipSpectralWindowIdFromBin
+        _skipBinMethods["timeInterval"] = SysCalRow.skipTimeIntervalFromBin
+        _skipBinMethods["feedId"] = SysCalRow.skipFeedIdFromBin
+        _skipBinMethods["numReceptor"] = SysCalRow.skipNumReceptorFromBin
+        _skipBinMethods["numChan"] = SysCalRow.skipNumChanFromBin
+
+        _skipBinMethods["tcalFlag"] = SysCalRow.skipTcalFlagFromBin
+        _skipBinMethods["tcalSpectrum"] = SysCalRow.skipTcalSpectrumFromBin
+        _skipBinMethods["trxFlag"] = SysCalRow.skipTrxFlagFromBin
+        _skipBinMethods["trxSpectrum"] = SysCalRow.skipTrxSpectrumFromBin
+        _skipBinMethods["tskyFlag"] = SysCalRow.skipTskyFlagFromBin
+        _skipBinMethods["tskySpectrum"] = SysCalRow.skipTskySpectrumFromBin
+        _skipBinMethods["tsysFlag"] = SysCalRow.skipTsysFlagFromBin
+        _skipBinMethods["tsysSpectrum"] = SysCalRow.skipTsysSpectrumFromBin
+        _skipBinMethods["tantFlag"] = SysCalRow.skipTantFlagFromBin
+        _skipBinMethods["tantSpectrum"] = SysCalRow.skipTantSpectrumFromBin
+        _skipBinMethods["tantTsysFlag"] = SysCalRow.skipTantTsysFlagFromBin
+        _skipBinMethods["tantTsysSpectrum"] = SysCalRow.skipTantTsysSpectrumFromBin
+        _skipBinMethods["phaseDiffFlag"] = SysCalRow.skipPhaseDiffFlagFromBin
+        _skipBinMethods["phaseDiffSpectrum"] = SysCalRow.skipPhaseDiffSpectrumFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -1028,7 +1278,81 @@ class SysCalRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SysCal",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (antennaId, spectralWindowId, timeInterval, feedId)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        spectralWindowId = None
+
+        timeInterval = None
+
+        feedId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SysCal",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "spectralWindowId":
+
+                spectralWindowId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            elif attributeName == "feedId":
+
+                feedId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, spectralWindowId, timeInterval, feedId)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -2073,5 +2397,8 @@ class SysCalRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 SysCalRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+SysCalRow.initSkipBinMethods()

@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -419,6 +423,8 @@ class EphemerisRow:
 
                 eos.writeDouble(self._radVel[i])
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def timeIntervalFromBin(row, eis):
         """
@@ -563,6 +569,140 @@ class EphemerisRow:
         _fromBinMethods["numPolyRadVel"] = EphemerisRow.numPolyRadVelFromBin
         _fromBinMethods["radVel"] = EphemerisRow.radVelFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipEphemerisIdFromBin(eis):
+        """
+        Skip the ephemerisId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipObserverLocationFromBin(eis):
+        """
+        Skip the observerLocation in row from the EndianInput (eis) instance.
+        """
+
+        observerLocationDim1 = eis.readInt()
+        for _ in range(observerLocationDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipEquinoxEquatorFromBin(eis):
+        """
+        Skip the equinoxEquator in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipDouble()
+
+    @staticmethod
+    def skipNumPolyDirFromBin(eis):
+        """
+        Skip the numPolyDir in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipDirFromBin(eis):
+        """
+        Skip the dir in row from the EndianInput (eis) instance.
+        """
+
+        dirDim1 = eis.readInt()
+        dirDim2 = eis.readInt()
+        for _ in range(dirDim1):
+            for _ in range(dirDim2):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipNumPolyDistFromBin(eis):
+        """
+        Skip the numPolyDist in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipDistanceFromBin(eis):
+        """
+        Skip the distance in row from the EndianInput (eis) instance.
+        """
+
+        distanceDim1 = eis.readInt()
+        for _ in range(distanceDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipTimeOriginFromBin(eis):
+        """
+        Skip the timeOrigin in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipOriginFromBin(eis):
+        """
+        Skip the origin in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipNumPolyRadVelFromBin(eis):
+        """
+        Skip the optional numPolyRadVel in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipRadVelFromBin(eis):
+        """
+        Skip the optional radVel in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            radVelDim1 = eis.readInt()
+            for _ in range(radVelDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["timeInterval"] = EphemerisRow.skipTimeIntervalFromBin
+        _skipBinMethods["ephemerisId"] = EphemerisRow.skipEphemerisIdFromBin
+        _skipBinMethods["observerLocation"] = EphemerisRow.skipObserverLocationFromBin
+        _skipBinMethods["equinoxEquator"] = EphemerisRow.skipEquinoxEquatorFromBin
+        _skipBinMethods["numPolyDir"] = EphemerisRow.skipNumPolyDirFromBin
+        _skipBinMethods["dir"] = EphemerisRow.skipDirFromBin
+        _skipBinMethods["numPolyDist"] = EphemerisRow.skipNumPolyDistFromBin
+        _skipBinMethods["distance"] = EphemerisRow.skipDistanceFromBin
+        _skipBinMethods["timeOrigin"] = EphemerisRow.skipTimeOriginFromBin
+        _skipBinMethods["origin"] = EphemerisRow.skipOriginFromBin
+
+        _skipBinMethods["numPolyRadVel"] = EphemerisRow.skipNumPolyRadVelFromBin
+        _skipBinMethods["radVel"] = EphemerisRow.skipRadVelFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -589,7 +729,69 @@ class EphemerisRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Ephemeris",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (timeInterval, ephemerisId)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        timeInterval = None
+
+        ephemerisId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Ephemeris",
+                )
+
+            if attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            elif attributeName == "ephemerisId":
+
+                ephemerisId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (timeInterval, ephemerisId)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1205,5 +1407,8 @@ class EphemerisRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 EphemerisRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+EphemerisRow.initSkipBinMethods()

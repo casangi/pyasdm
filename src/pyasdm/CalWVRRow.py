@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.WVRMethod import WVRMethod
 
@@ -533,6 +537,8 @@ class CalWVRRow:
 
             eos.writeFloat(self._tauBaseline)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaNameFromBin(row, eis):
         """
@@ -742,6 +748,203 @@ class CalWVRRow:
 
         _fromBinMethods["tauBaseline"] = CalWVRRow.tauBaselineFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaNameFromBin(eis):
+        """
+        Skip the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipWvrMethodFromBin(eis):
+        """
+        Skip the wvrMethod in row from the EndianInput (eis) instance.
+        """
+
+        # WVRMethod stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipNumInputAntennasFromBin(eis):
+        """
+        Skip the numInputAntennas in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipInputAntennaNamesFromBin(eis):
+        """
+        Skip the inputAntennaNames in row from the EndianInput (eis) instance.
+        """
+
+        inputAntennaNamesDim1 = eis.readInt()
+        for _ in range(inputAntennaNamesDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipNumChanFromBin(eis):
+        """
+        Skip the numChan in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipChanFreqFromBin(eis):
+        """
+        Skip the chanFreq in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipChanWidthFromBin(eis):
+        """
+        Skip the chanWidth in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipRefTempFromBin(eis):
+        """
+        Skip the refTemp in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skip2DBin(eis)
+
+    @staticmethod
+    def skipNumPolyFromBin(eis):
+        """
+        Skip the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipPathCoeffFromBin(eis):
+        """
+        Skip the pathCoeff in row from the EndianInput (eis) instance.
+        """
+
+        pathCoeffDim1 = eis.readInt()
+        pathCoeffDim2 = eis.readInt()
+        pathCoeffDim3 = eis.readInt()
+        for _ in range(pathCoeffDim1):
+            for _ in range(pathCoeffDim2):
+                for _ in range(pathCoeffDim3):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipPolyFreqLimitsFromBin(eis):
+        """
+        Skip the polyFreqLimits in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipWetPathFromBin(eis):
+        """
+        Skip the wetPath in row from the EndianInput (eis) instance.
+        """
+
+        wetPathDim1 = eis.readInt()
+        for _ in range(wetPathDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipDryPathFromBin(eis):
+        """
+        Skip the dryPath in row from the EndianInput (eis) instance.
+        """
+
+        dryPathDim1 = eis.readInt()
+        for _ in range(dryPathDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipWaterFromBin(eis):
+        """
+        Skip the water in row from the EndianInput (eis) instance.
+        """
+
+        Length.skipBin(eis)
+
+    @staticmethod
+    def skipTauBaselineFromBin(eis):
+        """
+        Skip the optional tauBaseline in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipFloat()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaName"] = CalWVRRow.skipAntennaNameFromBin
+        _skipBinMethods["calDataId"] = CalWVRRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalWVRRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalWVRRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalWVRRow.skipEndValidTimeFromBin
+        _skipBinMethods["wvrMethod"] = CalWVRRow.skipWvrMethodFromBin
+        _skipBinMethods["numInputAntennas"] = CalWVRRow.skipNumInputAntennasFromBin
+        _skipBinMethods["inputAntennaNames"] = CalWVRRow.skipInputAntennaNamesFromBin
+        _skipBinMethods["numChan"] = CalWVRRow.skipNumChanFromBin
+        _skipBinMethods["chanFreq"] = CalWVRRow.skipChanFreqFromBin
+        _skipBinMethods["chanWidth"] = CalWVRRow.skipChanWidthFromBin
+        _skipBinMethods["refTemp"] = CalWVRRow.skipRefTempFromBin
+        _skipBinMethods["numPoly"] = CalWVRRow.skipNumPolyFromBin
+        _skipBinMethods["pathCoeff"] = CalWVRRow.skipPathCoeffFromBin
+        _skipBinMethods["polyFreqLimits"] = CalWVRRow.skipPolyFreqLimitsFromBin
+        _skipBinMethods["wetPath"] = CalWVRRow.skipWetPathFromBin
+        _skipBinMethods["dryPath"] = CalWVRRow.skipDryPathFromBin
+        _skipBinMethods["water"] = CalWVRRow.skipWaterFromBin
+
+        _skipBinMethods["tauBaseline"] = CalWVRRow.skipTauBaselineFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -768,7 +971,29 @@ class CalWVRRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalWVR",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute startValidTime
 
@@ -1817,5 +2042,8 @@ class CalWVRRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalWVRRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalWVRRow.initSkipBinMethods()

@@ -370,6 +370,13 @@ class Angle:
         return Angle(eis.readDouble())
 
     @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of any Angle from an EndianInput
+        """
+        eis.skipDouble()
+
+    @staticmethod
     def from1DBin(eis):
         """
         Read a list of binary Angle values, in radians, from an
@@ -381,6 +388,16 @@ class Angle:
             result.append(Angle.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Angle values from an EndianInput
+        The leading integer giving the length of the list is always read
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Angle.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -398,6 +415,18 @@ class Angle:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Angle values from an EndianInput
+        The leading 2 integers giving the shape of the list are always read
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Angle.skipBin(eis)
 
     @staticmethod
     def from3Dbin(eis):
@@ -419,6 +448,20 @@ class Angle:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Angle values from an EndianInput
+        The leading 3 integers giving the shape of the list are always read
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Angle.skipBin(eis)
 
     def equals(self, otherAngle):
         """

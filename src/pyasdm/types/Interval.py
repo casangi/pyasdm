@@ -317,6 +317,14 @@ class Interval:
         return Interval(eis.readLong())
 
     @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of an Interval
+        from an EndianInput instance
+        """
+        eis.skipLong()
+
+    @staticmethod
     def from1DBin(eis):
         """
         Read a list of binary Interval values, in nanoseconds, from an
@@ -328,6 +336,16 @@ class Interval:
             result.append(Interval.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Interval values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Interval.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -345,6 +363,18 @@ class Interval:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Interval values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Interval.skipBin(eis)
 
     @staticmethod
     def from3Dbin(eis):
@@ -366,3 +396,17 @@ class Interval:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Interval values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Interval.skipBin(eis)

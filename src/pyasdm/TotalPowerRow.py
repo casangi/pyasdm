@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -495,6 +499,8 @@ class TotalPowerRow:
 
             eos.writeInt(self._subintegrationNumber)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def timeFromBin(row, eis):
         """
@@ -680,6 +686,181 @@ class TotalPowerRow:
             TotalPowerRow.subintegrationNumberFromBin
         )
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipTimeFromBin(eis):
+        """
+        Skip the time in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipConfigDescriptionIdFromBin(eis):
+        """
+        Skip the configDescriptionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipFieldIdFromBin(eis):
+        """
+        Skip the fieldId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipScanNumberFromBin(eis):
+        """
+        Skip the scanNumber in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipSubscanNumberFromBin(eis):
+        """
+        Skip the subscanNumber in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipIntegrationNumberFromBin(eis):
+        """
+        Skip the integrationNumber in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipUvwFromBin(eis):
+        """
+        Skip the uvw in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip2DBin(eis)
+
+    @staticmethod
+    def skipExposureFromBin(eis):
+        """
+        Skip the exposure in row from the EndianInput (eis) instance.
+        """
+
+        Interval.skip2DBin(eis)
+
+    @staticmethod
+    def skipTimeCentroidFromBin(eis):
+        """
+        Skip the timeCentroid in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skip2DBin(eis)
+
+    @staticmethod
+    def skipFloatDataFromBin(eis):
+        """
+        Skip the floatData in row from the EndianInput (eis) instance.
+        """
+
+        floatDataDim1 = eis.readInt()
+        floatDataDim2 = eis.readInt()
+        floatDataDim3 = eis.readInt()
+        for _ in range(floatDataDim1):
+            for _ in range(floatDataDim2):
+                for _ in range(floatDataDim3):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipFlagAntFromBin(eis):
+        """
+        Skip the flagAnt in row from the EndianInput (eis) instance.
+        """
+
+        flagAntDim1 = eis.readInt()
+        for _ in range(flagAntDim1):
+            eis.skipInt()
+
+    @staticmethod
+    def skipFlagPolFromBin(eis):
+        """
+        Skip the flagPol in row from the EndianInput (eis) instance.
+        """
+
+        flagPolDim1 = eis.readInt()
+        flagPolDim2 = eis.readInt()
+        for _ in range(flagPolDim1):
+            for _ in range(flagPolDim2):
+                eis.skipInt()
+
+    @staticmethod
+    def skipIntervalFromBin(eis):
+        """
+        Skip the interval in row from the EndianInput (eis) instance.
+        """
+
+        Interval.skipBin(eis)
+
+    @staticmethod
+    def skipStateIdFromBin(eis):
+        """
+        Skip the stateId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipExecBlockIdFromBin(eis):
+        """
+        Skip the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipSubintegrationNumberFromBin(eis):
+        """
+        Skip the optional subintegrationNumber in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["time"] = TotalPowerRow.skipTimeFromBin
+        _skipBinMethods["configDescriptionId"] = (
+            TotalPowerRow.skipConfigDescriptionIdFromBin
+        )
+        _skipBinMethods["fieldId"] = TotalPowerRow.skipFieldIdFromBin
+        _skipBinMethods["scanNumber"] = TotalPowerRow.skipScanNumberFromBin
+        _skipBinMethods["subscanNumber"] = TotalPowerRow.skipSubscanNumberFromBin
+        _skipBinMethods["integrationNumber"] = (
+            TotalPowerRow.skipIntegrationNumberFromBin
+        )
+        _skipBinMethods["uvw"] = TotalPowerRow.skipUvwFromBin
+        _skipBinMethods["exposure"] = TotalPowerRow.skipExposureFromBin
+        _skipBinMethods["timeCentroid"] = TotalPowerRow.skipTimeCentroidFromBin
+        _skipBinMethods["floatData"] = TotalPowerRow.skipFloatDataFromBin
+        _skipBinMethods["flagAnt"] = TotalPowerRow.skipFlagAntFromBin
+        _skipBinMethods["flagPol"] = TotalPowerRow.skipFlagPolFromBin
+        _skipBinMethods["interval"] = TotalPowerRow.skipIntervalFromBin
+        _skipBinMethods["stateId"] = TotalPowerRow.skipStateIdFromBin
+        _skipBinMethods["execBlockId"] = TotalPowerRow.skipExecBlockIdFromBin
+
+        _skipBinMethods["subintegrationNumber"] = (
+            TotalPowerRow.skipSubintegrationNumberFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -706,7 +887,75 @@ class TotalPowerRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " TotalPower",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (time, configDescriptionId, fieldId)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        time = None
+
+        configDescriptionId = None
+
+        fieldId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " TotalPower",
+                )
+
+            if attributeName == "time":
+
+                time = ArrayTime.fromBin(eis)
+
+            elif attributeName == "configDescriptionId":
+
+                configDescriptionId = Tag.fromBin(eis)
+
+            elif attributeName == "fieldId":
+
+                fieldId = Tag.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (time, configDescriptionId, fieldId)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute time
 
@@ -1711,5 +1960,8 @@ class TotalPowerRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 TotalPowerRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+TotalPowerRow.initSkipBinMethods()

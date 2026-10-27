@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.DopplerReferenceCode import DopplerReferenceCode
 
@@ -248,6 +252,8 @@ class DopplerRow:
 
         eos.writeString(str(self._velDef))
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def dopplerIdFromBin(row, eis):
         """
@@ -291,6 +297,52 @@ class DopplerRow:
         _fromBinMethods["transitionIndex"] = DopplerRow.transitionIndexFromBin
         _fromBinMethods["velDef"] = DopplerRow.velDefFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipDopplerIdFromBin(eis):
+        """
+        Skip the dopplerId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipSourceIdFromBin(eis):
+        """
+        Skip the sourceId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipTransitionIndexFromBin(eis):
+        """
+        Skip the transitionIndex in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipVelDefFromBin(eis):
+        """
+        Skip the velDef in row from the EndianInput (eis) instance.
+        """
+
+        # DopplerReferenceCode stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["dopplerId"] = DopplerRow.skipDopplerIdFromBin
+        _skipBinMethods["sourceId"] = DopplerRow.skipSourceIdFromBin
+        _skipBinMethods["transitionIndex"] = DopplerRow.skipTransitionIndexFromBin
+        _skipBinMethods["velDef"] = DopplerRow.skipVelDefFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -317,7 +369,70 @@ class DopplerRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Doppler",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis,
+        in order, this skips one row by skipping values from that EndianInput in
+        the expected order. Only values necessary to understand that row plus
+        the context values appropriate for the DopplerRow are read. The context
+        tuple that is returned is (dopplerId, sourceId)
+
+        This allows the dopplerId to be used
+        appropriately when filling a binary table version of DopplerTable.
+        """
+        global _skipBinMethods
+
+        dopplerId = None
+
+        sourceId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Doppler",
+                )
+
+            if attributeName == "dopplerId":
+
+                dopplerId = eis.readInt()
+
+            elif attributeName == "sourceId":
+
+                sourceId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (dopplerId, sourceId)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute dopplerId
 
@@ -482,5 +597,8 @@ class DopplerRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 DopplerRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+DopplerRow.initSkipBinMethods()

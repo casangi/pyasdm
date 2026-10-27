@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -346,7 +350,9 @@ class ReceiverRow:
         eos.writeInt(len(self._sidebandLO))
         for i in range(len(self._sidebandLO)):
 
-            eos.writeString(str(self._sidebandLO[i]))
+            eos.writeInt(int(self._sidebandLO[i].getValue()))
+
+    # the static fromBin methods to extract each field from an EndianInput stream
 
     @staticmethod
     def receiverIdFromBin(row, eis):
@@ -441,6 +447,101 @@ class ReceiverRow:
         _fromBinMethods["receiverSideband"] = ReceiverRow.receiverSidebandFromBin
         _fromBinMethods["sidebandLO"] = ReceiverRow.sidebandLOFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipReceiverIdFromBin(eis):
+        """
+        Skip the receiverId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipNameFromBin(eis):
+        """
+        Skip the name in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipNumLOFromBin(eis):
+        """
+        Skip the numLO in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipFrequencyBandFromBin(eis):
+        """
+        Skip the frequencyBand in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverBand stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipFreqLOFromBin(eis):
+        """
+        Skip the freqLO in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipReceiverSidebandFromBin(eis):
+        """
+        Skip the receiverSideband in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverSideband stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipSidebandLOFromBin(eis):
+        """
+        Skip the sidebandLO in row from the EndianInput (eis) instance.
+        """
+
+        sidebandLODim1 = eis.readInt()
+        for _ in range(sidebandLODim1):
+            # NetSideband stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["receiverId"] = ReceiverRow.skipReceiverIdFromBin
+        _skipBinMethods["spectralWindowId"] = ReceiverRow.skipSpectralWindowIdFromBin
+        _skipBinMethods["timeInterval"] = ReceiverRow.skipTimeIntervalFromBin
+        _skipBinMethods["name"] = ReceiverRow.skipNameFromBin
+        _skipBinMethods["numLO"] = ReceiverRow.skipNumLOFromBin
+        _skipBinMethods["frequencyBand"] = ReceiverRow.skipFrequencyBandFromBin
+        _skipBinMethods["freqLO"] = ReceiverRow.skipFreqLOFromBin
+        _skipBinMethods["receiverSideband"] = ReceiverRow.skipReceiverSidebandFromBin
+        _skipBinMethods["sidebandLO"] = ReceiverRow.skipSidebandLOFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -467,7 +568,75 @@ class ReceiverRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Receiver",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (receiverId, spectralWindowId, timeInterval)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        receiverId = None
+
+        spectralWindowId = None
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Receiver",
+                )
+
+            if attributeName == "receiverId":
+
+                receiverId = eis.readInt()
+
+            elif attributeName == "spectralWindowId":
+
+                spectralWindowId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (receiverId, spectralWindowId, timeInterval)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute receiverId
 
@@ -883,5 +1052,8 @@ class ReceiverRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 ReceiverRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+ReceiverRow.initSkipBinMethods()

@@ -61,10 +61,10 @@ class Length:
     def sum(l1, l2):
         """
         Return a new Length that is the sum of the
-        specified lengths, l1 +  l2.
+        specified Lengths, l1 +  l2.
         l1 The first Length of the pair.
         l2 The second Length of the pair.
-        return A new Length that is the sum of the specified lengths, l1 +  l2.
+        return A new Length that is the sum of the specified Lengths, l1 +  l2.
         """
         if not (isinstance(l1, Length) and isinstance(l2, Length)):
             raise ValueError("l1 and l2 must both be Length instances")
@@ -75,45 +75,45 @@ class Length:
     def subtract(l1, l2):
         """
         Return a new Length that is the difference of the
-        specified lengths, l1 - l2.
+        specified Lengths, l1 - l2.
         l1 The first Length of the pair.
         l2 The second Length of the pair.
-        return A new Length that is the difference of the specified lengths, l1 - l2.
+        return A new Length that is the difference of the specified Lengths, l1 - l2.
         """
         if not (isinstance(l1, Length) and isinstance(l2, Length)):
             raise ValueError("l1 and l2 must both be Length instances")
 
-        return Length(l1.length - l2.length)
+        return Length(l1._length - l2._length)
 
     @staticmethod
     def multiply(l, factor):
         """
         Return a new Length that is the product of a specified
-        length and some specified factor, l * factor.
-        l The base length
+        Length and some specified factor, l * factor.
+        l The base Length
         factor The factor that is used to multiply the value.
-        return A new Length that is the product of a specified length and
+        return A new Length that is the product of a specified Length and
         some specified factor, l * factor.
         """
         if not isinstance(l, Length):
             raise ValueError("l must be a Length")
 
-        return Length(l.length * factor)
+        return Length(l._length * factor)
 
     @staticmethod
     def divide(l, factor):
         """
-        Return a new Length that is a specified length divided by a
+        Return a new Length that is a specified Length divided by a
         specified factor, l / factor.
-        l The base length
+        l The base Length
         factor The factor that is used to divide the value.
         return A new Length that is the quotient of a specified
-        length and some specified factor, l / factor.
+        Length and some specified factor, l / factor.
         """
         if not isinstance(l, Length):
             raise ValueError("l be a Length")
 
-        return Length(l.length / factor)
+        return Length(l._length / factor)
 
     @staticmethod
     def getInstance(stringList):
@@ -122,7 +122,7 @@ class Length:
 
         This is used when parsing Length lists from an XML representation to
         eventually construct a list of Length instances. The string values
-        are float representation of a length in meters
+        are float representation of a Length in meters
 
         Returns a tuple of (Length, stringList) where Length is the new Length
         created by this call and stringList is the remaining, unused, part of
@@ -135,7 +135,7 @@ class Length:
         floatVal = float(stringList[0])
         return (Length(floatVal), stringList[1:])
 
-    # The length in meters.
+    # The Length in meters.
     _length = 0.0
 
     def __init__(self, value=0.0, units=None):
@@ -159,7 +159,7 @@ class Length:
 
     def get(self, units=None):
         """
-        Return the value of this length in the specified units.
+        Return the value of this Length in the specified units.
         When units is None (the default) the returned units are METER.
         Recognized units are None (METER), METER, KILOMETER, CENTIMETER, and MILLIMETER
         """
@@ -169,14 +169,14 @@ class Length:
             return self._length / 1000.0
         if units == self.CENTIMETER:
             return self._length * 100.0
-        if units == MILLIMETER:
+        if units == self.MILLIMETER:
             return self._length * 1000.0
 
         raise ValueError(str(units) + " is not an alllowable unit.")
 
     def set(self, value, units=None):
         """
-        Set the value of this length to the given value in the specified units.
+        Set the value of this Length to the given value in the specified units.
         Any value is valid so long as it can be converted into a float using float(value)
         (including a parseable string).
         The units is a string argument that detaults to METER as defined here.
@@ -200,7 +200,7 @@ class Length:
 
     def __str__(self):
         """
-        Return the value of this length as a string in the default units of METER.
+        Return the value of this Length as a string in the default units of METER.
         """
         return pyasdm.Parser.doubleToString(self.get())
 
@@ -343,13 +343,21 @@ class Length:
     @staticmethod
     def fromBin(eis):
         """
-        Read the binary representation of an Length, in meters,
+        Read the binary representation of a Length, in meters,
         from an EndianInput instance and use the read value to set a
         Length.
 
         return a Length
         """
         return Length(eis.readDouble())
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of a Length
+        from an EndianInput
+        """
+        eis.readDouble()
 
     @staticmethod
     def from1DBin(eis):
@@ -363,6 +371,16 @@ class Length:
             result.append(Length.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Length values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Length.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -380,6 +398,18 @@ class Length:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Length values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Length.skipBin(eis)
 
     @staticmethod
     def from3Dbin(eis):
@@ -402,10 +432,24 @@ class Length:
 
         return result
 
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Length values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Length.skipBin(eis)
+
     def equals(self, otherLength):
         """
-        Return True if and only if the specified other length is a Length
-        that has a value that is equal to this length.
+        Return True if and only if the specified other Length is a Length
+        that has a value that is equal to this Length.
         """
         return isinstance(otherLength, Length) and (self._length == otherLength._length)
 
@@ -425,7 +469,7 @@ class Length:
 
     def isZero(self):
         """
-        Return True if and only if this length is zero (0.0).
+        Return True if and only if this Length is zero (0.0).
         """
         return self._length == 0.0
 
@@ -495,26 +539,26 @@ class Length:
 
     def __sub__(self, otherLength):
         """
-        Subtract a specified Length from this length, (this - x).
+        Subtract a specified Length from this Length, (this - x).
         """
-        if not isinstance(otherLength, length):
+        if not isinstance(otherLength, Length):
             raise ValueError("otherLength must be a length")
 
-        self._length -= otherLengthx._length
+        self._length -= otherLength._length
         return self
 
     def __mul__(self, factor):
         """
-        Multiply this length by some factor, (this * factor).
-        Return this length after multiplication.
+        Multiply this Length by some factor, (this * factor).
+        Return this Length after multiplication.
         """
         self._length *= factor
         return self
 
-    def __truediv__(factor):
+    def __truediv__(self, factor):
         """
-        Divide this length by some factor, (this / factor).
-        Return this length after division.
+        Divide this Length by some factor, (this / factor).
+        Return this Length after division.
         """
         self._length /= factor
         return self

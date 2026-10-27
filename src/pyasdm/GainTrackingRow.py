@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.PolarizationType import PolarizationType
 
@@ -407,7 +411,7 @@ class GainTrackingRow:
         eos.writeInt(len(self._polarizationType))
         for i in range(len(self._polarizationType)):
 
-            eos.writeString(str(self._polarizationType[i]))
+            eos.writeInt(int(self._polarizationType[i].getValue()))
 
         eos.writeBool(self._samplingLevelExists)
         if self._samplingLevelExists:
@@ -431,6 +435,8 @@ class GainTrackingRow:
         if self._attSpectrumExists:
 
             Complex.listToBin(self._attSpectrum, eos)
+
+    # the static fromBin methods to extract each field from an EndianInput stream
 
     @staticmethod
     def antennaIdFromBin(row, eis):
@@ -562,6 +568,138 @@ class GainTrackingRow:
         _fromBinMethods["attFreq"] = GainTrackingRow.attFreqFromBin
         _fromBinMethods["attSpectrum"] = GainTrackingRow.attSpectrumFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipFeedIdFromBin(eis):
+        """
+        Skip the feedId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumReceptorFromBin(eis):
+        """
+        Skip the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipAttenuatorFromBin(eis):
+        """
+        Skip the attenuator in row from the EndianInput (eis) instance.
+        """
+
+        attenuatorDim1 = eis.readInt()
+        for _ in range(attenuatorDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipPolarizationTypeFromBin(eis):
+        """
+        Skip the polarizationType in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypeDim1 = eis.readInt()
+        for _ in range(polarizationTypeDim1):
+            # PolarizationType stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipSamplingLevelFromBin(eis):
+        """
+        Skip the optional samplingLevel in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipFloat()
+
+    @staticmethod
+    def skipNumAttFreqFromBin(eis):
+        """
+        Skip the optional numAttFreq in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipAttFreqFromBin(eis):
+        """
+        Skip the optional attFreq in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            attFreqDim1 = eis.readInt()
+            for _ in range(attFreqDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipAttSpectrumFromBin(eis):
+        """
+        Skip the optional attSpectrum in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Complex.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = GainTrackingRow.skipAntennaIdFromBin
+        _skipBinMethods["spectralWindowId"] = (
+            GainTrackingRow.skipSpectralWindowIdFromBin
+        )
+        _skipBinMethods["timeInterval"] = GainTrackingRow.skipTimeIntervalFromBin
+        _skipBinMethods["feedId"] = GainTrackingRow.skipFeedIdFromBin
+        _skipBinMethods["numReceptor"] = GainTrackingRow.skipNumReceptorFromBin
+        _skipBinMethods["attenuator"] = GainTrackingRow.skipAttenuatorFromBin
+        _skipBinMethods["polarizationType"] = (
+            GainTrackingRow.skipPolarizationTypeFromBin
+        )
+
+        _skipBinMethods["samplingLevel"] = GainTrackingRow.skipSamplingLevelFromBin
+        _skipBinMethods["numAttFreq"] = GainTrackingRow.skipNumAttFreqFromBin
+        _skipBinMethods["attFreq"] = GainTrackingRow.skipAttFreqFromBin
+        _skipBinMethods["attSpectrum"] = GainTrackingRow.skipAttSpectrumFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -588,7 +726,81 @@ class GainTrackingRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " GainTracking",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (antennaId, spectralWindowId, timeInterval, feedId)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        spectralWindowId = None
+
+        timeInterval = None
+
+        feedId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " GainTracking",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "spectralWindowId":
+
+                spectralWindowId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            elif attributeName == "feedId":
+
+                feedId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, spectralWindowId, timeInterval, feedId)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1184,5 +1396,8 @@ class GainTrackingRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 GainTrackingRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+GainTrackingRow.initSkipBinMethods()

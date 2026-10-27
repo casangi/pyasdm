@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -764,6 +768,8 @@ class ExecBlockRow:
 
             self._scaleId.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def execBlockIdFromBin(row, eis):
         """
@@ -1065,6 +1071,317 @@ class ExecBlockRow:
         _fromBinMethods["arrayName"] = ExecBlockRow.arrayNameFromBin
         _fromBinMethods["scaleId"] = ExecBlockRow.scaleIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipExecBlockIdFromBin(eis):
+        """
+        Skip the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartTimeFromBin(eis):
+        """
+        Skip the startTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndTimeFromBin(eis):
+        """
+        Skip the endTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipExecBlockNumFromBin(eis):
+        """
+        Skip the execBlockNum in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipExecBlockUIDFromBin(eis):
+        """
+        Skip the execBlockUID in row from the EndianInput (eis) instance.
+        """
+
+        EntityRef.skipBin(eis)
+
+    @staticmethod
+    def skipProjectUIDFromBin(eis):
+        """
+        Skip the projectUID in row from the EndianInput (eis) instance.
+        """
+
+        EntityRef.skipBin(eis)
+
+    @staticmethod
+    def skipConfigNameFromBin(eis):
+        """
+        Skip the configName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipTelescopeNameFromBin(eis):
+        """
+        Skip the telescopeName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipObserverNameFromBin(eis):
+        """
+        Skip the observerName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipNumObservingLogFromBin(eis):
+        """
+        Skip the numObservingLog in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipObservingLogFromBin(eis):
+        """
+        Skip the observingLog in row from the EndianInput (eis) instance.
+        """
+
+        observingLogDim1 = eis.readInt()
+        for _ in range(observingLogDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipSessionReferenceFromBin(eis):
+        """
+        Skip the sessionReference in row from the EndianInput (eis) instance.
+        """
+
+        EntityRef.skipBin(eis)
+
+    @staticmethod
+    def skipBaseRangeMinFromBin(eis):
+        """
+        Skip the baseRangeMin in row from the EndianInput (eis) instance.
+        """
+
+        Length.skipBin(eis)
+
+    @staticmethod
+    def skipBaseRangeMaxFromBin(eis):
+        """
+        Skip the baseRangeMax in row from the EndianInput (eis) instance.
+        """
+
+        Length.skipBin(eis)
+
+    @staticmethod
+    def skipBaseRmsMinorFromBin(eis):
+        """
+        Skip the baseRmsMinor in row from the EndianInput (eis) instance.
+        """
+
+        Length.skipBin(eis)
+
+    @staticmethod
+    def skipBaseRmsMajorFromBin(eis):
+        """
+        Skip the baseRmsMajor in row from the EndianInput (eis) instance.
+        """
+
+        Length.skipBin(eis)
+
+    @staticmethod
+    def skipBasePaFromBin(eis):
+        """
+        Skip the basePa in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skipBin(eis)
+
+    @staticmethod
+    def skipAbortedFromBin(eis):
+        """
+        Skip the aborted in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipBool()
+
+    @staticmethod
+    def skipNumAntennaFromBin(eis):
+        """
+        Skip the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skip1DBin(eis)
+
+    @staticmethod
+    def skipSBSummaryIdFromBin(eis):
+        """
+        Skip the sBSummaryId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipReleaseDateFromBin(eis):
+        """
+        Skip the optional releaseDate in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipSchedulerModeFromBin(eis):
+        """
+        Skip the optional schedulerMode in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipSiteAltitudeFromBin(eis):
+        """
+        Skip the optional siteAltitude in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skipBin(eis)
+
+    @staticmethod
+    def skipSiteLongitudeFromBin(eis):
+        """
+        Skip the optional siteLongitude in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skipBin(eis)
+
+    @staticmethod
+    def skipSiteLatitudeFromBin(eis):
+        """
+        Skip the optional siteLatitude in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skipBin(eis)
+
+    @staticmethod
+    def skipObservingScriptFromBin(eis):
+        """
+        Skip the optional observingScript in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipObservingScriptUIDFromBin(eis):
+        """
+        Skip the optional observingScriptUID in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            EntityRef.skipBin(eis)
+
+    @staticmethod
+    def skipArrayNameFromBin(eis):
+        """
+        Skip the optional arrayName in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipScaleIdFromBin(eis):
+        """
+        Skip the optional scaleId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["execBlockId"] = ExecBlockRow.skipExecBlockIdFromBin
+        _skipBinMethods["startTime"] = ExecBlockRow.skipStartTimeFromBin
+        _skipBinMethods["endTime"] = ExecBlockRow.skipEndTimeFromBin
+        _skipBinMethods["execBlockNum"] = ExecBlockRow.skipExecBlockNumFromBin
+        _skipBinMethods["execBlockUID"] = ExecBlockRow.skipExecBlockUIDFromBin
+        _skipBinMethods["projectUID"] = ExecBlockRow.skipProjectUIDFromBin
+        _skipBinMethods["configName"] = ExecBlockRow.skipConfigNameFromBin
+        _skipBinMethods["telescopeName"] = ExecBlockRow.skipTelescopeNameFromBin
+        _skipBinMethods["observerName"] = ExecBlockRow.skipObserverNameFromBin
+        _skipBinMethods["numObservingLog"] = ExecBlockRow.skipNumObservingLogFromBin
+        _skipBinMethods["observingLog"] = ExecBlockRow.skipObservingLogFromBin
+        _skipBinMethods["sessionReference"] = ExecBlockRow.skipSessionReferenceFromBin
+        _skipBinMethods["baseRangeMin"] = ExecBlockRow.skipBaseRangeMinFromBin
+        _skipBinMethods["baseRangeMax"] = ExecBlockRow.skipBaseRangeMaxFromBin
+        _skipBinMethods["baseRmsMinor"] = ExecBlockRow.skipBaseRmsMinorFromBin
+        _skipBinMethods["baseRmsMajor"] = ExecBlockRow.skipBaseRmsMajorFromBin
+        _skipBinMethods["basePa"] = ExecBlockRow.skipBasePaFromBin
+        _skipBinMethods["aborted"] = ExecBlockRow.skipAbortedFromBin
+        _skipBinMethods["numAntenna"] = ExecBlockRow.skipNumAntennaFromBin
+        _skipBinMethods["antennaId"] = ExecBlockRow.skipAntennaIdFromBin
+        _skipBinMethods["sBSummaryId"] = ExecBlockRow.skipSBSummaryIdFromBin
+
+        _skipBinMethods["releaseDate"] = ExecBlockRow.skipReleaseDateFromBin
+        _skipBinMethods["schedulerMode"] = ExecBlockRow.skipSchedulerModeFromBin
+        _skipBinMethods["siteAltitude"] = ExecBlockRow.skipSiteAltitudeFromBin
+        _skipBinMethods["siteLongitude"] = ExecBlockRow.skipSiteLongitudeFromBin
+        _skipBinMethods["siteLatitude"] = ExecBlockRow.skipSiteLatitudeFromBin
+        _skipBinMethods["observingScript"] = ExecBlockRow.skipObservingScriptFromBin
+        _skipBinMethods["observingScriptUID"] = (
+            ExecBlockRow.skipObservingScriptUIDFromBin
+        )
+        _skipBinMethods["arrayName"] = ExecBlockRow.skipArrayNameFromBin
+        _skipBinMethods["scaleId"] = ExecBlockRow.skipScaleIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -1091,7 +1408,29 @@ class ExecBlockRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " ExecBlock",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute execBlockId
 
@@ -2412,5 +2751,8 @@ class ExecBlockRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 ExecBlockRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+ExecBlockRow.initSkipBinMethods()

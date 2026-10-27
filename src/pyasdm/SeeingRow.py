@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -269,6 +273,8 @@ class SeeingRow:
 
         eos.writeFloat(self._exponent)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def timeIntervalFromBin(row, eis):
         """
@@ -330,6 +336,69 @@ class SeeingRow:
         _fromBinMethods["seeing"] = SeeingRow.seeingFromBin
         _fromBinMethods["exponent"] = SeeingRow.exponentFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipNumBaseLengthFromBin(eis):
+        """
+        Skip the numBaseLength in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipBaseLengthFromBin(eis):
+        """
+        Skip the baseLength in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipPhaseRmsFromBin(eis):
+        """
+        Skip the phaseRms in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip1DBin(eis)
+
+    @staticmethod
+    def skipSeeingFromBin(eis):
+        """
+        Skip the seeing in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipFloat()
+
+    @staticmethod
+    def skipExponentFromBin(eis):
+        """
+        Skip the exponent in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipFloat()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["timeInterval"] = SeeingRow.skipTimeIntervalFromBin
+        _skipBinMethods["numBaseLength"] = SeeingRow.skipNumBaseLengthFromBin
+        _skipBinMethods["baseLength"] = SeeingRow.skipBaseLengthFromBin
+        _skipBinMethods["phaseRms"] = SeeingRow.skipPhaseRmsFromBin
+        _skipBinMethods["seeing"] = SeeingRow.skipSeeingFromBin
+        _skipBinMethods["exponent"] = SeeingRow.skipExponentFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -356,7 +425,59 @@ class SeeingRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Seeing",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, i
+        n order, this skips one row by skipping values from that EndianInput in the
+        expected order. Only the timeInterval is read.
+        The timeInterval is returned.
+        """
+        global _skipBinMethods
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Seeing",
+                )
+            if attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(self._eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return timeInterval
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -663,5 +784,8 @@ class SeeingRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 SeeingRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+SeeingRow.initSkipBinMethods()

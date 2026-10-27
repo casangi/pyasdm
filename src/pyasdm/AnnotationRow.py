@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.BasebandName import BasebandName
 
@@ -574,7 +578,7 @@ class AnnotationRow:
             eos.writeInt(len(self._basebandName))
             for i in range(len(self._basebandName)):
 
-                eos.writeString(str(self._basebandName[i]))
+                eos.writeInt(int(self._basebandName[i].getValue()))
 
         eos.writeBool(self._numBasebandExists)
         if self._numBasebandExists:
@@ -653,6 +657,8 @@ class AnnotationRow:
         if self._antennaIdExists:
 
             Tag.listToBin(self._antennaId, eos)
+
+    # the static fromBin methods to extract each field from an EndianInput stream
 
     @staticmethod
     def annotationIdFromBin(row, eis):
@@ -863,6 +869,211 @@ class AnnotationRow:
         _fromBinMethods["sValue"] = AnnotationRow.sValueFromBin
         _fromBinMethods["antennaId"] = AnnotationRow.antennaIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAnnotationIdFromBin(eis):
+        """
+        Skip the annotationId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeFromBin(eis):
+        """
+        Skip the time in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipIssueFromBin(eis):
+        """
+        Skip the issue in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipDetailsFromBin(eis):
+        """
+        Skip the details in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipNumAntennaFromBin(eis):
+        """
+        Skip the optional numAntenna in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipBasebandNameFromBin(eis):
+        """
+        Skip the optional basebandName in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            basebandNameDim1 = eis.readInt()
+            for _ in range(basebandNameDim1):
+                # BasebandName stored as a string
+                eis.skipString()
+
+    @staticmethod
+    def skipNumBasebandFromBin(eis):
+        """
+        Skip the optional numBaseband in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipIntervalFromBin(eis):
+        """
+        Skip the optional interval in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Interval.skipBin(eis)
+
+    @staticmethod
+    def skipDValueFromBin(eis):
+        """
+        Skip the optional dValue in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def skipVdValueFromBin(eis):
+        """
+        Skip the optional vdValue in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            vdValueDim1 = eis.readInt()
+            for _ in range(vdValueDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipVvdValuesFromBin(eis):
+        """
+        Skip the optional vvdValues in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            vvdValuesDim1 = eis.readInt()
+            vvdValuesDim2 = eis.readInt()
+            for _ in range(vvdValuesDim1):
+                for _ in range(vvdValuesDim2):
+                    eis.skipDouble()
+
+    @staticmethod
+    def skipLlValueFromBin(eis):
+        """
+        Skip the optional llValue in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipVllValueFromBin(eis):
+        """
+        Skip the optional vllValue in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            vllValueDim1 = eis.readInt()
+            for _ in range(vllValueDim1):
+                eis.skipInt()
+
+    @staticmethod
+    def skipVvllValueFromBin(eis):
+        """
+        Skip the optional vvllValue in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            vvllValueDim1 = eis.readInt()
+            vvllValueDim2 = eis.readInt()
+            for _ in range(vvllValueDim1):
+                for _ in range(vvllValueDim2):
+                    eis.skipInt()
+
+    @staticmethod
+    def skipSValueFromBin(eis):
+        """
+        Skip the optional sValue in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the optional antennaId in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Tag.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["annotationId"] = AnnotationRow.skipAnnotationIdFromBin
+        _skipBinMethods["time"] = AnnotationRow.skipTimeFromBin
+        _skipBinMethods["issue"] = AnnotationRow.skipIssueFromBin
+        _skipBinMethods["details"] = AnnotationRow.skipDetailsFromBin
+
+        _skipBinMethods["numAntenna"] = AnnotationRow.skipNumAntennaFromBin
+        _skipBinMethods["basebandName"] = AnnotationRow.skipBasebandNameFromBin
+        _skipBinMethods["numBaseband"] = AnnotationRow.skipNumBasebandFromBin
+        _skipBinMethods["interval"] = AnnotationRow.skipIntervalFromBin
+        _skipBinMethods["dValue"] = AnnotationRow.skipDValueFromBin
+        _skipBinMethods["vdValue"] = AnnotationRow.skipVdValueFromBin
+        _skipBinMethods["vvdValues"] = AnnotationRow.skipVvdValuesFromBin
+        _skipBinMethods["llValue"] = AnnotationRow.skipLlValueFromBin
+        _skipBinMethods["vllValue"] = AnnotationRow.skipVllValueFromBin
+        _skipBinMethods["vvllValue"] = AnnotationRow.skipVvllValueFromBin
+        _skipBinMethods["sValue"] = AnnotationRow.skipSValueFromBin
+        _skipBinMethods["antennaId"] = AnnotationRow.skipAntennaIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -889,7 +1100,29 @@ class AnnotationRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Annotation",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute annotationId
 
@@ -1771,5 +2004,8 @@ class AnnotationRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 AnnotationRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+AnnotationRow.initSkipBinMethods()

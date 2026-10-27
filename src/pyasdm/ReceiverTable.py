@@ -53,7 +53,7 @@ import io
 
 class ReceiverTable:
     """
-    The ReceiverTable class is an Alma table.
+    The ReceiverTable class is an ASDM table.
 
     Receiver properties.
 
@@ -134,27 +134,54 @@ class ReceiverTable:
     # The name of this table.
     _tableName = "Receiver"
 
-    # The list of field names that make up key 'key'.
+    # The list of field names that make up 'key'.
     _key = ["receiverId", "spectralWindowId", "timeInterval"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # archive as bin not used by python implementation
-    # _archiveAsBin = False # If True archive binary else archive XML
     _fileAsBin = False  # If True file binary else file XML
 
-    # A data structure to store the ReceiverRow s.
-    # In all cases we maintain a private list of ReceiverRow s.
-    _privateRows = []
+    # these values are only used when rows have been loaded from a binary table file
+    _eis = None  # the EndianInput stream
+    _byteStream = None  # the io.BufferedReader opened and used by _eis
+    # the list of required and optional attributes found in this table
+    _attributesSeq = []
 
-    # this table has a temporal key, an auto-incremetable key, and other key fields
-    # context is a dictionary where the key is the key without the temporal and auto
-    # incrementable fields.
-    # the value is a list of lists, where the outer list is index by the auto-incrementable
-    # key value and the inner list is the list of rows having that auto-incrementable
-    # value.
-    # Each list of rows is kept in temporal order
+    # these are used to avoid re-reading the row that was just read from a binary table file
+    _lastBinRow = None  # the most recent row read
+    _lastBinRowloc = -1  # the location in the binary table file of _lastBinRow
+
+    # If loaded from a binary source, the binary table related lists are used
+    # first when retrieving rows and then the _rowList for any additionall rows.
+    # When the binary table lists are empty then all rows come from _rowList.
+    # Rows added using the add() method are always added to _rowList.
+    # Rows can only be added from one file and then only if no rows have previously been added.
+    # For rows added from a binary table file, only enough information to populate these lists
+    # is read and the starting location of reach row is kept here. Reading the full row requires
+    # seeking to the starting location of that row and then reading the row.
+
+    # ReceiverRow objects added from an XML file or using the add() method are kept here
+    _rowList = []
+
+    # binary table locations for rows added from a binary table file are kept here
+    _rowLocList = []
+
+    # this table has a temporal key attribute
+
+    # the temporal key attribute values for all rows known to this table
+    # (ArrayTimeInterval or ArrayTime) are kept here, in the order in which they were added.
+    # The element number here is the same value used in getRow to retrieve that row.
+    _rowTimesList = []
+
+    # there is an auto-incrementable key attribute along with other key attributes
+
+    # the context dictionary contains list of lists of row numbers with one set of lists of list
+    # for each unique key string excluding the temporal and auto-incrementable key attributes.
+    # For each key string, there is one list of row numbers for each auto-incrementable key value for
+    # that key string.
+    # Each list of row numbers is kept sorted by the temporal key value in ascending order.
+    # The row numbers can also be used to index _rowTimesList
     _context = {}
 
     # the Entity of this table
@@ -184,12 +211,13 @@ class ReceiverTable:
 
     def getKeyName(self):
         """
-        Return the list of field names that make up key key
+        Return the list of field names that make up 'key'
         as a list of strings.
         """
         return self._key
 
-    def Key(self, spectralWindowId):
+    @staticmethod
+    def Key(spectralWindowId):
         """
         Returns a string built by concatenating the ascii representation of the
         parameters values suffixed with a "_" character.
@@ -200,75 +228,122 @@ class ReceiverTable:
 
         return result
 
-    def insertByStartTime(self, x, rowlist):
+    def insertByStartTime(self, x, rowIndexList):
         """
         Insert a ReceiverRow in a list of ReceiverRow so that it's ordered by ascending start time.
 
-        x The ReceiverRow to be inserted.
-        rowlist The list where x is to be inserted.
+        x The ReceiverRow to be inserted or a tuple of (rowStartLoc, timeInterval) where rowStartLoc
+        is the starting location in self._eis where that row is found and timeInterval is the
+        ArrayTimeInterval for that row at that location.
+        rowIndexList The list where x is to be inserted.
 
-        The inserted row is returned. If x already exists in rowlist then it is not added and
-        the row in rowlist is returned.
+        If the row is added, then the new row index (row number) for that row is returned. If x
+        already exists in rowIndexList then it is not added and the row index found with the matching
+        information in rowIndexList is returned.
 
         If a row matching the value of the start time of timeInterval is
-        found in rowlist but the other required parameters do not have the same value
+        found in rowIndexList but the other required parameters do not have the same value
         then a DuplicateKey exception is raised.
         """
 
         # get the ArrayTime value at the start of the ArrayTimeInterval found in x
-        xTimeStart = x.getTimeInterval().getStart().get()
 
-        # work out where to add x to rowlist
-        if (len(rowlist) == 0) or (
-            xTimeStart > (rowlist[-1].getTimeInterval().getStart().get())
+        rowStartLoc = None
+        xTimeInterval = None
+        xTimeStart = None
+        addToRowLocList = False
+
+        if isinstance(x, tuple):
+            rowStartLoc, xTimeInterval = x
+            addToRowLocList = True
+            # this is the only sanity check here because this is an internal method
+            # If it gets here then it's coming from a binary table file and there
+            # can be no additional rows kept internally
+            if self.size() != len(self._rowLocList):
+                raise (
+                    ValueError(
+                        "ReceiverTable internal error in insertByStartTime, attempting to insert a binary table row when there are already row objects kept internally, this should never happen"
+                    )
+                )
+        else:
+            xTimeInterval = x.getTimeInterval()
+
+        xTimeStart = xTimeInterval.getStart().get()
+
+        # work out where to add x to rowIndexList
+        if (len(rowIndexList) == 0) or (
+            xTimeStart > self._rowTimesList[rowIndexList[-1]].getStart().get()
         ):
             # it belongs at the end
-            if len(rowlist) > 0:
-                lastRow = rowlist[-1]
-                # Modify the duration of lastRow if and only if the start time of x
-                # is located strictly before the end time of last.
+            if len(rowIndexList) > 0:
+                lastRowIndex = rowIndexList[-1]
+                # Modify the duration of the row at lastRowIndex if and only if the start time of x
+                # is located strictly before the end time of that row.
+                lastTimeInterval = self._rowTimesList[lastRowIndex]
                 if xTimeStart < (
-                    lastRow.getTimeInterval().getStart().get()
-                    + lastRow.getTimeInterval().getDuration().get()
+                    lastTimeInterval.getStart().get()
+                    + lastTimeInterval.getDuration().get()
                 ):
-                    lastRow.getTimeInterval().setDuration(
-                        xTimeStart - lastRow.getTimeInterval().getStart().get()
+                    # because these changes work through the reference that python maintains this
+                    # change will change the value already in the list
+                    lastTimeInterval.setDuration(
+                        xTimeStart - lastTimeInterval.getStart().get()
                     )
-            rowlist.append(x)
-        elif xTimeStart < rowlist[0].getTimeInterval().getStart().get():
+            # this information will be appended to self._rowTimesList at the end,
+            # that location is the row number for this newly added row
+            rowIndexList.append(len(self._rowTimesList))
+        elif xTimeStart < self._rowTimesList[rowIndexList[0]].getStart().get():
             # it belongs at the start
-            firstRow = rowlist[0]
-            # Modify the duration of x if and only if the start time of firstRow
+            firstRowIndex = rowIndexList[0]
+            # Modify the duration of x if and only if the start time of the row at firstRowIndex
             # is located strictly before the end time of x.
-            if firstRow.getTimeInterval().getStart().get() < (
-                xTimeStart + x.getTimeInterval().getDuration().get()
+            firstTimeInterval = self._rowTimesList[firstRowIndex]
+            if firstTimeInterval.getStart().get() < (
+                xTimeStart + xTimeInterval.getDuration().get()
             ):
-                x.getTimeInterval().setDuration(
-                    firstRow.getTimeInterval().getStart().get() - xTimeStart
+                # because these changes work through the reference that python maintains this
+                # change will change wherever xTimeInterval came from
+                xTimeInterval.setDuration(
+                    firstTimeInterval.getStart().get() - xTimeStart
                 )
-
-            rowlist.insert(0, x)
+            # this information will be appended to self._rowTimesList at the end,
+            # that location is the row number for this newly added row
+            rowIndexList.insert(0, len(self._rowTimesList))
         else:
-            # x is inserted somewhere inside rowlist; let's use a dichotomoy
+            # x is inserted somewhere inside rowIndexList; let's use a dichotomoy
             # method to find the insertion index.
 
             k0 = 0
-            k1 = len(rowlist) - 1
+            k1 = len(rowIndexList) - 1
 
             while k0 != (k1 - 1):
-                if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
-                    if rowlist[k0].equalByRequiredValue(x):
-                        # this row already exists at k0, nothing to insert or add, return that row
-                        return rowlist[k0]
+                k0TimeInterval = self._rowTimesList[rowIndexList[k0]]
+                k1TimeInterval = self._rowTimesList[rowIndexList[k1]]
+                if xTimeStart == k0TimeInterval.getStart().get():
+                    # need to get both rows in hand here to compare
+                    k0row = self.getRow(rowIndexList[k0])
+                    if not isinstance(x, ReceiverRow):
+                        # get the row corresponding to rowStartLoc and store it in x
+                        # so that this isn't done more than needed
+                        x = self._getRowByLoc(rowStartLoc)
+                    if k0row.equalByRequiredValue(x):
+                        # this row already exists at k0, nothing to insert or add, return that row index
+                        return rowIndexList[k0]
                     else:
                         # the start time matches, but the rest of the required parameters do not
                         raise DuplicateKey(
                             "DuplicateKey exception in ", "ReceiverTable"
                         )
-                elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
-                    if rowlist[k1].equalByRequiredValue(x):
-                        # this row already exists at k1, nothing to insert or add, return that row
-                        return rowlist[k1]
+                elif xTimeStart == k1TimeInterval.getStart().get():
+                    # need to get both rows in hand here to compare
+                    k1row = self.getRow(rowIndexList[k1])
+                    if not isinstance(x, ReceiverRow):
+                        # get the row corresponding to rowStartLoc and store it in x
+                        # so that this isn't done more than needed
+                        x = self._getRowByLoc(rowStartLoc)
+                    if k1row.equalByRequiredValue(x):
+                        # this row already exists at k1, nothing to insert or add, return that row index
+                        return rowIndexList[k1]
                     else:
                         # the start time matches, but the rest of the required parameters do not
                         raise DuplicateKey(
@@ -279,42 +354,68 @@ class ReceiverTable:
                     newIndex = int((k0 + k1) / 2)
                     if (
                         xTimeStart
-                        <= rowlist[newIndex].getTimeInterval().getStart().get()
+                        <= self._rowTimesList[rowIndexList[newIndex]].getStart().get()
                     ):
                         k1 = newIndex
                     else:
                         k0 = newIndex
 
-            if xTimeStart == rowlist[k0].getTimeInterval().getStart().get():
-                if rowlist[k0].equalByRequiredValue(x):
-                    # this row already exists at k0, nothing to insert or add, return that row
-                    return rowlist[k0]
+            if xTimeStart == self._rowTimesList[rowIndexList[k0]].getStart().get():
+                # need to get both rows in hand here to compare
+                k0row = self.getRow(rowIndexList[k0])
+                if not isinstance(x, ReceiverRow):
+                    # get the row corresponding to rowStartLoc and store it in x
+                    # so that this isn't done more than needed
+                    x = self._getRowByLoc(rowStartLoc)
+                if k0row.equalByRequiredValue(x):
+                    # this row already exists at k0, nothing to insert or add, return that row index
+                    return rowIndexList[k0]
                 else:
                     # the start time matches, but the rest of the required paramters do not
                     raise DuplicateKey("DuplicateKey exception in ", "ReceiverTable")
-            elif xTimeStart == rowlist[k1].getTimeInterval().getStart().get():
-                if rowlist[k1].equalByRequiredValue(x):
-                    # this row already exists at k1, nothing to insert or add, return that row
-                    return rowlist[k1]
+            elif xTimeStart == self._rowTimesList[rowIndexList[k1]].getStart().get():
+                # need to get both rows here to compare
+                k1row = self.getRow(rowIndexList[k1])
+                if not isinstance(x, ReceiverRow):
+                    # get the row corresponding to rowStartLoc and store it in x
+                    # so that this isn't done more than needed
+                    x = self._getRowByLoc(rowStartLoc)
+                if k1row.equalByRequiredValue(x):
+                    # this row already exists at k1, nothing to insert or add, return that row index
+                    return rowIndexList[k1]
                 else:
                     # the start time matches, but the rest of the required parameters do not
                     raise DuplicateKey("DuplicateKey exception in ", "ReceiverTable")
 
             # if it reaches here, it should be added, set the duration as appropriate for
             # insertion at k1, after k0, adjust duration of k0 as appropriate
-            rowlist[k0].getTimeInterval().setDuration(
-                xTimeStart - rowlist[k0].getTimeInterval().getStart().get()
-            )
-            x.getTimeInterval().setDuration(
-                rowlist[k0 + 1].getTimeInterval().getStart().get() - xTimeStart
-            )
-            rowlist.insert(k1, x)
 
-        # if it reaches here then x has already been addded to rowlist and it needs to be
-        # appended to privateRows and marked as added internally before being returned
-        self._privateRows.append(x)
-        x.isAdded()
-        return x
+            timeInterval0 = self._rowTimesList[rowIndexList[k0]]
+            timeInterval1 = self._rowTimesList[rowIndexList[k0 + 1]]
+
+            timeInterval0.setDuration(xTimeStart - timeInterval0.getStart().get())
+            # use XTimeInterval but pull from x again if x is a row
+            if isinstance(x, ReceiverRow):
+                xTimeInterval = x.getTimeInterval()
+            xTimeInterval.setDuration(timeInterval1.getStart().get() - xTimeStart)
+
+            # this information will be appended to self._rowTimesList at the end, that location is the row number for this newly added row
+            rowIndexList.insert(k1, len(self._rowTimesList))
+
+        # if it reaches here then the next element number of self._rowTimesList now appears in rowIndexList
+        # The row location or the row itself need to be added to self._rowLocList or self._row as appropriate
+        # and this time needs to be added to self._rowTimesList
+        if addToRowLocList:
+            self._rowLocList.append(rowStartLoc)
+        else:
+            self._rowList.append(x)
+            x.isAdded()
+
+        # in all cases, _rowTimesList gets xTimeInterval appended
+        self._rowTimesList.append(xTimeInterval)
+
+        # and return the element number of that newly added value
+        return len(self._rowTimesList) - 1
 
     def __init__(self, container, checkRowUniqueness=False):
         """
@@ -326,7 +427,7 @@ class ReceiverTable:
         The uniqueness check is off by default. Turn that on by setting
         checkRowUniqueness to True. When this is true the the uniquess check
         that normally happens with a row is added to the table is skipped when
-        the full table is read from an existing copy (e.g. and XML or bin file).
+        the full table is read from an existing copy (e.g. an XML or bin file).
         Checking that each row is unique can take a significant time for large
         tables. This check should be unnecessary for ASDMs created by the telescope.
 
@@ -335,7 +436,7 @@ class ReceiverTable:
         """
 
         if not isinstance(container, pyasdm.ASDM):
-            raise (ValueError("ReceiverTable constructor must use a ASDM instance"))
+            raise (ValueError("ReceiverTable constructor must use an ASDM instance"))
 
         self._container = container
 
@@ -352,11 +453,40 @@ class ReceiverTable:
         self._presentInMemory = True
         self._loadInProgress = False
 
-        self._privateRows = []
+        self._eis = None
+        self._byteStream = None
+        self._attributesSeq = []
 
+        self._lastBinRow = None
+        self._lastBinRowLoc = -1
+
+        self._rowList = []
+        self._rowLocList = []
+
+        self._rowTimesList = []
         self._context = {}
 
         self._version = 0
+
+    def __del__(self):
+        """
+        close any opened files used for binary table reading
+        """
+        self.close()
+
+    def close(self):
+        """
+        close any opened files used for binary table reading
+        Note: once closed this object will be useless for reading any rows found
+        in the binary table and there is no way to reset and reuse this instance
+        """
+        # closing one should close the other but there's no error in doing both so this is safest
+        #  it's not an error to close it if it was previously closed
+        if self._eis is not None:
+            self._eis.close()
+
+        if self._byteStream is not None:
+            self._byteStream.close()
 
     def setNotPresentInMemory(self):
         """
@@ -415,13 +545,21 @@ class ReceiverTable:
         """
         Return the number of rows in the table.
         """
-        return len(self._privateRows)
+        return len(self._rowList) + len(self._rowLocList)
 
     def getName(self):
         """
         Return the name of this table.
         """
         return self._tableName
+
+    def hasBinaryRows(self):
+        # returns True if any of the rows present are tied to a binary table and not always
+        # present in memory. Binary table rows are best retrieved individually using getRow()
+        # or in a list (which should be short) using getRowList().
+        # The get() method may be used to return all rows but for large binary table files that
+        # may exhaust all of the resources available and should be used with caution.
+        return len(self._rowLocList) > 0
 
     def __str__(self):
         """
@@ -468,8 +606,11 @@ class ReceiverTable:
             # look through all of the auto-incrementable lists to see there is any
             # row that matches this time and other required values
             for autoIncList in range(len(contextRows)):
-                for thisRow in autoIncList:
-                    if startTime.equals(thisRow.getTimeInterval().getStart()):
+                for thisRowIndex in autoIncList:
+                    # check the self._rowTimesList for a matching start time
+                    if startTime.equals(self._rowTimesList[thisRowIndex].getStart()):
+                        # this row is needed for a full comparison of the required values
+                        thisRow = self.getRow(thisRowIndex)
                         if thisRow.compareRequiredValue(
                             x.getName(),
                             x.getNumLO(),
@@ -485,7 +626,7 @@ class ReceiverTable:
                         # we must autoincrement receiverId and
                         # insert a new ReceiverRow with this autoincremented value.
                         # System.out.println("A row has been found with the same start time but different value , increment id")
-                        insertionId = i + 1
+                        insertionId = insertionId + 1
 
                         # And directly goto next id value
                         break
@@ -567,82 +708,155 @@ class ReceiverTable:
         A method to append a row to its table, used by input conversion methods.
         Not indended for external use.
 
-        If this table has an autoincrementable attribute then check if
-        x verifies the rule of uniqueness and throw exception if not.
+        This method is appropriate for an auto-incrementable attribute with an
+        ArrayTimeInterval key field either with or without additional keywords.
 
-        This method is appropriate for an auto-incrementable attribute with a
-        temporal field either with or without additional keywords.
+        When skipUniquenessCheck is False the row indicated by x is used to check
+        to see if that row with that receiverId is already known
+        to this table. If it is known then a DuplicateKey exception is raised. If the
+        full row is needed for this step and x is a tuple then the row is read from the
+        binary table file.
 
         Append x to its table.
-        x The row to be appended.
-        returns  x.
+
+        x The row to be appended or a tuple of
+        (rowStartLocation, time, keyString,  receiverId)
+        where rowStartLocation is a location in self._eis where the row can be found,
+        time is the ArrayTimeInterval keyword value for that row, keyString
+        is the Key() appropriate for that row, and the final argument is the
+        auto incrementable attribute value for that row.
+        returns the index of the row that was inserted (the same rules as insertByStartTime
         """
-        # startTime is an ArrayTimeInterval
-        startTime = x.getTimeInterval().getStart()
 
-        # this lookup is not done with the uniqueness check is skipped
-        if not skipUniquenessCheck:
-            if (
-                self.lookup(
-                    x.getSpectralWindowId(),
-                    x.getTimeInterval(),
-                    x.getName(),
-                    x.getNumLO(),
-                    x.getFrequencyBand(),
-                    x.getFreqLO(),
-                    x.getReceiverSideband(),
-                    x.getSidebandLO(),
-                )
-                is not None
-            ):
-                raise UniquenessViolationException(
-                    "Uniqueness violation exception in table ReceiverTable"
-                )
+        keystr = None
+        receiverId = None
+        rowStartLoc = None
+        xTimeInterval = None
 
-        # this check to make sure the key is not a duplicate is only done when the uniqueness check is not skipped
-        if not skipUniquenessCheck:
-            if (
-                self.getRowByKey(
-                    x.getReceiverId(), x.getSpectralWindowId(), x.getTimeInterval()
-                )
-                is not None
-            ):
-                raise DuplicateKey(
-                    "Duplicate key exception . ("
-                    + "receiverId="
-                    + x.getReceiverId()
-                    + " "
-                    + "spectralWindowId="
-                    + x.getSpectralWindowId()
-                    + " "
-                    + "timeInterval="
-                    + x.getTimeInterval()
-                    + " "
-                    + ") in ",
-                    "ReceiverTable.",
-                )
+        if isinstance(x, tuple):
+            rowStartLoc, xTimeInterval, keystr, receiverId = x
+            # the tuple expected by insertByStartTime
+            x = (rowStartLoc, xTimeInterval)
+        else:
+            keystr = self.Key(x.getSpectralWindowId())
 
-        keystr = self.Key(x.getSpectralWindowId())
+            receiverId = x.getReceiverId()
 
-        i = x.getReceiverId()
-
-        # make sure keystr is known to context and that there enough elements to retrieve
-        # the list at element "i"
+        # make sure keystr is known to context
         if keystr not in self._context:
             self._context[keystr] = []
-        while len(self._context[keystr]) <= i:
+        else:
+            # this is the only case where the uniqueness check might be needed
+            if not skipUniquenessCheck:
+                if xTimeInterval is None:
+                    # then x must be a row instance and we need to get this
+                    xTimeInterval = x.getTimeInterval()
+
+                # is there a list for this receiverId
+                if receiverId < len(self._context[keystr]):
+                    # do any of these rows have the same timeInterval
+                    for rowIndex in self._context[keystr][receiverId]:
+                        if self._rowTimesList[rowIndex].equals(xTimeInterval):
+
+                            # is this a duplicate key
+                            thisRow = x
+                            if rowLocation is not None:
+                                thisRow = self._getRowByLoc(rowLocation)
+                            otherRow = self.getRow(rowIndex)
+                            if otherRow.equalByRequiredValue(thisRow):
+                                raise UniquenessViolation(
+                                    "Uniqueness violation exception", "ReceiverTable."
+                                )
+
+                        raise DuplicateKey(
+                            "Duplicate key exception . ("
+                            + "receiverId="
+                            + x.getReceiverId()
+                            + " "
+                            + "spectralWindowId="
+                            + x.getSpectralWindowId()
+                            + " "
+                            + "timeInterval="
+                            + x.getTimeInterval()
+                            + " "
+                            + ") in ",
+                            "ReceiverTable.",
+                        )
+
+        # make sure that there are enough elements in this context for receiverId
+        while len(self._context[keystr]) <= receiverId:
             self._context[keystr].append([])
 
-        return self.insertByStartTime(x, self._context[keystr][i])
+        return self.insertByStartTime(x, self._context[keystr][receiverId])
 
     # ====> methods returning rows.
 
     def get(self):
         """
         Get all rows.
-        return all rows as list of ReceiverRow
+
+        NOTE: if the rows are found in a binary table file then this may be an
+        expensive operation since all of these rows will need to be read from disk and
+        exist in memory at the same time. For a large table that may be enough to exhaust all
+        resources. Use with caution.
+
+        return all rows as a list of ReceiverRow
         """
-        return self._privateRows
+        result = []
+        if len(self._rowLocList) > 0:
+            # any binary rows come first and must be fetched individually
+            for index in range(len(self.rowLocList)):
+                # relies on getRow to set the added and temporal value if appropriate
+                # the index is the row number since binary rows come first
+                result.append(self.getRow(index))
+            if len(self._rowList) > 0:
+                result = result + self._rowList
+        else:
+            result = self._rowList
+
+        return result
+
+    def getRow(self, index):
+        """
+        Return the row indicated by index, which is a row number. Rows are numbered in the order
+        they were added to the table. The index must be between 0 and (size()-1).
+
+        raises a ValueError if index is out of range for this table.
+        """
+        if (index < 0) or (index >= self.size()):
+            raise ValueError("index out of range")
+
+        result = None
+        # rows are found first in self._rowLocList then from self._rowList as needed
+        if index < len(self._rowLocList):
+            result = self._getRowByLoc(self._rowLocList[index])
+
+            # adding a row can cause temporal key values to be adjusted, use the one found in self._rowTImesList to use the appropriate one
+            # this is only needed for the binary rows as they are read from disk, rows already in memory will already have the correct temporal value
+            # this MUST happen before isAdded is called
+            result.setTimeInterval(self._rowTimesList[index])
+
+            # this row has been added
+            result.isAdded()
+        else:
+            rowListIndex = index - len(self._rowLocList)
+            result = self._rowList[rowListIndex]
+
+        return result
+
+    def getRowList(self, indexList):
+        """
+        Return a list of rows using a list of row numbers in same order as the list.
+
+        indexList is a list of row numbers (see getRow)
+        returns a list of row instances in the same order as indexList
+        raises a ValueError if an index is out of range for this table.
+        """
+        result = []
+        for index in indexList:
+            result.append(self.getRow(index))
+
+        return result
 
     def getRowByKey(self, receiverId, spectralWindowId, timeInterval):
         """
@@ -660,34 +874,55 @@ class ReceiverTable:
 
         id = int(receiverId)
 
-        contextRows = self._context[keystr]
+        contextRowList = self._context[keystr]
         # the first list is indexed by id so it must exist for this to find a row
-        if id < len(contextRows):
-            idRows = contextRows[id]
-            for aRow in idRows:
-                if aRow.getTimeInterval().equals(timeInterval):
-                    return aRow
+        if id < len(contextRowList):
+            idRowList = contextRowList[id]
+            for thisRowIndex in idRowList:
+                if self._rowTimesList[thisRowIndex].equals(timeInterval):
+                    return self.getRow(thisRowIndex)
 
         # never found
         return None
 
-    def getRowByReceiverId(self, receiverId):
+    def getRowListByReceiverId(self, receiverId):
         """
-        Returns a list of rows whose key element receiverId
+        Returns a list of row numbers whose key element receiverId
         is equal to the parameter receiverId.
-        return a list of ReceiverRow. A returned list of size 0 means that no row has been found.
+        return a list of indices that can be used in getRowList to get a list of rows or individually
+        in getRow to get each row in turn. A returned list of size 0 means that no row has been found.
         receiverId is of type int and contains the value of
         the autoincrementable attribute that is looked up in the table.
         """
         result = []
 
         # any of the context strings could contain a list appropriate for the requested value
-        for thisKeyValue in self._context.values():
+        for thisKeyList in self._context.values():
             # if this has the requested value, that value can be used to index into this list
-            if receiverId < len(thisKeyValue):
+            if receiverId < len(thisKeyList):
                 # this value contains rows with the requested value
                 # append all of them to the result
-                result.extend(thisKeyValue[receiverId])
+                result.extend(thisKeyList[receiverId])
+
+        return result
+
+    def getRowByReceiverId(self, receiverIdyReceiverId):
+        """
+        Returns a list of rows whose key element receiverId
+        is equal to the parameter receiverId.
+        return a list of ReceiverRow. A returned list of size 0 means that no row has been found.
+        receiverId is of type int and contains the value of
+        the autoincrementable attribute that is looked up in the table.
+        Note that for rows stored in a binary table file getting all of the rows in a list may be
+        and expensive operation. The getRowListByReceiverId can be used
+        to get a list of row numbers that can then be used in individual calls to getRow so that all rows
+        in the list need not be in memory at the same time.
+        """
+        resultList = self.getRowListByReceiverId(ReceiverId)
+
+        result = []
+        if len(resultList) > 0:
+            result = getRowList(resultList)
 
         return result
 
@@ -729,28 +964,50 @@ class ReceiverTable:
             # it may be found in any of the list of lists
             for thisKeyValueList in self._context.values():
                 for thisList in thisKeyValueList:
-                    for thisRow in thisList:
-                        if thisRow.getTimeInterval().contains(
-                            timeInterval
-                        ) and thisRow.compareNoAutoInc(
-                            spectralWindowId,
-                            timeInterval,
-                            name,
-                            numLO,
-                            frequencyBand,
-                            freqLO,
-                            receiverSideband,
-                            sidebandLO,
-                        ):
-                            return thisRow
-
+                    for thisRowIndex in thisList:
+                        if self._rowTimesList[thisRowIndex].contains(timeInterval):
+                            # a full comparison requires thie row
+                            thisRow = self.getRow(thisRowIndex)
+                            if thisRow.compareNoAutoInc(
+                                spectralWindowId,
+                                timeInterval,
+                                name,
+                                numLO,
+                                frequencyBand,
+                                freqLO,
+                                receiverSideband,
+                                sidebandLO,
+                            ):
+                                return thisRow
         return None
 
-    def getRows(self):
+    def _getRowByLoc(self, rowStartLoc):
         """
-        get the rows, synonymous with the get method.
+        Used when attached to a binary table. For internal use.
+
+        The retrieved row is kept internally in case the same row is requested before any
+        other rows to avoid re-reading it.
+
+        Note that when used by getRow the returned row will be marked as added and
+        if this is a temporal table the temporal value in _rowTimesList will be used to set the temporal value in each row.
+        That should only be done for row already added to this this table.
+
+        Return a row using the binary table values that  start at rowStartLoc in self._eis.
         """
-        return self.get()
+        result = None
+
+        if rowStartLoc == self._lastBinRowLoc:
+            # no need to re-read it
+            result = self._lastBinRow
+        else:
+            loc = self._eis.seek(rowStartLoc)
+            result = ReceiverRow.fromBin(self._eis, self, self._attributesSeq)
+
+            # remember this, in case the same row is requested again
+            self._lastBinRow = result
+            self._lastBinRowLoc = rowStartLoc
+
+        return result
 
     # ====> conversion Methods
 
@@ -768,7 +1025,10 @@ class ReceiverTable:
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
         result += "\n <Container" + s[1:]
-        for thisRow in self._privateRows:
+
+        # use self.getRow to handle binary table rows and xml rows in the correct order
+        for rowNumber in range(self.size()):
+            thisRow = self.getRow(rowNumber)
             result += "\n" + thisRow.toXML()
         result += "\n</ReceiverTable>"
         return result
@@ -840,6 +1100,7 @@ class ReceiverTable:
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
+
                     self.checkAndAdd(row, (not self._checkRowUniqueness))
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
@@ -962,10 +1223,11 @@ class ReceiverTable:
             eos = EndianOutput(outBuffer, byteOrder)
             self.getEntity().toBin(eos)
             self.getContainer().getEntity().toBin(eos)
-            eos.writeInt(len(self._privateRows))
+            eos.writeInt(self.size())
 
             # and all of the rows
-            for thisRow in self._privateRows:
+            for thisRowNumber in range(self.size()):
+                thisRow = self.getRow(thisRowNumber)
                 thisRow.toBin(eos)
 
             # The closing MIME boundary
@@ -975,18 +1237,21 @@ class ReceiverTable:
             # close the eos, also closes outBuffer, no penalty for doing that more than once
             eos.close()
 
-    def setFromMIME(self, byteStream):
+    def setFromMIME(self):
         """
         Extracts the binary part of a MIME message and deserialize its content
         to fill this with the result of the deserialization.
-        param byteStream the previously opened io.BufferedReader instance
-        containing the data to be extracted.
 
-        It is the responsibility of this method to close byteStream.
+        The previously opened io.BufferedReader is found at self._byteStream and
+        contains the data to be extracted.
         """
 
-        if not (isinstance(byteStream, io.BufferedReader) and byteStream.seekable()):
-            byteStream.close()
+        if not (
+            isinstance(self._byteStream, io.BufferedReader)
+            and self._byteStream.seekable()
+        ):
+            if self._byteStream is not None:
+                self._byteStream.close()
             raise ConversionException(
                 "opened byteStream is not the expected io.BufferedReader or it is not seekable, this should never happen.",
                 "Receiver",
@@ -1002,7 +1267,7 @@ class ReceiverTable:
         xmlPartMIMEHeaderAlt = bytes(str("Content-ID: <header.xml>\r\n\r\n").encode())
 
         # follow the Java example and grab the first 10000 bytes, which will always contain the header
-        headerBytes = byteStream.read(10000)
+        headerBytes = self._byteStream.read(10000)
 
         # Detect the XML header.
         loc0 = headerBytes.find(xmlPartMIMEHeader)
@@ -1011,7 +1276,7 @@ class ReceiverTable:
             loc0 = headerBytes.find(xmlPartMIMEHeaderAlt)
             if loc0 < 0:
                 # nothing else to try
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "Failed to detect the begining of the XML header.", "Receiver"
                 )
@@ -1023,7 +1288,7 @@ class ReceiverTable:
         # Look for the string announcing the binary part.
         loc1 = headerBytes.find(binPartMIMEHeader, loc0)
         if loc1 < 0:
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException(
                 "Failed to detect the begining of the binary part.", "Receiver"
             )
@@ -1033,10 +1298,10 @@ class ReceiverTable:
 
         xmldom = minidom.parseString(xmlHeader)
         if not xmldom.hasChildNodes():
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException("XML is not properly structured.", "Receiver")
 
-        attributesSeq = []
+        self._attributesSeq = []
         byteOrderStr = None
         versionStr = "-1"
 
@@ -1046,31 +1311,30 @@ class ReceiverTable:
             # assume Big_Endian and the default order of the elements
             byteOrderStr = "Big_Endian"
 
-            attributesSeq.append("receiverId")
+            self._attributesSeq.append("receiverId")
 
-            attributesSeq.append("spectralWindowId")
+            self._attributesSeq.append("spectralWindowId")
 
-            attributesSeq.append("timeInterval")
+            self._attributesSeq.append("timeInterval")
 
-            attributesSeq.append("name")
+            self._attributesSeq.append("name")
 
-            attributesSeq.append("numLO")
+            self._attributesSeq.append("numLO")
 
-            attributesSeq.append("frequencyBand")
+            self._attributesSeq.append("frequencyBand")
 
-            attributesSeq.append("freqLO")
+            self._attributesSeq.append("freqLO")
 
-            attributesSeq.append("receiverSideband")
+            self._attributesSeq.append("receiverSideband")
 
-            attributesSeq.append("sidebandLO")
+            self._attributesSeq.append("sidebandLO")
 
             versionStr = "2"
-
         else:
             # c++ and Java just assume it then must be a Receiver table
             # this is more insistant, just in case
             if hdrdom.nodeName != "ReceiverTable":
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "XML Header is not from the expected table.", "Receiver"
                 )
@@ -1083,7 +1347,7 @@ class ReceiverTable:
                 versionStr = hdrdom.attributes.getNamedItem("schemaVersion").value
 
             if not hdrdom.hasChildNodes():
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "THe XML header is missing all of the expected elements.",
                     "Receiver",
@@ -1093,51 +1357,51 @@ class ReceiverTable:
             for hdrnode in hdrdom.childNodes:
                 if hdrnode.nodeName == "BulkStoreRef":
                     if byteOrderStr is not None:
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "More than one BulkStoreRef element seen. Invalid XML header.",
                             "Receiver",
                         )
                     if not hdrnode.hasAttributes():
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "BulkStoreRef does not contain any attributes. Invalid XML header.",
                             "Receiver",
                         )
                     byteOrderAttr = hdrnode.attributes.getNamedItem("byteOrder")
                     if byteOrderAttr is None:
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "byteOrder attribute not found in BulkStoreRef element. Invalid XML header.",
                             "Receiver",
                         )
                     byteOrderStr = byteOrderAttr.value
                 elif hdrnode.nodeName == "Attributes":
-                    if len(attributesSeq) > 0:
-                        byteStream.close()
+                    if len(self._attributesSeq) > 0:
+                        self._byteStream.close()
                         raise ConversionException(
                             "More than one Attributes node seen. Invalid XML header.",
                             "Receiver",
                         )
                     if not hdrnode.hasChildNodes():
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "Attributes element has no child nodes. Invalid XML header.",
                             "Receiver",
                         )
                     for attrnode in hdrnode.childNodes:
                         if attrnode.nodeType == attrnode.ELEMENT_NODE:
-                            attributesSeq.append(str(attrnode.nodeName))
+                            self._attributesSeq.append(str(attrnode.nodeName))
 
         if byteOrderStr is None:
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException(
                 "BulkStoreRef element not seen and this is not an older version 2 XML header. Invalid XML header.",
                 "Receiver",
             )
 
-        if len(attributesSeq) == 0:
-            byteStream.close()
+        if len(self._attributesSeq) == 0:
+            self._byteStream.close()
             raise ConversionException(
                 "Attributes element not seen and this is not an older version 2 XML header. Invalid XML header.",
                 "Receiver",
@@ -1146,18 +1410,18 @@ class ReceiverTable:
         byteOrder = ByteOrder(byteOrderStr)
 
         # seek to the start of the binary part
-        byteStream.seek(loc1 + len(binPartMIMEHeader))
+        self._byteStream.seek(loc1 + len(binPartMIMEHeader))
 
         # and create the class that manages that stream and returns values as requested
-        eis = EndianInput(byteStream, byteOrder)
+        self._eis = EndianInput(self._byteStream, byteOrder)
 
-        self._entity = Entity.fromBin(eis)
+        self._entity = Entity.fromBin(self._eis)
 
         # containerEntity is not used, but it is next
-        containerEntity = Entity.fromBin(eis)
+        containerEntity = Entity.fromBin(self._eis)
 
         # the number of rows
-        numRows = eis.readInt()
+        numRows = self._eis.readInt()
         if numRows == -1:
             # when this happens (used by eVLA, I believe) use the expected size from ASDM.xml
             numRows = self._container.getExpectedTableSize("Receiver")
@@ -1165,48 +1429,73 @@ class ReceiverTable:
         # c++ reports an error when numRows is != -1 and does not agree with the value in the ASDM.xml
         # Java just uses numRows (but doesn't cover the case when numRows == -1)
         # do not check or report any difference here but cover the numRows==-1 case above
+
+        # rows are not fully read here, just the starting location, the key information, and timeInterval
+        self._lastBinRow = None
+        self._lastBinRowLoc = -1
         try:
             for i in range(numRows):
-                self.checkAndAdd(
-                    ReceiverRow.fromBin(eis, self, attributesSeq),
-                    self._checkRowUniqueness,
+                rowStart = self._eis.tell()
+
+                # skip this row, getting only the information needed for checkAndAdd
+
+                receiverId, spectralWindowId, timeInterval = (
+                    ReceiverRow.skipWithContextFromBin(self._eis, self._attributesSeq)
                 )
-                # print("row %s added, loc = %s" % (i, eis.tell()))
+
+                keystr = self.Key(spectralWindowId)
+
+                # temporal, with auto-incremntal, other keys : 2 (Feed, Receiver, Source)
+                self.checkAndAdd(
+                    rowStart,
+                    timeInterval,
+                    keystr,
+                    receiverId,
+                    (not self._checkRowUniqueness),
+                )
+
         except DuplicateKey as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             # reraise it as a ConversionException
             raise ConversionException(str(exc), "ReceiverTable") from None
         except UniquenessViolationException as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             msg = "UniquenessViolationException while adding row : %s" % str(exc)
             # raise a ConversionException using this msg
             raise ConversionException(msg, "ReceiverTable") from None
         except Exception as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             raise ConversionException(
                 "Error while reading binary data, the exception was " + str(exc),
-                "Receiver",
+                "ReceiverTable",
             ) from None
-
-        # there is no harm in closing both
-        # print("closing")
-        eis.close()
-        byteStream.close()
-        # print("checking")
-        # print("eis : %s" % eis.closed())
-        # print("byteStream : %s" % byteStream.closed)
 
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a ReceiverTable as those produced  by the toFile method.
+        Reads and parses a file containing a representation of a ReceiverTable as those produced by the toFile method.
         This table is populated with the result of the parsing.
         param directory The name of the directory containing the file te be read and parsed.
-        raises ConversionException If any error occurs while reading the
+
+        raises ConversionException if any error occurs while reading the
         files in the directory or parsing them.
+
+        raises ConversionException if some rows are already known or if an attempt was made to read from a
+        binary table file and that resulted in an unexpected exception, leaving the object in a mixed state.
         """
+        # check if this is allowed
+        if (
+            (self.size() > 0)
+            or (self._eis is not None)
+            or (self._byteStream is not None)
+        ):
+            raise ConversionException(
+                "A table can not be set from a file once the size is > 0 or if an unexpected error happened while reading a binary table.",
+                "ReceiverTable",
+            )
+
         if not isinstance(directory, str):
             print("directory must be a string")
 
@@ -1235,17 +1524,23 @@ class ReceiverTable:
         # This uses a buffered byte stream. Created here and then
         # handed off to the setFromMIME method, which is responsible for closing it.
 
+        if self._byteStream is not None and not self._byteStream.closed:
+            raise ConversionException(
+                "The binary table file is already opened and can not be re-opened. This should never happen",
+                "ReceiverTable",
+            )
+
         filename = os.path.join(directory, "Receiver.bin")
-        byteStream = None
+        self._byteStream = None
         try:
-            byteStream = open(filename, "rb")
+            self._byteStream = open(filename, "rb")
         except Exception as exc:
             raise ConversionException(
                 "Error while opening " + filename + ". The exception was " + str(exc),
-                "Receiver",
+                "ReceiverTable",
             )
 
-        self.setFromMIME(byteStream)
+        self.setFromMIME()
 
     def setFromXMLFile(self, directory):
         """

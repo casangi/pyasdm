@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -638,6 +642,8 @@ class WeatherRow:
 
             eos.writeDouble(self._water)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def stationIdFromBin(row, eis):
         """
@@ -818,6 +824,202 @@ class WeatherRow:
         _fromBinMethods["wvrTemp"] = WeatherRow.wvrTempFromBin
         _fromBinMethods["water"] = WeatherRow.waterFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipStationIdFromBin(eis):
+        """
+        Skip the stationId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipPressureFromBin(eis):
+        """
+        Skip the optional pressure in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Pressure.skipBin(eis)
+
+    @staticmethod
+    def skipRelHumidityFromBin(eis):
+        """
+        Skip the optional relHumidity in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Humidity.skipBin(eis)
+
+    @staticmethod
+    def skipTemperatureFromBin(eis):
+        """
+        Skip the optional temperature in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skipBin(eis)
+
+    @staticmethod
+    def skipWindDirectionFromBin(eis):
+        """
+        Skip the optional windDirection in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skipBin(eis)
+
+    @staticmethod
+    def skipWindSpeedFromBin(eis):
+        """
+        Skip the optional windSpeed in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Speed.skipBin(eis)
+
+    @staticmethod
+    def skipWindMaxFromBin(eis):
+        """
+        Skip the optional windMax in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Speed.skipBin(eis)
+
+    @staticmethod
+    def skipDewPointFromBin(eis):
+        """
+        Skip the optional dewPoint in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skipBin(eis)
+
+    @staticmethod
+    def skipNumLayerFromBin(eis):
+        """
+        Skip the optional numLayer in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipLayerHeightFromBin(eis):
+        """
+        Skip the optional layerHeight in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipTemperatureProfileFromBin(eis):
+        """
+        Skip the optional temperatureProfile in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def skipCloudMonitorFromBin(eis):
+        """
+        Skip the optional cloudMonitor in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skipBin(eis)
+
+    @staticmethod
+    def skipNumWVRFromBin(eis):
+        """
+        Skip the optional numWVR in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipWvrTempFromBin(eis):
+        """
+        Skip the optional wvrTemp in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def skipWaterFromBin(eis):
+        """
+        Skip the optional water in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipDouble()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["stationId"] = WeatherRow.skipStationIdFromBin
+        _skipBinMethods["timeInterval"] = WeatherRow.skipTimeIntervalFromBin
+
+        _skipBinMethods["pressure"] = WeatherRow.skipPressureFromBin
+        _skipBinMethods["relHumidity"] = WeatherRow.skipRelHumidityFromBin
+        _skipBinMethods["temperature"] = WeatherRow.skipTemperatureFromBin
+        _skipBinMethods["windDirection"] = WeatherRow.skipWindDirectionFromBin
+        _skipBinMethods["windSpeed"] = WeatherRow.skipWindSpeedFromBin
+        _skipBinMethods["windMax"] = WeatherRow.skipWindMaxFromBin
+        _skipBinMethods["dewPoint"] = WeatherRow.skipDewPointFromBin
+        _skipBinMethods["numLayer"] = WeatherRow.skipNumLayerFromBin
+        _skipBinMethods["layerHeight"] = WeatherRow.skipLayerHeightFromBin
+        _skipBinMethods["temperatureProfile"] = WeatherRow.skipTemperatureProfileFromBin
+        _skipBinMethods["cloudMonitor"] = WeatherRow.skipCloudMonitorFromBin
+        _skipBinMethods["numWVR"] = WeatherRow.skipNumWVRFromBin
+        _skipBinMethods["wvrTemp"] = WeatherRow.skipWvrTempFromBin
+        _skipBinMethods["water"] = WeatherRow.skipWaterFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -844,7 +1046,69 @@ class WeatherRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Weather",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (stationId, timeInterval)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        stationId = None
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Weather",
+                )
+
+            if attributeName == "stationId":
+
+                stationId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (stationId, timeInterval)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1656,5 +1920,8 @@ class WeatherRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 WeatherRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+WeatherRow.initSkipBinMethods()

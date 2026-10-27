@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -335,6 +339,8 @@ class CalGainRow:
 
         eos.writeFloat(self._totalFitWeight)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def calDataIdFromBin(row, eis):
         """
@@ -441,6 +447,114 @@ class CalGainRow:
         _fromBinMethods["totalFit"] = CalGainRow.totalFitFromBin
         _fromBinMethods["totalFitWeight"] = CalGainRow.totalFitWeightFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipGainFromBin(eis):
+        """
+        Skip the gain in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipFloat()
+
+    @staticmethod
+    def skipGainValidFromBin(eis):
+        """
+        Skip the gainValid in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipBool()
+
+    @staticmethod
+    def skipFitFromBin(eis):
+        """
+        Skip the fit in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipFloat()
+
+    @staticmethod
+    def skipFitWeightFromBin(eis):
+        """
+        Skip the fitWeight in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipFloat()
+
+    @staticmethod
+    def skipTotalGainValidFromBin(eis):
+        """
+        Skip the totalGainValid in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipBool()
+
+    @staticmethod
+    def skipTotalFitFromBin(eis):
+        """
+        Skip the totalFit in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipFloat()
+
+    @staticmethod
+    def skipTotalFitWeightFromBin(eis):
+        """
+        Skip the totalFitWeight in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipFloat()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["calDataId"] = CalGainRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalGainRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalGainRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalGainRow.skipEndValidTimeFromBin
+        _skipBinMethods["gain"] = CalGainRow.skipGainFromBin
+        _skipBinMethods["gainValid"] = CalGainRow.skipGainValidFromBin
+        _skipBinMethods["fit"] = CalGainRow.skipFitFromBin
+        _skipBinMethods["fitWeight"] = CalGainRow.skipFitWeightFromBin
+        _skipBinMethods["totalGainValid"] = CalGainRow.skipTotalGainValidFromBin
+        _skipBinMethods["totalFit"] = CalGainRow.skipTotalFitFromBin
+        _skipBinMethods["totalFitWeight"] = CalGainRow.skipTotalFitWeightFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -467,7 +581,29 @@ class CalGainRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalGain",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute startValidTime
 
@@ -911,5 +1047,8 @@ class CalGainRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalGainRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalGainRow.initSkipBinMethods()

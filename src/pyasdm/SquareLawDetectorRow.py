@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.DetectorBandType import DetectorBandType
 
@@ -234,6 +238,8 @@ class SquareLawDetectorRow:
 
         eos.writeString(str(self._bandType))
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def squareLawDetectorIdFromBin(row, eis):
         """
@@ -270,6 +276,45 @@ class SquareLawDetectorRow:
         _fromBinMethods["numBand"] = SquareLawDetectorRow.numBandFromBin
         _fromBinMethods["bandType"] = SquareLawDetectorRow.bandTypeFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipSquareLawDetectorIdFromBin(eis):
+        """
+        Skip the squareLawDetectorId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNumBandFromBin(eis):
+        """
+        Skip the numBand in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipBandTypeFromBin(eis):
+        """
+        Skip the bandType in row from the EndianInput (eis) instance.
+        """
+
+        # DetectorBandType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["squareLawDetectorId"] = (
+            SquareLawDetectorRow.skipSquareLawDetectorIdFromBin
+        )
+        _skipBinMethods["numBand"] = SquareLawDetectorRow.skipNumBandFromBin
+        _skipBinMethods["bandType"] = SquareLawDetectorRow.skipBandTypeFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -296,7 +341,29 @@ class SquareLawDetectorRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SquareLawDetector",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute squareLawDetectorId
 
@@ -418,5 +485,8 @@ class SquareLawDetectorRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 SquareLawDetectorRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+SquareLawDetectorRow.initSkipBinMethods()

@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.DifferenceType import DifferenceType
 
@@ -551,6 +555,8 @@ class DelayModelVariableParametersRow:
 
             eos.writeStr(self._delayModelVersion)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def delayModelVariableParametersIdFromBin(row, eis):
         """
@@ -729,6 +735,194 @@ class DelayModelVariableParametersRow:
             DelayModelVariableParametersRow.delayModelVersionFromBin
         )
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipDelayModelVariableParametersIdFromBin(eis):
+        """
+        Skip the delayModelVariableParametersId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeFromBin(eis):
+        """
+        Skip the time in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipUt1_utcFromBin(eis):
+        """
+        Skip the ut1_utc in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipDouble()
+
+    @staticmethod
+    def skipIat_utcFromBin(eis):
+        """
+        Skip the iat_utc in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipDouble()
+
+    @staticmethod
+    def skipTimeTypeFromBin(eis):
+        """
+        Skip the timeType in row from the EndianInput (eis) instance.
+        """
+
+        # DifferenceType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipGstAtUt0FromBin(eis):
+        """
+        Skip the gstAtUt0 in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skipBin(eis)
+
+    @staticmethod
+    def skipEarthRotationRateFromBin(eis):
+        """
+        Skip the earthRotationRate in row from the EndianInput (eis) instance.
+        """
+
+        AngularRate.skipBin(eis)
+
+    @staticmethod
+    def skipPolarOffsetsFromBin(eis):
+        """
+        Skip the polarOffsets in row from the EndianInput (eis) instance.
+        """
+
+        polarOffsetsDim1 = eis.readInt()
+        for _ in range(polarOffsetsDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipPolarOffsetsTypeFromBin(eis):
+        """
+        Skip the polarOffsetsType in row from the EndianInput (eis) instance.
+        """
+
+        # DifferenceType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipDelayModelFixedParametersIdFromBin(eis):
+        """
+        Skip the delayModelFixedParametersId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipNutationInLongitudeFromBin(eis):
+        """
+        Skip the optional nutationInLongitude in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skipBin(eis)
+
+    @staticmethod
+    def skipNutationInLongitudeRateFromBin(eis):
+        """
+        Skip the optional nutationInLongitudeRate in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            AngularRate.skipBin(eis)
+
+    @staticmethod
+    def skipNutationInObliquityFromBin(eis):
+        """
+        Skip the optional nutationInObliquity in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skipBin(eis)
+
+    @staticmethod
+    def skipNutationInObliquityRateFromBin(eis):
+        """
+        Skip the optional nutationInObliquityRate in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            AngularRate.skipBin(eis)
+
+    @staticmethod
+    def skipDelayModelVersionFromBin(eis):
+        """
+        Skip the optional delayModelVersion in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipStr()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["delayModelVariableParametersId"] = (
+            DelayModelVariableParametersRow.skipDelayModelVariableParametersIdFromBin
+        )
+        _skipBinMethods["time"] = DelayModelVariableParametersRow.skipTimeFromBin
+        _skipBinMethods["ut1_utc"] = DelayModelVariableParametersRow.skipUt1_utcFromBin
+        _skipBinMethods["iat_utc"] = DelayModelVariableParametersRow.skipIat_utcFromBin
+        _skipBinMethods["timeType"] = (
+            DelayModelVariableParametersRow.skipTimeTypeFromBin
+        )
+        _skipBinMethods["gstAtUt0"] = (
+            DelayModelVariableParametersRow.skipGstAtUt0FromBin
+        )
+        _skipBinMethods["earthRotationRate"] = (
+            DelayModelVariableParametersRow.skipEarthRotationRateFromBin
+        )
+        _skipBinMethods["polarOffsets"] = (
+            DelayModelVariableParametersRow.skipPolarOffsetsFromBin
+        )
+        _skipBinMethods["polarOffsetsType"] = (
+            DelayModelVariableParametersRow.skipPolarOffsetsTypeFromBin
+        )
+        _skipBinMethods["delayModelFixedParametersId"] = (
+            DelayModelVariableParametersRow.skipDelayModelFixedParametersIdFromBin
+        )
+
+        _skipBinMethods["nutationInLongitude"] = (
+            DelayModelVariableParametersRow.skipNutationInLongitudeFromBin
+        )
+        _skipBinMethods["nutationInLongitudeRate"] = (
+            DelayModelVariableParametersRow.skipNutationInLongitudeRateFromBin
+        )
+        _skipBinMethods["nutationInObliquity"] = (
+            DelayModelVariableParametersRow.skipNutationInObliquityFromBin
+        )
+        _skipBinMethods["nutationInObliquityRate"] = (
+            DelayModelVariableParametersRow.skipNutationInObliquityRateFromBin
+        )
+        _skipBinMethods["delayModelVersion"] = (
+            DelayModelVariableParametersRow.skipDelayModelVersionFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -755,7 +949,29 @@ class DelayModelVariableParametersRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " DelayModelVariableParameters",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute delayModelVariableParametersId
 
@@ -1418,5 +1634,8 @@ class DelayModelVariableParametersRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 DelayModelVariableParametersRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+DelayModelVariableParametersRow.initSkipBinMethods()

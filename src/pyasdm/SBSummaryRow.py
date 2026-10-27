@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -552,6 +556,8 @@ class SBSummaryRow:
 
             self._centerDirectionEquinox.toBin(eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def sBSummaryIdFromBin(row, eis):
         """
@@ -747,6 +753,202 @@ class SBSummaryRow:
             SBSummaryRow.centerDirectionEquinoxFromBin
         )
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipSBSummaryIdFromBin(eis):
+        """
+        Skip the sBSummaryId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipSbSummaryUIDFromBin(eis):
+        """
+        Skip the sbSummaryUID in row from the EndianInput (eis) instance.
+        """
+
+        EntityRef.skipBin(eis)
+
+    @staticmethod
+    def skipProjectUIDFromBin(eis):
+        """
+        Skip the projectUID in row from the EndianInput (eis) instance.
+        """
+
+        EntityRef.skipBin(eis)
+
+    @staticmethod
+    def skipObsUnitSetUIDFromBin(eis):
+        """
+        Skip the obsUnitSetUID in row from the EndianInput (eis) instance.
+        """
+
+        EntityRef.skipBin(eis)
+
+    @staticmethod
+    def skipFrequencyFromBin(eis):
+        """
+        Skip the frequency in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipDouble()
+
+    @staticmethod
+    def skipFrequencyBandFromBin(eis):
+        """
+        Skip the frequencyBand in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverBand stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipSbTypeFromBin(eis):
+        """
+        Skip the sbType in row from the EndianInput (eis) instance.
+        """
+
+        # SBType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipSbDurationFromBin(eis):
+        """
+        Skip the sbDuration in row from the EndianInput (eis) instance.
+        """
+
+        Interval.skipBin(eis)
+
+    @staticmethod
+    def skipNumObservingModeFromBin(eis):
+        """
+        Skip the numObservingMode in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipObservingModeFromBin(eis):
+        """
+        Skip the observingMode in row from the EndianInput (eis) instance.
+        """
+
+        observingModeDim1 = eis.readInt()
+        for _ in range(observingModeDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipNumberRepeatsFromBin(eis):
+        """
+        Skip the numberRepeats in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumScienceGoalFromBin(eis):
+        """
+        Skip the numScienceGoal in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipScienceGoalFromBin(eis):
+        """
+        Skip the scienceGoal in row from the EndianInput (eis) instance.
+        """
+
+        scienceGoalDim1 = eis.readInt()
+        for _ in range(scienceGoalDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipNumWeatherConstraintFromBin(eis):
+        """
+        Skip the numWeatherConstraint in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipWeatherConstraintFromBin(eis):
+        """
+        Skip the weatherConstraint in row from the EndianInput (eis) instance.
+        """
+
+        weatherConstraintDim1 = eis.readInt()
+        for _ in range(weatherConstraintDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipCenterDirectionFromBin(eis):
+        """
+        Skip the optional centerDirection in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Angle.skip1DBin(eis)
+
+    @staticmethod
+    def skipCenterDirectionCodeFromBin(eis):
+        """
+        Skip the optional centerDirectionCode in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # DirectionReferenceCode stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipCenterDirectionEquinoxFromBin(eis):
+        """
+        Skip the optional centerDirectionEquinox in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["sBSummaryId"] = SBSummaryRow.skipSBSummaryIdFromBin
+        _skipBinMethods["sbSummaryUID"] = SBSummaryRow.skipSbSummaryUIDFromBin
+        _skipBinMethods["projectUID"] = SBSummaryRow.skipProjectUIDFromBin
+        _skipBinMethods["obsUnitSetUID"] = SBSummaryRow.skipObsUnitSetUIDFromBin
+        _skipBinMethods["frequency"] = SBSummaryRow.skipFrequencyFromBin
+        _skipBinMethods["frequencyBand"] = SBSummaryRow.skipFrequencyBandFromBin
+        _skipBinMethods["sbType"] = SBSummaryRow.skipSbTypeFromBin
+        _skipBinMethods["sbDuration"] = SBSummaryRow.skipSbDurationFromBin
+        _skipBinMethods["numObservingMode"] = SBSummaryRow.skipNumObservingModeFromBin
+        _skipBinMethods["observingMode"] = SBSummaryRow.skipObservingModeFromBin
+        _skipBinMethods["numberRepeats"] = SBSummaryRow.skipNumberRepeatsFromBin
+        _skipBinMethods["numScienceGoal"] = SBSummaryRow.skipNumScienceGoalFromBin
+        _skipBinMethods["scienceGoal"] = SBSummaryRow.skipScienceGoalFromBin
+        _skipBinMethods["numWeatherConstraint"] = (
+            SBSummaryRow.skipNumWeatherConstraintFromBin
+        )
+        _skipBinMethods["weatherConstraint"] = SBSummaryRow.skipWeatherConstraintFromBin
+
+        _skipBinMethods["centerDirection"] = SBSummaryRow.skipCenterDirectionFromBin
+        _skipBinMethods["centerDirectionCode"] = (
+            SBSummaryRow.skipCenterDirectionCodeFromBin
+        )
+        _skipBinMethods["centerDirectionEquinox"] = (
+            SBSummaryRow.skipCenterDirectionEquinoxFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -773,7 +975,29 @@ class SBSummaryRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " SBSummary",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute sBSummaryId
 
@@ -1576,5 +1800,8 @@ class SBSummaryRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 SBSummaryRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+SBSummaryRow.initSkipBinMethods()

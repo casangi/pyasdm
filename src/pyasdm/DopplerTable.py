@@ -53,7 +53,7 @@ import io
 
 class DopplerTable:
     """
-    The DopplerTable class is an Alma table.
+    The DopplerTable class is an ASDM table.
 
     Doppler tracking information. This table defines how velocity  information is converted into a frequency offset to compensate in real time  for the Doppler effect. This table may be omitted for ALMA when the  Doppler tracking is not corrected.
 
@@ -122,21 +122,38 @@ class DopplerTable:
     # The name of this table.
     _tableName = "Doppler"
 
-    # The list of field names that make up key 'key'.
+    # The list of field names that make up 'key'.
     _key = ["dopplerId", "sourceId"]
 
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # archive as bin not used by python implementation
-    # _archiveAsBin = False # If True archive binary else archive XML
     _fileAsBin = False  # If True file binary else file XML
 
-    # A data structure to store the DopplerRow s.
-    # In all cases we maintain a private list of DopplerRow s.
-    _privateRows = []
+    # these values are only used when rows have been loaded from a binary table file
+    _eis = None  # the EndianInput stream
+    _byteStream = None  # the io.BufferedReader opened and used by _eis
+    # the list of required and optional attributes found in this table
+    _attributesSeq = []
 
-    # non-temporal ASDM in Java had a private row element here to also hold  DopplerRow s. Not needed in python.
+    # these are used to avoid re-reading the row that was just read from a binary table file
+    _lastBinRow = None  # the most recent row read
+    _lastBinRowloc = -1  # the location in the binary table file of _lastBinRow
+
+    # If loaded from a binary source, the binary table related lists are used
+    # first when retrieving rows and then the _rowList for any additionall rows.
+    # When the binary table lists are empty then all rows come from _rowList.
+    # Rows added using the add() method are always added to _rowList.
+    # Rows can only be added from one file and then only if no rows have previously been added.
+    # For rows added from a binary table file, only enough information to populate these lists
+    # is read and the starting location of reach row is kept here. Reading the full row requires
+    # seeking to the starting location of that row and then reading the row.
+
+    # DopplerRow objects added from an XML file or using the add() method are kept here
+    _rowList = []
+
+    # binary table locations for rows added from a binary table file are kept here
+    _rowLocList = []
 
     # the Entity of this table
     _entity = None
@@ -146,12 +163,13 @@ class DopplerTable:
 
     def getKeyName(self):
         """
-        Return the list of field names that make up key key
+        Return the list of field names that make up 'key'
         as a list of strings.
         """
         return self._key
 
-    def Key(self, sourceId):
+    @staticmethod
+    def Key(sourceId):
         """
         Returns a string built by concatenating the ascii representation of the
         parameters values suffixed with a "_" character.
@@ -201,7 +219,7 @@ class DopplerTable:
         The uniqueness check is off by default. Turn that on by setting
         checkRowUniqueness to True. When this is true the the uniquess check
         that normally happens with a row is added to the table is skipped when
-        the full table is read from an existing copy (e.g. and XML or bin file).
+        the full table is read from an existing copy (e.g. an XML or bin file).
         Checking that each row is unique can take a significant time for large
         tables. This check should be unnecessary for ASDMs created by the telescope.
 
@@ -210,7 +228,7 @@ class DopplerTable:
         """
 
         if not isinstance(container, pyasdm.ASDM):
-            raise (ValueError("DopplerTable constructor must use a ASDM instance"))
+            raise (ValueError("DopplerTable constructor must use an ASDM instance"))
 
         self._container = container
 
@@ -227,11 +245,39 @@ class DopplerTable:
         self._presentInMemory = True
         self._loadInProgress = False
 
-        self._privateRows = []
+        self._eis = None
+        self._byteStream = None
+        self._attributesSeq = []
+
+        self._lastBinRow = None
+        self._lastBinRowLoc = -1
+
+        self._rowList = []
+        self._rowLocList = []
 
         self._noAutoIncIds = {}
 
         self._version = 0
+
+    def __del__(self):
+        """
+        close any opened files used for binary table reading
+        """
+        self.close()
+
+    def close(self):
+        """
+        close any opened files used for binary table reading
+        Note: once closed this object will be useless for reading any rows found
+        in the binary table and there is no way to reset and reuse this instance
+        """
+        # closing one should close the other but there's no error in doing both so this is safest
+        #  it's not an error to close it if it was previously closed
+        if self._eis is not None:
+            self._eis.close()
+
+        if self._byteStream is not None:
+            self._byteStream.close()
 
     def setNotPresentInMemory(self):
         """
@@ -290,13 +336,21 @@ class DopplerTable:
         """
         Return the number of rows in the table.
         """
-        return len(self._privateRows)
+        return len(self._rowList) + len(self._rowLocList)
 
     def getName(self):
         """
         Return the name of this table.
         """
         return self._tableName
+
+    def hasBinaryRows(self):
+        # returns True if any of the rows present are tied to a binary table and not always
+        # present in memory. Binary table rows are best retrieved individually using getRow()
+        # or in a list (which should be short) using getRowList().
+        # The get() method may be used to return all rows but for large binary table files that
+        # may exhaust all of the resources available and should be used with caution.
+        return len(self._rowLocList) > 0
 
     def __str__(self):
         """
@@ -333,8 +387,8 @@ class DopplerTable:
             return aRow
 
         keystr = self.Key(x.getSourceId())
-        self.autoIncrement(key, x)
-        self._privateRows.append(x)
+        self.autoIncrement(keystr, x)
+        self._rowList.append(x)
         x.isAdded()
         return x
 
@@ -382,12 +436,31 @@ class DopplerTable:
         x verifies the rule of uniqueness and raise an exception if not.
 
         Append x to its table.
-        x is the row to be appended.
-        returns x.
+
+
+        x is the row to be appended or a tuple of (rowStartlocation, keyString, dopplerId)
+
+        Note that if skipUniquenessCheck is False and x is a tuple then
+        the row at that location is first read so that the lookup can be done using the full
+        set of required attributes.
+
         """
+        # remember where this is being added, in case the full row needs to be read into x
+        rowStartLoc = None
+
+        dopplerId = -1
+        keystr = None
+        if isinstance(x, tuple):
+            rowStartLoc, keystr, dopplerId = x
+        else:
+            dopplerId = x.getDopplerId()
+            keystr = self.Key(x.getSourceId())
 
         # is this check being skipped
         if not skipUniquenessCheck:
+            if isinstance(x, int):
+                # the full row is needed in x
+                x = self._getRowByLoc(rowStartLoc)
             if (
                 self.lookup(x.getSourceId(), x.getTransitionIndex(), x.getVelDef())
                 is not None
@@ -398,43 +471,121 @@ class DopplerTable:
 
         # is this check being skipped
         if not skipUniquenessCheck:
+            if isinstance(x, int):
+                # the full row is needed in x
+                x = self._getRowByLoc(rowStartLoc)
             if self.getRowByKey(x.getDopplerId(), x.getSourceId()) is not None:
                 raise DuplicateKey("Duplicate key exception in ", "DopplerTable")
 
-        # when skipUniquenessCheck is True then this is all that happens, the rows are added
-        self._privateRows.append(x)
-        x.isAdded()
-        return x
+        # make sure that keystr is in self._noAutoIncIds and that the value for that keystr
+        # includes dopplerId
+        # this does not do any uniqueness check on that value, just sets things so that if
+        # another row is added using the add() method then that auto incrementable
+        # parameter will be incremented if needed.
+        if keystr not in self._noAutoIncIds:
+            self._noAutoIncIds[keystr] = 0
+        if dopplerId > self._noAutoIncIds[keystr]:
+            self._noAutoIncIds[keystr] = dopplerId
+
+        # the row is now added and the index (rownumber) of the newly added row is returned.
+        result = None
+        if rowStartLoc is None:
+            result = len(self._rowList)
+            self._rowList.append(x)
+            x.isAdded()
+        else:
+            result = len(self._rowLocList)
+            self._rowLocList.append(rowStartLoc)
+
+        return result
 
     # ====> methods returning rows.
 
     def get(self):
         """
         Get all rows.
-        return Alls rows as a list of DopplerRow
+
+        NOTE: if the rows are found in a binary table file then this may be an
+        expensive operation since all of these rows will need to be read from disk and
+        exist in memory at the same time. For a large table that may be enough to exhaust all
+        resources. Use with caution.
+
+        return all rows as a list of DopplerRow
         """
-        return self._privateRows
+        result = []
+        if len(self._rowLocList) > 0:
+            # any binary rows come first and must be fetched individually
+            for index in range(len(self.rowLocList)):
+                # relies on getRow to set the added and temporal value if appropriate
+                # the index is the row number since binary rows come first
+                result.append(self.getRow(index))
+            if len(self._rowList) > 0:
+                result = result + self._rowList
+        else:
+            result = self._rowList
+
+        return result
+
+    def getRow(self, index):
+        """
+        Return the row indicated by index, which is a row number. Rows are numbered in the order
+        they were added to the table. The index must be between 0 and (size()-1).
+
+        raises a ValueError if index is out of range for this table.
+        """
+        if (index < 0) or (index >= self.size()):
+            raise ValueError("index out of range")
+
+        result = None
+        # rows are found first in self._rowLocList then from self._rowList as needed
+        if index < len(self._rowLocList):
+            result = self._getRowByLoc(self._rowLocList[index])
+
+            # this row has been added
+            result.isAdded()
+        else:
+            rowListIndex = index - len(self._rowLocList)
+            result = self._rowList[rowListIndex]
+
+        return result
+
+    def getRowList(self, indexList):
+        """
+        Return a list of rows using a list of row numbers in same order as the list.
+
+        indexList is a list of row numbers (see getRow)
+        returns a list of row instances in the same order as indexList
+        raises a ValueError if an index is out of range for this table.
+        """
+        result = []
+        for index in indexList:
+            result.append(self.getRow(index))
+
+        return result
 
     def getRowByKey(self, dopplerId, sourceId):
         """
         Returns a DopplerRow given a key.
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
+        Note that if the rows are found in a binary table file they will each be read until a
+        match is found or the list of rows is exhausted. This may be slow in that case.
 
         param dopplerId.
 
         param sourceId.
 
         """
-        for row in self._privateRows:
+        for rowNumber in range(self.size()):
+            thisRow = self.getRow(rowNumber)
 
-            if row.getDopplerId() != dopplerId:
+            if thisRow.getDopplerId() != dopplerId:
                 continue
 
-            if row.getSourceId() != sourceId:
+            if thisRow.getSourceId() != sourceId:
                 continue
 
-            return row
+            return thisRow
 
         # no match found
         return None
@@ -452,34 +603,62 @@ class DopplerTable:
 
         param velDef.
 
+        Note: for rows found in a binary table file this method will get each row in turn until a match
+        is found.
         """
-        for row in self._privateRows:
-            if row.compareNoAutoInc(sourceId, transitionIndex, velDef):
-                return row
+        for rowNumber in range(self.size()):
+            thisRow = self.getRow(rowNumber)
+            if thisRow.compareNoAutoInc(sourceId, transitionIndex, velDef):
+                return thisRow
 
         return None
 
-    def getRowByDopplerId(dopplerId):
+    def getRowByDopplerId(self, dopplerId):
         """
         Returns an array of rows whose key element dopplerId
         is equal to the parameter dopplerId.
         return an array of DopplerRow. A returned array of size 0 means that no row has been found.
         param dopplerId of type int contains the value of
         the autoincrementable attribute that is looked up in the table.
+        Note: for rows found in a binary table file this method will get each row in turn until a match
+        is found.
         """
         result = []
-        for row in self._privateRows:
+        for rowNumber in range(self.size()):
+            thisRow = self.getRow(rowNumber)
 
-            if row.getDopplerId() == dopplerId:
+            if thisRow.getDopplerId() == dopplerId:
 
-                result.append(row)
+                result.append(thisRow)
         return result
 
-    def getRows(self):
+    def _getRowByLoc(self, rowStartLoc):
         """
-        get the rows, synonymous with the get method.
+        Used when attached to a binary table. For internal use.
+
+        The retrieved row is kept internally in case the same row is requested before any
+        other rows to avoid re-reading it.
+
+        Note that when used by getRow the returned row will be marked as added and
+        if this is a temporal table the temporal value in _rowTimesList will be used to set the temporal value in each row.
+        That should only be done for row already added to this this table.
+
+        Return a row using the binary table values that  start at rowStartLoc in self._eis.
         """
-        return self.get()
+        result = None
+
+        if rowStartLoc == self._lastBinRowLoc:
+            # no need to re-read it
+            result = self._lastBinRow
+        else:
+            loc = self._eis.seek(rowStartLoc)
+            result = DopplerRow.fromBin(self._eis, self, self._attributesSeq)
+
+            # remember this, in case the same row is requested again
+            self._lastBinRow = result
+            self._lastBinRowLoc = rowStartLoc
+
+        return result
 
     # ====> conversion Methods
 
@@ -497,7 +676,10 @@ class DopplerTable:
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
         result += "\n <Container" + s[1:]
-        for thisRow in self._privateRows:
+
+        # use self.getRow to handle binary table rows and xml rows in the correct order
+        for rowNumber in range(self.size()):
+            thisRow = self.getRow(rowNumber)
             result += "\n" + thisRow.toXML()
         result += "\n</DopplerTable>"
         return result
@@ -569,6 +751,7 @@ class DopplerTable:
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
+
                     self.checkAndAdd(row, (not self._checkRowUniqueness))
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
@@ -686,10 +869,11 @@ class DopplerTable:
             eos = EndianOutput(outBuffer, byteOrder)
             self.getEntity().toBin(eos)
             self.getContainer().getEntity().toBin(eos)
-            eos.writeInt(len(self._privateRows))
+            eos.writeInt(self.size())
 
             # and all of the rows
-            for thisRow in self._privateRows:
+            for thisRowNumber in range(self.size()):
+                thisRow = self.getRow(thisRowNumber)
                 thisRow.toBin(eos)
 
             # The closing MIME boundary
@@ -699,18 +883,21 @@ class DopplerTable:
             # close the eos, also closes outBuffer, no penalty for doing that more than once
             eos.close()
 
-    def setFromMIME(self, byteStream):
+    def setFromMIME(self):
         """
         Extracts the binary part of a MIME message and deserialize its content
         to fill this with the result of the deserialization.
-        param byteStream the previously opened io.BufferedReader instance
-        containing the data to be extracted.
 
-        It is the responsibility of this method to close byteStream.
+        The previously opened io.BufferedReader is found at self._byteStream and
+        contains the data to be extracted.
         """
 
-        if not (isinstance(byteStream, io.BufferedReader) and byteStream.seekable()):
-            byteStream.close()
+        if not (
+            isinstance(self._byteStream, io.BufferedReader)
+            and self._byteStream.seekable()
+        ):
+            if self._byteStream is not None:
+                self._byteStream.close()
             raise ConversionException(
                 "opened byteStream is not the expected io.BufferedReader or it is not seekable, this should never happen.",
                 "Doppler",
@@ -726,7 +913,7 @@ class DopplerTable:
         xmlPartMIMEHeaderAlt = bytes(str("Content-ID: <header.xml>\r\n\r\n").encode())
 
         # follow the Java example and grab the first 10000 bytes, which will always contain the header
-        headerBytes = byteStream.read(10000)
+        headerBytes = self._byteStream.read(10000)
 
         # Detect the XML header.
         loc0 = headerBytes.find(xmlPartMIMEHeader)
@@ -735,7 +922,7 @@ class DopplerTable:
             loc0 = headerBytes.find(xmlPartMIMEHeaderAlt)
             if loc0 < 0:
                 # nothing else to try
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "Failed to detect the begining of the XML header.", "Doppler"
                 )
@@ -747,7 +934,7 @@ class DopplerTable:
         # Look for the string announcing the binary part.
         loc1 = headerBytes.find(binPartMIMEHeader, loc0)
         if loc1 < 0:
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException(
                 "Failed to detect the begining of the binary part.", "Doppler"
             )
@@ -757,10 +944,10 @@ class DopplerTable:
 
         xmldom = minidom.parseString(xmlHeader)
         if not xmldom.hasChildNodes():
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException("XML is not properly structured.", "Doppler")
 
-        attributesSeq = []
+        self._attributesSeq = []
         byteOrderStr = None
         versionStr = "-1"
 
@@ -770,21 +957,20 @@ class DopplerTable:
             # assume Big_Endian and the default order of the elements
             byteOrderStr = "Big_Endian"
 
-            attributesSeq.append("dopplerId")
+            self._attributesSeq.append("dopplerId")
 
-            attributesSeq.append("sourceId")
+            self._attributesSeq.append("sourceId")
 
-            attributesSeq.append("transitionIndex")
+            self._attributesSeq.append("transitionIndex")
 
-            attributesSeq.append("velDef")
+            self._attributesSeq.append("velDef")
 
             versionStr = "2"
-
         else:
             # c++ and Java just assume it then must be a Doppler table
             # this is more insistant, just in case
             if hdrdom.nodeName != "DopplerTable":
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "XML Header is not from the expected table.", "Doppler"
                 )
@@ -797,7 +983,7 @@ class DopplerTable:
                 versionStr = hdrdom.attributes.getNamedItem("schemaVersion").value
 
             if not hdrdom.hasChildNodes():
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "THe XML header is missing all of the expected elements.", "Doppler"
                 )
@@ -806,51 +992,51 @@ class DopplerTable:
             for hdrnode in hdrdom.childNodes:
                 if hdrnode.nodeName == "BulkStoreRef":
                     if byteOrderStr is not None:
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "More than one BulkStoreRef element seen. Invalid XML header.",
                             "Doppler",
                         )
                     if not hdrnode.hasAttributes():
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "BulkStoreRef does not contain any attributes. Invalid XML header.",
                             "Doppler",
                         )
                     byteOrderAttr = hdrnode.attributes.getNamedItem("byteOrder")
                     if byteOrderAttr is None:
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "byteOrder attribute not found in BulkStoreRef element. Invalid XML header.",
                             "Doppler",
                         )
                     byteOrderStr = byteOrderAttr.value
                 elif hdrnode.nodeName == "Attributes":
-                    if len(attributesSeq) > 0:
-                        byteStream.close()
+                    if len(self._attributesSeq) > 0:
+                        self._byteStream.close()
                         raise ConversionException(
                             "More than one Attributes node seen. Invalid XML header.",
                             "Doppler",
                         )
                     if not hdrnode.hasChildNodes():
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "Attributes element has no child nodes. Invalid XML header.",
                             "Doppler",
                         )
                     for attrnode in hdrnode.childNodes:
                         if attrnode.nodeType == attrnode.ELEMENT_NODE:
-                            attributesSeq.append(str(attrnode.nodeName))
+                            self._attributesSeq.append(str(attrnode.nodeName))
 
         if byteOrderStr is None:
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException(
                 "BulkStoreRef element not seen and this is not an older version 2 XML header. Invalid XML header.",
                 "Doppler",
             )
 
-        if len(attributesSeq) == 0:
-            byteStream.close()
+        if len(self._attributesSeq) == 0:
+            self._byteStream.close()
             raise ConversionException(
                 "Attributes element not seen and this is not an older version 2 XML header. Invalid XML header.",
                 "Doppler",
@@ -859,18 +1045,18 @@ class DopplerTable:
         byteOrder = ByteOrder(byteOrderStr)
 
         # seek to the start of the binary part
-        byteStream.seek(loc1 + len(binPartMIMEHeader))
+        self._byteStream.seek(loc1 + len(binPartMIMEHeader))
 
         # and create the class that manages that stream and returns values as requested
-        eis = EndianInput(byteStream, byteOrder)
+        self._eis = EndianInput(self._byteStream, byteOrder)
 
-        self._entity = Entity.fromBin(eis)
+        self._entity = Entity.fromBin(self._eis)
 
         # containerEntity is not used, but it is next
-        containerEntity = Entity.fromBin(eis)
+        containerEntity = Entity.fromBin(self._eis)
 
         # the number of rows
-        numRows = eis.readInt()
+        numRows = self._eis.readInt()
         if numRows == -1:
             # when this happens (used by eVLA, I believe) use the expected size from ASDM.xml
             numRows = self._container.getExpectedTableSize("Doppler")
@@ -878,48 +1064,65 @@ class DopplerTable:
         # c++ reports an error when numRows is != -1 and does not agree with the value in the ASDM.xml
         # Java just uses numRows (but doesn't cover the case when numRows == -1)
         # do not check or report any difference here but cover the numRows==-1 case above
+
+        # rows are not fully read here, just the starting location, the key information, and timeInterval
+        self._lastBinRow = None
+        self._lastBinRowLoc = -1
         try:
             for i in range(numRows):
-                self.checkAndAdd(
-                    DopplerRow.fromBin(eis, self, attributesSeq),
-                    self._checkRowUniqueness,
+                rowStart = self._eis.tell()
+
+                # non temporal, auto incrementable, other keywords, this needs a context
+                dopplerId, sourceId = DopplerRow.skipWithContextFromBin(
+                    self._eis, self._attributesSeq
                 )
-                # print("row %s added, loc = %s" % (i, eis.tell()))
+                keystr = self.Key(sourceId)
+                self.checkAndAdd(
+                    (rowStart, keystr, dopplerId), (not self._checkRowUniqueness)
+                )
+
         except DuplicateKey as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             # reraise it as a ConversionException
             raise ConversionException(str(exc), "DopplerTable") from None
         except UniquenessViolationException as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             msg = "UniquenessViolationException while adding row : %s" % str(exc)
             # raise a ConversionException using this msg
             raise ConversionException(msg, "DopplerTable") from None
         except Exception as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             raise ConversionException(
                 "Error while reading binary data, the exception was " + str(exc),
-                "Doppler",
+                "DopplerTable",
             ) from None
-
-        # there is no harm in closing both
-        # print("closing")
-        eis.close()
-        byteStream.close()
-        # print("checking")
-        # print("eis : %s" % eis.closed())
-        # print("byteStream : %s" % byteStream.closed)
 
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a DopplerTable as those produced  by the toFile method.
+        Reads and parses a file containing a representation of a DopplerTable as those produced by the toFile method.
         This table is populated with the result of the parsing.
         param directory The name of the directory containing the file te be read and parsed.
-        raises ConversionException If any error occurs while reading the
+
+        raises ConversionException if any error occurs while reading the
         files in the directory or parsing them.
+
+        raises ConversionException if some rows are already known or if an attempt was made to read from a
+        binary table file and that resulted in an unexpected exception, leaving the object in a mixed state.
         """
+        # check if this is allowed
+        if (
+            (self.size() > 0)
+            or (self._eis is not None)
+            or (self._byteStream is not None)
+        ):
+            raise ConversionException(
+                "A table can not be set from a file once the size is > 0 or if an unexpected error happened while reading a binary table.",
+                "DopplerTable",
+            )
+
         if not isinstance(directory, str):
             print("directory must be a string")
 
@@ -948,17 +1151,23 @@ class DopplerTable:
         # This uses a buffered byte stream. Created here and then
         # handed off to the setFromMIME method, which is responsible for closing it.
 
+        if self._byteStream is not None and not self._byteStream.closed:
+            raise ConversionException(
+                "The binary table file is already opened and can not be re-opened. This should never happen",
+                "DopplerTable",
+            )
+
         filename = os.path.join(directory, "Doppler.bin")
-        byteStream = None
+        self._byteStream = None
         try:
-            byteStream = open(filename, "rb")
+            self._byteStream = open(filename, "rb")
         except Exception as exc:
             raise ConversionException(
                 "Error while opening " + filename + ". The exception was " + str(exc),
-                "Doppler",
+                "DopplerTable",
             )
 
-        self.setFromMIME(byteStream)
+        self.setFromMIME()
 
     def setFromXMLFile(self, directory):
         """

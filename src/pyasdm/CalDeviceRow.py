@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.CalibrationDevice import CalibrationDevice
 
@@ -427,7 +431,7 @@ class CalDeviceRow:
         eos.writeInt(len(self._calLoadNames))
         for i in range(len(self._calLoadNames)):
 
-            eos.writeString(str(self._calLoadNames[i]))
+            eos.writeInt(int(self._calLoadNames[i].getValue()))
 
         eos.writeBool(self._numReceptorExists)
         if self._numReceptorExists:
@@ -478,6 +482,8 @@ class CalDeviceRow:
         if self._temperatureLoadExists:
 
             Temperature.listToBin(self._temperatureLoad, eos)
+
+    # the static fromBin methods to extract each field from an EndianInput stream
 
     @staticmethod
     def antennaIdFromBin(row, eis):
@@ -624,6 +630,143 @@ class CalDeviceRow:
         _fromBinMethods["coupledNoiseCal"] = CalDeviceRow.coupledNoiseCalFromBin
         _fromBinMethods["temperatureLoad"] = CalDeviceRow.temperatureLoadFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipFeedIdFromBin(eis):
+        """
+        Skip the feedId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumCalloadFromBin(eis):
+        """
+        Skip the numCalload in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipCalLoadNamesFromBin(eis):
+        """
+        Skip the calLoadNames in row from the EndianInput (eis) instance.
+        """
+
+        calLoadNamesDim1 = eis.readInt()
+        for _ in range(calLoadNamesDim1):
+            # CalibrationDevice stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipNumReceptorFromBin(eis):
+        """
+        Skip the optional numReceptor in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipCalEffFromBin(eis):
+        """
+        Skip the optional calEff in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            calEffDim1 = eis.readInt()
+            calEffDim2 = eis.readInt()
+            for _ in range(calEffDim1):
+                for _ in range(calEffDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipNoiseCalFromBin(eis):
+        """
+        Skip the optional noiseCal in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            noiseCalDim1 = eis.readInt()
+            for _ in range(noiseCalDim1):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipCoupledNoiseCalFromBin(eis):
+        """
+        Skip the optional coupledNoiseCal in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            coupledNoiseCalDim1 = eis.readInt()
+            coupledNoiseCalDim2 = eis.readInt()
+            for _ in range(coupledNoiseCalDim1):
+                for _ in range(coupledNoiseCalDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipTemperatureLoadFromBin(eis):
+        """
+        Skip the optional temperatureLoad in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = CalDeviceRow.skipAntennaIdFromBin
+        _skipBinMethods["spectralWindowId"] = CalDeviceRow.skipSpectralWindowIdFromBin
+        _skipBinMethods["timeInterval"] = CalDeviceRow.skipTimeIntervalFromBin
+        _skipBinMethods["feedId"] = CalDeviceRow.skipFeedIdFromBin
+        _skipBinMethods["numCalload"] = CalDeviceRow.skipNumCalloadFromBin
+        _skipBinMethods["calLoadNames"] = CalDeviceRow.skipCalLoadNamesFromBin
+
+        _skipBinMethods["numReceptor"] = CalDeviceRow.skipNumReceptorFromBin
+        _skipBinMethods["calEff"] = CalDeviceRow.skipCalEffFromBin
+        _skipBinMethods["noiseCal"] = CalDeviceRow.skipNoiseCalFromBin
+        _skipBinMethods["coupledNoiseCal"] = CalDeviceRow.skipCoupledNoiseCalFromBin
+        _skipBinMethods["temperatureLoad"] = CalDeviceRow.skipTemperatureLoadFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -650,7 +793,81 @@ class CalDeviceRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalDevice",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (antennaId, spectralWindowId, timeInterval, feedId)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        spectralWindowId = None
+
+        timeInterval = None
+
+        feedId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalDevice",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "spectralWindowId":
+
+                spectralWindowId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            elif attributeName == "feedId":
+
+                feedId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, spectralWindowId, timeInterval, feedId)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1266,5 +1483,8 @@ class CalDeviceRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalDeviceRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalDeviceRow.initSkipBinMethods()

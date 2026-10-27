@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.SubscanIntent import SubscanIntent
 
@@ -411,6 +415,8 @@ class SubscanRow:
 
             eos.writeString(str(self._correlatorCalibration))
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def execBlockIdFromBin(row, eis):
         """
@@ -529,6 +535,128 @@ class SubscanRow:
             SubscanRow.correlatorCalibrationFromBin
         )
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipExecBlockIdFromBin(eis):
+        """
+        Skip the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipScanNumberFromBin(eis):
+        """
+        Skip the scanNumber in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipSubscanNumberFromBin(eis):
+        """
+        Skip the subscanNumber in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipStartTimeFromBin(eis):
+        """
+        Skip the startTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndTimeFromBin(eis):
+        """
+        Skip the endTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipFieldNameFromBin(eis):
+        """
+        Skip the fieldName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipSubscanIntentFromBin(eis):
+        """
+        Skip the subscanIntent in row from the EndianInput (eis) instance.
+        """
+
+        # SubscanIntent stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipNumIntegrationFromBin(eis):
+        """
+        Skip the numIntegration in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumSubintegrationFromBin(eis):
+        """
+        Skip the numSubintegration in row from the EndianInput (eis) instance.
+        """
+
+        numSubintegrationDim1 = eis.readInt()
+        for _ in range(numSubintegrationDim1):
+            eis.skipInt()
+
+    @staticmethod
+    def skipSubscanModeFromBin(eis):
+        """
+        Skip the optional subscanMode in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # SwitchingMode stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipCorrelatorCalibrationFromBin(eis):
+        """
+        Skip the optional correlatorCalibration in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            # CorrelatorCalibration stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["execBlockId"] = SubscanRow.skipExecBlockIdFromBin
+        _skipBinMethods["scanNumber"] = SubscanRow.skipScanNumberFromBin
+        _skipBinMethods["subscanNumber"] = SubscanRow.skipSubscanNumberFromBin
+        _skipBinMethods["startTime"] = SubscanRow.skipStartTimeFromBin
+        _skipBinMethods["endTime"] = SubscanRow.skipEndTimeFromBin
+        _skipBinMethods["fieldName"] = SubscanRow.skipFieldNameFromBin
+        _skipBinMethods["subscanIntent"] = SubscanRow.skipSubscanIntentFromBin
+        _skipBinMethods["numIntegration"] = SubscanRow.skipNumIntegrationFromBin
+        _skipBinMethods["numSubintegration"] = SubscanRow.skipNumSubintegrationFromBin
+
+        _skipBinMethods["subscanMode"] = SubscanRow.skipSubscanModeFromBin
+        _skipBinMethods["correlatorCalibration"] = (
+            SubscanRow.skipCorrelatorCalibrationFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -555,7 +683,29 @@ class SubscanRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Subscan",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute scanNumber
 
@@ -1032,5 +1182,8 @@ class SubscanRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 SubscanRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+SubscanRow.initSkipBinMethods()

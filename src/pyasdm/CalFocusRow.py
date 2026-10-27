@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.ReceiverBand import ReceiverBand
 
@@ -1062,7 +1066,7 @@ class CalFocusRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(str(self._polarizationTypes[i]))
+            eos.writeInt(int(self._polarizationTypes[i].getValue()))
 
         eos.writeInt(len(self._wereFixed))
         for i in range(len(self._wereFixed)):
@@ -1188,6 +1192,8 @@ class CalFocusRow:
         if self._fitRMSExists:
 
             Length.listToBin(self._fitRMS, eos)
+
+    # the static fromBin methods to extract each field from an EndianInput stream
 
     @staticmethod
     def antennaNameFromBin(row, eis):
@@ -1596,6 +1602,425 @@ class CalFocusRow:
         _fromBinMethods["illumOffsetError"] = CalFocusRow.illumOffsetErrorFromBin
         _fromBinMethods["fitRMS"] = CalFocusRow.fitRMSFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaNameFromBin(eis):
+        """
+        Skip the antennaName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipReceiverBandFromBin(eis):
+        """
+        Skip the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverBand stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipAmbientTemperatureFromBin(eis):
+        """
+        Skip the ambientTemperature in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skipBin(eis)
+
+    @staticmethod
+    def skipAtmPhaseCorrectionFromBin(eis):
+        """
+        Skip the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        # AtmPhaseCorrection stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipFocusMethodFromBin(eis):
+        """
+        Skip the focusMethod in row from the EndianInput (eis) instance.
+        """
+
+        # FocusMethod stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipFrequencyRangeFromBin(eis):
+        """
+        Skip the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipPointingDirectionFromBin(eis):
+        """
+        Skip the pointingDirection in row from the EndianInput (eis) instance.
+        """
+
+        Angle.skip1DBin(eis)
+
+    @staticmethod
+    def skipNumReceptorFromBin(eis):
+        """
+        Skip the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipPolarizationTypesFromBin(eis):
+        """
+        Skip the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        for _ in range(polarizationTypesDim1):
+            # PolarizationType stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipWereFixedFromBin(eis):
+        """
+        Skip the wereFixed in row from the EndianInput (eis) instance.
+        """
+
+        wereFixedDim1 = eis.readInt()
+        for _ in range(wereFixedDim1):
+            eis.skipBool()
+
+    @staticmethod
+    def skipOffsetFromBin(eis):
+        """
+        Skip the offset in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip2DBin(eis)
+
+    @staticmethod
+    def skipOffsetErrorFromBin(eis):
+        """
+        Skip the offsetError in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip2DBin(eis)
+
+    @staticmethod
+    def skipOffsetWasTiedFromBin(eis):
+        """
+        Skip the offsetWasTied in row from the EndianInput (eis) instance.
+        """
+
+        offsetWasTiedDim1 = eis.readInt()
+        offsetWasTiedDim2 = eis.readInt()
+        for _ in range(offsetWasTiedDim1):
+            for _ in range(offsetWasTiedDim2):
+                eis.skipBool()
+
+    @staticmethod
+    def skipReducedChiSquaredFromBin(eis):
+        """
+        Skip the reducedChiSquared in row from the EndianInput (eis) instance.
+        """
+
+        reducedChiSquaredDim1 = eis.readInt()
+        reducedChiSquaredDim2 = eis.readInt()
+        for _ in range(reducedChiSquaredDim1):
+            for _ in range(reducedChiSquaredDim2):
+                eis.skipDouble()
+
+    @staticmethod
+    def skipPositionFromBin(eis):
+        """
+        Skip the position in row from the EndianInput (eis) instance.
+        """
+
+        Length.skip2DBin(eis)
+
+    @staticmethod
+    def skipPolarizationsAveragedFromBin(eis):
+        """
+        Skip the optional polarizationsAveraged in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipFocusCurveWidthFromBin(eis):
+        """
+        Skip the optional focusCurveWidth in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip2DBin(eis)
+
+    @staticmethod
+    def skipFocusCurveWidthErrorFromBin(eis):
+        """
+        Skip the optional focusCurveWidthError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip2DBin(eis)
+
+    @staticmethod
+    def skipFocusCurveWasFixedFromBin(eis):
+        """
+        Skip the optional focusCurveWasFixed in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            focusCurveWasFixedDim1 = eis.readInt()
+            for _ in range(focusCurveWasFixedDim1):
+                eis.skipBool()
+
+    @staticmethod
+    def skipOffIntensityFromBin(eis):
+        """
+        Skip the optional offIntensity in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def skipOffIntensityErrorFromBin(eis):
+        """
+        Skip the optional offIntensityError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def skipOffIntensityWasFixedFromBin(eis):
+        """
+        Skip the optional offIntensityWasFixed in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipPeakIntensityFromBin(eis):
+        """
+        Skip the optional peakIntensity in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def skipPeakIntensityErrorFromBin(eis):
+        """
+        Skip the optional peakIntensityError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Temperature.skip1DBin(eis)
+
+    @staticmethod
+    def skipPeakIntensityWasFixedFromBin(eis):
+        """
+        Skip the optional peakIntensityWasFixed in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipBool()
+
+    @staticmethod
+    def skipAstigmPlusFromBin(eis):
+        """
+        Skip the optional astigmPlus in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipAstigmPlusErrorFromBin(eis):
+        """
+        Skip the optional astigmPlusError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipAstigmMultFromBin(eis):
+        """
+        Skip the optional astigmMult in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipAstigmMultErrorFromBin(eis):
+        """
+        Skip the optional astigmMultError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip1DBin(eis)
+
+    @staticmethod
+    def skipIllumOffsetFromBin(eis):
+        """
+        Skip the optional illumOffset in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip2DBin(eis)
+
+    @staticmethod
+    def skipIllumOffsetErrorFromBin(eis):
+        """
+        Skip the optional illumOffsetError in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip2DBin(eis)
+
+    @staticmethod
+    def skipFitRMSFromBin(eis):
+        """
+        Skip the optional fitRMS in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            Length.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaName"] = CalFocusRow.skipAntennaNameFromBin
+        _skipBinMethods["receiverBand"] = CalFocusRow.skipReceiverBandFromBin
+        _skipBinMethods["calDataId"] = CalFocusRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalFocusRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalFocusRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalFocusRow.skipEndValidTimeFromBin
+        _skipBinMethods["ambientTemperature"] = (
+            CalFocusRow.skipAmbientTemperatureFromBin
+        )
+        _skipBinMethods["atmPhaseCorrection"] = (
+            CalFocusRow.skipAtmPhaseCorrectionFromBin
+        )
+        _skipBinMethods["focusMethod"] = CalFocusRow.skipFocusMethodFromBin
+        _skipBinMethods["frequencyRange"] = CalFocusRow.skipFrequencyRangeFromBin
+        _skipBinMethods["pointingDirection"] = CalFocusRow.skipPointingDirectionFromBin
+        _skipBinMethods["numReceptor"] = CalFocusRow.skipNumReceptorFromBin
+        _skipBinMethods["polarizationTypes"] = CalFocusRow.skipPolarizationTypesFromBin
+        _skipBinMethods["wereFixed"] = CalFocusRow.skipWereFixedFromBin
+        _skipBinMethods["offset"] = CalFocusRow.skipOffsetFromBin
+        _skipBinMethods["offsetError"] = CalFocusRow.skipOffsetErrorFromBin
+        _skipBinMethods["offsetWasTied"] = CalFocusRow.skipOffsetWasTiedFromBin
+        _skipBinMethods["reducedChiSquared"] = CalFocusRow.skipReducedChiSquaredFromBin
+        _skipBinMethods["position"] = CalFocusRow.skipPositionFromBin
+
+        _skipBinMethods["polarizationsAveraged"] = (
+            CalFocusRow.skipPolarizationsAveragedFromBin
+        )
+        _skipBinMethods["focusCurveWidth"] = CalFocusRow.skipFocusCurveWidthFromBin
+        _skipBinMethods["focusCurveWidthError"] = (
+            CalFocusRow.skipFocusCurveWidthErrorFromBin
+        )
+        _skipBinMethods["focusCurveWasFixed"] = (
+            CalFocusRow.skipFocusCurveWasFixedFromBin
+        )
+        _skipBinMethods["offIntensity"] = CalFocusRow.skipOffIntensityFromBin
+        _skipBinMethods["offIntensityError"] = CalFocusRow.skipOffIntensityErrorFromBin
+        _skipBinMethods["offIntensityWasFixed"] = (
+            CalFocusRow.skipOffIntensityWasFixedFromBin
+        )
+        _skipBinMethods["peakIntensity"] = CalFocusRow.skipPeakIntensityFromBin
+        _skipBinMethods["peakIntensityError"] = (
+            CalFocusRow.skipPeakIntensityErrorFromBin
+        )
+        _skipBinMethods["peakIntensityWasFixed"] = (
+            CalFocusRow.skipPeakIntensityWasFixedFromBin
+        )
+        _skipBinMethods["astigmPlus"] = CalFocusRow.skipAstigmPlusFromBin
+        _skipBinMethods["astigmPlusError"] = CalFocusRow.skipAstigmPlusErrorFromBin
+        _skipBinMethods["astigmMult"] = CalFocusRow.skipAstigmMultFromBin
+        _skipBinMethods["astigmMultError"] = CalFocusRow.skipAstigmMultErrorFromBin
+        _skipBinMethods["illumOffset"] = CalFocusRow.skipIllumOffsetFromBin
+        _skipBinMethods["illumOffsetError"] = CalFocusRow.skipIllumOffsetErrorFromBin
+        _skipBinMethods["fitRMS"] = CalFocusRow.skipFitRMSFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -1622,7 +2047,29 @@ class CalFocusRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalFocus",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute startValidTime
 
@@ -3823,5 +4270,8 @@ class CalFocusRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalFocusRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalFocusRow.initSkipBinMethods()

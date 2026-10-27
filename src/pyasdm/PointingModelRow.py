@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.PolarizationType import PolarizationType
 
@@ -390,6 +394,8 @@ class PointingModelRow:
 
                 eos.writeStr(self._coeffFormula[i])
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -507,6 +513,121 @@ class PointingModelRow:
 
         _fromBinMethods["coeffFormula"] = PointingModelRow.coeffFormulaFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipPointingModelIdFromBin(eis):
+        """
+        Skip the pointingModelId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumCoeffFromBin(eis):
+        """
+        Skip the numCoeff in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipCoeffNameFromBin(eis):
+        """
+        Skip the coeffName in row from the EndianInput (eis) instance.
+        """
+
+        coeffNameDim1 = eis.readInt()
+        for _ in range(coeffNameDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipCoeffValFromBin(eis):
+        """
+        Skip the coeffVal in row from the EndianInput (eis) instance.
+        """
+
+        coeffValDim1 = eis.readInt()
+        for _ in range(coeffValDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipPolarizationTypeFromBin(eis):
+        """
+        Skip the polarizationType in row from the EndianInput (eis) instance.
+        """
+
+        # PolarizationType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipReceiverBandFromBin(eis):
+        """
+        Skip the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverBand stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipAssocNatureFromBin(eis):
+        """
+        Skip the assocNature in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipAssocPointingModelIdFromBin(eis):
+        """
+        Skip the assocPointingModelId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipCoeffFormulaFromBin(eis):
+        """
+        Skip the optional coeffFormula in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            coeffFormulaDim1 = eis.readInt()
+            for _ in range(coeffFormulaDim1):
+                eis.skipStr()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = PointingModelRow.skipAntennaIdFromBin
+        _skipBinMethods["pointingModelId"] = PointingModelRow.skipPointingModelIdFromBin
+        _skipBinMethods["numCoeff"] = PointingModelRow.skipNumCoeffFromBin
+        _skipBinMethods["coeffName"] = PointingModelRow.skipCoeffNameFromBin
+        _skipBinMethods["coeffVal"] = PointingModelRow.skipCoeffValFromBin
+        _skipBinMethods["polarizationType"] = (
+            PointingModelRow.skipPolarizationTypeFromBin
+        )
+        _skipBinMethods["receiverBand"] = PointingModelRow.skipReceiverBandFromBin
+        _skipBinMethods["assocNature"] = PointingModelRow.skipAssocNatureFromBin
+        _skipBinMethods["assocPointingModelId"] = (
+            PointingModelRow.skipAssocPointingModelIdFromBin
+        )
+
+        _skipBinMethods["coeffFormula"] = PointingModelRow.skipCoeffFormulaFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -533,7 +654,70 @@ class PointingModelRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " PointingModel",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis,
+        in order, this skips one row by skipping values from that EndianInput in
+        the expected order. Only values necessary to understand that row plus
+        the context values appropriate for the PointingModelRow are read. The context
+        tuple that is returned is (antennaId, pointingModelId)
+
+        This allows the pointingModelId to be used
+        appropriately when filling a binary table version of PointingModelTable.
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        pointingModelId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " PointingModel",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "pointingModelId":
+
+                pointingModelId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, pointingModelId)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute pointingModelId
 
@@ -1025,5 +1209,8 @@ class PointingModelRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 PointingModelRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+PointingModelRow.initSkipBinMethods()

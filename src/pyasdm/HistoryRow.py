@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from xml.dom import minidom
 
@@ -307,6 +311,8 @@ class HistoryRow:
 
         eos.writeStr(self._appParms)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def execBlockIdFromBin(row, eis):
         """
@@ -395,6 +401,96 @@ class HistoryRow:
         _fromBinMethods["cliCommand"] = HistoryRow.cliCommandFromBin
         _fromBinMethods["appParms"] = HistoryRow.appParmsFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipExecBlockIdFromBin(eis):
+        """
+        Skip the execBlockId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeFromBin(eis):
+        """
+        Skip the time in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipMessageFromBin(eis):
+        """
+        Skip the message in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipPriorityFromBin(eis):
+        """
+        Skip the priority in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipOriginFromBin(eis):
+        """
+        Skip the origin in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipObjectIdFromBin(eis):
+        """
+        Skip the objectId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipApplicationFromBin(eis):
+        """
+        Skip the application in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipCliCommandFromBin(eis):
+        """
+        Skip the cliCommand in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipAppParmsFromBin(eis):
+        """
+        Skip the appParms in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["execBlockId"] = HistoryRow.skipExecBlockIdFromBin
+        _skipBinMethods["time"] = HistoryRow.skipTimeFromBin
+        _skipBinMethods["message"] = HistoryRow.skipMessageFromBin
+        _skipBinMethods["priority"] = HistoryRow.skipPriorityFromBin
+        _skipBinMethods["origin"] = HistoryRow.skipOriginFromBin
+        _skipBinMethods["objectId"] = HistoryRow.skipObjectIdFromBin
+        _skipBinMethods["application"] = HistoryRow.skipApplicationFromBin
+        _skipBinMethods["cliCommand"] = HistoryRow.skipCliCommandFromBin
+        _skipBinMethods["appParms"] = HistoryRow.skipAppParmsFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -421,7 +517,69 @@ class HistoryRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " History",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (execBlockId, time)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        execBlockId = None
+
+        time = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " History",
+                )
+
+            if attributeName == "execBlockId":
+
+                execBlockId = Tag.fromBin(eis)
+
+            elif attributeName == "time":
+
+                time = ArrayTime.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (execBlockId, time)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute time
 
@@ -766,5 +924,8 @@ class HistoryRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 HistoryRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+HistoryRow.initSkipBinMethods()

@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.PolarizationType import PolarizationType
 
@@ -371,6 +375,8 @@ class FocusModelRow:
 
         eos.writeInt(self._assocFocusModelId)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -483,6 +489,115 @@ class FocusModelRow:
         _fromBinMethods["assocNature"] = FocusModelRow.assocNatureFromBin
         _fromBinMethods["assocFocusModelId"] = FocusModelRow.assocFocusModelIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipFocusModelIdFromBin(eis):
+        """
+        Skip the focusModelId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipPolarizationTypeFromBin(eis):
+        """
+        Skip the polarizationType in row from the EndianInput (eis) instance.
+        """
+
+        # PolarizationType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipReceiverBandFromBin(eis):
+        """
+        Skip the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverBand stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipNumCoeffFromBin(eis):
+        """
+        Skip the numCoeff in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipCoeffNameFromBin(eis):
+        """
+        Skip the coeffName in row from the EndianInput (eis) instance.
+        """
+
+        coeffNameDim1 = eis.readInt()
+        for _ in range(coeffNameDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipCoeffFormulaFromBin(eis):
+        """
+        Skip the coeffFormula in row from the EndianInput (eis) instance.
+        """
+
+        coeffFormulaDim1 = eis.readInt()
+        for _ in range(coeffFormulaDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipCoeffValFromBin(eis):
+        """
+        Skip the coeffVal in row from the EndianInput (eis) instance.
+        """
+
+        coeffValDim1 = eis.readInt()
+        for _ in range(coeffValDim1):
+            eis.skipFloat()
+
+    @staticmethod
+    def skipAssocNatureFromBin(eis):
+        """
+        Skip the assocNature in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipAssocFocusModelIdFromBin(eis):
+        """
+        Skip the assocFocusModelId in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = FocusModelRow.skipAntennaIdFromBin
+        _skipBinMethods["focusModelId"] = FocusModelRow.skipFocusModelIdFromBin
+        _skipBinMethods["polarizationType"] = FocusModelRow.skipPolarizationTypeFromBin
+        _skipBinMethods["receiverBand"] = FocusModelRow.skipReceiverBandFromBin
+        _skipBinMethods["numCoeff"] = FocusModelRow.skipNumCoeffFromBin
+        _skipBinMethods["coeffName"] = FocusModelRow.skipCoeffNameFromBin
+        _skipBinMethods["coeffFormula"] = FocusModelRow.skipCoeffFormulaFromBin
+        _skipBinMethods["coeffVal"] = FocusModelRow.skipCoeffValFromBin
+        _skipBinMethods["assocNature"] = FocusModelRow.skipAssocNatureFromBin
+        _skipBinMethods["assocFocusModelId"] = (
+            FocusModelRow.skipAssocFocusModelIdFromBin
+        )
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -509,7 +624,70 @@ class FocusModelRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " FocusModel",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis,
+        in order, this skips one row by skipping values from that EndianInput in
+        the expected order. Only values necessary to understand that row plus
+        the context values appropriate for the FocusModelRow are read. The context
+        tuple that is returned is (antennaId, focusModelId)
+
+        This allows the focusModelId to be used
+        appropriately when filling a binary table version of FocusModelTable.
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        focusModelId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " FocusModel",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "focusModelId":
+
+                focusModelId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, focusModelId)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute focusModelId
 
@@ -1002,5 +1180,8 @@ class FocusModelRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 FocusModelRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+FocusModelRow.initSkipBinMethods()

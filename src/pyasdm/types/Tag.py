@@ -242,6 +242,13 @@ class Tag:
         return Tag(ein.readString())
 
     @staticmethod
+    def skipBin(ein):
+        """
+        Skip a Tag from an EndianInput instance.
+        """
+        ein.readString()
+
+    @staticmethod
     def from1DBin(ein):
         """
         Create and return a list of Tag values from an EndianInput instance.
@@ -252,6 +259,15 @@ class Tag:
             result.append(Tag.fromBin(ein))
 
         return result
+
+    @staticmethod
+    def skip1DBin(ein):
+        """
+        Skip a list of Tag values from an EndianInput instance.
+        """
+        ndim = ein.readInt()
+        for _ in range(ndim):
+            Tag.skipBin(ein)
 
     def toBin(self, eout):
         """

@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.WVRMethod import WVRMethod
 
@@ -388,6 +392,8 @@ class WVMCalRow:
 
         Tag.listToBin(self._inputAntennaId, eos)
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def antennaIdFromBin(row, eis):
         """
@@ -507,6 +513,121 @@ class WVMCalRow:
         _fromBinMethods["refTemp"] = WVMCalRow.refTempFromBin
         _fromBinMethods["inputAntennaId"] = WVMCalRow.inputAntennaIdFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAntennaIdFromBin(eis):
+        """
+        Skip the antennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipSpectralWindowIdFromBin(eis):
+        """
+        Skip the spectralWindowId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipTimeIntervalFromBin(eis):
+        """
+        Skip the timeInterval in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTimeInterval.skipBin(eis)
+
+    @staticmethod
+    def skipWvrMethodFromBin(eis):
+        """
+        Skip the wvrMethod in row from the EndianInput (eis) instance.
+        """
+
+        # WVRMethod stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipPolyFreqLimitsFromBin(eis):
+        """
+        Skip the polyFreqLimits in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipNumInputAntennaFromBin(eis):
+        """
+        Skip the numInputAntenna in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumChanFromBin(eis):
+        """
+        Skip the numChan in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumPolyFromBin(eis):
+        """
+        Skip the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipPathCoeffFromBin(eis):
+        """
+        Skip the pathCoeff in row from the EndianInput (eis) instance.
+        """
+
+        pathCoeffDim1 = eis.readInt()
+        pathCoeffDim2 = eis.readInt()
+        pathCoeffDim3 = eis.readInt()
+        for _ in range(pathCoeffDim1):
+            for _ in range(pathCoeffDim2):
+                for _ in range(pathCoeffDim3):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipRefTempFromBin(eis):
+        """
+        Skip the refTemp in row from the EndianInput (eis) instance.
+        """
+
+        Temperature.skip2DBin(eis)
+
+    @staticmethod
+    def skipInputAntennaIdFromBin(eis):
+        """
+        Skip the inputAntennaId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skip1DBin(eis)
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["antennaId"] = WVMCalRow.skipAntennaIdFromBin
+        _skipBinMethods["spectralWindowId"] = WVMCalRow.skipSpectralWindowIdFromBin
+        _skipBinMethods["timeInterval"] = WVMCalRow.skipTimeIntervalFromBin
+        _skipBinMethods["wvrMethod"] = WVMCalRow.skipWvrMethodFromBin
+        _skipBinMethods["polyFreqLimits"] = WVMCalRow.skipPolyFreqLimitsFromBin
+        _skipBinMethods["numInputAntenna"] = WVMCalRow.skipNumInputAntennaFromBin
+        _skipBinMethods["numChan"] = WVMCalRow.skipNumChanFromBin
+        _skipBinMethods["numPoly"] = WVMCalRow.skipNumPolyFromBin
+        _skipBinMethods["pathCoeff"] = WVMCalRow.skipPathCoeffFromBin
+        _skipBinMethods["refTemp"] = WVMCalRow.skipRefTempFromBin
+        _skipBinMethods["inputAntennaId"] = WVMCalRow.skipInputAntennaIdFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -533,7 +654,75 @@ class WVMCalRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " WVMCal",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    @staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The context tuple that is returned is
+        (antennaId, spectralWindowId, timeInterval)
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        spectralWindowId = None
+
+        timeInterval = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " WVMCal",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "spectralWindowId":
+
+                spectralWindowId = Tag.fromBin(eis)
+
+            elif attributeName == "timeInterval":
+
+                timeInterval = ArrayTimeInterval.fromBin(eis)
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, spectralWindowId, timeInterval)
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute timeInterval
 
@@ -1200,5 +1389,8 @@ class WVMCalRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 WVMCalRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+WVMCalRow.initSkipBinMethods()

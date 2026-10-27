@@ -25,6 +25,7 @@
 
 import pyasdm.utils
 import pyasdm.Parser
+import math
 
 
 class Complex:
@@ -217,9 +218,9 @@ class Complex:
         where x and y are strings representing the numbers.
         """
         return (
-            asdm.Parser.doubleToString(self._re)
+            pyasdm.Parser.doubleToString(self._re)
             + " "
-            + asdm.Parser.doubleToString(self._im)
+            + pyasdm.Parser.doubleToString(self._im)
         )
 
     @staticmethod
@@ -316,7 +317,7 @@ class Complex:
 
         # only check the first value
         if (len(complexList) > 0) and not isinstance(complexList[0], Complex):
-            raise (ValueError("complexList is not a list of Complex"))
+            raise ValueError("complexList is not a list of Complex")
 
         for thisComplex in complexList:
             thisComplex.toBin(eos)
@@ -392,9 +393,21 @@ class Complex:
 
         return a Complex
         """
-        reVal = eos.readDouble()
-        imVal = eos.readDouble()
+        reVal = eis.readDouble()
+        imVal = eis.readDouble()
         return Complex(reVal, imVal)
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of a Complex value
+        from an EndianInput instance
+
+        return a Complex
+        """
+        # two doubles
+        eis.skipDouble()
+        eis.skipDouble()
 
     @staticmethod
     def from1DBin(eis):
@@ -408,6 +421,17 @@ class Complex:
             result.append(Complex.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Complex values from an
+        EndianInput instance.
+        The integer giving the shape of the list is always read.
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Complex.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -427,6 +451,19 @@ class Complex:
         return result
 
     @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Complex values from an
+        EndianInput instance.
+        The integers giving the shape of the list are always read.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Complex.skipBin(eis)
+
+    @staticmethod
     def from3DBin(eis):
         """
         Read a 2D list of binary Complex values from an
@@ -442,6 +479,21 @@ class Complex:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 3D list of binary Complex values from an
+        EndianInput instance.
+        The integers giving the shape of the list are always read.
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Complex.skipBin(eis)
 
     def equals(self, otherComplex):
         """
@@ -471,7 +523,7 @@ class Complex:
         specified other complex number.
         """
         if not isinstance(other, Complex):
-            raise ("Attempt to compare a Complex to a non-Complex.")
+            raise ValueError("Attempt to compare a Complex to a non-Complex.")
 
         magThis = math.sqrt(self._re * self._re + self._im * self._im)
         magOther = math.sqrt(other._re * other._re + other._im * other._im)

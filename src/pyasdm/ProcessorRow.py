@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.ProcessorType import ProcessorType
 
@@ -255,6 +259,8 @@ class ProcessorRow:
 
         eos.writeString(str(self._processorSubType))
 
+    # the static fromBin methods to extract each field from an EndianInput stream
+
     @staticmethod
     def processorIdFromBin(row, eis):
         """
@@ -298,6 +304,53 @@ class ProcessorRow:
         _fromBinMethods["processorType"] = ProcessorRow.processorTypeFromBin
         _fromBinMethods["processorSubType"] = ProcessorRow.processorSubTypeFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipProcessorIdFromBin(eis):
+        """
+        Skip the processorId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipModeIdFromBin(eis):
+        """
+        Skip the modeId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipProcessorTypeFromBin(eis):
+        """
+        Skip the processorType in row from the EndianInput (eis) instance.
+        """
+
+        # ProcessorType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipProcessorSubTypeFromBin(eis):
+        """
+        Skip the processorSubType in row from the EndianInput (eis) instance.
+        """
+
+        # ProcessorSubType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["processorId"] = ProcessorRow.skipProcessorIdFromBin
+        _skipBinMethods["modeId"] = ProcessorRow.skipModeIdFromBin
+        _skipBinMethods["processorType"] = ProcessorRow.skipProcessorTypeFromBin
+        _skipBinMethods["processorSubType"] = ProcessorRow.skipProcessorSubTypeFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -324,7 +377,29 @@ class ProcessorRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Processor",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute processorId
 
@@ -482,5 +557,8 @@ class ProcessorRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 ProcessorRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+ProcessorRow.initSkipBinMethods()

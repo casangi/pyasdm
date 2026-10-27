@@ -29,6 +29,7 @@ from .ByteOrder import ByteOrder
 import io
 import struct
 import sys
+import os
 
 
 class EndianInput:
@@ -79,9 +80,20 @@ class EndianInput:
         Seek to some location in the stream being read. This always
         seeks relative to the start of the stream.
 
+        offset is bytes and must not be negative
+
         Returns the new position (which should equal offset).
         """
         return self._byteStream.seek(offset)
+
+    def currSeek(self, offset):
+        """
+        Seek to an offset relative to the current location.
+        offset is bytes and may be negative.
+
+        Returns the new position (current position + offset)
+        """
+        return self._byteStream.seek(offset, os.SEEK_CUR)
 
     def close(self):
         """
@@ -107,11 +119,24 @@ class EndianInput:
         """
         return bool.from_bytes(self._byteStream.read(1), self._byteOrder.getByteOrder())
 
+    def skipBool(self):
+        """
+        Skip 1 bool at the start of the current location.
+        """
+        # a bool is 1 byte
+        self.currSeek(1)
+
     def readByte(self):
         """
         Return the byte at the current location
         """
         return self._byteStream.read(1)
+
+    def skipByte(self):
+        """
+        Skip one byte at the current location
+        """
+        self.currSeek(1)
 
     def readShort(self):
         """
@@ -121,6 +146,12 @@ class EndianInput:
             self._byteStream.read(2), self._byteOrder.getByteOrder(), signed=True
         )
 
+    def skipShort(self):
+        """
+        Skip one 2-byte integer at the current location
+        """
+        self.currSeek(2)
+
     def readUShort(self):
         """
         Return the unsigned short integer at the current location as a python int.
@@ -128,6 +159,12 @@ class EndianInput:
         return int.from_bytes(
             self._byteStream.read(2), self.byteOrder.getByteOrder(), signed=False
         )
+
+    def skipUShort(self):
+        """
+        Skip one 2-byte unsigned integer at the current location
+        """
+        self.currSeek(2)
 
     def readInt(self):
         """
@@ -137,6 +174,12 @@ class EndianInput:
             self._byteStream.read(4), self._byteOrder.getByteOrder(), signed=True
         )
 
+    def skipInt(self):
+        """
+        Skip one 4-byte integer at the current location
+        """
+        self.currSeek(4)
+
     def readUInt(self):
         """
         Return the unsigned 4-byte integer at the current location as a python int.
@@ -144,6 +187,12 @@ class EndianInput:
         return int.from_bytes(
             self._bytesStream.read(4), self._byteOrder.getByteOrder(), signed=False
         )
+
+    def skipUInt(self):
+        """
+        Skip one unsigned 4-byte integer at the current location
+        """
+        self.currSeek(4)
 
     def readLongLong(self):
         """
@@ -153,11 +202,23 @@ class EndianInput:
             self._byteStream.read(8), self._byteOrder.getByteOrder(), signed=True
         )
 
+    def skipLongLong(self):
+        """
+        Skip one 8-byte integer at the current location
+        """
+        self.currSeek(8)
+
     def readLong(self):
         """
         Equivalent to readLongLong
         """
         return self.readLongLong()
+
+    def skipLong(self):
+        """
+        Equivalent to skipLongLong
+        """
+        self.skipLongLong()
 
     def readULongLong(self):
         """
@@ -166,6 +227,12 @@ class EndianInput:
         return int.from_bytes(
             self._byteStream.read(8), self._byteOrder.getByteOrder(), signed=False
         )
+
+    def skipULongLong(self):
+        """
+        Skip one unsigned 8-byte integer at the current location
+        """
+        self.currSeek(8)
 
     def readFloat(self):
         """
@@ -182,6 +249,12 @@ class EndianInput:
             # and unpack it into a float, in the native byte order
             return struct.unpack("f", intVal.to_bytes(4, sys.byteorder))[0]
 
+    def skipFloat(self):
+        """
+        Skip one 4-byte float at the current location
+        """
+        self.currSeek(4)
+
     def readDouble(self):
         """
         Return the 8-byte float at the current location as a float.
@@ -197,6 +270,12 @@ class EndianInput:
             # and unpack it into a double, in the native byte order
             return struct.unpack("d", intVal.to_bytes(8, sys.byteorder))[0]
 
+    def skipDouble(self):
+        """
+        Skip one 8-byte float at the current location
+        """
+        self.currSeek(8)
+
     def readString(self):
         """
         Return the string at the start of the current location.
@@ -207,6 +286,19 @@ class EndianInput:
         strLen = self.readInt()
         return str(self._byteStream.read(strLen).decode())
 
+    def skipString(self):
+        """
+        Skips the string at the start of the current location.
+
+        String are encoded as a 4-byte int specifying the number of characters
+        followed by those characters. The leading 4-byte int is always ready.
+
+        """
+        # the length of the string must always be read
+        strLen = self.readInt()
+        # skip that many characters (bytes)
+        self.currSeek(strLen)
+
     def readStr(self):
         """
         Identical to readString. Used because the type of the string value in
@@ -215,3 +307,9 @@ class EndianInput:
         tempalte code simpler.
         """
         return self.readString()
+
+    def skipStr(self):
+        """
+        Equivalent to skipString(self)
+        """
+        self.skipString()

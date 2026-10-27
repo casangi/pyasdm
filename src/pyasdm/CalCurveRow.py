@@ -44,6 +44,10 @@ from pyasdm.types import *
 # from an EndianInput instance
 _fromBinMethods = {}
 
+# this will contain all of the static methods used to skip past each element of the row
+# from an EndianInput instance
+_skipBinMethods = {}
+
 
 from pyasdm.enumerations.AtmPhaseCorrection import AtmPhaseCorrection
 
@@ -526,7 +530,7 @@ class CalCurveRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(str(self._polarizationTypes[i]))
+            eos.writeInt(int(self._polarizationTypes[i].getValue()))
 
         # null array case, unsure if this is possible but this should work
         if self._curve is None:
@@ -568,6 +572,8 @@ class CalCurveRow:
             for i in range(rms_dims[0]):
                 for j in range(rms_dims[1]):
                     eos.writeFloat(self._rms[i][j])
+
+    # the static fromBin methods to extract each field from an EndianInput stream
 
     @staticmethod
     def atmPhaseCorrectionFromBin(row, eis):
@@ -780,6 +786,206 @@ class CalCurveRow:
         _fromBinMethods["numBaseline"] = CalCurveRow.numBaselineFromBin
         _fromBinMethods["rms"] = CalCurveRow.rmsFromBin
 
+    # the static skip*FromBin methods to skip each field from an EndianInput stream
+
+    @staticmethod
+    def skipAtmPhaseCorrectionFromBin(eis):
+        """
+        Skip the atmPhaseCorrection in row from the EndianInput (eis) instance.
+        """
+
+        # AtmPhaseCorrection stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipTypeCurveFromBin(eis):
+        """
+        Skip the typeCurve in row from the EndianInput (eis) instance.
+        """
+
+        # CalCurveType stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipReceiverBandFromBin(eis):
+        """
+        Skip the receiverBand in row from the EndianInput (eis) instance.
+        """
+
+        # ReceiverBand stored as a string
+        eis.skipString()
+
+    @staticmethod
+    def skipCalDataIdFromBin(eis):
+        """
+        Skip the calDataId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipCalReductionIdFromBin(eis):
+        """
+        Skip the calReductionId in row from the EndianInput (eis) instance.
+        """
+
+        Tag.skipBin(eis)
+
+    @staticmethod
+    def skipStartValidTimeFromBin(eis):
+        """
+        Skip the startValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipEndValidTimeFromBin(eis):
+        """
+        Skip the endValidTime in row from the EndianInput (eis) instance.
+        """
+
+        ArrayTime.skipBin(eis)
+
+    @staticmethod
+    def skipFrequencyRangeFromBin(eis):
+        """
+        Skip the frequencyRange in row from the EndianInput (eis) instance.
+        """
+
+        Frequency.skip1DBin(eis)
+
+    @staticmethod
+    def skipNumAntennaFromBin(eis):
+        """
+        Skip the numAntenna in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumPolyFromBin(eis):
+        """
+        Skip the numPoly in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipNumReceptorFromBin(eis):
+        """
+        Skip the numReceptor in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipInt()
+
+    @staticmethod
+    def skipAntennaNamesFromBin(eis):
+        """
+        Skip the antennaNames in row from the EndianInput (eis) instance.
+        """
+
+        antennaNamesDim1 = eis.readInt()
+        for _ in range(antennaNamesDim1):
+            eis.skipStr()
+
+    @staticmethod
+    def skipRefAntennaNameFromBin(eis):
+        """
+        Skip the refAntennaName in row from the EndianInput (eis) instance.
+        """
+
+        eis.skipStr()
+
+    @staticmethod
+    def skipPolarizationTypesFromBin(eis):
+        """
+        Skip the polarizationTypes in row from the EndianInput (eis) instance.
+        """
+
+        polarizationTypesDim1 = eis.readInt()
+        for _ in range(polarizationTypesDim1):
+            # PolarizationType stored as a string
+            eis.skipString()
+
+    @staticmethod
+    def skipCurveFromBin(eis):
+        """
+        Skip the curve in row from the EndianInput (eis) instance.
+        """
+
+        curveDim1 = eis.readInt()
+        curveDim2 = eis.readInt()
+        curveDim3 = eis.readInt()
+        for _ in range(curveDim1):
+            for _ in range(curveDim2):
+                for _ in range(curveDim3):
+                    eis.skipFloat()
+
+    @staticmethod
+    def skipReducedChiSquaredFromBin(eis):
+        """
+        Skip the reducedChiSquared in row from the EndianInput (eis) instance.
+        """
+
+        reducedChiSquaredDim1 = eis.readInt()
+        for _ in range(reducedChiSquaredDim1):
+            eis.skipDouble()
+
+    @staticmethod
+    def skipNumBaselineFromBin(eis):
+        """
+        Skip the optional numBaseline in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            eis.skipInt()
+
+    @staticmethod
+    def skipRmsFromBin(eis):
+        """
+        Skip the optional rms in row from the EndianInput (eis) instance.
+        """
+        # the boolean must be read to know if there's more to skip
+        thisExists = eis.readBool()
+        if thisExists:
+
+            rmsDim1 = eis.readInt()
+            rmsDim2 = eis.readInt()
+            for _ in range(rmsDim1):
+                for _ in range(rmsDim2):
+                    eis.skipFloat()
+
+    @staticmethod
+    def initSkipBinMethods():
+        global _skipBinMethods
+        if len(_skipBinMethods) > 0:
+            return
+
+        _skipBinMethods["atmPhaseCorrection"] = (
+            CalCurveRow.skipAtmPhaseCorrectionFromBin
+        )
+        _skipBinMethods["typeCurve"] = CalCurveRow.skipTypeCurveFromBin
+        _skipBinMethods["receiverBand"] = CalCurveRow.skipReceiverBandFromBin
+        _skipBinMethods["calDataId"] = CalCurveRow.skipCalDataIdFromBin
+        _skipBinMethods["calReductionId"] = CalCurveRow.skipCalReductionIdFromBin
+        _skipBinMethods["startValidTime"] = CalCurveRow.skipStartValidTimeFromBin
+        _skipBinMethods["endValidTime"] = CalCurveRow.skipEndValidTimeFromBin
+        _skipBinMethods["frequencyRange"] = CalCurveRow.skipFrequencyRangeFromBin
+        _skipBinMethods["numAntenna"] = CalCurveRow.skipNumAntennaFromBin
+        _skipBinMethods["numPoly"] = CalCurveRow.skipNumPolyFromBin
+        _skipBinMethods["numReceptor"] = CalCurveRow.skipNumReceptorFromBin
+        _skipBinMethods["antennaNames"] = CalCurveRow.skipAntennaNamesFromBin
+        _skipBinMethods["refAntennaName"] = CalCurveRow.skipRefAntennaNameFromBin
+        _skipBinMethods["polarizationTypes"] = CalCurveRow.skipPolarizationTypesFromBin
+        _skipBinMethods["curve"] = CalCurveRow.skipCurveFromBin
+        _skipBinMethods["reducedChiSquared"] = CalCurveRow.skipReducedChiSquaredFromBin
+
+        _skipBinMethods["numBaseline"] = CalCurveRow.skipNumBaselineFromBin
+        _skipBinMethods["rms"] = CalCurveRow.skipRmsFromBin
+
     @staticmethod
     def fromBin(eis, table, attributesSeq):
         """
@@ -806,7 +1012,29 @@ class CalCurveRow:
 
         return row
 
-    # Intrinsice Table Attributes
+    @staticmethod
+    def skipBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
+        """
+        global _skipBinMethods
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " CalCurve",
+                )
+
+            method = _skipBinMethods[attributeName]
+            method(eis)
+
+        return
+
+    # Intrinsic Table Attributes
 
     # ===> Attribute atmPhaseCorrection
 
@@ -1719,5 +1947,8 @@ class CalCurveRow:
         return True
 
 
-# initialize the dictionary that maps fields to init methods
+# initialize the dictionary that maps fields to init from methods
 CalCurveRow.initFromBinMethods()
+
+# initialize the dictionary that maps fields to init skip methods
+CalCurveRow.initSkipBinMethods()

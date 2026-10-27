@@ -200,10 +200,7 @@ class ASDM:
     """
 
     # data members
-    # _archiveAsBin is not used here, included in a comment because it's in the model
-    # _archiveAsBin = False # if true archive binary else archive XML
     _fileAsBin = False  # if true file binary else file XML
-    # _hasBeenAdded = False # Just to be "compatible" with tables generated code. Not used here.
 
     # This Container's entity.
     _entity = Entity()
@@ -2668,7 +2665,7 @@ class ASDM:
                 xmlstr = f.read()
 
             if xmlstr is None:
-                raise ConversionException(filename + " is empty", "ASDM")
+                raise ConversionException(fileName + " is empty", "ASDM")
 
             self.fromXML(xmlstr)
 

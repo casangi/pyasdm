@@ -218,7 +218,7 @@ class Humidity:
 
         # only check the first value
         if (len(humidityList) > 0) and not isinstance(humidityList[0], Humidity):
-            raise (ValueError("humidityList is not a list of Humidity"))
+            raise ValueError("humidityList is not a list of Humidity")
 
         for thisHumidity in humidityList:
             thisHumidity.toBin(eos)
@@ -284,7 +284,7 @@ class Humidity:
         for thisList in humidityList:
             for middleList in thisList:
                 for thisHumidity in middleList:
-                    thisHumidityy.toBin(eos)
+                    thisHumidity.toBin(eos)
 
     @staticmethod
     def fromBin(eis):
@@ -298,6 +298,14 @@ class Humidity:
         return Humidity(eis.readDouble())
 
     @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of an Humidity from an
+        EndianInput instance
+        """
+        eis.skipDouble()
+
+    @staticmethod
     def from1DBin(eis):
         """
         Read a list of binary Humidity values, in percent, from an
@@ -309,6 +317,16 @@ class Humidity:
             result.append(Humidity.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Humidity values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Humidity.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -326,6 +344,18 @@ class Humidity:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Humidity values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Humidity.skipBin(eis)
 
     @staticmethod
     def from3DBin(eis):
@@ -347,6 +377,20 @@ class Humidity:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Humidity values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Humidity.skipBin(eis)
 
     def equals(self, otherHumidity):
         """
@@ -390,7 +434,7 @@ class Humidity:
         than, equal to, or greater than the specified other Humidity.
         """
         if not isinstance(otherHumidity, Humidity):
-            raise ("Attempt to compare a Humidity to a non-Humidity.")
+            raise ValueError("Attempt to compare a Humidity to a non-Humidity.")
 
         result = 0
         if self._percent < otherHumidity._percent:

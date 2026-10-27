@@ -220,7 +220,7 @@ class Temperature:
         if (len(temperatureList) > 0) and not isinstance(
             temperatureList[0], Temperature
         ):
-            raise (ValueError("temperatureList is not a list of Temperature"))
+            raise ValueError("temperatureList is not a list of Temperature")
 
         for thisTemperature in temperatureList:
             thisTemperature.toBin(eos)
@@ -293,13 +293,21 @@ class Temperature:
     @staticmethod
     def fromBin(eis):
         """
-        Read the binary representation of an Temperature, in degrees Centigrade,
+        Read the binary representation of a Temperature, in degrees Centigrade,
         from an EndianInput instance and use the read value to set a
         Temperature.
 
         return an Temperature
         """
         return Temperature(eis.readDouble())
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of a Temperature
+        from an EndianInput instance
+        """
+        eis.skipDouble()
 
     @staticmethod
     def from1DBin(eis):
@@ -313,6 +321,16 @@ class Temperature:
             result.append(Temperature.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Temperature values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Temperature.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -330,6 +348,18 @@ class Temperature:
             result.append(innerList)
 
         return result
+
+    @staticmethod
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Temperature values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Temperature.skipBin(eis)
 
     @staticmethod
     def from3Dbin(eis):
@@ -351,6 +381,20 @@ class Temperature:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Temperature values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Temperature.skipBin(eis)
 
     def equals(self, otherTemperature):
         """
@@ -394,7 +438,7 @@ class Temperature:
         than, equal to, or greater than the specified other Temperature.
         """
         if not isinstance(otherTemperature, Temperature):
-            raise ("Attempt to compare a Temperature to a non-Temperature.")
+            raise ValueError("Attempt to compare a Temperature to a non-Temperature.")
 
         result = 0
         if self._temperature < otherTemperature._temperature:

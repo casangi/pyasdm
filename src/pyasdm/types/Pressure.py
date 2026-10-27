@@ -218,7 +218,7 @@ class Pressure:
 
         # only check the first value
         if (len(pressureList) > 0) and not isinstance(pressureList[0], Pressure):
-            raise (ValueError("pressureList is not a list of Pressure"))
+            raise ValueError("pressureList is not a list of Pressure")
 
         for thisPressure in pressureList:
             thisPressure.toBin(eos)
@@ -289,13 +289,21 @@ class Pressure:
     @staticmethod
     def fromBin(eis):
         """
-        Read the binary representation of an Pressure, in hectopascals,
+        Read the binary representation of a Pressure, in hectopascals,
         from an EndianInput instance and use the read value to set a
         Pressure.
 
         return an Pressure
         """
         return Pressure(eis.readDouble())
+
+    @staticmethod
+    def skipBin(eis):
+        """
+        Skip the binary representation of a Pressure
+        from an EndianInput instance
+        """
+        eis.skipDouble()
 
     @staticmethod
     def from1DBin(eis):
@@ -309,6 +317,16 @@ class Pressure:
             result.append(Pressure.fromBin(eis))
 
         return result
+
+    @staticmethod
+    def skip1DBin(eis):
+        """
+        Skip a list of binary Pressure values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        for _ in range(dim1):
+            Pressure.skipBin(eis)
 
     @staticmethod
     def from2DBin(eis):
@@ -328,7 +346,19 @@ class Pressure:
         return result
 
     @staticmethod
-    def from3Dbin(eis):
+    def skip2DBin(eis):
+        """
+        Skip a 2D list of binary Pressure values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                Pressure.skipBin(eis)
+
+    @staticmethod
+    def from3DBin(eis):
         """
         Read a 3D list of binary Pressure values, in hectopascals, from an
         EndianInput instance and return the resulting list.
@@ -347,6 +377,20 @@ class Pressure:
             result.append(middleList)
 
         return result
+
+    @staticmethod
+    def skip3DBin(eis):
+        """
+        Skip a 3D list of binary Pressure values from an
+        EndianInput instance
+        """
+        dim1 = eis.readInt()
+        dim2 = eis.readInt()
+        dim3 = eis.readInt()
+        for _ in range(dim1):
+            for _ in range(dim2):
+                for _ in range(dim3):
+                    Pressure.skipBin(eis)
 
     def equals(self, otherPressure):
         """
@@ -390,7 +434,7 @@ class Pressure:
         than, equal to, or greater than the specified other Pressure.
         """
         if not isinstance(otherPressure, Pressure):
-            raise ("Attempt to compare a Pressure to a non-Pressure.")
+            raise ValueError("Attempt to compare a Pressure to a non-Pressure.")
 
         result = 0
         if self._pressure < otherPressure._pressure:

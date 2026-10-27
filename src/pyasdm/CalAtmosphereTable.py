@@ -53,7 +53,7 @@ import io
 
 class CalAtmosphereTable:
     """
-    The CalAtmosphereTable class is an Alma table.
+    The CalAtmosphereTable class is an ASDM table.
 
     Results of atmosphere calibration by TelCal. This calibration determines the system temperatures corrected for atmospheric absorption. Ionospheric effects are not dealt with in the Table.
 
@@ -194,7 +194,7 @@ class CalAtmosphereTable:
     # The name of this table.
     _tableName = "CalAtmosphere"
 
-    # The list of field names that make up key 'key'.
+    # The list of field names that make up 'key'.
     _key = [
         "antennaName",
         "receiverBand",
@@ -206,15 +206,32 @@ class CalAtmosphereTable:
     # the ASDM container that this table belongs to (set by constructor)
     _container = None
 
-    # archive as bin not used by python implementation
-    # _archiveAsBin = True # If True archive binary else archive XML
     _fileAsBin = True  # If True file binary else file XML
 
-    # A data structure to store the CalAtmosphereRow s.
-    # In all cases we maintain a private list of CalAtmosphereRow s.
-    _privateRows = []
+    # these values are only used when rows have been loaded from a binary table file
+    _eis = None  # the EndianInput stream
+    _byteStream = None  # the io.BufferedReader opened and used by _eis
+    # the list of required and optional attributes found in this table
+    _attributesSeq = []
 
-    # non-temporal ASDM in Java had a private row element here to also hold  CalAtmosphereRow s. Not needed in python.
+    # these are used to avoid re-reading the row that was just read from a binary table file
+    _lastBinRow = None  # the most recent row read
+    _lastBinRowloc = -1  # the location in the binary table file of _lastBinRow
+
+    # If loaded from a binary source, the binary table related lists are used
+    # first when retrieving rows and then the _rowList for any additionall rows.
+    # When the binary table lists are empty then all rows come from _rowList.
+    # Rows added using the add() method are always added to _rowList.
+    # Rows can only be added from one file and then only if no rows have previously been added.
+    # For rows added from a binary table file, only enough information to populate these lists
+    # is read and the starting location of reach row is kept here. Reading the full row requires
+    # seeking to the starting location of that row and then reading the row.
+
+    # CalAtmosphereRow objects added from an XML file or using the add() method are kept here
+    _rowList = []
+
+    # binary table locations for rows added from a binary table file are kept here
+    _rowLocList = []
 
     # the Entity of this table
     _entity = None
@@ -471,12 +488,13 @@ class CalAtmosphereTable:
 
     def getKeyName(self):
         """
-        Return the list of field names that make up key key
+        Return the list of field names that make up 'key'
         as a list of strings.
         """
         return self._key
 
-    def Key(self, antennaName, receiverBand, basebandName, calDataId, calReductionId):
+    @staticmethod
+    def Key(antennaName, receiverBand, basebandName, calDataId, calReductionId):
         """
         Returns a string built by concatenating the ascii representation of the
         parameters values suffixed with a "_" character.
@@ -499,7 +517,7 @@ class CalAtmosphereTable:
         The uniqueness check is off by default. Turn that on by setting
         checkRowUniqueness to True. When this is true the the uniquess check
         that normally happens with a row is added to the table is skipped when
-        the full table is read from an existing copy (e.g. and XML or bin file).
+        the full table is read from an existing copy (e.g. an XML or bin file).
         Checking that each row is unique can take a significant time for large
         tables. This check should be unnecessary for ASDMs created by the telescope.
 
@@ -509,7 +527,7 @@ class CalAtmosphereTable:
 
         if not isinstance(container, pyasdm.ASDM):
             raise (
-                ValueError("CalAtmosphereTable constructor must use a ASDM instance")
+                ValueError("CalAtmosphereTable constructor must use an ASDM instance")
             )
 
         self._container = container
@@ -527,9 +545,37 @@ class CalAtmosphereTable:
         self._presentInMemory = True
         self._loadInProgress = False
 
-        self._privateRows = []
+        self._eis = None
+        self._byteStream = None
+        self._attributesSeq = []
+
+        self._lastBinRow = None
+        self._lastBinRowLoc = -1
+
+        self._rowList = []
+        self._rowLocList = []
 
         self._version = 0
+
+    def __del__(self):
+        """
+        close any opened files used for binary table reading
+        """
+        self.close()
+
+    def close(self):
+        """
+        close any opened files used for binary table reading
+        Note: once closed this object will be useless for reading any rows found
+        in the binary table and there is no way to reset and reuse this instance
+        """
+        # closing one should close the other but there's no error in doing both so this is safest
+        #  it's not an error to close it if it was previously closed
+        if self._eis is not None:
+            self._eis.close()
+
+        if self._byteStream is not None:
+            self._byteStream.close()
 
     def setNotPresentInMemory(self):
         """
@@ -588,13 +634,21 @@ class CalAtmosphereTable:
         """
         Return the number of rows in the table.
         """
-        return len(self._privateRows)
+        return len(self._rowList) + len(self._rowLocList)
 
     def getName(self):
         """
         Return the name of this table.
         """
         return self._tableName
+
+    def hasBinaryRows(self):
+        # returns True if any of the rows present are tied to a binary table and not always
+        # present in memory. Binary table rows are best retrieved individually using getRow()
+        # or in a list (which should be short) using getRowList().
+        # The get() method may be used to return all rows but for large binary table files that
+        # may exhaust all of the resources available and should be used with caution.
+        return len(self._rowLocList) > 0
 
     def __str__(self):
         """
@@ -619,13 +673,13 @@ class CalAtmosphereTable:
         Add a row.
         raises a DuplicateKey Thrown if the new row has a key that is already in the table.
         If x is a list then this method is called recursively on each element of that list.
-        In that case, None is returned.
+        In that case, None is always returned.
         returns the row that was added.
         """
 
         if isinstance(x, list):
+            # add each row in the list, the type checking happens on each item
             for thisrow in x:
-                # check on correct type of thisrow happens in add
                 self.add(thisrow)
             # return None for the list case only
             return None
@@ -659,7 +713,7 @@ class CalAtmosphereTable:
                 "CalAtmosphere",
             )
 
-        self._privateRows.append(x)
+        self._rowList.append(x)
         x.isAdded()
         return x
 
@@ -793,12 +847,27 @@ class CalAtmosphereTable:
         x verifies the rule of uniqueness and raise an exception if not.
 
         Append x to its table.
-        x is the row to be appended.
-        returns x.
+
+
+        x is the row to be appended or an integer giving the row start location in self._eis
+        returns the index of the row that was added
+
+        Note that if skipUniquenessCheck is False and x is a row start location then
+        the row at that location is first read so that the lookup can be done using the full
+        set of required attributes.
+
         """
+        # remember where this is being added, in case the full row needs to be read into x
+        rowStartLoc = None
+
+        if isinstance(x, int):
+            rowStartLoc = x
 
         # is this check being skipped
         if not skipUniquenessCheck:
+            if isinstance(x, int):
+                # the full row is needed in x
+                x = self._getRowByLoc(rowStartLoc)
             if (
                 self.getRowByKey(
                     x.getAntennaName(),
@@ -811,19 +880,81 @@ class CalAtmosphereTable:
             ):
                 raise DuplicateKey("Duplicate key exception in ", "CalAtmosphereTable")
 
-        # when skipUniquenessCheck is True then this is all that happens, the rows are added
-        self._privateRows.append(x)
-        x.isAdded()
-        return x
+        # the row is now added and the index (rownumber) of the newly added row is returned.
+        result = None
+        if rowStartLoc is None:
+            result = len(self._rowList)
+            self._rowList.append(x)
+            x.isAdded()
+        else:
+            result = len(self._rowLocList)
+            self._rowLocList.append(rowStartLoc)
+
+        return result
 
     # ====> methods returning rows.
 
     def get(self):
         """
         Get all rows.
-        return Alls rows as a list of CalAtmosphereRow
+
+        NOTE: if the rows are found in a binary table file then this may be an
+        expensive operation since all of these rows will need to be read from disk and
+        exist in memory at the same time. For a large table that may be enough to exhaust all
+        resources. Use with caution.
+
+        return all rows as a list of CalAtmosphereRow
         """
-        return self._privateRows
+        result = []
+        if len(self._rowLocList) > 0:
+            # any binary rows come first and must be fetched individually
+            for index in range(len(self.rowLocList)):
+                # relies on getRow to set the added and temporal value if appropriate
+                # the index is the row number since binary rows come first
+                result.append(self.getRow(index))
+            if len(self._rowList) > 0:
+                result = result + self._rowList
+        else:
+            result = self._rowList
+
+        return result
+
+    def getRow(self, index):
+        """
+        Return the row indicated by index, which is a row number. Rows are numbered in the order
+        they were added to the table. The index must be between 0 and (size()-1).
+
+        raises a ValueError if index is out of range for this table.
+        """
+        if (index < 0) or (index >= self.size()):
+            raise ValueError("index out of range")
+
+        result = None
+        # rows are found first in self._rowLocList then from self._rowList as needed
+        if index < len(self._rowLocList):
+            result = self._getRowByLoc(self._rowLocList[index])
+
+            # this row has been added
+            result.isAdded()
+        else:
+            rowListIndex = index - len(self._rowLocList)
+            result = self._rowList[rowListIndex]
+
+        return result
+
+    def getRowList(self, indexList):
+        """
+        Return a list of rows using a list of row numbers in same order as the list.
+
+        indexList is a list of row numbers (see getRow)
+        returns a list of row instances in the same order as indexList
+        raises a ValueError if an index is out of range for this table.
+        """
+        result = []
+        for index in indexList:
+            result.append(self.getRow(index))
+
+        return result
 
     def getRowByKey(
         self, antennaName, receiverBand, basebandName, calDataId, calReductionId
@@ -832,6 +963,8 @@ class CalAtmosphereTable:
         Returns a CalAtmosphereRow given a key.
         return the row having the key whose values are passed as parameters, or None if
         no row exists for that key.
+        Note that if the rows are found in a binary table file they will each be read until a
+        match is found or the list of rows is exhausted. This may be slow in that case.
 
         param antennaName.
 
@@ -844,24 +977,25 @@ class CalAtmosphereTable:
         param calReductionId.
 
         """
-        for row in self._privateRows:
+        for rowNumber in range(self.size()):
+            thisRow = self.getRow(rowNumber)
 
-            if row.getAntennaName() != antennaName:
+            if thisRow.getAntennaName() != antennaName:
                 continue
 
-            if row.getReceiverBand() != receiverBand:
+            if thisRow.getReceiverBand() != receiverBand:
                 continue
 
-            if row.getBasebandName() != basebandName:
+            if thisRow.getBasebandName() != basebandName:
                 continue
 
-            if not row.getCalDataId().equals(calDataId):
+            if not thisRow.getCalDataId().equals(calDataId):
                 continue
 
-            if not row.getCalReductionId().equals(calReductionId):
+            if not thisRow.getCalReductionId().equals(calReductionId):
                 continue
 
-            return row
+            return thisRow
 
         # no match found
         return None
@@ -965,9 +1099,12 @@ class CalAtmosphereTable:
 
         param waterError.
 
+        Note: for rows found in a binary table file this method will get each row in turn until a match
+        is found.
         """
-        for row in self._privateRows:
-            if row.compareNoAutoInc(
+        for rowNumber in range(self.size()):
+            thisRow = self.getRow(rowNumber)
+            if thisRow.compareNoAutoInc(
                 antennaName,
                 receiverBand,
                 basebandName,
@@ -999,15 +1136,37 @@ class CalAtmosphereTable:
                 water,
                 waterError,
             ):
-                return row
+                return thisRow
 
         return None
 
-    def getRows(self):
+    def _getRowByLoc(self, rowStartLoc):
         """
-        get the rows, synonymous with the get method.
+        Used when attached to a binary table. For internal use.
+
+        The retrieved row is kept internally in case the same row is requested before any
+        other rows to avoid re-reading it.
+
+        Note that when used by getRow the returned row will be marked as added and
+        if this is a temporal table the temporal value in _rowTimesList will be used to set the temporal value in each row.
+        That should only be done for row already added to this this table.
+
+        Return a row using the binary table values that  start at rowStartLoc in self._eis.
         """
-        return self.get()
+        result = None
+
+        if rowStartLoc == self._lastBinRowLoc:
+            # no need to re-read it
+            result = self._lastBinRow
+        else:
+            loc = self._eis.seek(rowStartLoc)
+            result = CalAtmosphereRow.fromBin(self._eis, self, self._attributesSeq)
+
+            # remember this, in case the same row is requested again
+            self._lastBinRow = result
+            self._lastBinRowLoc = rowStartLoc
+
+        return result
 
     # ====> conversion Methods
 
@@ -1025,7 +1184,10 @@ class CalAtmosphereTable:
         s = self._container.getEntity().toXML()
         # Change the "Entity" tag to "ContainerEntity".
         result += "\n <Container" + s[1:]
-        for thisRow in self._privateRows:
+
+        # use self.getRow to handle binary table rows and xml rows in the correct order
+        for rowNumber in range(self.size()):
+            thisRow = self.getRow(rowNumber)
             result += "\n" + thisRow.toXML()
         result += "\n</CalAtmosphereTable>"
         return result
@@ -1101,6 +1263,7 @@ class CalAtmosphereTable:
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
+
                     self.checkAndAdd(row, (not self._checkRowUniqueness))
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
@@ -1243,10 +1406,11 @@ class CalAtmosphereTable:
             eos = EndianOutput(outBuffer, byteOrder)
             self.getEntity().toBin(eos)
             self.getContainer().getEntity().toBin(eos)
-            eos.writeInt(len(self._privateRows))
+            eos.writeInt(self.size())
 
             # and all of the rows
-            for thisRow in self._privateRows:
+            for thisRowNumber in range(self.size()):
+                thisRow = self.getRow(thisRowNumber)
                 thisRow.toBin(eos)
 
             # The closing MIME boundary
@@ -1256,18 +1420,21 @@ class CalAtmosphereTable:
             # close the eos, also closes outBuffer, no penalty for doing that more than once
             eos.close()
 
-    def setFromMIME(self, byteStream):
+    def setFromMIME(self):
         """
         Extracts the binary part of a MIME message and deserialize its content
         to fill this with the result of the deserialization.
-        param byteStream the previously opened io.BufferedReader instance
-        containing the data to be extracted.
 
-        It is the responsibility of this method to close byteStream.
+        The previously opened io.BufferedReader is found at self._byteStream and
+        contains the data to be extracted.
         """
 
-        if not (isinstance(byteStream, io.BufferedReader) and byteStream.seekable()):
-            byteStream.close()
+        if not (
+            isinstance(self._byteStream, io.BufferedReader)
+            and self._byteStream.seekable()
+        ):
+            if self._byteStream is not None:
+                self._byteStream.close()
             raise ConversionException(
                 "opened byteStream is not the expected io.BufferedReader or it is not seekable, this should never happen.",
                 "CalAtmosphere",
@@ -1283,7 +1450,7 @@ class CalAtmosphereTable:
         xmlPartMIMEHeaderAlt = bytes(str("Content-ID: <header.xml>\r\n\r\n").encode())
 
         # follow the Java example and grab the first 10000 bytes, which will always contain the header
-        headerBytes = byteStream.read(10000)
+        headerBytes = self._byteStream.read(10000)
 
         # Detect the XML header.
         loc0 = headerBytes.find(xmlPartMIMEHeader)
@@ -1292,7 +1459,7 @@ class CalAtmosphereTable:
             loc0 = headerBytes.find(xmlPartMIMEHeaderAlt)
             if loc0 < 0:
                 # nothing else to try
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "Failed to detect the begining of the XML header.", "CalAtmosphere"
                 )
@@ -1304,7 +1471,7 @@ class CalAtmosphereTable:
         # Look for the string announcing the binary part.
         loc1 = headerBytes.find(binPartMIMEHeader, loc0)
         if loc1 < 0:
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException(
                 "Failed to detect the begining of the binary part.", "CalAtmosphere"
             )
@@ -1314,12 +1481,12 @@ class CalAtmosphereTable:
 
         xmldom = minidom.parseString(xmlHeader)
         if not xmldom.hasChildNodes():
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException(
                 "XML is not properly structured.", "CalAtmosphere"
             )
 
-        attributesSeq = []
+        self._attributesSeq = []
         byteOrderStr = None
         versionStr = "-1"
 
@@ -1329,85 +1496,84 @@ class CalAtmosphereTable:
             # assume Big_Endian and the default order of the elements
             byteOrderStr = "Big_Endian"
 
-            attributesSeq.append("antennaName")
+            self._attributesSeq.append("antennaName")
 
-            attributesSeq.append("receiverBand")
+            self._attributesSeq.append("receiverBand")
 
-            attributesSeq.append("basebandName")
+            self._attributesSeq.append("basebandName")
 
-            attributesSeq.append("calDataId")
+            self._attributesSeq.append("calDataId")
 
-            attributesSeq.append("calReductionId")
+            self._attributesSeq.append("calReductionId")
 
-            attributesSeq.append("startValidTime")
+            self._attributesSeq.append("startValidTime")
 
-            attributesSeq.append("endValidTime")
+            self._attributesSeq.append("endValidTime")
 
-            attributesSeq.append("numFreq")
+            self._attributesSeq.append("numFreq")
 
-            attributesSeq.append("numLoad")
+            self._attributesSeq.append("numLoad")
 
-            attributesSeq.append("numReceptor")
+            self._attributesSeq.append("numReceptor")
 
-            attributesSeq.append("forwardEffSpectrum")
+            self._attributesSeq.append("forwardEffSpectrum")
 
-            attributesSeq.append("frequencyRange")
+            self._attributesSeq.append("frequencyRange")
 
-            attributesSeq.append("groundPressure")
+            self._attributesSeq.append("groundPressure")
 
-            attributesSeq.append("groundRelHumidity")
+            self._attributesSeq.append("groundRelHumidity")
 
-            attributesSeq.append("frequencySpectrum")
+            self._attributesSeq.append("frequencySpectrum")
 
-            attributesSeq.append("groundTemperature")
+            self._attributesSeq.append("groundTemperature")
 
-            attributesSeq.append("polarizationTypes")
+            self._attributesSeq.append("polarizationTypes")
 
-            attributesSeq.append("powerSkySpectrum")
+            self._attributesSeq.append("powerSkySpectrum")
 
-            attributesSeq.append("powerLoadSpectrum")
+            self._attributesSeq.append("powerLoadSpectrum")
 
-            attributesSeq.append("syscalType")
+            self._attributesSeq.append("syscalType")
 
-            attributesSeq.append("tAtmSpectrum")
+            self._attributesSeq.append("tAtmSpectrum")
 
-            attributesSeq.append("tRecSpectrum")
+            self._attributesSeq.append("tRecSpectrum")
 
-            attributesSeq.append("tSysSpectrum")
+            self._attributesSeq.append("tSysSpectrum")
 
-            attributesSeq.append("tauSpectrum")
+            self._attributesSeq.append("tauSpectrum")
 
-            attributesSeq.append("tAtm")
+            self._attributesSeq.append("tAtm")
 
-            attributesSeq.append("tRec")
+            self._attributesSeq.append("tRec")
 
-            attributesSeq.append("tSys")
+            self._attributesSeq.append("tSys")
 
-            attributesSeq.append("tau")
+            self._attributesSeq.append("tau")
 
-            attributesSeq.append("water")
+            self._attributesSeq.append("water")
 
-            attributesSeq.append("waterError")
+            self._attributesSeq.append("waterError")
 
-            attributesSeq.append("alphaSpectrum")
+            self._attributesSeq.append("alphaSpectrum")
 
-            attributesSeq.append("forwardEfficiency")
+            self._attributesSeq.append("forwardEfficiency")
 
-            attributesSeq.append("forwardEfficiencyError")
+            self._attributesSeq.append("forwardEfficiencyError")
 
-            attributesSeq.append("sbGain")
+            self._attributesSeq.append("sbGain")
 
-            attributesSeq.append("sbGainError")
+            self._attributesSeq.append("sbGainError")
 
-            attributesSeq.append("sbGainSpectrum")
+            self._attributesSeq.append("sbGainSpectrum")
 
             versionStr = "2"
-
         else:
             # c++ and Java just assume it then must be a CalAtmosphere table
             # this is more insistant, just in case
             if hdrdom.nodeName != "CalAtmosphereTable":
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "XML Header is not from the expected table.", "CalAtmosphere"
                 )
@@ -1420,7 +1586,7 @@ class CalAtmosphereTable:
                 versionStr = hdrdom.attributes.getNamedItem("schemaVersion").value
 
             if not hdrdom.hasChildNodes():
-                byteStream.close()
+                self._byteStream.close()
                 raise ConversionException(
                     "THe XML header is missing all of the expected elements.",
                     "CalAtmosphere",
@@ -1430,51 +1596,51 @@ class CalAtmosphereTable:
             for hdrnode in hdrdom.childNodes:
                 if hdrnode.nodeName == "BulkStoreRef":
                     if byteOrderStr is not None:
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "More than one BulkStoreRef element seen. Invalid XML header.",
                             "CalAtmosphere",
                         )
                     if not hdrnode.hasAttributes():
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "BulkStoreRef does not contain any attributes. Invalid XML header.",
                             "CalAtmosphere",
                         )
                     byteOrderAttr = hdrnode.attributes.getNamedItem("byteOrder")
                     if byteOrderAttr is None:
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "byteOrder attribute not found in BulkStoreRef element. Invalid XML header.",
                             "CalAtmosphere",
                         )
                     byteOrderStr = byteOrderAttr.value
                 elif hdrnode.nodeName == "Attributes":
-                    if len(attributesSeq) > 0:
-                        byteStream.close()
+                    if len(self._attributesSeq) > 0:
+                        self._byteStream.close()
                         raise ConversionException(
                             "More than one Attributes node seen. Invalid XML header.",
                             "CalAtmosphere",
                         )
                     if not hdrnode.hasChildNodes():
-                        byteStream.close()
+                        self._byteStream.close()
                         raise ConversionException(
                             "Attributes element has no child nodes. Invalid XML header.",
                             "CalAtmosphere",
                         )
                     for attrnode in hdrnode.childNodes:
                         if attrnode.nodeType == attrnode.ELEMENT_NODE:
-                            attributesSeq.append(str(attrnode.nodeName))
+                            self._attributesSeq.append(str(attrnode.nodeName))
 
         if byteOrderStr is None:
-            byteStream.close()
+            self._byteStream.close()
             raise ConversionException(
                 "BulkStoreRef element not seen and this is not an older version 2 XML header. Invalid XML header.",
                 "CalAtmosphere",
             )
 
-        if len(attributesSeq) == 0:
-            byteStream.close()
+        if len(self._attributesSeq) == 0:
+            self._byteStream.close()
             raise ConversionException(
                 "Attributes element not seen and this is not an older version 2 XML header. Invalid XML header.",
                 "CalAtmosphere",
@@ -1483,67 +1649,87 @@ class CalAtmosphereTable:
         byteOrder = ByteOrder(byteOrderStr)
 
         # seek to the start of the binary part
-        byteStream.seek(loc1 + len(binPartMIMEHeader))
+        self._byteStream.seek(loc1 + len(binPartMIMEHeader))
 
         # and create the class that manages that stream and returns values as requested
-        eis = EndianInput(byteStream, byteOrder)
+        self._eis = EndianInput(self._byteStream, byteOrder)
 
-        self._entity = Entity.fromBin(eis)
+        self._entity = Entity.fromBin(self._eis)
 
         # containerEntity is not used, but it is next
-        containerEntity = Entity.fromBin(eis)
+        containerEntity = Entity.fromBin(self._eis)
 
         # the number of rows
-        numRows = eis.readInt()
+        numRows = self._eis.readInt()
         if numRows == -1:
             # when this happens (used by eVLA, I believe) use the expected size from ASDM.xml
             numRows = self._container.getExpectedTableSize("CalAtmosphere")
 
+        print(f"using numRows = {numRows}")
+        print(f"checkRowUniqueness : {self._checkRowUniqueness}")
+
         # c++ reports an error when numRows is != -1 and does not agree with the value in the ASDM.xml
         # Java just uses numRows (but doesn't cover the case when numRows == -1)
         # do not check or report any difference here but cover the numRows==-1 case above
+
+        # rows are not fully read here, just the starting location, the key information, and timeInterval
+        self._lastBinRow = None
+        self._lastBinRowLoc = -1
         try:
             for i in range(numRows):
-                self.checkAndAdd(
-                    CalAtmosphereRow.fromBin(eis, self, attributesSeq),
-                    self._checkRowUniqueness,
-                )
-                # print("row %s added, loc = %s" % (i, eis.tell()))
+                rowStart = self._eis.tell()
+                print(f"{i} : {rowStart}")
+
+                # non temporal, rowstart (int), skip row
+                CalAtmosphereRow.skipBin(self._eis, self._attributesSeq)
+                print("skipped")
+                self.checkAndAdd(rowStart, (not self._checkRowUniqueness))
+                print("added")
+
+            print("done")
+
         except DuplicateKey as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             # reraise it as a ConversionException
             raise ConversionException(str(exc), "CalAtmosphereTable") from None
         except UniquenessViolationException as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             msg = "UniquenessViolationException while adding row : %s" % str(exc)
             # raise a ConversionException using this msg
             raise ConversionException(msg, "CalAtmosphereTable") from None
         except Exception as exc:
-            byteStream.close()
-            eis.close()
+            self._byteStream.close()
+            self._eis.close()
             raise ConversionException(
                 "Error while reading binary data, the exception was " + str(exc),
-                "CalAtmosphere",
+                "CalAtmosphereTable",
             ) from None
-
-        # there is no harm in closing both
-        # print("closing")
-        eis.close()
-        byteStream.close()
-        # print("checking")
-        # print("eis : %s" % eis.closed())
-        # print("byteStream : %s" % byteStream.closed)
 
     def setFromFile(self, directory):
         """
-        Reads and parses a file containing a representation of a CalAtmosphereTable as those produced  by the toFile method.
+        Reads and parses a file containing a representation of a CalAtmosphereTable as those produced by the toFile method.
         This table is populated with the result of the parsing.
         param directory The name of the directory containing the file te be read and parsed.
-        raises ConversionException If any error occurs while reading the
+
+        raises ConversionException if any error occurs while reading the
         files in the directory or parsing them.
+
+        raises ConversionException if some rows are already known or if an attempt was made to read from a
+        binary table file and that resulted in an unexpected exception, leaving the object in a mixed state.
         """
+        # check if this is allowed
+        if (
+            (self.size() > 0)
+            or (self._eis is not None)
+            or (self._byteStream is not None)
+        ):
+            raise ConversionException(
+                "A table can not be set from a file once the size is > 0 or if an unexpected error happened while reading a binary table.",
+                "CalAtmosphereTable",
+            )
+
         if not isinstance(directory, str):
             print("directory must be a string")
 
@@ -1572,17 +1758,23 @@ class CalAtmosphereTable:
         # This uses a buffered byte stream. Created here and then
         # handed off to the setFromMIME method, which is responsible for closing it.
 
+        if self._byteStream is not None and not self._byteStream.closed:
+            raise ConversionException(
+                "The binary table file is already opened and can not be re-opened. This should never happen",
+                "CalAtmosphereTable",
+            )
+
         filename = os.path.join(directory, "CalAtmosphere.bin")
-        byteStream = None
+        self._byteStream = None
         try:
-            byteStream = open(filename, "rb")
+            self._byteStream = open(filename, "rb")
         except Exception as exc:
             raise ConversionException(
                 "Error while opening " + filename + ". The exception was " + str(exc),
-                "CalAtmosphere",
+                "CalAtmosphereTable",
             )
 
-        self.setFromMIME(byteStream)
+        self.setFromMIME()
 
     def setFromXMLFile(self, directory):
         """
