@@ -386,7 +386,7 @@ class CorrelatorModeRow:
         eos.writeInt(len(self._basebandNames))
         for i in range(len(self._basebandNames)):
 
-            eos.writeString(str(self._basebandNames[i]))
+            eos.writeInt(int(self._basebandNames[i].getValue()))
 
         eos.writeInt(len(self._basebandConfig))
         for i in range(len(self._basebandConfig)):
@@ -402,12 +402,12 @@ class CorrelatorModeRow:
         eos.writeInt(len(self._axesOrderArray))
         for i in range(len(self._axesOrderArray)):
 
-            eos.writeString(str(self._axesOrderArray[i]))
+            eos.writeInt(int(self._axesOrderArray[i].getValue()))
 
         eos.writeInt(len(self._filterMode))
         for i in range(len(self._filterMode)):
 
-            eos.writeString(str(self._filterMode[i]))
+            eos.writeInt(int(self._filterMode[i].getValue()))
 
         eos.writeString(str(self._correlatorName))
 
@@ -707,9 +707,8 @@ class CorrelatorModeRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

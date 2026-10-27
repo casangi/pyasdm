@@ -1258,7 +1258,7 @@ class SourceRow:
             eos.writeInt(len(self._stokesParameter))
             for i in range(len(self._stokesParameter)):
 
-                eos.writeString(str(self._stokesParameter[i]))
+                eos.writeInt(int(self._stokesParameter[i].getValue()))
 
         eos.writeBool(self._fluxExists)
         if self._fluxExists:
@@ -2184,9 +2184,8 @@ class SourceRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 
@@ -2207,14 +2206,17 @@ class SourceRow:
     @staticmethod
     def skipWithContextFromBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order. Only values
-        necessary to understand that row plus the context values appropriate
-        for the Source row are read. The context tuple that is returned is
-        (sourceId, timeInterval, spectralWindowId)
+        This skips one row in an EndianInput by skipping values in the expected order.
+        Only values necessary to assemble the context tuple and any booleans necessary
+        to know if an optional field exists are read. The tuple that is returned is
+        (sourceId, timeInterval, spectralWindowId, sourceName).
+
+        eis is an EndianInput instance already positioned to start of a row
+        attributesSeq is the list of attributes, in order, to be found at that location in eis
         """
         global _skipBinMethods
+
+        sourceName = None
 
         sourceId = None
 
@@ -2243,11 +2245,15 @@ class SourceRow:
 
                 spectralWindowId = Tag.fromBin(eis)
 
+            elif attributeName == "sourceName":
+                soureceName = eis.readStr()
             else:
                 method = _skipBinMethods[attributeName]
                 method(eis)
 
-        return (sourceId, timeInterval, spectralWindowId)
+        contextTuple = (sourceId, timeInterval, spectralWindowId)
+        result = contextTuple + (sourceName,)
+        return result
 
     # Intrinsic Table Attributes
 

@@ -503,12 +503,12 @@ class ScanRow:
         eos.writeInt(len(self._scanIntent))
         for i in range(len(self._scanIntent)):
 
-            eos.writeString(str(self._scanIntent[i]))
+            eos.writeInt(int(self._scanIntent[i].getValue()))
 
         eos.writeInt(len(self._calDataType))
         for i in range(len(self._calDataType)):
 
-            eos.writeString(str(self._calDataType[i]))
+            eos.writeInt(int(self._calDataType[i].getValue()))
 
         eos.writeInt(len(self._calibrationOnLine))
         for i in range(len(self._calibrationOnLine)):
@@ -521,7 +521,7 @@ class ScanRow:
             eos.writeInt(len(self._calibrationFunction))
             for i in range(len(self._calibrationFunction)):
 
-                eos.writeString(str(self._calibrationFunction[i]))
+                eos.writeInt(int(self._calibrationFunction[i].getValue()))
 
         eos.writeBool(self._calibrationSetExists)
         if self._calibrationSetExists:
@@ -529,7 +529,7 @@ class ScanRow:
             eos.writeInt(len(self._calibrationSet))
             for i in range(len(self._calibrationSet)):
 
-                eos.writeString(str(self._calibrationSet[i]))
+                eos.writeInt(int(self._calibrationSet[i].getValue()))
 
         eos.writeBool(self._calPatternExists)
         if self._calPatternExists:
@@ -537,7 +537,7 @@ class ScanRow:
             eos.writeInt(len(self._calPattern))
             for i in range(len(self._calPattern)):
 
-                eos.writeString(str(self._calPattern[i]))
+                eos.writeInt(int(self._calPattern[i].getValue()))
 
         eos.writeBool(self._numFieldExists)
         if self._numFieldExists:
@@ -960,9 +960,8 @@ class ScanRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

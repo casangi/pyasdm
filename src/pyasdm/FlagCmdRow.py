@@ -452,9 +452,8 @@ class FlagCmdRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 
@@ -475,10 +474,10 @@ class FlagCmdRow:
     @staticmethod
     def skipWithContextFromBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order. Only timeInterval
-        in the FlagCmd row is read. The timeInterval is returned.
+        Given an EndianInput instance and the list of attributes to be found in eis, i
+        n order, this skips one row by skipping values from that EndianInput in the
+        expected order. Only the timeInterval is read.
+        The timeInterval is returned.
         """
         global _skipBinMethods
 

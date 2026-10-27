@@ -974,7 +974,7 @@ class CalPointingRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(str(self._polarizationTypes[i]))
+            eos.writeInt(int(self._polarizationTypes[i].getValue()))
 
         Angle.listToBin(self._collOffsetRelative, eos)
 
@@ -1848,9 +1848,8 @@ class CalPointingRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

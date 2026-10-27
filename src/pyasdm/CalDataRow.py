@@ -545,7 +545,7 @@ class CalDataRow:
             eos.writeInt(len(self._scanIntent))
             for i in range(len(self._scanIntent)):
 
-                eos.writeString(str(self._scanIntent[i]))
+                eos.writeInt(int(self._scanIntent[i].getValue()))
 
     # the static fromBin methods to extract each field from an EndianInput stream
 
@@ -917,9 +917,8 @@ class CalDataRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

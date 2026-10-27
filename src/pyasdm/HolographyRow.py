@@ -257,7 +257,7 @@ class HolographyRow:
         eos.writeInt(len(self._type))
         for i in range(len(self._type)):
 
-            eos.writeString(str(self._type[i]))
+            eos.writeInt(int(self._type[i].getValue()))
 
     # the static fromBin methods to extract each field from an EndianInput stream
 
@@ -404,9 +404,8 @@ class HolographyRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

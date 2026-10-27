@@ -53,7 +53,7 @@ import io
 
 class SeeingTable:
     """
-    The SeeingTable class is an Alma table.
+    The SeeingTable class is an ASDM table.
 
     Seeing information.
 
@@ -145,7 +145,7 @@ class SeeingTable:
     # If loaded from a binary source, the binary table related lists are used
     # first when retrieving rows and then the _rowList for any additionall rows.
     # When the binary table lists are empty then all rows come from _rowList.
-    # Rows added using the add() method are always added to _rowsList.
+    # Rows added using the add() method are always added to _rowList.
     # Rows can only be added from one file and then only if no rows have previously been added.
     # For rows added from a binary table file, only enough information to populate these lists
     # is read and the starting location of reach row is kept here. Reading the full row requires
@@ -318,7 +318,7 @@ class SeeingTable:
                     if not isinstance(x, SeeingRow):
                         # get the row corresponding to rowStartLoc and store it in x
                         # so that this isn't done more than needed
-                        x = self._getRowByLoc(rowStartLoc, isadded=False)
+                        x = self._getRowByLoc(rowStartLoc)
                     if k0row.equalByRequiredValue(x):
                         # this row already exists at k0, nothing to insert or add, return that row index
                         return rowIndexList[k0]
@@ -331,7 +331,7 @@ class SeeingTable:
                     if not isinstance(x, SeeingRow):
                         # get the row corresponding to rowStartLoc and store it in x
                         # so that this isn't done more than needed
-                        x = self._getRowByLoc(rowStartLoc, isadded=False)
+                        x = self._getRowByLoc(rowStartLoc)
                     if k1row.equalByRequiredValue(x):
                         # this row already exists at k1, nothing to insert or add, return that row index
                         return rowIndexList[k1]
@@ -355,7 +355,7 @@ class SeeingTable:
                 if not isinstance(x, SeeingRow):
                     # get the row corresponding to rowStartLoc and store it in x
                     # so that this isn't done more than needed
-                    x = self._getRowByLoc(rowStartLoc, isadded=False)
+                    x = self._getRowByLoc(rowStartLoc)
                 if k0row.equalByRequiredValue(x):
                     # this row already exists at k0, nothing to insert or add, return that row index
                     return rowIndexList[k0]
@@ -368,7 +368,7 @@ class SeeingTable:
                 if not isinstance(x, SeeingRow):
                     # get the row corresponding to rowStartLoc and store it in x
                     # so that this isn't done more than needed
-                    x = self._getRowByLoc(rowStartLoc, isadded=False)
+                    x = self._getRowByLoc(rowStartLoc)
                 if k1row.equalByRequiredValue(x):
                     # this row already exists at k1, nothing to insert or add, return that row index
                     return rowIndexList[k1]
@@ -416,7 +416,7 @@ class SeeingTable:
         The uniqueness check is off by default. Turn that on by setting
         checkRowUniqueness to True. When this is true the the uniquess check
         that normally happens with a row is added to the table is skipped when
-        the full table is read from an existing copy (e.g. and XML or bin file).
+        the full table is read from an existing copy (e.g. an XML or bin file).
         Checking that each row is unique can take a significant time for large
         tables. This check should be unnecessary for ASDMs created by the telescope.
 
@@ -425,7 +425,7 @@ class SeeingTable:
         """
 
         if not isinstance(container, pyasdm.ASDM):
-            raise (ValueError("SeeingTable constructor must use a ASDM instance"))
+            raise (ValueError("SeeingTable constructor must use an ASDM instance"))
 
         self._container = container
 
@@ -627,16 +627,17 @@ class SeeingTable:
         A method to append a row to its table, used by input conversion methods.
         Not indended for external use.
 
-        This method is appropriate for the case with a ArrayTimeInterval temporal key
+        This method is appropriate for the case with an ArrayTimeInterval temporal key
         and no other fields in the key.
 
         Append x to its table
+
         x The row to be appended or a tuple of (rowStartLocation, timeInterval) where
         rowStartLocation is the location in self._eis where this row starts and timeInterval is
         the ArrayTimeInterval key for this row
+
         returns  ths index of the row that was inserted (the same rules used by insertByStartTime)
         """
-        # skip this step if the uniqueness check is skipped
         rowStartLocation = None
         if isinstance(x, tuple):
             rowStartLocation, timeInterval = x
@@ -646,10 +647,11 @@ class SeeingTable:
             # this requires that the full row instance be used
             thisRow = x
             if rowStartLocation is not None:
-                thisRow = self._getRowByLoc(rowStartLocation, isadded=False)
+                thisRow = self._getRowByLoc(rowStartLocation)
             if self.getRowByKey(thisRow.getTimeInterval()) is not None:
                 raise DuplicateKey("Duplicate key exception in ", "SeeingTable")
 
+        # all rows are inseted into self._sortedRows, this also adds it to the appropriate lists for all rows in the order they were added
         return self.insertByStartTime(x, self._sortedRows)
 
     # ====> methods returning rows.
@@ -668,8 +670,10 @@ class SeeingTable:
         result = []
         if len(self._rowLocList) > 0:
             # any binary rows come first and must be fetched individually
-            for rowLoc in self._rowLocList:
-                result.append(self._getRowByLoc(rowLoc))
+            for index in range(len(self.rowLocList)):
+                # relies on getRow to set the added and temporal value if appropriate
+                # the index is the row number since binary rows come first
+                result.append(self.getRow(index))
             if len(self._rowList) > 0:
                 result = result + self._rowList
         else:
@@ -691,6 +695,14 @@ class SeeingTable:
         # rows are found first in self._rowLocList then from self._rowList as needed
         if index < len(self._rowLocList):
             result = self._getRowByLoc(self._rowLocList[index])
+
+            # adding a row can cause temporal key values to be adjusted, use the one found in self._rowTImesList to use the appropriate one
+            # this is only needed for the binary rows as they are read from disk, rows already in memory will already have the correct temporal value
+            # this MUST happen before isAdded is called
+            result.setTimeInterval(self._rowTimesList[index])
+
+            # this row has been added
+            result.isAdded()
         else:
             rowListIndex = index - len(self._rowLocList)
             result = self._rowList[rowListIndex]
@@ -724,16 +736,16 @@ class SeeingTable:
 
         return None
 
-    def _getRowByLoc(self, rowStartLoc, isadded=True):
+    def _getRowByLoc(self, rowStartLoc):
         """
         Used when attached to a binary table. For internal use.
 
-        If the row is in the process of being added then the row
-        should not be marked as "added" yet and isadded is False. In all other cases the
-        row has been added and that needs to be set when retrieving the row.
-
         The retrieved row is kept internally in case the same row is requested before any
         other rows to avoid re-reading it.
+
+        Note that when used by getRow the returned row will be marked as added and
+        if this is a temporal table the temporal value in _rowTimesList will be used to set the temporal value in each row.
+        That should only be done for row already added to this this table.
 
         Return a row using the binary table values that  start at rowStartLoc in self._eis.
         """
@@ -745,8 +757,6 @@ class SeeingTable:
         else:
             loc = self._eis.seek(rowStartLoc)
             result = SeeingRow.fromBin(self._eis, self, self._attributesSeq)
-            if isadded:
-                result.isAdded()
 
             # remember this, in case the same row is requested again
             self._lastBinRow = result
@@ -845,6 +855,7 @@ class SeeingTable:
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
+
                     self.checkAndAdd(row, (not self._checkRowUniqueness))
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
@@ -1165,6 +1176,7 @@ class SeeingTable:
                 rowStart = self._eis.tell()
 
                 # skip this row, getting only the information needed for checkAndAdd
+
                 timeInterval = SeeingRow.skipWithContextFromBin(
                     self._eis, self._attributesSeq
                 )

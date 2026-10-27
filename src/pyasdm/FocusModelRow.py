@@ -627,9 +627,8 @@ class FocusModelRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 
@@ -646,6 +645,47 @@ class FocusModelRow:
             method(eis)
 
         return
+
+    # staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis,
+        in order, this skips one row by skipping values from that EndianInput in
+        the expected order. Only values necessary to understand that row plus
+        the context values appropriate for the FocusModelRow are read. The context
+        tuple that is returned is (antennaId, focusModelId)
+
+        This allows the focusModelId to be used
+        appropriately when filling a binary table version of FocusModelTable.
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        focusModelId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " FocusModel",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "focusModelId":
+
+                focusModelId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, focusModelId)
 
     # Intrinsic Table Attributes
 

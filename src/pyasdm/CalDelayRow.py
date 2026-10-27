@@ -643,7 +643,7 @@ class CalDelayRow:
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
 
-            eos.writeString(str(self._polarizationTypes[i]))
+            eos.writeInt(int(self._polarizationTypes[i].getValue()))
 
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
@@ -686,7 +686,7 @@ class CalDelayRow:
             eos.writeInt(len(self._sidebands))
             for i in range(len(self._sidebands)):
 
-                eos.writeString(str(self._sidebands[i]))
+                eos.writeInt(int(self._sidebands[i].getValue()))
 
     # the static fromBin methods to extract each field from an EndianInput stream
 
@@ -1198,9 +1198,8 @@ class CalDelayRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

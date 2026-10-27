@@ -654,7 +654,7 @@ class CalFluxRow:
         eos.writeInt(len(self._stokes))
         for i in range(len(self._stokes)):
 
-            eos.writeString(str(self._stokes[i]))
+            eos.writeInt(int(self._stokes[i].getValue()))
 
         eos.writeBool(self._directionExists)
         if self._directionExists:
@@ -1182,9 +1182,8 @@ class CalFluxRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

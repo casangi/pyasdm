@@ -605,7 +605,7 @@ class ConfigDescriptionRow:
         eos.writeInt(len(self._atmPhaseCorrection))
         for i in range(len(self._atmPhaseCorrection)):
 
-            eos.writeString(str(self._atmPhaseCorrection[i]))
+            eos.writeInt(int(self._atmPhaseCorrection[i].getValue()))
 
         eos.writeString(str(self._processorType))
 
@@ -616,7 +616,7 @@ class ConfigDescriptionRow:
         eos.writeInt(len(self._feedId))
         for i in range(len(self._feedId)):
 
-            eos.writeInt(int(self._feedId[i].getValue()))
+            eos.writeInt(self._feedId[i])
 
         Tag.listToBin(self._switchCycleId, eos)
 
@@ -643,7 +643,7 @@ class ConfigDescriptionRow:
             eos.writeInt(len(self._assocNature))
             for i in range(len(self._assocNature)):
 
-                eos.writeString(str(self._assocNature[i]))
+                eos.writeInt(int(self._assocNature[i].getValue()))
 
         eos.writeBool(self._assocConfigDescriptionIdExists)
         if self._assocConfigDescriptionIdExists:
@@ -1105,9 +1105,8 @@ class ConfigDescriptionRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

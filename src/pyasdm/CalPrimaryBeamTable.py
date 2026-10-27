@@ -53,7 +53,7 @@ import io
 
 class CalPrimaryBeamTable:
     """
-    The CalPrimaryBeamTable class is an Alma table.
+    The CalPrimaryBeamTable class is an ASDM table.
 
     Result of Primary Beam Map measurement.
 
@@ -179,7 +179,7 @@ class CalPrimaryBeamTable:
     # If loaded from a binary source, the binary table related lists are used
     # first when retrieving rows and then the _rowList for any additionall rows.
     # When the binary table lists are empty then all rows come from _rowList.
-    # Rows added using the add() method are always added to _rowsList.
+    # Rows added using the add() method are always added to _rowList.
     # Rows can only be added from one file and then only if no rows have previously been added.
     # For rows added from a binary table file, only enough information to populate these lists
     # is read and the starting location of reach row is kept here. Reading the full row requires
@@ -323,7 +323,7 @@ class CalPrimaryBeamTable:
         The uniqueness check is off by default. Turn that on by setting
         checkRowUniqueness to True. When this is true the the uniquess check
         that normally happens with a row is added to the table is skipped when
-        the full table is read from an existing copy (e.g. and XML or bin file).
+        the full table is read from an existing copy (e.g. an XML or bin file).
         Checking that each row is unique can take a significant time for large
         tables. This check should be unnecessary for ASDMs created by the telescope.
 
@@ -333,7 +333,7 @@ class CalPrimaryBeamTable:
 
         if not isinstance(container, pyasdm.ASDM):
             raise (
-                ValueError("CalPrimaryBeamTable constructor must use a ASDM instance")
+                ValueError("CalPrimaryBeamTable constructor must use an ASDM instance")
             )
 
         self._container = container
@@ -620,15 +620,19 @@ class CalPrimaryBeamTable:
         x verifies the rule of uniqueness and raise an exception if not.
 
         Append x to its table.
+
+
         x is the row to be appended or an integer giving the row start location in self._eis
         returns the index of the row that was added
 
         Note that if skipUniquenessCheck is False and x is a row start location then
         the row at that location is first read so that the lookup can be done using the full
         set of required attributes.
+
         """
         # remember where this is being added, in case the full row needs to be read into x
         rowStartLoc = None
+
         if isinstance(x, int):
             rowStartLoc = x
 
@@ -636,7 +640,7 @@ class CalPrimaryBeamTable:
         if not skipUniquenessCheck:
             if isinstance(x, int):
                 # the full row is needed in x
-                x = self._getRowByLoc(rowStartLoc, isadded=False)
+                x = self._getRowByLoc(rowStartLoc)
             if (
                 self.getRowByKey(
                     x.getAntennaName(),
@@ -648,8 +652,7 @@ class CalPrimaryBeamTable:
             ):
                 raise DuplicateKey("Duplicate key exception in ", "CalPrimaryBeamTable")
 
-        # when skipUniquenessCheck is True then this is all that happens, the rows are added
-        # the index of the row being added is returned, set as appropriate
+        # the row is now added and the index (rownumber) of the newly added row is returned.
         result = None
         if rowStartLoc is None:
             result = len(self._rowList)
@@ -677,8 +680,10 @@ class CalPrimaryBeamTable:
         result = []
         if len(self._rowLocList) > 0:
             # any binary rows come first and must be fetched individually
-            for rowLoc in self._rowLocList:
-                result.append(self._getRowByLoc(rowLoc))
+            for index in range(len(self.rowLocList)):
+                # relies on getRow to set the added and temporal value if appropriate
+                # the index is the row number since binary rows come first
+                result.append(self.getRow(index))
             if len(self._rowList) > 0:
                 result = result + self._rowList
         else:
@@ -700,6 +705,9 @@ class CalPrimaryBeamTable:
         # rows are found first in self._rowLocList then from self._rowList as needed
         if index < len(self._rowLocList):
             result = self._getRowByLoc(self._rowLocList[index])
+
+            # this row has been added
+            result.isAdded()
         else:
             rowListIndex = index - len(self._rowLocList)
             result = self._rowList[rowListIndex]
@@ -857,16 +865,16 @@ class CalPrimaryBeamTable:
 
         return None
 
-    def _getRowByLoc(self, rowStartLoc, isadded=True):
+    def _getRowByLoc(self, rowStartLoc):
         """
         Used when attached to a binary table. For internal use.
 
-        If the row is in the process of being added then the row
-        should not be marked as "added" yet and isadded is False. In all other cases the
-        row has been added and that needs to be set when retrieving the row.
-
         The retrieved row is kept internally in case the same row is requested before any
         other rows to avoid re-reading it.
+
+        Note that when used by getRow the returned row will be marked as added and
+        if this is a temporal table the temporal value in _rowTimesList will be used to set the temporal value in each row.
+        That should only be done for row already added to this this table.
 
         Return a row using the binary table values that  start at rowStartLoc in self._eis.
         """
@@ -878,8 +886,6 @@ class CalPrimaryBeamTable:
         else:
             loc = self._eis.seek(rowStartLoc)
             result = CalPrimaryBeamRow.fromBin(self._eis, self, self._attributesSeq)
-            if isadded:
-                result.isAdded()
 
             # remember this, in case the same row is requested again
             self._lastBinRow = result
@@ -982,6 +988,7 @@ class CalPrimaryBeamTable:
                 try:
                     row = self.newRowDefault()
                     row.setFromXML(thisNode)
+
                     self.checkAndAdd(row, (not self._checkRowUniqueness))
                 except DuplicateKey as exc:
                     # reraise it as a ConversionException
@@ -1346,7 +1353,7 @@ class CalPrimaryBeamTable:
             for i in range(numRows):
                 rowStart = self._eis.tell()
 
-                # non temporal - 1, rowstart (int), skip row
+                # non temporal, rowstart (int), skip row
                 CalPrimaryBeamRow.skipBin(self._eis, self._attributesSeq)
                 self.checkAndAdd(rowStart, (not self._checkRowUniqueness))
 

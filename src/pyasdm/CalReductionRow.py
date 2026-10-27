@@ -363,7 +363,7 @@ class CalReductionRow:
         eos.writeInt(len(self._invalidConditions))
         for i in range(len(self._invalidConditions)):
 
-            eos.writeString(str(self._invalidConditions[i]))
+            eos.writeInt(int(self._invalidConditions[i].getValue()))
 
         self._timeReduced.toBin(eos)
 
@@ -650,9 +650,8 @@ class CalReductionRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

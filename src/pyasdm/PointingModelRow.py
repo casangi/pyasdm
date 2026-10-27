@@ -657,9 +657,8 @@ class PointingModelRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 
@@ -676,6 +675,47 @@ class PointingModelRow:
             method(eis)
 
         return
+
+    # staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis,
+        in order, this skips one row by skipping values from that EndianInput in
+        the expected order. Only values necessary to understand that row plus
+        the context values appropriate for the PointingModelRow are read. The context
+        tuple that is returned is (antennaId, pointingModelId)
+
+        This allows the pointingModelId to be used
+        appropriately when filling a binary table version of PointingModelTable.
+        """
+        global _skipBinMethods
+
+        antennaId = None
+
+        pointingModelId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " PointingModel",
+                )
+
+            if attributeName == "antennaId":
+
+                antennaId = Tag.fromBin(eis)
+
+            elif attributeName == "pointingModelId":
+
+                pointingModelId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (antennaId, pointingModelId)
 
     # Intrinsic Table Attributes
 

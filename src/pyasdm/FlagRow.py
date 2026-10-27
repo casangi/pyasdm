@@ -549,7 +549,7 @@ class FlagRow:
             eos.writeInt(len(self._polarizationType))
             for i in range(len(self._polarizationType)):
 
-                eos.writeString(str(self._polarizationType[i]))
+                eos.writeInt(int(self._polarizationType[i].getValue()))
 
         eos.writeBool(self._channelExists)
         if self._channelExists:
@@ -939,9 +939,8 @@ class FlagRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 

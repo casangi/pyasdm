@@ -372,9 +372,8 @@ class DopplerRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 
@@ -391,6 +390,47 @@ class DopplerRow:
             method(eis)
 
         return
+
+    # staticmethod
+    def skipWithContextFromBin(eis, attributesSeq):
+        """
+        Given an EndianInput instance and the list of attributes to be found in eis,
+        in order, this skips one row by skipping values from that EndianInput in
+        the expected order. Only values necessary to understand that row plus
+        the context values appropriate for the DopplerRow are read. The context
+        tuple that is returned is (dopplerId, sourceId)
+
+        This allows the dopplerId to be used
+        appropriately when filling a binary table version of DopplerTable.
+        """
+        global _skipBinMethods
+
+        dopplerId = None
+
+        sourceId = None
+
+        for attributeName in attributesSeq:
+            if attributeName not in _skipBinMethods:
+                raise ConversionException(
+                    "There is not a method to skip an attribute '"
+                    + attributeName
+                    + "'.",
+                    " Doppler",
+                )
+
+            if attributeName == "dopplerId":
+
+                dopplerId = eis.readInt()
+
+            elif attributeName == "sourceId":
+
+                sourceId = eis.readInt()
+
+            else:
+                method = _skipBinMethods[attributeName]
+                method(eis)
+
+        return (dopplerId, sourceId)
 
     # Intrinsic Table Attributes
 

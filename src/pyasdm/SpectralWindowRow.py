@@ -1367,7 +1367,7 @@ class SpectralWindowRow:
             eos.writeInt(len(self._assocNature))
             for i in range(len(self._assocNature)):
 
-                eos.writeString(str(self._assocNature[i]))
+                eos.writeInt(int(self._assocNature[i].getValue()))
 
         eos.writeBool(self._numFactorExists)
         if self._numFactorExists:
@@ -2446,9 +2446,8 @@ class SpectralWindowRow:
     @staticmethod
     def skipBin(eis, attributesSeq):
         """
-        Given an EndianInput instance and
-        the list of attributes to be found in eis, in order, this skips one row by
-        skipping values from that EndianInput in the expected order.
+        Given an EndianInput instance and the list of attributes to be found in eis, in order,
+        this skips one row by skipping values from that EndianInput in the expected order.
         """
         global _skipBinMethods
 
