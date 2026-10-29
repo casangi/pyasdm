@@ -1065,12 +1065,10 @@ class CalFocusRow:
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         eos.writeInt(len(self._wereFixed))
         for i in range(len(self._wereFixed)):
-
             eos.writeBool(self._wereFixed[i])
 
         Length.listToBin(self._offset, eos)
@@ -1083,12 +1081,12 @@ class CalFocusRow:
             eos.writeInt(0)
         else:
             offsetWasTied_dims = pyasdm.utils.getListDims(self._offsetWasTied)
-        # assumes it really is 2D
-        eos.writeInt(offsetWasTied_dims[0])
-        eos.writeInt(offsetWasTied_dims[1])
-        for i in range(offsetWasTied_dims[0]):
-            for j in range(offsetWasTied_dims[1]):
-                eos.writeBool(self._offsetWasTied[i][j])
+            # assumes it really is 2D
+            eos.writeInt(offsetWasTied_dims[0])
+            eos.writeInt(offsetWasTied_dims[1])
+            for i in range(offsetWasTied_dims[0]):
+                for j in range(offsetWasTied_dims[1]):
+                    eos.writeBool(self._offsetWasTied[i][j])
 
         # null array case, unsure if this is possible but this should work
         if self._reducedChiSquared is None:
@@ -1096,12 +1094,12 @@ class CalFocusRow:
             eos.writeInt(0)
         else:
             reducedChiSquared_dims = pyasdm.utils.getListDims(self._reducedChiSquared)
-        # assumes it really is 2D
-        eos.writeInt(reducedChiSquared_dims[0])
-        eos.writeInt(reducedChiSquared_dims[1])
-        for i in range(reducedChiSquared_dims[0]):
-            for j in range(reducedChiSquared_dims[1]):
-                eos.writeDouble(self._reducedChiSquared[i][j])
+            # assumes it really is 2D
+            eos.writeInt(reducedChiSquared_dims[0])
+            eos.writeInt(reducedChiSquared_dims[1])
+            for i in range(reducedChiSquared_dims[0]):
+                for j in range(reducedChiSquared_dims[1]):
+                    eos.writeDouble(self._reducedChiSquared[i][j])
 
         Length.listToBin(self._position, eos)
 
@@ -1125,7 +1123,6 @@ class CalFocusRow:
 
             eos.writeInt(len(self._focusCurveWasFixed))
             for i in range(len(self._focusCurveWasFixed)):
-
                 eos.writeBool(self._focusCurveWasFixed[i])
 
         eos.writeBool(self._offIntensityExists)

@@ -700,7 +700,6 @@ class ExecBlockRow:
 
         eos.writeInt(len(self._observingLog))
         for i in range(len(self._observingLog)):
-
             eos.writeStr(self._observingLog[i])
 
         self._sessionReference.toBin(eos)

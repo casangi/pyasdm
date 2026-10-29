@@ -430,8 +430,7 @@ class CalDeviceRow:
 
         eos.writeInt(len(self._calLoadNames))
         for i in range(len(self._calLoadNames)):
-
-            eos.writeInt(int(self._calLoadNames[i].getValue()))
+            eos.writeString(str(self._calLoadNames[i]))
 
         eos.writeBool(self._numReceptorExists)
         if self._numReceptorExists:
@@ -447,19 +446,18 @@ class CalDeviceRow:
                 eos.writeInt(0)
             else:
                 calEff_dims = pyasdm.utils.getListDims(self._calEff)
-            # assumes it really is 2D
-            eos.writeInt(calEff_dims[0])
-            eos.writeInt(calEff_dims[1])
-            for i in range(calEff_dims[0]):
-                for j in range(calEff_dims[1]):
-                    eos.writeFloat(self._calEff[i][j])
+                # assumes it really is 2D
+                eos.writeInt(calEff_dims[0])
+                eos.writeInt(calEff_dims[1])
+                for i in range(calEff_dims[0]):
+                    for j in range(calEff_dims[1]):
+                        eos.writeFloat(self._calEff[i][j])
 
         eos.writeBool(self._noiseCalExists)
         if self._noiseCalExists:
 
             eos.writeInt(len(self._noiseCal))
             for i in range(len(self._noiseCal)):
-
                 eos.writeDouble(self._noiseCal[i])
 
         eos.writeBool(self._coupledNoiseCalExists)
@@ -471,12 +469,12 @@ class CalDeviceRow:
                 eos.writeInt(0)
             else:
                 coupledNoiseCal_dims = pyasdm.utils.getListDims(self._coupledNoiseCal)
-            # assumes it really is 2D
-            eos.writeInt(coupledNoiseCal_dims[0])
-            eos.writeInt(coupledNoiseCal_dims[1])
-            for i in range(coupledNoiseCal_dims[0]):
-                for j in range(coupledNoiseCal_dims[1]):
-                    eos.writeFloat(self._coupledNoiseCal[i][j])
+                # assumes it really is 2D
+                eos.writeInt(coupledNoiseCal_dims[0])
+                eos.writeInt(coupledNoiseCal_dims[1])
+                for i in range(coupledNoiseCal_dims[0]):
+                    for j in range(coupledNoiseCal_dims[1]):
+                        eos.writeFloat(self._coupledNoiseCal[i][j])
 
         eos.writeBool(self._temperatureLoadExists)
         if self._temperatureLoadExists:

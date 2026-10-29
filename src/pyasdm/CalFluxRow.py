@@ -631,12 +631,12 @@ class CalFluxRow:
             eos.writeInt(0)
         else:
             flux_dims = pyasdm.utils.getListDims(self._flux)
-        # assumes it really is 2D
-        eos.writeInt(flux_dims[0])
-        eos.writeInt(flux_dims[1])
-        for i in range(flux_dims[0]):
-            for j in range(flux_dims[1]):
-                eos.writeDouble(self._flux[i][j])
+            # assumes it really is 2D
+            eos.writeInt(flux_dims[0])
+            eos.writeInt(flux_dims[1])
+            for i in range(flux_dims[0]):
+                for j in range(flux_dims[1]):
+                    eos.writeDouble(self._flux[i][j])
 
         # null array case, unsure if this is possible but this should work
         if self._fluxError is None:
@@ -644,17 +644,16 @@ class CalFluxRow:
             eos.writeInt(0)
         else:
             fluxError_dims = pyasdm.utils.getListDims(self._fluxError)
-        # assumes it really is 2D
-        eos.writeInt(fluxError_dims[0])
-        eos.writeInt(fluxError_dims[1])
-        for i in range(fluxError_dims[0]):
-            for j in range(fluxError_dims[1]):
-                eos.writeDouble(self._fluxError[i][j])
+            # assumes it really is 2D
+            eos.writeInt(fluxError_dims[0])
+            eos.writeInt(fluxError_dims[1])
+            for i in range(fluxError_dims[0]):
+                for j in range(fluxError_dims[1]):
+                    eos.writeDouble(self._fluxError[i][j])
 
         eos.writeInt(len(self._stokes))
         for i in range(len(self._stokes)):
-
-            eos.writeInt(int(self._stokes[i].getValue()))
+            eos.writeString(str(self._stokes[i]))
 
         eos.writeBool(self._directionExists)
         if self._directionExists:

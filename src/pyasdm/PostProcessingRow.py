@@ -451,7 +451,6 @@ class PostProcessingRow:
 
             eos.writeInt(len(self._scanNumber))
             for i in range(len(self._scanNumber)):
-
                 eos.writeInt(self._scanNumber[i])
 
         eos.writeBool(self._calibrationStrategyExists)

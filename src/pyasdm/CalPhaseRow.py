@@ -724,12 +724,12 @@ class CalPhaseRow:
             eos.writeInt(0)
         else:
             ampli_dims = pyasdm.utils.getListDims(self._ampli)
-        # assumes it really is 2D
-        eos.writeInt(ampli_dims[0])
-        eos.writeInt(ampli_dims[1])
-        for i in range(ampli_dims[0]):
-            for j in range(ampli_dims[1]):
-                eos.writeFloat(self._ampli[i][j])
+            # assumes it really is 2D
+            eos.writeInt(ampli_dims[0])
+            eos.writeInt(ampli_dims[1])
+            for i in range(ampli_dims[0]):
+                for j in range(ampli_dims[1]):
+                    eos.writeFloat(self._ampli[i][j])
 
         # null array case, unsure if this is possible but this should work
         if self._antennaNames is None:
@@ -737,12 +737,12 @@ class CalPhaseRow:
             eos.writeInt(0)
         else:
             antennaNames_dims = pyasdm.utils.getListDims(self._antennaNames)
-        # assumes it really is 2D
-        eos.writeInt(antennaNames_dims[0])
-        eos.writeInt(antennaNames_dims[1])
-        for i in range(antennaNames_dims[0]):
-            for j in range(antennaNames_dims[1]):
-                eos.writeStr(self._antennaNames[i][j])
+            # assumes it really is 2D
+            eos.writeInt(antennaNames_dims[0])
+            eos.writeInt(antennaNames_dims[1])
+            for i in range(antennaNames_dims[0]):
+                for j in range(antennaNames_dims[1]):
+                    eos.writeStr(self._antennaNames[i][j])
 
         Length.listToBin(self._baselineLengths, eos)
 
@@ -754,12 +754,12 @@ class CalPhaseRow:
             decorrelationFactor_dims = pyasdm.utils.getListDims(
                 self._decorrelationFactor
             )
-        # assumes it really is 2D
-        eos.writeInt(decorrelationFactor_dims[0])
-        eos.writeInt(decorrelationFactor_dims[1])
-        for i in range(decorrelationFactor_dims[0]):
-            for j in range(decorrelationFactor_dims[1]):
-                eos.writeFloat(self._decorrelationFactor[i][j])
+            # assumes it really is 2D
+            eos.writeInt(decorrelationFactor_dims[0])
+            eos.writeInt(decorrelationFactor_dims[1])
+            for i in range(decorrelationFactor_dims[0]):
+                for j in range(decorrelationFactor_dims[1]):
+                    eos.writeFloat(self._decorrelationFactor[i][j])
 
         Angle.listToBin(self._direction, eos)
 
@@ -773,17 +773,16 @@ class CalPhaseRow:
             eos.writeInt(0)
         else:
             phase_dims = pyasdm.utils.getListDims(self._phase)
-        # assumes it really is 2D
-        eos.writeInt(phase_dims[0])
-        eos.writeInt(phase_dims[1])
-        for i in range(phase_dims[0]):
-            for j in range(phase_dims[1]):
-                eos.writeFloat(self._phase[i][j])
+            # assumes it really is 2D
+            eos.writeInt(phase_dims[0])
+            eos.writeInt(phase_dims[1])
+            for i in range(phase_dims[0]):
+                for j in range(phase_dims[1]):
+                    eos.writeFloat(self._phase[i][j])
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         # null array case, unsure if this is possible but this should work
         if self._phaseRMS is None:
@@ -791,12 +790,12 @@ class CalPhaseRow:
             eos.writeInt(0)
         else:
             phaseRMS_dims = pyasdm.utils.getListDims(self._phaseRMS)
-        # assumes it really is 2D
-        eos.writeInt(phaseRMS_dims[0])
-        eos.writeInt(phaseRMS_dims[1])
-        for i in range(phaseRMS_dims[0]):
-            for j in range(phaseRMS_dims[1]):
-                eos.writeFloat(self._phaseRMS[i][j])
+            # assumes it really is 2D
+            eos.writeInt(phaseRMS_dims[0])
+            eos.writeInt(phaseRMS_dims[1])
+            for i in range(phaseRMS_dims[0]):
+                for j in range(phaseRMS_dims[1]):
+                    eos.writeFloat(self._phaseRMS[i][j])
 
         # null array case, unsure if this is possible but this should work
         if self._statPhaseRMS is None:
@@ -804,19 +803,18 @@ class CalPhaseRow:
             eos.writeInt(0)
         else:
             statPhaseRMS_dims = pyasdm.utils.getListDims(self._statPhaseRMS)
-        # assumes it really is 2D
-        eos.writeInt(statPhaseRMS_dims[0])
-        eos.writeInt(statPhaseRMS_dims[1])
-        for i in range(statPhaseRMS_dims[0]):
-            for j in range(statPhaseRMS_dims[1]):
-                eos.writeFloat(self._statPhaseRMS[i][j])
+            # assumes it really is 2D
+            eos.writeInt(statPhaseRMS_dims[0])
+            eos.writeInt(statPhaseRMS_dims[1])
+            for i in range(statPhaseRMS_dims[0]):
+                for j in range(statPhaseRMS_dims[1]):
+                    eos.writeFloat(self._statPhaseRMS[i][j])
 
         eos.writeBool(self._correctionValidityExists)
         if self._correctionValidityExists:
 
             eos.writeInt(len(self._correctionValidity))
             for i in range(len(self._correctionValidity)):
-
                 eos.writeBool(self._correctionValidity[i])
 
         eos.writeBool(self._numAntennaExists)
@@ -829,7 +827,6 @@ class CalPhaseRow:
 
             eos.writeInt(len(self._singleAntennaName))
             for i in range(len(self._singleAntennaName)):
-
                 eos.writeStr(self._singleAntennaName[i])
 
         eos.writeBool(self._refAntennaNameExists)
@@ -846,12 +843,12 @@ class CalPhaseRow:
                 eos.writeInt(0)
             else:
                 phaseAnt_dims = pyasdm.utils.getListDims(self._phaseAnt)
-            # assumes it really is 2D
-            eos.writeInt(phaseAnt_dims[0])
-            eos.writeInt(phaseAnt_dims[1])
-            for i in range(phaseAnt_dims[0]):
-                for j in range(phaseAnt_dims[1]):
-                    eos.writeFloat(self._phaseAnt[i][j])
+                # assumes it really is 2D
+                eos.writeInt(phaseAnt_dims[0])
+                eos.writeInt(phaseAnt_dims[1])
+                for i in range(phaseAnt_dims[0]):
+                    for j in range(phaseAnt_dims[1]):
+                        eos.writeFloat(self._phaseAnt[i][j])
 
         eos.writeBool(self._phaseAntRMSExists)
         if self._phaseAntRMSExists:
@@ -862,12 +859,12 @@ class CalPhaseRow:
                 eos.writeInt(0)
             else:
                 phaseAntRMS_dims = pyasdm.utils.getListDims(self._phaseAntRMS)
-            # assumes it really is 2D
-            eos.writeInt(phaseAntRMS_dims[0])
-            eos.writeInt(phaseAntRMS_dims[1])
-            for i in range(phaseAntRMS_dims[0]):
-                for j in range(phaseAntRMS_dims[1]):
-                    eos.writeFloat(self._phaseAntRMS[i][j])
+                # assumes it really is 2D
+                eos.writeInt(phaseAntRMS_dims[0])
+                eos.writeInt(phaseAntRMS_dims[1])
+                for i in range(phaseAntRMS_dims[0]):
+                    for j in range(phaseAntRMS_dims[1]):
+                        eos.writeFloat(self._phaseAntRMS[i][j])
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

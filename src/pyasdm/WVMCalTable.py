@@ -709,7 +709,7 @@ class WVMCalTable:
         rowStartLocation is the location self._eis where this row starts, timeInterval is the
         ArrayTimeInterval key value for this row and keystr is the Key() string appropriate for
         this row.
-        returns  the index of the row that was inserted (the same rules used by insertByTime)
+        returns  the index of the row that was inserted (the same rules used by insertByStartTime)
         """
         keystr = None
         if isinstance(x, tuple):

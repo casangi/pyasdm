@@ -914,12 +914,12 @@ class CalAtmosphereRow:
             eos.writeInt(0)
         else:
             forwardEffSpectrum_dims = pyasdm.utils.getListDims(self._forwardEffSpectrum)
-        # assumes it really is 2D
-        eos.writeInt(forwardEffSpectrum_dims[0])
-        eos.writeInt(forwardEffSpectrum_dims[1])
-        for i in range(forwardEffSpectrum_dims[0]):
-            for j in range(forwardEffSpectrum_dims[1]):
-                eos.writeFloat(self._forwardEffSpectrum[i][j])
+            # assumes it really is 2D
+            eos.writeInt(forwardEffSpectrum_dims[0])
+            eos.writeInt(forwardEffSpectrum_dims[1])
+            for i in range(forwardEffSpectrum_dims[0]):
+                for j in range(forwardEffSpectrum_dims[1]):
+                    eos.writeFloat(self._forwardEffSpectrum[i][j])
 
         Frequency.listToBin(self._frequencyRange, eos)
 
@@ -933,8 +933,7 @@ class CalAtmosphereRow:
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         # null array case, unsure if this is possible but this should work
         if self._powerSkySpectrum is None:
@@ -942,12 +941,12 @@ class CalAtmosphereRow:
             eos.writeInt(0)
         else:
             powerSkySpectrum_dims = pyasdm.utils.getListDims(self._powerSkySpectrum)
-        # assumes it really is 2D
-        eos.writeInt(powerSkySpectrum_dims[0])
-        eos.writeInt(powerSkySpectrum_dims[1])
-        for i in range(powerSkySpectrum_dims[0]):
-            for j in range(powerSkySpectrum_dims[1]):
-                eos.writeFloat(self._powerSkySpectrum[i][j])
+            # assumes it really is 2D
+            eos.writeInt(powerSkySpectrum_dims[0])
+            eos.writeInt(powerSkySpectrum_dims[1])
+            for i in range(powerSkySpectrum_dims[0]):
+                for j in range(powerSkySpectrum_dims[1]):
+                    eos.writeFloat(self._powerSkySpectrum[i][j])
 
         # null array case, unsure if this is possible but this should work
         if self._powerLoadSpectrum is None:
@@ -955,14 +954,14 @@ class CalAtmosphereRow:
             eos.writeInt(0)
         else:
             powerLoadSpectrum_dims = pyasdm.utils.getListDims(self._powerLoadSpectrum)
-        # assumes it really is 3D
-        eos.writeInt(powerLoadSpectrum_dims[0])
-        eos.writeInt(powerLoadSpectrum_dims[1])
-        eos.writeInt(powerLoadSpectrum_dims[2])
-        for i in range(powerLoadSpectrum_dims[0]):
-            for j in range(powerLoadSpectrum_dims[1]):
-                for k in range(powerLoadSpectrum_dims[2]):
-                    eos.writeFloat(self._powerLoadSpectrum[i][j][k])
+            # assumes it really is 3D
+            eos.writeInt(powerLoadSpectrum_dims[0])
+            eos.writeInt(powerLoadSpectrum_dims[1])
+            eos.writeInt(powerLoadSpectrum_dims[2])
+            for i in range(powerLoadSpectrum_dims[0]):
+                for j in range(powerLoadSpectrum_dims[1]):
+                    for k in range(powerLoadSpectrum_dims[2]):
+                        eos.writeFloat(self._powerLoadSpectrum[i][j][k])
 
         eos.writeString(str(self._syscalType))
 
@@ -978,12 +977,12 @@ class CalAtmosphereRow:
             eos.writeInt(0)
         else:
             tauSpectrum_dims = pyasdm.utils.getListDims(self._tauSpectrum)
-        # assumes it really is 2D
-        eos.writeInt(tauSpectrum_dims[0])
-        eos.writeInt(tauSpectrum_dims[1])
-        for i in range(tauSpectrum_dims[0]):
-            for j in range(tauSpectrum_dims[1]):
-                eos.writeFloat(self._tauSpectrum[i][j])
+            # assumes it really is 2D
+            eos.writeInt(tauSpectrum_dims[0])
+            eos.writeInt(tauSpectrum_dims[1])
+            for i in range(tauSpectrum_dims[0]):
+                for j in range(tauSpectrum_dims[1]):
+                    eos.writeFloat(self._tauSpectrum[i][j])
 
         Temperature.listToBin(self._tAtm, eos)
 
@@ -993,7 +992,6 @@ class CalAtmosphereRow:
 
         eos.writeInt(len(self._tau))
         for i in range(len(self._tau)):
-
             eos.writeFloat(self._tau[i])
 
         Length.listToBin(self._water, eos)
@@ -1009,19 +1007,18 @@ class CalAtmosphereRow:
                 eos.writeInt(0)
             else:
                 alphaSpectrum_dims = pyasdm.utils.getListDims(self._alphaSpectrum)
-            # assumes it really is 2D
-            eos.writeInt(alphaSpectrum_dims[0])
-            eos.writeInt(alphaSpectrum_dims[1])
-            for i in range(alphaSpectrum_dims[0]):
-                for j in range(alphaSpectrum_dims[1]):
-                    eos.writeFloat(self._alphaSpectrum[i][j])
+                # assumes it really is 2D
+                eos.writeInt(alphaSpectrum_dims[0])
+                eos.writeInt(alphaSpectrum_dims[1])
+                for i in range(alphaSpectrum_dims[0]):
+                    for j in range(alphaSpectrum_dims[1]):
+                        eos.writeFloat(self._alphaSpectrum[i][j])
 
         eos.writeBool(self._forwardEfficiencyExists)
         if self._forwardEfficiencyExists:
 
             eos.writeInt(len(self._forwardEfficiency))
             for i in range(len(self._forwardEfficiency)):
-
                 eos.writeFloat(self._forwardEfficiency[i])
 
         eos.writeBool(self._forwardEfficiencyErrorExists)
@@ -1029,7 +1026,6 @@ class CalAtmosphereRow:
 
             eos.writeInt(len(self._forwardEfficiencyError))
             for i in range(len(self._forwardEfficiencyError)):
-
                 eos.writeDouble(self._forwardEfficiencyError[i])
 
         eos.writeBool(self._sbGainExists)
@@ -1037,7 +1033,6 @@ class CalAtmosphereRow:
 
             eos.writeInt(len(self._sbGain))
             for i in range(len(self._sbGain)):
-
                 eos.writeFloat(self._sbGain[i])
 
         eos.writeBool(self._sbGainErrorExists)
@@ -1045,7 +1040,6 @@ class CalAtmosphereRow:
 
             eos.writeInt(len(self._sbGainError))
             for i in range(len(self._sbGainError)):
-
                 eos.writeFloat(self._sbGainError[i])
 
         eos.writeBool(self._sbGainSpectrumExists)
@@ -1057,12 +1051,12 @@ class CalAtmosphereRow:
                 eos.writeInt(0)
             else:
                 sbGainSpectrum_dims = pyasdm.utils.getListDims(self._sbGainSpectrum)
-            # assumes it really is 2D
-            eos.writeInt(sbGainSpectrum_dims[0])
-            eos.writeInt(sbGainSpectrum_dims[1])
-            for i in range(sbGainSpectrum_dims[0]):
-                for j in range(sbGainSpectrum_dims[1]):
-                    eos.writeFloat(self._sbGainSpectrum[i][j])
+                # assumes it really is 2D
+                eos.writeInt(sbGainSpectrum_dims[0])
+                eos.writeInt(sbGainSpectrum_dims[1])
+                for i in range(sbGainSpectrum_dims[0]):
+                    for j in range(sbGainSpectrum_dims[1]):
+                        eos.writeFloat(self._sbGainSpectrum[i][j])
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

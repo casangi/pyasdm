@@ -247,8 +247,7 @@ class PolarizationRow:
 
         eos.writeInt(len(self._corrType))
         for i in range(len(self._corrType)):
-
-            eos.writeInt(int(self._corrType[i].getValue()))
+            eos.writeString(str(self._corrType[i]))
 
         # null array case, unsure if this is possible but this should work
         if self._corrProduct is None:
@@ -256,12 +255,12 @@ class PolarizationRow:
             eos.writeInt(0)
         else:
             corrProduct_dims = pyasdm.utils.getListDims(self._corrProduct)
-        # assumes it really is 2D
-        eos.writeInt(corrProduct_dims[0])
-        eos.writeInt(corrProduct_dims[1])
-        for i in range(corrProduct_dims[0]):
-            for j in range(corrProduct_dims[1]):
-                eos.writeString(str(self._corrProduct[i][j]))
+            # assumes it really is 2D
+            eos.writeInt(corrProduct_dims[0])
+            eos.writeInt(corrProduct_dims[1])
+            for i in range(corrProduct_dims[0]):
+                for j in range(corrProduct_dims[1]):
+                    eos.writeString(str(self._corrProduct[i][j]))
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

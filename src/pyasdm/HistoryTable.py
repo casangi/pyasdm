@@ -335,7 +335,7 @@ class HistoryTable:
         # self._rowTimesList and the appropriate self._rowLocList or self._rowList need to be
         # appended with that information
         if addToRowLocList:
-            self._rowLocList.append(len(self._rowTimesList))
+            self._rowLocList.append(rowStartLoc)
         else:
             self._rowList.append(x)
             x.isAdded()
@@ -612,7 +612,7 @@ class HistoryTable:
         x The row to be appended or a tuple of (rowStartLocation, time, keystr) where
         rowStartLocation is the location in self._eis where the row starts, time is the ArrayTime
         keyword value for this row and keystr is the Key() value appropriate for this row.
-        returns  the index of the row that was inserted (the same rules used by insertByStartTime
+        returns  the index of the row that was inserted (the same rules used by insertByTime
         """
         keystr = None
         if isinstance(x, tuple):

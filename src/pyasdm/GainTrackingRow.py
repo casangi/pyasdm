@@ -405,13 +405,11 @@ class GainTrackingRow:
 
         eos.writeInt(len(self._attenuator))
         for i in range(len(self._attenuator)):
-
             eos.writeFloat(self._attenuator[i])
 
         eos.writeInt(len(self._polarizationType))
         for i in range(len(self._polarizationType)):
-
-            eos.writeInt(int(self._polarizationType[i].getValue()))
+            eos.writeString(str(self._polarizationType[i]))
 
         eos.writeBool(self._samplingLevelExists)
         if self._samplingLevelExists:
@@ -428,7 +426,6 @@ class GainTrackingRow:
 
             eos.writeInt(len(self._attFreq))
             for i in range(len(self._attFreq)):
-
                 eos.writeDouble(self._attFreq[i])
 
         eos.writeBool(self._attSpectrumExists)

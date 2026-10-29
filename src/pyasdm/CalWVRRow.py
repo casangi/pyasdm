@@ -490,7 +490,6 @@ class CalWVRRow:
 
         eos.writeInt(len(self._inputAntennaNames))
         for i in range(len(self._inputAntennaNames)):
-
             eos.writeStr(self._inputAntennaNames[i])
 
         eos.writeInt(self._numChan)
@@ -509,25 +508,23 @@ class CalWVRRow:
             eos.writeInt(0)
         else:
             pathCoeff_dims = pyasdm.utils.getListDims(self._pathCoeff)
-        # assumes it really is 3D
-        eos.writeInt(pathCoeff_dims[0])
-        eos.writeInt(pathCoeff_dims[1])
-        eos.writeInt(pathCoeff_dims[2])
-        for i in range(pathCoeff_dims[0]):
-            for j in range(pathCoeff_dims[1]):
-                for k in range(pathCoeff_dims[2]):
-                    eos.writeFloat(self._pathCoeff[i][j][k])
+            # assumes it really is 3D
+            eos.writeInt(pathCoeff_dims[0])
+            eos.writeInt(pathCoeff_dims[1])
+            eos.writeInt(pathCoeff_dims[2])
+            for i in range(pathCoeff_dims[0]):
+                for j in range(pathCoeff_dims[1]):
+                    for k in range(pathCoeff_dims[2]):
+                        eos.writeFloat(self._pathCoeff[i][j][k])
 
         Frequency.listToBin(self._polyFreqLimits, eos)
 
         eos.writeInt(len(self._wetPath))
         for i in range(len(self._wetPath)):
-
             eos.writeFloat(self._wetPath[i])
 
         eos.writeInt(len(self._dryPath))
         for i in range(len(self._dryPath)):
-
             eos.writeFloat(self._dryPath[i])
 
         self._water.toBin(eos)

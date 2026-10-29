@@ -349,8 +349,7 @@ class ReceiverRow:
 
         eos.writeInt(len(self._sidebandLO))
         for i in range(len(self._sidebandLO)):
-
-            eos.writeInt(int(self._sidebandLO[i].getValue()))
+            eos.writeString(str(self._sidebandLO[i]))
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

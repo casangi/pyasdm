@@ -712,12 +712,12 @@ class SysCalRow:
                 eos.writeInt(0)
             else:
                 tantSpectrum_dims = pyasdm.utils.getListDims(self._tantSpectrum)
-            # assumes it really is 2D
-            eos.writeInt(tantSpectrum_dims[0])
-            eos.writeInt(tantSpectrum_dims[1])
-            for i in range(tantSpectrum_dims[0]):
-                for j in range(tantSpectrum_dims[1]):
-                    eos.writeFloat(self._tantSpectrum[i][j])
+                # assumes it really is 2D
+                eos.writeInt(tantSpectrum_dims[0])
+                eos.writeInt(tantSpectrum_dims[1])
+                for i in range(tantSpectrum_dims[0]):
+                    for j in range(tantSpectrum_dims[1]):
+                        eos.writeFloat(self._tantSpectrum[i][j])
 
         eos.writeBool(self._tantTsysFlagExists)
         if self._tantTsysFlagExists:
@@ -733,12 +733,12 @@ class SysCalRow:
                 eos.writeInt(0)
             else:
                 tantTsysSpectrum_dims = pyasdm.utils.getListDims(self._tantTsysSpectrum)
-            # assumes it really is 2D
-            eos.writeInt(tantTsysSpectrum_dims[0])
-            eos.writeInt(tantTsysSpectrum_dims[1])
-            for i in range(tantTsysSpectrum_dims[0]):
-                for j in range(tantTsysSpectrum_dims[1]):
-                    eos.writeFloat(self._tantTsysSpectrum[i][j])
+                # assumes it really is 2D
+                eos.writeInt(tantTsysSpectrum_dims[0])
+                eos.writeInt(tantTsysSpectrum_dims[1])
+                for i in range(tantTsysSpectrum_dims[0]):
+                    for j in range(tantTsysSpectrum_dims[1]):
+                        eos.writeFloat(self._tantTsysSpectrum[i][j])
 
         eos.writeBool(self._phaseDiffFlagExists)
         if self._phaseDiffFlagExists:
@@ -756,12 +756,12 @@ class SysCalRow:
                 phaseDiffSpectrum_dims = pyasdm.utils.getListDims(
                     self._phaseDiffSpectrum
                 )
-            # assumes it really is 2D
-            eos.writeInt(phaseDiffSpectrum_dims[0])
-            eos.writeInt(phaseDiffSpectrum_dims[1])
-            for i in range(phaseDiffSpectrum_dims[0]):
-                for j in range(phaseDiffSpectrum_dims[1]):
-                    eos.writeFloat(self._phaseDiffSpectrum[i][j])
+                # assumes it really is 2D
+                eos.writeInt(phaseDiffSpectrum_dims[0])
+                eos.writeInt(phaseDiffSpectrum_dims[1])
+                for i in range(phaseDiffSpectrum_dims[0]):
+                    for j in range(phaseDiffSpectrum_dims[1]):
+                        eos.writeFloat(self._phaseDiffSpectrum[i][j])
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

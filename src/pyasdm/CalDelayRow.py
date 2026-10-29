@@ -632,27 +632,22 @@ class CalDelayRow:
 
         eos.writeInt(len(self._delayError))
         for i in range(len(self._delayError)):
-
             eos.writeDouble(self._delayError[i])
 
         eos.writeInt(len(self._delayOffset))
         for i in range(len(self._delayOffset)):
-
             eos.writeDouble(self._delayOffset[i])
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
-
             eos.writeDouble(self._reducedChiSquared[i])
 
         eos.writeInt(len(self._appliedDelay))
         for i in range(len(self._appliedDelay)):
-
             eos.writeDouble(self._appliedDelay[i])
 
         eos.writeBool(self._crossDelayOffsetExists)
@@ -685,8 +680,7 @@ class CalDelayRow:
 
             eos.writeInt(len(self._sidebands))
             for i in range(len(self._sidebands)):
-
-                eos.writeInt(int(self._sidebands[i].getValue()))
+                eos.writeString(str(self._sidebands[i]))
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

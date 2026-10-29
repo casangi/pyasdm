@@ -577,8 +577,7 @@ class AnnotationRow:
 
             eos.writeInt(len(self._basebandName))
             for i in range(len(self._basebandName)):
-
-                eos.writeInt(int(self._basebandName[i].getValue()))
+                eos.writeString(str(self._basebandName[i]))
 
         eos.writeBool(self._numBasebandExists)
         if self._numBasebandExists:
@@ -600,7 +599,6 @@ class AnnotationRow:
 
             eos.writeInt(len(self._vdValue))
             for i in range(len(self._vdValue)):
-
                 eos.writeDouble(self._vdValue[i])
 
         eos.writeBool(self._vvdValuesExists)
@@ -612,12 +610,12 @@ class AnnotationRow:
                 eos.writeInt(0)
             else:
                 vvdValues_dims = pyasdm.utils.getListDims(self._vvdValues)
-            # assumes it really is 2D
-            eos.writeInt(vvdValues_dims[0])
-            eos.writeInt(vvdValues_dims[1])
-            for i in range(vvdValues_dims[0]):
-                for j in range(vvdValues_dims[1]):
-                    eos.writeDouble(self._vvdValues[i][j])
+                # assumes it really is 2D
+                eos.writeInt(vvdValues_dims[0])
+                eos.writeInt(vvdValues_dims[1])
+                for i in range(vvdValues_dims[0]):
+                    for j in range(vvdValues_dims[1]):
+                        eos.writeDouble(self._vvdValues[i][j])
 
         eos.writeBool(self._llValueExists)
         if self._llValueExists:
@@ -629,7 +627,6 @@ class AnnotationRow:
 
             eos.writeInt(len(self._vllValue))
             for i in range(len(self._vllValue)):
-
                 eos.writeInt(self._vllValue[i])
 
         eos.writeBool(self._vvllValueExists)
@@ -641,12 +638,12 @@ class AnnotationRow:
                 eos.writeInt(0)
             else:
                 vvllValue_dims = pyasdm.utils.getListDims(self._vvllValue)
-            # assumes it really is 2D
-            eos.writeInt(vvllValue_dims[0])
-            eos.writeInt(vvllValue_dims[1])
-            for i in range(vvllValue_dims[0]):
-                for j in range(vvllValue_dims[1]):
-                    eos.writeInt(self._vvllValue[i][j])
+                # assumes it really is 2D
+                eos.writeInt(vvllValue_dims[0])
+                eos.writeInt(vvllValue_dims[1])
+                for i in range(vvllValue_dims[0]):
+                    for j in range(vvllValue_dims[1]):
+                        eos.writeInt(self._vvllValue[i][j])
 
         eos.writeBool(self._sValueExists)
         if self._sValueExists:

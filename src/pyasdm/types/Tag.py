@@ -246,7 +246,7 @@ class Tag:
         """
         Skip a Tag from an EndianInput instance.
         """
-        ein.readString()
+        ein.skipString()
 
     @staticmethod
     def from1DBin(ein):
@@ -286,7 +286,6 @@ class Tag:
         ntags = 0
         if tagList is not None:
             ntags = len(tagList)
-
         # ntags is always written, even for zero-element lists
         eout.writeInt(ntags)
 

@@ -1885,10 +1885,7 @@ class SourceTable:
 
                 # temporal, with auto-incremntal, other keys : 2 (Feed, Receiver, Source)
                 self.checkAndAdd(
-                    rowStart,
-                    timeInterval,
-                    keystr,
-                    sourceId,
+                    (rowStart, timeInterval, keystr, sourceId),
                     (not self._checkRowUniqueness),
                 )
 

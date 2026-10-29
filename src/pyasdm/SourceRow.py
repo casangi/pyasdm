@@ -1204,7 +1204,6 @@ class SourceRow:
 
             eos.writeInt(len(self._transition))
             for i in range(len(self._transition)):
-
                 eos.writeStr(self._transition[i])
 
         eos.writeBool(self._restFrequencyExists)
@@ -1257,8 +1256,7 @@ class SourceRow:
 
             eos.writeInt(len(self._stokesParameter))
             for i in range(len(self._stokesParameter)):
-
-                eos.writeInt(int(self._stokesParameter[i].getValue()))
+                eos.writeString(str(self._stokesParameter[i]))
 
         eos.writeBool(self._fluxExists)
         if self._fluxExists:

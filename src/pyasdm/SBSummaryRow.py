@@ -522,7 +522,6 @@ class SBSummaryRow:
 
         eos.writeInt(len(self._observingMode))
         for i in range(len(self._observingMode)):
-
             eos.writeStr(self._observingMode[i])
 
         eos.writeInt(self._numberRepeats)
@@ -531,14 +530,12 @@ class SBSummaryRow:
 
         eos.writeInt(len(self._scienceGoal))
         for i in range(len(self._scienceGoal)):
-
             eos.writeStr(self._scienceGoal[i])
 
         eos.writeInt(self._numWeatherConstraint)
 
         eos.writeInt(len(self._weatherConstraint))
         for i in range(len(self._weatherConstraint)):
-
             eos.writeStr(self._weatherConstraint[i])
 
         eos.writeBool(self._centerDirectionExists)

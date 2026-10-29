@@ -357,7 +357,7 @@ class Length:
         Skip the binary representation of a Length
         from an EndianInput
         """
-        eis.readDouble()
+        eis.skipDouble()
 
     @staticmethod
     def from1DBin(eis):

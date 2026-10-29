@@ -1665,9 +1665,6 @@ class CalAtmosphereTable:
             # when this happens (used by eVLA, I believe) use the expected size from ASDM.xml
             numRows = self._container.getExpectedTableSize("CalAtmosphere")
 
-        print(f"using numRows = {numRows}")
-        print(f"checkRowUniqueness : {self._checkRowUniqueness}")
-
         # c++ reports an error when numRows is != -1 and does not agree with the value in the ASDM.xml
         # Java just uses numRows (but doesn't cover the case when numRows == -1)
         # do not check or report any difference here but cover the numRows==-1 case above
@@ -1678,15 +1675,10 @@ class CalAtmosphereTable:
         try:
             for i in range(numRows):
                 rowStart = self._eis.tell()
-                print(f"{i} : {rowStart}")
 
                 # non temporal, rowstart (int), skip row
                 CalAtmosphereRow.skipBin(self._eis, self._attributesSeq)
-                print("skipped")
                 self.checkAndAdd(rowStart, (not self._checkRowUniqueness))
-                print("added")
-
-            print("done")
 
         except DuplicateKey as exc:
             self._byteStream.close()

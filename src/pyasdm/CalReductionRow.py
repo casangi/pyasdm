@@ -348,22 +348,19 @@ class CalReductionRow:
 
         eos.writeInt(len(self._appliedCalibrations))
         for i in range(len(self._appliedCalibrations)):
-
             eos.writeStr(self._appliedCalibrations[i])
 
         eos.writeInt(self._numParam)
 
         eos.writeInt(len(self._paramSet))
         for i in range(len(self._paramSet)):
-
             eos.writeStr(self._paramSet[i])
 
         eos.writeInt(self._numInvalidConditions)
 
         eos.writeInt(len(self._invalidConditions))
         for i in range(len(self._invalidConditions)):
-
-            eos.writeInt(int(self._invalidConditions[i].getValue()))
+            eos.writeString(str(self._invalidConditions[i]))
 
         self._timeReduced.toBin(eos)
 

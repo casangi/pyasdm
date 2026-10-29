@@ -718,8 +718,7 @@ class CalHolographyRow:
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         eos.writeInt(self._numPanelModes)
 
@@ -745,7 +744,6 @@ class CalHolographyRow:
 
             eos.writeInt(len(self._screwName))
             for i in range(len(self._screwName)):
-
                 eos.writeStr(self._screwName[i])
 
         eos.writeBool(self._screwMotionExists)

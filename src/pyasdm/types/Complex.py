@@ -481,7 +481,7 @@ class Complex:
         return result
 
     @staticmethod
-    def skip2DBin(eis):
+    def skip3DBin(eis):
         """
         Skip a 3D list of binary Complex values from an
         EndianInput instance.
