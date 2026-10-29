@@ -558,12 +558,10 @@ class CalPrimaryBeamRow:
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         eos.writeInt(len(self._mainBeamEfficiency))
         for i in range(len(self._mainBeamEfficiency)):
-
             eos.writeDouble(self._mainBeamEfficiency[i])
 
         self._beamDescriptionUID.toBin(eos)
@@ -580,7 +578,6 @@ class CalPrimaryBeamRow:
 
         eos.writeInt(len(self._imageChannelNumber))
         for i in range(len(self._imageChannelNumber)):
-
             eos.writeInt(self._imageChannelNumber[i])
 
         Frequency.listToBin(self._imageNominalFrequency, eos)

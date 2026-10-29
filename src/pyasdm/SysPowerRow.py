@@ -594,7 +594,6 @@ class SysPowerRow:
 
             eos.writeInt(len(self._switchedPowerDifference))
             for i in range(len(self._switchedPowerDifference)):
-
                 eos.writeFloat(self._switchedPowerDifference[i])
 
         eos.writeBool(self._switchedPowerSumExists)
@@ -602,7 +601,6 @@ class SysPowerRow:
 
             eos.writeInt(len(self._switchedPowerSum))
             for i in range(len(self._switchedPowerSum)):
-
                 eos.writeFloat(self._switchedPowerSum[i])
 
         eos.writeBool(self._requantizerGainExists)
@@ -610,7 +608,6 @@ class SysPowerRow:
 
             eos.writeInt(len(self._requantizerGain))
             for i in range(len(self._requantizerGain)):
-
                 eos.writeFloat(self._requantizerGain[i])
 
         eos.writeBool(self._numChannelsExists)
@@ -644,12 +641,12 @@ class SysPowerRow:
                 switchedPowerDifferenceSpectrum_dims = pyasdm.utils.getListDims(
                     self._switchedPowerDifferenceSpectrum
                 )
-            # assumes it really is 2D
-            eos.writeInt(switchedPowerDifferenceSpectrum_dims[0])
-            eos.writeInt(switchedPowerDifferenceSpectrum_dims[1])
-            for i in range(switchedPowerDifferenceSpectrum_dims[0]):
-                for j in range(switchedPowerDifferenceSpectrum_dims[1]):
-                    eos.writeFloat(self._switchedPowerDifferenceSpectrum[i][j])
+                # assumes it really is 2D
+                eos.writeInt(switchedPowerDifferenceSpectrum_dims[0])
+                eos.writeInt(switchedPowerDifferenceSpectrum_dims[1])
+                for i in range(switchedPowerDifferenceSpectrum_dims[0]):
+                    for j in range(switchedPowerDifferenceSpectrum_dims[1]):
+                        eos.writeFloat(self._switchedPowerDifferenceSpectrum[i][j])
 
         eos.writeBool(self._switchedPowerSumSpectrumExists)
         if self._switchedPowerSumSpectrumExists:
@@ -662,12 +659,12 @@ class SysPowerRow:
                 switchedPowerSumSpectrum_dims = pyasdm.utils.getListDims(
                     self._switchedPowerSumSpectrum
                 )
-            # assumes it really is 2D
-            eos.writeInt(switchedPowerSumSpectrum_dims[0])
-            eos.writeInt(switchedPowerSumSpectrum_dims[1])
-            for i in range(switchedPowerSumSpectrum_dims[0]):
-                for j in range(switchedPowerSumSpectrum_dims[1]):
-                    eos.writeFloat(self._switchedPowerSumSpectrum[i][j])
+                # assumes it really is 2D
+                eos.writeInt(switchedPowerSumSpectrum_dims[0])
+                eos.writeInt(switchedPowerSumSpectrum_dims[1])
+                for i in range(switchedPowerSumSpectrum_dims[0]):
+                    for j in range(switchedPowerSumSpectrum_dims[1]):
+                        eos.writeFloat(self._switchedPowerSumSpectrum[i][j])
 
         eos.writeBool(self._requantizerGainSpectrumExists)
         if self._requantizerGainSpectrumExists:
@@ -680,12 +677,12 @@ class SysPowerRow:
                 requantizerGainSpectrum_dims = pyasdm.utils.getListDims(
                     self._requantizerGainSpectrum
                 )
-            # assumes it really is 2D
-            eos.writeInt(requantizerGainSpectrum_dims[0])
-            eos.writeInt(requantizerGainSpectrum_dims[1])
-            for i in range(requantizerGainSpectrum_dims[0]):
-                for j in range(requantizerGainSpectrum_dims[1]):
-                    eos.writeFloat(self._requantizerGainSpectrum[i][j])
+                # assumes it really is 2D
+                eos.writeInt(requantizerGainSpectrum_dims[0])
+                eos.writeInt(requantizerGainSpectrum_dims[1])
+                for i in range(requantizerGainSpectrum_dims[0]):
+                    for j in range(requantizerGainSpectrum_dims[1]):
+                        eos.writeFloat(self._requantizerGainSpectrum[i][j])
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

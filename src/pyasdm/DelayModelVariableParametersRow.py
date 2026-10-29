@@ -523,7 +523,6 @@ class DelayModelVariableParametersRow:
 
         eos.writeInt(len(self._polarOffsets))
         for i in range(len(self._polarOffsets)):
-
             eos.writeDouble(self._polarOffsets[i])
 
         eos.writeString(str(self._polarOffsetsType))

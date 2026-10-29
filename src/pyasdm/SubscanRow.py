@@ -402,7 +402,6 @@ class SubscanRow:
 
         eos.writeInt(len(self._numSubintegration))
         for i in range(len(self._numSubintegration)):
-
             eos.writeInt(self._numSubintegration[i])
 
         eos.writeBool(self._subscanModeExists)

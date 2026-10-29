@@ -973,8 +973,7 @@ class CalPointingRow:
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         Angle.listToBin(self._collOffsetRelative, eos)
 
@@ -988,16 +987,15 @@ class CalPointingRow:
             eos.writeInt(0)
         else:
             collOffsetTied_dims = pyasdm.utils.getListDims(self._collOffsetTied)
-        # assumes it really is 2D
-        eos.writeInt(collOffsetTied_dims[0])
-        eos.writeInt(collOffsetTied_dims[1])
-        for i in range(collOffsetTied_dims[0]):
-            for j in range(collOffsetTied_dims[1]):
-                eos.writeBool(self._collOffsetTied[i][j])
+            # assumes it really is 2D
+            eos.writeInt(collOffsetTied_dims[0])
+            eos.writeInt(collOffsetTied_dims[1])
+            for i in range(collOffsetTied_dims[0]):
+                for j in range(collOffsetTied_dims[1]):
+                    eos.writeBool(self._collOffsetTied[i][j])
 
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
-
             eos.writeDouble(self._reducedChiSquared[i])
 
         eos.writeBool(self._averagedPolarizationsExists)
@@ -1035,7 +1033,6 @@ class CalPointingRow:
 
             eos.writeInt(len(self._beamWidthWasFixed))
             for i in range(len(self._beamWidthWasFixed)):
-
                 eos.writeBool(self._beamWidthWasFixed[i])
 
         eos.writeBool(self._offIntensityExists)

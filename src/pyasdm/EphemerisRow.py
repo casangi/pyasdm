@@ -379,7 +379,6 @@ class EphemerisRow:
 
         eos.writeInt(len(self._observerLocation))
         for i in range(len(self._observerLocation)):
-
             eos.writeDouble(self._observerLocation[i])
 
         eos.writeDouble(self._equinoxEquator)
@@ -392,18 +391,17 @@ class EphemerisRow:
             eos.writeInt(0)
         else:
             dir_dims = pyasdm.utils.getListDims(self._dir)
-        # assumes it really is 2D
-        eos.writeInt(dir_dims[0])
-        eos.writeInt(dir_dims[1])
-        for i in range(dir_dims[0]):
-            for j in range(dir_dims[1]):
-                eos.writeDouble(self._dir[i][j])
+            # assumes it really is 2D
+            eos.writeInt(dir_dims[0])
+            eos.writeInt(dir_dims[1])
+            for i in range(dir_dims[0]):
+                for j in range(dir_dims[1]):
+                    eos.writeDouble(self._dir[i][j])
 
         eos.writeInt(self._numPolyDist)
 
         eos.writeInt(len(self._distance))
         for i in range(len(self._distance)):
-
             eos.writeDouble(self._distance[i])
 
         self._timeOrigin.toBin(eos)
@@ -420,7 +418,6 @@ class EphemerisRow:
 
             eos.writeInt(len(self._radVel))
             for i in range(len(self._radVel)):
-
                 eos.writeDouble(self._radVel[i])
 
     # the static fromBin methods to extract each field from an EndianInput stream

@@ -546,29 +546,24 @@ class CalAntennaSolutionsRow:
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         eos.writeBool(self._correctionValidity)
 
         eos.writeInt(len(self._phaseAnt))
         for i in range(len(self._phaseAnt)):
-
             eos.writeFloat(self._phaseAnt[i])
 
         eos.writeInt(len(self._phaseAntRMS))
         for i in range(len(self._phaseAntRMS)):
-
             eos.writeFloat(self._phaseAntRMS[i])
 
         eos.writeInt(len(self._amplitudeAnt))
         for i in range(len(self._amplitudeAnt)):
-
             eos.writeFloat(self._amplitudeAnt[i])
 
         eos.writeInt(len(self._amplitudeAntRMS))
         for i in range(len(self._amplitudeAntRMS)):
-
             eos.writeFloat(self._amplitudeAntRMS[i])
 
     # the static fromBin methods to extract each field from an EndianInput stream

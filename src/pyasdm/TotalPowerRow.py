@@ -461,18 +461,17 @@ class TotalPowerRow:
             eos.writeInt(0)
         else:
             floatData_dims = pyasdm.utils.getListDims(self._floatData)
-        # assumes it really is 3D
-        eos.writeInt(floatData_dims[0])
-        eos.writeInt(floatData_dims[1])
-        eos.writeInt(floatData_dims[2])
-        for i in range(floatData_dims[0]):
-            for j in range(floatData_dims[1]):
-                for k in range(floatData_dims[2]):
-                    eos.writeFloat(self._floatData[i][j][k])
+            # assumes it really is 3D
+            eos.writeInt(floatData_dims[0])
+            eos.writeInt(floatData_dims[1])
+            eos.writeInt(floatData_dims[2])
+            for i in range(floatData_dims[0]):
+                for j in range(floatData_dims[1]):
+                    for k in range(floatData_dims[2]):
+                        eos.writeFloat(self._floatData[i][j][k])
 
         eos.writeInt(len(self._flagAnt))
         for i in range(len(self._flagAnt)):
-
             eos.writeInt(self._flagAnt[i])
 
         # null array case, unsure if this is possible but this should work
@@ -481,12 +480,12 @@ class TotalPowerRow:
             eos.writeInt(0)
         else:
             flagPol_dims = pyasdm.utils.getListDims(self._flagPol)
-        # assumes it really is 2D
-        eos.writeInt(flagPol_dims[0])
-        eos.writeInt(flagPol_dims[1])
-        for i in range(flagPol_dims[0]):
-            for j in range(flagPol_dims[1]):
-                eos.writeInt(self._flagPol[i][j])
+            # assumes it really is 2D
+            eos.writeInt(flagPol_dims[0])
+            eos.writeInt(flagPol_dims[1])
+            for i in range(flagPol_dims[0]):
+                for j in range(flagPol_dims[1]):
+                    eos.writeInt(self._flagPol[i][j])
 
         self._interval.toBin(eos)
 

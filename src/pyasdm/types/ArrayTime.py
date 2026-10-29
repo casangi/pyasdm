@@ -664,7 +664,7 @@ class ArrayTime(Interval):
 
         return an ArrayTime
         """
-        return ArrayTime(eis.readLongLong())
+        return ArrayTime(eis.readLong())
 
     @staticmethod
     def skipBin(eis):
@@ -672,7 +672,7 @@ class ArrayTime(Interval):
         Skip the binary representation of an ArrayTime
         from an EndianInput instance
         """
-        eis.skipLongLong()
+        eis.skipLong()
 
     @staticmethod
     def from1Bin(eis):

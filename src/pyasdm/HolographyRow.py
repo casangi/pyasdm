@@ -256,8 +256,7 @@ class HolographyRow:
 
         eos.writeInt(len(self._type))
         for i in range(len(self._type)):
-
-            eos.writeInt(int(self._type[i].getValue()))
+            eos.writeString(str(self._type[i]))
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

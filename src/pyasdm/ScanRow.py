@@ -502,17 +502,14 @@ class ScanRow:
 
         eos.writeInt(len(self._scanIntent))
         for i in range(len(self._scanIntent)):
-
-            eos.writeInt(int(self._scanIntent[i].getValue()))
+            eos.writeString(str(self._scanIntent[i]))
 
         eos.writeInt(len(self._calDataType))
         for i in range(len(self._calDataType)):
-
-            eos.writeInt(int(self._calDataType[i].getValue()))
+            eos.writeString(str(self._calDataType[i]))
 
         eos.writeInt(len(self._calibrationOnLine))
         for i in range(len(self._calibrationOnLine)):
-
             eos.writeBool(self._calibrationOnLine[i])
 
         eos.writeBool(self._calibrationFunctionExists)
@@ -520,24 +517,21 @@ class ScanRow:
 
             eos.writeInt(len(self._calibrationFunction))
             for i in range(len(self._calibrationFunction)):
-
-                eos.writeInt(int(self._calibrationFunction[i].getValue()))
+                eos.writeString(str(self._calibrationFunction[i]))
 
         eos.writeBool(self._calibrationSetExists)
         if self._calibrationSetExists:
 
             eos.writeInt(len(self._calibrationSet))
             for i in range(len(self._calibrationSet)):
-
-                eos.writeInt(int(self._calibrationSet[i].getValue()))
+                eos.writeString(str(self._calibrationSet[i]))
 
         eos.writeBool(self._calPatternExists)
         if self._calPatternExists:
 
             eos.writeInt(len(self._calPattern))
             for i in range(len(self._calPattern)):
-
-                eos.writeInt(int(self._calPattern[i].getValue()))
+                eos.writeString(str(self._calPattern[i]))
 
         eos.writeBool(self._numFieldExists)
         if self._numFieldExists:
@@ -549,7 +543,6 @@ class ScanRow:
 
             eos.writeInt(len(self._fieldName))
             for i in range(len(self._fieldName)):
-
                 eos.writeStr(self._fieldName[i])
 
         eos.writeBool(self._sourceNameExists)

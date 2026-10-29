@@ -502,7 +502,6 @@ class CalDataRow:
 
         eos.writeInt(len(self._scanSet))
         for i in range(len(self._scanSet)):
-
             eos.writeInt(self._scanSet[i])
 
         eos.writeBool(self._assocCalDataIdExists)
@@ -520,7 +519,6 @@ class CalDataRow:
 
             eos.writeInt(len(self._fieldName))
             for i in range(len(self._fieldName)):
-
                 eos.writeStr(self._fieldName[i])
 
         eos.writeBool(self._sourceNameExists)
@@ -528,7 +526,6 @@ class CalDataRow:
 
             eos.writeInt(len(self._sourceName))
             for i in range(len(self._sourceName)):
-
                 eos.writeStr(self._sourceName[i])
 
         eos.writeBool(self._sourceCodeExists)
@@ -536,7 +533,6 @@ class CalDataRow:
 
             eos.writeInt(len(self._sourceCode))
             for i in range(len(self._sourceCode)):
-
                 eos.writeStr(self._sourceCode[i])
 
         eos.writeBool(self._scanIntentExists)
@@ -544,8 +540,7 @@ class CalDataRow:
 
             eos.writeInt(len(self._scanIntent))
             for i in range(len(self._scanIntent)):
-
-                eos.writeInt(int(self._scanIntent[i].getValue()))
+                eos.writeString(str(self._scanIntent[i]))
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

@@ -1590,10 +1590,7 @@ class FeedTable:
 
                 # temporal, with auto-incremntal, other keys : 2 (Feed, Receiver, Source)
                 self.checkAndAdd(
-                    rowStart,
-                    timeInterval,
-                    keystr,
-                    feedId,
+                    (rowStart, timeInterval, keystr, feedId),
                     (not self._checkRowUniqueness),
                 )
 

@@ -379,14 +379,14 @@ class WVMCalRow:
             eos.writeInt(0)
         else:
             pathCoeff_dims = pyasdm.utils.getListDims(self._pathCoeff)
-        # assumes it really is 3D
-        eos.writeInt(pathCoeff_dims[0])
-        eos.writeInt(pathCoeff_dims[1])
-        eos.writeInt(pathCoeff_dims[2])
-        for i in range(pathCoeff_dims[0]):
-            for j in range(pathCoeff_dims[1]):
-                for k in range(pathCoeff_dims[2]):
-                    eos.writeFloat(self._pathCoeff[i][j][k])
+            # assumes it really is 3D
+            eos.writeInt(pathCoeff_dims[0])
+            eos.writeInt(pathCoeff_dims[1])
+            eos.writeInt(pathCoeff_dims[2])
+            for i in range(pathCoeff_dims[0]):
+                for j in range(pathCoeff_dims[1]):
+                    for k in range(pathCoeff_dims[2]):
+                        eos.writeFloat(self._pathCoeff[i][j][k])
 
         Temperature.listToBin(self._refTemp, eos)
 

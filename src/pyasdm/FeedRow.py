@@ -597,19 +597,18 @@ class FeedRow:
             eos.writeInt(0)
         else:
             beamOffset_dims = pyasdm.utils.getListDims(self._beamOffset)
-        # assumes it really is 2D
-        eos.writeInt(beamOffset_dims[0])
-        eos.writeInt(beamOffset_dims[1])
-        for i in range(beamOffset_dims[0]):
-            for j in range(beamOffset_dims[1]):
-                eos.writeDouble(self._beamOffset[i][j])
+            # assumes it really is 2D
+            eos.writeInt(beamOffset_dims[0])
+            eos.writeInt(beamOffset_dims[1])
+            for i in range(beamOffset_dims[0]):
+                for j in range(beamOffset_dims[1]):
+                    eos.writeDouble(self._beamOffset[i][j])
 
         Length.listToBin(self._focusReference, eos)
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         Complex.listToBin(self._polResponse, eos)
 
@@ -617,7 +616,6 @@ class FeedRow:
 
         eos.writeInt(len(self._receiverId))
         for i in range(len(self._receiverId)):
-
             eos.writeInt(self._receiverId[i])
 
         eos.writeBool(self._feedNumExists)
@@ -650,7 +648,6 @@ class FeedRow:
 
             eos.writeInt(len(self._skyCouplingSpectrum))
             for i in range(len(self._skyCouplingSpectrum)):
-
                 eos.writeFloat(self._skyCouplingSpectrum[i])
 
         eos.writeBool(self._receiverGenerationExists)

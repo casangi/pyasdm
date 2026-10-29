@@ -194,7 +194,7 @@ class EndianInput:
         """
         self.currSeek(4)
 
-    def readLongLong(self):
+    def readLong(self):
         """
         Return the signed 8-byte integer at the current location as a python int.
         """
@@ -202,25 +202,13 @@ class EndianInput:
             self._byteStream.read(8), self._byteOrder.getByteOrder(), signed=True
         )
 
-    def skipLongLong(self):
+    def skipLong(self):
         """
         Skip one 8-byte integer at the current location
         """
         self.currSeek(8)
 
-    def readLong(self):
-        """
-        Equivalent to readLongLong
-        """
-        return self.readLongLong()
-
-    def skipLong(self):
-        """
-        Equivalent to skipLongLong
-        """
-        self.skipLongLong()
-
-    def readULongLong(self):
+    def readULong(self):
         """
         Return the unsigned 8-byte integer at the current location as a python int.
         """
@@ -228,7 +216,7 @@ class EndianInput:
             self._byteStream.read(8), self._byteOrder.getByteOrder(), signed=False
         )
 
-    def skipULongLong(self):
+    def skipULong(self):
         """
         Skip one unsigned 8-byte integer at the current location
         """

@@ -643,7 +643,6 @@ class CalAppPhaseRow:
 
         eos.writeInt(len(self._phasedAntennas))
         for i in range(len(self._phasedAntennas)):
-
             eos.writeStr(self._phasedAntennas[i])
 
         eos.writeInt(self._refAntennaIndex)
@@ -660,7 +659,6 @@ class CalAppPhaseRow:
 
         eos.writeInt(len(self._phaseValues))
         for i in range(len(self._phaseValues)):
-
             eos.writeFloat(self._phaseValues[i])
 
         eos.writeInt(self._numCompare)
@@ -669,12 +667,10 @@ class CalAppPhaseRow:
 
         eos.writeInt(len(self._compareArray))
         for i in range(len(self._compareArray)):
-
             eos.writeStr(self._compareArray[i])
 
         eos.writeInt(len(self._efficiencyIndices))
         for i in range(len(self._efficiencyIndices)):
-
             eos.writeInt(self._efficiencyIndices[i])
 
         # null array case, unsure if this is possible but this should work
@@ -683,16 +679,15 @@ class CalAppPhaseRow:
             eos.writeInt(0)
         else:
             efficiencies_dims = pyasdm.utils.getListDims(self._efficiencies)
-        # assumes it really is 2D
-        eos.writeInt(efficiencies_dims[0])
-        eos.writeInt(efficiencies_dims[1])
-        for i in range(efficiencies_dims[0]):
-            for j in range(efficiencies_dims[1]):
-                eos.writeFloat(self._efficiencies[i][j])
+            # assumes it really is 2D
+            eos.writeInt(efficiencies_dims[0])
+            eos.writeInt(efficiencies_dims[1])
+            for i in range(efficiencies_dims[0]):
+                for j in range(efficiencies_dims[1]):
+                    eos.writeFloat(self._efficiencies[i][j])
 
         eos.writeInt(len(self._quality))
         for i in range(len(self._quality)):
-
             eos.writeFloat(self._quality[i])
 
         eos.writeStr(self._phasedSumAntenna)
@@ -712,7 +707,6 @@ class CalAppPhaseRow:
 
             eos.writeInt(len(self._phaseSupports))
             for i in range(len(self._phaseSupports)):
-
                 eos.writeFloat(self._phaseSupports[i])
 
     # the static fromBin methods to extract each field from an EndianInput stream

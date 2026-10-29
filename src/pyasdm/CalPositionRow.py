@@ -563,7 +563,6 @@ class CalPositionRow:
 
         eos.writeInt(len(self._refAntennaNames))
         for i in range(len(self._refAntennaNames)):
-
             eos.writeStr(self._refAntennaNames[i])
 
         self._axesOffset.toBin(eos)

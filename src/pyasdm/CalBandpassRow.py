@@ -779,7 +779,6 @@ class CalBandpassRow:
 
         eos.writeInt(len(self._antennaNames))
         for i in range(len(self._antennaNames)):
-
             eos.writeStr(self._antennaNames[i])
 
         eos.writeStr(self._refAntennaName)
@@ -788,8 +787,7 @@ class CalBandpassRow:
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         # null array case, unsure if this is possible but this should work
         if self._curve is None:
@@ -797,18 +795,17 @@ class CalBandpassRow:
             eos.writeInt(0)
         else:
             curve_dims = pyasdm.utils.getListDims(self._curve)
-        # assumes it really is 3D
-        eos.writeInt(curve_dims[0])
-        eos.writeInt(curve_dims[1])
-        eos.writeInt(curve_dims[2])
-        for i in range(curve_dims[0]):
-            for j in range(curve_dims[1]):
-                for k in range(curve_dims[2]):
-                    eos.writeFloat(self._curve[i][j][k])
+            # assumes it really is 3D
+            eos.writeInt(curve_dims[0])
+            eos.writeInt(curve_dims[1])
+            eos.writeInt(curve_dims[2])
+            for i in range(curve_dims[0]):
+                for j in range(curve_dims[1]):
+                    for k in range(curve_dims[2]):
+                        eos.writeFloat(self._curve[i][j][k])
 
         eos.writeInt(len(self._reducedChiSquared))
         for i in range(len(self._reducedChiSquared)):
-
             eos.writeDouble(self._reducedChiSquared[i])
 
         eos.writeBool(self._numBaselineExists)
@@ -830,12 +827,12 @@ class CalBandpassRow:
                 eos.writeInt(0)
             else:
                 rms_dims = pyasdm.utils.getListDims(self._rms)
-            # assumes it really is 2D
-            eos.writeInt(rms_dims[0])
-            eos.writeInt(rms_dims[1])
-            for i in range(rms_dims[0]):
-                for j in range(rms_dims[1]):
-                    eos.writeFloat(self._rms[i][j])
+                # assumes it really is 2D
+                eos.writeInt(rms_dims[0])
+                eos.writeInt(rms_dims[1])
+                for i in range(rms_dims[0]):
+                    for j in range(rms_dims[1]):
+                        eos.writeFloat(self._rms[i][j])
 
         eos.writeBool(self._frequencyRangeExists)
         if self._frequencyRangeExists:
@@ -862,7 +859,6 @@ class CalBandpassRow:
 
             eos.writeInt(len(self._numSpectralWindowChan))
             for i in range(len(self._numSpectralWindowChan)):
-
                 eos.writeInt(self._numSpectralWindowChan[i])
 
         eos.writeBool(self._spectrumExists)
@@ -874,14 +870,14 @@ class CalBandpassRow:
                 eos.writeInt(0)
             else:
                 spectrum_dims = pyasdm.utils.getListDims(self._spectrum)
-            # assumes it really is 3D
-            eos.writeInt(spectrum_dims[0])
-            eos.writeInt(spectrum_dims[1])
-            eos.writeInt(spectrum_dims[2])
-            for i in range(spectrum_dims[0]):
-                for j in range(spectrum_dims[1]):
-                    for k in range(spectrum_dims[2]):
-                        eos.writeFloat(self._spectrum[i][j][k])
+                # assumes it really is 3D
+                eos.writeInt(spectrum_dims[0])
+                eos.writeInt(spectrum_dims[1])
+                eos.writeInt(spectrum_dims[2])
+                for i in range(spectrum_dims[0]):
+                    for j in range(spectrum_dims[1]):
+                        for k in range(spectrum_dims[2]):
+                            eos.writeFloat(self._spectrum[i][j][k])
 
     # the static fromBin methods to extract each field from an EndianInput stream
 

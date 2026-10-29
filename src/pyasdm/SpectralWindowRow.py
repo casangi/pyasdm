@@ -1318,7 +1318,6 @@ class SpectralWindowRow:
 
             eos.writeInt(len(self._lineArray))
             for i in range(len(self._lineArray)):
-
                 eos.writeBool(self._lineArray[i])
 
         eos.writeBool(self._measFreqRefExists)
@@ -1366,8 +1365,7 @@ class SpectralWindowRow:
 
             eos.writeInt(len(self._assocNature))
             for i in range(len(self._assocNature)):
-
-                eos.writeInt(int(self._assocNature[i].getValue()))
+                eos.writeString(str(self._assocNature[i]))
 
         eos.writeBool(self._numFactorExists)
         if self._numFactorExists:
@@ -1379,7 +1377,6 @@ class SpectralWindowRow:
 
             eos.writeInt(len(self._numBinFactors))
             for i in range(len(self._numBinFactors)):
-
                 eos.writeInt(self._numBinFactors[i])
 
         eos.writeBool(self._numOrigFreqSliceExists)
@@ -1392,7 +1389,6 @@ class SpectralWindowRow:
 
             eos.writeInt(len(self._originatingFrequencySlices))
             for i in range(len(self._originatingFrequencySlices)):
-
                 eos.writeInt(self._originatingFrequencySlices[i])
 
         eos.writeBool(self._quantizationBitsExists)
@@ -1410,7 +1406,6 @@ class SpectralWindowRow:
 
             eos.writeInt(len(self._requantization))
             for i in range(len(self._requantization)):
-
                 eos.writeBool(self._requantization[i])
 
         eos.writeBool(self._requantizationBitsExists)
@@ -1418,7 +1413,6 @@ class SpectralWindowRow:
 
             eos.writeInt(len(self._requantizationBits))
             for i in range(len(self._requantizationBits)):
-
                 eos.writeInt(self._requantizationBits[i])
 
         eos.writeBool(self._assocSpectralWindowIdExists)

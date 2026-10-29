@@ -358,17 +358,14 @@ class FocusModelRow:
 
         eos.writeInt(len(self._coeffName))
         for i in range(len(self._coeffName)):
-
             eos.writeStr(self._coeffName[i])
 
         eos.writeInt(len(self._coeffFormula))
         for i in range(len(self._coeffFormula)):
-
             eos.writeStr(self._coeffFormula[i])
 
         eos.writeInt(len(self._coeffVal))
         for i in range(len(self._coeffVal)):
-
             eos.writeFloat(self._coeffVal[i])
 
         eos.writeStr(self._assocNature)

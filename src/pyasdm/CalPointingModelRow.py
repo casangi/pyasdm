@@ -548,22 +548,18 @@ class CalPointingModelRow:
 
         eos.writeInt(len(self._coeffName))
         for i in range(len(self._coeffName)):
-
             eos.writeStr(self._coeffName[i])
 
         eos.writeInt(len(self._coeffVal))
         for i in range(len(self._coeffVal)):
-
             eos.writeFloat(self._coeffVal[i])
 
         eos.writeInt(len(self._coeffError))
         for i in range(len(self._coeffError)):
-
             eos.writeFloat(self._coeffError[i])
 
         eos.writeInt(len(self._coeffFixed))
         for i in range(len(self._coeffFixed)):
-
             eos.writeBool(self._coeffFixed[i])
 
         self._azimuthRMS.toBin(eos)
@@ -584,7 +580,6 @@ class CalPointingModelRow:
 
             eos.writeInt(len(self._coeffFormula))
             for i in range(len(self._coeffFormula)):
-
                 eos.writeStr(self._coeffFormula[i])
 
     # the static fromBin methods to extract each field from an EndianInput stream

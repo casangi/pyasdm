@@ -1056,22 +1056,18 @@ class DelayModelRow:
 
         eos.writeInt(len(self._phaseDelay))
         for i in range(len(self._phaseDelay)):
-
             eos.writeDouble(self._phaseDelay[i])
 
         eos.writeInt(len(self._phaseDelayRate))
         for i in range(len(self._phaseDelayRate)):
-
             eos.writeDouble(self._phaseDelayRate[i])
 
         eos.writeInt(len(self._groupDelay))
         for i in range(len(self._groupDelay)):
-
             eos.writeDouble(self._groupDelay[i])
 
         eos.writeInt(len(self._groupDelayRate))
         for i in range(len(self._groupDelayRate)):
-
             eos.writeDouble(self._groupDelayRate[i])
 
         self._fieldId.toBin(eos)
@@ -1156,15 +1152,13 @@ class DelayModelRow:
 
             eos.writeInt(len(self._polarizationType))
             for i in range(len(self._polarizationType)):
-
-                eos.writeInt(int(self._polarizationType[i].getValue()))
+                eos.writeString(str(self._polarizationType[i]))
 
         eos.writeBool(self._electronicDelayExists)
         if self._electronicDelayExists:
 
             eos.writeInt(len(self._electronicDelay))
             for i in range(len(self._electronicDelay)):
-
                 eos.writeDouble(self._electronicDelay[i])
 
         eos.writeBool(self._electronicDelayRateExists)
@@ -1172,7 +1166,6 @@ class DelayModelRow:
 
             eos.writeInt(len(self._electronicDelayRate))
             for i in range(len(self._electronicDelayRate)):
-
                 eos.writeDouble(self._electronicDelayRate[i])
 
         eos.writeBool(self._receiverDelayExists)
@@ -1180,7 +1173,6 @@ class DelayModelRow:
 
             eos.writeInt(len(self._receiverDelay))
             for i in range(len(self._receiverDelay)):
-
                 eos.writeDouble(self._receiverDelay[i])
 
         eos.writeBool(self._IFDelayExists)
@@ -1188,7 +1180,6 @@ class DelayModelRow:
 
             eos.writeInt(len(self._IFDelay))
             for i in range(len(self._IFDelay)):
-
                 eos.writeDouble(self._IFDelay[i])
 
         eos.writeBool(self._LODelayExists)
@@ -1196,7 +1187,6 @@ class DelayModelRow:
 
             eos.writeInt(len(self._LODelay))
             for i in range(len(self._LODelay)):
-
                 eos.writeDouble(self._LODelay[i])
 
         eos.writeBool(self._crossPolarizationDelayExists)

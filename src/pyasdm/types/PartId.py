@@ -99,7 +99,7 @@ class PartId:
         """
         Skip the binary representation of a PartId from an EndianInput stream
         """
-        eis.readString()
+        eis.skipString()
 
     def equals(self, other):
         return isinstance(other, PartId) and (other._id == self._id)

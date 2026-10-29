@@ -172,8 +172,6 @@ class ArrayTimeInterval:
                     "When start is an int duration must be either None or int"
                 )
         else:
-            print("type of start : " + str(type(start)))
-            print("start : " + str(start))
             raise ValueError(
                 "unrecognized type for start, must be one of None, ArrayTimeInterval, ArrayTime, float or int"
             )

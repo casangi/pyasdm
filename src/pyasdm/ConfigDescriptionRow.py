@@ -604,8 +604,7 @@ class ConfigDescriptionRow:
 
         eos.writeInt(len(self._atmPhaseCorrection))
         for i in range(len(self._atmPhaseCorrection)):
-
-            eos.writeInt(int(self._atmPhaseCorrection[i].getValue()))
+            eos.writeString(str(self._atmPhaseCorrection[i]))
 
         eos.writeString(str(self._processorType))
 
@@ -615,7 +614,6 @@ class ConfigDescriptionRow:
 
         eos.writeInt(len(self._feedId))
         for i in range(len(self._feedId)):
-
             eos.writeInt(self._feedId[i])
 
         Tag.listToBin(self._switchCycleId, eos)
@@ -629,7 +627,6 @@ class ConfigDescriptionRow:
 
             eos.writeInt(len(self._phasedArrayList))
             for i in range(len(self._phasedArrayList)):
-
                 eos.writeInt(self._phasedArrayList[i])
 
         eos.writeBool(self._numAssocValuesExists)
@@ -642,8 +639,7 @@ class ConfigDescriptionRow:
 
             eos.writeInt(len(self._assocNature))
             for i in range(len(self._assocNature)):
-
-                eos.writeInt(int(self._assocNature[i].getValue()))
+                eos.writeString(str(self._assocNature[i]))
 
         eos.writeBool(self._assocConfigDescriptionIdExists)
         if self._assocConfigDescriptionIdExists:

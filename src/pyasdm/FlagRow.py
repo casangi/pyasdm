@@ -548,8 +548,7 @@ class FlagRow:
 
             eos.writeInt(len(self._polarizationType))
             for i in range(len(self._polarizationType)):
-
-                eos.writeInt(int(self._polarizationType[i].getValue()))
+                eos.writeString(str(self._polarizationType[i]))
 
         eos.writeBool(self._channelExists)
         if self._channelExists:
@@ -560,12 +559,12 @@ class FlagRow:
                 eos.writeInt(0)
             else:
                 channel_dims = pyasdm.utils.getListDims(self._channel)
-            # assumes it really is 2D
-            eos.writeInt(channel_dims[0])
-            eos.writeInt(channel_dims[1])
-            for i in range(channel_dims[0]):
-                for j in range(channel_dims[1]):
-                    eos.writeInt(self._channel[i][j])
+                # assumes it really is 2D
+                eos.writeInt(channel_dims[0])
+                eos.writeInt(channel_dims[1])
+                for i in range(channel_dims[0]):
+                    for j in range(channel_dims[1]):
+                        eos.writeInt(self._channel[i][j])
 
         eos.writeBool(self._pairedAntennaIdExists)
         if self._pairedAntennaIdExists:

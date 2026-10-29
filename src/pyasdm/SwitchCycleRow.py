@@ -349,7 +349,6 @@ class SwitchCycleRow:
 
         eos.writeInt(len(self._weightArray))
         for i in range(len(self._weightArray)):
-
             eos.writeFloat(self._weightArray[i])
 
         Angle.listToBin(self._dirOffsetArray, eos)

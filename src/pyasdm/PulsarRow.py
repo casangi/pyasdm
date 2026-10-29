@@ -450,7 +450,6 @@ class PulsarRow:
 
             eos.writeInt(len(self._phasePoly))
             for i in range(len(self._phasePoly)):
-
                 eos.writeDouble(self._phasePoly[i])
 
         eos.writeBool(self._timeSpanExists)
@@ -463,7 +462,6 @@ class PulsarRow:
 
             eos.writeInt(len(self._startPhaseBin))
             for i in range(len(self._startPhaseBin)):
-
                 eos.writeFloat(self._startPhaseBin[i])
 
         eos.writeBool(self._endPhaseBinExists)
@@ -471,7 +469,6 @@ class PulsarRow:
 
             eos.writeInt(len(self._endPhaseBin))
             for i in range(len(self._endPhaseBin)):
-
                 eos.writeFloat(self._endPhaseBin[i])
 
         eos.writeBool(self._dispersionMeasureExists)

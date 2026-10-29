@@ -460,8 +460,7 @@ class CalAmpliRow:
 
         eos.writeInt(len(self._polarizationTypes))
         for i in range(len(self._polarizationTypes)):
-
-            eos.writeInt(int(self._polarizationTypes[i].getValue()))
+            eos.writeString(str(self._polarizationTypes[i]))
 
         self._startValidTime.toBin(eos)
 
@@ -471,12 +470,10 @@ class CalAmpliRow:
 
         eos.writeInt(len(self._apertureEfficiency))
         for i in range(len(self._apertureEfficiency)):
-
             eos.writeFloat(self._apertureEfficiency[i])
 
         eos.writeInt(len(self._apertureEfficiencyError))
         for i in range(len(self._apertureEfficiencyError)):
-
             eos.writeFloat(self._apertureEfficiencyError[i])
 
         eos.writeBool(self._correctionValidityExists)

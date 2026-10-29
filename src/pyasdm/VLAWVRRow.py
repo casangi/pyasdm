@@ -347,12 +347,10 @@ class VLAWVRRow:
 
         eos.writeInt(len(self._hiValues))
         for i in range(len(self._hiValues)):
-
             eos.writeFloat(self._hiValues[i])
 
         eos.writeInt(len(self._loValues))
         for i in range(len(self._loValues)):
-
             eos.writeFloat(self._loValues[i])
 
         eos.writeBool(self._chanFreqCenterExists)
