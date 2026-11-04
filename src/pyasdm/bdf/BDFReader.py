@@ -511,7 +511,7 @@ class BDFReader:
             actualDurations, zeroLags, autoData, crossData)
         """
 
-        if len(loadOnlyComponents) == 0:
+        if loadOnlyComponents and len(loadOnlyComponents) == 0:
             raise ValueError("loadOnlyComponents cannot be empty in getSubset. "
                              "To skip all components use skipSubset")
 
