@@ -32,7 +32,7 @@ if __name__ == "__main__":
     sdmdir_path = os.path.expanduser(args.sdmdir_path)
 
     if not os.path.isdir(sdmdir_path):
-        print(f"{sdmdir_path} is not a directory, existing")
+        print(f"{sdmdir_path} is not a directory, exiting")
         sys.exit(1)
 
     print(
